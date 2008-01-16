@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.ui.viewers.DecoratingWorkbenchTreePathLab
 /**
  * This {@link ILabelProvider} knows about the beans core model's
  * {@link IModelElement}s.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansModelLabelProvider extends
 		DecoratingWorkbenchTreePathLabelProvider {
@@ -106,11 +106,15 @@ public class BeansModelLabelProvider extends
 			return BeansModelLabels.getElementLabel((IModelElement) element, 0);
 		}
 		else if (element instanceof ZipEntryStorage) {
+			// create zip entry label right here as it is not a core model element 
 			ZipEntryStorage storage = (ZipEntryStorage) element;
-			StringBuffer buf = new StringBuffer(storage.getFile()
-					.getProjectRelativePath().toString());
-			buf.append(" - " + storage.getFullPath().toString());
-			return buf.toString();
+			StringBuilder builder = new StringBuilder();
+			builder.append(storage.getFullPath().lastSegment());
+			builder.append(" - ");
+			builder.append(storage.getFile().getFullPath().toString());
+			builder.append("!");
+			builder.append(storage.getFullPath().removeLastSegments(1).toString());
+			return builder.toString();
 		}
 		else if (element instanceof BeanClassReferences) {
 			return BeansUIPlugin.getResourceString("BeanClassReferences.label");

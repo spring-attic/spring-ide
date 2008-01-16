@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,14 +30,15 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.AbstractBeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -185,6 +186,7 @@ public final class BeansUIUtils {
 			boolean activate) {
 		IResourceModelElement sourceElement;
 		IResource resource = null;
+		ZipEntryStorage zipEntryStorage = null;
 		int line;
 		if (element instanceof ISourceModelElement) {
 			ISourceModelElement source = (ISourceModelElement) element;
@@ -193,15 +195,17 @@ public final class BeansUIUtils {
 			Resource res = source.getElementSourceLocation().getResource();
 			if (res instanceof IAdaptable) {
 				resource = (IResource) ((IAdaptable) res)
-						.getAdapter(IFile.class);
+						.getAdapter(IResource.class);
+				zipEntryStorage = (ZipEntryStorage) ((IAdaptable) res)
+						.getAdapter(ZipEntryStorage.class);
 			}
 			else {
 				resource = sourceElement.getElementResource();
 			}
 		}
-		else if (element instanceof BeansConfig) {
+		else if (element instanceof AbstractBeansConfig) {
 			sourceElement = element;
-			line = ((BeansConfig) element).getElementStartLine();
+			line = ((AbstractBeansConfig) element).getElementStartLine();
 			resource = sourceElement.getElementResource();
 		}
 		else {
@@ -217,15 +221,7 @@ public final class BeansUIUtils {
 			if (sourceElement.isElementArchived()) {
 				try {
 					ZipEntryStorage storage = new ZipEntryStorage(sourceElement);
-					IEditorInput input = new ZipEntryEditorInput(storage);
-					IEditorDescriptor desc = IDE.getEditorDescriptor(storage
-							.getName());
-					IEditorPart editor = SpringUIUtils.openInEditor(input, desc
-							.getId());
-					IMarker marker = file.createMarker(IMarker.TEXT);
-					marker.setAttribute(IMarker.LINE_NUMBER, line);
-					IDE.gotoMarker(editor, marker);
-					return editor;
+					return openZipEntryStorage(line, file, storage);
 				}
 				catch (CoreException e) {
 					BeansCorePlugin.log(e);
@@ -235,7 +231,27 @@ public final class BeansUIUtils {
 				return SpringUIUtils.openInEditor(file, line, activate);
 			}
 		}
+		else if (zipEntryStorage != null) {
+			try {
+				return openZipEntryStorage(line, zipEntryStorage.getFile(),
+						zipEntryStorage);
+			}
+			catch (CoreException e) {
+				BeansCorePlugin.log(e);
+			}
+		}
 		return null;
+	}
+	
+	private static IEditorPart openZipEntryStorage(int line, IFile file,
+			ZipEntryStorage storage) throws PartInitException, CoreException {
+		IEditorInput input = new ZipEntryEditorInput(storage);
+		IEditorDescriptor desc = IDE.getEditorDescriptor(storage.getName());
+		IEditorPart editor = SpringUIUtils.openInEditor(input, desc.getId());
+		IMarker marker = file.createMarker(IMarker.TEXT);
+		marker.setAttribute(IMarker.LINE_NUMBER, line);
+		IDE.gotoMarker(editor, marker);
+		return editor;
 	}
 
 	public static IModelElement getSelectedElement(ISelection selection,

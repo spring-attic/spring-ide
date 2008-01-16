@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,6 +101,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
@@ -117,7 +118,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * @author Christian Dupuis
  * @since 2.0.1
  */
-@SuppressWarnings( { "deprecation", "restriction" })
+@SuppressWarnings( "restriction" )
 public class BeansInplaceOutlineDialog {
 
 	/**
@@ -701,7 +702,7 @@ public class BeansInplaceOutlineDialog {
 				element = this.selectedBeansConfig;
 			}
 			else {
-				element = this.selectedBeansConfig.getElementParent();
+				element = BeansModelUtils.getParentOfClass(this.selectedBeansConfig, IBeansProject.class);
 			}
 			if (element != null) {
 				viewer.getControl().setRedraw(false);
@@ -1241,9 +1242,9 @@ public class BeansInplaceOutlineDialog {
 					.getActiveEditor().getEditorInput();
 			if (input instanceof IFileEditorInput) {
 				IFile file = ((IFileEditorInput) input).getFile();
-				if (BeansCoreUtils.isBeansConfig(file)) {
+				if (BeansCoreUtils.isBeansConfig(file, true)) {
 					this.selectedBeansConfig = BeansCorePlugin.getModel()
-							.getConfig(file);
+							.getConfig(file, true);
 					viewer.setInput(this.selectedBeansConfig);
 				}
 			}

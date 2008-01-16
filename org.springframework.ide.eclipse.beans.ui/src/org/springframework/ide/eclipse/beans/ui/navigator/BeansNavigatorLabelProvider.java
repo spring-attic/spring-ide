@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,12 +89,15 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 			}
 		}
 		else if (element instanceof ZipEntryStorage) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					((ZipEntryStorage) element).getAbsoluteName());
-			if (config != null) {
-				return BeansModelLabels.getElementLabel(config,
-						BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
-			}
+			// Create label of zip entry here as it is not a core model element
+			ZipEntryStorage storage = (ZipEntryStorage) element;
+			StringBuilder builder = new StringBuilder();
+			builder.append(storage.getFullPath().lastSegment());
+			builder.append(" - ");
+			builder.append(storage.getFullPath().removeLastSegments(1).toString());
+			builder.append(" - ");
+			builder.append(storage.getFile().getFullPath().toString());
+			return builder.toString();
 		}
 		return null;
 	}
@@ -131,7 +134,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 				&& parentElement instanceof IModelElement) {
 			return ((IFile) element).getName()
 					+ " - "
-					+ ((IFile) element).getProjectRelativePath()
+					+ ((IFile) element).getFullPath()
 							.removeLastSegments(1).toString();
 		}
 		else if (element instanceof ILazyInitializedModelElement

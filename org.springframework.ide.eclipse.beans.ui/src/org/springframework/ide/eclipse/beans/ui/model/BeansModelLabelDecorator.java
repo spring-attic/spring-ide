@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -139,17 +140,10 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 
 	protected void decorateFile(IFile file, IDecoration decoration) {
 		IBeansModel model = BeansCorePlugin.getModel();
-		IBeansProject project = model.getProject(file.getProject());
-		if (project != null) {
-			for (IBeansConfig config : project.getConfigs()) {
-
-				// The following comparison works for archived config files too
-				if (config.getElementResource().equals(file)) {
-					addErrorOverlay(decoration, getSeverity(config));
-					decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
-					break;
-				}
-			}
+		IBeansConfig config = model.getConfig(file, true);
+		if (config != null) {
+			addErrorOverlay(decoration, getSeverity(config));
+			decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 		}
 	}
 
@@ -232,7 +226,10 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 
 	protected int getSeverity(Object element) {
 		int severity = 0;
-		if (element instanceof ISourceModelElement) {
+		if (element instanceof IBeansImport) {
+			severity = getSeverityForImport((IBeansImport) element);
+		}
+		else if (element instanceof ISourceModelElement) {
 			ISourceModelElement source = (ISourceModelElement) element;
 			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(source
 					.getElementResource(), source.getElementStartLine(), source
@@ -242,9 +239,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 			if (element instanceof IBeansProject) {
 				for (IBeansConfig config : ((IBeansProject) element)
 						.getConfigs()) {
-					severity = MarkerUtils
-							.getHighestSeverityFromMarkersInRange(config
-									.getElementResource(), -1, -1);
+					severity = getSeverityForConfig(config);
 					if (severity == IMarker.SEVERITY_ERROR) {
 						break;
 					}
@@ -261,6 +256,9 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 					}
 				}
 			}
+			else if (element instanceof IBeansConfig) {
+				severity = getSeverityForConfig((IBeansConfig) element);
+			}
 			else {
 				severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
 						((IResourceModelElement) element).getElementResource(),
@@ -275,6 +273,42 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 			IResource resource = ((ZipEntryStorage) element).getFile();
 			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
 					resource, -1, -1);
+		}
+		return severity;
+	}
+
+	private int getSeverityForConfig(IBeansConfig beansConfig) {
+		int severity = MarkerUtils
+				.getHighestSeverityFromMarkersInRange(beansConfig
+						.getElementResource(), -1, -1);
+
+		// Check imported configs
+		for (IBeansImport beanImport : beansConfig.getImports()) {
+			int importedSeverity = getSeverityForImport(beanImport);
+			if (importedSeverity == IMarker.SEVERITY_WARNING) {
+				severity = importedSeverity;
+			}
+			else if (importedSeverity == IMarker.SEVERITY_ERROR) {
+				severity = importedSeverity;
+				break;
+			}
+		}
+
+		return severity;
+	}
+
+	private int getSeverityForImport(IBeansImport beanImport) {
+		int severity = 0;
+		for (IBeansConfig importedConfig : beanImport
+				.getImportedBeansConfigs()) {
+			int importedSeverity = getSeverityForConfig(importedConfig);
+			if (importedSeverity == IMarker.SEVERITY_WARNING) {
+				severity = importedSeverity;
+			}
+			else if (importedSeverity == IMarker.SEVERITY_ERROR) {
+				severity = importedSeverity;
+				break;
+			}
 		}
 		return severity;
 	}

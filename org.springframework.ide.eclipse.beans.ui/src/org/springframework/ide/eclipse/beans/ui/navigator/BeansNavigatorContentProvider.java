@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,12 +29,15 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -95,7 +98,25 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 					((IModelElement) parentElement).getElementParent());
 			return IModelElement.NO_CHILDREN;
 		}
+		else if (parentElement instanceof IBeansImport) {
+			return getImportChildren(parentElement);
+		}
 		return super.getChildren(parentElement);
+	}
+
+	protected Object[] getImportChildren(final Object parentElement) {
+		Set<IImportedBeansConfig> importedBeansConfigs = ((IBeansImport) parentElement)
+				.getImportedBeansConfigs();
+		Set<Object> importedFiles = new LinkedHashSet<Object>();
+		for (IBeansConfig bc : importedBeansConfigs) {
+			if (bc.isElementArchived()) {
+				importedFiles.add(new ZipEntryStorage(bc));
+			}
+			else {
+				importedFiles.add(bc.getElementResource());
+			}
+		}
+		return importedFiles.toArray(new Object[importedFiles.size()]);
 	}
 
 	protected Object[] getConfigSetChildren(IBeansConfigSet configSet) {
@@ -288,4 +309,5 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			return MODEL_CONTENT_FAMILY == family;
 		}
 	}
+
 }

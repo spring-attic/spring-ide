@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,8 +25,8 @@ import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAct
 
 /**
  * Opens the file for currently selected {@link IBeansConfig}.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class OpenConfigFileAction extends AbstractNavigatorAction {
 
@@ -48,7 +48,8 @@ public class OpenConfigFileAction extends AbstractNavigatorAction {
 				if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
 						.equals(getActionSite().getExtensionId())) {
 					rElement = BeansCorePlugin.getModel().getConfig(
-							(IFile) sElement);
+							(IFile) sElement, true);
+					
 				}
 			} else if (sElement instanceof ZipEntryStorage) {
 				rElement = BeansModelUtils

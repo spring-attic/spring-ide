@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,9 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreePathContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -26,8 +28,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceContentProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -41,18 +45,17 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 /**
  * This class is a content provider which knows about the beans core model's
  * {@link IModelElement elements}.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public class BeansModelContentProvider implements ITreeContentProvider,
-		IModelChangeListener {
+		ITreePathContentProvider, IModelChangeListener {
 
-	public static final DefaultNamespaceContentProvider
-			DEFAULT_NAMESPACE_CONTENT_PROVIDER = new
-					DefaultNamespaceContentProvider();
+	public static final DefaultNamespaceContentProvider DEFAULT_NAMESPACE_CONTENT_PROVIDER = 
+		new DefaultNamespaceContentProvider();
 
 	private boolean refresh;
+
 	private StructuredViewer viewer;
 
 	public BeansModelContentProvider() {
@@ -70,7 +73,8 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			Object newInput) {
 		if (viewer instanceof StructuredViewer) {
 			this.viewer = (StructuredViewer) viewer;
-		} else {
+		}
+		else {
 			this.viewer = null;
 		}
 	}
@@ -85,32 +89,37 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		return BeansCorePlugin.getModel().getElementChildren();
 	}
 
-    public boolean hasChildren(Object element) {
+	public boolean hasChildren(Object element) {
 		if (element instanceof ISourceModelElement) {
 			ITreeContentProvider provider = NamespaceUtils
 					.getContentProvider((ISourceModelElement) element);
 			if (provider != null) {
 				return provider.hasChildren(element);
-			} else {
+			}
+			else {
 				return DEFAULT_NAMESPACE_CONTENT_PROVIDER.hasChildren(element);
 			}
-		} else if (element instanceof IModelElement) {
+		}
+		else if (element instanceof IModelElement) {
 			return ((IModelElement) element).getElementChildren().length > 0;
-		} else if (element instanceof IFile) {
+		}
+		else if (element instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					(IFile) element);
 			if (config != null) {
 				// The single IBeansConfig node is available
 				return true;
 			}
-		} else if (element instanceof ZipEntryStorage) {
+		}
+		else if (element instanceof ZipEntryStorage) {
 			IBeansConfig config = BeansModelUtils
 					.getConfig((ZipEntryStorage) element);
 			if (config != null) {
 				// The single IBeansConfig node is available
 				return true;
 			}
-		} else if (element instanceof IType) {
+		}
+		else if (element instanceof IType) {
 			IType type = (IType) element;
 
 			// Only source types are supported
@@ -123,7 +132,8 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 					return beans != null && beans.size() > 0;
 				}
 			}
-		} else if (element instanceof BeanClassReferences) {
+		}
+		else if (element instanceof BeanClassReferences) {
 			return true;
 		}
 		return false;
@@ -135,34 +145,40 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 					.getContentProvider((ISourceModelElement) parentElement);
 			if (provider != null) {
 				return provider.getChildren(parentElement);
-			} else {
+			}
+			else {
 				return DEFAULT_NAMESPACE_CONTENT_PROVIDER
 						.getChildren(parentElement);
 			}
-		} else if (parentElement instanceof IModelElement) {
+		}
+		else if (parentElement instanceof IModelElement) {
 			if (parentElement instanceof IBeansProject) {
 				return getProjectChildren((IBeansProject) parentElement, false);
-			} else if (parentElement instanceof IBeansConfigSet) {
+			}
+			else if (parentElement instanceof IBeansConfigSet) {
 				return getConfigSetChildren((IBeansConfigSet) parentElement);
 			}
 			return ((IModelElement) parentElement).getElementChildren();
-		} else if (parentElement instanceof IFile) {
+		}
+		else if (parentElement instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					(IFile) parentElement);
 			if (config != null) {
 				return new IBeansConfig[] { config };
 			}
-		} else if (parentElement instanceof ZipEntryStorage) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					((ZipEntryStorage) parentElement).getAbsoluteName());
-			if (config != null) {
-				return new IBeansConfig[] { config };
+		}
+		else if (parentElement instanceof ZipEntryStorage) {
+			IResourceModelElement parent = (IResourceModelElement) ((ZipEntryStorage) parentElement)
+					.getAdapter(IResourceModelElement.class);
+			if (parent instanceof IBeansConfig) {
+				return new Object[] { parent };
 			}
-		} else if (parentElement instanceof IType) {
+		}
+		else if (parentElement instanceof IType) {
 			return getJavaTypeChildren((IType) parentElement);
-		} else if (parentElement instanceof BeanClassReferences) {
-			Set<IBean> beans = ((BeanClassReferences) parentElement)
-					.getBeans();
+		}
+		else if (parentElement instanceof BeanClassReferences) {
+			Set<IBean> beans = ((BeanClassReferences) parentElement).getBeans();
 			return beans.toArray(new IBean[beans.size()]);
 		}
 		return IModelElement.NO_CHILDREN;
@@ -175,7 +191,8 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			for (IBeansConfig config : project.getConfigs()) {
 				if (config.isElementArchived()) {
 					children.add(new ZipEntryStorage(config));
-				} else {
+				}
+				else {
 					children.add(config.getElementResource());
 				}
 			}
@@ -185,13 +202,11 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 	}
 
 	protected Object[] getConfigSetChildren(IBeansConfigSet configSet) {
-		Set<ISourceModelElement> children =
-				new LinkedHashSet<ISourceModelElement>();
+		Set<ISourceModelElement> children = new LinkedHashSet<ISourceModelElement>();
 		for (IBeansConfig config : configSet.getConfigs()) {
 			Object[] configChildren = getChildren(config);
 			for (Object child : configChildren) {
-				if (child instanceof IBean
-						|| child instanceof IBeansComponent) {
+				if (child instanceof IBean || child instanceof IBeansComponent) {
 					children.add((ISourceModelElement) child);
 				}
 			}
@@ -221,24 +236,28 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 				return provider.getParent(element);
 			}
 			return DEFAULT_NAMESPACE_CONTENT_PROVIDER.getParent(element);
-		} else if (element instanceof IModelElement) {
+		}
+		else if (element instanceof IModelElement) {
 			if (element instanceof IBeansConfig
 					|| element instanceof IBeansProject) {
 				return ((IResourceModelElement) element).getElementResource();
 			}
-		} else if (element instanceof IFile) {
+		}
+		else if (element instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					(IFile) element);
 			if (config != null) {
 				return config.getElementParent();
 			}
-		} else if (element instanceof ZipEntryStorage) {
+		}
+		else if (element instanceof ZipEntryStorage) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					((ZipEntryStorage) element).getFullName());
 			if (config != null) {
 				return config.getElementParent();
 			}
-		} else if (element instanceof BeanClassReferences) {
+		}
+		else if (element instanceof BeanClassReferences) {
 			return ((BeanClassReferences) element).getBeanClass();
 		}
 		return null;
@@ -251,7 +270,8 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		// model element
 		if (event.getType() == Type.CHANGED) {
 			refreshViewerForElement(element);
-		} else {
+		}
+		else {
 			refreshViewerForElement(element.getElementParent());
 		}
 	}
@@ -272,7 +292,8 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			// Are we in the UI thread?
 			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
 				viewer.refresh(element);
-			} else {
+			}
+			else {
 				ctrl.getDisplay().asyncExec(new Runnable() {
 					public void run() {
 
@@ -282,10 +303,11 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 							return;
 						}
 
-						// If the model changed then refresh the whole viewer 
+						// If the model changed then refresh the whole viewer
 						if (element instanceof IBeansModel) {
 							viewer.refresh();
-						} else {
+						}
+						else {
 							viewer.refresh(element);
 						}
 					}
@@ -293,4 +315,33 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			}
 		}
 	}
+	
+
+	public Object[] getChildren(TreePath parentPath) {
+		// Segment information is currently only required for bean imports
+		if (parentPath.getParentPath().getLastSegment() instanceof IBeansImport
+				&& parentPath.getLastSegment() instanceof IFile) {
+			IFile file = (IFile) parentPath.getLastSegment();
+			IBeansImport beansImport = (IBeansImport) parentPath
+					.getParentPath().getLastSegment();
+			Set<IImportedBeansConfig> importedConfigs = beansImport.getImportedBeansConfigs();
+			for (IBeansConfig bc : importedConfigs) {
+				if (bc.getElementResource().equals(file)) {
+					return new Object[] { bc };
+				}
+			}
+		}
+		return getChildren(parentPath.getLastSegment());
+	}
+
+	public TreePath[] getParents(Object element) {
+		// TODO CD revise this section as we know the parent
+		return new TreePath[0];
+	}
+
+	public boolean hasChildren(TreePath path) {
+		Object[] children = getChildren(path);
+		return children != null && children.length > 0;
+	}
+
 }
