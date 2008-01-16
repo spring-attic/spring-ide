@@ -79,7 +79,7 @@
     </dependency>
     <dependency>
       <groupId>${spring.osgi.groupId}</groupId>
-      <artifactId>backport-util-concurrent</artifactId>
+      <artifactId>backport-util-concurrent.osgi</artifactId>
       <version>3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -142,11 +142,6 @@
   </build>
   <repositories>
     <repository>
-      <id>org.springframework.snapshots</id>
-      <name>Springframework Snapshots Repository</name>
-      <url>http://static.springframework.org/maven2-snapshots</url>
-    </repository>
-    <repository>
       <id>org.apache.snapshots</id>
       <name>Apache Snapshots Repository</name>
       <url>http://cvs.apache.org/maven-snapshot-repository</url>
@@ -160,6 +155,11 @@
       <id>i21-s3-maven-repo</id>
       <name>i21 S3 milestone repo</name>
       <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
+    </repository>
+    <repository>
+      <id>i21-s3-osgi-repo</id>
+      <name>i21 S3 OSGi repo</name>
+      <url>http://s3.amazonaws.com/maven.springframework.org/osgi</url>
     </repository>
   </repositories>
 </project>
