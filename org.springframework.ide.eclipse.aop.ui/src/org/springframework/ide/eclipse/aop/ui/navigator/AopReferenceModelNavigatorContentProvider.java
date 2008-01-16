@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,7 +114,6 @@ public class AopReferenceModelNavigatorContentProvider implements
 		return IModelElement.NO_CHILDREN;
 	}
 
-	@SuppressWarnings("restriction")
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IReferenceNode) {
 			return ((IReferenceNode) parentElement).getChildren();
@@ -270,11 +269,10 @@ public class AopReferenceModelNavigatorContentProvider implements
 
 			IResource resource = SpringUIUtils.getFile(document);
 			// check if resource is a Beans Config
-			if (!BeansCoreUtils.isBeansConfig(resource) || document == null) {
+			if (!BeansCoreUtils.isBeansConfig(resource, true) || document == null) {
 				return nodes.toArray();
 			}
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getProject(
-					resource.getProject()).getConfig((IFile) resource);
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource, true);
 			int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
 			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 			String id = BeansEditorUtils.getAttribute(element, "id");
@@ -345,7 +343,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 				if (reference.getDefinition().getAspectName().equals(id)
 						|| (targetBean.getElementStartLine() >= startLine
 								&& targetBean.getElementEndLine() <= endLine && resource
-								.equals(reference.getResource()))) {
+								.equals(targetBean.getElementResource()))) {
 					if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
 						if (foundIntroductionTargetReferences
 								.containsKey(targetBean)) {
@@ -460,7 +458,6 @@ public class AopReferenceModelNavigatorContentProvider implements
 		return null;
 	}
 
-	@SuppressWarnings("restriction")
 	public boolean hasChildren(Object element) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).hasChildren();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,10 +40,10 @@ public class AopReferenceModelNavigatorLabelProvider extends
 				return node.getResource().getName()
 						+ " - "
 						+ node.getResource().getFullPath().toString()
-								.substring(1) + element;
+								.substring(1);
 			}
 		}
-		return super.getDescription(element) + element;
+		return super.getDescription(element);
 	}
 
 	@Override

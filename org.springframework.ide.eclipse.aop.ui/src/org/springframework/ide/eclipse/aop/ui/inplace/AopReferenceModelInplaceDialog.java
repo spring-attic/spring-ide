@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -106,9 +106,9 @@ import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNa
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings( { "deprecation", "restriction" })
+@SuppressWarnings( "restriction" )
 public class AopReferenceModelInplaceDialog {
-
+ 
 	/**
 	 * Dialog constants telling whether this control can be resized or move.
 	 */
@@ -972,7 +972,6 @@ public class AopReferenceModelInplaceDialog {
 		}
 	}
 
-	@SuppressWarnings("restriction")
 	private Object findElement(TreeItem[] items) {
 		ILabelProvider labelProvider = (ILabelProvider) viewer
 				.getLabelProvider();
