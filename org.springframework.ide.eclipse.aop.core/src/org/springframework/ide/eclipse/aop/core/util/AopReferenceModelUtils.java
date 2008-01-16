@@ -30,12 +30,14 @@ import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
@@ -160,9 +162,12 @@ public class AopReferenceModelUtils {
 				}
 			}
 		}
-		else if (BeansCoreUtils.isBeansConfig(resource)) {
+		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
 			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils
 				.getResourceModelElement(resource);
+			if (beansConfig instanceof IImportedBeansConfig) {
+				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
+			}
 			getAffectedFilesFromBeansConfig(beansConfig, files);
 		}
 		// if the .classpath file is updated redo for every beans config

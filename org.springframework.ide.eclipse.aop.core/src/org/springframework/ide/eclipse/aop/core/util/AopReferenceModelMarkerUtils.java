@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
-@SuppressWarnings("restriction")
 public class AopReferenceModelMarkerUtils {
 
 	private static final String SOURCE_RESOURCE = "source_resource";

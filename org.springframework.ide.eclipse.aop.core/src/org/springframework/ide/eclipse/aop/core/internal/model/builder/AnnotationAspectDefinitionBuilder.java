@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,6 @@ public class AnnotationAspectDefinitionBuilder extends
 		aspectInfos.add(info);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void createAnnotationAspectDefinition(IBean bean, final String id,
 			final String className, final List<IAspectDefinition> aspectInfos)
 			throws Throwable {
@@ -84,9 +83,9 @@ public class AnnotationAspectDefinitionBuilder extends
 	public void doBuildAspectDefinitions(IDOMDocument document, IFile file,
 			List<IAspectDefinition> aspectInfos,
 			IProjectClassLoaderSupport classLoaderSupport) {
-		if (BeansCoreUtils.isBeansConfig(file)) {
+		if (BeansCoreUtils.isBeansConfig(file, true)) {
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(
-					file);
+					file, true);
 			parseAnnotationAspects(document, beansConfig, aspectInfos,
 					classLoaderSupport);
 		}
