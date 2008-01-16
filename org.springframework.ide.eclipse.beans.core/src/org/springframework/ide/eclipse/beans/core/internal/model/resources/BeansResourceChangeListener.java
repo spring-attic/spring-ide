@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.core.internal.model.resources.SpringResou
  * <p>
  * An implementation of {@link IBeansResourceChangeEvents} has to be provided.
  * Here are callbacks defined for the different events.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansResourceChangeListener extends SpringResourceChangeListener {
 
@@ -78,7 +78,7 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 						if (SpringCoreUtils.isSpringProject(file)) {
 							events.projectDescriptionChanged(file, eventType);
 						}
-					} else if (BeansCoreUtils.isBeansConfig(file)) {
+					} else if (BeansCoreUtils.isBeansConfig(file, true)) {
 						events.configChanged(file, eventType);
 					}
 				}

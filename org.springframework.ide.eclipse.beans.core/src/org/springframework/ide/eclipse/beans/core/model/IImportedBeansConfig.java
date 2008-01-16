@@ -10,22 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Set;
-
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-
 /**
- * This interface provides information for a Spring beans import.
- * 
- * @author Torsten Juergeleit
+ * Marker interface for imported {@link IBeansConfig} implementations.
  * @author Christian Dupuis
- * @since 2.0
+ * @since 2.0.3
  */
-public interface IBeansImport extends IBeansModelElement, ISourceModelElement {
+public interface IImportedBeansConfig extends IBeansConfig {
 
-	/**
-	 * Returns a set of imported {@link IImportedBeansConfig}s.
-	 * @since 2.0.3
-	 */
-	Set<IImportedBeansConfig> getImportedBeansConfigs();
 }

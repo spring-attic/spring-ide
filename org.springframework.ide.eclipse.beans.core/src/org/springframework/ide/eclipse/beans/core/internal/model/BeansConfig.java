@@ -130,7 +130,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * to reloading of the corresponding beans config file.
 	 */
 	public void reload() {
-		if (file != null && file.isAccessible()&& super.changed()) {
+		if (file != null && file.isAccessible()&& super.resourceChanged()) {
 			try {
 				w.lock();
 				isModelPopulated = false;

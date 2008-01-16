@@ -10,25 +10,30 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.Path;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * This class defines an import within a Spring beans configuration.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class BeansImport extends AbstractBeansModelElement
 		implements IBeansImport {
 
 	private String resourcePath;
+	
+	private Set<IImportedBeansConfig> beansConfigs;
 
 	public BeansImport(IBeansConfig config, ImportDefinition definition) {
 		super(config, definition.getImportedResource(), definition);
@@ -38,14 +43,12 @@ public class BeansImport extends AbstractBeansModelElement
 	public int getElementType() {
 		return IBeansModelElementTypes.IMPORT_TYPE;
 	}
-
-	public IFile getImportedFile() {
-		if (resourcePath.indexOf(':') > -1) {
-			IBeansConfig config = (IBeansConfig) getElementParent();
-			return config.getElementResource().getParent().getFile(
-					new Path(resourcePath));
-		}
-		return null;
+	
+	@Override
+	public IModelElement[] getElementChildren() {
+		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
+				getImportedBeansConfigs());
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	@Override
@@ -75,4 +78,16 @@ public class BeansImport extends AbstractBeansModelElement
 		text.append(resourcePath);
 		return text.toString();
 	}
+
+	public Set<IImportedBeansConfig> getImportedBeansConfigs() {
+		return beansConfigs;
+	}
+	
+	protected void addImportedBeansConfig(IImportedBeansConfig importedBeansConfig) {
+		if (beansConfigs == null) {
+			beansConfigs = new LinkedHashSet<IImportedBeansConfig>();
+		}
+		beansConfigs.add(importedBeansConfig);
+	}
+	
 }

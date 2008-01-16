@@ -24,11 +24,14 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -84,9 +87,19 @@ public class BeansConfigValidator extends AbstractValidator {
 
 			// First check for a beans config file
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					(IFile) resource);
+					(IFile) resource, true);
 			if (config != null) {
-				resources.add(resource);
+				// Resolve imported config files to their root importing one
+				if (config instanceof IImportedBeansConfig) {
+					IBeansConfig importingConfig = BeansModelUtils
+							.getParentOfClass(config, BeansConfig.class);
+					if (importingConfig != null) {
+						resources.add(importingConfig.getElementResource());
+					}
+				}
+				else {
+					resources.add(resource);
+				}
 			}
 			else if (JdtUtils.isClassPathFile(resource)) {
 				IBeansProject beansProject = BeansCorePlugin.getModel()
@@ -131,7 +144,9 @@ public class BeansConfigValidator extends AbstractValidator {
 
 	@Override
 	protected boolean supports(IModelElement element) {
-		return (element instanceof IBeansModelElement);
+		// Stop at imports because the contents is validated on the root config
+		// level
+		return (element instanceof IBeansModelElement || element instanceof IBeansImport);
 	}
 
 	private List<IResource> getBeanConfigResources(IType beanClass) {

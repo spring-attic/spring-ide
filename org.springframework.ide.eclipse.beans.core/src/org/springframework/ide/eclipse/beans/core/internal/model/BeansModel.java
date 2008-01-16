@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -57,10 +58,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			+ "/model/debug";
 
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
-	
+
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
 	private final Lock r = rwl.readLock();
-	private final Lock w = rwl.writeLock(); 
+
+	private final Lock w = rwl.writeLock();
 
 	/**
 	 * The table of Spring Beans projects
@@ -135,7 +138,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		workspace.removeResourceChangeListener(workspaceListener);
 		workspaceListener = null;
 
-		
 		try {
 			w.lock();
 			// Remove all projects
@@ -175,8 +177,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	public Set<IBeansProject> getProjects() {
 		try {
 			r.lock();
-			return Collections.unmodifiableSet(new HashSet<IBeansProject>(projects
-					.values()));
+			return Collections.unmodifiableSet(new HashSet<IBeansProject>(
+					projects.values()));
 		}
 		finally {
 			r.unlock();
@@ -184,10 +186,24 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	}
 
 	public IBeansConfig getConfig(IFile configFile) {
+		return getConfig(configFile, true);
+	}
+	
+	public IBeansConfig getConfig(IFile configFile, boolean includeImported) {
 		if (configFile != null) {
 			IBeansProject project = getProject(configFile.getProject());
 			if (project != null) {
-				return project.getConfig(configFile);
+				IBeansConfig bc = project.getConfig(configFile, includeImported);
+				if (bc != null) {
+					return bc;
+				}
+			}
+			
+			for (IBeansProject p : getProjects()) {
+				IBeansConfig bc = p.getConfig(configFile, includeImported);
+				if (bc != null) {
+					return bc;
+				}
 			}
 		}
 		return null;
@@ -417,15 +433,18 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				BeansProject project = null;
 				try {
 					r.lock();
-					project = (BeansProject) projects.get(file
-							.getProject());
+					project = (BeansProject) projects.get(file.getProject());
 				}
 				finally {
 					r.unlock();
 				}
-				project.reset();
+				// project can be null if the model has not been populated 
+				// correctly before updating the project description
+				if (project != null) {
+					project.reset();
+				}
 				notifyListeners(project, Type.CHANGED);
-				
+
 				// trigger build of project
 				SpringCoreUtils.buildProject(project.getProject());
 			}
@@ -440,8 +459,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				BeansProject project = null;
 				try {
 					r.lock();
-					project = (BeansProject) projects.get(file
-							.getProject());
+					project = (BeansProject) projects.get(file.getProject());
 				}
 				finally {
 					r.unlock();
@@ -455,16 +473,20 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		public void configChanged(IFile file, int eventType) {
-			BeansProject project = null;
+			BeansConfig config = null;
 			try {
 				r.lock();
-				project = (BeansProject) projects.get(file
-						.getProject());
+				IBeansConfig bc  = getConfig(file, true);
+				if (bc instanceof IImportedBeansConfig) {
+					config = BeansModelUtils.getParentOfClass(bc, BeansConfig.class);
+				}
+				else {
+					config = (BeansConfig) bc;
+				}
 			}
 			finally {
 				r.unlock();
 			}
-			BeansConfig config = (BeansConfig) project.getConfig(file);
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
 					System.out.println("Config '" + file.getFullPath()
@@ -488,8 +510,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				BeansProject project = null;
 				try {
 					r.lock();
-					project = (BeansProject) projects.get(file
-							.getProject());
+					project = (BeansProject) projects.get(file.getProject());
 				}
 				finally {
 					r.unlock();
@@ -519,4 +540,5 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 	}
+
 }

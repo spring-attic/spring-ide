@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,13 +32,13 @@ public interface IBeansProject extends IBeansModelElement,
 	public static final String DEFAULT_CONFIG_SUFFIX = "xml";
 
 	/**
-	 * Returns corresponding Eclipse project. 
+	 * Returns corresponding Eclipse project.
 	 */
 	IProject getProject();
 
 	/**
 	 * Returns a list of file suffixes for <code>IBeansConfig</code> files.
-	 * @since 2.0.2 
+	 * @since 2.0.2
 	 */
 	Set<String> getConfigSuffixes();
 
@@ -50,15 +50,15 @@ public interface IBeansProject extends IBeansModelElement,
 	Set<String> getConfigExtensions();
 
 	/**
-	 * Returns true if given config suffix belongs to the list of Spring
-	 * bean config file suffixes which are stored in the project description.
-	 * @since 2.0.2 
+	 * Returns true if given config suffix belongs to the list of Spring bean
+	 * config file suffixes which are stored in the project description.
+	 * @since 2.0.2
 	 */
 	boolean hasConfigSuffix(String suffix);
 
 	/**
-	 * Returns true if given config extension belongs to the list of Spring
-	 * bean config file extensions which are stored in the project description.
+	 * Returns true if given config extension belongs to the list of Spring bean
+	 * config file extensions which are stored in the project description.
 	 * @deprecated use {@link #hasConfigSuffix(String)} instead.
 	 */
 	@Deprecated
@@ -66,25 +66,33 @@ public interface IBeansProject extends IBeansModelElement,
 
 	/**
 	 * Returns true if given file belongs to the list of Spring bean config
-	 * files which are stored in the project description. 
+	 * files which are stored in the project description.
 	 */
 	boolean hasConfig(IFile file);
 
 	/**
 	 * Returns true if given config name belongs to the list of Spring bean
-	 * config files which are stored in the project description. 
+	 * config files which are stored in the project description.
 	 */
 	boolean hasConfig(String configName);
 
 	/**
-	 * Returns <code>IBeansConfig</code> for given config file. 
+	 * Returns <code>IBeansConfig</code> for given config file.
 	 */
 	IBeansConfig getConfig(IFile configFile);
 
 	/**
-	 * Returns <code>IBeansConfig</code> of given name. 
+	 * Returns <code>IBeansConfig</code> of given name.
 	 */
 	IBeansConfig getConfig(String configName);
+
+	/**
+	 * Returns <code>IBeansConfig</code> for the given config file. Includes
+	 * imported {@link IImportedBeansConfig} in the search if
+	 * <code>includeImported</code> is true.
+	 * @since 2.0.3
+	 */
+	IBeansConfig getConfig(IFile configFile, boolean includeImported);
 
 	/**
 	 * Returns a collection of all configs defined in this project.
@@ -106,4 +114,5 @@ public interface IBeansProject extends IBeansModelElement,
 	 * Returns a list of config sets defined within this project.
 	 */
 	Set<IBeansConfigSet> getConfigSets();
+
 }

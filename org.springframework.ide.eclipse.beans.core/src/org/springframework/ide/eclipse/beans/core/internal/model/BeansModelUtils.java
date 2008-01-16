@@ -62,6 +62,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -1006,6 +1007,12 @@ public final class BeansModelUtils {
 	 * Returns the beans config for a given ZIP file entry.
 	 */
 	public static IBeansConfig getConfig(ZipEntryStorage storage) {
+		IResourceModelElement parent = (IResourceModelElement) storage
+				.getAdapter(IResourceModelElement.class);
+		if (parent instanceof IBeansConfig) {
+			return (IBeansConfig) parent;
+		}
+
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				storage.getFile().getProject());
 		if (project != null) {
@@ -1215,14 +1222,14 @@ public final class BeansModelUtils {
 	 */
 	public static IModelElement getMostSpecificModelElement(int startLine,
 			int endLine, IFile resource, IProgressMonitor monitor) {
-		if (BeansCoreUtils.isBeansConfig(resource)) {
+		if (BeansCoreUtils.isBeansConfig(resource, true)) {
 
 			if (monitor == null) {
 				monitor = new NullProgressMonitor();
 			}
 
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(
-					resource);
+					resource, true);
 			ModelElementDetermingModelVisitor v = new ModelElementDetermingModelVisitor(
 					startLine, endLine, resource);
 			beansConfig.accept(v, monitor);
@@ -1263,7 +1270,7 @@ public final class BeansModelUtils {
 				ISourceModelElement sourceElement = (ISourceModelElement) element;
 				if (sourceElement.getElementResource().equals(file)
 						&& (sourceElement.getElementStartLine() <= startLine || sourceElement
-								.getElementStartLine() -1 <= startLine)
+								.getElementStartLine() - 1 <= startLine)
 						&& endLine <= sourceElement.getElementEndLine()) {
 					this.element = element;
 
@@ -1285,4 +1292,29 @@ public final class BeansModelUtils {
 			}
 		}
 	}
+
+	public static IBeansConfig getImportingBeansConfig(IBeansConfig beansConfig) {
+		if (beansConfig instanceof IImportedBeansConfig) {
+			// navigate up the model tree
+			return (IBeansConfig) beansConfig.getElementParent()
+					.getElementParent();
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getParentOfClass(IModelElement child,
+			Class<T> parentType) {
+		if (child != null) {
+			IModelElement parent = child.getElementParent();
+			while (parent != null) {
+				if (parentType.isAssignableFrom(parent.getClass())) {
+					return (T) parent;
+				}
+				parent = parent.getElementParent();
+			}
+		}
+		return null;
+	}
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectD
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -51,10 +52,13 @@ import org.springframework.util.ObjectUtils;
  */
 public class BeansProject extends AbstractResourceModelElement implements
 		IBeansProject {
-	
+
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
 	private final Lock r = rwl.readLock();
-	private final Lock w = rwl.writeLock(); 
+
+	private final Lock w = rwl.writeLock();
+
 	protected volatile boolean modelPopulated = false;
 
 	private final IProject project;
@@ -169,7 +173,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			r.unlock();
 		}
 	}
-	
+
 	/**
 	 * @deprecated user {@link #getConfigSuffixes()} instead.
 	 */
@@ -187,7 +191,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			r.unlock();
 		}
 	}
-	
+
 	/**
 	 * @deprecated user {@link #hasConfigSuffix(String)} instead.
 	 */
@@ -224,7 +228,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 					deleteMarkersFrom.add(config.getElementResource());
 				}
 			}
-	
+
 			// Create new list of configs
 			configs.clear();
 			for (String configName : configNames) {
@@ -337,6 +341,52 @@ public class BeansProject extends AbstractResourceModelElement implements
 		finally {
 			r.unlock();
 		}
+	}
+
+	public IBeansConfig getConfig(IFile file, boolean includeImported) {
+		IBeansConfig beansConfig = getConfig(file);
+		if (beansConfig != null) {
+			return beansConfig;
+		}
+		if (includeImported && configs != null) {
+			try {
+				r.lock();
+				for (IBeansConfig bc : configs.values()) {
+					beansConfig = checkForImportedBeansConfig(file, bc);
+					if (beansConfig != null) {
+						return beansConfig;
+					}
+				}
+			}
+			finally {
+				r.unlock();
+			}
+		}
+		return null;
+	}
+
+	private IBeansConfig checkForImportedBeansConfig(IFile file, IBeansConfig bc) {
+		if (bc.getElementResource().equals(file)) {
+			return bc;
+		}
+		for (IBeansImport bi : bc.getImports()) {
+			for (IBeansConfig importedBc : bi
+					.getImportedBeansConfigs()) {
+				if (importedBc.getElementResource().equals(file)) {
+					return importedBc;
+				}
+				for (IBeansImport iBi : importedBc.getImports()) {
+					for (IBeansConfig iBc : iBi
+							.getImportedBeansConfigs()) {
+						IBeansConfig f = checkForImportedBeansConfig(file, iBc);
+						if (f != null) {
+							return f;
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	public IBeansConfig getConfig(IFile file) {
@@ -557,8 +607,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 		try {
 			r.lock();
 			return "Project=" + getElementName() + ", ConfigExtensions="
-				+ configSuffixes + ", Configs=" + configs.values()
-				+ ", ConfigsSets=" + configSets;
+					+ configSuffixes + ", Configs=" + configs.values()
+					+ ", ConfigsSets=" + configSets;
 		}
 		finally {
 			r.unlock();
@@ -619,9 +669,9 @@ public class BeansProject extends AbstractResourceModelElement implements
 			configSets = new LinkedHashMap<String, IBeansConfigSet>();
 			this.modelPopulated = true;
 			BeansProjectDescriptionReader.read(this);
-	
+
 			// Remove all invalid configs from this project
-	
+
 			for (IBeansConfig config : getConfigs()) {
 				if (config.getElementResource() == null) {
 					removeConfig(config.getElementName());

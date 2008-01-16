@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
@@ -45,6 +46,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * we only want to validate bean references for infrastructure beans.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class BeanReferenceRule implements
@@ -100,6 +102,9 @@ public class BeanReferenceRule implements
 				} catch (NoSuchBeanDefinitionException e) {
 					context.warning(bean, "UNDEFINED_PARENT_BEAN",
 							"Parent bean '" + parentName + "' not found");
+				} catch (BeanDefinitionStoreException e) {
+					context.warning(bean, "UNDEFINED_PARENT_BEAN",
+							"Parent bean '" + parentName + "' not found");
 				}
 			}
 		}
@@ -137,7 +142,7 @@ public class BeanReferenceRule implements
 		}
 	}
 
-	private void validateValue(IBeansModelElement element, Object value,
+	private void validateValue(IResourceModelElement element, Object value,
 			IBeansValidationContext context) {
 		String beanName = null;
 		if (value instanceof RuntimeBeanReference) {

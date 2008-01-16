@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
  * <li><strong>isInfrstructureBean</strong> checks if a given {@link IBean} is
  * a {@link BeanDefinition#ROLE_INFRASTRUCTURE}</li>
  * </ul>
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -37,7 +36,7 @@ public class BeansModelPropertyTester extends PropertyTester {
 			Object expectedValue) {
 		if (receiver instanceof IFile && "isBeansConfig".equals(property)) {
 			boolean isBeansConfig = BeansCoreUtils
-					.isBeansConfig((IFile) receiver);
+					.isBeansConfig((IFile) receiver, true);
 			return expectedValue == null ? isBeansConfig
 					: isBeansConfig == ((Boolean) expectedValue).booleanValue();
 		}

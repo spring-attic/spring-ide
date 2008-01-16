@@ -15,7 +15,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -89,10 +88,10 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	@Override
 	public IResource getElementResource() {
 		// We need to make sure that the beans resource comes back
-		if (getElementSourceLocation() != null
+ 		if (getElementSourceLocation() != null
 				&& getElementSourceLocation().getResource() instanceof IAdaptable) {
 			IResource resource = (IResource) ((IAdaptable) getElementSourceLocation()
-					.getResource()).getAdapter(IFile.class);
+					.getResource()).getAdapter(IResource.class);
 			if (resource != null) {
 				return resource;
 			}
