@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: org.springframework.spring.source;singleton:=true
-Bundle-Version: 2.5.0
+Bundle-Version: 2.5.1
 Bundle-ManifestVersion: 2
