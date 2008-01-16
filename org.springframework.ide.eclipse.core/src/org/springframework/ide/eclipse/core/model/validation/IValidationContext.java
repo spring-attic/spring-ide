@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.core.model.validation;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -62,7 +61,7 @@ public interface IValidationContext {
 	 * the implementing a quick fix for this problem
 	 * @since 2.0.2
 	 */
-	void info(IModelElement element, String problemId, String message,
+	void info(IResourceModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes);
 	
 	/**
@@ -76,7 +75,7 @@ public interface IValidationContext {
 	 * @param attributes some optional meta attributes which can be useful for
 	 * the implementing a quick fix for this problem
 	 */
-	void warning(IModelElement element, String problemId, String message,
+	void warning(IResourceModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes);
 
 	/**
@@ -89,7 +88,7 @@ public interface IValidationContext {
 	 * @param attributes some optional meta attributes which can be useful for
 	 * the implementing a quick fix for this problem
 	 */
-	void error(IModelElement element, String problemId, String message,
+	void error(IResourceModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes);
-
+	
 }

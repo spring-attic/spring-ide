@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,17 +20,18 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for Eclipse {@link IStorage storage} handles.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class StorageResource extends AbstractResource implements IAdaptable {
 
-	private IStorage storage;
+	private ZipEntryStorage storage;
 
-	public StorageResource(IStorage storage) {
+	public StorageResource(ZipEntryStorage storage) {
 		this.storage = storage;
 	}
 
@@ -61,7 +62,16 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 		if (adapter.equals(IStorage.class)) {
 			return storage;
 		}
+		else if (adapter.equals(ZipEntryStorage.class)) {
+			return storage;
+		}
 		return storage.getAdapter(adapter);
+	}
+	
+	public Resource createRelative(String relativePath) {
+		String pathToUse = StringUtils.applyRelativePath(storage.getEntryName(),
+				relativePath);
+		return new EclipseClassPathResource(pathToUse, storage.getFile().getProject());
 	}
 
 	@Override
@@ -79,5 +89,9 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 	@Override
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(storage);
+	}
+	
+	public IStorage getRawStorage() {
+		return this.storage;
 	}
 }

@@ -24,11 +24,15 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.ValidationRuleUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
+import org.springframework.ide.eclipse.core.model.validation.IValidationProblemMarker;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.Assert;
@@ -174,5 +178,39 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName,
 				beanClass);
 		return bds != null && bds.size() > 0;
+	}
+
+	@Override
+	protected Set<ValidationProblem> createProblems(
+			IResourceModelElement element, String problemId, int severity,
+			String message, ValidationProblemAttribute... attributes) {
+
+		Set<ValidationProblem> problems = super.createProblems(element,
+				problemId, severity, message, attributes);
+		IResource resource = element.getElementResource();
+
+		// Check if error or warning on imported resource exists
+		if (!resource.equals(getRootElementResource())) {
+			IBeansImport beansImport = BeansModelUtils.getParentOfClass(
+					element, IBeansImport.class);
+
+			do {
+				if (severity == IValidationProblemMarker.SEVERITY_ERROR) {
+					problems.add(createProblem(beansImport, "",
+							IValidationProblemMarker.SEVERITY_ERROR,
+							"Validation error occured in imported configuration file"));
+				}
+				else if (severity == IValidationProblemMarker.SEVERITY_WARNING) {
+					problems.add(createProblem(beansImport, "",
+							IValidationProblemMarker.SEVERITY_WARNING,
+							"Validation warning occured in imported configuration file"));
+				}
+				beansImport = BeansModelUtils.getParentOfClass(beansImport,
+						IBeansImport.class);
+			}
+			while (beansImport != null);
+		}
+
+		return problems;
 	}
 }

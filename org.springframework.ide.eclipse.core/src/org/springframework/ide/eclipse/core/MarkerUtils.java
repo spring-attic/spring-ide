@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,22 +12,24 @@ package org.springframework.ide.eclipse.core;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
 /**
  * Some {@link IMarker} helper methods.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public final class MarkerUtils {
+
+	public static final String ORIGINATING_RESOURCE_KEY = "ORIGINATING_RESOURCE";
 
 	public static int getHighestSeverityFromMarkersInRange(IResource resource,
 			int startLine, int endLine) {
 		int severity = -1;
 		if (resource != null) {
 			try {
-				// TODO CD change this to SpringCore.MARKER_ID or
-				// IMarker.PROBLEM
 				IMarker[] markers = resource.findMarkers(SpringCore.MARKER_ID,
 						true, IResource.DEPTH_INFINITE);
 				for (IMarker marker : markers) {
@@ -64,15 +66,32 @@ public final class MarkerUtils {
 	/**
 	 * Removes all {@link IMarker markers} with given id (including the
 	 * inherited ones) from given {@link IResource} and it's members.
+	 * <p>
+	 * Also removes markers on any other resource if given resource's full path
+	 * matches a markers {@link #ORIGINATING_RESOURCE_KEY} attribute.
 	 */
-    public static void deleteMarkers(IResource resource, String id) {
-        if (resource != null && resource.isAccessible()) {
-            try {
-                resource.deleteMarkers(id, true, IResource.DEPTH_INFINITE);
-            }
-            catch (CoreException e) {
-                SpringCore.log(e);
-            }
-        }
-    }
+	public static void deleteMarkers(IResource resource, String id) {
+		if (resource != null && resource.isAccessible()) {
+			try {
+				resource.deleteMarkers(id, true, IResource.DEPTH_INFINITE);
+				String originatingResourceValue = resource.getFullPath()
+						.toString();
+				
+				// Look for markers that have been created elsewhere in the 
+				// workspace but originate from the given resource
+				IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot()
+						.findMarkers(id, true, IResource.DEPTH_INFINITE);
+				for (IMarker marker : markers) {
+					if (originatingResourceValue.equals(marker
+							.getAttribute(ORIGINATING_RESOURCE_KEY))) {
+						marker.delete();
+					}
+				}
+			}
+			catch (CoreException e) {
+				SpringCore.log(e);
+			}
+		}
+	}
+	
 }

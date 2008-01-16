@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.core.model.validation;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
@@ -58,37 +58,69 @@ public abstract class AbstractValidationContext implements IValidationContext {
 	}
 
 	/**
+	 * Create {@link ValidationProblem} of severity info with the given
+	 * information.
 	 * @since 2.0.2
 	 */
-	public void info(IModelElement element, String problemId, String message,
-			ValidationProblemAttribute... attributes) {
-		problems.add(createProblem(element, problemId,
+	public void info(IResourceModelElement element, String problemId,
+			String message, ValidationProblemAttribute... attributes) {
+		problems.addAll(createProblems(element, problemId,
 				IValidationProblemMarker.SEVERITY_INFO, message, attributes));
 	}
 
-	public void warning(IModelElement element, String problemId,
+	/**
+	 * Create {@link ValidationProblem} of severity warning with the given
+	 * information.
+	 */
+	public void warning(IResourceModelElement element, String problemId,
 			String message, ValidationProblemAttribute... attributes) {
-		problems.add(createProblem(element, problemId,
-				IValidationProblemMarker.SEVERITY_WARNING, message, attributes));
+		problems
+				.addAll(createProblems(element, problemId,
+						IValidationProblemMarker.SEVERITY_WARNING, message,
+						attributes));
 	}
 
-	public void error(IModelElement element, String problemId, String message,
-			ValidationProblemAttribute... attributes) {
-		problems.add(createProblem(element, problemId,
+	/**
+	 * Create {@link ValidationProblem} of severity error with the given
+	 * information.
+	 */
+	public void error(IResourceModelElement element, String problemId,
+			String message, ValidationProblemAttribute... attributes) {
+		problems.addAll(createProblems(element, problemId,
 				IValidationProblemMarker.SEVERITY_ERROR, message, attributes));
 	}
 
-	protected final ValidationProblem createProblem(IModelElement element,
-			String problemId, int severity, String message,
-			ValidationProblemAttribute... attributes) {
+	/**
+	 * Create {@link ValidationProblem} for the given information.
+	 * <p>
+	 * Subclasses may override this method to change the creation of validation
+	 * problems, e.g. to automatically create markers on other resources for
+	 * certain error types.
+	 * @since 2.0.3
+	 */
+	protected Set<ValidationProblem> createProblems(
+			IResourceModelElement element, String problemId, int severity,
+			String message, ValidationProblemAttribute... attributes) {
+		Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>(
+				2);
+		problems.add(createProblem(element, problemId, severity, message,
+				attributes));
+		return problems;
+	}
+
+	protected final ValidationProblem createProblem(
+			IResourceModelElement element, String problemId, int severity,
+			String message, ValidationProblemAttribute... attributes) {
 		int line = (element instanceof ISourceModelElement ? ((ISourceModelElement) element)
 				.getElementStartLine()
 				: -1);
+		IResource resource = element.getElementResource();
 		return new ValidationProblem(currentRuleId, problemId, severity,
-				message, line, attributes);
+				message, resource, line, attributes);
 	}
 
 	protected void addProblems(Set<ValidationProblem> problems) {
 		problems.addAll(problems);
 	}
+
 }

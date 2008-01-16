@@ -17,11 +17,13 @@ import java.util.Set;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * Validation helper methods.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public final class ValidationUtils {
@@ -42,9 +44,20 @@ public final class ValidationUtils {
 	/**
 	 * Creates an {@link IMarker validation marker} on the specified resource
 	 * for the given validation problem.
+	 * <p>
+	 * Adds the originating resource as marker attribute with the key
+	 * {@link MarkerUtils#ORIGINATING_RESOURCE_KEY}.
 	 */
 	public static void createProblemMarker(IResource resource,
 			ValidationProblem problem, String markerId) {
+
+		// Use resource used during reporting of the problem as this might be
+		// more concise.
+		IResource originatingResource = resource;
+		if (problem.getResource() != null) {
+			resource = problem.getResource();
+		}
+
 		if (resource != null && resource.isAccessible()) {
 			try {
 
@@ -67,6 +80,12 @@ public final class ValidationUtils {
 				attributes.put(IMarker.MESSAGE, problem.getMessage());
 				attributes.put(IMarker.SEVERITY, new Integer(problem
 						.getSeverity()));
+
+				// Store the originating resource reference in marker so that
+				// the marker can later on be deleted with a reference from the
+				// initial resource
+				attributes.put(MarkerUtils.ORIGINATING_RESOURCE_KEY,
+						originatingResource.getFullPath().toString());
 				if (problem.getLine() > 0) {
 					attributes.put(IMarker.LINE_NUMBER, new Integer(problem
 							.getLine()));

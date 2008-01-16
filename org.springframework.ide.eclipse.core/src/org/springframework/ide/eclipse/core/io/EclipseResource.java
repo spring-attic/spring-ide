@@ -29,45 +29,37 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
- * {@link Resource} implementation for Eclipse {@link IFile file} handles.
- * @author Torsten Juergeleit
+ * {@link Resource} abstraction for Eclipse {@link IResource} implementations.
  * @author Christian Dupuis
+ * @since 2.0.3
  */
-public class FileResource extends AbstractResource implements IAdaptable {
+public class EclipseResource extends AbstractResource implements IAdaptable {
 
-	private IFile file;
-
-	/**
-	 * Create a new FileResource.
-	 * @param file  a file
-	 */
-	public FileResource(IFile file) {
-		this.file = file;
+	private IResource resource;
+	
+	public EclipseResource(IResource resource) {
+		this.resource = resource;
 	}
 
-	/**
-	 * Create a new FileResource.
-	 * @param path a file path (relative to Eclipse workspace)
-	 */
-	public FileResource(String path) {
+	public EclipseResource(String path) {
 		if (path.charAt(0) != '/') {
 			throw new IllegalArgumentException("Path '" + path
 					+ "' has to be relative to Eclipse workspace");
 		}
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IResource member = root.findMember(path);
-		if (member != null && member instanceof IFile) {
-			file = (IFile) member;
+		if (member != null && member instanceof IResource) {
+			resource = (IResource) member;
 		}
 	}
 
 	@Override
 	public boolean exists() {
-		return (file != null && file.exists());
+		return resource != null && resource.exists();
 	}
 
 	public InputStream getInputStream() throws IOException {
-		if (file == null) {
+		if (resource == null || !(resource instanceof IFile)) {
 			throw new FileNotFoundException("File not found");
 		}
 		return new FileInputStream(getFile());
@@ -75,30 +67,30 @@ public class FileResource extends AbstractResource implements IAdaptable {
 
 	@Override
 	public URL getURL() throws IOException {
-		if (file == null) {
+		if (resource == null || !(resource instanceof IFile)) {
 			throw new FileNotFoundException("File not found");
 		}
 		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":"
-				+ file.getRawLocation());
+				+ resource.getRawLocation());
 	}
 
 	@Override
 	public File getFile() throws IOException {
-		if (file == null) {
+		if (resource == null || !(resource instanceof IFile)) {
 			throw new FileNotFoundException("File not found");
 		}
-		return file.getLocation().toFile();
+		return resource.getLocation().toFile();
 	}
 
 	@Override
 	public Resource createRelative(String relativePath) throws IOException {
-		if (file == null) {
+		if (resource == null) {
 			throw new IllegalStateException("File not found");
 		}
-		IFile relativeFile = file.getParent().getFile(
+		IFile relativeFile = resource.getParent().getFile(
 				new Path(relativePath));
 		if (relativeFile != null) {
-			return new FileResource(relativeFile);
+			return new EclipseResource(relativeFile);
 		}
 		throw new FileNotFoundException("Cannot create relative resource '"
 				+ relativePath + "' for " + getDescription());
@@ -106,24 +98,14 @@ public class FileResource extends AbstractResource implements IAdaptable {
 
 	@Override
 	public String getFilename() {
-		if (file == null) {
+		if (resource == null) {
 			throw new IllegalStateException("File not found");
 		}
-		return file.getName();
+		return resource.getName();
 	}
 
 	public String getDescription() {
-		return "file [" + (file != null ? file.getRawLocation() : "") + "]";
-	}
-
-	/**
-	 * Adapts to {@link IResource} or {@link IFile}.
-	 */
-	public Object getAdapter(Class adapter) {
-		if (adapter.equals(IResource.class) || adapter.equals(IFile.class)) {
-			return file;
-		}
-		return null;
+		return "resource [" + (resource != null ? resource.getRawLocation() : "") + "]";
 	}
 
 	@Override
@@ -131,19 +113,26 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof FileResource)) {
+		if (!(other instanceof EclipseResource)) {
 			return false;
 		}
-		FileResource that = (FileResource) other;
-		return ObjectUtils.nullSafeEquals(this.file, that.file);
+		EclipseResource that = (EclipseResource) other;
+		return ObjectUtils.nullSafeEquals(this.resource, that.resource);
 	}
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(file);
+		return ObjectUtils.nullSafeHashCode(resource);
 	}
 	
-	public IFile getRawFile() {
-		return this.file;
+	public IResource getRawResource() {
+		return resource;
+	}
+
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(IResource.class)) {
+			return resource;
+		}
+		return null;
 	}
 }
