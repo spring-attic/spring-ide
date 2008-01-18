@@ -33,6 +33,7 @@ public interface IBeansProjectDescriptionConstants {
 	String NAME = "name";
 	
 	String PLUGIN_VERSION = "pluginVersion";
+	String ENABLE_IMPORTS = "enableImports";
 	String VERSION = "version";
 	String CURRENT_VERSION = "1";
 }

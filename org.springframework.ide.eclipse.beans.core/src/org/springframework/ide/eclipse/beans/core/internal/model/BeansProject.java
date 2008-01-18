@@ -64,6 +64,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	private final IProject project;
 
 	protected volatile Set<String> configSuffixes;
+	
+	protected volatile boolean isImportsEnabled = true;
 
 	protected volatile Map<String, IBeansConfig> configs;
 
@@ -693,5 +695,13 @@ public class BeansProject extends AbstractResourceModelElement implements
 		finally {
 			w.unlock();
 		}
+	}
+
+	public boolean isImportsEnabled() {
+		return isImportsEnabled;
+	}
+	
+	public void setImportsEnabled(boolean importEnabled) {
+		this.isImportsEnabled = importEnabled;
 	}
 }

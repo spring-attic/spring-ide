@@ -44,6 +44,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
@@ -87,7 +88,8 @@ import org.xml.sax.SAXParseException;
 public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		ILazyInitializedModelElement {
 
-	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
+	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = 
+		new DefaultModelElementProvider();
 
 	public BeansConfig(IBeansProject project, String name) {
 		super(project, name);
@@ -242,23 +244,26 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 							registry);
 					reader.setDocumentLoader(new XercesDocumentLoader());
-
-					// set the resource loader to use the customized project
-					// class loader
-					reader
-							.setResourceLoader(new EclipsePathMatchingResourcePatternResolver(
-									file.getProject()));
-
+					
+					// Only install Eclipse-based resource loader if enabled in
+					// project properties
+					if (((IBeansProject) getElementParent()).isImportsEnabled()) {
+						reader.setResourceLoader(new EclipsePathMatchingResourcePatternResolver(
+							file.getProject()));
+					}
+					else {
+						reader.setResourceLoader(new PathMatchingResourcePatternResolver(
+								JdtUtils.getClassLoader(getElementResource())));
+					}
+					
 					reader.setEntityResolver(resolver);
 					reader.setSourceExtractor(new DelegatingSourceExtractor(
 							file.getProject()));
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader
-							.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
-									NamespaceHandlerResolver.class
-											.getClassLoader(), this));
+					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
+							NamespaceHandlerResolver.class.getClassLoader(), this));
 					reader.setBeanNameGenerator(beanNameGenerator);
 					try {
 						reader.loadBeanDefinitions(resource);
@@ -577,61 +582,63 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			else if (config instanceof ImportedBeansConfig) {
 				((ImportedBeansConfig) config).addImport(beansImport);
 			}
-
-			Resource[] importedResources = importDefinition
-					.getActualResources();
-
-			for (Resource importedResource : importedResources) {
-				ImportedBeansConfig importedBeansConfig = new ImportedBeansConfig(
-						beansImport, importedResource);
-				importedBeansConfig.readConfig();
-				beansImport.addImportedBeansConfig(importedBeansConfig);
-
-				importedBeansConfig.setDefaults(defaultDefinitionsCache
-						.get(importedResource));
-				Set<ComponentDefinition> componentDefinitions = componentDefinitionsCache
-						.get(importedResource);
-				if (componentDefinitions != null) {
-					for (ComponentDefinition componentDefinition : componentDefinitions) {
-						String uri = NamespaceUtils
-								.getNameSpaceURI(componentDefinition);
-						IModelElementProvider provider = elementProviders
-								.get(uri);
-						if (provider == null) {
-							provider = DEFAULT_ELEMENT_PROVIDER;
-						}
-						ISourceModelElement element = provider.getElement(
-								importedBeansConfig, componentDefinition);
-						if (element instanceof IBean) {
-							importedBeansConfig.addBean((IBean) element);
-						}
-						else if (element instanceof IBeansComponent) {
-							importedBeansConfig
-									.addComponent((IBeansComponent) element);
+			
+			if (((IBeansProject) getElementParent()).isImportsEnabled()) {
+	 			Resource[] importedResources = importDefinition
+						.getActualResources();
+	
+				for (Resource importedResource : importedResources) {
+					ImportedBeansConfig importedBeansConfig = new ImportedBeansConfig(
+							beansImport, importedResource);
+					importedBeansConfig.readConfig();
+					beansImport.addImportedBeansConfig(importedBeansConfig);
+	
+					importedBeansConfig.setDefaults(defaultDefinitionsCache
+							.get(importedResource));
+					Set<ComponentDefinition> componentDefinitions = componentDefinitionsCache
+							.get(importedResource);
+					if (componentDefinitions != null) {
+						for (ComponentDefinition componentDefinition : componentDefinitions) {
+							String uri = NamespaceUtils
+									.getNameSpaceURI(componentDefinition);
+							IModelElementProvider provider = elementProviders
+									.get(uri);
+							if (provider == null) {
+								provider = DEFAULT_ELEMENT_PROVIDER;
+							}
+							ISourceModelElement element = provider.getElement(
+									importedBeansConfig, componentDefinition);
+							if (element instanceof IBean) {
+								importedBeansConfig.addBean((IBean) element);
+							}
+							else if (element instanceof IBeansComponent) {
+								importedBeansConfig
+										.addComponent((IBeansComponent) element);
+							}
 						}
 					}
-				}
-
-				Set<AliasDefinition> aliasDefinitions = aliasDefinitionsCache
-						.get(importedResource);
-				if (aliasDefinitions != null) {
-					for (AliasDefinition aliasDefinition : aliasDefinitions) {
-						importedBeansConfig.addAlias(new BeanAlias(
-								importedBeansConfig, aliasDefinition));
+	
+					Set<AliasDefinition> aliasDefinitions = aliasDefinitionsCache
+							.get(importedResource);
+					if (aliasDefinitions != null) {
+						for (AliasDefinition aliasDefinition : aliasDefinitions) {
+							importedBeansConfig.addAlias(new BeanAlias(
+									importedBeansConfig, aliasDefinition));
+						}
 					}
-				}
-
-				// process nested imports
-				Set<ImportDefinition> importDefinitions = importDefinitionsCache
-						.get(importedResource);
-				if (importDefinitions != null) {
-					for (ImportDefinition nestedImportDefinition : importDefinitions) {
-						processImportDefinition(nestedImportDefinition,
-								importedBeansConfig);
+	
+					// process nested imports
+					Set<ImportDefinition> importDefinitions = importDefinitionsCache
+							.get(importedResource);
+					if (importDefinitions != null) {
+						for (ImportDefinition nestedImportDefinition : importDefinitions) {
+							processImportDefinition(nestedImportDefinition,
+									importedBeansConfig);
+						}
 					}
+	
+					importedBeansConfig.readFinish();
 				}
-
-				importedBeansConfig.readFinish();
 			}
 		}
 	}

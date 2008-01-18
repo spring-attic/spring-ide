@@ -33,7 +33,8 @@ public class BeansImport extends AbstractBeansModelElement
 
 	private String resourcePath;
 	
-	private Set<IImportedBeansConfig> beansConfigs;
+	private Set<IImportedBeansConfig> beansConfigs = 
+		new LinkedHashSet<IImportedBeansConfig>();
 
 	public BeansImport(IBeansConfig config, ImportDefinition definition) {
 		super(config, definition.getImportedResource(), definition);
@@ -84,9 +85,6 @@ public class BeansImport extends AbstractBeansModelElement
 	}
 	
 	protected void addImportedBeansConfig(IImportedBeansConfig importedBeansConfig) {
-		if (beansConfigs == null) {
-			beansConfigs = new LinkedHashSet<IImportedBeansConfig>();
-		}
 		beansConfigs.add(importedBeansConfig);
 	}
 	

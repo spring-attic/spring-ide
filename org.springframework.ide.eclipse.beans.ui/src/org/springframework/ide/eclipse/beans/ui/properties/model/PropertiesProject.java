@@ -43,6 +43,8 @@ public class PropertiesProject extends BeansProject {
 
 		configSuffixes = new LinkedHashSet<String>(project
 				.getConfigSuffixes());
+		
+		isImportsEnabled = project.isImportsEnabled();
 
 		configs = new LinkedHashMap<String, IBeansConfig>();
 		for (IBeansConfig config : project.getConfigs()) {

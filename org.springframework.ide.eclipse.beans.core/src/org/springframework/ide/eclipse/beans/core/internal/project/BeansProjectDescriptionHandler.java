@@ -36,7 +36,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		CONFIG_EXTENSION, CONFIG_SUFFIXES, CONFIG_SUFFIX, CONFIGS, 
 		CONFIG, CONFIG_SETS, CONFIG_SET, CONFIG_SET_NAME, CONFIG_SET_OVERRIDING, 
 		CONFIG_SET_INCOMPLETE, CONFIG_SET_CONFIGS,CONFIG_SET_CONFIG, VERSION, 
-		PLUGIN_VERSION
+		PLUGIN_VERSION, ENABLE_IMPORTS
 	}
 	protected BeansProject project;
 	protected MultiStatus problems;
@@ -79,6 +79,8 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 				state = State.CONFIGS;
 			} else if (elementName.equals(CONFIG_SETS)) {
 				state = State.CONFIG_SETS;
+			} else if (elementName.equals(ENABLE_IMPORTS)) {
+				state = State.ENABLE_IMPORTS;
 			}
 		} else if (state == State.CONFIG_EXTENSIONS) {
 			if (elementName.equals(CONFIG_EXTENSION)) {
@@ -87,6 +89,10 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.CONFIG_SUFFIXES) {
 			if (elementName.equals(CONFIG_SUFFIX)) {
 				state = State.CONFIG_SUFFIX;
+			}
+		} else if (state == State.ENABLE_IMPORTS) {
+			if (elementName.equals(ENABLE_IMPORTS)) {
+				state = State.ENABLE_IMPORTS;
 			}
 		} else if (state == State.CONFIGS) {
 			if (elementName.equals(CONFIG)) {
@@ -126,6 +132,12 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 			}
 		} else if (state == State.CONFIG_EXTENSIONS) {
 			if (elementName.equals(CONFIG_EXTENSIONS)) {
+				state = State.PROJECT_DESC;
+			}
+		} else if (state == State.ENABLE_IMPORTS) {
+			if (elementName.equals(ENABLE_IMPORTS)) {
+				boolean isImportEnabled = Boolean.valueOf(charBuffer.toString().trim());
+				project.setImportsEnabled(isImportEnabled);
 				state = State.PROJECT_DESC;
 			}
 		} else if (state == State.CONFIG_SUFFIXES) {

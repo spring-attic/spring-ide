@@ -63,9 +63,10 @@ import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
 /**
  * Property page tab for defining the list of beans config file extensions and
  * the selected beans config files.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
+@SuppressWarnings("deprecation")
 public class ConfigFilesTab {
 
 	private static final String PREFIX = "ConfigurationPropertyPage."
@@ -91,6 +92,8 @@ public class ConfigFilesTab {
 
 	private static final int TABLE_WIDTH = 250;
 
+	private static final String ENABLE_IMPORT_LABEL = PREFIX + "enableImports.label";
+
 	private PropertiesModel model;
 
 	private PropertiesProject project;
@@ -104,6 +107,8 @@ public class ConfigFilesTab {
 	private Label errorLabel;
 
 	private Button addButton, removeButton;
+
+	private Button enableImportText;
 
 	private IModelElement selectedElement;
 
@@ -124,6 +129,7 @@ public class ConfigFilesTab {
 	};
 
 	private boolean hasUserMadeChanges;
+
 
 	public ConfigFilesTab(PropertiesModel model, PropertiesProject project,
 			IModelElement selectedModelElement) {
@@ -155,17 +161,6 @@ public class ConfigFilesTab {
 		description.setText(BeansUIPlugin.getResourceString(DESCRIPTION));
 		description.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		// Create extension text field
-		suffixesText = SpringUIUtils.createTextField(composite, BeansUIPlugin
-				.getResourceString(SUFFIXES_LABEL));
-		suffixesText.setText(StringUtils.collectionToDelimitedString(project
-				.getConfigSuffixes(), ","));
-		suffixesText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				handleSuffixesTextModified();
-			}
-		});
-
 		Composite tableAndButtons = new Composite(composite, SWT.NONE);
 		tableAndButtons.setLayoutData(new GridData(GridData.FILL_BOTH));
 		layout = new GridLayout();
@@ -187,8 +182,7 @@ public class ConfigFilesTab {
 			}
 		});
 		configsViewer = new TableViewer(configsTable);
-		configsViewer
-				.setContentProvider(new ConfigFilesContentProvider(project));
+		configsViewer.setContentProvider(new ConfigFilesContentProvider(project));
 		configsViewer.setLabelProvider(new PropertiesModelLabelProvider());
 		configsViewer.setInput(this); // activate content provider
 		configsViewer.setSorter(new ConfigFilesSorter());
@@ -197,6 +191,32 @@ public class ConfigFilesTab {
 			configsViewer.setSelection(
 					new StructuredSelection(selectedElement), true);
 		}
+		
+		Label options = new Label(composite, SWT.WRAP);
+		options.setText("Options:");
+		options.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		// Create enable import checkbox
+		enableImportText = SpringUIUtils.createCheckBox(composite, BeansUIPlugin
+				.getResourceString(ENABLE_IMPORT_LABEL));
+		enableImportText.setSelection(project.isImportsEnabled());
+		enableImportText.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handleImportEnabledChanged();
+			}
+		});
+
+		// Create suffix text field
+		suffixesText = SpringUIUtils.createTextField(composite, BeansUIPlugin
+				.getResourceString(SUFFIXES_LABEL));
+		suffixesText.setText(StringUtils.collectionToDelimitedString(project
+				.getConfigSuffixes(), ","));
+		suffixesText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				handleSuffixesTextModified();
+			}
+		});
 
 		// Create error label
 		errorLabel = new Label(composite, SWT.NONE);
@@ -218,12 +238,23 @@ public class ConfigFilesTab {
 				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
 		model.addChangeListener(modelChangeListener);
 		handleSuffixesTextModified();
-		hasUserMadeChanges = false; // handleSuffixTextModified() has set
-		// this to true
+		hasUserMadeChanges = false; 
+		// handleSuffixTextModified() has set this to true
 		
 		handleTableSelectionChanged();
 		
 		return composite;
+	}
+
+	private void handleImportEnabledChanged() {
+		if (project.isImportsEnabled() && !enableImportText.getSelection()) {
+			hasUserMadeChanges = true;
+			project.setImportsEnabled(enableImportText.getSelection());
+		}
+		else if  (!project.isImportsEnabled() && enableImportText.getSelection()) {
+			hasUserMadeChanges = true;
+			project.setImportsEnabled(enableImportText.getSelection());
+		}
 	}
 
 	public void dispose() {

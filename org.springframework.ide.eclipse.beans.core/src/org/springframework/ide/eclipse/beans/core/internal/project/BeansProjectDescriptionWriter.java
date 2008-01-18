@@ -77,6 +77,7 @@ public class BeansProjectDescriptionWriter implements
 		writer.printCDataTag(PLUGIN_VERSION, BeansCorePlugin.getPluginVersion());
 		writeCData(CONFIG_SUFFIXES, CONFIG_SUFFIX, project
 				.getConfigSuffixes(), writer);
+		writer.printCDataTag(ENABLE_IMPORTS, project.isImportsEnabled());
 		write(CONFIGS, CONFIG, project.getConfigNames(), writer);
 		write(CONFIG_SETS, project.getConfigSets(), writer);
 		writer.endTag(PROJECT_DESCRIPTION);
