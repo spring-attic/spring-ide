@@ -88,8 +88,7 @@ public class AdviceRootAopReferenceNode implements IReferenceNode,
 		text += " <";
 		text += reference.get(0).getDefinition().getAspectName();
 		text += "> - ";
-		text += reference.get(0).getDefinition().getResource().getFullPath()
-				.toString();
+		text += ModelUtils.getFilePath(getResource()); 
 		return text;
 	}
 

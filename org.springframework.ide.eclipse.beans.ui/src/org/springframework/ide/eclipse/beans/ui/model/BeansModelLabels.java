@@ -75,7 +75,7 @@ public final class BeansModelLabels extends BeansUILabels {
 						.removeLastSegments(1).toString();
 			}
 			else {
-				path = resource.getFullPath().makeRelative().toString();
+				path = resource.getProjectRelativePath().makeRelative().toString();
 			}
 			buf.append(path);
 			if (element instanceof IBeanConstructorArgument

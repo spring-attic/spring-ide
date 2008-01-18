@@ -76,8 +76,7 @@ public class AdvisedAopSourceNode implements IReferenceNode,
 		text += " <";
 		text += references.getDefinition().getAspectName();
 		text += "> - ";
-		text += references.getDefinition().getResource().getFullPath()
-				.toString();
+		text += ModelUtils.getFilePath(getResource());
 		return text;
 	}
 

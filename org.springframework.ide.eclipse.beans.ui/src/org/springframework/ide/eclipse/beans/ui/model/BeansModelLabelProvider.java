@@ -111,7 +111,7 @@ public class BeansModelLabelProvider extends
 			StringBuilder builder = new StringBuilder();
 			builder.append(storage.getFullPath().lastSegment());
 			builder.append(" - ");
-			builder.append(storage.getFile().getFullPath().toString());
+			builder.append(storage.getFile().getProjectRelativePath().toString());
 			builder.append("!");
 			builder.append(storage.getFullPath().removeLastSegments(1).toString());
 			return builder.toString();

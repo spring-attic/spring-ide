@@ -145,7 +145,7 @@ public class BeanReferenceNode implements IReferenceNode,
 		IBean bean = getBean();
 		if (bean != null) {
 			return BeansUIPlugin.getLabelProvider().getText(bean) + " - "
-					+ bean.getElementResource().getFullPath().toString();
+					+ ModelUtils.getFilePath(bean.getElementResource());
 		}
 		else {
 			return "<bean cannot be found>";

@@ -54,7 +54,7 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode,
 				.get(0).getTargetBeanId());
 		if (bean != null) {
 			return BeansUIPlugin.getLabelProvider().getText(bean) + " - "
-					+ bean.getElementResource().getFullPath().toString();
+					+ ModelUtils.getFilePath(bean.getElementResource());
 		}
 		else {
 			return "<bean cannot be found>";

@@ -92,9 +92,8 @@ public class AdviceAopTargetNode implements IReferenceNode,
 		}
 		text += " <";
 		text += references.get(0).getDefinition().getAspectName();
-		text += "> -";
-		text += references.get(0).getDefinition().getResource().getFullPath()
-				.toString();
+		text += "> - ";
+		text += ModelUtils.getFilePath(getResource());
 		return text;
 	}
 
