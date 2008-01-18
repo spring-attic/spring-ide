@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.internal.model.validation;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -30,15 +34,15 @@ public class ValidatorDefinitionFactory {
 
 	public static final String VALIDATORS_EXTENSION_POINT = SpringCore.PLUGIN_ID
 			+ ".validators";
+
 	public static final String VALIDATOR_ELEMENT = "validator";
 
-	
 	/**
-	 * Returns all contributed {@link ValidatorDefinition}. 
+	 * Returns all contributed {@link ValidatorDefinition}.
 	 */
 	public static Set<ValidatorDefinition> getValidatorDefinitions() {
-		Set<ValidatorDefinition> validatorDefinitions =
-				new LinkedHashSet<ValidatorDefinition>();
+		List<ValidatorDefinition> validatorDefinitions =
+				new ArrayList<ValidatorDefinition>();
 		for (IExtension extension : Platform.getExtensionRegistry()
 				.getExtensionPoint(VALIDATORS_EXTENSION_POINT)
 						.getExtensions()) {
@@ -56,9 +60,19 @@ public class ValidatorDefinitionFactory {
 				}
 			}
 		}
-		return validatorDefinitions;
+		Collections.sort(validatorDefinitions, new Comparator<ValidatorDefinition>() {
+
+			public int compare(ValidatorDefinition v1, ValidatorDefinition v2) {
+				if (v1.getOrder() == v2.getOrder()) {
+					return v1.getName().compareTo(v2.getName());
+				}
+				else {
+					return Integer.valueOf(v1.getOrder()).compareTo(Integer.valueOf(v2.getOrder()));
+				}
+			}});
+		return new LinkedHashSet<ValidatorDefinition>(validatorDefinitions);
 	}
-	
+
 	/**
 	 * Returns a specific {@link ValidatorDefinition} or null if the requested
 	 * one can't be found.
@@ -72,5 +86,5 @@ public class ValidatorDefinitionFactory {
 		}
 		return null;
 	}
-	
+
 }

@@ -45,7 +45,8 @@
 			class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidator"
 			markerId="problemmarker"
 			description="%webflowvalidator.description"
-			enabledByDefault="true"/>
+			enabledByDefault="true"
+			order="30" />
   <rules validatorId="org.springframework.ide.eclipse.webflow.core.validator">
      <rule
            class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.ActionStateValidationRule"

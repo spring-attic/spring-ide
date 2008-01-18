@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -158,12 +158,16 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 				resources.addAll(contributor.getAffectedResources(resource, 
 						IncrementalProjectBuilder.FULL_BUILD));
 			}
+			else if (resource instanceof IProject) {
+				resources.addAll(contributor.getAffectedResources(resource, 
+						IncrementalProjectBuilder.FULL_BUILD));
+			}
 			return true;
 		}
 	}
 
 	/**
-	 * Create a list of affected resources from a resource delat.
+	 * Create a list of affected resources from a resource delta.
 	 */
 	private class ResourceDeltaVisitor implements IResourceDeltaVisitor {
 
@@ -189,6 +193,10 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 				// Only check projects with Spring beans nature
 				visitChildren = SpringCoreUtils.isSpringProject(resource);
+				if (visitChildren) {
+					resources.addAll(contributor.getAffectedResources(resource,
+							kind));
+				}
 			}
 			else if (resource instanceof IFolder) {
 				resources.addAll(contributor.getAffectedResources(resource,

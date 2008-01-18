@@ -99,6 +99,13 @@ This extension-point is used to add one or more validators (and it&apos;s valida
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="order" type="string">
+            <annotation>
+               <documentation>
+                  this attribute value determines the order the validator appreas in the list of validators and is executed. A lower number appreas first.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

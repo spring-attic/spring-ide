@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
+import org.springframework.util.StringUtils;
 
 /**
  * Wraps an {@link IValidator} and all the information from it's definition via
@@ -47,6 +48,8 @@ public class ValidatorDefinition extends PersistablePreferenceObjectSupport {
 
 	private static final String NAME_ATTRIBUTE = "name";
 
+	private static final String ORDER_ATTRIBUTE = "order";
+
 	private String description;
 
 	private String iconUri;
@@ -58,6 +61,8 @@ public class ValidatorDefinition extends PersistablePreferenceObjectSupport {
 	private String name;
 
 	private String namespaceUri;
+	
+	private int order;
 
 	private IValidator validator;
 
@@ -100,6 +105,10 @@ public class ValidatorDefinition extends PersistablePreferenceObjectSupport {
 		return id;
 	}
 
+	public int getOrder() {
+		return order;
+	}
+
 	public String getMarkerId() {
 		return markerId;
 	}
@@ -131,6 +140,14 @@ public class ValidatorDefinition extends PersistablePreferenceObjectSupport {
 		name = element.getAttribute(NAME_ATTRIBUTE);
 		description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
 		iconUri = element.getAttribute(ICON_ATTRIBUTE);
+		// Get the ordering information
+		String orderString = element.getAttribute(ORDER_ATTRIBUTE);
+		if (StringUtils.hasText(orderString)) {
+			order = Integer.valueOf(orderString);
+		}
+		else {
+			order = Integer.MAX_VALUE;
+		}
 		markerId = element.getContributor().getName() + "."
 				+ element.getAttribute(MARKER_ID_ATTRIBUTE);
 		namespaceUri = element.getDeclaringExtension().getNamespaceIdentifier();

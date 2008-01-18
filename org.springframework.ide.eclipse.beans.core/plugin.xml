@@ -48,7 +48,8 @@
 	          description="%beansValidator.description"
 			  icon="icons/full/obj16/bean_obj.gif"
 			  markerId="problemmarker"
-			  enabledByDefault="true" />
+			  enabledByDefault="true" 
+			  order="20" />
 	    <rules validatorId="org.springframework.ide.eclipse.beans.core.beansvalidator">
 		    <rule id="beanAlias"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanAliasRule"
