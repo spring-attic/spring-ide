@@ -67,6 +67,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	protected volatile Set<String> configSuffixes;
 	
 	protected volatile boolean isImportsEnabled = true;
+	
+	protected volatile String version = BeansCorePlugin.getPluginVersion();
 
 	protected volatile Map<String, IBeansConfig> configs;
 
@@ -707,5 +709,13 @@ public class BeansProject extends AbstractResourceModelElement implements
 	
 	public void setImportsEnabled(boolean importEnabled) {
 		this.isImportsEnabled = importEnabled;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 }

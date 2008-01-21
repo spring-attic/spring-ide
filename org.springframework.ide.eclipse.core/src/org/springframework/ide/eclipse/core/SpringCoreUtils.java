@@ -44,11 +44,11 @@ import org.osgi.framework.Bundle;
  * @author Christian Dupuis
  */
 public final class SpringCoreUtils {
-	
+
 	public static final String PLACEHOLDER_PREFIX = "${";
 
 	public static final String PLACEHOLDER_SUFFIX = "}";
-	
+
 	/**
 	 * Returns <code>true</code> if given text contains a placeholder, e.g.
 	 * <code>${beansRef}</code>.
@@ -228,8 +228,9 @@ public final class SpringCoreUtils {
 	/**
 	 * Adds (or updates) a builder in given project description.
 	 */
-	public static void addProjectBuilderCommand(IProjectDescription description,
-			 ICommand command) throws CoreException {
+	public static void addProjectBuilderCommand(
+			IProjectDescription description, ICommand command)
+			throws CoreException {
 		ICommand[] oldCommands = description.getBuildSpec();
 		ICommand oldBuilderCommand = getProjectBuilderCommand(description,
 				command.getBuilderName());
@@ -238,10 +239,12 @@ public final class SpringCoreUtils {
 
 			// Add given builder to the end of the builder list
 			newCommands = new ICommand[oldCommands.length + 1];
-			System.arraycopy(oldCommands, 0, newCommands, 0,
-							 oldCommands.length);
+			System
+					.arraycopy(oldCommands, 0, newCommands, 0,
+							oldCommands.length);
 			newCommands[oldCommands.length] = command;
-		} else {
+		}
+		else {
 
 			// Replace old builder with given new one
 			for (int i = 0, max = oldCommands.length; i < max; i++) {
@@ -321,6 +324,40 @@ public final class SpringCoreUtils {
 		return false;
 	}
 
+	/**
+	 * Returns true if Eclipse's runtime bundle has the same or a newer than
+	 * given version.
+	 */
+	public static boolean isVersionSameOrNewer(String version,
+			int majorVersion, int minorVersion, int patchVersion) {
+		StringTokenizer st = new StringTokenizer(version, ".");
+		try {
+			int major = Integer.parseInt(st.nextToken());
+			if (major > majorVersion) {
+				return true;
+			}
+			int minor = Integer.parseInt(st.nextToken());
+			if (major == majorVersion) {
+				if (minor > minorVersion) {
+					return true;
+				}
+			}
+			if (major == majorVersion && minor == minorVersion) {
+				int patch = Integer.parseInt(st.nextToken());
+				if (patch >= patchVersion) {
+					return true;
+				}
+			}
+		}
+		catch (NoSuchElementException e) {
+			// ignore
+		}
+		catch (NumberFormatException e) {
+			// ignore
+		}
+		return false;
+	}
+
 	public static IPath getProjectLocation(IProject project) {
 		return (project.getRawLocation() != null ? project.getRawLocation()
 				: project.getLocation());
@@ -358,7 +395,8 @@ public final class SpringCoreUtils {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) {
 				try {
-					project.build(IncrementalProjectBuilder.FULL_BUILD,
+					project
+							.build(IncrementalProjectBuilder.FULL_BUILD,
 									monitor);
 					return Status.OK_STATUS;
 				}

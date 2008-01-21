@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
+import org.springframework.ide.eclipse.beans.core.internal.model.update.BeansModelUpdater;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -111,10 +112,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			for (IProject project : SpringCoreUtils.getSpringProjects()) {
 				addProject(new BeansProject(this, project));
 			}
+			
+			// Check for update actions
+			BeansModelUpdater.updateModel(projects.values());
 		}
 		finally {
 			w.unlock();
 		}
+		
+		
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new BeansResourceChangeListener(

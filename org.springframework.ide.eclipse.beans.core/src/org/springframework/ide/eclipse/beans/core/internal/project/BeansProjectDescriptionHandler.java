@@ -81,6 +81,8 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 				state = State.CONFIG_SETS;
 			} else if (elementName.equals(ENABLE_IMPORTS)) {
 				state = State.ENABLE_IMPORTS;
+			} else if (elementName.equals(PLUGIN_VERSION)) {
+				state = State.PLUGIN_VERSION;
 			}
 		} else if (state == State.CONFIG_EXTENSIONS) {
 			if (elementName.equals(CONFIG_EXTENSION)) {
@@ -138,6 +140,12 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 			if (elementName.equals(ENABLE_IMPORTS)) {
 				boolean isImportEnabled = Boolean.valueOf(charBuffer.toString().trim());
 				project.setImportsEnabled(isImportEnabled);
+				state = State.PROJECT_DESC;
+			}
+		} else if (state == State.PLUGIN_VERSION) {
+			if (elementName.equals(PLUGIN_VERSION)) {
+				String version = charBuffer.toString().trim();
+				project.setVersion(version);
 				state = State.PROJECT_DESC;
 			}
 		} else if (state == State.CONFIG_SUFFIXES) {
