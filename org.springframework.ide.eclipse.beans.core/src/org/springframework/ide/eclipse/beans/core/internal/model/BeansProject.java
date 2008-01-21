@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -344,51 +345,54 @@ public class BeansProject extends AbstractResourceModelElement implements
 			r.unlock();
 		}
 	}
+	
+	public IBeansConfig getConfig(IFile configFile, boolean includeImported) {
+		Set<IBeansConfig> beansConfigs = getConfigs(configFile, includeImported);
+		Iterator<IBeansConfig> iterator = beansConfigs.iterator();
+		if (iterator.hasNext()) {
+			return iterator.next();
+		}
+		return null;
+	}
 
-	public IBeansConfig getConfig(IFile file, boolean includeImported) {
+	public Set<IBeansConfig> getConfigs(IFile file, boolean includeImported) {
+		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
 		IBeansConfig beansConfig = getConfig(file);
 		if (beansConfig != null) {
-			return beansConfig;
+			beansConfigs.add(beansConfig);
 		}
 		if (includeImported && configs != null) {
 			try {
 				r.lock();
 				for (IBeansConfig bc : configs.values()) {
-					beansConfig = checkForImportedBeansConfig(file, bc);
-					if (beansConfig != null) {
-						return beansConfig;
-					}
+					checkForImportedBeansConfig(file, bc, beansConfigs);
 				}
 			}
 			finally {
 				r.unlock();
 			}
 		}
-		return null;
+		return beansConfigs;
 	}
 
-	private IBeansConfig checkForImportedBeansConfig(IFile file, IBeansConfig bc) {
+	private void checkForImportedBeansConfig(IFile file, IBeansConfig bc, Set<IBeansConfig> beansConfigs) {
 		if (bc.getElementResource().equals(file)) {
-			return bc;
+			beansConfigs.add(bc);
 		}
 		for (IBeansImport bi : bc.getImports()) {
 			for (IBeansConfig importedBc : bi
 					.getImportedBeansConfigs()) {
 				if (importedBc.getElementResource().equals(file)) {
-					return importedBc;
+					beansConfigs.add(importedBc);
 				}
 				for (IBeansImport iBi : importedBc.getImports()) {
 					for (IBeansConfig iBc : iBi
 							.getImportedBeansConfigs()) {
-						IBeansConfig f = checkForImportedBeansConfig(file, iBc);
-						if (f != null) {
-							return f;
-						}
+						checkForImportedBeansConfig(file, iBc, beansConfigs);
 					}
 				}
 			}
 		}
-		return null;
 	}
 
 	public IBeansConfig getConfig(IFile file) {

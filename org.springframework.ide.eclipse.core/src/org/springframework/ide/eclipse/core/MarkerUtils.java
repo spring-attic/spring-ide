@@ -64,21 +64,19 @@ public final class MarkerUtils {
 	}
 
 	/**
-	 * Removes all {@link IMarker markers} with given id (including the
-	 * inherited ones) from given {@link IResource} and it's members.
-	 * <p>
-	 * Also removes markers on any other resource if given resource's full path
-	 * matches a markers {@link #ORIGINATING_RESOURCE_KEY} attribute.
+	 * Removes all {@link IMarker markers} with the given id (including the
+	 * inherited ones) from given {@link IResource} and it's members that if the
+	 * marker has an attribute under the key named
+	 * {@link #ORIGINATING_RESOURCE_KEY} attribute that matches the given
+	 * {@link IResource#getFullPath()}.
 	 */
-	public static void deleteMarkers(IResource resource, String id) {
+	public static void deleteAllMarkers(IResource resource, String id) {
 		if (resource != null && resource.isAccessible()) {
 			try {
-				resource.deleteMarkers(id, true, IResource.DEPTH_INFINITE);
+				// Look for markers that have been created elsewhere in the
+				// workspace but originate from the given resource
 				String originatingResourceValue = resource.getFullPath()
 						.toString();
-				
-				// Look for markers that have been created elsewhere in the 
-				// workspace but originate from the given resource
 				IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot()
 						.findMarkers(id, true, IResource.DEPTH_INFINITE);
 				for (IMarker marker : markers) {
@@ -93,5 +91,20 @@ public final class MarkerUtils {
 			}
 		}
 	}
-	
+
+	/**
+	 * Removes all {@link IMarker markers} with given id (including the
+	 * inherited ones) from given {@link IResource} and it's members.
+	 */
+	public static void deleteMarkers(IResource resource, String id) {
+		if (resource != null && resource.isAccessible()) {
+			try {
+				resource.deleteMarkers(id, true, IResource.DEPTH_INFINITE);
+			}
+			catch (CoreException e) {
+				SpringCore.log(e);
+			}
+		}
+	}
+
 }

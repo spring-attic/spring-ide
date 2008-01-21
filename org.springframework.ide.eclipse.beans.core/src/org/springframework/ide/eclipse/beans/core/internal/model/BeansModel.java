@@ -208,6 +208,17 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 		return null;
 	}
+	
+	public Set<IBeansConfig> getConfigs(IFile configFile,
+			boolean includeImported) {
+		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
+		if (configFile != null) {
+			for (IBeansProject p : getProjects()) {
+				beansConfigs.addAll(p.getConfigs(configFile, includeImported));
+			}
+		}
+		return beansConfigs;
+	}
 
 	public IBeansConfig getConfig(String configName) {
 
@@ -473,15 +484,17 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		public void configChanged(IFile file, int eventType) {
-			BeansConfig config = null;
+			Set<BeansConfig> configs = new LinkedHashSet<BeansConfig>();
 			try {
 				r.lock();
-				IBeansConfig bc  = getConfig(file, true);
-				if (bc instanceof IImportedBeansConfig) {
-					config = BeansModelUtils.getParentOfClass(bc, BeansConfig.class);
-				}
-				else {
-					config = (BeansConfig) bc;
+				Set<IBeansConfig> bcs  = getConfigs(file, true);
+				for (IBeansConfig bc : bcs) {
+					if (bc instanceof IImportedBeansConfig) {
+						configs.add(BeansModelUtils.getParentOfClass(bc, BeansConfig.class));
+					}
+					else {
+						configs.add((BeansConfig) bc);
+					}
 				}
 			}
 			finally {
@@ -492,12 +505,16 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Config '" + file.getFullPath()
 							+ "' changed");
 				}
-				notifyListeners(config, Type.CHANGED);
+				for (BeansConfig config : configs) {
+					notifyListeners(config, Type.CHANGED);
+				}
 			}
 			else {
 				// Reset corresponding BeansConfig BEFORE the project builder
 				// starts validating this BeansConfig
-				config.reload();
+				for (BeansConfig config : configs) {
+					config.reload();
+				}
 			}
 		}
 

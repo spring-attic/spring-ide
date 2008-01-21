@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -32,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -80,25 +82,33 @@ public class BeansConfigValidator extends AbstractValidator {
 		return resources;
 	}
 
+	@Override
+	public void cleanup(IResource resource, IProgressMonitor monitor)
+			throws CoreException {
+		MarkerUtils.deleteAllMarkers(resource, getMarkerId());
+	}
+
 	public Set<IResource> getAffectedResources(IResource resource, int kind)
 			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
 
 			// First check for a beans config file
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs(
 					(IFile) resource, true);
-			if (config != null) {
-				// Resolve imported config files to their root importing one
-				if (config instanceof IImportedBeansConfig) {
-					IBeansConfig importingConfig = BeansModelUtils
-							.getParentOfClass(config, BeansConfig.class);
-					if (importingConfig != null) {
-						resources.add(importingConfig.getElementResource());
+			if (configs != null && configs.size() > 0) {
+				for (IBeansConfig config : configs) {
+					// Resolve imported config files to their root importing one
+					if (config instanceof IImportedBeansConfig) {
+						IBeansConfig importingConfig = BeansModelUtils
+								.getParentOfClass(config, BeansConfig.class);
+						if (importingConfig != null) {
+							resources.add(importingConfig.getElementResource());
+						}
 					}
-				}
-				else {
-					resources.add(resource);
+					else {
+						resources.add(resource);
+					}
 				}
 			}
 			else if (JdtUtils.isClassPathFile(resource)) {

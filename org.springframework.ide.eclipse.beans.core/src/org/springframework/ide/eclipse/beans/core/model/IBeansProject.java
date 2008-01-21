@@ -93,6 +93,14 @@ public interface IBeansProject extends IBeansModelElement,
 	 * @since 2.0.3
 	 */
 	IBeansConfig getConfig(IFile configFile, boolean includeImported);
+	
+	/**
+	 * Returns all <code>IBeansConfig</code> for the given config file. Includes
+	 * imported {@link IImportedBeansConfig} in the search if
+	 * <code>includeImported</code> is true.
+	 * @since 2.0.3
+	 */
+	Set<IBeansConfig> getConfigs(IFile configFile, boolean includeImported);
 
 	/**
 	 * Returns a collection of all configs defined in this project.

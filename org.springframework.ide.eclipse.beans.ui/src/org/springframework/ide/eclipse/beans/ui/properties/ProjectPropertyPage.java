@@ -129,7 +129,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		if (configFilesTab.hasUserMadeChanges()) {
 			for (IBeansConfig currentConfig : currentProject.getConfigs()) {
 				if (!newProject.hasConfig(currentConfig.getElementName())) {
-					MarkerUtils.deleteMarkers(currentConfig
+					MarkerUtils.deleteAllMarkers(currentConfig
 							.getElementResource(), SpringCore.MARKER_ID);
 				}
 			}
