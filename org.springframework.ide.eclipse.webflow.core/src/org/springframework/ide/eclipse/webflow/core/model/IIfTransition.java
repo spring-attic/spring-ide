@@ -16,7 +16,6 @@ package org.springframework.ide.eclipse.webflow.core.model;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public interface IIfTransition extends ITransition {
 
 	/**

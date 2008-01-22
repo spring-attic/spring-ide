@@ -242,7 +242,6 @@ public class ConfigFilesTab {
 		// handleSuffixTextModified() has set this to true
 		
 		handleTableSelectionChanged();
-		
 		return composite;
 	}
 

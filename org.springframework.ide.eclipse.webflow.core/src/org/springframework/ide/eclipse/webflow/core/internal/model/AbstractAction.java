@@ -19,7 +19,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IBeanReference;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public abstract class AbstractAction extends AbstractActionElement implements
 		IAction, IBeanReference {
 

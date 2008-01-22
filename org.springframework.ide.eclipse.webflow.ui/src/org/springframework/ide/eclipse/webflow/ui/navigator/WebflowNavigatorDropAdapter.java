@@ -131,7 +131,9 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 			// handle resource drop to project or IWorkspaceRoot
 			if (parent instanceof WebflowProject) {
 				WebflowProject webflowProject = (WebflowProject) parent;
-
+				if (!webflowProject.isUpdatable()) {
+					return Status.CANCEL_STATUS;
+				}
 				// check if target project is actually the parent of
 				// resource
 				IProject project = getProject(parent);
@@ -151,6 +153,9 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 				IProject project = getProject(parent);
 				WebflowProject webflowProject = (WebflowProject) Activator
 						.getModel().getProject(project);
+				if (!webflowProject.isUpdatable()) {
+					return Status.CANCEL_STATUS;
+				}
 				IBeansModelElement beansElement = BeansCorePlugin.getModel()
 						.getConfig(file);
 

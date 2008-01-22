@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -122,6 +123,19 @@ public class ProjectPropertyPage extends PropertyPage {
 		IProject project = (IProject) getElement();
 		IBeansProject currentProject = BeansCorePlugin.getModel().getProject(
 				project);
+		boolean userMadeChanges = configFilesTab.hasUserMadeChanges()
+				|| configSetsTab.hasUserMadeChanges();
+		
+		if (userMadeChanges && !currentProject.isUpdatable()) {
+			MessageDialog
+					.openInformation(
+							getShell(),
+							"Project cannot be updated",
+							"The project properties cannot be changed because the project "
+									+ "description file '.springBeans' is not accessible or writable. \n\nPlease ensure that this file is writable.");
+			return super.performOk();
+		}
+
 		PropertiesProject newProject = (PropertiesProject) model
 				.getProject(project);
 
@@ -136,8 +150,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		}
 
 		// Now save modified project description
-		if (configFilesTab.hasUserMadeChanges()
-				|| configSetsTab.hasUserMadeChanges()) {
+		if (userMadeChanges) {
 			newProject.saveDescription();
 		}
 

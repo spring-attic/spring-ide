@@ -124,7 +124,9 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 			// handle resource drop to project or IWorkspaceRoot
 			if (parent instanceof BeansProject) {
 				BeansProject beansProject = (BeansProject) parent;
-
+				if (!beansProject.isUpdatable()) {
+					return Status.CANCEL_STATUS;
+				}
 				// check if target project is actually the parent of
 				// resource
 				IProject project = getProject(parent);
@@ -140,7 +142,9 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 				IProject project = getProject(parent);
 				BeansProject beansProject = (BeansProject) BeansCorePlugin
 						.getModel().getProject(project);
-
+				if (!beansProject.isUpdatable()) {
+					return Status.CANCEL_STATUS;
+				}
 				// TODO CD add support for linked project and config sets
 				if (resource.getProject().equals(project)
 						&& !beansConfigSet.hasConfig(file)) {

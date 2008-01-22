@@ -26,7 +26,6 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class IfTransition extends Transition implements IIfTransition {
 
 	/**

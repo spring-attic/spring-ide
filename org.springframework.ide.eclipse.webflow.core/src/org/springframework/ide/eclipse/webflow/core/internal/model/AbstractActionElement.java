@@ -18,7 +18,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public abstract class AbstractActionElement extends AbstractModelElement
 		implements IActionElement {
 

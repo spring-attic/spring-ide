@@ -29,5 +29,12 @@ public interface IWebflowProject extends IModelElement {
 	IWebflowConfig getConfig(IFile file);
 	
 	IWebflowConfig getConfig(String flowId);
+	
+	/**
+	 * Returns true if this project's settings can be changed 
+	 * @return true if this project can be changed.
+	 * @since 2.0.3
+	 */
+	boolean isUpdatable();
 
 }

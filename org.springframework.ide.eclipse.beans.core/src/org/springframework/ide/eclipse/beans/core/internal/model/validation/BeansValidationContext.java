@@ -198,17 +198,22 @@ public class BeansValidationContext extends AbstractValidationContext implements
 				if (severity == IValidationProblemMarker.SEVERITY_ERROR) {
 					problems.add(createProblem(beansImport, "",
 							IValidationProblemMarker.SEVERITY_ERROR,
-							"Validation error occured in imported configuration file"));
+							"Validation error occured in imported configuration file '"
+									+ element.getElementResource()
+											.getProjectRelativePath()
+											.toString() + "'"));
 				}
 				else if (severity == IValidationProblemMarker.SEVERITY_WARNING) {
 					problems.add(createProblem(beansImport, "",
 							IValidationProblemMarker.SEVERITY_WARNING,
-							"Validation warning occured in imported configuration file"));
+							"Validation warning occured in imported configuration file '"
+									+ element.getElementResource()
+											.getProjectRelativePath()
+											.toString() + "'"));
 				}
 				beansImport = BeansModelUtils.getParentOfClass(beansImport,
 						IBeansImport.class);
-			}
-			while (beansImport != null);
+			} while (beansImport != null);
 		}
 
 		return problems;

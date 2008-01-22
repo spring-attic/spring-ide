@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectDescription;
@@ -130,5 +131,11 @@ public class WebflowProject extends AbstractModelElement
 	public void saveDescription() {
 		WebflowProjectDescription description = getDescription();
 		WebflowProjectDescriptionWriter.write(project, description);
+	}
+	
+	public boolean isUpdatable() {
+		IFile file = project.getProject().getFile(
+				new Path(IWebflowProject.DESCRIPTION_FILE));
+		return !file.isReadOnly();
 	}
 }

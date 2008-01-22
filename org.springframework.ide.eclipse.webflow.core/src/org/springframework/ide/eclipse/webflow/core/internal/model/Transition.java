@@ -19,7 +19,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public abstract class Transition extends AbstractModelElement implements
 		ITransition {
 

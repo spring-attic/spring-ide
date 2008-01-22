@@ -167,7 +167,6 @@ public class WebflowConfig extends AbstractModelElement implements
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPersistableElement.class) {
 			return new WebflowModelElementToPersistableElementAdapter(this);

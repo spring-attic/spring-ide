@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
@@ -65,9 +66,9 @@ public class BeansProject extends AbstractResourceModelElement implements
 	private final IProject project;
 
 	protected volatile Set<String> configSuffixes;
-	
+
 	protected volatile boolean isImportsEnabled = true;
-	
+
 	protected volatile String version = BeansCorePlugin.getPluginVersion();
 
 	protected volatile Map<String, IBeansConfig> configs;
@@ -347,7 +348,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			r.unlock();
 		}
 	}
-	
+
 	public IBeansConfig getConfig(IFile configFile, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = getConfigs(configFile, includeImported);
 		Iterator<IBeansConfig> iterator = beansConfigs.iterator();
@@ -377,19 +378,18 @@ public class BeansProject extends AbstractResourceModelElement implements
 		return beansConfigs;
 	}
 
-	private void checkForImportedBeansConfig(IFile file, IBeansConfig bc, Set<IBeansConfig> beansConfigs) {
+	private void checkForImportedBeansConfig(IFile file, IBeansConfig bc,
+			Set<IBeansConfig> beansConfigs) {
 		if (bc.getElementResource().equals(file)) {
 			beansConfigs.add(bc);
 		}
 		for (IBeansImport bi : bc.getImports()) {
-			for (IBeansConfig importedBc : bi
-					.getImportedBeansConfigs()) {
+			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
 				if (importedBc.getElementResource().equals(file)) {
 					beansConfigs.add(importedBc);
 				}
 				for (IBeansImport iBi : importedBc.getImports()) {
-					for (IBeansConfig iBc : iBi
-							.getImportedBeansConfigs()) {
+					for (IBeansConfig iBc : iBi.getImportedBeansConfigs()) {
 						checkForImportedBeansConfig(file, iBc, beansConfigs);
 					}
 				}
@@ -706,7 +706,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	public boolean isImportsEnabled() {
 		return isImportsEnabled;
 	}
-	
+
 	public void setImportsEnabled(boolean importEnabled) {
 		this.isImportsEnabled = importEnabled;
 	}
@@ -717,5 +717,11 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public boolean isUpdatable() {
+		IFile file = project.getProject().getFile(
+				new Path(IBeansProject.DESCRIPTION_FILE));
+		return !file.isReadOnly();
 	}
 }

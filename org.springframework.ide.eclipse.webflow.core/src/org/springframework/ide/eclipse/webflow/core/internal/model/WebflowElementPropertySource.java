@@ -23,7 +23,6 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class WebflowElementPropertySource implements IPropertySource {
 
 	/**

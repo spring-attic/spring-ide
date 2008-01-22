@@ -127,7 +127,15 @@ public interface IBeansProject extends IBeansModelElement,
 	 * Returns true of this project should process imports in
 	 * {@link IBeansConfig}.
 	 * @return true if imports should be processed for this project
+	 * @since 2.0.3
 	 */
 	boolean isImportsEnabled();
+	
+	/**
+	 * Returns true if this project's settings can be changed 
+	 * @return true if this project can be changed.
+	 * @since 2.0.3
+	 */
+	boolean isUpdatable();
 
 }
