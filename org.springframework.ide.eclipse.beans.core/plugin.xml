@@ -102,4 +102,11 @@
 		            description="%beansValidator.rule.methodOverride.description" />
 	    </rules>
 	</extension>
+	
+	<extension point="org.eclipse.ui.ide.markerResolution">
+        <markerResolutionGenerator
+            markerType="org.springframework.ide.eclipse.beans.core.problemmarker"
+            class="org.springframework.ide.eclipse.beans.core.quickfix.QuickFixer"/>
+    </extension>
+	
 </plugin>
