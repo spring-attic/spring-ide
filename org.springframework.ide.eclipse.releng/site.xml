@@ -5,6 +5,54 @@
 		(http://www.springframework.org/) within the Eclipse platform.
 	</description>
 	
+	<feature url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.feature" 
+		version="@VERSION@">
+		<category name="Core"/>
+	</feature>
+
+	<feature url="features/org.springframework.ide.eclipse.dependency.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.dependency.feature" 
+		version="@VERSION@">
+		<category name="Dependencies"/>
+	</feature>
+
+	<feature url="features/org.springframework.ide.eclipse.aop.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.aop.feature" 
+		version="@VERSION@">
+		<category name="Extensions"/>
+	</feature>
+
+	<feature url="features/org.springframework.ide.eclipse.ajdt.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.ajdt.feature" 
+		version="@VERSION@">
+		<category name="Integrations"/>
+	</feature>
+
+	<feature url="features/org.springframework.ide.eclipse.javaconfig.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.javaconfig.feature" 
+		version="@VERSION@">
+		<category name="Extensions"/>
+	</feature>
+
+	<feature url="features/org.springframework.ide.eclipse.webflow.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.webflow.feature" 
+		version="@VERSION@">
+		<category name="Extensions"/>
+	</feature>
+
+	<feature url="features/org.springframework.ide.eclipse.mylyn.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.mylyn.feature"	
+		version="@VERSION@">
+		<category name="Integrations"/>
+	</feature>
+
+	<feature url="features/org.springframework.ide.eclipse.osgi.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.osgi.feature" 
+		version="@VERSION@">
+		<category name="Extensions"/>
+	</feature>
+	
 	<category-def name="Core" label="Core" />
 	<category-def name="Extensions" label="Extensions" />
 	<category-def name="Integrations" label="Integrations" />

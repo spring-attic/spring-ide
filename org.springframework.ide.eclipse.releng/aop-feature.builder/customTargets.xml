@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="Build specific targets and properties" default="noDefault">
-
-	<import file="../customTargets.xml" />
-	
-	<property name="featureName" value="org.springframework.ide.eclipse.aop.feature" />
-	<property name="featureCategory" value="Extensions" />
-	
-</project>

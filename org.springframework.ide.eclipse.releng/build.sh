@@ -20,16 +20,10 @@ ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/e3.3/
 AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/33/dev/update
 
-FEATURES_TO_BUILD="beans-feature dependency-feature aop-feature ajdt-feature javaconfig-feature webflow-feature mylyn-feature osgi-feature"
-
-
 # Run the Eclipse builder on a single builder
 build() {
-    b=$1
-    shift
     p=$@
-    echo Building $b with $p
-    $JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/eclipse/startup.jar -application org.eclipse.ant.core.antRunner -buildfile $WORKSPACE/org.eclipse.releng.basebuilder/eclipse/plugins/org.eclipse.pde.build_3.2.0.v20060505a/scripts/build.xml -Dbuilder=$WORKSPACE/$b.builder -DforceContextQualifier=v${NAME} $p
+    $JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/eclipse/startup.jar -application org.eclipse.ant.core.antRunner -buildfile $WORKSPACE/org.eclipse.releng.basebuilder/eclipse/plugins/org.eclipse.pde.build_3.2.0.v20060505a/scripts/build.xml -Dbuilder=$WORKSPACE/feature.builder -DforceContextQualifier=v${NAME} $p
 
     if [ $? -ne 0 ]
     then
@@ -65,8 +59,8 @@ install_feature () {
 # Download and unzip Eclipse from $ECLIPSE_DISTRO_URL
 install_eclipse() {
 	echo Downloading Eclipse Distribution
-	wget $ECLIPSE_DISTRO_URL -O $ECLIPSE_TEAMP_NAME
-	tar zxvf ./$ECLIPSE_TEAMP_NAME
+	wget $ECLIPSE_DISTRO_URL -O $ECLIPSE_TEMP_NAME
+	tar zxvf ./$ECLIPSE_TEMP_NAME
 }
 
 #echo Command line: $@
@@ -89,12 +83,8 @@ rm -rf $STAGINGLOCATION
 rm -rf $WORKSPACE/build
 rm -rf $WORKSPACE/eclipse-stage
 
-# Trigger build of features stored in FEATURES_TO_BUILD variable
-for featureName in $FEATURES_TO_BUILD
-do
-	build $featureName $@
-done
+# Trigger build of features
+build $@
 
-
-# trigger pack
+# Trigger pack
 pack
