@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.model.validation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IResource;
+import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
@@ -91,7 +94,7 @@ public abstract class AbstractValidationContext implements IValidationContext {
 	}
 
 	/**
-	 * Create {@link ValidationProblem} for the given information.
+	 * Create {@link ValidationProblem}s for the given information.
 	 * <p>
 	 * Subclasses may override this method to change the creation of validation
 	 * problems, e.g. to automatically create markers on other resources for
@@ -108,15 +111,28 @@ public abstract class AbstractValidationContext implements IValidationContext {
 		return problems;
 	}
 
+	/**
+	 * Create a single root {@link ValidationProblem} from the provided
+	 * information.
+	 */
 	protected final ValidationProblem createProblem(
 			IResourceModelElement element, String problemId, int severity,
 			String message, ValidationProblemAttribute... attributes) {
 		int line = (element instanceof ISourceModelElement ? ((ISourceModelElement) element)
 				.getElementStartLine()
 				: -1);
-		IResource resource = element.getElementResource();
+
+		// Add the element Id to the list of problem attributes
+		String elementId = element.getElementID();
+		List<ValidationProblemAttribute> attributeList = 	new ArrayList<ValidationProblemAttribute>(
+				Arrays.asList(attributes));
+		attributeList.add(new ValidationProblemAttribute(
+				MarkerUtils.ELEMENT_ID_KEY, elementId));
+
 		return new ValidationProblem(currentRuleId, problemId, severity,
-				message, resource, line, attributes);
+				message, element.getElementResource(), line, attributeList
+						.toArray(new ValidationProblemAttribute[attributeList
+								.size()]));
 	}
 
 	protected void addProblems(Set<ValidationProblem> problems) {

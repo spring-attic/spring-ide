@@ -23,7 +23,9 @@ import org.eclipse.core.runtime.CoreException;
  */
 public final class MarkerUtils {
 
-	public static final String ORIGINATING_RESOURCE_KEY = "ORIGINATING_RESOURCE";
+	public static final String ORIGINATING_RESOURCE_KEY = "originatingResource";
+	
+	public static final String ELEMENT_ID_KEY = "elementId";
 
 	public static int getHighestSeverityFromMarkersInRange(IResource resource,
 			int startLine, int endLine) {

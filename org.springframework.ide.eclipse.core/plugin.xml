@@ -28,6 +28,8 @@
          name="%springProblemMarker">
       <super type="org.eclipse.core.resources.problemmarker"/>
 	  <super type="org.eclipse.core.resources.textmarker"/>
+	  <attribute name="originatingResource" />
+	  <attribute name="elementId" />
    </extension>
 
    <extension point="org.eclipse.ui.ide.markerSupport">

@@ -98,6 +98,12 @@ public final class ValidationUtils {
 					attributes.put(IValidationProblemMarker.RULE_ID, problem
 							.getRuleId());
 				}
+				
+				// Add validation attributes to the list of marker attributes
+				for (ValidationProblemAttribute attribute : problem.getAttributes()) {
+					attributes.put(attribute.getKey(), attribute.getValue());
+				}
+				
 				marker.setAttributes(attributes);
 			}
 			catch (CoreException e) {
