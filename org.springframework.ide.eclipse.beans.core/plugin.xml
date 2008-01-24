@@ -103,10 +103,11 @@
 	    </rules>
 	</extension>
 	
-	<extension point="org.eclipse.ui.ide.markerResolution">
+	<!-- support for upcoming quick fix -->
+	<!--<extension point="org.eclipse.ui.ide.markerResolution">
         <markerResolutionGenerator
             markerType="org.springframework.ide.eclipse.beans.core.problemmarker"
             class="org.springframework.ide.eclipse.beans.core.quickfix.QuickFixer"/>
-    </extension>
+    </extension>-->
 	
 </plugin>
