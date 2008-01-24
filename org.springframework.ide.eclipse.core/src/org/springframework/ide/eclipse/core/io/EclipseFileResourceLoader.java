@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.io;
 import org.eclipse.core.resources.IProject;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -27,20 +28,22 @@ class EclipseFileResourceLoader implements ResourceLoader {
 
 	private final IProject project;
 	
+	private final ClassLoader classLoader;
+	
 	/**
 	 * Constructor taking a {@link IProject}.
 	 */
 	public EclipseFileResourceLoader(IProject project) {
 		this.project = project;
+		this.classLoader = JdtUtils.getClassLoader(project);
 	}
 	
 	/**
-	 * Returns always <code>null</code>.
-	 * <p>
-	 * Note: this violates the {@link ResourceLoader} interface contract.
+	 * Returns the {@link IProject}'s classloader constructed from the Eclipse 
+	 * build path.
 	 */
 	public ClassLoader getClassLoader() {
-		return null;
+		return this.classLoader;
 	}
 
 	public Resource getResource(String location) {
