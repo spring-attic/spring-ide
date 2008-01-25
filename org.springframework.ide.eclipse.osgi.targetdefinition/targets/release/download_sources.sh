@@ -3,7 +3,7 @@
 SPRING_VERSION=2.5.1
 BUNDLE_SPRING_VERSION=2.5.1
 
-OSGI_VERSION=1.0.0
+OSGI_VERSION=1.0
 BUNDLE_OSGI_VERSION=1.0.0
 ROOT=`pwd`
 
@@ -35,8 +35,8 @@ download_spring_source spring-core org.springframework.bundle.spring.core
 download_spring_source spring-context org.springframework.bundle.spring.context 
 download_spring_source spring-context-support org.springframework.bundle.spring.context.support 
 
-download_osgi_source spring-osgi-annotation org.springframework.osgi.bundle.annotation
-download_osgi_source spring-osgi-core org.springframework.osgi.bundle.core
-download_osgi_source spring-osgi-extender org.springframework.osgi.bundle.extender
-download_osgi_source spring-osgi-io org.springframework.osgi.bundle.io
-download_osgi_source spring-osgi-test org.springframework.osgi.bundle.test
+download_osgi_source spring-osgi-annotation org.springframework.bundle.osgi.extensions.annotations
+download_osgi_source spring-osgi-core org.springframework.bundle.osgi.core
+download_osgi_source spring-osgi-extender org.springframework.bundle.osgi.extender
+download_osgi_source spring-osgi-io org.springframework.bundle.osgi.io
+download_osgi_source spring-osgi-test org.springframework.bundle.osgi.test

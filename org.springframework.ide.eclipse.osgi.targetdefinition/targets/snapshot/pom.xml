@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>${spring.osgi.groupId}</groupId>
   <artifactId>${spring.osgi.groupId}.target</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Target Platform for Spring Dynamic Modules for OSGi(tm) Service Platforms</name>
   <properties>
     <spring.groupId>org.springframework</spring.groupId>
     <spring.version>2.5.1</spring.version>
     <spring.osgi.groupId>org.springframework.osgi</spring.osgi.groupId>
-    <spring.osgi.version>1.0-SNAPSHOT</spring.osgi.version>
+    <spring.osgi.version>1.1.0-SNAPSHOT</spring.osgi.version>
     <felix.commons.groupId>org.apache.felix.commons</felix.commons.groupId>
   </properties>
   <dependencies>

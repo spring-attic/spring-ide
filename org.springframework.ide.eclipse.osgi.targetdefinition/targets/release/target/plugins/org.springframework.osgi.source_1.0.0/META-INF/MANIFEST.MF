@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: org.springframework.osgi.source;singleton:=true
-Bundle-Version: 1.0.0.rc2
+Bundle-Version: 1.0.0
 Bundle-ManifestVersion: 2
