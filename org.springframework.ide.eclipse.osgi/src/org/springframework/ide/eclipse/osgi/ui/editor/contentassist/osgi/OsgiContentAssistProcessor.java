@@ -30,6 +30,8 @@ public class OsgiContentAssistProcessor extends
 				true);
 		registerContentAssistCalculator("service", "ref", beanRef);
 		registerContentAssistCalculator("service", "depends-on", beanRef);
+		registerContentAssistCalculator("bundle", "depends-on", beanRef);
+		registerContentAssistCalculator("property-placeholder", "defaults-ref", beanRef);
 		registerContentAssistCalculator("reference", "ref", beanRef);
 		registerContentAssistCalculator("reference", "depends-on", beanRef);
 
