@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<!--
+    Build file for the reference documentation of the Spring Framework.
+
+    $Id: build.xml 2428 2007-10-18 15:18:56Z cdupuis $
+
+    This script requires a "lib" directory containing the necessary third party JAR files.
+    See build.properties for the definitions of the properties used in this file.
+-->
+
+<project name="spring-docs" default="usage" basedir=".">
+
+	<property file="build.properties" />
+
+	<target name="usage">
+		<echo message="" />
+		<echo message="spring-docs build file" />
+		<echo message="------------------------------------------------------" />
+		<echo message="" />
+		<echo message="Available targets:" />
+		<echo message="" />
+		<echo message="doc.html --> build HTML documentation" />
+		<echo message="doc.clean --> delete HTML documentation" />
+		<echo message="" />
+	</target>
+
+
+	<target name="doc.clean" description="Delete temporary and distribution directories for docs">
+		<delete quiet="true" dir="${basedir}/${dist.ref.dir}" />
+		<delete quiet="true" file="${basedir}/doc.zip" />
+		<delete quiet="true" file="${basedir}/toc.xml" />
+		<delete quiet="true" dir="${basedir}/../samples" />
+	</target>
+
+
+	<target name="doc.html" description="Compile reference documentation to chunked html" depends="doc.clean">
+
+		<mkdir dir="${basedir}/${dist.ref.dir}" />
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${basedir}/${dist.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<jvmarg value="-Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl" />
+			<jvmarg value="-Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl" />
+			<jvmarg value="-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=org.apache.xerces.parsers.XIncludeParserConfiguration" />
+			<arg value="${spring.home}/docs/src/docbkx/index.xml" />
+			<arg value="${basedir}/styles/eclipse/eclipse.xsl" />
+		</java>
+
+		<move file="${basedir}/${dist.ref.dir}/toc.xml" todir="${basedir}" />
+
+		<zip destfile="${basedir}/doc.zip">
+			<fileset dir="${spring.home}/docs/src/docbkx/resources">
+				<include name="images/**" />
+				<include name="css/**" />
+			</fileset>
+			<fileset dir="${basedir}/html/" excludes="toc.xml" />
+		</zip>
+	</target>
+
+</project>

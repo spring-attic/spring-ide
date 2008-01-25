@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<plugin>
+    
+    <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="linktoc.xml"
+            primary="false">
+      </toc>
+      <toc
+            file="toc.xml"
+            primary="false">
+      </toc>
+   </extension>
+   
+</plugin>

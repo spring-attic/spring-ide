@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<toc label="Spring Dynamic Modules Reference Guide" topic="index.html">
+   <topic label="Preface" href="pr01.html"/>
+   <topic label="Introduction" href="pt01.html">
+      <topic label="Why Spring Dynamic Modules?" href="ch01.html"/>
+      <topic label="Requirements" href="ch02.html"/>
+   </topic>
+   <topic label="Reference Documentation" href="pt02.html">
+      <topic label="Bundles and Application Contexts" href="ch03.html">
+         <topic label="The Spring Dynamic Modules Extender bundle" href="ch03.html#bnd-app-ctx:extender"/>
+         <topic label="Application Context Creation" href="ch03s02.html">
+            <topic label="Mandatory Service Dependencies" href="ch03s02.html#bnd-app-ctx:app-creation:mandatory-deps"/>
+            <topic label="Application Context Service Publication" href="ch03s02.html#bnd-app-ctx:app-creation:app-ctx-publication"/>
+         </topic>
+         <topic label="Bundle Lifecycle" href="ch03s03.html"/>
+         <topic label="The Resource abstraction" href="ch03s04.html"/>
+         <topic label="Accessing the BundleContext" href="ch03s05.html"/>
+         <topic label="Application Context Destruction" href="ch03s06.html"/>
+         <topic label="Stopping the extender bundle" href="ch03s07.html"/>
+      </topic>
+      <topic label="Packaging and Deploying Spring-based OSGi applications" href="ch04.html">
+         <topic label="Bundle format and Manifest headers" href="ch04.html#app-deploy:headers"/>
+         <topic label="Required Spring Framework and Spring Dynamic Modules Bundles" href="ch04s02.html"/>
+         <topic label="Importing and Exporting packages" href="ch04s03.html"/>
+         <topic label="Considerations when using external libraries" href="ch04s04.html"/>
+         <topic label="Diagnosing problems" href="ch04s05.html"/>
+      </topic>
+      <topic label="The Service Registry" href="ch05.html">
+         <topic label="Exporting a Spring bean as an OSGi service" href="ch05.html#service-registry:export">
+            <topic label="Controlling the set of advertised service interfaces for an exported service" href="ch05.html#service-registry:export:intfs">
+               <topic label="Detecting the advertised interfaces at runtime" href="ch05.html#service-registry:export:auto-export"/>
+            </topic>
+            <topic label="Controlling the set of advertised properties for an exported service" href="ch05.html#service-registry:export:props"/>
+            <topic label="The depends-on attribute" href="ch05.html#service-registry:export:depends-on"/>
+            <topic label="The context-class-loader attribute" href="ch05.html#service-registry:export:ccl"/>
+            <topic label="The ranking attribute" href="ch05.html#service-registry:export:ranking"/>
+            <topic label="service element attribute" href="ch05.html#service-registry:export:service:attributes"/>
+            <topic label="Service registration and unregistration lifecycle" href="ch05.html#service-registry:export:lifecycle">
+               <topic label="Using OsgiServiceRegistrationListener interface" href="ch05.html#service-registry:export:lifecycle:interface"/>
+            </topic>
+         </topic>
+         <topic label="Defining references to OSGi services" href="ch05s02.html">
+            <topic label="Referencing an individual service" href="ch05s02.html#service-registry:refs:singular">
+               <topic label="Controlling the set of advertised interfaces for the imported service" href="ch05s02.html#service-registry:refs:singular:interface"/>
+               <topic label="The filter attribute" href="ch05s02.html#service-registry:refs:singular:filter"/>
+               <topic label="The bean-name attribute" href="ch05s02.html#service-registry:refs:singular:bean-name"/>
+               <topic label="The cardinality attribute" href="ch05s02.html#service-registry:refs:singular:cardinality"/>
+               <topic label="The depends-on attribute" href="ch05s02.html#service-registry:refs:singular:depends-on"/>
+               <topic label="The context-class-loader attribute" href="ch05s02.html#service-registry:refs:singular:tccl"/>
+               <topic label="reference element attributes" href="ch05s02.html#service-registry:refs:singular:reference:attributes"/>
+               <topic label="reference and OSGi Service Dynamics" href="ch05s02.html#service-registry:refs:singular:dynamics"/>
+               <topic label="Getting a hold of the managed service service reference" href="ch05s02.html#service-registry:refs:singular:property-editor"/>
+            </topic>
+            <topic label="Referencing a collection of services" href="ch05s02.html#service-registry:refs:collection">
+               <topic label="Collection (list and set) element attributes" href="ch05s02.html#service-registry:refs:collection:attributes"/>
+               <topic label="list / set and OSGi Service Dynamics" href="ch05s02.html#service-registry:refs:collection:dynamics"/>
+               <topic label="Iterator contract and service collections" href="ch05s02.html#service-registry:refs:collection:iterator"/>
+            </topic>
+            <topic label="Dealing with the dynamics of OSGi imported services" href="ch05s02.html#service-registry:refs:dynamics"/>
+            <topic label="Listener and service proxies" href="ch05s02.html#service-registry:refs:listener-and-proxies"/>
+            <topic label="Accessing the caller BundleContext" href="ch05s02.html#service-registry:refs:invoker-bundle-context"/>
+         </topic>
+         <topic label="Exporter/Importer listener best practices" href="ch05s03.html">
+            <topic label="Listener and cyclic dependencies" href="ch05s03.html#service-registry:refs:listener-best-practices:cycles"/>
+         </topic>
+         <topic label="Service importer global defaults" href="ch05s04.html"/>
+         <topic label="Relationship between the service exporter and service importer" href="ch05s05.html"/>
+      </topic>
+      <topic label="Working with Bundles" href="ch06.html"/>
+      <topic label="Testing OSGi based Applications" href="ch07.html">
+         <topic label="OSGi Mocks" href="ch07.html#testing:mocks"/>
+         <topic label="Integration Testing" href="ch07s02.html">
+            <topic label="Creating a simple OSGi integration test" href="ch07s02.html#testing:integration:simple-test"/>
+            <topic label="Installing test prerequisites" href="ch07s02.html#testing:integration:provisioning"/>
+            <topic label="Advanced testing framework topics" href="ch07s02.html#testing:integration:advanced-topics">
+               <topic label="Customizing test manifest" href="ch07s02.html#testing:integration:specify-manifest"/>
+               <topic label="Customizing test bundle content" href="ch07s02.html#testing:integration:specify-test-jar-content"/>
+            </topic>
+            <topic label="Creating an OSGi application context" href="ch07s02.html#testing:integration:appContext"/>
+            <topic label="Specifying the OSGi platform to use" href="ch07s02.html#testing:integration:specify-platform"/>
+            <topic label="Waiting for the test dependencies" href="ch07s02.html#testing:integration:specify-test-wait-time"/>
+            <topic label="Testing framework performance" href="ch07s02.html#testing:integration:performance"/>
+         </topic>
+      </topic>
+   </topic>
+   <topic label="Appendixes" href="pt03.html">
+      <topic label="Compendium Services" href="apa.html">
+         <topic label="Configuration Admin" href="apa.html#compendium:cm">
+            <topic label="Property placeholder support" href="apa.html#compendium:cm:ppc"/>
+            <topic label="Configuration Dictionaries" href="apa.html#compendium:cm:dict"/>
+         </topic>
+      </topic>
+      <topic label="Extensions" href="apb.html">
+         <topic label="Annotation-based injection" href="apb.html#d0e3469"/>
+      </topic>
+      <topic label="Eclipse Plug-in Development integration" href="apc.html"/>
+      <topic label="Roadmap" href="apd.html">
+         <topic label="Enhanced Configuration Admin Support" href="apd.html#d0e3644">
+            <topic label="Managed Services" href="apd.html#d0e3647"/>
+            <topic label="Managed Service Factories" href="apd.html#d0e3731"/>
+            <topic label="Direct access to configuration data" href="apd.html#d0e3796"/>
+            <topic label="Publishing configuration administration properties with exported services" href="apd.html#d0e3817"/>
+         </topic>
+         <topic label="Access to Service References for Collections" href="apds02.html"/>
+         <topic label="Start level integration" href="apds03.html"/>
+         <topic label="Web application support" href="apds04.html"/>
+         <topic label="ORM/Persistence support" href="apds05.html"/>
+         <topic label="OSGi standards" href="apds06.html"/>
+      </topic>
+      <topic label="Spring Dynamic Modules Schema" href="ape.html"/>
+      <topic label="Acknowledgments" href="apf.html"/>
+   </topic>
+   <topic label="Other Resources" href="pt04.html">
+      <topic label="Useful links" href="ch08.html"/>
+   </topic>
+</toc>

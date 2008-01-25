@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.springframework.bundle.osgi.doc;singleton:=true
+Bundle-Version: 1.0.0.v200801251000
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Localization: plugin
+Bundle-Vendor: %providerName
