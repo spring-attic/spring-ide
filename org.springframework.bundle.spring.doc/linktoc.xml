@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toc label="Spring Documentation" link_to="../org.springframework.ide.eclipse.doc/toc.xml#spring_additions">
+	<topic label="Spring Framework - Reference Documentation" href="index.html">
+		<link toc="toc.xml" />
+	</topic>
+</toc>

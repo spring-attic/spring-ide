@@ -1044,3 +1044,4 @@ Import-Package: bsh;resolution:=optional,com.caucho.burlap.client;reso
  c.dom;resolution:=optional,org.xml.sax;resolution:=optional
 Originally-Created-By: 1.6.0_01-41-release (Apple Inc.)
 Bundle-ClassPath: spring.jar
+Bundle-Vendor: Spring Framework

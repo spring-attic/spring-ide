@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="spring-osgi-extender.jar" sourcepath="/org.springframework.osgi.source/src/org.springframework.osgi.bundle.extender_1.0.0.rc2_v200712112043/src.zip"/>
+	<classpathentry exported="true" kind="lib" path="spring-osgi-extender.jar" sourcepath="/org.springframework.osgi.source/src/org.springframework.bundle.osgi.extender_1.0.0_v200801251000/src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

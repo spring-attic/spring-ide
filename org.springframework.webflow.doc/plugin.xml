@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="org.springframework.webflow.doc"
-   name="%pluginName"
-   version="1.0.3"
-   provider-name="%providerName">
-
-   <runtime>
-   </runtime>
+<plugin>
 
    <extension
          point="org.eclipse.help.toc">
+      <toc
+            file="linktoc.xml"
+            primary="false">
+      </toc>
       <toc
             file="toc.xml"
             primary="false">

@@ -52,21 +52,28 @@
          unpack="true"/>
 
    <plugin
-         id="org.springframework.osgi.bundle.core"
+         id="org.springframework.bundle.osgi.doc"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.osgi.bundle.io"
+         id="org.springframework.bundle.osgi.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.osgi.bundle.extender"
+         id="org.springframework.bundle.osgi.io"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.bundle.osgi.extender"
          download-size="0"
          install-size="0"
          version="0.0.0"
