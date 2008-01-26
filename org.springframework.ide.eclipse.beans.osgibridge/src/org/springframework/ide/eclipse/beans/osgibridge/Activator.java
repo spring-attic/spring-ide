@@ -30,7 +30,7 @@ public class Activator extends AbstractUIPlugin {
 		"org.springframework.ide.eclipse.beans.osgibridge";
 
 	public static final String OSGI_EXTENDER_SYMBOLIC_NAME = 
-		"org.springframework.osgi.bundle.extender";
+		"org.springframework.bundle.osgi.extender";
 
 	private static Activator plugin;
 
