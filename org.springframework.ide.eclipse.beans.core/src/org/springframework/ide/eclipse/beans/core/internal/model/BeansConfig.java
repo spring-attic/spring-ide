@@ -167,7 +167,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * set. If the corresponding file is not available or accessible then an
 	 * entry is added to the config's list of errors.
 	 */
-	private void init(String name) {
+	protected void init(String name) {
 		IContainer container;
 		String fileName;
 		String fullPath;
@@ -292,7 +292,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 	}
 
-	private final class BeansConfigErrorHandler implements ErrorHandler {
+	protected final class BeansConfigErrorHandler implements ErrorHandler {
 
 		public void warning(SAXParseException e) throws SAXException {
 			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, e
@@ -309,8 +309,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					.getMessage(), file, e.getLineNumber()));
 		}
 	}
-
-	private final class BeansConfigProblemReporter implements ProblemReporter {
+	
+	protected final class BeansConfigProblemReporter implements ProblemReporter {
 
 		public void fatal(Problem problem) {
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
