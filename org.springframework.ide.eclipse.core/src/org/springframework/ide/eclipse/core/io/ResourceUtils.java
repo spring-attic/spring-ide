@@ -355,6 +355,9 @@ abstract class ResourceUtils {
 						}
 
 					}
+					else if (p instanceof IFolder) {
+						deepAddChildren((IFolder) p, holders, parentPath);
+					}
 					else if (p instanceof IResource) {
 						holders.add(new ResourceHolder(parentPath,
 								(IResource) p));
@@ -375,6 +378,20 @@ abstract class ResourceUtils {
 			}
 			if (holderPath.equals(path)) {
 				resources.add(holder.getResource());
+			}
+		}
+	}
+	
+	private static void deepAddChildren(IFolder obj, List<RelevantLocationAwareResourceHolder> holders, String parentPath) {
+		holders.add(new ResourceHolder(parentPath, obj));
+		Object[] children = ResourceUtils.getChildren(obj);
+		for (Object child : children) {
+			if (child instanceof IFolder) {
+				deepAddChildren((IFolder) child, holders, parentPath);
+			}
+			else if (child instanceof IResource) {
+				holders.add(new ResourceHolder(parentPath,
+						(IResource) child));
 			}
 		}
 	}
