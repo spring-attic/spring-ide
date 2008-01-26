@@ -1,0 +1,2 @@
+http\://www.springframework.org/schema/osgi=org.springframework.osgi.config.OsgiNamespaceHandler
+http\://www.springframework.org/schema/osgi-compendium=org.springframework.osgi.config.CompendiumNamespaceHandler
