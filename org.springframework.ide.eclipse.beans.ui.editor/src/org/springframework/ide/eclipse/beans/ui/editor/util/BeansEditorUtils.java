@@ -54,6 +54,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IReferenceableElementsLocator;
@@ -448,8 +449,14 @@ public class BeansEditorUtils {
 			}
 		}
 
-		if (BeansCoreUtils.isBeansConfig(file)) {
-			configs.add(project.getConfig(file));
+		if (BeansCoreUtils.isBeansConfig(file, true)) {
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+			if (config instanceof IImportedBeansConfig) {
+				configs.add(BeansModelUtils.getParentOfClass(config, IBeansConfig.class));
+			}
+			else {
+				configs.add(config);
+			}
 		}
 
 		for (IBeansConfig bc : configs) {
