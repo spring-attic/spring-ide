@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.aop.mylyn.ui.actions;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.mylyn.context.ui.InterestFilter;
 import org.eclipse.mylyn.internal.ide.ui.actions.FocusProjectExplorerAction;
@@ -20,6 +21,7 @@ import org.eclipse.mylyn.internal.resources.ui.FocusCommonNavigatorAction;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.springframework.ide.eclipse.aop.mylyn.ui.AopReferenceModelNavigatorInterestFilter;
+import org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator;
 
 /**
  * Extension of {@link FocusProjectExplorerAction} class that serves as a
@@ -30,6 +32,8 @@ import org.springframework.ide.eclipse.aop.mylyn.ui.AopReferenceModelNavigatorIn
 public class FocusAopReferenceModelNavigatorAction extends FocusCommonNavigatorAction {
 	
 	private boolean isLinkingEnabled = false;
+	
+	private AopReferenceModelNavigator navigator = null;
 	
 	public FocusAopReferenceModelNavigatorAction() {
 		super(new AopReferenceModelNavigatorInterestFilter(), true, true, true);
@@ -47,6 +51,9 @@ public class FocusAopReferenceModelNavigatorAction extends FocusCommonNavigatorA
 		if (view instanceof CommonNavigator) {
 			CommonNavigator navigator = (CommonNavigator) view;
 			viewers.add(navigator.getCommonViewer());
+			if (navigator instanceof AopReferenceModelNavigator) {
+				this.navigator = (AopReferenceModelNavigator) navigator;
+			}
 		}
 		return viewers;
 	}
@@ -61,5 +68,17 @@ public class FocusAopReferenceModelNavigatorAction extends FocusCommonNavigatorA
 	protected boolean isDefaultLinkingEnabled() {
 		isLinkingEnabled = super.isDefaultLinkingEnabled();
 		return isLinkingEnabled;
+	}
+	
+ 	@Override
+ 	public void run(IAction action) {
+ 		super.run(action);
+ 		refreshViewer();
+ 	}
+
+	private void refreshViewer() {
+		if (navigator != null) {
+			navigator.elementChanged(null);
+		}
 	}
 }

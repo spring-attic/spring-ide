@@ -292,7 +292,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 	 * artefacts will be displayed in the references view.
 	 */
 	public void elementChanged(ModelChangeEvent event) {
-		if (event.getType() == Type.ADDED || event.getType() == Type.REMOVED) {
+		if (event == null || event.getType() == Type.ADDED || event.getType() == Type.REMOVED) {
 			updateTreeViewer(lastWorkbenchPart, lastSelection, false);
 		}
 	}

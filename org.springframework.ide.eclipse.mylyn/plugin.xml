@@ -19,7 +19,7 @@
 	  	</viewContribution> 
 	</extension>
 	
-	<extension point="org.eclipse.ui.actionSets">
+<!--	<extension point="org.eclipse.ui.actionSets">
 		<actionSet id="org.springframework.ide.eclipse.mylyn.actionSet"
 			label="%commandCategory.name" 
 			visible="false">
@@ -47,7 +47,7 @@
          id="org.springframework.ide.eclipse.mylyn.folding.auto"
          name="%toggleActiveFoldingCommand.name">
       </command>
-   </extension>
+   </extension> -->
 
 	<extension point="org.eclipse.ui.popupMenus">
 		<objectContribution adaptable="true"
@@ -80,7 +80,23 @@
 	           		</not>
            		</and>
    			</enablement>
+   			<visibility>
+      			<systemProperty
+	               name="org.eclipse.mylyn.context.core.context.active"
+    	           value="true">
+      			</systemProperty>
+		      </visibility>
 		</objectContribution>
 	</extension>
+	
+ <extension
+       point="org.eclipse.ui.actionSetPartAssociations">
+    <actionSetPartAssociation
+          targetID="org.eclipse.mylyn.java.actionSet">
+       <part
+             id="org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart">
+       </part>
+    </actionSetPartAssociation>
+ </extension>
  
 </plugin>

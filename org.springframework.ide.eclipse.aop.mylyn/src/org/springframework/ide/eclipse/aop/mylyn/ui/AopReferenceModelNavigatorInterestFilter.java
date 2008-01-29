@@ -116,7 +116,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 
 	protected boolean isInteresting(IInteractionElement element) {
 		if (element.getInterest().isPredicted()) {
-			return false;
+			return true;
 		}
 		else {
 			return element.getInterest().isInteresting();
