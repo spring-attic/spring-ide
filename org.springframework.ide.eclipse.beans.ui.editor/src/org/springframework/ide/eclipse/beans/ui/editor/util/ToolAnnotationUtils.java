@@ -45,30 +45,31 @@ public abstract class ToolAnnotationUtils {
 	public static final String TOOL_NAMESPACE_URI = "http://www.springframework.org/schema/tool";
 
 	public static final String ANNOTATION_ELEMENT = "annotation";
-	
-	
+
 	/**
 	 * Return the {@link CMElementDeclaration} definied for the given node.
 	 */
 	protected static CMElementDeclaration getCMElementDeclaration(Node node) {
 		CMElementDeclaration result = null;
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
-			ModelQuery modelQuery = ModelQueryUtil.getModelQuery(node.getOwnerDocument());
+			ModelQuery modelQuery = ModelQueryUtil.getModelQuery(node
+					.getOwnerDocument());
 			if (modelQuery != null) {
 				result = modelQuery.getCMElementDeclaration((Element) node);
 			}
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Return a list of annotations that are defined for a given attribute for 
-	 * a specific node. 
+	 * Return a list of annotations that are defined for a given attribute for a
+	 * specific node.
 	 */
 	public static List<Element> getApplicationInformationElements(Node node,
 			String attributeName) {
 		// Retrieve the declaration
-		CMElementDeclaration elementDecl = ToolAnnotationUtils.getCMElementDeclaration(node);
+		CMElementDeclaration elementDecl = ToolAnnotationUtils
+				.getCMElementDeclaration(node);
 		CMAttributeDeclaration attrDecl = null;
 
 		// No CMElementDeclaration means no attribute metadata, but
@@ -88,21 +89,25 @@ public abstract class ToolAnnotationUtils {
 			if (attrDecl instanceof XSDAttributeUseAdapter) {
 				XSDAttributeUse attribute = (XSDAttributeUse) ((XSDAttributeUseAdapter) attrDecl)
 						.getKey();
-				List<Element> appInfo = attribute.getAttributeDeclaration()
-						.getAnnotation().getApplicationInformation();
-				return appInfo;
+				// Check if annotation and tool annotation are actually present
+				if (attribute.getAttributeDeclaration() != null
+						&& attribute.getAttributeDeclaration().getAnnotation() != null
+						&& attribute.getAttributeDeclaration().getAnnotation()
+								.getApplicationInformation() != null) {
+					return attribute.getAttributeDeclaration().getAnnotation()
+							.getApplicationInformation();
+				}
 			}
 		}
 		return Collections.emptyList();
 	}
 
 	/**
-	 * Returns a instance of {@link ToolAnnotationData}. This data holder carries
-	 * information of the annotation values. 
+	 * Returns a instance of {@link ToolAnnotationData}. This data holder
+	 * carries information of the annotation values.
 	 */
 	public static ToolAnnotationData getToolAnnotationData(Node annotation) {
-		String kind = BeansEditorUtils.getAttribute(annotation,
-				KIND_ATTRIBUTE);
+		String kind = BeansEditorUtils.getAttribute(annotation, KIND_ATTRIBUTE);
 		String expectedType = null;
 		String assignableTo = null;
 
@@ -120,22 +125,21 @@ public abstract class ToolAnnotationUtils {
 						TYPE_ATTRIBUTE);
 			}
 		}
-		
+
 		return new ToolAnnotationData(assignableTo, expectedType, kind);
 	}
-	
+
 	/**
 	 * Helper class carrying information from attribute annotations.
 	 */
 	public static class ToolAnnotationData {
-		
+
 		private String kind;
 
 		private String assignableTo;
 
 		private String expectedType;
-		
-		
+
 		public ToolAnnotationData(String assignableTo, String expectedType,
 				String kind) {
 			this.assignableTo = assignableTo;
