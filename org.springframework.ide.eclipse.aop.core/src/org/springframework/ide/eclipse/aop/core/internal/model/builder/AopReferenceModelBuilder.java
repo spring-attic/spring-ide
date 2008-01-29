@@ -45,12 +45,14 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.Introspector;
@@ -265,7 +267,13 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
 				.getProjectWithInitialization(JdtUtils.getJavaProject(info
 						.getResource().getProject()));
-
+		
+		// add support for imported beans configuration files by extending the
+		// scope to the importing beans configuration
+		if (config instanceof IImportedBeansConfig) {
+			config = BeansModelUtils.getParentOfClass(config, BeansConfig.class);
+		}
+		
 		Set<IBean> beans = new LinkedHashSet<IBean>();
 		beans.addAll(config.getBeans());
 
@@ -346,7 +354,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				currentFile.getProject());
 
 		if (project != null) {
-			IBeansConfig config = project.getConfig(currentFile);
+			IBeansConfig config = project.getConfig(currentFile, true);
 			IJavaProject javaProject = JdtUtils.getJavaProject(project
 					.getProject());
 

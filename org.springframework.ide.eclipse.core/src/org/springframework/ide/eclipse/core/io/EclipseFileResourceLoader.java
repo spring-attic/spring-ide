@@ -11,10 +11,11 @@
 package org.springframework.ide.eclipse.core.io;
 
 import org.eclipse.core.resources.IProject;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Eclipse specific {@link ResourceLoader} implementation that creates
@@ -24,7 +25,7 @@ import org.springframework.util.Assert;
  * @since 2.0.3
  * @see EclipsePathMatchingResourcePatternResolver
  */
-class EclipseFileResourceLoader implements ResourceLoader {
+class EclipseFileResourceLoader extends DefaultResourceLoader {
 
 	private final IProject project;
 	
@@ -33,9 +34,10 @@ class EclipseFileResourceLoader implements ResourceLoader {
 	/**
 	 * Constructor taking a {@link IProject}.
 	 */
-	public EclipseFileResourceLoader(IProject project) {
+	public EclipseFileResourceLoader(IProject project, ClassLoader classLoader) {
+		super(classLoader);
 		this.project = project;
-		this.classLoader = JdtUtils.getClassLoader(project);
+		this.classLoader = classLoader;
 	}
 	
 	/**
@@ -48,11 +50,17 @@ class EclipseFileResourceLoader implements ResourceLoader {
 
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
-		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
+		// Eclipse does not know anything about class files
+		if (location.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
+			return super.getResource(location);
+		}
+		else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
 			return new EclipseClassPathResource(location
 					.substring(CLASSPATH_URL_PREFIX.length()), project);
 		}
-		return new EclipseResource('/' + project.getName() + location);
+		else {
+			return new EclipseResource('/' + project.getName() + location);
+		}
 	}
 
 }

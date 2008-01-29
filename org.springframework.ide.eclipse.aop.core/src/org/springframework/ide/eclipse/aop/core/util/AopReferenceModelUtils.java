@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
@@ -164,9 +165,16 @@ public class AopReferenceModelUtils {
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
 			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils
-				.getResourceModelElement(resource);
+					.getResourceModelElement(resource);
 			if (beansConfig instanceof IImportedBeansConfig) {
-				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
+				beansConfig = BeansModelUtils.getParentOfClass(beansConfig,
+						BeansConfig.class);
+			}
+			for (IBeansImport beansImport : beansConfig.getImports()) {
+				for (IImportedBeansConfig importedBeansConfig : beansImport
+						.getImportedBeansConfigs()) {
+					files.add(importedBeansConfig.getElementResource());
+				}
 			}
 			getAffectedFilesFromBeansConfig(beansConfig, files);
 		}
@@ -183,8 +191,8 @@ public class AopReferenceModelUtils {
 		return files;
 	}
 
-	private static void getAffectedFilesFromBeansConfig(IBeansConfig beansConfig,
-			Set<IResource> files) {
+	private static void getAffectedFilesFromBeansConfig(
+			IBeansConfig beansConfig, Set<IResource> files) {
 		files.add((IFile) beansConfig.getElementResource());
 
 		// add confis from config set
