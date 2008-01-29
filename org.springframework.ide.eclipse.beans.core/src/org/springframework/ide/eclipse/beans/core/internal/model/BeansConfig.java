@@ -44,6 +44,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
@@ -210,6 +211,21 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	protected void readConfig() {
 		if (!this.isModelPopulated) {
 			try {
+				
+				// Only install Eclipse-based resource loader if enabled in
+				// project properties
+				// IMPORTANT: the following block needs to stay before the w.lock()
+				// as it could otherwise create a runtime deadlock
+				ResourceLoader resourceLoader = null;
+				if (((IBeansProject) getElementParent()).isImportsEnabled()) {
+					resourceLoader = new EclipsePathMatchingResourcePatternResolver(
+						file.getProject());
+				}
+				else {
+					resourceLoader =  new PathMatchingResourcePatternResolver(
+							JdtUtils.getClassLoader(getElementResource()));
+				}
+				
 				w.lock();
 				if (this.isModelPopulated) {
 					return;
@@ -244,17 +260,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 							registry);
 					reader.setDocumentLoader(new XercesDocumentLoader());
-					
-					// Only install Eclipse-based resource loader if enabled in
-					// project properties
-					if (((IBeansProject) getElementParent()).isImportsEnabled()) {
-						reader.setResourceLoader(new EclipsePathMatchingResourcePatternResolver(
-							file.getProject()));
-					}
-					else {
-						reader.setResourceLoader(new PathMatchingResourcePatternResolver(
-								JdtUtils.getClassLoader(getElementResource())));
-					}
+					reader.setResourceLoader(resourceLoader);
 					
 					reader.setEntityResolver(resolver);
 					reader.setSourceExtractor(new DelegatingSourceExtractor(

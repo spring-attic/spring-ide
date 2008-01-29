@@ -32,15 +32,10 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.core.model.TrueModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.internal.model.resources.WebflowResourceChangeListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
@@ -122,7 +117,7 @@ public class WebflowModel extends AbstractModelElement implements
 
 	public void startup() {
 		initialize();
-		initializeModel();
+		//initializeModel();
 		
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(this);
@@ -134,6 +129,7 @@ public class WebflowModel extends AbstractModelElement implements
 				SpringResourceChangeListener.LISTENER_FLAGS);
 	}
 	
+	/*
 	private void initializeModel() {
 		Job job = new Job("Initializing Spring Web Flow Model") {
 
@@ -151,6 +147,7 @@ public class WebflowModel extends AbstractModelElement implements
 		job.setPriority(Job.SHORT); // process asap
 		job.schedule();
 	}
+	*/
 
 	public void shutdown() {
 		initialize();

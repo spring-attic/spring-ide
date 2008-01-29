@@ -26,10 +26,6 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
@@ -44,7 +40,6 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.core.model.TrueModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
 
@@ -127,7 +122,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		// Trigger Job to initialize model
-		initializeModel();
+		// initializeModel();
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new BeansResourceChangeListener(
@@ -136,7 +131,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		workspace.addResourceChangeListener(workspaceListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
 	}
-
+	
+	/*
 	private void initializeModel() {
 		Job job = new Job("Initializing Spring Model") {
 
@@ -153,7 +149,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		job.setSystem(true);
 		job.setPriority(Job.SHORT); // process asap
 		job.schedule();
-	}
+	}*/
 
 	protected void addProject(IBeansProject project) {
 		projects.put(project.getProject(), project);
