@@ -31,18 +31,6 @@
 	<!-- Replace values for mapsCheckoutTag as desired. -->
 	<!-- ===================================================================== -->
 	<target name="getMapFiles" depends="checkLocalMaps" unless="skipMaps">
-
-			<!--<mkdir dir="${buildDirectory}/maps" />
-		    <java classname="org.tmatesoft.svn.cli.SVN"
-		       dir="${buildDirectory}/maps" fork="true">
-		      <arg value="co"/>
-		      <arg value="${mapsRepo}"/>
-			  <classpath>
-			        <pathelement location="${builder}/../org.eclipse.releng.basebuilder/eclipse/plugins/org.apache.ant_1.6.5/lib/ganymed.jar" />
-			        <pathelement location="${builder}/../org.eclipse.releng.basebuilder/eclipse/plugins/org.apache.ant_1.6.5/lib/svnkit.jar" />
-			        <pathelement location="${builder}/../org.eclipse.releng.basebuilder/eclipse/plugins/org.apache.ant_1.6.5/lib/svnkit-cli.jar" />
-			  </classpath>
-		    </java>-->
 				
 		<svn javahl="false" username="${svn.username}" password="${svn.password}">
 			<export srcurl="${mapsRepo}" destpath="${buildDirectory}/maps" force="true" />
@@ -199,6 +187,8 @@
 				<exclude name="**/*.gz"/>
 			</zipfileset>
 		</zip>
+		<checksum file="${buildDist.file}" algorithm="SHA1" fileext=".sha1" />
+		<checksum file="${buildDist.file}" algorithm="MD5" fileext=".md5" />
 	</target>
 	
 	<!-- ===================================================================== -->
