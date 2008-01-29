@@ -48,6 +48,7 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
@@ -452,7 +453,7 @@ public class BeansEditorUtils {
 		if (BeansCoreUtils.isBeansConfig(file, true)) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
 			if (config instanceof IImportedBeansConfig) {
-				configs.add(BeansModelUtils.getParentOfClass(config, IBeansConfig.class));
+				configs.add(BeansModelUtils.getParentOfClass(config, BeansConfig.class));
 			}
 			else {
 				configs.add(config);
