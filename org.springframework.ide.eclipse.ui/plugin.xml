@@ -306,6 +306,23 @@
    			relative="org.eclipse.ui.views.ContentOutline" 
    			visible="true" />
    	</perspectiveExtension>
+   	<!-- TODO CD: Does it make sense to add the Spring Explorer to the Java EE perspective as we contribute to the Project Explorer? -->
+   	<!-- 
+   	<perspectiveExtension
+   		targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+   		<viewShortcut
+   			id="org.springframework.ide.eclipse.ui.navigator.springExplorer" />
+   		<view 
+   			closeable="true"
+   			id="org.springframework.ide.eclipse.ui.navigator.springExplorer"
+   			minimized="false" 
+   			moveable="true" 
+   			ratio="0.5"
+   			relationship="bottom"
+   			relative="org.eclipse.ui.views.ContentOutline" 
+   			visible="true" />
+   	</perspectiveExtension>
+   	-->
    </extension>
    
    	<extension point="org.eclipse.ui.viewActions"> 
