@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
@@ -230,6 +231,13 @@ public class BeansJavaCompletionUtils {
 			for (IPackageFragment p : packages) {
 				if (p.getElementName().equals(packageName))
 					return p;
+			}
+		}
+		else {
+			for (IPackageFragmentRoot p : project.getAllPackageFragmentRoots()) {
+				if (p.getKind() == IPackageFragmentRoot.K_SOURCE) {
+					return p.getPackageFragment("");
+				}
 			}
 		}
 		return project.getPackageFragments()[0];
