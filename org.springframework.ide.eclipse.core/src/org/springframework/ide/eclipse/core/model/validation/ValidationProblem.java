@@ -47,6 +47,7 @@ public class ValidationProblem {
 		this.line = line;
 		this.resource = resource;
 		this.attributes = attributes;
+		this.errorId = errorId;
 	}
 
 	/**

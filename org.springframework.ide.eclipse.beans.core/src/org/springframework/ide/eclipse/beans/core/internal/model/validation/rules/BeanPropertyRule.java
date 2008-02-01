@@ -62,14 +62,21 @@ public class BeanPropertyRule extends
 		String mergedClassName = mergedBd.getBeanClassName();
 		IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean,
 				mergedClassName, context);
-		if (type != null) {
-			// Don't validate property names on ScriptFactory implementations
-			// as these property values are injected into the created object
-			if (type != null
-					&& !Introspector.doesImplement(type, ScriptFactory.class
-							.getName())) {
-				validateProperty(property, type, context);
-			}
+
+		// Don't validate a bean without a valid and resolvable IType; this will
+		// be validated by the BeanClassRule
+
+		// Properties of abstract beans shouldn't be validated
+
+		// Don't validate property names on ScriptFactory implementations
+		// as these property values are injected into the created object rather
+		// then on the factory bean itself.
+
+		if (type != null
+				&& !mergedBd.isAbstract()
+				&& !Introspector.doesImplement(type, ScriptFactory.class
+						.getName())) {
+			validateProperty(property, type, context);
 		}
 	}
 

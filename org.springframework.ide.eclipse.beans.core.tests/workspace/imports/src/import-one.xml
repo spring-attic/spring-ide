@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+              http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+              http://www.springframework.org/schema/aop
+              http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+                             
+	<!-- <import resource="classpath:org/codehaus/xfire/spring/xfire.xml" />-->
+	<import resource="classpath*:test1/import-two.xml" />
+               
+    <bean id="test1" class="java.util.Date" />
+   
+	<aop:config proxy-target-class="true">
+		<aop:aspect id="aspect" ref="aspectBean">
+			<aop:around method="before"
+				pointcut="bean(test2) and execution( * java.util.Date.after(..))" />
+		</aop:aspect>
+	</aop:config>   
+
+	<bean id="aspectBean" class="TestAspect" />
+	
+</beans>
