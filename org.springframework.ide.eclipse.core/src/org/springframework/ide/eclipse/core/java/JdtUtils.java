@@ -800,8 +800,13 @@ public class JdtUtils {
 	}
 	
 	public static String getPropertyNameFromMethodName(IMethod method) {
-		String replaceText = method.getElementName().substring("set".length(),
-				method.getElementName().length());
+		// Special support Ajdt intertype declarations
+		String methodName = method.getElementName();
+		int index = methodName.lastIndexOf('.');
+		if (index > 0) {
+			methodName = methodName.substring(index + 1);
+		}
+		String replaceText = methodName.substring("set".length());
 		if (replaceText != null) {
 			replaceText = java.beans.Introspector.decapitalize(replaceText);
 		}

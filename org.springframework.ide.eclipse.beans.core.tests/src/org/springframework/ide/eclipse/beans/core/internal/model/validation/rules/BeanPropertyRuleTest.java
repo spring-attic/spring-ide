@@ -52,4 +52,11 @@ public class BeanPropertyRuleTest extends BeansCoreTestCase {
 		}
 	}
 
+	public void testIntertypeDeclaredProperty() throws Exception {
+		IResource resource = createPredefinedProjectAndGetResource("aspectj", "src/ide-743.xml");
+		IMarker[] markers = resource.findMarkers(BeansCorePlugin.PLUGIN_ID
+				+ ".problemmarker", false, IResource.DEPTH_ZERO);
+		assertTrue(markers.length == 0);
+	}
+
 }

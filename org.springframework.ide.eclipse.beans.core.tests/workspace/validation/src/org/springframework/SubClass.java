@@ -1,6 +1,12 @@
 package org.springframework;
 
-public class SubClass extends Base {
+import java.io.Serializable;
+
+public class SubClass extends Base implements Serializable{
+	
+	public SubClass(String test) {
+		
+	}
 	
 	private Object dao;
 	
@@ -18,7 +24,7 @@ public class SubClass extends Base {
 		return dao;
 	}
 
-	public void setDao(Object dao) {
+	public static void setDao(Object dao) {
 		this.dao = dao;
 	}
 }

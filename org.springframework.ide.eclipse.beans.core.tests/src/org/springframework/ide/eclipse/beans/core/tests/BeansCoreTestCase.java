@@ -41,15 +41,16 @@ public abstract class BeansCoreTestCase extends TestCase {
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot()
+				.getProjects();
 		for (int i = 0; i < allProjects.length; i++) {
 			IProject project = allProjects[i];
-			deleteProject(project,false);
+			deleteProject(project, false);
 		}
 		allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < allProjects.length; i++) {
 			IProject project = allProjects[i];
-			deleteProject(project,true);
+			deleteProject(project, true);
 		}
 	}
 
@@ -58,16 +59,20 @@ public abstract class BeansCoreTestCase extends TestCase {
 	 */
 	protected String getPluginDirectoryPath() {
 		try {
-			URL platformURL = Platform.getBundle("org.springframework.ide.eclipse.beans.core.tests").getEntry("/"); //$NON-NLS-1$ //$NON-NLS-2$
-			return new File(FileLocator.toFileURL(platformURL).getFile()).getAbsolutePath();
-		} catch (IOException e) {
+			URL platformURL = Platform
+					.getBundle(
+							"org.springframework.ide.eclipse.beans.core.tests").getEntry("/"); //$NON-NLS-1$ //$NON-NLS-2$
+			return new File(FileLocator.toFileURL(platformURL).getFile())
+					.getAbsolutePath();
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public String getSourceWorkspacePath() {
-		return getPluginDirectoryPath() +  java.io.File.separator + "workspace"; //$NON-NLS-1$
+		return getPluginDirectoryPath() + java.io.File.separator + "workspace"; //$NON-NLS-1$
 	}
 
 	/**
@@ -76,29 +81,33 @@ public abstract class BeansCoreTestCase extends TestCase {
 	public IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
-	
+
 	public IWorkspaceRoot getWorkspaceRoot() {
 		return getWorkspace().getRoot();
 	}
-	
-	protected IProject createPredefinedProject(final String projectName) throws CoreException, IOException {
+
+	protected IProject createPredefinedProject(final String projectName)
+			throws CoreException, IOException {
 		IJavaProject jp = setUpJavaProject(projectName);
-		getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD,null);
-		jp.getProject().build(IncrementalProjectBuilder.FULL_BUILD,null);
+		getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		jp.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		return jp.getProject();
 	}
-	
-	
-	protected IJavaProject setUpJavaProject(final String projectName) throws CoreException, IOException {
+
+	protected IJavaProject setUpJavaProject(final String projectName)
+			throws CoreException, IOException {
 		return setUpJavaProject(projectName, "1.4"); //$NON-NLS-1$
 	}
-	
-	protected IJavaProject setUpJavaProject(final String projectName, String compliance) throws CoreException, IOException {
+
+	protected IJavaProject setUpJavaProject(final String projectName,
+			String compliance) throws CoreException, IOException {
 		// copy files in project from source workspace to target workspace
 		String sourceWorkspacePath = getSourceWorkspacePath();
-		String targetWorkspacePath = getWorkspaceRoot().getLocation().toFile().getCanonicalPath();
-		copyDirectory(new File(sourceWorkspacePath, projectName), new File(targetWorkspacePath, projectName));
-		
+		String targetWorkspacePath = getWorkspaceRoot().getLocation().toFile()
+				.getCanonicalPath();
+		copyDirectory(new File(sourceWorkspacePath, projectName), new File(
+				targetWorkspacePath, projectName));
+
 		// create project
 		final IProject project = getWorkspaceRoot().getProject(projectName);
 		IWorkspaceRunnable populate = new IWorkspaceRunnable() {
@@ -111,7 +120,6 @@ public abstract class BeansCoreTestCase extends TestCase {
 		IJavaProject javaProject = JavaCore.create(project);
 		return javaProject;
 	}
-	
 
 	/**
 	 * Wait for autobuild notification to occur
@@ -120,54 +128,64 @@ public abstract class BeansCoreTestCase extends TestCase {
 		boolean wasInterrupted = false;
 		do {
 			try {
-				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD,
+						null);
 				wasInterrupted = false;
-			} catch (OperationCanceledException e) {
+			}
+			catch (OperationCanceledException e) {
 				e.printStackTrace();
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				wasInterrupted = true;
 			}
 		} while (wasInterrupted);
 	}
-	
+
 	public static void waitForManualBuild() {
 		boolean wasInterrupted = false;
 		do {
 			try {
-				Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD,
+						null);
 				wasInterrupted = false;
-			} catch (OperationCanceledException e) {
+			}
+			catch (OperationCanceledException e) {
 				e.printStackTrace();
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				wasInterrupted = true;
 			}
-		} while (wasInterrupted);		
+		} while (wasInterrupted);
 	}
-	
+
 	/**
-	 * Copy the given source directory (and all its contents) to the given target directory.
+	 * Copy the given source directory (and all its contents) to the given
+	 * target directory.
 	 */
 	protected void copyDirectory(File source, File target) throws IOException {
 		if (!target.exists()) {
 			target.mkdirs();
 		}
 		File[] files = source.listFiles();
-		if (files == null) return;
+		if (files == null)
+			return;
 		for (int i = 0; i < files.length; i++) {
 			File sourceChild = files[i];
-			String name =  sourceChild.getName();
-			if (name.equals("CVS")) continue; //$NON-NLS-1$
+			String name = sourceChild.getName();
+			if (name.equals("CVS"))continue; //$NON-NLS-1$
 			File targetChild = new File(target, name);
 			if (sourceChild.isDirectory()) {
 				copyDirectory(sourceChild, targetChild);
-			} else {
+			}
+			else {
 				copy(sourceChild, targetChild);
 			}
 		}
 	}
-	
+
 	/**
-	 * Copy file from src (path to the original file) to dest (path to the destination file).
+	 * Copy file from src (path to the original file) to dest (path to the
+	 * destination file).
 	 */
 	public void copy(File src, File dest) throws IOException {
 		// read source bytes
@@ -177,7 +195,7 @@ public abstract class BeansCoreTestCase extends TestCase {
 		out.write(srcBytes);
 		out.close();
 	}
-	
+
 	public byte[] read(java.io.File file) throws java.io.IOException {
 		int fileLength;
 		byte[] fileBytes = new byte[fileLength = (int) file.length()];
@@ -185,7 +203,8 @@ public abstract class BeansCoreTestCase extends TestCase {
 		int bytesRead = 0;
 		int lastReadSize = 0;
 		while ((lastReadSize != -1) && (bytesRead != fileLength)) {
-			lastReadSize = stream.read(fileBytes, bytesRead, fileLength - bytesRead);
+			lastReadSize = stream.read(fileBytes, bytesRead, fileLength
+					- bytesRead);
 			bytesRead += lastReadSize;
 		}
 		stream.close();
@@ -193,54 +212,66 @@ public abstract class BeansCoreTestCase extends TestCase {
 	}
 
 	public static String convertToIndependantLineDelimiter(String source) {
-		if (source.indexOf('\n') == -1 && source.indexOf('\r') == -1) return source;
+		if (source.indexOf('\n') == -1 && source.indexOf('\r') == -1)
+			return source;
 		StringBuffer buffer = new StringBuffer();
 		for (int i = 0, length = source.length(); i < length; i++) {
 			char car = source.charAt(i);
 			if (car == '\r') {
 				buffer.append('\n');
-				if (i < length-1 && source.charAt(i+1) == '\n') {
+				if (i < length - 1 && source.charAt(i + 1) == '\n') {
 					i++; // skip \n after \r
 				}
-			} else {
+			}
+			else {
 				buffer.append(car);
 			}
 		}
 		return buffer.toString();
 	}
-	
+
 	protected IProject getProject(String project) {
 		return getWorkspaceRoot().getProject(project);
 	}
 
-	protected void deleteProject(IProject project, boolean force) throws CoreException {
-		if (project.exists() && !project.isOpen()) { // force opening so that project can be deleted without logging (see bug 23629)
+	protected void deleteProject(IProject project, boolean force)
+			throws CoreException {
+		if (project.exists() && !project.isOpen()) { // force opening so that
+														// project can be
+														// deleted without
+														// logging (see bug
+														// 23629)
 			project.open(null);
 		}
-		deleteResource(project,force);
+		deleteResource(project, force);
 	}
-	
+
 	protected void deleteProject(String projectName) throws CoreException {
-		deleteProject(this.getProject(projectName),true);
+		deleteProject(this.getProject(projectName), true);
 	}
-	
+
 	/**
 	 * Delete this resource.
 	 */
-	public void deleteResource(IResource resource, boolean force) throws CoreException {
+	public void deleteResource(IResource resource, boolean force)
+			throws CoreException {
 		waitForManualBuild();
 		waitForAutoBuild();
 		CoreException lastException = null;
 		try {
 			resource.delete(false, null);
-		} catch (CoreException e) {
+		}
+		catch (CoreException e) {
 			lastException = e;
 			// just print for info
-			System.out.println("(CoreException): " + e.getMessage() + " Resource " + resource.getFullPath()); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out
+					.println("(CoreException): " + e.getMessage() + " Resource " + resource.getFullPath()); //$NON-NLS-1$ //$NON-NLS-2$
 			e.printStackTrace();
-		} catch (IllegalArgumentException iae) {
+		}
+		catch (IllegalArgumentException iae) {
 			// just print for info
-			System.out.println("(IllegalArgumentException): " + iae.getMessage() + ", resource " + resource.getFullPath()); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out
+					.println("(IllegalArgumentException): " + iae.getMessage() + ", resource " + resource.getFullPath()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (!force) {
 			return;
@@ -250,29 +281,36 @@ public abstract class BeansCoreTestCase extends TestCase {
 			waitForAutoBuild();
 			try {
 				Thread.sleep(1000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 			}
 			try {
 				resource.delete(true, null);
-			} catch (CoreException e) {
+			}
+			catch (CoreException e) {
 				lastException = e;
 				// just print for info
-				System.out.println("(CoreException) Retry "+retryCount+": "+ e.getMessage() + ", resource " + resource.getFullPath()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			} catch (IllegalArgumentException iae) {
+				System.out
+						.println("(CoreException) Retry " + retryCount + ": " + e.getMessage() + ", resource " + resource.getFullPath()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			catch (IllegalArgumentException iae) {
 				// just print for info
-				System.out.println("(IllegalArgumentException) Retry "+retryCount+": "+ iae.getMessage() + ", resource " + resource.getFullPath()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				System.out
+						.println("(IllegalArgumentException) Retry " + retryCount + ": " + iae.getMessage() + ", resource " + resource.getFullPath()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
-		if (!resource.isAccessible()) return;
+		if (!resource.isAccessible())
+			return;
 		System.err.println("Failed to delete " + resource.getFullPath()); //$NON-NLS-1$
 		if (lastException != null) {
 			throw lastException;
 		}
 	}
-	
-	protected IResource createPredefinedProjectAndGetResource(String projectName, String resourcePath) throws CoreException, IOException {
+
+	protected IResource createPredefinedProjectAndGetResource(
+			String projectName, String resourcePath) throws CoreException,
+			IOException {
 		IProject project = createPredefinedProject(projectName);
 		return project.findMember(resourcePath);
 	}
 }
-

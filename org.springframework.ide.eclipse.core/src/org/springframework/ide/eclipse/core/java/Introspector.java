@@ -121,7 +121,8 @@ public final class Introspector {
 		try {
 			while (type != null) {
 				for (IMethod method : type.getMethods()) {
-					if (filter.matches(method, prefix)) {
+					if (!method.isConstructor()
+							&& filter.matches(method, prefix)) {
 						methods.add(method);
 					}
 				}
@@ -153,30 +154,52 @@ public final class Introspector {
 		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
-				int flags = method.getFlags();
-				String key = method.getElementName() + method.getSignature();
-				if (!allMethods.containsKey(key)
-						&& (publics == Public.DONT_CARE
-								|| (publics == Public.YES && (Flags
-										.isPublic(flags) || Flags
-										.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
-								.isPublic(flags) && !Flags.isInterface(type
-								.getFlags()))))
-						&& (statics == Static.DONT_CARE
-								|| (statics == Static.YES && Flags
-										.isStatic(flags)) || (statics == Static.NO && !Flags
-								.isStatic(flags)))
-						&& (argCount == -1 || method.getNumberOfParameters() == argCount)
-						&& ((!ignoreCase && method.getElementName().startsWith(
-								methodPrefix)))
-						|| (ignoreCase && method.getElementName().toLowerCase()
-								.startsWith(methodPrefix.toLowerCase()))) {
-					allMethods.put(key, method);
+				checkMethod(type, methodPrefix, argCount, publics, statics,
+						ignoreCase, allMethods, method);
+			}
+
+			// Add intertype declared methods
+			if (JdtUtils.isAjdtProject(type.getResource())) {
+				for (IMethod method : AjdtUtils.getDeclaredMethods(type)) {
+					checkMethod(type, methodPrefix, argCount, publics, statics,
+							ignoreCase, allMethods, method);
 				}
 			}
+
 			type = getSuperType(type);
 		}
 		return new HashSet<IMethod>(allMethods.values());
+	}
+
+	private static void checkMethod(IType type, String methodPrefix,
+			int argCount, Public publics, Static statics, boolean ignoreCase,
+			Map<String, IMethod> allMethods, IMethod method)
+			throws JavaModelException {
+		int flags = method.getFlags();
+		String key = method.getElementName() + method.getSignature();
+		if (!allMethods.containsKey(key) && !method.isConstructor()
+				&& (publics == Public.DONT_CARE
+						|| (publics == Public.YES && (Flags.isPublic(flags) || Flags.isInterface(type.getFlags()))) 
+						|| (publics == Public.NO && (!Flags.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
+				&& (statics == Static.DONT_CARE
+						|| (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
+						.isStatic(flags)))
+				&& (argCount == -1 || method.getNumberOfParameters() == argCount)
+				&& checkMethodName(method, type, methodPrefix, ignoreCase)) {
+			allMethods.put(key, method);
+		}
+	}
+
+	private static boolean checkMethodName(IMethod method, IType type,
+			String methodPrefix, boolean ignoreCase) {
+		String methodName = method.getElementName();
+		int index = methodName.lastIndexOf('.');
+		if (index > 0) {
+			methodName = methodName.substring(index + 1);
+		}
+		return ((!ignoreCase && methodName.startsWith(methodPrefix)))
+				|| (ignoreCase && methodName.toLowerCase().startsWith(
+						methodPrefix.toLowerCase()));
 	}
 
 	/**
@@ -226,6 +249,33 @@ public final class Introspector {
 						&& (argCount == -1 || method.getNumberOfParameters() == argCount)
 						&& methodName.equals(method.getElementName())) {
 					return method;
+				}
+			}
+
+			// Add intertype declared methods
+			if (JdtUtils.isAjdtProject(type.getResource())) {
+				for (IMethod method : AjdtUtils.getDeclaredMethods(type)) {
+					int flags = method.getFlags();
+					if ((publics == Public.DONT_CARE
+							|| (publics == Public.YES && (Flags.isPublic(flags) || Flags
+									.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
+							.isPublic(flags) && !Flags.isInterface(type
+							.getFlags()))))
+							&& (statics == Static.DONT_CARE
+									|| (statics == Static.YES && Flags
+											.isStatic(flags)) || (statics == Static.NO && !Flags
+									.isStatic(flags)))
+							&& (argCount == -1 || method
+									.getNumberOfParameters() == argCount)) {
+						String elementName = method.getElementName();
+						int index = elementName.lastIndexOf('.');
+						if (index > 0) {
+							elementName = elementName.substring(index + 1);
+						}
+						if (elementName.equals(methodName)) {
+							return method;
+						}
+					}
 				}
 			}
 			type = getSuperType(type);
@@ -309,7 +359,7 @@ public final class Introspector {
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
 				String key = method.getElementName() + method.getSignature();
-				if (!allMethods.containsKey(key)) {
+				if (!allMethods.containsKey(key) && !method.isConstructor()) {
 					allMethods.put(key, method);
 				}
 			}

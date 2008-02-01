@@ -10,15 +10,24 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.ajdt.core.javaelements.AJCompilationUnit;
 import org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager;
 import org.eclipse.ajdt.core.javaelements.IAspectJElement;
+import org.eclipse.ajdt.core.javaelements.IntertypeElement;
+import org.eclipse.ajdt.core.model.AJModel;
+import org.eclipse.ajdt.core.model.AJRelationship;
+import org.eclipse.ajdt.core.model.AJRelationshipManager;
+import org.eclipse.ajdt.core.model.AJRelationshipType;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
@@ -58,4 +67,17 @@ public class AjdtUtils {
 		return type instanceof IAspectJElement;
 	}
 
+	public static Set<IMethod> getDeclaredMethods(IType type) throws JavaModelException {
+		Set<IMethod> methods = new HashSet<IMethod>();
+		AJRelationshipType[] types = new AJRelationshipType[] { AJRelationshipManager.DECLARED_ON };
+		List<AJRelationship> rels = AJModel.getInstance().getAllRelationships(
+				type.getResource().getProject(), types);
+		for (AJRelationship rel : rels) {
+			if (rel.getTarget().equals(type)) {
+				IntertypeElement iType = (IntertypeElement) rel.getSource();
+				methods.add(iType);
+			}
+		}
+		return methods;
+	}
 }

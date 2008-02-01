@@ -1,6 +1,13 @@
 package org.springframework;
 
-public class Base {
+public class Base implements FooInterface {
+	
+	public Base() {
+	}
+	
+	public Base(String test) {
+		
+	}
 	
 	private String foo;
 
@@ -10,6 +17,14 @@ public class Base {
 
 	public void setFoo(String foo) {
 		this.foo = foo;
+	}
+	
+	protected void test1() {
+		
+	}
+	
+	protected static test2() {
+		
 	}
 	
 }
