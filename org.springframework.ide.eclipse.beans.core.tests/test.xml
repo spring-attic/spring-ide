@@ -30,7 +30,7 @@
       <property name="data-dir" value="${session-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" 
-                value="org.eclipse.ajdt.core.tests.AllCoreTests"/>
+                value="org.springframework.ide.eclipse.beans.core.tests.AllBeansCoreTests"/>
   
     </ant>
     
