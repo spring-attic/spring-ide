@@ -25,6 +25,5 @@ public class SubClass extends Base implements Serializable{
 	}
 
 	public static void setDao(Object dao) {
-		this.dao = dao;
 	}
 }

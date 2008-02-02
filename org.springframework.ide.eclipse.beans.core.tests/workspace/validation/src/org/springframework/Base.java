@@ -23,7 +23,7 @@ public class Base implements FooInterface {
 		
 	}
 	
-	protected static test2() {
+	protected static void test2() {
 		
 	}
 	
