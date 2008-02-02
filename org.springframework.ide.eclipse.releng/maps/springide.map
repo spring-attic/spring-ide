@@ -36,6 +36,7 @@ plugin@org.springframework.ide.eclipse.aop.mylyn=SVN,trunk,https://src.springfra
 plugin@org.springframework.ide.eclipse.ajdt.ui.visualiser=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.ajdt.ui.visualiser
 plugin@org.springframework.ide.eclipse.ajdt.ui.xref=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.ajdt.ui.xref
 plugin@org.springframework.ide.eclipse.beans.core=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.core
+plugin@org.springframework.ide.eclipse.beans.core.tests=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.core.tests
 plugin@org.springframework.ide.eclipse.beans.osgibridge=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.osgibridge
 plugin@org.springframework.ide.eclipse.beans.mylyn=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.mylyn
 plugin@org.springframework.ide.eclipse.beans.ui=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.ui
