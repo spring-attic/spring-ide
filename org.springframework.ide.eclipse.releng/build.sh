@@ -14,7 +14,7 @@ WORKSPACE=`pwd`
 NAME=`date +%Y%m%d%H%M`
 STAGINGLOCATION=$WORKSPACE/updatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
-ECLIPSE_DISTRO_URL=http://mirror.csclub.uwaterloo.ca/eclipse/technology/epp/downloads/release/20071103/eclipse-jee-europa-fall2-linux-gtk.tar.gz
+ECLIPSE_DISTRO_URL=http://glucose-fructose.csclub.uwaterloo.ca/eclipse/technology/epp/downloads/release/20071103/eclipse-java-europa-fall2-macosx-carbon.tar.gz
 ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 
 MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/e3.3/
@@ -87,4 +87,17 @@ rm -rf $WORKSPACE/eclipse-stage
 build $@
 
 # Trigger pack
-pack
+#pack
+
+# Start test
+# unzip test support
+install_feature org.springframework.ide.eclipse.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.ajdt.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.aop.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.javaconfig.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.webflow.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.mylyn.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.osgi.feature $STAGINGLOCATION
+
+ECLIPSELOCATION=`ls $WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_*`
+java -cp $ECLIPSELOCATION org.eclipse.core.launcher.Main -ws carbon -os macosx -arch x86 -Dws=carbon -Dos=macosx -Darch=x86 -application org.eclipse.ant.core.antRunner -file plugins/org.springframework.ide.eclipse.beans.core.tests/test.xml -Declipse-home=$WORKSPACE/eclipse

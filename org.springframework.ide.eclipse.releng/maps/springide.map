@@ -18,6 +18,7 @@ feature@org.springframework.ide.eclipse.javaconfig.feature=SVN,trunk,https://src
 feature@org.springframework.ide.eclipse.javaconfig.feature.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.javaconfig.feature.source
 feature@org.springframework.ide.eclipse.osgi.feature=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.osgi.feature
 feature@org.springframework.ide.eclipse.osgi.feature.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.osgi.feature.source
+feature@org.springframework.ide.eclipse.tests.feature=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.tests.feature
 
 plugin@org.springframework.ide.eclipse=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse
 plugin@org.springframework.ide.eclipse.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.source
