@@ -20,6 +20,7 @@
 
    <url>
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
+      <discovery label="Spring IDE" url="http://springide.org/updatesite"/>
    </url>
 
    <includes
@@ -27,7 +28,6 @@
          version="0.0.0"/>
 
    <requires>
-   	  <!-- keep without explicit version constraint until WTP problem is solved -->
       <import feature="org.eclipse.wst.xml_ui.feature" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
       <import plugin="org.apache.commons.logging"/>
@@ -149,7 +149,7 @@
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="0.0.0" 
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
