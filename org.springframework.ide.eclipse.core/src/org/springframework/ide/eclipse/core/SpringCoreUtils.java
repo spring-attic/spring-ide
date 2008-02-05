@@ -277,11 +277,18 @@ public final class SpringCoreUtils {
 	 * Returns true if given resource's project is a Spring project.
 	 */
 	public static boolean isSpringProject(IResource resource) {
+		return hasNature(resource, SpringCore.NATURE_ID);
+	}
+
+	/**
+	 * Returns true if given resource's project has the given nature.
+	 */
+	public static boolean hasNature(IResource resource, String natureId) {
 		if (resource != null && resource.isAccessible()) {
 			IProject project = resource.getProject();
 			if (project != null) {
 				try {
-					return project.hasNature(SpringCore.NATURE_ID);
+					return project.hasNature(natureId);
 				}
 				catch (CoreException e) {
 					SpringCore.log(e);
