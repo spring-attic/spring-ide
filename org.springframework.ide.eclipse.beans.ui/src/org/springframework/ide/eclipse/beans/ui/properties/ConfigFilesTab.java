@@ -45,6 +45,7 @@ import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
@@ -346,7 +347,7 @@ public class ConfigFilesTab {
 		if (SpringCoreUtils.isEclipseSameOrNewer(3, 2)) {
 			FilteredElementTreeSelectionDialog selDialog = new FilteredElementTreeSelectionDialog(
 					SpringUIUtils.getStandardDisplay().getActiveShell(),
-					new JavaElementLabelProvider(),
+					new LabelProvider(),
 					new NonJavaResourceContentProvider());
 			selDialog.addFilter(new ConfigFileFilter(project
 					.getConfigSuffixes()));
@@ -358,7 +359,7 @@ public class ConfigFilesTab {
 		else {
 			ElementTreeSelectionDialog selDialog = new ElementTreeSelectionDialog(
 					SpringUIUtils.getStandardDisplay().getActiveShell(),
-					new JavaElementLabelProvider(),
+					new LabelProvider(),
 					new NonJavaResourceContentProvider());
 			selDialog.addFilter(new ConfigFileFilter(project
 					.getConfigSuffixes()));
@@ -456,7 +457,25 @@ public class ConfigFilesTab {
 		protected boolean selectFile(IFile element) {
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
 					element.getProject());
-			return !project.hasConfig(element);
+			return project != null && !project.hasConfig(element);
+		}
+	}
+	
+	private static class LabelProvider extends JavaElementLabelProvider {
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getText(java.lang.Object)
+		 */
+		@Override
+		public String getText(Object element) {
+			String label = super.getText(element);
+			if (element instanceof IFile) {
+				IBeansConfig bc = BeansCorePlugin.getModel().getConfig((IFile) element, true);
+				if (bc instanceof IImportedBeansConfig) {
+					label += " [imported]";
+				}
+			}
+			return label;
 		}
 	}
 }
