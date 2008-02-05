@@ -5,12 +5,12 @@
 	<extension 
 		point="org.springframework.ide.eclipse.core.builders">
 		<builder
-        class="org.springframework.ide.eclipse.aop.core.builder.AopReferenceModelProjectBuilder"
-        description="%aopBuilder.description"
-        enabledByDefault="true"
-        icon="icons/obj16/aspect.gif"
-        id="aopreferencemodelbuilder"
-        name="%aopBuilder.name">
+	        class="org.springframework.ide.eclipse.aop.core.builder.AopReferenceModelProjectBuilder"
+	        description="%aopBuilder.description"
+	        enabledByDefault="true"
+	        icon="icons/obj16/aspect.gif"
+	        id="aopreferencemodelbuilder"
+	        name="%aopBuilder.name">
 		</builder>
 	</extension>
 
