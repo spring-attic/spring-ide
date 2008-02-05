@@ -189,12 +189,7 @@
             class="org.springframework.ide.eclipse.ui.workingsets.actions.WorkingSetActionProvider"
             id="org.springframework.ide.eclipse.ui.navigator.springExplorerWorkingSetActions">
            <enablement>
-                <or>
-					<adapt type="org.eclipse.core.resources.IResource" />	 
-					<adapt type="java.util.Collection"> 
-						<count value="0" />
-					</adapt>
-				</or>
+				<adapt type="org.eclipse.core.resources.IResource" />	 
            </enablement>            
       	 </actionProvider>
          <dropAssistant

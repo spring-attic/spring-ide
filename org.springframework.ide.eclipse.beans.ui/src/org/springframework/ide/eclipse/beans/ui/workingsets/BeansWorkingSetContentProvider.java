@@ -14,7 +14,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorContentProvider;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 
@@ -26,6 +28,16 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
  */
 public class BeansWorkingSetContentProvider extends
 		BeansNavigatorContentProvider implements ITreeContentProvider {
+
+	@Override
+	public Object getParent(Object element) {
+		if (element instanceof IBeansProject) {
+			return SpringCore.getModel().getProject(
+					((IBeansProject) element).getProject());
+		}
+
+		return super.getParent(element);
+	}
 
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IBeansConfigSet) {
