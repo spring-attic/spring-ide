@@ -4,7 +4,7 @@ Implementation-Version: 1.0.2
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework.binding
 Bundle-Name: org.springframework.binding
-Bundle-Version: 1.0.3
+Bundle-Version: 1.0.3.1
 Bundle-Vendor: Spring Binding
 Bundle-ClassPath: spring-binding.jar
 Export-Package: 
@@ -19,4 +19,5 @@ Export-Package:
  org.springframework.binding.method
 Require-Bundle: org.springframework.bundle.spring
 Eclipse-LazyStart: false
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 
