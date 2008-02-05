@@ -481,11 +481,10 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				// correctly before updating the project description
 				if (project != null) {
 					project.reset();
+					notifyListeners(project, Type.CHANGED);
+					// trigger build of project
+					SpringCoreUtils.buildProject(project.getProject());
 				}
-				notifyListeners(project, Type.CHANGED);
-
-				// trigger build of project
-				SpringCoreUtils.buildProject(project.getProject());
 			}
 		}
 

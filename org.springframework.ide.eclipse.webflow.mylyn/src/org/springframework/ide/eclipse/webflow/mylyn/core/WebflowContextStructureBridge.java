@@ -171,8 +171,11 @@ public class WebflowContextStructureBridge extends
 	public String getParentHandle(String handle) {
 		Object obj = getObjectForHandle(handle);
 		if (obj instanceof IWebflowProject) {
-			return SpringCore.getModel().getProject(
-					((IWebflowProject) obj).getProject()).getElementID();
+			ISpringProject project = SpringCore.getModel().getProject(
+					((IWebflowProject) obj).getProject());
+			if (project != null) {
+				return project.getElementID();
+			}
 		}
 		else if (obj instanceof ISpringProject) {
 			AbstractContextStructureBridge parentBridge = ContextCorePlugin
