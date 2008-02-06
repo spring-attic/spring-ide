@@ -131,25 +131,18 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		workspace.addResourceChangeListener(workspaceListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
 	}
-	
-	/*
-	private void initializeModel() {
-		Job job = new Job("Initializing Spring Model") {
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor,
-						IProgressMonitor.UNKNOWN);
-				TrueModelElementVisitor visitor = new TrueModelElementVisitor();
-				accept(visitor, subMonitor);
-				subMonitor.done();
-				return Status.OK_STATUS;
-			}
-		};
-		job.setSystem(true);
-		job.setPriority(Job.SHORT); // process asap
-		job.schedule();
-	}*/
+	/*
+	 * private void initializeModel() { Job job = new Job("Initializing Spring
+	 * Model") {
+	 * 
+	 * @Override protected IStatus run(IProgressMonitor monitor) {
+	 * SubProgressMonitor subMonitor = new SubProgressMonitor(monitor,
+	 * IProgressMonitor.UNKNOWN); TrueModelElementVisitor visitor = new
+	 * TrueModelElementVisitor(); accept(visitor, subMonitor);
+	 * subMonitor.done(); return Status.OK_STATUS; } }; job.setSystem(true);
+	 * job.setPriority(Job.SHORT); // process asap job.schedule(); }
+	 */
 
 	protected void addProject(IBeansProject project) {
 		projects.put(project.getProject(), project);
@@ -391,7 +384,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				finally {
 					w.unlock();
 				}
-				notifyListeners(proj, Type.CHANGED);
+				if (proj != null) {
+					notifyListeners(proj, Type.CHANGED);
+				}
 			}
 		}
 
@@ -446,7 +441,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			finally {
 				w.unlock();
 			}
-			notifyListeners(proj, Type.REMOVED);
+			if (proj != null) {
+				notifyListeners(proj, Type.REMOVED);
+			}
 		}
 
 		public void projectDeleted(IProject project, int eventType) {
@@ -462,7 +459,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			finally {
 				w.unlock();
 			}
-			notifyListeners(proj, Type.REMOVED);
+			if (proj != null) {
+				notifyListeners(proj, Type.REMOVED);
+			}
 		}
 
 		public void projectDescriptionChanged(IFile file, int eventType) {
@@ -583,7 +582,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				finally {
 					r.unlock();
 				}
-				notifyListeners(config, Type.REMOVED);
+				if (config != null) {
+					notifyListeners(config, Type.REMOVED);
+				}
 			}
 		}
 	}
