@@ -89,7 +89,8 @@ public abstract class ToolAnnotationUtils {
 			if (attrDecl instanceof XSDAttributeUseAdapter) {
 				XSDAttributeUse attribute = (XSDAttributeUse) ((XSDAttributeUseAdapter) attrDecl)
 						.getKey();
-				// Check if annotation and tool annotation are actually present
+				// 1. Check if annotation and tool annotation are actually
+				// present
 				if (attribute.getAttributeDeclaration() != null
 						&& attribute.getAttributeDeclaration().getAnnotation() != null
 						&& attribute.getAttributeDeclaration().getAnnotation()
@@ -97,6 +98,21 @@ public abstract class ToolAnnotationUtils {
 					return attribute.getAttributeDeclaration().getAnnotation()
 							.getApplicationInformation();
 				}
+				// 2. If no directly attached annotation could be
+				// found, try the referenced type definition if any.
+				if (attribute.getAttributeDeclaration() != null
+						&& attribute.getAttributeDeclaration()
+								.getTypeDefinition() != null
+						&& attribute.getAttributeDeclaration()
+								.getTypeDefinition().getAnnotation() != null
+						&& attribute.getAttributeDeclaration()
+								.getTypeDefinition().getAnnotation()
+								.getApplicationInformation() != null) {
+					return attribute.getAttributeDeclaration()
+							.getTypeDefinition().getAnnotation()
+							.getApplicationInformation();
+				}
+
 			}
 		}
 		return Collections.emptyList();
