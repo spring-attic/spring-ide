@@ -169,10 +169,12 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				ISpringProject proj = projects.remove(project);
 
-				// Need REMOVE here because for the SpringExplorer the accoring
+				// Need REMOVE here because for the SpringExplorer the according
 				// ISpringProject node has to be disappear in the
 				// CommonNavigator
-				notifyListeners(proj, Type.REMOVED);
+				if (proj != null) {
+					notifyListeners(proj, Type.REMOVED);
+				}
 			}
 		}
 
@@ -196,12 +198,16 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 
 		public void projectClosed(IProject project, int eventType) {
 			ISpringProject proj = projects.remove(project);
-			notifyListeners(proj, Type.REMOVED);
+			if (proj != null) {
+				notifyListeners(proj, Type.REMOVED);
+			}
 		}
 
 		public void projectDeleted(IProject project, int eventType) {
 			ISpringProject proj = projects.remove(project);
-			notifyListeners(proj, Type.REMOVED);
+			if (proj != null) {
+				notifyListeners(proj, Type.REMOVED);
+			}
 		}
 	}
 }
