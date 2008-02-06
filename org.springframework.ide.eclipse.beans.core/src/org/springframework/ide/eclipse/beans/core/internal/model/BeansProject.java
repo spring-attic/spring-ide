@@ -67,7 +67,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	protected volatile Set<String> configSuffixes;
 
-	protected volatile boolean isImportsEnabled = true;
+	/** the internal flag to specify if import processing is enabled */
+	protected volatile boolean isImportsEnabled = DEFAULT_IMPORTS_ENABLED;
 
 	protected volatile String version = BeansCorePlugin.getPluginVersion();
 
@@ -704,7 +705,16 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public boolean isImportsEnabled() {
-		return isImportsEnabled;
+		if (!this.modelPopulated) {
+			populateModel();
+		}
+		try {
+			r.lock();
+			return isImportsEnabled;
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public void setImportsEnabled(boolean importEnabled) {
@@ -712,7 +722,16 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public String getVersion() {
-		return version;
+		if (!this.modelPopulated) {
+			populateModel();
+		}
+		try {
+			r.lock();
+			return version;
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public void setVersion(String version) {

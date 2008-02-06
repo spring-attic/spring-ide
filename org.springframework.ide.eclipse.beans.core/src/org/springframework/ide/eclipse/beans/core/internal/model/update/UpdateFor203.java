@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 public class UpdateFor203 implements IBeansModelUpdate {
 
 	public String getName() {
-		return "Support for <import /> elements";
+		return "Updating Spring model description file to 2.0.3 version";
 	}
 
 	public boolean requiresUpdate(IBeansProject beansProject) {

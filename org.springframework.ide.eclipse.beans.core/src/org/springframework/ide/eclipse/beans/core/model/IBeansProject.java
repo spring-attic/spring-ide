@@ -26,10 +26,13 @@ public interface IBeansProject extends IBeansModelElement,
 		IResourceModelElement, IBeanClassAware {
 
 	/** File name of the Spring Beans project description */
-	public static final String DESCRIPTION_FILE = ".springBeans";
+	String DESCRIPTION_FILE = ".springBeans";
 
 	/** Default file extension for beans config files */
-	public static final String DEFAULT_CONFIG_SUFFIX = "xml";
+	String DEFAULT_CONFIG_SUFFIX = "xml";
+	
+	/** Default specifying if imports should be processed */
+	boolean DEFAULT_IMPORTS_ENABLED = false;
 
 	/**
 	 * Returns corresponding Eclipse project.

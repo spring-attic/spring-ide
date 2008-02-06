@@ -405,6 +405,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				try {
 					w.lock();
 					projects.put(project, proj);
+					BeansModelUpdater.updateProject(proj);
 				}
 				finally {
 					w.unlock();
@@ -423,6 +424,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				try {
 					w.lock();
 					projects.put(project, proj);
+					BeansModelUpdater.updateProject(proj);
 				}
 				finally {
 					w.unlock();

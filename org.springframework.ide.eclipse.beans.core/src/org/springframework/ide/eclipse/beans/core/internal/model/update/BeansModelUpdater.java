@@ -40,17 +40,27 @@ public abstract class BeansModelUpdater {
 		UPDATES = new ArrayList<IBeansModelUpdate>();
 		UPDATES.add(new UpdateFor203());
 	}
-
+	
+	/**
+	 * Updates the complete list of {@link IBeansProject}.
+	 */
 	public static void updateModel(Collection<IBeansProject> projects) {
+		for (IBeansProject project : projects) {
+			updateProject(project);
+		}
+	}
+	
+	/**
+	 * Updates a single {@link IBeansProject}. 
+	 */
+	public static void updateProject(IBeansProject project) {
 		for (IBeansModelUpdate update : UPDATES) {
-			for (IBeansProject project : projects) {
-				if (update.requiresUpdate(project)) {
-					UpdateJob job = new UpdateJob(project, update);
-					job.setPriority(Job.BUILD);
-					job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory()
-							.buildRule());
-					job.schedule();
-				}
+			if (update.requiresUpdate(project)) {
+				UpdateJob job = new UpdateJob(project, update);
+				job.setPriority(Job.BUILD);
+				job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory()
+						.buildRule());
+				job.schedule();
 			}
 		}
 	}
