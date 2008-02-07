@@ -12,6 +12,7 @@
 
 WORKSPACE=`pwd`
 NAME=`date +%Y%m%d%H%M`
+#NAME=200802061800
 STAGINGLOCATION=$WORKSPACE/updatesite/
 TEST_STAGINGLOCATION=$WORKSPACE/testupdatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
@@ -85,9 +86,9 @@ while [ "$1" != "" ]; do
                                 rm -rf $WORKSPACE/$ECLIPSE_TEMP_NAME
                                 INSTALL_FEATURES=1
                                 ;;
-        -update-features )  INSTALL_FEATURES=1
+        -update-features )  	INSTALL_FEATURES=1
                                 ;;
-		-execute-tests )    EXECUTE_TESTS=1
+		-execute-tests )    	EXECUTE_TESTS=1
                                 ;;
         * )
     esac
