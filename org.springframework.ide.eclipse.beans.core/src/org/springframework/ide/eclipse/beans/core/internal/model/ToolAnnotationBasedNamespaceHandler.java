@@ -138,7 +138,7 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 		else {
 			// emit a warning that the NamespaceHandler cannot be found
 			parserContext.getReaderContext().warning(
-					"Unable to locate Spring NamespaceHandler for elemen '" + 
+					"Unable to locate Spring NamespaceHandler for element '" + 
 					element.getNodeName() + "' of schema namespace '" + 
 					element.getNamespaceURI() + "'", parserContext.extractSource(element));
 		}
