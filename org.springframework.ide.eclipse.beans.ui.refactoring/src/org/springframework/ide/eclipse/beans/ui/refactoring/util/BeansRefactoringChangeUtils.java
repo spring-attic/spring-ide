@@ -61,8 +61,9 @@ public class BeansRefactoringChangeUtils {
 				for (int i = 0; i < nodes.getLength(); i++) {
 					TextEdit edit = createMethodTextEdit(nodes.item(i),
 							affectedElements[j], newNames[j], file);
-					if (edit != null)
+					if (edit != null) {
 						multiEdit.addChild(edit);
+					}
 				}
 			}
 			if (multiEdit.hasChildren()) {
@@ -85,11 +86,12 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	@SuppressWarnings( { "restriction", "unchecked" })
+	@SuppressWarnings( { "unchecked" })
 	private static TextEdit createMethodTextEdit(Node node,
 			IJavaElement element, String newName, IFile file) {
-		if (node == null)
+		if (node == null) {
 			return null;
+		}
 
 		if (element instanceof IMethod
 				&& element.getElementName().startsWith("set")) {
@@ -110,9 +112,10 @@ public class BeansRefactoringChangeUtils {
 							AttrImpl attr = (AttrImpl) child.getAttributes()
 									.getNamedItem("name");
 							int offset = attr.getValueRegionStartOffset() + 1;
-							if (offset >= 0)
+							if (offset >= 0) {
 								return new ReplaceEdit(offset, propertyName
 										.length(), newName);
+							}
 						}
 					}
 				}
@@ -138,8 +141,9 @@ public class BeansRefactoringChangeUtils {
 			for (int i = 0; i < nodes.getLength(); i++) {
 				TextEdit edit = createRenameBeanIdTextEdit(nodes.item(i),
 						beanId, newBeanId);
-				if (edit != null)
+				if (edit != null) {
 					multiEdit.addChild(edit);
+				}
 			}
 
 			if (model != null) {
@@ -186,15 +190,17 @@ public class BeansRefactoringChangeUtils {
 
 	private static TextEdit createRenameBeanIdTextEdit(Node node,
 			String beanId, String newBeanId) {
-		if (node == null)
+		if (node == null) {
 			return null;
+		}
 
 		String id = BeansEditorUtils.getAttribute(node, "id");
 		if (beanId.equals(id)) {
 			AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem("id");
 			int offset = attr.getValueRegionStartOffset() + 1;
-			if (offset >= 0)
+			if (offset >= 0) {
 				return new ReplaceEdit(offset, beanId.length(), newBeanId);
+			}
 		}
 		return null;
 	}
@@ -276,9 +282,10 @@ public class BeansRefactoringChangeUtils {
 				AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem(
 						attributeName);
 				int offset = attr.getValueRegionStartOffset() + 1;
-				if (offset >= 0)
+				if (offset >= 0) {
 					multiEdit.addChild(new ReplaceEdit(offset,
 							beanRef.length(), newBeanId));
+				}
 			}
 		}
 	}
@@ -301,8 +308,9 @@ public class BeansRefactoringChangeUtils {
 				for (int i = 0; i < nodes.getLength(); i++) {
 					TextEdit edit = createTextEdit(nodes.item(i),
 							affectedElements[j], newNames[j]);
-					if (edit != null)
+					if (edit != null) {
 						multiEdit.addChild(edit);
+					}
 				}
 			}
 			if (multiEdit.hasChildren()) {
@@ -325,11 +333,11 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	@SuppressWarnings("restriction")
 	private static TextEdit createTextEdit(Node node, IJavaElement element,
 			String newName) {
-		if (node == null)
+		if (node == null) {
 			return null;
+		}
 
 		String oldName = (element instanceof IType) ? ((IType) element)
 				.getFullyQualifiedName('$') : element.getElementName();
@@ -340,16 +348,18 @@ public class BeansRefactoringChangeUtils {
 			AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem(
 					"class");
 			int offset = attr.getValueRegionStartOffset() + 1;
-			if (offset >= 0)
+			if (offset >= 0) {
 				return new ReplaceEdit(offset, oldName.length(), newName);
+			}
 		}
 		return null;
 	}
 
 	private static boolean isGoodMatch(String value, String oldName,
 			boolean isPackage) {
-		if (value == null || value.length() <= oldName.length())
+		if (value == null || value.length() <= oldName.length()) {
 			return false;
+		}
 		boolean goodLengthMatch = isPackage ? value.lastIndexOf('.') <= oldName
 				.length() : value.charAt(oldName.length()) == '$';
 		return value.startsWith(oldName) && goodLengthMatch;

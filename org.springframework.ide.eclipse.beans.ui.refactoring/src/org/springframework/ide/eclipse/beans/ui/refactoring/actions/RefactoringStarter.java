@@ -11,15 +11,12 @@
 package org.springframework.ide.eclipse.beans.ui.refactoring.actions;
 
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
-
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * A helper class to activate the UI of a refactoring
@@ -31,7 +28,6 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class RefactoringStarter {
 
 	private RefactoringStatus fStatus;
@@ -50,8 +46,9 @@ public class RefactoringStarter {
 			Shell parent, String dialogTitle, int saveMode)
 			throws JavaModelException {
 		RefactoringSaveHelper saveHelper = new RefactoringSaveHelper(saveMode);
-		if (!canActivate(saveHelper, parent))
+		if (!canActivate(saveHelper, parent)) {
 			return false;
+		}
 
 		try {
 			RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(

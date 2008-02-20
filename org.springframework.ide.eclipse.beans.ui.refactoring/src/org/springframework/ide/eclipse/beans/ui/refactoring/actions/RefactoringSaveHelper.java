@@ -106,6 +106,7 @@ public class RefactoringSaveHelper {
 	 * @return <code>true</code> if save was successful and refactoring can
 	 * proceed; false if the refactoring must be cancelled
 	 */
+	@SuppressWarnings("deprecation")
 	public boolean saveEditors(Shell shell) {
 		final IEditorPart[] dirtyEditors;
 		switch (fSaveMode) {
@@ -119,10 +120,12 @@ public class RefactoringSaveHelper {
 		default:
 			throw new IllegalStateException(Integer.toString(fSaveMode));
 		}
-		if (dirtyEditors.length == 0)
+		if (dirtyEditors.length == 0) {
 			return true;
-		if (!askSaveAllDirtyEditors(shell, dirtyEditors))
+		}
+		if (!askSaveAllDirtyEditors(shell, dirtyEditors)) {
 			return false;
+		}
 		try {
 			// Save isn't cancelable.
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -134,8 +137,9 @@ public class RefactoringSaveHelper {
 				if (fSaveMode == SAVE_ALL_ALWAYS_ASK || fSaveMode == SAVE_ALL
 						|| RefactoringSavePreferences.getSaveAllEditors()) {
 					if (!JavaPlugin.getActiveWorkbenchWindow().getWorkbench()
-							.saveAllEditors(false))
+							.saveAllEditors(false)) {
 						return false;
+					}
 				}
 				else {
 					IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -146,8 +150,9 @@ public class RefactoringSaveHelper {
 							for (int i = 0; i < count; i++) {
 								IEditorPart editor = dirtyEditors[i];
 								editor.doSave(new SubProgressMonitor(pm, 1));
-								if (pm.isCanceled())
+								if (pm.isCanceled()) {
 									throw new InterruptedException();
+								}
 							}
 							pm.done();
 						}
@@ -202,14 +207,16 @@ public class RefactoringSaveHelper {
 			IEditorPart[] dirtyEditors) {
 		final boolean canSaveAutomatically = fSaveMode != SAVE_ALL_ALWAYS_ASK;
 		if (canSaveAutomatically
-				&& RefactoringSavePreferences.getSaveAllEditors()) // must save
+				&& RefactoringSavePreferences.getSaveAllEditors()) {
 			// everything
 			return true;
+		}
 		ListDialog dialog = new ListDialog(shell) {
 			{
 				setShellStyle(getShellStyle() | SWT.APPLICATION_MODAL);
 			}
 
+			@Override
 			protected Control createDialogArea(Composite parent) {
 				Composite result = (Composite) super.createDialogArea(parent);
 				if (canSaveAutomatically) {
@@ -219,6 +226,7 @@ public class RefactoringSaveHelper {
 					check.setSelection(RefactoringSavePreferences
 							.getSaveAllEditors());
 					check.addSelectionListener(new SelectionAdapter() {
+						@Override
 						public void widgetSelected(SelectionEvent e) {
 							RefactoringSavePreferences.setSaveAllEditors(check
 									.getSelection());
@@ -245,10 +253,12 @@ public class RefactoringSaveHelper {
 
 	private ILabelProvider createDialogLabelProvider() {
 		return new LabelProvider() {
+			@Override
 			public Image getImage(Object element) {
 				return ((IEditorPart) element).getTitleImage();
 			}
 
+			@Override
 			public String getText(Object element) {
 				return ((IEditorPart) element).getTitle();
 			}

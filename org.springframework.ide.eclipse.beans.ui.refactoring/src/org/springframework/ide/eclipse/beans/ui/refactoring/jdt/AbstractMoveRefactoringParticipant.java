@@ -27,6 +27,7 @@ import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
@@ -54,14 +55,20 @@ public abstract class AbstractMoveRefactoringParticipant extends
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException,
 			OperationCanceledException {
-		if (!getArguments().getUpdateReferences())
+		if (!getArguments().getUpdateReferences()) {
 			return null;
+		}
 		CompositeChange result = new CompositeChange(getName());
 		Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
 		for (IBeansProject beansProject : projects) {
 			Set<IBeansConfig> beansConfigs = beansProject.getConfigs();
 			for (IBeansConfig beansConfig : beansConfigs) {
 				addChange(result, beansConfig.getElementResource(), pm);
+				for (IBeansImport import_ : beansConfig.getImports()) {
+					for (IBeansConfig config : import_.getImportedBeansConfigs()) {
+						addChange(result, config.getElementResource(), pm);
+					}
+				}
 			}
 		}
 		return (result.getChildren().length == 0) ? null : result;
