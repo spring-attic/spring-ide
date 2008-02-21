@@ -52,8 +52,12 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 			detectAnnotationBasedHyperlinks(textViewer, region,
 					canShowMultipleHyperlinks, hyperlinks, currentNode);
 		}
-
-		return hyperlinks.toArray(new IHyperlink[hyperlinks.size()]);
+		if (hyperlinks.size() > 0) {
+			return hyperlinks.toArray(new IHyperlink[hyperlinks.size()]);
+		}
+		else {
+			return null;
+		}
 	}
 
 	private void detectAnnotationBasedHyperlinks(ITextViewer textViewer,
