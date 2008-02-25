@@ -28,8 +28,16 @@
                name="nature"
                value="org.springframework.ide.eclipse.core.springnature">
          </filter>
+         <keywordReference
+               id="org.springframework.ide.eclipse.webflow.ui.keywords">
+         </keywordReference>
       </page>
    </extension>
+   
+    <extension point="org.eclipse.ui.keywords">
+         <keyword id="org.springframework.ide.eclipse.webflow.ui.keywords"
+            label="%preferenceKeywords.label"/>
+    </extension>
    
    <extension
          point="org.eclipse.ui.navigator.viewer">

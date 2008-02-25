@@ -256,8 +256,16 @@
   	      	name="AOP Support"
 	      	class="org.springframework.ide.eclipse.aop.ui.preferences.AopPreferencePage"
 	      	category="org.springframework.ide.eclipse.ui.preferencePage">
+	      	<keywordReference
+            	id="org.springframework.ide.eclipse.aop.ui.keywords">
+      		</keywordReference>
    		</page>
 	</extension>
+	
+    <extension point="org.eclipse.ui.keywords">
+      <keyword  id="org.springframework.ide.eclipse.aop.ui.keywords"
+            label="%preferenceKeywords.label"/>
+    </extension>
 
 	<extension point="org.eclipse.ui.perspectiveExtensions">
 		<perspectiveExtension

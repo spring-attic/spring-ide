@@ -103,6 +103,9 @@
                name="nature"
                value="org.springframework.ide.eclipse.core.springnature">
          </filter>
+         <keywordReference
+               id="org.springframework.ide.eclipse.beans.ui.propertykeywords">
+      	 </keywordReference>
       </page>
    </extension>
 
@@ -434,8 +437,21 @@
   	      	name="Beans Support"
 	      	class="org.springframework.ide.eclipse.beans.ui.preferences.BeansPreferencePage"
 	      	category="org.springframework.ide.eclipse.ui.preferencePage">
+      		<keywordReference
+            	id="org.springframework.ide.eclipse.beans.ui.keywords">
+      		</keywordReference>
    		</page>
 	</extension>
+	
+    <extension point="org.eclipse.ui.keywords">
+      <keyword  id="org.springframework.ide.eclipse.beans.ui.keywords"
+            label="%preferenceKeywords.label"/>
+    </extension>
+
+    <extension point="org.eclipse.ui.keywords">
+      <keyword  id="org.springframework.ide.eclipse.beans.ui.propertykeywords"
+            label="%propertyKeywords.label"/>
+    </extension>
 	
 	<extension point="org.eclipse.ui.actionSets">
 		<actionSet label="%beansInplaceNavigation.label"
