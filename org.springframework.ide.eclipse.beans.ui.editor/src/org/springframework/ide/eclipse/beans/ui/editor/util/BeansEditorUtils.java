@@ -438,6 +438,14 @@ public class BeansEditorUtils {
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				file.getProject());
 
+		Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(file, true);
+		for (IBeansConfig config : allConfigs) {
+			if (config instanceof IImportedBeansConfig) {
+				BeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config, BeansConfig.class);
+				configs.add(rootBeansConfig);
+			}
+		}
+
 		if (project != null) {
 			Set<IBeansConfigSet> configSets = project.getConfigSets();
 
@@ -446,6 +454,13 @@ public class BeansEditorUtils {
 						|| !BeansCoreUtils.isBeansConfig(file)) {
 					Set<IBeansConfig> bcs = configSet.getConfigs();
 					configs.addAll(bcs);
+				}
+				List<IBeansConfig> tempConfigs = new ArrayList<IBeansConfig>(configs);
+				for (IBeansConfig config : tempConfigs) {
+					if (configSet.hasConfig(config.getElementName())) {
+						Set<IBeansConfig> bcs = configSet.getConfigs();
+						configs.addAll(bcs);
+					}	
 				}
 			}
 		}
@@ -760,8 +775,9 @@ public class BeansEditorUtils {
 			}
 		}
 		finally {
-			if (sModel != null)
+			if (sModel != null) {
 				sModel.releaseFromRead();
+			}
 		}
 
 		if (inode instanceof Node) {
@@ -860,8 +876,9 @@ public class BeansEditorUtils {
 	 */
 	public static final String replace(String aString, String source,
 			String target) {
-		if (aString == null)
+		if (aString == null) {
 			return null;
+		}
 		String normalString = ""; //$NON-NLS-1$
 		int length = aString.length();
 		int position = 0;

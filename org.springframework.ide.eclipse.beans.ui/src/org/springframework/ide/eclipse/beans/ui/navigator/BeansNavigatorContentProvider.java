@@ -25,8 +25,6 @@ import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
@@ -119,6 +117,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		return importedFiles.toArray(new Object[importedFiles.size()]);
 	}
 
+	@Override
 	protected Object[] getConfigSetChildren(IBeansConfigSet configSet) {
 		Set<ISourceModelElement> children = new LinkedHashSet<ISourceModelElement>();
 		for (final IBeansConfig config : configSet.getConfigs()) {
@@ -127,12 +126,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 				triggerDeferredElementLoading(config, configSet);
 				continue;
 			}
-			Object[] configChildren = getChildren(config);
-			for (Object child : configChildren) {
-				if (child instanceof IBean || child instanceof IBeansComponent) {
-					children.add((ISourceModelElement) child);
-				}
-			}
+			getConfigChildren(children, config);
 		}
 		return children.toArray();
 	}
@@ -305,6 +299,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			return otherParent.equals(parent) && otherConfig.equals(config);
 		}
 
+		@Override
 		public boolean belongsTo(Object family) {
 			return MODEL_CONTENT_FAMILY == family;
 		}

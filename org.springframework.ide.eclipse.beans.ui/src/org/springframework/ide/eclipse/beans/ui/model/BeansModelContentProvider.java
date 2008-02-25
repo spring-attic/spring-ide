@@ -54,7 +54,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 	public static final DefaultNamespaceContentProvider DEFAULT_NAMESPACE_CONTENT_PROVIDER = 
 		new DefaultNamespaceContentProvider();
 
-	private boolean refresh;
+	private final boolean refresh;
 
 	private StructuredViewer viewer;
 
@@ -204,14 +204,23 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 	protected Object[] getConfigSetChildren(IBeansConfigSet configSet) {
 		Set<ISourceModelElement> children = new LinkedHashSet<ISourceModelElement>();
 		for (IBeansConfig config : configSet.getConfigs()) {
-			Object[] configChildren = getChildren(config);
-			for (Object child : configChildren) {
-				if (child instanceof IBean || child instanceof IBeansComponent) {
-					children.add((ISourceModelElement) child);
+			getConfigChildren(children, config);
+		}
+		return children.toArray();
+	}
+
+	protected void getConfigChildren(Set<ISourceModelElement> children, IBeansConfig config) {
+		Object[] configChildren = getChildren(config);
+		for (Object child : configChildren) {
+			if (child instanceof IBean || child instanceof IBeansComponent) {
+				children.add((ISourceModelElement) child);
+			}
+			else if (child instanceof IBeansImport) {
+				for (IBeansConfig importedConfig : ((IBeansImport) child).getImportedBeansConfigs()) {
+					getConfigChildren(children, importedConfig);
 				}
 			}
 		}
-		return children.toArray();
 	}
 
 	protected Object[] getJavaTypeChildren(IType type) {
