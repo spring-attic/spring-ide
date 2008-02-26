@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -24,27 +27,36 @@ import org.eclipse.core.runtime.CoreException;
 public final class MarkerUtils {
 
 	public static final String ORIGINATING_RESOURCE_KEY = "originatingResource";
-	
+
 	public static final String ELEMENT_ID_KEY = "elementId";
 
-	public static int getHighestSeverityFromMarkersInRange(IResource resource,
-			int startLine, int endLine) {
+	public static int getHighestSeverityFromMarkersInRange(IResource resource, int startLine,
+			int endLine) {
 		int severity = -1;
 		if (resource != null) {
+			for (IMarker marker : getAllMarkersInRange(resource, startLine, endLine)) {
+				int sev = marker.getAttribute(IMarker.SEVERITY, -1);
+				if (sev == IMarker.SEVERITY_WARNING) {
+					severity = sev;
+				}
+				else if (sev == IMarker.SEVERITY_ERROR) {
+					severity = sev;
+					break;
+				}
+			}
+		}
+		return severity;
+	}
+
+	public static Set<IMarker> getAllMarkersInRange(IResource resource, int startLine, int endLine) {
+		Set<IMarker> foundMarkers = new HashSet<IMarker>();
+		if (resource != null) {
 			try {
-				IMarker[] markers = resource.findMarkers(SpringCore.MARKER_ID,
-						true, IResource.DEPTH_INFINITE);
+				IMarker[] markers = resource.findMarkers(SpringCore.MARKER_ID, true,
+						IResource.DEPTH_INFINITE);
 				for (IMarker marker : markers) {
-					if (startLine == -1
-							|| isMarkerInRange(marker, startLine, endLine)) {
-						int sev = marker.getAttribute(IMarker.SEVERITY, -1);
-						if (sev == IMarker.SEVERITY_WARNING) {
-							severity = sev;
-						}
-						else if (sev == IMarker.SEVERITY_ERROR) {
-							severity = sev;
-							break;
-						}
+					if (startLine == -1 || isMarkerInRange(marker, startLine, endLine)) {
+						foundMarkers.add(marker);
 					}
 				}
 			}
@@ -52,13 +64,12 @@ public final class MarkerUtils {
 				// ignore
 			}
 		}
-		return severity;
+		return foundMarkers;
 	}
 
-	public static boolean isMarkerInRange(IMarker marker, int startLine,
-			int endLine) throws CoreException {
-		if (startLine >= 0 && endLine >= startLine
-				&& marker.isSubtypeOf(IMarker.TEXT)) {
+	public static boolean isMarkerInRange(IMarker marker, int startLine, int endLine)
+			throws CoreException {
+		if (startLine >= 0 && endLine >= startLine && marker.isSubtypeOf(IMarker.TEXT)) {
 			int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
 			return (line >= startLine && line <= endLine);
 		}
@@ -77,10 +88,9 @@ public final class MarkerUtils {
 			try {
 				// Look for markers that have been created elsewhere in the
 				// workspace but originate from the given resource
-				String originatingResourceValue = resource.getFullPath()
-						.toString();
-				IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot()
-						.findMarkers(id, true, IResource.DEPTH_INFINITE);
+				String originatingResourceValue = resource.getFullPath().toString();
+				IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(id, true,
+						IResource.DEPTH_INFINITE);
 				for (IMarker marker : markers) {
 					if (originatingResourceValue.equals(marker
 							.getAttribute(ORIGINATING_RESOURCE_KEY))) {

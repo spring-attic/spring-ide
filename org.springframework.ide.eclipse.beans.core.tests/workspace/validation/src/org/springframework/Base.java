@@ -27,4 +27,16 @@ public class Base implements FooInterface {
 		
 	}
 	
+	private static Base createInstance() {
+		return new Base();
+	}
+	
+	private void init() {
+		
+	}
+	
+	private void initWithParameters(String test) {
+		
+	}
+	
 }

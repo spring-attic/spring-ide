@@ -22,9 +22,17 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationProblemM
  * @since 2.0.3
  */
 public class BeanPropertyRuleTest extends BeansCoreTestCase {
-
+	
+	private IResource resource;
+	
+	@Override
+	protected void setUp() throws Exception {
+		resource = null;
+		Thread.sleep(5000);
+	}
+	
 	public void testInvalidPropertyWithAbstractBean() throws Exception {
-		IResource resource = createPredefinedProjectAndGetResource("validation", "src/ide-798.xml");
+		resource = createPredefinedProjectAndGetResource("validation", "src/ide-798.xml");
 		IMarker[] markers = resource.findMarkers(BeansCorePlugin.PLUGIN_ID
 				+ ".problemmarker", false, IResource.DEPTH_ZERO);
 
@@ -39,7 +47,7 @@ public class BeanPropertyRuleTest extends BeansCoreTestCase {
 	}
 
 	public void testInvalidPropertyWithBean() throws Exception {
-		IResource resource = createPredefinedProjectAndGetResource("validation", "src/ide-798.xml");
+		resource = createPredefinedProjectAndGetResource("validation", "src/ide-798.xml");
 		IMarker[] markers = resource.findMarkers(BeansCorePlugin.PLUGIN_ID
 				+ ".problemmarker", false, IResource.DEPTH_ZERO);
 
@@ -53,10 +61,10 @@ public class BeanPropertyRuleTest extends BeansCoreTestCase {
 	}
 
 	public void testIntertypeDeclaredProperty() throws Exception {
-		IResource resource = createPredefinedProjectAndGetResource("aspectj", "src/ide-743.xml");
+		resource = createPredefinedProjectAndGetResource("aspectj", "src/ide-743.xml");
 		IMarker[] markers = resource.findMarkers(BeansCorePlugin.PLUGIN_ID
 				+ ".problemmarker", false, IResource.DEPTH_ZERO);
 		assertTrue(markers.length == 0);
 	}
-
+	
 }

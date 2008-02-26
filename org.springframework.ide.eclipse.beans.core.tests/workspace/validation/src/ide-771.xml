@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<bean id="correct" class="org.springframework.Base"
+		factory-method="createInstance" init-method="init" destroy-method="" />
+	
+	<bean id="incorrect" class="org.springframework.Base"
+		factory-method="notExisting" init-method="notExisting" destroy-method="notExisting" />
+
+	<bean id="incorrectWithParameters" class="org.springframework.Base"
+		init-method="initWithParameters" destroy-method="initWithParameters" />
+		  
+</beans>

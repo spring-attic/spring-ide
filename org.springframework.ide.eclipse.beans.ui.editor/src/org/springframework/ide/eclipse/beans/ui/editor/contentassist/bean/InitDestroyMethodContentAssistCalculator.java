@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NodeClassMethodContentAssistCalculator;
 import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
 import org.springframework.ide.eclipse.core.java.IMethodFilter;
-import org.springframework.ide.eclipse.core.java.OrMethodFilter;
 import org.w3c.dom.Node;
 
 /**
@@ -28,26 +27,17 @@ import org.w3c.dom.Node;
 public class InitDestroyMethodContentAssistCalculator extends
 		NodeClassMethodContentAssistCalculator {
 
-	private static IMethodFilter FILTER;
+	private static IMethodFilter FILTER = new FlagsMethodFilter(FlagsMethodFilter.NOT_CONSTRUCTOR
+			| FlagsMethodFilter.NOT_INTERFACE, 0);
 
-	static {
-		OrMethodFilter filter = new OrMethodFilter();
-		filter.addMethodFilter(new FlagsMethodFilter(FlagsMethodFilter.PUBLIC
-				| FlagsMethodFilter.NOT_CONSTRUCTOR
-				| FlagsMethodFilter.NOT_INTERFACE, 0));
-		filter.addMethodFilter(new FlagsMethodFilter(
-				FlagsMethodFilter.PROTECTED | FlagsMethodFilter.NOT_CONSTRUCTOR
-						| FlagsMethodFilter.NOT_INTERFACE, 0));
-		FILTER = filter;
-	}
-
+	
 	public InitDestroyMethodContentAssistCalculator() {
 		super(FILTER);
 	}
 
 	@Override
-	protected Node getClassNode(ContentAssistRequest request,
-			String attributeName) {
+	protected Node getClassNode(ContentAssistRequest request, String attributeName) {
 		return request.getNode();
 	}
+
 }
