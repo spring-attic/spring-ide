@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassConten
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.PropertyBeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
@@ -230,11 +231,13 @@ public class BeansContentAssistProcessor extends
 		registerContentAssistCalculator("arg-type", "match", clazz);
 		registerContentAssistCalculator("value", "type", clazz);
 
+		PropertyBeanReferenceContentAssistCalculator propertyBean = new PropertyBeanReferenceContentAssistCalculator();
+		registerContentAssistCalculator("property", "ref", propertyBean);
+
 		BeanReferenceContentAssistCalculator globalBean = new BeanReferenceContentAssistCalculator();
 		registerContentAssistCalculator("bean", "parent", globalBean);
 		registerContentAssistCalculator("bean", "depends-on", globalBean);
 		registerContentAssistCalculator("bean", "factory-bean", globalBean);
-		registerContentAssistCalculator("property", "ref", globalBean);
 		registerContentAssistCalculator("ref", "bean", globalBean);
 		registerContentAssistCalculator("idref", "bean", globalBean);
 		registerContentAssistCalculator("constructor-arg", "ref", globalBean);

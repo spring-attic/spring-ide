@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,13 +30,18 @@ public class BeansCompletionUtils {
 	
 	public static void addBeanReferenceProposals(ContentAssistRequest request,
 			String prefix, Document document, boolean showExternal) {
+		addBeanReferenceProposals(request, prefix, document, showExternal, new ArrayList<String>());
+	}
+	
+	public static void addBeanReferenceProposals(ContentAssistRequest request,
+			String prefix, Document document, boolean showExternal, List<String> requiredTypes) {
 		if (prefix == null) {
 			prefix = "";
 		}
 		IFile file = BeansEditorUtils.getFile(request);
 		if (document != null) {
 			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
-					request);
+					request, requiredTypes);
 			Map<String, Node> beanNodes = BeansEditorUtils
 					.getReferenceableNodes(document);
 			for (Map.Entry<String, Node> node : beanNodes.entrySet()) {

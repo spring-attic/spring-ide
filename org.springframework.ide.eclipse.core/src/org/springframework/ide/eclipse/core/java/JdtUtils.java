@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,8 +63,7 @@ public class JdtUtils {
 
 	private static final String FILE_SCHEME = "file";
 
-	static class DefaultProjectClassLoaderSupport implements
-			IProjectClassLoaderSupport {
+	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
 
 		private ClassLoader classLoader;
 
@@ -84,8 +83,7 @@ public class JdtUtils {
 			Thread.currentThread().setContextClassLoader(weavingClassLoader);
 		}
 
-		public void executeCallback(IProjectClassLoaderAwareCallback callback)
-				throws Throwable {
+		public void executeCallback(IProjectClassLoaderAwareCallback callback) throws Throwable {
 			try {
 				activateWeavingClassLoader();
 				callback.doWithActiveProjectClassLoader();
@@ -115,8 +113,7 @@ public class JdtUtils {
 
 	private static final String CLASSPATH_FILENAME = ".classpath";
 
-	private static final String DEBUG_OPTION = SpringCore.PLUGIN_ID
-			+ "/java/classloader/debug";
+	private static final String DEBUG_OPTION = SpringCore.PLUGIN_ID + "/java/classloader/debug";
 
 	private static boolean DEBUG_CLASSLOADER = SpringCore.isDebug(DEBUG_OPTION);
 
@@ -191,12 +188,11 @@ public class JdtUtils {
 		}
 	}
 
-	private static void covertPathToUrl(IProject project, Set<URL> paths,
-			IPath path) throws MalformedURLException {
+	private static void covertPathToUrl(IProject project, Set<URL> paths, IPath path)
+			throws MalformedURLException {
 		if (path != null && project != null) {
 
-			URI uri = project.findMember(path.removeFirstSegments(1))
-					.getRawLocationURI();
+			URI uri = project.findMember(path.removeFirstSegments(1)).getRawLocationURI();
 
 			if (uri != null) {
 				String scheme = uri.getScheme();
@@ -204,16 +200,15 @@ public class JdtUtils {
 					addUri(paths, uri);
 				}
 				else {
-					IPathVariableManager variableManager = ResourcesPlugin
-							.getWorkspace().getPathVariableManager();
+					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace()
+							.getPathVariableManager();
 					addUri(paths, variableManager.resolveURI(uri));
 				}
 			}
 		}
 	}
 
-	private static void addUri(Set<URL> paths, URI uri)
-			throws MalformedURLException {
+	private static void addUri(Set<URL> paths, URI uri) throws MalformedURLException {
 		File file = new File(uri);
 		if (file.exists()) {
 			if (file.isDirectory()) {
@@ -228,21 +223,18 @@ public class JdtUtils {
 	/**
 	 * Creates specified Java project.
 	 */
-	public static IJavaProject createJavaProject(String projectName,
-			IProgressMonitor monitor) throws CoreException {
-		IProject project = SpringCoreUtils.createProject(projectName, null,
-				monitor);
+	public static IJavaProject createJavaProject(String projectName, IProgressMonitor monitor)
+			throws CoreException {
+		IProject project = SpringCoreUtils.createProject(projectName, null, monitor);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
 		if (!project.hasNature(JavaCore.NATURE_ID)) {
-			SpringCoreUtils.addProjectNature(project, JavaCore.NATURE_ID,
-					monitor);
+			SpringCoreUtils.addProjectNature(project, JavaCore.NATURE_ID, monitor);
 		}
 		IJavaProject jproject = JavaCore.create(project);
 		// append JRE entry
-		jproject.setRawClasspath(
-				new IClasspathEntry[] { getJreVariableEntry() }, monitor);
+		jproject.setRawClasspath(new IClasspathEntry[] { getJreVariableEntry() }, monitor);
 		jproject.setOutputLocation(project.getFullPath(), monitor);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
@@ -276,18 +268,15 @@ public class JdtUtils {
 				}
 			}
 			catch (CoreException e) {
-				SpringCore
-						.log("Error getting Java type '" + className + "'", e);
+				SpringCore.log("Error getting Java type '" + className + "'", e);
 			}
 		}
 		return null;
 	}
 
-	public static List<IJavaProject> getAllDependingJavaProjects(
-			IJavaProject project) {
+	public static List<IJavaProject> getAllDependingJavaProjects(IJavaProject project) {
 		List<IJavaProject> javaProjects = new ArrayList<IJavaProject>();
-		IJavaModel model = JavaCore.create(ResourcesPlugin.getWorkspace()
-				.getRoot());
+		IJavaModel model = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		if (model != null) {
 			try {
 				String[] names = project.getRequiredProjectNames();
@@ -319,17 +308,15 @@ public class JdtUtils {
 				String bundleClassPath = (String) bundle.getHeaders().get(
 						org.osgi.framework.Constants.BUNDLE_CLASSPATH);
 				if (bundleClassPath != null) {
-					String[] classPathEntries = StringUtils
-							.delimitedListToStringArray(bundleClassPath, ",");
+					String[] classPathEntries = StringUtils.delimitedListToStringArray(
+							bundleClassPath, ",");
 					for (String classPathEntry : classPathEntries) {
 						if (".".equals(classPathEntry.trim())) {
-							paths.add(FileLocator.toFileURL(bundle
-									.getEntry("/")));
+							paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
 						}
 						else {
-							paths.add(FileLocator
-									.toFileURL(new URL(bundle.getEntry("/"),
-											"/" + classPathEntry.trim())));
+							paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/"
+									+ classPathEntry.trim())));
 						}
 					}
 				}
@@ -370,15 +357,14 @@ public class JdtUtils {
 	 * @return {@link ClassLoader} instance constructed from the
 	 * <code>project</code>'s build path configuration
 	 */
-	public static ClassLoader getClassLoader(IProject project,
-			boolean useParentClassLoader) {
+	public static ClassLoader getClassLoader(IProject project, boolean useParentClassLoader) {
 		// prepare for tracing
 		long start = System.currentTimeMillis();
 		try {
 			Set<URL> paths = getClassPathUrls(project, useParentClassLoader);
 			if (useParentClassLoader) {
-				return new URLClassLoader(paths.toArray(new URL[paths.size()]),
-						Thread.currentThread().getContextClassLoader());
+				return new URLClassLoader(paths.toArray(new URL[paths.size()]), Thread
+						.currentThread().getContextClassLoader());
 			}
 			else {
 				return new URLClassLoader(paths.toArray(new URL[paths.size()]));
@@ -386,9 +372,8 @@ public class JdtUtils {
 		}
 		finally {
 			if (DEBUG_CLASSLOADER) {
-				System.out.println("getClassLoader for '"
-						+ project.getProject().getName() + "' took "
-						+ (System.currentTimeMillis() - start) + "ms");
+				System.out.println("getClassLoader for '" + project.getProject().getName()
+						+ "' took " + (System.currentTimeMillis() - start) + "ms");
 			}
 		}
 	}
@@ -405,8 +390,7 @@ public class JdtUtils {
 	 * @return a set of {@link URL}s that can be used to construct a
 	 * {@link URLClassLoader}
 	 */
-	private static Set<URL> getClassPathUrls(IProject project,
-			boolean useParentClassLoader) {
+	private static Set<URL> getClassPathUrls(IProject project, boolean useParentClassLoader) {
 
 		// needs to be linked to preserve ordering
 		Set<URL> paths = new LinkedHashSet<URL>();
@@ -439,8 +423,8 @@ public class JdtUtils {
 				}
 			}
 			catch (CoreException e) {
-				SpringCore.log("Error getting Java project for project '"
-						+ project.getName() + "'", e);
+				SpringCore.log(
+						"Error getting Java project for project '" + project.getName() + "'", e);
 			}
 		}
 		return null;
@@ -482,8 +466,7 @@ public class JdtUtils {
 
 				// Then look for the type in the referenced Java projects
 				for (IProject refProject : project.getReferencedProjects()) {
-					IJavaProject refJavaProject = JdtUtils
-							.getJavaProject(refProject);
+					IJavaProject refJavaProject = JdtUtils.getJavaProject(refProject);
 					if (refJavaProject != null) {
 						type = refJavaProject.findType(className);
 						if (type != null) {
@@ -496,8 +479,7 @@ public class JdtUtils {
 				return getAjdtType(project, className);
 			}
 			catch (CoreException e) {
-				SpringCore
-						.log("Error getting Java type '" + className + "'", e);
+				SpringCore.log("Error getting Java type '" + className + "'", e);
 			}
 		}
 
@@ -516,14 +498,12 @@ public class JdtUtils {
 				String targetsource;
 				if (method.getDeclaringType() != null
 						&& method.getDeclaringType().getCompilationUnit() != null) {
-					targetsource = method.getDeclaringType()
-							.getCompilationUnit().getSource();
-					String sourceuptomethod = targetsource.substring(0, method
-							.getNameRange().getOffset());
+					targetsource = method.getDeclaringType().getCompilationUnit().getSource();
+					String sourceuptomethod = targetsource.substring(0, method.getNameRange()
+							.getOffset());
 
 					char[] chars = new char[sourceuptomethod.length()];
-					sourceuptomethod.getChars(0, sourceuptomethod.length(),
-							chars, 0);
+					sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
 					for (char element0 : chars) {
 						if (element0 == '\n') {
 							lines++;
@@ -542,12 +522,11 @@ public class JdtUtils {
 				int lines = 0;
 				String targetsource;
 				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type
-						.getNameRange().getOffset());
+				String sourceuptomethod = targetsource
+						.substring(0, type.getNameRange().getOffset());
 
 				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
-						0);
+				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
 				for (char element0 : chars) {
 					if (element0 == '\n') {
 						lines++;
@@ -564,12 +543,11 @@ public class JdtUtils {
 				int lines = 0;
 				String targetsource;
 				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type
-						.getNameRange().getOffset());
+				String sourceuptomethod = targetsource
+						.substring(0, type.getNameRange().getOffset());
 
 				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
-						0);
+				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
 				for (char element0 : chars) {
 					if (element0 == '\n') {
 						lines++;
@@ -583,14 +561,12 @@ public class JdtUtils {
 		return new Integer(-1);
 	}
 
-	public static IMethod getMethod(IType type, String methodName,
-			Class[] parameterTypes) {
+	public static IMethod getMethod(IType type, String methodName, Class[] parameterTypes) {
 		String[] parameterTypesAsString = getParameterTypesAsStringArray(parameterTypes);
 		return getMethod(type, methodName, parameterTypesAsString);
 	}
 
-	public static IMethod getMethod(IType type, String methodName,
-			String[] parameterTypes) {
+	public static IMethod getMethod(IType type, String methodName, String[] parameterTypes) {
 		int index = methodName.indexOf('(');
 		if (index >= 0) {
 			methodName = methodName.substring(0, index);
@@ -607,16 +583,15 @@ public class JdtUtils {
 				}
 			}
 
-			return Introspector.findMethod(type, methodName,
-					parameterTypes.length, Public.YES, Static.DONT_CARE);
+			return Introspector.findMethod(type, methodName, parameterTypes.length, Public.YES,
+					Static.DONT_CARE);
 		}
 		catch (JavaModelException e) {
 		}
 		return null;
 	}
 
-	private static String[] getParameterTypesAsStringArray(
-			Class[] parameterTypes) {
+	private static String[] getParameterTypesAsStringArray(Class[] parameterTypes) {
 		String[] parameterTypesAsString = new String[parameterTypes.length];
 		for (int i = 0; i < parameterTypes.length; i++) {
 			parameterTypesAsString[i] = parameterTypes[i].getName();
@@ -627,14 +602,13 @@ public class JdtUtils {
 	private static String[] getParameterTypesAsStringArray(IMethod method) {
 		String[] parameterTypesAsString = new String[method.getParameterTypes().length];
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			parameterTypesAsString[i] = resolveClassName(method
-					.getParameterTypes()[i], method.getDeclaringType());
+			parameterTypesAsString[i] = resolveClassName(method.getParameterTypes()[i], method
+					.getDeclaringType());
 		}
 		return parameterTypesAsString;
 	}
 
-	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(
-			IProject je) {
+	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je) {
 		return new DefaultProjectClassLoaderSupport(je);
 	}
 
@@ -671,8 +645,8 @@ public class JdtUtils {
 	 * .classpath file of a {@link IJavaProject}.
 	 */
 	public static boolean isClassPathFile(IResource resource) {
-		String classPathFileName = resource.getProject().getFullPath().append(
-				CLASSPATH_FILENAME).toString();
+		String classPathFileName = resource.getProject().getFullPath().append(CLASSPATH_FILENAME)
+				.toString();
 		return resource.getFullPath().toString().equals(classPathFileName);
 	}
 
@@ -715,15 +689,13 @@ public class JdtUtils {
 		return className;
 	}
 
-	public static IType getJavaTypeFromSignatureClassName(String className,
-			IType contextType) {
+	public static IType getJavaTypeFromSignatureClassName(String className, IType contextType) {
 		if (contextType == null || className == null) {
 			return null;
 		}
 		try {
-			return JdtUtils.getJavaType(contextType.getJavaProject()
-					.getProject(), JdtUtils.resolveClassName(className,
-					contextType));
+			return JdtUtils.getJavaType(contextType.getJavaProject().getProject(), JdtUtils
+					.resolveClassName(className, contextType));
 		}
 		catch (IllegalArgumentException e) {
 			// do Nothing
@@ -732,45 +704,38 @@ public class JdtUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static final List<IType> getJavaTypesForMethodParameterTypes(
-			IMethod method, IType contextType) {
+	public static final List<IType> getJavaTypesForMethodParameterTypes(IMethod method,
+			IType contextType) {
 		if (method == null || method.getParameterTypes() == null
 				|| method.getParameterTypes().length == 0) {
 			return Collections.EMPTY_LIST;
 		}
-		List<IType> parameterTypes = new ArrayList<IType>(method
-				.getParameterTypes().length);
+		List<IType> parameterTypes = new ArrayList<IType>(method.getParameterTypes().length);
 		String[] parameterTypeNames = method.getParameterTypes();
 		for (String parameterTypeName : parameterTypeNames) {
-			parameterTypes.add(JdtUtils.getJavaTypeFromSignatureClassName(
-					parameterTypeName, contextType));
+			parameterTypes.add(JdtUtils.getJavaTypeFromSignatureClassName(parameterTypeName,
+					contextType));
 		}
 		return parameterTypes;
 	}
 
-	public static final IType getJavaTypeForMethodReturnType(IMethod method,
-			IType contextType) {
+	public static final IType getJavaTypeForMethodReturnType(IMethod method, IType contextType) {
 		try {
-			return JdtUtils.getJavaTypeFromSignatureClassName(method
-					.getReturnType(), contextType);
+			return JdtUtils.getJavaTypeFromSignatureClassName(method.getReturnType(), contextType);
 		}
 		catch (JavaModelException e) {
 		}
 		return null;
 	}
-	
+
 	public static String[] getParameterTypesString(IMethod method) {
 		try {
-			String[] parameterQualifiedTypes = Signature
-					.getParameterTypes(method.getSignature());
-			int length = parameterQualifiedTypes == null ? 0
-					: parameterQualifiedTypes.length;
+			String[] parameterQualifiedTypes = Signature.getParameterTypes(method.getSignature());
+			int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
 			String[] parameterPackages = new String[length];
 			for (int i = 0; i < length; i++) {
-				parameterQualifiedTypes[i] = parameterQualifiedTypes[i]
-						.replace('/', '.');
-				parameterPackages[i] = Signature
-						.getSignatureSimpleName(parameterQualifiedTypes[i]);
+				parameterQualifiedTypes[i] = parameterQualifiedTypes[i].replace('/', '.');
+				parameterPackages[i] = Signature.getSignatureSimpleName(parameterQualifiedTypes[i]);
 			}
 			return parameterPackages;
 		}
@@ -783,12 +748,10 @@ public class JdtUtils {
 
 	public static String getReturnTypeString(IMethod method, boolean classTypesOnly) {
 		try {
-			String qualifiedReturnType = Signature.getReturnType(method
-					.getSignature());
+			String qualifiedReturnType = Signature.getReturnType(method.getSignature());
 			if (!classTypesOnly || qualifiedReturnType.startsWith("L")
 					|| qualifiedReturnType.startsWith("Q")) {
-				return Signature.getSignatureSimpleName(qualifiedReturnType
-						.replace('/', '.'));
+				return Signature.getSignatureSimpleName(qualifiedReturnType.replace('/', '.'));
 			}
 		}
 		catch (IllegalArgumentException e) {
@@ -797,7 +760,7 @@ public class JdtUtils {
 		}
 		return null;
 	}
-	
+
 	public static String getPropertyNameFromMethodName(IMethod method) {
 		// Special support Ajdt intertype declarations
 		String methodName = method.getElementName();
@@ -810,6 +773,40 @@ public class JdtUtils {
 			replaceText = java.beans.Introspector.decapitalize(replaceText);
 		}
 		return replaceText;
+	}
+
+	/**
+	 * Returns a flat list of all interfaces and super types for the given
+	 * {@link IType}.
+	 */
+	public static List<String> getFlatListOfClassAndInterfaceNames(IType parameterType, IType type) {
+		List<String> requiredTypes = new ArrayList<String>();
+		if (parameterType != null) {
+			do {
+				try {
+					requiredTypes.add(parameterType.getFullyQualifiedName());
+					String[] interfaceNames = parameterType.getSuperInterfaceNames();
+					for (String interfaceName : interfaceNames) {
+						if (interfaceName != null) {
+							if (type.isBinary()) {
+								requiredTypes.add(interfaceName);
+							}
+							String[][] resolvedNames = type.resolveType(interfaceName);
+							if (resolvedNames != null && resolvedNames.length > 0) {
+								String resolvedName = org.springframework.ide.eclipse.core.StringUtils
+										.concatenate(resolvedNames[0][0], resolvedNames[0][1], ".");
+								requiredTypes.add(resolvedName);
+							}
+						}
+					}
+					parameterType = Introspector.getSuperType(parameterType);
+				}
+				catch (JavaModelException e) {
+				}
+			} while (parameterType != null
+					&& !parameterType.getFullyQualifiedName().equals(Object.class.getName()));
+		}
+		return requiredTypes;
 	}
 
 }

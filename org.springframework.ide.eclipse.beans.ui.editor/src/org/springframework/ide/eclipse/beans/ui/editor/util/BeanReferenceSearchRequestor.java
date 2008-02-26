@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,13 +16,16 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.DelegatingLabelProvider;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -49,8 +52,7 @@ public class BeanReferenceSearchRequestor {
 		this(request, new ArrayList<String>());
 	}
 
-	public BeanReferenceSearchRequestor(ContentAssistRequest request,
-			List<String> requiredTypes) {
+	public BeanReferenceSearchRequestor(ContentAssistRequest request, List<String> requiredTypes) {
 		this.request = request;
 		this.beans = new HashSet<String>();
 		this.requiredTypes = requiredTypes;
@@ -58,12 +60,10 @@ public class BeanReferenceSearchRequestor {
 
 	public void acceptSearchMatch(IBean bean, IFile file, String prefix) {
 		if (bean.getElementName() != null
-				&& bean.getElementName().toLowerCase().startsWith(
-						prefix.toLowerCase())) {
+				&& bean.getElementName().toLowerCase().startsWith(prefix.toLowerCase())) {
 			String beanName = bean.getElementName();
 			String replaceText = beanName;
-			String fileName = bean.getElementResource()
-					.getProjectRelativePath().toString();
+			String fileName = bean.getElementResource().getProjectRelativePath().toString();
 			String key = beanName + fileName;
 			if (!beans.contains(key)) {
 				StringBuffer buf = new StringBuffer();
@@ -84,25 +84,30 @@ public class BeanReferenceSearchRequestor {
 				String displayText = buf.toString();
 
 				Image image = BeansUIPlugin.getLabelProvider().getImage(bean);
-
 				BeansJavaCompletionProposal proposal = null;
-				if (this.requiredTypes.contains(bean.getClassName())) {
-					proposal = new BeansJavaCompletionProposal(
-							replaceText,
-							request.getReplacementBeginPosition(),
-							request.getReplacementLength(),
-							replaceText.length(),
-							image,
-							displayText,
-							null,
-							BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE,
-							bean);
+
+				String className = BeansModelUtils.getBeanClass(bean, null);
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
+				List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type,
+						type);
+				boolean matchesType = false;
+				for (String cn : hierachyTypes) {
+					if (this.requiredTypes.contains(cn)) {
+						matchesType = true;
+						break;
+					}
+				}
+
+				if (matchesType) {
+					proposal = new BeansJavaCompletionProposal(replaceText, request
+							.getReplacementBeginPosition(), request.getReplacementLength(),
+							replaceText.length(), image, displayText, null,
+							BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE, bean);
 				}
 				else {
-					proposal = new BeansJavaCompletionProposal(replaceText,
-							request.getReplacementBeginPosition(), request
-									.getReplacementLength(), replaceText
-									.length(), image, displayText, null,
+					proposal = new BeansJavaCompletionProposal(replaceText, request
+							.getReplacementBeginPosition(), request.getReplacementLength(),
+							replaceText.length(), image, displayText, null,
 							BeanReferenceSearchRequestor.RELEVANCE, bean);
 				}
 
@@ -112,8 +117,7 @@ public class BeanReferenceSearchRequestor {
 		}
 	}
 
-	public void acceptSearchMatch(String beanId, Node beanNode, IFile file,
-			String prefix) {
+	public void acceptSearchMatch(String beanId, Node beanNode, IFile file, String prefix) {
 		NamedNodeMap attributes = beanNode.getAttributes();
 		if (beanId.toLowerCase().startsWith(prefix.toLowerCase())) {
 			if (beanNode.getParentNode() != null
@@ -126,15 +130,13 @@ public class BeanReferenceSearchRequestor {
 					StringBuffer buf = new StringBuffer();
 					buf.append(beanName);
 					if (attributes.getNamedItem("class") != null) {
-						String className = attributes.getNamedItem("class")
-								.getNodeValue();
+						String className = attributes.getNamedItem("class").getNodeValue();
 						buf.append(" [");
 						buf.append(Signature.getSimpleName(className));
 						buf.append("]");
 					}
 					if (attributes.getNamedItem("parent") != null) {
-						String parentName = attributes.getNamedItem("parent")
-								.getNodeValue();
+						String parentName = attributes.getNamedItem("parent").getNodeValue();
 						buf.append(" <");
 						buf.append(parentName);
 						buf.append(">");
@@ -142,26 +144,32 @@ public class BeanReferenceSearchRequestor {
 					buf.append(" - ");
 					buf.append(fileName);
 					String displayText = buf.toString();
-					Image image = new DelegatingLabelProvider()
-							.getImage(beanNode);
+					Image image = new DelegatingLabelProvider().getImage(beanNode);
 
 					BeansJavaCompletionProposal proposal = null;
 
-					String className = BeansEditorUtils
-							.getClassNameForBean(beanNode);
-					if (this.requiredTypes.contains(className)) {
-						proposal = new BeansJavaCompletionProposal(replaceText,
-								request.getReplacementBeginPosition(), request
-										.getReplacementLength(), replaceText
-										.length(), image, displayText, null,
+					String className = BeansEditorUtils.getClassNameForBean(beanNode);
+					IType type = JdtUtils.getJavaType(file.getProject(), className);
+					List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type,
+							type);
+					boolean matchesType = false;
+					for (String cn : hierachyTypes) {
+						if (this.requiredTypes.contains(cn)) {
+							matchesType = true;
+							break;
+						}
+					}
+
+					if (matchesType) {
+						proposal = new BeansJavaCompletionProposal(replaceText, request
+								.getReplacementBeginPosition(), request.getReplacementLength(),
+								replaceText.length(), image, displayText, null,
 								TYPE_MATCHING_RELEVANCE, beanNode);
 					}
 					else {
-						proposal = new BeansJavaCompletionProposal(replaceText,
-								request.getReplacementBeginPosition(), request
-										.getReplacementLength(), replaceText
-										.length(), image, displayText, null,
-								RELEVANCE, beanNode);
+						proposal = new BeansJavaCompletionProposal(replaceText, request
+								.getReplacementBeginPosition(), request.getReplacementLength(),
+								replaceText.length(), image, displayText, null, RELEVANCE, beanNode);
 					}
 
 					request.addProposal(proposal);
