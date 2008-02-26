@@ -53,18 +53,19 @@ import org.w3c.dom.Node;
  */
 @SuppressWarnings("restriction")
 public class BeansJavaCompletionUtils {
-	
+
 	public static final int FLAG_INTERFACE = 1 << 2;
+
 	public static final int FLAG_CLASS = 1 << 3;
+
 	public static final int FLAG_PACKAGE = 1 << 4;
-	
+
 	private static final String CLASS_NAME = "_xxx";
 
 	private static final String CLASS_SOURCE_END = "\n" + "    }\n" + "}";
 
-	private static final String CLASS_SOURCE_START = "public class "
-			+ CLASS_NAME + " {\n" + "    public void main(String[] args) {\n"
-			+ "        ";
+	private static final String CLASS_SOURCE_START = "public class " + CLASS_NAME + " {\n"
+			+ "    public void main(String[] args) {\n" + "        ";
 
 	private static CompletionProposalComparator comparator = new CompletionProposalComparator();
 
@@ -74,8 +75,7 @@ public class BeansJavaCompletionUtils {
 	 * @param request the {@link ContentAssistRequest} to add the proposals
 	 * @param prefix the prefix
 	 */
-	public static void addClassValueProposals(ContentAssistRequest request,
-			String prefix) {
+	public static void addClassValueProposals(ContentAssistRequest request, String prefix) {
 		addClassValueProposals(request, prefix, FLAG_PACKAGE | FLAG_CLASS);
 	}
 
@@ -85,8 +85,7 @@ public class BeansJavaCompletionUtils {
 	 * @param request the {@link ContentAssistRequest} to add the proposals
 	 * @param prefix the prefix
 	 */
-	public static void addInterfaceValueProposals(ContentAssistRequest request,
-			String prefix) {
+	public static void addInterfaceValueProposals(ContentAssistRequest request, String prefix) {
 		addClassValueProposals(request, prefix, FLAG_PACKAGE | FLAG_INTERFACE);
 	}
 
@@ -96,8 +95,7 @@ public class BeansJavaCompletionUtils {
 	 * @param request the {@link ContentAssistRequest} to add the proposals
 	 * @param prefix the prefix
 	 */
-	public static void addPackageValueProposals(ContentAssistRequest request,
-			String prefix) {
+	public static void addPackageValueProposals(ContentAssistRequest request, String prefix) {
 		addClassValueProposals(request, prefix, FLAG_PACKAGE);
 	}
 
@@ -108,8 +106,7 @@ public class BeansJavaCompletionUtils {
 	 * @param prefix the prefix
 	 * @param interfaceRequired true if only interfaces are requested
 	 */
-	public static void addClassValueProposals(ContentAssistRequest request,
-			String prefix, int flags) {
+	public static void addClassValueProposals(ContentAssistRequest request, String prefix, int flags) {
 
 		if (prefix == null || prefix.length() == 0) {
 			return;
@@ -117,6 +114,9 @@ public class BeansJavaCompletionUtils {
 
 		try {
 			ICompilationUnit unit = createSourceCompilationUnit(request, prefix);
+			// Special handling of inner classes
+			boolean innerClass = prefix.indexOf('$') > prefix.lastIndexOf('.');
+			prefix = prefix.replace('$', '.');
 
 			String sourceStart = CLASS_SOURCE_START + prefix;
 			String packageName = null;
@@ -130,17 +130,13 @@ public class BeansJavaCompletionUtils {
 
 			BeansJavaCompletionProposalCollector collector = new BeansJavaCompletionProposalCollector(
 					unit, flags);
-			unit.codeComplete(sourceStart.length(), collector,
-					DefaultWorkingCopyOwner.PRIMARY);
+			unit.codeComplete(sourceStart.length(), collector, DefaultWorkingCopyOwner.PRIMARY);
 
-			IJavaCompletionProposal[] props = collector
-					.getJavaCompletionProposals();
+			IJavaCompletionProposal[] props = collector.getJavaCompletionProposals();
 
 			ICompletionProposal[] proposals = order(props);
-			boolean innerClass = prefix.indexOf('$') > prefix.lastIndexOf('.');
 			for (ICompletionProposal comProposal : proposals) {
-				processJavaCompletionProposal(request, comProposal,
-						packageName, innerClass);
+				processJavaCompletionProposal(request, comProposal, packageName, innerClass);
 			}
 		}
 		catch (Exception e) {
@@ -155,46 +151,38 @@ public class BeansJavaCompletionUtils {
 	 * @param prefix the prefix
 	 * @param typeName the super class of the request proposals
 	 */
-	public static void addTypeHierachyAttributeValueProposals(
-			ContentAssistRequest request, final String prefix, String typeName) {
+	public static void addTypeHierachyAttributeValueProposals(ContentAssistRequest request,
+			final String prefix, String typeName) {
 
 		if (prefix == null || prefix.length() == 0) {
 			return;
 		}
 
-		IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request)
-				.getProject(), typeName);
+		IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request).getProject(), typeName);
 		try {
-			if (BeansEditorUtils.getFile(request).getProject().hasNature(
-					JavaCore.NATURE_ID)) {
+			if (BeansEditorUtils.getFile(request).getProject().hasNature(JavaCore.NATURE_ID)) {
 
-				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore
-						.create(BeansEditorUtils.getFile(request)
-								.getProject()), new NullProgressMonitor());
+				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(BeansEditorUtils
+						.getFile(request).getProject()), new NullProgressMonitor());
 				IType[] types = hierachy.getAllSubtypes(type);
 				Map<String, IType> sortMap = new HashMap<String, IType>();
 				for (IType foundType : types) {
 					if ((foundType.getFullyQualifiedName().startsWith(prefix) || foundType
 							.getElementName().startsWith(prefix))
-							&& !sortMap.containsKey(foundType
-									.getFullyQualifiedName())
+							&& !sortMap.containsKey(foundType.getFullyQualifiedName())
 							&& !Flags.isAbstract(foundType.getFlags())
 							&& Flags.isPublic(foundType.getFlags())) {
 						BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 								foundType.getFullyQualifiedName(), request
 										.getReplacementBeginPosition(), request
-										.getReplacementLength(), foundType
-										.getFullyQualifiedName().length(),
-								JavaPluginImages
-										.get(JavaPluginImages.IMG_OBJS_CLASS),
-								foundType.getElementName()
-										+ " - "
-										+ foundType.getPackageFragment()
-												.getElementName(), null, 10,
-								foundType);
+										.getReplacementLength(), foundType.getFullyQualifiedName()
+										.length(), JavaPluginImages
+										.get(JavaPluginImages.IMG_OBJS_CLASS), foundType
+										.getElementName()
+										+ " - " + foundType.getPackageFragment().getElementName(),
+								null, 10, foundType);
 						request.addProposal(proposal);
-						sortMap.put(foundType.getFullyQualifiedName(),
-								foundType);
+						sortMap.put(foundType.getFullyQualifiedName(), foundType);
 					}
 				}
 			}
@@ -206,24 +194,20 @@ public class BeansJavaCompletionUtils {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static ICompilationUnit createSourceCompilationUnit(
-			ContentAssistRequest request, String prefix)
-			throws JavaModelException {
+	private static ICompilationUnit createSourceCompilationUnit(ContentAssistRequest request,
+			String prefix) throws JavaModelException {
 		IFile file = BeansEditorUtils.getFile(request);
 		IJavaProject project = JavaCore.create(file.getProject());
 		IPackageFragment root = getPackageFragment(project, prefix);
-		ICompilationUnit unit = root.getCompilationUnit("_xxx.java")
-				.getWorkingCopy(
-						CompilationUnitHelper.getInstance()
-								.getWorkingCopyOwner(),
-						CompilationUnitHelper.getInstance()
-								.getProblemRequestor(),
-						BeansEditorUtils.getProgressMonitor());
+		ICompilationUnit unit = root.getCompilationUnit("_xxx.java").getWorkingCopy(
+				CompilationUnitHelper.getInstance().getWorkingCopyOwner(),
+				CompilationUnitHelper.getInstance().getProblemRequestor(),
+				BeansEditorUtils.getProgressMonitor());
 		return unit;
 	}
 
-	private static IPackageFragment getPackageFragment(IJavaProject project,
-			String prefix) throws JavaModelException {
+	private static IPackageFragment getPackageFragment(IJavaProject project, String prefix)
+			throws JavaModelException {
 		int dot = prefix.lastIndexOf('.');
 		if (dot > -1) {
 			String packageName = prefix.substring(0, dot);
@@ -245,42 +229,31 @@ public class BeansJavaCompletionUtils {
 
 	public static List<String> getPropertyTypes(Node node, IProject project) {
 		List<String> requiredTypes = new ArrayList<String>();
-		String className = BeansEditorUtils.getClassNameForBean(node
-				.getParentNode());
+		String className = BeansEditorUtils.getClassNameForBean(node.getParentNode());
 		String propertyName = BeansEditorUtils.getAttribute(node, "name");
 		if (className != null && propertyName != null && project != null) {
 			IType type = JdtUtils.getJavaType(project, className);
 			if (type != null) {
 				try {
-					IMethod method = Introspector.getWritableProperty(type,
-							propertyName);
+					IMethod method = Introspector.getWritableProperty(type, propertyName);
 					if (method != null) {
 						String signature = method.getParameterTypes()[0];
-						String packageName = Signature
-								.getSignatureQualifier(signature);
-						String fullName = (packageName.trim().equals("") ? ""
-								: packageName + ".")
+						String packageName = Signature.getSignatureQualifier(signature);
+						String fullName = (packageName.trim().equals("") ? "" : packageName + ".")
 								+ Signature.getSignatureSimpleName(signature);
-						String[][] resolvedTypeNames = type
-								.resolveType(fullName);
+						String[][] resolvedTypeNames = type.resolveType(fullName);
 
-						if (resolvedTypeNames != null
-								&& resolvedTypeNames.length > 0
+						if (resolvedTypeNames != null && resolvedTypeNames.length > 0
 								&& resolvedTypeNames[0].length > 0) {
 							IType propertyType = JdtUtils.getJavaType(project,
-									resolvedTypeNames[0][0] + "."
-											+ resolvedTypeNames[0][1]);
-							ITypeHierarchy hierachy = propertyType
-									.newTypeHierarchy(JavaCore.create(project),
-											new NullProgressMonitor());
+									resolvedTypeNames[0][0] + "." + resolvedTypeNames[0][1]);
+							ITypeHierarchy hierachy = propertyType.newTypeHierarchy(JavaCore
+									.create(project), new NullProgressMonitor());
 
-							requiredTypes.add(propertyType
-									.getFullyQualifiedName());
-							IType[] subTypes = hierachy
-									.getAllSubtypes(propertyType);
+							requiredTypes.add(propertyType.getFullyQualifiedName());
+							IType[] subTypes = hierachy.getAllSubtypes(propertyType);
 							for (IType subType : subTypes) {
-								requiredTypes.add(subType
-										.getFullyQualifiedName());
+								requiredTypes.add(subType.getFullyQualifiedName());
 							}
 						}
 					}
@@ -301,26 +274,21 @@ public class BeansJavaCompletionUtils {
 		return proposals;
 	}
 
-	private static void processJavaCompletionProposal(
-			ContentAssistRequest request, ICompletionProposal comProposal,
-			String packageName, boolean innerClass) {
+	private static void processJavaCompletionProposal(ContentAssistRequest request,
+			ICompletionProposal comProposal, String packageName, boolean innerClass) {
 		if (comProposal instanceof JavaCompletionProposal) {
 			JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-					prop.getReplacementString(), request
-							.getReplacementBeginPosition(), request
-							.getReplacementLength(), prop
-							.getReplacementString().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop.getRelevance(), prop
-							.getJavaElement());
+			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop
+					.getReplacementString(), request.getReplacementBeginPosition(), request
+					.getReplacementLength(), prop.getReplacementString().length(), prop.getImage(),
+					prop.getDisplayString(), null, prop.getRelevance(), prop.getJavaElement());
 
 			request.addProposal(proposal);
 		}
 		else if (comProposal instanceof LazyJavaTypeCompletionProposal) {
 			LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) comProposal;
 
-			if (prop.getQualifiedTypeName().equals(
-					packageName + "." + CLASS_NAME)
+			if (prop.getQualifiedTypeName().equals(packageName + "." + CLASS_NAME)
 					|| prop.getQualifiedTypeName().equals(CLASS_NAME)) {
 				return;
 			}
@@ -332,13 +300,15 @@ public class BeansJavaCompletionUtils {
 				}
 			}
 
+			String replacementString = prop.getQualifiedTypeName();
+			if (innerClass) {
+				replacementString = getClassName(((IType) prop.getJavaElement()));
+			}
+
 			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-					prop.getQualifiedTypeName(), request
-							.getReplacementBeginPosition(), request
-							.getReplacementLength(), prop
-							.getQualifiedTypeName().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop.getRelevance(), prop
-							.getJavaElement());
+					replacementString, request.getReplacementBeginPosition(), request
+							.getReplacementLength(), replacementString.length(), prop.getImage(),
+					prop.getDisplayString(), null, prop.getRelevance(), prop.getJavaElement());
 
 			request.addProposal(proposal);
 		}
@@ -368,4 +338,12 @@ public class BeansJavaCompletionUtils {
 		}
 	}
 
+	private static String getClassName(IType type) {
+		if (type.getDeclaringType() == null) {
+			return type.getFullyQualifiedName();
+		}
+		else {
+			return getClassName(type.getDeclaringType()) + "$" + type.getElementName();
+		}
+	}
 }

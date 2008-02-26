@@ -464,9 +464,8 @@ public class JdtUtils {
 			boolean innerClass = false;
 			// For inner classes replace '$' by '.'
 			int pos = className.lastIndexOf('$');
-			if (pos > 0 && pos < (className.length() - 1)) {
-				className = className.substring(0, pos) + '.'
-						+ className.substring(pos + 1);
+			if (pos > 0) {
+				className = className.replace('$', '.');
 				innerClass = true;
 			}
 			try {

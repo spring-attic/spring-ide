@@ -206,7 +206,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	}
 
 	public IBeansConfig getConfig(IFile configFile) {
-		System.out.println(getProjects());
 		return getConfig(configFile, true);
 	}
 
