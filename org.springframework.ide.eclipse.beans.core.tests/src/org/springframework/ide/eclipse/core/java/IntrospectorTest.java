@@ -111,10 +111,10 @@ public class IntrospectorTest extends BeansCoreTestCase {
 	public void testGetAllImplementedInterfaces() throws CoreException, IOException {
 		IProject project = createPredefinedProject("validation"); 		
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
-		Set<IType> interfaces = Introspector.getAllImplenentedInterfaces(foo);
+		Set<IType> interfaces = Introspector.getAllImplementedInterfaces(foo);
 		assertTrue(interfaces.toArray().length == 2);
 		IType base = JdtUtils.getJavaType(project, "org.springframework.Base");
-		interfaces = Introspector.getAllImplenentedInterfaces(base);
+		interfaces = Introspector.getAllImplementedInterfaces(base);
 		assertTrue(interfaces.toArray().length == 1);
 	}
 
@@ -127,7 +127,5 @@ public class IntrospectorTest extends BeansCoreTestCase {
 		methods = Introspector.getAllMethods(base);
 		assertTrue(methods.toArray().length == 4);
 	}
-	
-	
 	
 }

@@ -56,7 +56,7 @@ public class BeanIdContentAssistCalculator implements IContentAssistCalculator {
 			IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request)
 					.getProject(), className);
 			Set<IType> allInterfaces = Introspector
-					.getAllImplenentedInterfaces(type);
+					.getAllImplementedInterfaces(type);
 			for (IType interf : allInterfaces) {
 				createBeanIdProposals(request, matchString, interf
 						.getFullyQualifiedName());
