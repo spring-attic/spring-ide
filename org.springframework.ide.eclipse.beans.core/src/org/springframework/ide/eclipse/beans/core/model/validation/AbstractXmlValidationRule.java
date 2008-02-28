@@ -123,6 +123,9 @@ public abstract class AbstractXmlValidationRule implements
 	private abstract static class DomVisitor {
 
 		public void visit(Document dom) {
+			if (supportsNode(dom)) {
+				validateNode(dom);
+			}
 			visit(dom.getDocumentElement());
 		}
 
