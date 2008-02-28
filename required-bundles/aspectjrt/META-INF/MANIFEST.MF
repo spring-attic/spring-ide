@@ -1,9 +1,9 @@
 Implementation-Title: aspectjrt
-Implementation-Version: 1.5.3
+Implementation-Version: 1.6.0.v200802271800
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.aspectj.aspectjrt
 Bundle-Name: aspecjrt
-Bundle-Version: 1.5.3
+Bundle-Version: 1.6.0.v200802271800
 Bundle-Vendor: Eclipse.org
 Bundle-ClassPath: aspectjrt.jar
 Export-Package: org.aspectj.internal.lang.annotation,

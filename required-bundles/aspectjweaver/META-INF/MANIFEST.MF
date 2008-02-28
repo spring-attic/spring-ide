@@ -1,9 +1,9 @@
 Implementation-Title: aspectjweaver
-Implementation-Version: 1.5.3
+Implementation-Version: 1.6.0.v200802271800
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.aspectj.aspectjweaver
 Bundle-Name: aspectjweaver
-Bundle-Version: 1.5.3
+Bundle-Version: 1.6.0.v200802271800
 Bundle-Vendor: Eclipse.org
 Require-Bundle: org.aspectj.aspectjrt;visibility:=reexport
 Export-Package: org.aspectj.apache.bcel,
