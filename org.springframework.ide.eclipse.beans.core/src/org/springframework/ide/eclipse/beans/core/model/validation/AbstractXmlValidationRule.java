@@ -11,18 +11,29 @@
 package org.springframework.ide.eclipse.beans.core.model.validation;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
+import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -76,7 +87,7 @@ public abstract class AbstractXmlValidationRule implements
 
 						@Override
 						public void validateNode(Node n) {
-							validate(n, context);
+							validate(n, new XmlValidationContext(context));
 						}
 
 						@Override
@@ -109,14 +120,15 @@ public abstract class AbstractXmlValidationRule implements
 	 * @return true if validation should be called
 	 */
 	protected abstract boolean supports(Node n);
-	
+
 	/**
 	 * Validates the given {@link Node n}
 	 * @param n the node to validate
 	 * @param context the current validation context
 	 */
-	protected abstract void validate(Node n, IBeansValidationContext context);
+	protected abstract void validate(Node n, IXmlValidationContext context);
 
+	
 	/**
 	 * Internal visitor implementation that visits an entire {@link Document}.
 	 */
@@ -149,4 +161,111 @@ public abstract class AbstractXmlValidationRule implements
 
 	}
 
+	/**
+	 * Internal validation context implementation that coverts {@link Node}
+	 * object back to {@link IResourceModelElement}s.
+	 */
+	private static class XmlValidationContext implements IXmlValidationContext {
+
+		private final IBeansValidationContext delegateContext;
+
+		public XmlValidationContext(IBeansValidationContext delegateContext) {
+			this.delegateContext = delegateContext;
+		}
+
+		public ClassReaderFactory getClassReaderFactory() {
+			return delegateContext.getClassReaderFactory();
+		}
+
+		public BeanDefinitionRegistry getCompleteRegistry() {
+			return delegateContext.getCompleteRegistry();
+		}
+
+		public BeanDefinitionRegistry getIncompleteRegistry() {
+			return delegateContext.getIncompleteRegistry();
+		}
+
+		public Set<BeanDefinition> getRegisteredBeanDefinition(String beanName, String beanClass) {
+			return delegateContext.getRegisteredBeanDefinition(beanName, beanClass);
+		}
+
+		public IProject getRootElementProject() {
+			return delegateContext.getRootElementProject();
+		}
+
+		public IResource getRootElementResource() {
+			return delegateContext.getRootElementResource();
+		}
+
+		public boolean isBeanRegistered(String beanName, String beanClass) {
+			return delegateContext.isBeanRegistered(beanName, beanClass);
+		}
+
+		public void error(IResourceModelElement element, String problemId, String message,
+				ValidationProblemAttribute... attributes) {
+			delegateContext.error(element, problemId, message, attributes);
+		}
+
+		public void error(Node node, String problemId, String message,
+				ValidationProblemAttribute... attributes) {
+			delegateContext.error(getResourceModelElementFromNode(node), problemId, message,
+					attributes);
+		}
+
+		public IResourceModelElement getContextElement() {
+			return delegateContext.getContextElement();
+		}
+
+		public Set<ValidationProblem> getProblems() {
+			return delegateContext.getProblems();
+		}
+
+		public IResourceModelElement getRootElement() {
+			return delegateContext.getRootElement();
+		}
+
+		public void info(IResourceModelElement element, String problemId, String message,
+				ValidationProblemAttribute... attributes) {
+			delegateContext.info(element, problemId, message, attributes);
+		}
+
+		public void info(Node n, String problemId, String message,
+				ValidationProblemAttribute... attributes) {
+			delegateContext
+					.info(getResourceModelElementFromNode(n), problemId, message, attributes);
+		}
+
+		public void setCurrentRuleId(String ruleId) {
+			delegateContext.setCurrentRuleId(ruleId);
+		}
+
+		public void warning(IResourceModelElement element, String problemId, String message,
+				ValidationProblemAttribute... attributes) {
+			delegateContext.warning(element, problemId, message, attributes);
+		}
+
+		public void warning(Node n, String problemId, String message,
+				ValidationProblemAttribute... attributes) {
+			delegateContext.warning(getResourceModelElementFromNode(n), problemId, message,
+					attributes);
+		}
+
+		private IResourceModelElement getResourceModelElementFromNode(Node n) {
+			if (n instanceof IDOMNode) {
+				IDOMNode domNode = ((IDOMNode) n);
+				int startLine = domNode.getStructuredDocument().getLineOfOffset(
+						domNode.getStartOffset());
+				int endLine = domNode.getStructuredDocument().getLineOfOffset(
+						domNode.getStartOffset());
+				IModelElement modelElement = BeansModelUtils.getMostSpecificModelElement(startLine,
+						endLine, (IFile) delegateContext.getRootElement().getElementResource(),
+						null);
+				if (modelElement instanceof IResourceModelElement) {
+					return (IResourceModelElement) modelElement;
+				}
+			}
+			return delegateContext.getRootElement();
+		}
+
+	}
 }
