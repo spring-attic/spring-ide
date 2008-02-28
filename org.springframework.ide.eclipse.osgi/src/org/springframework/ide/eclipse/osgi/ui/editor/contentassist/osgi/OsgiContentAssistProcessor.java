@@ -10,10 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.osgi.ui.editor.contentassist.osgi;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * {@link INamespaceContentAssistProcessor} implementation responsible for the
@@ -21,8 +28,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceCont
  * @author Christian Dupuis
  * @since 2.0.1
  */
-public class OsgiContentAssistProcessor extends
-		NamespaceContentAssistProcessorSupport {
+@SuppressWarnings("restriction")
+public class OsgiContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
 
 	@Override
 	public void init() {
@@ -34,10 +41,34 @@ public class OsgiContentAssistProcessor extends
 		registerContentAssistCalculator("property-placeholder", "defaults-ref", beanRef);
 		registerContentAssistCalculator("reference", "ref", beanRef);
 		registerContentAssistCalculator("reference", "depends-on", beanRef);
+		registerContentAssistCalculator("registration-listener", "ref", beanRef);
 
-		ClassContentAssistCalculator classRef = new ClassContentAssistCalculator(
-				true);
+		ClassContentAssistCalculator classRef = new ClassContentAssistCalculator(true);
 		registerContentAssistCalculator("service", "interface", classRef);
 		registerContentAssistCalculator("reference", "interface", classRef);
+
+		MethodContentAssistCalculator methodRef = new MethodContentAssistCalculator(
+				new FlagsMethodFilter(FlagsMethodFilter.NOT_INTERFACE
+						| FlagsMethodFilter.NOT_CONSTRUCTOR)) {
+
+			@Override
+			protected IType calculateType(ContentAssistRequest request, String attributeName) {
+				if (request.getNode() != null
+						&& "registration-listener".equals(request.getNode().getLocalName())) {
+					String ref = BeansEditorUtils.getAttribute(request.getNode(),
+							"ref");
+					if (ref != null) {
+						IFile file = BeansEditorUtils.getFile(request);
+						String className = BeansEditorUtils.getClassNameForBean(file, request
+								.getNode().getOwnerDocument(), ref);
+						return JdtUtils.getJavaType(file.getProject(), className);
+					}
+				}
+				return null;
+			}
+		};
+		registerContentAssistCalculator("registration-method", methodRef);
+		registerContentAssistCalculator("unregistration-method", methodRef);
+
 	}
 }
