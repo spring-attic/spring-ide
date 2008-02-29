@@ -19,7 +19,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
 /**
  * The images provided by the Spring Beans UI plugin.
@@ -63,10 +62,10 @@ public class AopCoreImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(BeansUIPlugin.getDefault().getBundle()
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle()
 					.getEntry("/"), ICON_PATH_PREFIX);
 		} catch (MalformedURLException e) {
-			BeansUIPlugin.log(e);
+			Activator.log(e);
 		}
 	}
 	
@@ -100,7 +99,7 @@ public class AopCoreImages {
 	 * or <code>null</code> if it does not exist.
 	 */
 	public static Image getImage(String key) {
-		return BeansUIPlugin.getDefault().getImageRegistry().get(key);
+		return Activator.getDefault().getImageRegistry().get(key);
 	}
 	
 	/**
@@ -133,7 +132,7 @@ public class AopCoreImages {
 				action.setDisabledImageDescriptor(id);
 			}
 		} catch (MalformedURLException e) {
-			BeansUIPlugin.log(e);
+			Activator.log(e);
 		}
 	}
 
@@ -147,7 +146,7 @@ public class AopCoreImages {
 			imageDescriptors.put(name, result);
 			return result;
 		} catch (MalformedURLException e) {
-			BeansUIPlugin.log(e);
+			Activator.log(e);
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
 	}

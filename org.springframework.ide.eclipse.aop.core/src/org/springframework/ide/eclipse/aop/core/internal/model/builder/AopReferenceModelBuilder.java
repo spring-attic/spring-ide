@@ -545,7 +545,7 @@ public class AopReferenceModelBuilder extends Job {
 		 * Always returns <code>false</code>.
 		 */
 		public boolean contains(ISchedulingRule rule) {
-			return false;
+			return rule == this;
 		}
 		
 		/**

@@ -8,7 +8,7 @@
 	        class="org.springframework.ide.eclipse.aop.core.builder.AopReferenceModelProjectBuilder"
 	        description="%aopBuilder.description"
 	        enabledByDefault="true"
-	        icon="icons/obj16/aspect.gif"
+	        icon="icons/full/obj16/aspect_obj.gif"
 	        id="aopreferencemodelbuilder"
 	        name="%aopBuilder.name">
 		</builder>
