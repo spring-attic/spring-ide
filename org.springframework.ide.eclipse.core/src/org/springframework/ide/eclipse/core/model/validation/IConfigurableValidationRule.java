@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * @author Christian Dupuis
  * @since 2.0.4
  */
-public interface IConfigurabeValidationRule<E extends IModelElement, C extends IValidationContext>
+public interface IConfigurableValidationRule<E extends IModelElement, C extends IValidationContext>
 		extends IValidationRule<E, C> {
 
 	/**

@@ -15,7 +15,7 @@ import java.util.Properties;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
-import org.springframework.ide.eclipse.core.model.validation.IConfigurabeValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.IConfigurableValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
@@ -120,8 +120,8 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 			configurationData.put(configurationDataElement.getAttribute(KEY_ATTRIBUTE),
 					configurationDataElement.getAttribute(VALUE_ATTRIBUTE));
 		}
-		if (rule instanceof IConfigurabeValidationRule) {
-			((IConfigurabeValidationRule) rule).configure(configurationData);
+		if (rule instanceof IConfigurableValidationRule) {
+			((IConfigurableValidationRule) rule).configure(configurationData);
 		}
 	}
 
