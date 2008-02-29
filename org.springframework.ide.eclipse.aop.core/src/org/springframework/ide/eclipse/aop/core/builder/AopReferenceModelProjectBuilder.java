@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,12 +16,9 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AopReferenceModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
@@ -42,12 +39,10 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	 * rebuild in the context of the current <code>resource</code> and
 	 * <code>kind</code>
 	 */
-	public Set<IResource> getAffectedResources(IResource resource, int kind)
-			throws CoreException {
+	public Set<IResource> getAffectedResources(IResource resource, int kind) throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
-			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind,
-					resource));
+			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind, resource));
 		}
 		return resources;
 	}
@@ -57,24 +52,13 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	 * affectedResources on to a new instance of
 	 * {@link AopReferenceModelBuilder}.
 	 */
-	public void build(Set<IResource> affectedResources, int kind,
-			IProgressMonitor monitor) throws CoreException {
-		try {
-			monitor.subTask(Activator.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
-			IWorkspaceRunnable referenceModelBuilder = new AopReferenceModelBuilder(
-					affectedResources);
-			IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			ISchedulingRule rule = workspace.getRuleFactory().markerRule(
-					workspace.getRoot());
-			workspace.run(referenceModelBuilder, rule, IWorkspace.AVOID_UPDATE,
-					monitor);
-		}
-		catch (CoreException e) {
-			Activator.log(e);
-		}
-		finally {
-			monitor.done();
-		}
+	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor)
+			throws CoreException {
+		monitor.subTask(Activator
+				.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
+		Job job = new AopReferenceModelBuilder(affectedResources);
+		job.schedule();
+		monitor.done();
 	}
 
 	/**
@@ -82,17 +66,16 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	 */
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
-			monitor.subTask(Activator.getFormattedMessage(
-					"AopReferenceModelProjectBuilder.deletedProblemMarkers",
-					resource.getFullPath()));
+			monitor.subTask(Activator
+					.getFormattedMessage("AopReferenceModelProjectBuilder.deletedProblemMarkers",
+							resource.getFullPath()));
 			AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
 
 			// delete existing AOP references in case a build is disabled for
 			// a certain project.
 			IProject project = resource.getProject();
 			if (JdtUtils.isJavaProject(project)) {
-				Activator.getModel().removeProject(
-						JdtUtils.getJavaProject(project));
+				Activator.getModel().removeProject(JdtUtils.getJavaProject(project));
 			}
 		}
 		finally {

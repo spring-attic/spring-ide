@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.aop.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
@@ -29,24 +31,41 @@ public class AopProject implements IAopProject {
 
 	private List<IAopReference> references = new ArrayList<IAopReference>();
 
+	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
+	protected final Lock r = rwl.readLock();
+
+	protected final Lock w = rwl.writeLock();
+
 	public AopProject(IJavaProject project) {
 		this.project = project;
 	}
 
 	public void addAopReference(IAopReference reference) {
-		AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference ["
-				+ reference + "]");
-		this.references.add(reference);
+		AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference [" + reference + "]");
+		try {
+			w.lock();
+			this.references.add(reference);
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	public void clearReferencesForResource(IResource resource) {
 		List<IAopReference> toRemove = new ArrayList<IAopReference>();
-		for (IAopReference reference : this.references) {
-			if (reference.getDefinition().getResource().equals(resource)) {
-				toRemove.add(reference);
+		try {
+			w.lock();
+			for (IAopReference reference : this.references) {
+				if (reference.getDefinition().getResource().equals(resource)) {
+					toRemove.add(reference);
+				}
 			}
+			this.references.removeAll(toRemove);
 		}
-		this.references.removeAll(toRemove);
+		finally {
+			w.unlock();
+		}
 	}
 
 	public List<IAopReference> getAllReferences() {
@@ -58,13 +77,19 @@ public class AopProject implements IAopProject {
 	}
 
 	public List<IAopReference> getReferencesForResource(IResource resource) {
-		List<IAopReference> list = new ArrayList<IAopReference>();
-		for (IAopReference reference : this.references) {
-			if (reference.getResource().equals(resource)
-					|| reference.getDefinition().getResource().equals(resource)) {
-				list.add(reference);
+		try {
+			r.lock();
+			List<IAopReference> list = new ArrayList<IAopReference>();
+			for (IAopReference reference : this.references) {
+				if (reference.getResource().equals(resource)
+						|| reference.getDefinition().getResource().equals(resource)) {
+					list.add(reference);
+				}
 			}
+			return list;
 		}
-		return list;
+		finally {
+			r.unlock();
+		}
 	}
 }
