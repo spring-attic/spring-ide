@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.internal.model.validation;
 
+import java.util.Properties;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
+import org.springframework.ide.eclipse.core.model.validation.IConfigurabeValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
@@ -22,8 +25,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ValidationRuleDefinition extends
-		PersistablePreferenceObjectSupport {
+public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport {
 
 	private static final String CLASS_ATTRIBUTE = "class";
 
@@ -37,6 +39,12 @@ public class ValidationRuleDefinition extends
 
 	private static final String NAME_ATTRIBUTE = "name";
 
+	private static final String CONFIGURATION_DATA_ELEMENT = "configuration-data";
+
+	private static final String KEY_ATTRIBUTE = "key";
+
+	private static final String VALUE_ATTRIBUTE = "value";
+
 	private String description;
 
 	private String id;
@@ -47,14 +55,15 @@ public class ValidationRuleDefinition extends
 
 	private String validatorId;
 
-	public ValidationRuleDefinition(String validatorID,
-			IConfigurationElement element) throws CoreException {
+	private Properties configurationData;
+
+	public ValidationRuleDefinition(String validatorID, IConfigurationElement element)
+			throws CoreException {
 		this.validatorId = validatorID;
 		init(element);
 	}
 
-	public ValidationRuleDefinition(String validatorId, String id, String name,
-			String description) {
+	public ValidationRuleDefinition(String validatorId, String id, String name, String description) {
 		this.validatorId = validatorId;
 		this.id = id;
 		this.name = name;
@@ -91,17 +100,28 @@ public class ValidationRuleDefinition extends
 		if (executable instanceof IValidationRule) {
 			rule = (IValidationRule) executable;
 		}
-		id = element.getContributor().getName() + "."
-				+ element.getAttribute(ID_ATTRIBUTE) + "-" + validatorId;
+		id = element.getContributor().getName() + "." + element.getAttribute(ID_ATTRIBUTE) + "-"
+				+ validatorId;
 		name = element.getAttribute(NAME_ATTRIBUTE);
 		description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
-		String enabledByDefault = element
-				.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
+		String enabledByDefault = element.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
 		if (enabledByDefault != null) {
 			setEnabledByDefault(Boolean.valueOf(enabledByDefault));
 		}
 		else {
 			setEnabledByDefault(true);
+		}
+
+		// get configuration data
+		configurationData = new Properties();
+		IConfigurationElement[] configurationDataElements = element
+				.getChildren(CONFIGURATION_DATA_ELEMENT);
+		for (IConfigurationElement configurationDataElement : configurationDataElements) {
+			configurationData.put(configurationDataElement.getAttribute(KEY_ATTRIBUTE),
+					configurationDataElement.getAttribute(VALUE_ATTRIBUTE));
+		}
+		if (rule instanceof IConfigurabeValidationRule) {
+			((IConfigurabeValidationRule) rule).configure(configurationData);
 		}
 	}
 

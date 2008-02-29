@@ -124,7 +124,7 @@ public abstract class AbstractValidationContext implements IValidationContext {
 
 		// Add the element Id to the list of problem attributes
 		String elementId = element.getElementID();
-		List<ValidationProblemAttribute> attributeList = 	new ArrayList<ValidationProblemAttribute>(
+		List<ValidationProblemAttribute> attributeList = new ArrayList<ValidationProblemAttribute>(
 				Arrays.asList(attributes));
 		attributeList.add(new ValidationProblemAttribute(
 				MarkerUtils.ELEMENT_ID_KEY, elementId));

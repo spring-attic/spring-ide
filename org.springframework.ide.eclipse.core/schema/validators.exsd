@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.springframework.ide.eclipse.core">
+<schema targetNamespace="org.springframework.ide.eclipse.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
+      <appinfo>
          <meta.schema plugin="org.springframework.ide.eclipse.core" id="validators" name="Spring Project Validators"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 This extension-point is used to add one or more validators (and it&apos;s validation rules) to the list of Spring project validators. These validators are called for every modified resource during incremental build of a Spring project.
@@ -49,9 +49,9 @@ This extension-point is used to add one or more validators (and it&apos;s valida
                   the full-qualified name of a class which implements 
 &lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidator&lt;/samp&gt;
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.model.validation.IValidator"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="id" type="string" use="required">
@@ -87,9 +87,9 @@ This extension-point is used to add one or more validators (and it&apos;s valida
                <documentation>
                   an optional icon of this validator
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="resource"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="markerId" type="string" use="required">
@@ -126,15 +126,18 @@ This extension-point is used to add one or more validators (and it&apos;s valida
 
    <element name="rule">
       <complexType>
+         <choice>
+            <element ref="configuration-data" minOccurs="0" maxOccurs="unbounded"/>
+         </choice>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   the full-qualified name of a class which implements 
 &lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidationRule&lt;/samp&gt;
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.model.validation.IValidationRule"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="id" type="string" use="required">
@@ -168,19 +171,43 @@ This extension-point is used to add one or more validators (and it&apos;s valida
       </complexType>
    </element>
 
+   <element name="configuration-data">
+      <annotation>
+         <documentation>
+            Attach any key-value configuration data to a validation rule
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="key" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="value" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="since"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          2.0
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt;
 &lt;extension point=&quot;org.springframework.ide.eclipse.core.validators&quot;&gt;
@@ -206,9 +233,9 @@ If this extension was defined in a plug-in with id &lt;samp&gt;org.springframewo
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="apiInfo"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 Each validator must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidator&lt;/samp&gt;.
@@ -216,10 +243,11 @@ Each validation rule must supply a public, no-argument constructor and implement
       </documentation>
    </annotation>
 
+
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="implementation"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 This plugin itself does not have any predefined validators and validation rules.
@@ -227,9 +255,9 @@ This plugin itself does not have any predefined validators and validation rules.
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="copyright"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt;
 Copyright (c) 2005, 2007 Spring IDE Developers
