@@ -55,8 +55,7 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 		this.validatorTab = new ProjectValidatorPropertyTab(getShell(),
 				((IProject) getElement()));
 		validatorItem.setControl(validatorTab.createContents(folder));
-		validatorItem
-				.setText(SpringUIMessages.ProjectValidatorPropertyPage_title);
+		validatorItem.setText(SpringUIMessages.ProjectValidatorPropertyPage_title);
 
 		TabItem builderItem = new TabItem(folder, SWT.NONE);
 		this.builderTab = new ProjectBuilderPropertyTab(

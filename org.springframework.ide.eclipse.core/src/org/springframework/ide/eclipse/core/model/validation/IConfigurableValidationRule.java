@@ -10,27 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.model.validation;
 
-import java.util.Properties;
-
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * Extension to {@link IValidationRule} that allows to be configured by external
- * configuration data from the
- * <code>org.springframework.ide.eclipse.core.validators</code> extension
- * point.
+ * Marker interface that allows for property injection on configured property
+ * values.
+ * <p>
+ * The syntax for configuring property values in <code>plugin.xml</code> is as
+ * follows:
+ * 
+ * <pre>
+ * &lt;rule id=&quot;methodOverride&quot;
+ *      class=&quot;FooRule&quot;
+ *      name=&quot;Foo Rule&quot;
+ *      description=&quot;Bar&quot; &gt;
+ *      &lt;property name=&quot;threshold&quot; value=&quot;50&quot; /&gt;
+ *  &lt;/rule&gt;
+ * </pre>
+ * 
  * @author Christian Dupuis
  * @since 2.0.4
  */
 public interface IConfigurableValidationRule<E extends IModelElement, C extends IValidationContext>
 		extends IValidationRule<E, C> {
-
-	/**
-	 * Configures the {@link IValidationRule} instance with the given key value
-	 * pairs in the {@link Properties} instance.
-	 * @param configurationData the configuration data taken from the extension
-	 * point contribution
-	 */
-	void configure(Properties configurationData);
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -36,10 +37,14 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -65,15 +70,13 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  */
 public class ProjectValidatorPropertyTab {
 
-	private static class ProjectValidatorContentProvider implements
-			ITreeContentProvider {
+	private static class ProjectValidatorContentProvider implements ITreeContentProvider {
 
 		private Set<ValidatorDefinition> validatorDefinitions;
 
 		private Map<ValidatorDefinition, List<ValidationRuleDefinition>> validationRuleDefinitions;
 
-		public ProjectValidatorContentProvider(
-				Set<ValidatorDefinition> validatorDefinitions,
+		public ProjectValidatorContentProvider(Set<ValidatorDefinition> validatorDefinitions,
 				Map<ValidatorDefinition, List<ValidationRuleDefinition>> validationRuleDefinitions) {
 			this.validatorDefinitions = validatorDefinitions;
 			this.validationRuleDefinitions = validationRuleDefinitions;
@@ -91,8 +94,8 @@ public class ProjectValidatorPropertyTab {
 
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof ValidatorDefinition) {
-				return this.validationRuleDefinitions.get(
-						(ValidatorDefinition) parentElement).toArray();
+				return this.validationRuleDefinitions.get((ValidatorDefinition) parentElement)
+						.toArray();
 			}
 			else {
 				return IModelElement.NO_CHILDREN;
@@ -102,8 +105,7 @@ public class ProjectValidatorPropertyTab {
 		public Object getParent(Object element) {
 			if (element instanceof ValidationRuleDefinition) {
 				for (ValidatorDefinition def : this.validatorDefinitions) {
-					if (((ValidationRuleDefinition) element).getValidatorId()
-							.equals(def.getID())) {
+					if (((ValidationRuleDefinition) element).getValidatorId().equals(def.getID())) {
 						return def;
 					}
 				}
@@ -134,15 +136,12 @@ public class ProjectValidatorPropertyTab {
 				String icon = ((ValidatorDefinition) element).getIconUri();
 				String ns = ((ValidatorDefinition) element).getNamespaceUri();
 				if (icon != null && ns != null) {
-					image = SpringUIPlugin.getDefault().getImageRegistry().get(
-							icon);
+					image = SpringUIPlugin.getDefault().getImageRegistry().get(icon);
 					if (image == null) {
-						ImageDescriptor imageDescriptor = SpringUIPlugin
-								.imageDescriptorFromPlugin(ns, icon);
-						SpringUIPlugin.getDefault().getImageRegistry().put(
-								icon, imageDescriptor);
-						image = SpringUIPlugin.getDefault().getImageRegistry()
-								.get(icon);
+						ImageDescriptor imageDescriptor = SpringUIPlugin.imageDescriptorFromPlugin(
+								ns, icon);
+						SpringUIPlugin.getDefault().getImageRegistry().put(icon, imageDescriptor);
+						image = SpringUIPlugin.getDefault().getImageRegistry().get(icon);
 					}
 				}
 			}
@@ -169,19 +168,27 @@ public class ProjectValidatorPropertyTab {
 
 	private Shell shell;
 
+	private Button configureButton;
+
+	private Map<ValidationRuleDefinition, Map<String, String>> changedPropertyValues = new HashMap<ValidationRuleDefinition, Map<String, String>>();
+
+	private SelectionListener buttonListener = new SelectionAdapter() {
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			handleButtonPressed((Button) e.widget);
+		}
+	};
+
 	public ProjectValidatorPropertyTab(Shell shell, IProject project) {
-		this.validatorDefinitions = ValidatorDefinitionFactory
-				.getValidatorDefinitions();
+		this.validatorDefinitions = ValidatorDefinitionFactory.getValidatorDefinitions();
 		this.validationRuleDefinitions = new HashMap<ValidatorDefinition, List<ValidationRuleDefinition>>();
 		for (ValidatorDefinition def : this.validatorDefinitions) {
 			List<ValidationRuleDefinition> rules = new ArrayList<ValidationRuleDefinition>();
-			rules.addAll(ValidationRuleDefinitionFactory.getRuleDefinitions(def
-					.getID()));
+			rules.addAll(ValidationRuleDefinitionFactory.getRuleDefinitions(def.getID()));
 
 			Collections.sort(rules, new Comparator<ValidationRuleDefinition>() {
 
-				public int compare(ValidationRuleDefinition o1,
-						ValidationRuleDefinition o2) {
+				public int compare(ValidationRuleDefinition o1, ValidationRuleDefinition o2) {
 					return o1.getName().compareTo(o2.getName());
 				}
 			});
@@ -190,6 +197,31 @@ public class ProjectValidatorPropertyTab {
 		}
 		this.project = project;
 		this.shell = shell;
+	}
+
+	protected void handleButtonPressed(Button widget) {
+		if (widget == configureButton) {
+			IStructuredSelection selection = (IStructuredSelection) validatorViewer.getSelection();
+			if (!selection.isEmpty()) {
+				Object obj = selection.getFirstElement();
+				if (obj instanceof ValidationRuleDefinition) {
+					ValidationRuleDefinition ruleDef = (ValidationRuleDefinition) obj;
+					Map<String, String> propertyValues = null;
+					if (changedPropertyValues.containsKey(ruleDef)) {
+						propertyValues = changedPropertyValues.get(ruleDef);
+					}
+					else {
+						propertyValues = new HashMap<String, String>(ruleDef.getPropertyValues());
+					}
+
+					ValidationRuleConfigurationDialog dialog = new ValidationRuleConfigurationDialog(this.shell,
+							propertyValues, ruleDef);
+					if (dialog.open() == Dialog.OK) {
+						changedPropertyValues.put(ruleDef, propertyValues);
+					}
+				}
+			}
+		}
 	}
 
 	public Control createContents(Composite parent) {
@@ -202,38 +234,47 @@ public class ProjectValidatorPropertyTab {
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		Label beansLabel = new Label(composite, SWT.NONE);
-		beansLabel
-				.setText(SpringUIMessages.ProjectValidatorPropertyPage_description);
+		beansLabel.setText(SpringUIMessages.ProjectValidatorPropertyPage_description);
+
+		Composite tableAndButtons = new Composite(composite, SWT.NONE);
+		tableAndButtons.setLayoutData(new GridData(GridData.FILL_BOTH));
+		layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.numColumns = 2;
+		tableAndButtons.setLayout(layout);
+
 		// config set list viewer
-		validatorViewer = new CheckboxTreeViewer(composite);
+		validatorViewer = new CheckboxTreeViewer(tableAndButtons);
 		// validatorViewer.setUseHashlookup(true);
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.heightHint = 150;
-		this.contentProvider = new ProjectValidatorContentProvider(
-				this.validatorDefinitions, this.validationRuleDefinitions);
+		this.contentProvider = new ProjectValidatorContentProvider(this.validatorDefinitions,
+				this.validationRuleDefinitions);
 		validatorViewer.setContentProvider(this.contentProvider);
 		validatorViewer.setLabelProvider(new ProjectBuilderLabelProvider());
 		validatorViewer.setInput(this); // activate content provider
 
-		GridData data = new GridData(GridData.FILL_BOTH
-				| GridData.GRAB_VERTICAL);
+		GridData data = new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL);
 		data.heightHint = 150;
 		validatorViewer.getControl().setLayoutData(data);
 		validatorViewer.getControl().setFont(font);
 
-		validatorViewer
-				.addSelectionChangedListener(new ISelectionChangedListener() {
-					public void selectionChanged(SelectionChangedEvent event) {
-						if (event.getSelection() instanceof IStructuredSelection) {
-							IStructuredSelection sel = (IStructuredSelection) event
-									.getSelection();
-							if (sel.getFirstElement() == null)
-								clearDescription();
-							else
-								showDescription(sel.getFirstElement());
-						}
+		validatorViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (event.getSelection() instanceof IStructuredSelection) {
+					IStructuredSelection sel = (IStructuredSelection) event.getSelection();
+					if (sel.getFirstElement() == null) {
+						clearDescription();
 					}
-				});
+					else {
+						showDescription(sel.getFirstElement());
+
+					}
+					updateConfigureButtonEnablement(sel.getFirstElement());
+				}
+			}
+		});
 
 		validatorViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
@@ -241,12 +282,24 @@ public class ProjectValidatorPropertyTab {
 			}
 		});
 
-		Label descriptionLabel = new Label(composite, SWT.NONE);
-		descriptionLabel
-				.setText(SpringUIMessages.ProjectValidatorPropertyPage_builderDescription);
+		// Create button area
+		Composite buttonArea = new Composite(tableAndButtons, SWT.NONE);
+		layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		buttonArea.setLayout(layout);
+		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 
-		descriptionText = new Text(composite, SWT.MULTI | SWT.WRAP
-				| SWT.READ_ONLY | SWT.BORDER | SWT.H_SCROLL);
+		configureButton = new Button(buttonArea, SWT.PUSH);
+		configureButton.setText("Configure");
+		configureButton.setEnabled(false);
+		configureButton.addSelectionListener(buttonListener);
+
+		Label descriptionLabel = new Label(composite, SWT.NONE);
+		descriptionLabel.setText(SpringUIMessages.ProjectValidatorPropertyPage_builderDescription);
+
+		descriptionText = new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.BORDER
+				| SWT.H_SCROLL);
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 30;
 		descriptionText.setLayoutData(data);
@@ -274,8 +327,7 @@ public class ProjectValidatorPropertyTab {
 		boolean childChecked = false;
 		Object[] members = contentProvider.getChildren(parent);
 		for (int i = members.length - 1; i >= 0; i--) {
-			if (validatorViewer.getChecked(members[i])
-					|| validatorViewer.getGrayed(members[i])) {
+			if (validatorViewer.getChecked(members[i]) || validatorViewer.getGrayed(members[i])) {
 				childChecked = true;
 				break;
 			}
@@ -284,8 +336,7 @@ public class ProjectValidatorPropertyTab {
 		updateParentState(parent);
 	}
 
-	private void setSubtreeChecked(Object container, boolean state,
-			boolean checkExpandedState) {
+	private void setSubtreeChecked(Object container, boolean state, boolean checkExpandedState) {
 		Object[] members = contentProvider.getChildren(container);
 		for (int i = members.length - 1; i >= 0; i--) {
 			Object element = members[i];
@@ -313,8 +364,7 @@ public class ProjectValidatorPropertyTab {
 				filteredValidatorDefinitions.add(builderDefinition);
 			}
 		}
-		for (List<ValidationRuleDefinition> defs : this.validationRuleDefinitions
-				.values()) {
+		for (List<ValidationRuleDefinition> defs : this.validationRuleDefinitions.values()) {
 			for (ValidationRuleDefinition def : defs) {
 				if (def.isEnabled(project)) {
 					filteredValidatorDefinitions.add(def);
@@ -338,11 +388,13 @@ public class ProjectValidatorPropertyTab {
 		else if (definition instanceof ValidationRuleDefinition) {
 			text = ((ValidationRuleDefinition) definition).getDescription();
 		}
-		if (text == null || text.length() == 0)
+		if (text == null || text.length() == 0) {
 			descriptionText
 					.setText(SpringUIMessages.ProjectValidatorPropertyPage_noBuilderDescription);
-		else
+		}
+		else {
 			descriptionText.setText(text);
+		}
 	}
 
 	private void initializeCheckedState() {
@@ -370,16 +422,24 @@ public class ProjectValidatorPropertyTab {
 		descriptionText.setText(""); //$NON-NLS-1$
 	}
 
+	private void updateConfigureButtonEnablement(Object firstElement) {
+		if (firstElement instanceof ValidationRuleDefinition
+				&& ((ValidationRuleDefinition) firstElement).getPropertyValues().size() > 0) {
+			configureButton.setEnabled(true);
+		}
+		else {
+			configureButton.setEnabled(false);
+		}
+	}
+
 	public boolean performOk() {
-		final List checkElements = Arrays.asList(this.validatorViewer
-				.getCheckedElements());
+		final List checkElements = Arrays.asList(this.validatorViewer.getCheckedElements());
 
 		WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
 
 			@Override
-			protected void execute(IProgressMonitor monitor)
-					throws CoreException, InvocationTargetException,
-					InterruptedException {
+			protected void execute(IProgressMonitor monitor) throws CoreException,
+					InvocationTargetException, InterruptedException {
 				for (Map.Entry<ValidatorDefinition, List<ValidationRuleDefinition>> def : validationRuleDefinitions
 						.entrySet()) {
 					boolean enableValidator = false;
@@ -391,6 +451,11 @@ public class ProjectValidatorPropertyTab {
 						else {
 							rule.setEnabled(false, project);
 						}
+
+						if (changedPropertyValues.containsKey(rule)) {
+							rule.setSpecificConfiguration(changedPropertyValues.get(rule), project);
+						}
+
 					}
 					def.getKey().setEnabled(enableValidator, project);
 				}

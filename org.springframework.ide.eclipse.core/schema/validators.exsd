@@ -127,7 +127,7 @@ This extension-point is used to add one or more validators (and it&apos;s valida
    <element name="rule">
       <complexType>
          <choice>
-            <element ref="configuration-data" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="property" minOccurs="0" maxOccurs="unbounded"/>
          </choice>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -171,14 +171,14 @@ This extension-point is used to add one or more validators (and it&apos;s valida
       </complexType>
    </element>
 
-   <element name="configuration-data">
+   <element name="property">
       <annotation>
          <documentation>
             Attach any key-value configuration data to a validation rule
          </documentation>
       </annotation>
       <complexType>
-         <attribute name="key" type="string" use="required">
+         <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
                   
@@ -186,6 +186,13 @@ This extension-point is used to add one or more validators (and it&apos;s valida
             </annotation>
          </attribute>
          <attribute name="value" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="description" type="string">
             <annotation>
                <documentation>
                   

@@ -10,13 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.internal.model.validation;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.BeansException;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.validation.IConfigurableValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.util.StringUtils;
 
 /**
  * Wraps a {@link IValidationRule} and all the information from it's definition
@@ -35,13 +43,13 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 
 	private static final String ENABLEMENT_PREFIX = "validator.rule.enable.";
 
+	private static final String PROPERTY_PREFIX = "validator.rule.property.";
+
 	private static final String ID_ATTRIBUTE = "id";
 
 	private static final String NAME_ATTRIBUTE = "name";
 
-	private static final String CONFIGURATION_DATA_ELEMENT = "configuration-data";
-
-	private static final String KEY_ATTRIBUTE = "key";
+	private static final String PROPERTY_ELEMENT = "property";
 
 	private static final String VALUE_ATTRIBUTE = "value";
 
@@ -55,7 +63,11 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 
 	private String validatorId;
 
-	private Properties configurationData;
+	private Map<String, String> propertyValues;
+
+	private Map<String, String> originalPropertyValues;
+	
+	private Map<String, String> propertyDescriptions;
 
 	public ValidationRuleDefinition(String validatorID, IConfigurationElement element)
 			throws CoreException {
@@ -88,6 +100,17 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 	}
 
 	public IValidationRule getRule() {
+		if (rule instanceof IConfigurableValidationRule) {
+ 			BeanWrapper wrapper = new BeanWrapperImpl(rule);
+			for (Map.Entry<String, String> entry : propertyValues.entrySet()) {
+				try {
+					wrapper.setPropertyValue(entry.getKey(), entry.getValue());
+				}
+				catch (BeansException e) {
+					SpringCore.log(e);
+				}
+			}
+		}
 		return rule;
 	}
 
@@ -113,20 +136,75 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 		}
 
 		// get configuration data
-		configurationData = new Properties();
-		IConfigurationElement[] configurationDataElements = element
-				.getChildren(CONFIGURATION_DATA_ELEMENT);
+		propertyValues = new HashMap<String, String>();
+		propertyDescriptions = new HashMap<String, String>();
+		IConfigurationElement[] configurationDataElements = element.getChildren(PROPERTY_ELEMENT);
 		for (IConfigurationElement configurationDataElement : configurationDataElements) {
-			configurationData.put(configurationDataElement.getAttribute(KEY_ATTRIBUTE),
+			String propertyName = configurationDataElement.getAttribute(NAME_ATTRIBUTE);
+			propertyValues.put(propertyName,
 					configurationDataElement.getAttribute(VALUE_ATTRIBUTE));
+			String desc = configurationDataElement.getAttribute(DESCRIPTION_ATTRIBUTE);
+			if (StringUtils.hasText(desc)) {
+				propertyDescriptions.put(propertyName, desc);
+			}
 		}
-		if (rule instanceof IConfigurableValidationRule) {
-			((IConfigurableValidationRule) rule).configure(configurationData);
-		}
+		originalPropertyValues = new HashMap<String, String>(propertyValues);
+	}
+
+	public Map<String, String> getPropertyValues() {
+		return new HashMap<String, String>(propertyValues);
 	}
 
 	@Override
 	public String toString() {
 		return id + " (" + rule.getClass().getName() + ")";
 	}
+
+	@Override
+	public boolean isEnabled(IProject project) {
+		readSpecificConfiguration(project);
+		return super.isEnabled(project);
+	}
+
+	protected void readSpecificConfiguration(IProject project) {
+		if (project != null && hasProjectSpecificOptions(project)) {
+			for (Map.Entry<String, String> entry : originalPropertyValues.entrySet()) {
+				String value = SpringCorePreferences.getProjectPreferences(project).getString(
+						PROPERTY_PREFIX + entry.getKey(), entry.getValue());
+				propertyValues.put(entry.getKey(), value);
+			}
+		}
+		else {
+			for (Map.Entry<String, String> entry : originalPropertyValues.entrySet()) {
+				String value = SpringCore.getDefault().getPluginPreferences().getString(
+						PROPERTY_PREFIX + entry.getKey());
+				if (StringUtils.hasText(value)) {
+					propertyValues.put(entry.getKey(), value);
+				}
+			}
+		}
+	}
+
+	public void setSpecificConfiguration(Map<String, String> newPropertyValues, IProject project) {
+		if (project != null && hasProjectSpecificOptions(project)) {
+			for (Map.Entry<String, String> entry : originalPropertyValues.entrySet()) {
+				SpringCorePreferences.getProjectPreferences(project).putString(
+						PROPERTY_PREFIX + entry.getKey(), entry.getValue());
+			}
+		}
+		else {
+			for (Map.Entry<String, String> entry : newPropertyValues.entrySet()) {
+				SpringCore.getDefault().getPluginPreferences().setValue(
+						PROPERTY_PREFIX + entry.getKey(), entry.getValue());
+			}
+		}
+	}
+	
+	public String getPropertyDescription(String propertyName) {
+		if (propertyDescriptions.containsKey(propertyName)) {
+			return propertyDescriptions.get(propertyName);
+		}
+		return propertyName;
+	}
+
 }
