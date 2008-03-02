@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 /**
  * Validates a given {@link IBean}'s bean class. Skips child beans and bean
  * class names with placeholders.
- * 
  * @author Torsten Juergeleit
  * @since 2.0
  */

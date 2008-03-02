@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidat
 
 /**
  * Validates a given root {@link IBean}'s name and aliases.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0

@@ -27,6 +27,9 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
@@ -49,14 +52,37 @@ import org.w3c.dom.NodeList;
  */
 @SuppressWarnings("restriction")
 public abstract class AbstractXmlValidationRule implements
-		IValidationRule<IBeansConfig, IBeansValidationContext> {
+		IValidationRule<IBeansModelElement, IBeansValidationContext> {
 
 	/**
 	 * This rule support <strong>only</strong> {@link IBeansConfig} elements as
 	 * this is the model element representing a actual file.
 	 */
 	public final boolean supports(IModelElement element, IValidationContext context) {
-		return element instanceof IBeansConfig;
+		return element instanceof IBeansConfig
+				|| (element instanceof IBeansImport && ((IBeansImport) element)
+						.getImportedBeansConfigs().size() > 0);
+	}
+
+	/**
+	 * Validates a {@link IBeansConfig} or imported {@link IImportedBeansConfig}
+	 * from a {@link IBeansImport}.
+	 * <p>
+	 * Calls for every {@link IBeansConfig} the
+	 * {@link #validateBeansConfig(IBeansConfig, IBeansValidationContext)}
+	 * method.
+	 */
+	public final void validate(IBeansModelElement element, final IBeansValidationContext context,
+			IProgressMonitor monitor) {
+		if (element instanceof IBeansConfig) {
+			validateBeansConfig((IBeansConfig) element, context);
+		}
+		else if (element instanceof IBeansImport) {
+			for (IImportedBeansConfig beansConfig : ((IBeansImport) element)
+					.getImportedBeansConfigs()) {
+				validateBeansConfig(beansConfig, context);
+			}
+		}
 	}
 
 	/**
@@ -70,8 +96,7 @@ public abstract class AbstractXmlValidationRule implements
 	 * @see #supports(Node)
 	 * @see #validate(Node, IBeansValidationContext)
 	 */
-	public final void validate(IBeansConfig element, final IBeansValidationContext context,
-			IProgressMonitor monitor) {
+	private void validateBeansConfig(final IBeansConfig element, final IBeansValidationContext context) {
 		IStructuredModel model = null;
 		try {
 			model = StructuredModelManager.getModelManager().getExistingModelForRead(
@@ -87,7 +112,7 @@ public abstract class AbstractXmlValidationRule implements
 
 						@Override
 						public void validateNode(Node n) {
-							validate(n, new XmlValidationContext(context));
+							validate(n, new XmlValidationContext(context, element));
 						}
 
 						@Override
@@ -128,7 +153,6 @@ public abstract class AbstractXmlValidationRule implements
 	 */
 	protected abstract void validate(Node n, IXmlValidationContext context);
 
-	
 	/**
 	 * Internal visitor implementation that visits an entire {@link Document}.
 	 */
@@ -166,11 +190,14 @@ public abstract class AbstractXmlValidationRule implements
 	 * object back to {@link IResourceModelElement}s.
 	 */
 	private static class XmlValidationContext implements IXmlValidationContext {
+		
+		private final IBeansConfig beansConfig;
 
 		private final IBeansValidationContext delegateContext;
 
-		public XmlValidationContext(IBeansValidationContext delegateContext) {
+		public XmlValidationContext(IBeansValidationContext delegateContext, IBeansConfig beansConfig) {
 			this.delegateContext = delegateContext;
+			this.beansConfig = beansConfig;
 		}
 
 		public ClassReaderFactory getClassReaderFactory() {
@@ -258,7 +285,7 @@ public abstract class AbstractXmlValidationRule implements
 				int endLine = domNode.getStructuredDocument().getLineOfOffset(
 						domNode.getStartOffset());
 				IModelElement modelElement = BeansModelUtils.getMostSpecificModelElement(startLine,
-						endLine, (IFile) delegateContext.getRootElement().getElementResource(),
+						endLine, (IFile) beansConfig.getElementResource(),
 						null);
 				if (modelElement instanceof IResourceModelElement) {
 					return (IResourceModelElement) modelElement;
