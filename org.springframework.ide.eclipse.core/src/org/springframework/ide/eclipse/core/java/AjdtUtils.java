@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * Utility class that tries to locate {@link IType} instances from the AJDT type
- * hierachy.
+ * Hierarchy.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -67,6 +67,7 @@ public class AjdtUtils {
 		return type instanceof IAspectJElement;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Set<IMethod> getDeclaredMethods(IType type) throws JavaModelException {
 		Set<IMethod> methods = new HashSet<IMethod>();
 		AJRelationshipType[] types = new AJRelationshipType[] { AJRelationshipManager.DECLARED_ON };
