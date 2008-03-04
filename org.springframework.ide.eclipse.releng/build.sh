@@ -132,10 +132,12 @@ then
 	# Start test
 	TEST_SUPPORT_ARCHIVE=`ls $WORKSPACE/org.eclipse.test_*`
 	ECLIPSELOCATION=`ls $WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_*`
+	JUNIT4=$WORKSPACE/eclipse/plugins/org.junit4_4.3.1
 
 	# Unzip test support zip into target eclipse
 	tar xvfz $TEST_SUPPORT_ARCHIVE
-
+	rm -rf $JUNIT4
+	
 	# Install Spring IDE features into target eclipse
 	install_feature org.springframework.ide.eclipse.feature file://$STAGINGLOCATION
 	install_feature org.springframework.ide.eclipse.aop.feature file://$STAGINGLOCATION
@@ -146,11 +148,10 @@ then
 	install_feature org.springframework.ide.eclipse.osgi.feature file://$STAGINGLOCATION
 
 	# Build the tests feature
-
 	$JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/eclipse/startup.jar -application org.eclipse.ant.core.antRunner -buildfile $WORKSPACE/org.eclipse.releng.basebuilder/eclipse/plugins/org.eclipse.pde.build_3.2.0.v20060505a/scripts/build.xml -Dbuilder=$WORKSPACE/test-feature.builder -DforceContextQualifier=v${NAME} $ARGS
 	if [ $? -ne 0 ]
 	then
-    	exit 1
+     	exit 1
 	fi
 
 	# Install the test feature into target eclipse

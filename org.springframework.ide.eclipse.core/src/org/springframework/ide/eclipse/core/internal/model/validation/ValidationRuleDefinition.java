@@ -22,7 +22,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
-import org.springframework.ide.eclipse.core.model.validation.IConfigurableValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.util.StringUtils;
 
@@ -100,7 +99,7 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 	}
 
 	public IValidationRule getRule() {
-		if (rule instanceof IConfigurableValidationRule) {
+		if (propertyValues.size() > 0) {
  			BeanWrapper wrapper = new BeanWrapperImpl(rule);
 			for (Map.Entry<String, String> entry : propertyValues.entrySet()) {
 				try {
