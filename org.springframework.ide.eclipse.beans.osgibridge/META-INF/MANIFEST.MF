@@ -12,3 +12,4 @@ Require-Bundle: org.eclipse.ui,
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
+Export-Package: org.springframework.ide.eclipse.beans.osgibridge
