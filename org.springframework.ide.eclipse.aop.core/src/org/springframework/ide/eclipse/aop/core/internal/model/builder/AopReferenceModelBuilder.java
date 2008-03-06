@@ -480,7 +480,7 @@ public class AopReferenceModelBuilder extends Job {
 	 * workspace will be locked for modifications while this jobs runs.
 	 * @since 2.0.4
 	 */
-	private static class MarkerModifyingJob extends Job {
+	private class MarkerModifyingJob extends Job {
 
 		private Map<IResource, List<IAopReference>> references = new HashMap<IResource, List<IAopReference>>();
 
@@ -498,27 +498,33 @@ public class AopReferenceModelBuilder extends Job {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
-			for (IResource currentFile : resources) {
-				int worked = 1;
-				monitor.beginTask("Creating AOP reference model markers for file ["
-						+ currentFile.getFullPath().toString() + "]", references.get(currentFile)
-						.size() + 1);
-				AopReferenceModelMarkerUtils.deleteProblemMarkers(currentFile);
-				monitor.worked(worked);
-				AopLog.log(AopLog.BUILDER_MESSAGES, Activator
-						.getFormattedMessage("AopReferenceModelBuilder.deletedProblemMarkers"));
-				for (IAopReference reference : references.get(currentFile)) {
-					if (reference.getDefinition().getResource().equals(currentFile)
-							|| reference.getResource().equals(currentFile)) {
-						AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
-						worked++;
-						monitor.worked(worked);
+			try {
+				for (IResource currentFile : resources) {
+					monitor.beginTask("Creating AOP reference model markers for file ["
+							+ currentFile.getFullPath().toString() + "]", IProgressMonitor.UNKNOWN);
+					AopReferenceModelMarkerUtils.deleteProblemMarkers(currentFile);
+					AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.deletedProblemMarkers", currentFile.getFullPath().toString()));
+					// could be that no references have been recorded as the problem during pc matching
+					// occurred
+					if (references.containsKey(currentFile) && references.get(currentFile) != null) {
+						for (IAopReference reference : references.get(currentFile)) {
+							if (reference.getDefinition().getResource().equals(currentFile)
+									|| reference.getResource().equals(currentFile)) {
+								AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
+							}
+						}
+						AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+							"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath().toString()));
 					}
 				}
-				AopLog.log(AopLog.BUILDER_MESSAGES, Activator
-						.getFormattedMessage("AopReferenceModelBuilder.createdProblemMarkers"));
+				monitor.done();
+				return Status.OK_STATUS;
 			}
-			return Status.OK_STATUS;
+			catch (Exception e) {
+				Activator.log(e);
+				return Status.CANCEL_STATUS;
+			}
 		}
 
 		public void addResource(IResource resource) {
@@ -539,7 +545,7 @@ public class AopReferenceModelBuilder extends Job {
 	 * rule attached runs.
 	 * @since 2.0.4
 	 */
-	private static class BlockingOnSelfSchedulingRule implements ISchedulingRule {
+	private class BlockingOnSelfSchedulingRule implements ISchedulingRule {
 		
 		/**
 		 * Always returns <code>false</code>.
