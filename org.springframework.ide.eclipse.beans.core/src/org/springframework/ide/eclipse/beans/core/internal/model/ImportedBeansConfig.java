@@ -34,31 +34,27 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
 /**
- * Imported Spring configuration file.  
+ * Imported Spring configuration file.
  * @author Christian Dupuis
  * @since 2.0.3
- */
-public class ImportedBeansConfig extends AbstractBeansConfig implements
-		IImportedBeansConfig {
+ */ 
+public class ImportedBeansConfig extends AbstractBeansConfig implements IImportedBeansConfig {
 
 	public ImportedBeansConfig(IBeansImport beansImport, Resource resource) {
 		super(beansImport, resource.getDescription());
 		init(resource);
-	} 
+	}
 
 	@Override
 	public IModelElement[] getElementChildren() {
 
-		List<ISourceModelElement> children = new ArrayList<ISourceModelElement>(
-				imports);
+		List<ISourceModelElement> children = new ArrayList<ISourceModelElement>(imports);
 		children.addAll(aliases.values());
 		children.addAll(components);
 		children.addAll(beans.values());
 		Collections.sort(children, new Comparator<ISourceModelElement>() {
-			public int compare(ISourceModelElement element1,
-					ISourceModelElement element2) {
-				return element1.getElementStartLine()
-						- element2.getElementStartLine();
+			public int compare(ISourceModelElement element1, ISourceModelElement element2) {
+				return element1.getElementStartLine() - element2.getElementStartLine();
 			}
 		});
 		return children.toArray(new IModelElement[children.size()]);
@@ -67,11 +63,20 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements
 	@Override
 	protected void readConfig() {
 		if (!isModelPopulated) {
-			imports = new LinkedHashSet<IBeansImport>();
-			aliases = new LinkedHashMap<String, IBeanAlias>();
-			components = new LinkedHashSet<IBeansComponent>();
-			beans = new LinkedHashMap<String, IBean>();
-			problems = new LinkedHashSet<ValidationProblem>();
+			try {
+				w.lock();
+				if (this.isModelPopulated) {
+					return;
+				}
+				imports = new LinkedHashSet<IBeansImport>();
+				aliases = new LinkedHashMap<String, IBeanAlias>();
+				components = new LinkedHashSet<IBeansComponent>();
+				beans = new LinkedHashMap<String, IBean>();
+				problems = new LinkedHashSet<ValidationProblem>();
+			} 
+			finally {
+				w.unlock();
+			}
 		}
 	}
 
@@ -115,11 +120,9 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements
 
 		if (file == null || !file.isAccessible()) {
 			modificationTimestamp = IResource.NULL_STAMP;
-			String msg = "Imported Beans config file '" + resource
-					+ "' not accessible";
+			String msg = "Imported Beans config file '" + resource + "' not accessible";
 			problems = new LinkedHashSet<ValidationProblem>();
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg,
-					file, -1));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
