@@ -60,6 +60,3 @@ Export-Package: org.springframework.ide.eclipse.beans.ui.editor,
  org.springframework.ide.eclipse.beans.ui.editor.templates,
  org.springframework.ide.eclipse.beans.ui.editor.util
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Bundle-ClassPath: spel.jar,
- .,
- antlr-runtime-3.0.1.jar

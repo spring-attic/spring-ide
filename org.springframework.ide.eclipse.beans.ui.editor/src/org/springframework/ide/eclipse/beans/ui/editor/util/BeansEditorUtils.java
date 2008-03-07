@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -432,9 +434,9 @@ public class BeansEditorUtils {
 		return null;
 	}
 
-	public static final List getBeansFromConfigSets(IFile file) {
-		List<IBean> beans = new ArrayList<IBean>();
-		List<IBeansConfig> configs = new ArrayList<IBeansConfig>();
+	public static final Set<IBean> getBeansFromConfigSets(IFile file) {
+		Set<IBean> beans = new HashSet<IBean>();
+		Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				file.getProject());
 
@@ -455,7 +457,7 @@ public class BeansEditorUtils {
 					Set<IBeansConfig> bcs = configSet.getConfigs();
 					configs.addAll(bcs);
 				}
-				List<IBeansConfig> tempConfigs = new ArrayList<IBeansConfig>(configs);
+				Set<IBeansConfig> tempConfigs = new HashSet<IBeansConfig>(configs);
 				for (IBeansConfig config : tempConfigs) {
 					if (configSet.hasConfig(config.getElementName())) {
 						Set<IBeansConfig> bcs = configSet.getConfigs();
@@ -558,9 +560,10 @@ public class BeansEditorUtils {
 		}
 
 		if (!foundLocal) {
-			List beansList = BeansEditorUtils.getBeansFromConfigSets(file);
-			for (int i = 0; i < beansList.size(); i++) {
-				IBean bean = (IBean) beansList.get(i);
+			Set<IBean> beansList = BeansEditorUtils.getBeansFromConfigSets(file);
+			Iterator<IBean> iterator = beansList.iterator();
+			while(iterator.hasNext()) {
+				IBean bean = iterator.next();
 				if (id != null && id.equals(bean.getElementName())) {
 					return BeansModelUtils.getBeanClass(bean, null);
 				}
@@ -657,10 +660,10 @@ public class BeansEditorUtils {
 				}
 			}
 			if (!foundLocal) {
-				List beansList = BeansEditorUtils.getBeansFromConfigSets(file);
-				for (int i = 0; i < beansList.size(); i++) {
-					IBean bean = (IBean) beansList.get(i);
-
+				Set<IBean> beansList = BeansEditorUtils.getBeansFromConfigSets(file);
+				Iterator<IBean> iterator = beansList.iterator();
+				while(iterator.hasNext()) {
+					IBean bean = iterator.next();
 					if (parentId.equals(bean.getElementName())) {
 						getClassNamesOfBeans(file, document, bean
 								.getElementName(), BeansModelUtils

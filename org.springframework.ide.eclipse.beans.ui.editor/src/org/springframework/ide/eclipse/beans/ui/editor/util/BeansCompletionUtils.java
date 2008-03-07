@@ -11,8 +11,10 @@
 package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
@@ -50,9 +52,10 @@ public class BeansCompletionUtils {
 						prefix);
 			}
 			if (showExternal) {
-				List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
-				for (int i = 0; i < beans.size(); i++) {
-					IBean bean = (IBean) beans.get(i);
+				Set<IBean> beansList = BeansEditorUtils.getBeansFromConfigSets(file);
+				Iterator<IBean> iterator = beansList.iterator();
+				while(iterator.hasNext()) {
+					IBean bean = iterator.next();
 					requestor.acceptSearchMatch(bean, file, prefix);
 				}
 			}
