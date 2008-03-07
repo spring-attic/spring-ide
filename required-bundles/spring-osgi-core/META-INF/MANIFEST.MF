@@ -151,4 +151,3 @@ Implementation-Version: 1.0.1
 Implementation-Vendor: Spring Dynamic Modules Framework
 Bundle-ClassPath: spring-osgi-core.jar
 
-
