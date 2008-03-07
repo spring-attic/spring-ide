@@ -12,14 +12,14 @@ Import-Package: org.apache.commons.logging,org.osgi.framework;version=
  rsion=1.0,org.springframework.osgi.service.importer.support;version=1
  .0,org.springframework.osgi.util;version=1.0,org.springframework.util
  ,org.xml.sax;resolution:=optional
-Spring-DM-Version: 1.0
+Spring-DM-Version: 1.0.1
 Include-Resource: src/main/resources, 
       META-INF/license.txt=../l
  icense.txt, 
       META-INF/notice.txt=../notice.txt
 Implementation-Vendor-Id: org.springframework.osgi
-Bnd-LastModified: 1200678894187
-Bundle-Version: 1.0.0.v200801251000
+Bnd-LastModified: 1204220048578
+Bundle-Version: 1.0.1.v200803070100
 Ignore-Package: org.springframework.osgi.extender.internal.dependencie
  s.startup,org.springframework.osgi.extender.internal.util,org.springf
  ramework.osgi.extender.internal,org.springframework.osgi.extender.int
@@ -40,7 +40,7 @@ Bundle-ManifestVersion: 2
 Implementation-Title: Spring Dynamic Modules Framework
 Bundle-SymbolicName: org.springframework.bundle.osgi.extender
 Tool: Bnd-0.0.160
-Implementation-Version: 1.0
+Implementation-Version: 1.0.1
 Implementation-Vendor: Spring Dynamic Modules Framework
 Bundle-ClassPath: spring-osgi-extender.jar
 

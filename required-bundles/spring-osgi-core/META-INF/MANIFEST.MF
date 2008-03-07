@@ -13,52 +13,52 @@ Import-Package: org.aopalliance.aop;version=0.0.0,org.aopalliance.inte
  ersion=2.5,org.springframework.context.support;version=2.5,org.spring
  framework.core;version=2.5,org.springframework.core.enums;version=2.5
  ,org.springframework.core.io;version=2.5,org.springframework.core.io.
- support;version=2.5,org.springframework.osgi;version=1.0.0,org.spring
- framework.osgi.bundle;version=1.0.0,org.springframework.osgi.compendi
- um.config;version=1.0.0,org.springframework.osgi.compendium.internal;
- version=1.0.0,org.springframework.osgi.config;version=1.0.0,org.sprin
- gframework.osgi.context;version=1.0.0,org.springframework.osgi.contex
- t.support;version=1.0.0,org.springframework.osgi.context.support.inte
- rnal;version=1.0.0,org.springframework.osgi.io;version=1.0,org.spring
- framework.osgi.service;version=1.0.0,org.springframework.osgi.service
- .dependency;version=1.0.0,org.springframework.osgi.service.dependency
- .internal;version=1.0.0,org.springframework.osgi.service.exporter;ver
- sion=1.0.0,org.springframework.osgi.service.exporter.support;version=
- 1.0.0,org.springframework.osgi.service.importer;version=1.0.0,org.spr
- ingframework.osgi.service.importer.internal.aop;version=1.0.0,org.spr
- ingframework.osgi.service.importer.internal.collection;version=1.0.0,
+ support;version=2.5,org.springframework.osgi;version=1.0.1,org.spring
+ framework.osgi.bundle;version=1.0.1,org.springframework.osgi.compendi
+ um.config;version=1.0.1,org.springframework.osgi.compendium.internal;
+ version=1.0.1,org.springframework.osgi.config;version=1.0.1,org.sprin
+ gframework.osgi.context;version=1.0.1,org.springframework.osgi.contex
+ t.support;version=1.0.1,org.springframework.osgi.context.support.inte
+ rnal;version=1.0.1,org.springframework.osgi.io;version=1.0,org.spring
+ framework.osgi.service;version=1.0.1,org.springframework.osgi.service
+ .dependency;version=1.0.1,org.springframework.osgi.service.dependency
+ .internal;version=1.0.1,org.springframework.osgi.service.exporter;ver
+ sion=1.0.1,org.springframework.osgi.service.exporter.support;version=
+ 1.0.1,org.springframework.osgi.service.importer;version=1.0.1,org.spr
+ ingframework.osgi.service.importer.internal.aop;version=1.0.1,org.spr
+ ingframework.osgi.service.importer.internal.collection;version=1.0.1,
  org.springframework.osgi.service.importer.internal.collection.compara
- tor;version=1.0.0,org.springframework.osgi.service.importer.internal.
- support;version=1.0.0,org.springframework.osgi.service.importer.inter
- nal.util;version=1.0.0,org.springframework.osgi.service.importer.supp
- ort;version=1.0.0,org.springframework.osgi.util;version=1.0.0,org.spr
- ingframework.osgi.util.internal;version=1.0.0,org.springframework.uti
+ tor;version=1.0.1,org.springframework.osgi.service.importer.internal.
+ support;version=1.0.1,org.springframework.osgi.service.importer.inter
+ nal.util;version=1.0.1,org.springframework.osgi.service.importer.supp
+ ort;version=1.0.1,org.springframework.osgi.util;version=1.0.1,org.spr
+ ingframework.osgi.util.internal;version=1.0.1,org.springframework.uti
  l;version=2.5,org.springframework.util.xml;version=2.5,org.w3c.dom;re
  solution:=optional,org.xml.sax;resolution:=optional
-Spring-DM-Version: 1.0
+Spring-DM-Version: 1.0.1
 Include-Resource: src/main/resources, 
       META-INF/license.txt=../l
  icense.txt, 
       META-INF/notice.txt=../notice.txt
 Implementation-Vendor-Id: org.springframework.osgi
-Bnd-LastModified: 1200678891578
+Bnd-LastModified: 1204220044765
 Export-Package: org.springframework.osgi.service.dependency;version=1.
- 0.0,org.springframework.osgi.compendium.config;version=1.0.0,org.spri
+ 0.1,org.springframework.osgi.compendium.config;version=1.0.1,org.spri
  ngframework.osgi.service.importer.internal.support;uses:="org.osgi.fr
  amework,org.springframework.util,org.springframework.osgi.util";versi
- on=1.0.0,org.springframework.osgi.compendium.internal;uses:="org.osgi
+ on=1.0.1,org.springframework.osgi.compendium.internal;uses:="org.osgi
  .framework,org.apache.commons.logging,org.osgi.service.cm,org.springf
  ramework.osgi.util,org.springframework.osgi.context,org.springframewo
  rk.beans.factory.config,org.springframework.osgi.util.internal,org.sp
  ringframework.beans,org.springframework.util,org.springframework.bean
- s.factory";version=1.0.0,org.springframework.osgi.service.importer.in
+ s.factory";version=1.0.1,org.springframework.osgi.service.importer.in
  ternal.aop;uses:="org.springframework.osgi.service.dependency,org.osg
  i.framework,org.springframework.osgi.service.importer.internal.suppor
  t,org.apache.commons.logging,org.springframework.osgi.service.importe
  r,org.aopalliance.intercept,org.springframework.osgi.util,org.springf
  ramework.osgi.service.importer.internal.util,org.springframework.osgi
  .service,org.springframework.util,org.springframework.aop.support,org
- .springframework.beans.factory";version=1.0.0,org.springframework.osg
+ .springframework.beans.factory";version=1.0.1,org.springframework.osg
  i.config;uses:="org.springframework.util.xml,org.springframework.core
  ,org.osgi.framework,org.springframework.osgi.compendium.internal,org.
  w3c.dom,org.springframework.core.enums,org.apache.commons.logging,org
@@ -68,8 +68,8 @@ Export-Package: org.springframework.osgi.service.dependency;version=1.
  ml,org.springframework.osgi.util.internal,org.springframework.beans,o
  rg.springframework.osgi.service.exporter,org.springframework.util,org
  .springframework.beans.factory,org.springframework.osgi.service.impor
- ter.internal.collection.comparator";version=1.0.0,org.springframework
- .osgi.service.importer;uses:=org.osgi.framework;version=1.0.0,org.spr
+ ter.internal.collection.comparator";version=1.0.1,org.springframework
+ .osgi.service.importer;uses:=org.osgi.framework;version=1.0.1,org.spr
  ingframework.osgi.service.exporter.support;uses:="org.springframework
  .osgi.service.dependency,org.springframework.core,org.osgi.framework,
  org.springframework.core.enums,org.springframework.osgi.service.impor
@@ -79,20 +79,20 @@ Export-Package: org.springframework.osgi.service.dependency;version=1.
  aop.framework,org.springframework.osgi.context.support.internal,org.s
  pringframework.beans,org.springframework.osgi.service.exporter,org.sp
  ringframework.util,org.aopalliance.aop,org.springframework.beans.fact
- ory";version=1.0.0,org.springframework.osgi.bundle;uses:="org.osgi.se
+ ory";version=1.0.1,org.springframework.osgi.bundle;uses:="org.osgi.se
  rvice.startlevel,org.osgi.framework,org.springframework.core.enums,or
  g.apache.commons.logging,org.springframework.context,org.springframew
  ork.osgi.util,org.springframework.osgi.context,org.springframework.co
  re.io,org.springframework.util,org.springframework.beans.factory";ver
- sion=1.0.0,org.springframework.osgi.util;uses:="org.springframework.c
+ sion=1.0.1,org.springframework.osgi.util;uses:="org.springframework.c
  ore,org.osgi.framework,org.apache.commons.logging,org.springframework
- .osgi.util.internal,org.springframework.util";version=1.0.0,org.sprin
+ .osgi.util.internal,org.springframework.util";version=1.0.1,org.sprin
  gframework.osgi.service.importer.internal.collection;uses:="org.osgi.
  framework,org.springframework.osgi.service.importer.internal.aop,org.
  apache.commons.logging,org.springframework.osgi.service,org.springfra
  mework.osgi.service.importer.internal.util,org.springframework.util,o
  rg.springframework.beans.factory,org.springframework.osgi.service.imp
- orter,org.springframework.osgi.util";version=1.0.0,org.springframewor
+ orter,org.springframework.osgi.util";version=1.0.1,org.springframewor
  k.osgi.service.importer.support;uses:="org.springframework.osgi.servi
  ce.dependency,org.springframework.osgi.service.importer.internal.supp
  ort,org.osgi.framework,org.springframework.core.enums,org.springframe
@@ -102,13 +102,13 @@ Export-Package: org.springframework.osgi.service.dependency;version=1.
  internal.collection,org.springframework.osgi.context,org.springframew
  ork.osgi.util.internal,org.springframework.aop.framework,org.springfr
  amework.util,org.aopalliance.aop,org.springframework.beans.factory";v
- ersion=1.0.0,org.springframework.osgi.context;uses:="org.osgi.framewo
+ ersion=1.0.1,org.springframework.osgi.context;uses:="org.osgi.framewo
  rk,org.springframework.beans,org.springframework.context";version=1.0
- .0,org.springframework.osgi;version=1.0.0,org.springframework.osgi.ut
+ .1,org.springframework.osgi;version=1.0.1,org.springframework.osgi.ut
  il.internal;uses:="org.springframework.beans.factory.config,org.sprin
  gframework.core,org.osgi.framework,org.springframework.aop.framework,
  org.springframework.util,org.springframework.beans.factory";version=1
- .0.0,org.springframework.osgi.context.support;uses:="org.osgi.framewo
+ .0.1,org.springframework.osgi.context.support;uses:="org.osgi.framewo
  rk,org.springframework.context.support,org.springframework.core.io,or
  g.springframework.core.io.support,org.xml.sax,org.apache.commons.logg
  ing,org.springframework.context,org.aopalliance.intercept,org.springf
@@ -117,25 +117,25 @@ Export-Package: org.springframework.osgi.service.dependency;version=1.
  .springframework.beans.factory.xml,org.springframework.osgi.util.inte
  rnal,org.springframework.osgi.io,org.springframework.aop.framework,or
  g.springframework.beans,org.springframework.osgi.context.support.inte
- rnal,org.springframework.util,org.aopalliance.aop";version=1.0.0,org.
+ rnal,org.springframework.util,org.aopalliance.aop";version=1.0.1,org.
  springframework.osgi.service.dependency.internal;uses:="org.springfra
  mework.beans.factory.config,org.springframework.osgi.service.dependen
  cy,org.springframework.core,org.springframework.osgi.util.internal,or
  g.springframework.beans,org.apache.commons.logging,org.springframewor
- k.util,org.springframework.beans.factory";version=1.0.0,org.springfra
+ k.util,org.springframework.beans.factory";version=1.0.1,org.springfra
  mework.osgi.context.support.internal;uses:="org.springframework.beans
  .factory.config,org.springframework.core,org.osgi.framework,org.apach
  e.commons.logging,org.springframework.util,org.springframework.beans.
- factory";version=1.0.0,org.springframework.osgi.service.importer.inte
+ factory";version=1.0.1,org.springframework.osgi.service.importer.inte
  rnal.util;uses:="org.osgi.framework,org.apache.commons.logging,org.sp
  ringframework.util,org.springframework.osgi.service.importer,org.spri
- ngframework.osgi.util";version=1.0.0,org.springframework.osgi.service
+ ngframework.osgi.util";version=1.0.1,org.springframework.osgi.service
  ;uses:="org.springframework.osgi,org.osgi.framework,org.springframewo
- rk.osgi.util";version=1.0.0,org.springframework.osgi.service.exporter
- ;version=1.0.0,org.springframework.osgi.service.importer.internal.col
+ rk.osgi.util";version=1.0.1,org.springframework.osgi.service.exporter
+ ;version=1.0.1,org.springframework.osgi.service.importer.internal.col
  lection.comparator;uses:="org.osgi.framework,org.springframework.osgi
- .service.importer,org.springframework.osgi.util";version=1.0.0
-Bundle-Version: 1.0.0.v200801251010
+ .service.importer,org.springframework.osgi.util";version=1.0.1
+Bundle-Version: 1.0.1.v200803070100
 Bundle-Name: spring-osgi-core
 Bundle-Description: Spring/OSGi core classes. Offers OSGi-based applic
  ation context and importer/exporter functionality.
@@ -147,7 +147,8 @@ Bundle-ManifestVersion: 2
 Implementation-Title: Spring Dynamic Modules Framework
 Bundle-SymbolicName: org.springframework.bundle.osgi.core
 Tool: Bnd-0.0.160
-Implementation-Version: 1.0
+Implementation-Version: 1.0.1
 Implementation-Vendor: Spring Dynamic Modules Framework
 Bundle-ClassPath: spring-osgi-core.jar
+
 
