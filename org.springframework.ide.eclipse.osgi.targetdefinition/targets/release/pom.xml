@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>${spring.osgi.groupId}</groupId>
   <artifactId>${spring.osgi.groupId}.target</artifactId>
-  <version>1.0</version>
+  <version>1.0.1</version>
   <packaging>pom</packaging>
   <name>Target Platform for Spring Dynamic Modules for OSGi(tm) Service Platforms</name>
   <properties>
     <spring.groupId>org.springframework</spring.groupId>
-    <spring.version>2.5.1</spring.version>
+    <spring.version>2.5.2</spring.version>
     <spring.osgi.groupId>org.springframework.osgi</spring.osgi.groupId>
-    <spring.osgi.version>1.0</spring.osgi.version>
+    <spring.osgi.version>1.0.1</spring.osgi.version>
     <felix.commons.groupId>org.apache.felix.commons</felix.commons.groupId>
   </properties>
   <dependencies>
@@ -114,9 +114,9 @@
     </dependency>
     <!-- OSGi frameworks bundles -->
     <dependency>
-      <groupId>org.eclipse.osgi</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
-      <version>3.2.2</version>
+      <groupId>org.eclipse</groupId>
+      <artifactId>osgi</artifactId>
+      <version>3.3.0-v20070530</version>
     </dependency>
   </dependencies>
   <build>
@@ -152,13 +152,13 @@
       <url>https://springframework.svn.sourceforge.net/svnroot/springframework/repos/repo-ext</url>
     </repository>
     <repository>
-      <id>i21-s3-maven-repo</id>
-      <name>i21 S3 milestone repo</name>
+      <id>springsource-s3-maven-repo</id>
+      <name>SpringSource S3 milestone repo</name>
       <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
     </repository>
     <repository>
-      <id>i21-s3-osgi-repo</id>
-      <name>i21 S3 OSGi repo</name>
+      <id>springsource-s3-osgi-repo</id>
+      <name>SpringSource S3 OSGi repo</name>
       <url>http://s3.amazonaws.com/maven.springframework.org/osgi</url>
     </repository>
   </repositories>
