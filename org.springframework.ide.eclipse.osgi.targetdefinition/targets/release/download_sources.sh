@@ -26,7 +26,7 @@ download_spring_source() {
 }
 
 download_osgi_source() {
-	download_source org/springframework/osgi $1 $OSGI_VERSION $2 $BUNDLE_OSGI_VERSION org.springframework.osgi.source http://s3.amazonaws.com/maven.springframework.org/milestone
+	download_source org/springframework/osgi $1 $OSGI_VERSION $2 $BUNDLE_OSGI_VERSION org.springframework.osgi.source http://repo1.maven.org/maven2
 }
 
 download_spring_source spring-aop org.springframework.bundle.spring.aop 
