@@ -28,7 +28,6 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
-import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.taginfo.XMLTagInfoHoverProcessor;
@@ -76,7 +75,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 			int documentPosition) {
 		String result = null;
 
-		IndexedRegion treeNode = ContentAssistUtils.getNodeAt(
+		IndexedRegion treeNode = BeansEditorUtils.getNodeAt(
 				(StructuredTextViewer) textViewer, documentPosition);
 		if (treeNode == null)
 			return null;

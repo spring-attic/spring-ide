@@ -36,14 +36,18 @@ import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.internal.Workbench;
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
+import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.beans.PropertyAccessor;
@@ -424,6 +428,41 @@ public class BeansEditorUtils {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * /**
+	 * Returns the closest IndexedRegion for the offset and viewer allowing
+	 * for differences between viewer offsets and model positions. note: this
+	 * method returns an IndexedRegion for read only
+	 * <p>
+	 * Copied from {@link ContentAssistUtils} in order to solve compatibility problems on 3.2.
+	 * @see ContentAssistUtils#getNodeAt(ITextViewer, int)
+	 */
+	public static IndexedRegion getNodeAt(ITextViewer viewer, int documentOffset) {
+
+		if (viewer == null)
+			return null;
+
+		IndexedRegion node = null;
+		IModelManager mm = StructuredModelManager.getModelManager();
+		IStructuredModel model = null;
+		if (mm != null)
+			model = mm.getExistingModelForRead(viewer.getDocument());
+		try {
+			if (model != null) {
+				int lastOffset = documentOffset;
+				node = model.getIndexedRegion(documentOffset);
+				while (node == null && lastOffset >= 0) {
+					lastOffset--;
+					node = model.getIndexedRegion(lastOffset);
+				}
+			}
+		} finally {
+			if (model != null)
+				model.releaseFromRead();
+		}
+		return node;
 	}
 
 	public static final String getAttribute(Node node, String attributeName) {
