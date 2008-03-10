@@ -66,6 +66,11 @@
       <artifactId>spring-core</artifactId>
       <version>${spring.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${spring.groupId}</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
     <!-- Required libraries repackaged as OSGi bundles -->
     <dependency>
       <groupId>${spring.osgi.groupId}</groupId>
@@ -113,11 +118,11 @@
       <version>1.4.3</version>
     </dependency>
     <!-- OSGi frameworks bundles -->
-    <dependency>
+    <!-- <dependency>
       <groupId>org.eclipse</groupId>
       <artifactId>osgi</artifactId>
       <version>3.3.0-v20070530</version>
-    </dependency>
+    </dependency>-->
   </dependencies>
   <build>
     <plugins>

@@ -34,6 +34,7 @@ download_spring_source spring-beans org.springframework.bundle.spring.beans
 download_spring_source spring-core org.springframework.bundle.spring.core
 download_spring_source spring-context org.springframework.bundle.spring.context 
 download_spring_source spring-context-support org.springframework.bundle.spring.context.support 
+download_spring_source spring-test org.springframework.bundle.spring.test
 
 download_osgi_source spring-osgi-annotation org.springframework.bundle.osgi.extensions.annotations
 download_osgi_source spring-osgi-core org.springframework.bundle.osgi.core
