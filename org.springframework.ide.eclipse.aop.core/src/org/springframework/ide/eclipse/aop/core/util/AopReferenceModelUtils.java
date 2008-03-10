@@ -62,8 +62,7 @@ public class AopReferenceModelUtils {
 			return je.getElementName();
 		}
 		else if (je instanceof IField) {
-			return je.getElementName() + " - "
-					+ ((IType) je.getParent()).getFullyQualifiedName();
+			return je.getElementName() + " - " + ((IType) je.getParent()).getFullyQualifiedName();
 		}
 		else if (je.getParent() != null) {
 			return je.getParent().getElementName() + '.' + je.getElementName();
@@ -73,8 +72,7 @@ public class AopReferenceModelUtils {
 
 	public static String getPackageLinkName(IJavaElement je) {
 		if (je instanceof IMethod) {
-			return ((IMethod) je).getDeclaringType().getPackageFragment()
-					.getElementName();
+			return ((IMethod) je).getDeclaringType().getPackageFragment().getElementName();
 		}
 		else if (je instanceof IType) {
 			return ((IType) je).getPackageFragment().getElementName();
@@ -104,16 +102,14 @@ public class AopReferenceModelUtils {
 		StringBuffer buf = new StringBuffer(": <");
 		buf.append(reference.getDefinition().getAspectName());
 		buf.append("> [");
-		buf.append(reference.getDefinition().getResource()
-				.getProjectRelativePath().toString());
+		buf.append(reference.getDefinition().getResource().getProjectRelativePath().toString());
 		buf.append("]");
 		return buf.toString();
 	}
 
 	public static Set<IFile> getAffectedFilesFromBeansProject(IProject file) {
 		Set<IFile> affectedFiles = new HashSet<IFile>();
-		IBeansProject bp = BeansCorePlugin.getModel().getProject(
-				file.getProject());
+		IBeansProject bp = BeansCorePlugin.getModel().getProject(file.getProject());
 		if (bp != null && bp.getConfigs() != null && bp.getConfigs().size() > 0) {
 			for (IBeansConfig config : bp.getConfigs()) {
 				affectedFiles.add((IFile) config.getElementResource());
@@ -128,10 +124,8 @@ public class AopReferenceModelUtils {
 		// since we moved to the new AbstractProjectBuilder we don't need the
 		// following check.
 		if ((kind == IncrementalProjectBuilder.AUTO_BUILD || kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
-				&& resource instanceof IFile
-				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
-			Set<IBeansProject> projects = BeansCorePlugin.getModel()
-					.getProjects();
+				&& resource instanceof IFile && resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
+			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
 			if (projects != null) {
 				for (IBeansProject project : projects) {
 					if (project != null) {
@@ -139,19 +133,16 @@ public class AopReferenceModelUtils {
 						IJavaElement element = JavaCore.create(resource);
 						if (element instanceof ICompilationUnit) {
 							try {
-								IType[] types = ((ICompilationUnit) element)
-										.getAllTypes();
+								IType[] types = ((ICompilationUnit) element).getAllTypes();
 								List<String> typeNames = new ArrayList<String>();
 								for (IType type : types) {
 									typeNames.add(type.getFullyQualifiedName());
 								}
 								for (IBeansConfig config : configs) {
-									Set<String> allBeanClasses = config
-											.getBeanClasses();
+									Set<String> allBeanClasses = config.getBeanClasses();
 									for (String className : allBeanClasses) {
 										if (typeNames.contains(className)) {
-											files.add((IFile) config
-													.getElementResource());
+											files.add((IFile) config.getElementResource());
 										}
 									}
 								}
@@ -167,8 +158,7 @@ public class AopReferenceModelUtils {
 			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils
 					.getResourceModelElement(resource);
 			if (beansConfig instanceof IImportedBeansConfig) {
-				beansConfig = BeansModelUtils.getParentOfClass(beansConfig,
-						BeansConfig.class);
+				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
 			}
 			for (IBeansImport beansImport : beansConfig.getImports()) {
 				for (IImportedBeansConfig importedBeansConfig : beansImport
@@ -176,7 +166,7 @@ public class AopReferenceModelUtils {
 					files.add(importedBeansConfig.getElementResource());
 				}
 			}
-			getAffectedFilesFromBeansConfig(beansConfig, files);
+			files.add((IFile) beansConfig.getElementResource());
 		}
 		// if the .classpath file is updated redo for every beans config
 		else if (JdtUtils.isClassPathFile(resource)) {
@@ -184,31 +174,33 @@ public class AopReferenceModelUtils {
 					resource.getProject());
 			if (beansProject != null) {
 				for (IBeansConfig beansConfig : beansProject.getConfigs()) {
-					getAffectedFilesFromBeansConfig(beansConfig, files);
+					files.add((IFile) beansConfig.getElementResource());
 				}
 			}
 		}
 		return files;
 	}
 
-	private static void getAffectedFilesFromBeansConfig(
-			IBeansConfig beansConfig, Set<IResource> files) {
-		files.add((IFile) beansConfig.getElementResource());
-
-		// add confis from config set
-		IBeansProject project = BeansCorePlugin.getModel().getProject(
-				beansConfig.getElementResource().getProject());
-		if (project != null) {
-			Set<IBeansConfigSet> configSets = project.getConfigSets();
-			for (IBeansConfigSet configSet : configSets) {
-				if (configSet.getConfigs().contains(beansConfig)) {
-					Set<IBeansConfig> bcs = configSet.getConfigs();
-					for (IBeansConfig bc : bcs) {
-						files.add(bc.getElementResource());
+	public static Set<IResource> getAffectedFilesFromBeansConfig(Set<IResource> files) {
+		Set<IResource> newResources = new HashSet<IResource>();
+		for (IResource resource : files) {
+			// add confis from config set
+			IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
+			IBeansConfig beansConfig = project.getConfig((IFile) resource);
+			if (project != null) {
+				Set<IBeansConfigSet> configSets = project.getConfigSets();
+				for (IBeansConfigSet configSet : configSets) {
+					if (configSet.getConfigs().contains(beansConfig)) {
+						Set<IBeansConfig> bcs = configSet.getConfigs();
+						for (IBeansConfig bc : bcs) {
+							newResources.add(bc.getElementResource());
+						}
 					}
 				}
 			}
 		}
+		newResources.addAll(files);
+		return newResources;
 	}
 
 	public static IBean getBeanFromElementId(String elementId) {

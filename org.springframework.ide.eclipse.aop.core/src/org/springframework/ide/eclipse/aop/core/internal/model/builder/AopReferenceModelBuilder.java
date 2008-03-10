@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
@@ -80,6 +79,8 @@ public class AopReferenceModelBuilder extends Job {
 
 	private Set<IResource> affectedResources;
 
+	private Set<IResource> originalResources;
+
 	private IProjectClassLoaderSupport classLoaderSupport;
 
 	
@@ -87,9 +88,10 @@ public class AopReferenceModelBuilder extends Job {
 	 * Constructor to create a {@link AopReferenceModelBuilder} instance.
 	 * @param affectedResources the set of resources that should be processed
 	 */
-	public AopReferenceModelBuilder(Set<IResource> affectedResources) {
+	public AopReferenceModelBuilder(Set<IResource> affectedResources, Set<IResource> originalResources) {
 		super(Activator.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
 		this.affectedResources = affectedResources;
+		this.originalResources = originalResources;
 		setPriority(Job.BUILD);
 		// make sure that only one Job at a time runs but without blocking the UI
 		setRule(new BlockingOnSelfSchedulingRule());
@@ -108,7 +110,8 @@ public class AopReferenceModelBuilder extends Job {
 				"AopReferenceModelBuilder.startBuildReferenceModel", affectedResources.size()));
 		
 		MarkerModifyingJob markerJob = new MarkerModifyingJob();
-		
+		monitor.beginTask(Activator.getFormattedMessage(
+				"AopReferenceModelBuilder.startBuildingAopReferenceModel"), affectedResources.size());
 		try {
 			int worked = 0;
 			for (IResource currentResource : affectedResources) {
@@ -122,9 +125,9 @@ public class AopReferenceModelBuilder extends Job {
 					AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 							"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile
 									.getFullPath().toString()));
-					monitor.beginTask(Activator.getFormattedMessage(
+					monitor.subTask(Activator.getFormattedMessage(
 							"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile
-									.getFullPath().toString()), 1);
+									.getFullPath().toString()));
 					
 					markerJob.addResource(currentFile);
 					IAopProject aopProject = buildAopReferencesForFile(currentFile, monitor);
@@ -295,29 +298,18 @@ public class AopReferenceModelBuilder extends Job {
 			AspectDefinitionMatcher matcher, IProgressMonitor monitor, IResource file,
 			IAopProject aopProject, Set<IBean> beans) {
 
-		SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor,
-				IProgressMonitor.UNKNOWN);
-		subProgressMonitor.beginTask(Activator
-				.getFormattedMessage("AopReferenceModelBuilder.buildingAopReferences"), beans
-				.size());
-		int worked = 0;
+		monitor.subTask(Activator
+				.getFormattedMessage("AopReferenceModelBuilder.buildingAopReferences"));
 
-		try {
-			for (IBean bean : beans) {
-				subProgressMonitor.subTask(Activator.getFormattedMessage(
-						"AopReferenceModelBuilder.buildingAopReferencesForBean", bean
-								.getElementName(), bean.getElementResource().getFullPath()));
-				buildAopReferencesForBean(bean, config, info, file, aopProject, matcher, monitor);
+		for (IBean bean : beans) {
+			monitor.subTask(Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.buildingAopReferencesForBean", bean.getElementName(),
+					bean.getElementResource().getFullPath()));
+			buildAopReferencesForBean(bean, config, info, file, aopProject, matcher, monitor);
 
-				// Make sure that inner beans are handled as well
-				buildAopReferencesForBeans(config, info, matcher, monitor, file, aopProject,
-						BeansModelUtils.getInnerBeans(bean));
-
-				subProgressMonitor.worked(worked++);
-			}
-		}
-		finally {
-			subProgressMonitor.done();
+			// Make sure that inner beans are handled as well
+			buildAopReferencesForBeans(config, info, matcher, monitor, file, aopProject,
+					BeansModelUtils.getInnerBeans(bean));
 		}
 	}
 
@@ -329,12 +321,14 @@ public class AopReferenceModelBuilder extends Job {
 	 */
 	private void buildAopReferencesFromBeansConfigSets(IBeansProject project, IBeansConfig config,
 			IAspectDefinition info, AspectDefinitionMatcher matcher, IProgressMonitor monitor) {
-		for (IBeansConfigSet configSet : project.getConfigSets()) {
-			if (configSet.getConfigs().contains(config)) {
-				Set<IBeansConfig> configs = configSet.getConfigs();
-				for (IBeansConfig configSetConfig : configs) {
-					if (!config.equals(configSetConfig)) {
-						buildAopReferencesForBeansConfig(configSetConfig, info, matcher, monitor);
+		if (this.originalResources.contains(config.getElementResource())) {
+			for (IBeansConfigSet configSet : project.getConfigSets()) {
+				if 	(configSet.getConfigs().contains(config)) {
+					Set<IBeansConfig> configs = configSet.getConfigs();
+					for (IBeansConfig configSetConfig : configs) {
+						if (!config.equals(configSetConfig)) {
+							buildAopReferencesForBeansConfig(configSetConfig, info, matcher, monitor);
+						}
 					}
 				}
 			}

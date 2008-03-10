@@ -56,8 +56,11 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 			throws CoreException {
 		monitor.subTask(Activator
 				.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
-		Job job = new AopReferenceModelBuilder(affectedResources);
-		job.schedule();
+		if (affectedResources.size() > 0) {
+			Job job = new AopReferenceModelBuilder(AopReferenceModelUtils
+					.getAffectedFilesFromBeansConfig(affectedResources), affectedResources);
+			job.schedule();
+		}
 		monitor.done();
 	}
 
