@@ -48,7 +48,7 @@
 			<jvmarg value="-Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl" />
 			<jvmarg value="-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=org.apache.xerces.parsers.XIncludeParserConfiguration" />
 			<arg value="${spring.home}/docs/src/docbkx/index.xml" />
-			<arg value="${basedir}/styles/eclipse/eclipse.xsl" />
+			<arg value="${basedir}/../../styles/eclipse/eclipse.xsl" />
 		</java>
 
 		<move file="${basedir}/${dist.ref.dir}/toc.xml" todir="${basedir}" />
