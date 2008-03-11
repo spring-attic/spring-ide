@@ -79,7 +79,7 @@ public class AopReferenceModelBuilder extends Job {
 
 	private Set<IResource> affectedResources;
 
-	private Set<IResource> originalResources;
+	//private Set<IResource> originalResources;
 
 	private IProjectClassLoaderSupport classLoaderSupport;
 
@@ -91,7 +91,7 @@ public class AopReferenceModelBuilder extends Job {
 	public AopReferenceModelBuilder(Set<IResource> affectedResources, Set<IResource> originalResources) {
 		super(Activator.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
 		this.affectedResources = affectedResources;
-		this.originalResources = originalResources;
+		//this.originalResources = originalResources;
 		setPriority(Job.BUILD);
 		// make sure that only one Job at a time runs but without blocking the UI
 		setRule(new BlockingOnSelfSchedulingRule());
@@ -321,7 +321,8 @@ public class AopReferenceModelBuilder extends Job {
 	 */
 	private void buildAopReferencesFromBeansConfigSets(IBeansProject project, IBeansConfig config,
 			IAspectDefinition info, AspectDefinitionMatcher matcher, IProgressMonitor monitor) {
-		if (this.originalResources.contains(config.getElementResource())) {
+		// Revisit this statement once we have sorted out the algorithm
+		//if (this.originalResources.contains(config.getElementResource())) {
 			for (IBeansConfigSet configSet : project.getConfigSets()) {
 				if 	(configSet.getConfigs().contains(config)) {
 					Set<IBeansConfig> configs = configSet.getConfigs();
@@ -332,7 +333,7 @@ public class AopReferenceModelBuilder extends Job {
 					}
 				}
 			}
-		}
+		//}
 	}
 
 	private IAopProject buildAopReferencesForFile(IFile currentFile, IProgressMonitor monitor) {
