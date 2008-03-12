@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ import org.eclipse.swt.graphics.Image;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class SimpleNamespaceDefinition implements INamespaceDefinition {
+public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
 	private final String prefix;
 
@@ -32,7 +32,7 @@ public class SimpleNamespaceDefinition implements INamespaceDefinition {
 	
 	private Set<String> locations = new HashSet<String>();
 
-	public SimpleNamespaceDefinition(final String prefix, final String uri,
+	public DefaultNamespaceDefinition(final String prefix, final String uri,
 			final String defaultLocation, final Image image) {
 		this.prefix = prefix;
 		this.uri = uri;
@@ -69,8 +69,8 @@ public class SimpleNamespaceDefinition implements INamespaceDefinition {
 	}
 	
 	public boolean equals(Object obj) {
-		if (obj instanceof SimpleNamespaceDefinition) {
-			SimpleNamespaceDefinition o = (SimpleNamespaceDefinition) obj;
+		if (obj instanceof DefaultNamespaceDefinition) {
+			DefaultNamespaceDefinition o = (DefaultNamespaceDefinition) obj;
 			return o.prefix.equals(prefix) && o.uri.equals(uri);
 		}
 		return false;
