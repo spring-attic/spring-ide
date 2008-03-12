@@ -48,11 +48,10 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansModelContentProvider implements ITreeContentProvider,
-		ITreePathContentProvider, IModelChangeListener {
+public class BeansModelContentProvider implements ITreeContentProvider, ITreePathContentProvider,
+		IModelChangeListener {
 
-	public static final DefaultNamespaceContentProvider DEFAULT_NAMESPACE_CONTENT_PROVIDER = 
-		new DefaultNamespaceContentProvider();
+	public static final DefaultNamespaceContentProvider DEFAULT_NAMESPACE_CONTENT_PROVIDER = new DefaultNamespaceContentProvider();
 
 	private final boolean refresh;
 
@@ -69,8 +68,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		}
 	}
 
-	public final void inputChanged(Viewer viewer, Object oldInput,
-			Object newInput) {
+	public final void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (viewer instanceof StructuredViewer) {
 			this.viewer = (StructuredViewer) viewer;
 		}
@@ -104,16 +102,14 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			return ((IModelElement) element).getElementChildren().length > 0;
 		}
 		else if (element instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					(IFile) element);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
 			if (config != null) {
 				// The single IBeansConfig node is available
 				return true;
 			}
 		}
 		else if (element instanceof ZipEntryStorage) {
-			IBeansConfig config = BeansModelUtils
-					.getConfig((ZipEntryStorage) element);
+			IBeansConfig config = BeansModelUtils.getConfig((ZipEntryStorage) element);
 			if (config != null) {
 				// The single IBeansConfig node is available
 				return true;
@@ -124,11 +120,10 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 
 			// Only source types are supported
 			if (!type.isBinary()) {
-				IBeansProject beansProject = BeansCorePlugin.getModel()
-						.getProject(type.getJavaProject().getProject());
+				IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
+						type.getJavaProject().getProject());
 				if (beansProject != null) {
-					Set<IBean> beans = beansProject.getBeans(type
-							.getFullyQualifiedName());
+					Set<IBean> beans = beansProject.getBeans(type.getFullyQualifiedName());
 					return beans != null && beans.size() > 0;
 				}
 			}
@@ -147,8 +142,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 				return provider.getChildren(parentElement);
 			}
 			else {
-				return DEFAULT_NAMESPACE_CONTENT_PROVIDER
-						.getChildren(parentElement);
+				return DEFAULT_NAMESPACE_CONTENT_PROVIDER.getChildren(parentElement);
 			}
 		}
 		else if (parentElement instanceof IModelElement) {
@@ -161,8 +155,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			return ((IModelElement) parentElement).getElementChildren();
 		}
 		else if (parentElement instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					(IFile) parentElement);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) parentElement);
 			if (config != null) {
 				return new IBeansConfig[] { config };
 			}
@@ -184,8 +177,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		return IModelElement.NO_CHILDREN;
 	}
 
-	protected Object[] getProjectChildren(IBeansProject project,
-			boolean onlyConfigSets) {
+	protected Object[] getProjectChildren(IBeansProject project, boolean onlyConfigSets) {
 		Set<Object> children = new LinkedHashSet<Object>();
 		if (!onlyConfigSets) {
 			for (IBeansConfig config : project.getConfigs()) {
@@ -247,14 +239,12 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			return DEFAULT_NAMESPACE_CONTENT_PROVIDER.getParent(element);
 		}
 		else if (element instanceof IModelElement) {
-			if (element instanceof IBeansConfig
-					|| element instanceof IBeansProject) {
+			if (element instanceof IBeansConfig || element instanceof IBeansProject) {
 				return ((IResourceModelElement) element).getElementResource();
 			}
 		}
 		else if (element instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					(IFile) element);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
 			if (config != null) {
 				return config.getElementParent();
 			}
@@ -324,15 +314,17 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			}
 		}
 	}
-	
 
 	public Object[] getChildren(TreePath parentPath) {
+		if (parentPath == null) {
+			return new Object[0];
+		}
 		// Segment information is currently only required for bean imports
-		if (parentPath.getParentPath().getLastSegment() instanceof IBeansImport
+		if (parentPath.getParentPath() != null
+				&& parentPath.getParentPath().getLastSegment() instanceof IBeansImport
 				&& parentPath.getLastSegment() instanceof IFile) {
 			IFile file = (IFile) parentPath.getLastSegment();
-			IBeansImport beansImport = (IBeansImport) parentPath
-					.getParentPath().getLastSegment();
+			IBeansImport beansImport = (IBeansImport) parentPath.getParentPath().getLastSegment();
 			Set<IImportedBeansConfig> importedConfigs = beansImport.getImportedBeansConfigs();
 			for (IBeansConfig bc : importedConfigs) {
 				if (bc.getElementResource().equals(file)) {
