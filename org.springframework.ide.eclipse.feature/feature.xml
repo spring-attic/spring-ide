@@ -20,7 +20,7 @@
 
    <url>
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
-      <discovery label="Spring IDE" url="http://springide.org/updatesite"/>
+      <discovery label="%updateSiteName" url="http://springide.org/updatesite"/>
    </url>
 
    <includes
