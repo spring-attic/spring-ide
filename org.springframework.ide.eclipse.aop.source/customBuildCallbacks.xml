@@ -166,9 +166,9 @@
 	</target>
 
 	<target name="copy.source" if="plugin-name">
-		<mkdir dir="src/${plugin-name}_2.0.4.${forceContextQualifier}" />
+		<mkdir dir="src/${plugin-name}_2.0.5.${forceContextQualifier}" />
 		<ant antfile="build.xml" dir="${build.result.folder}/../../${plugin-name}" target="build.sources" />
-		<move todir="src/${plugin-name}_2.0.4.${forceContextQualifier}">
+		<move todir="src/${plugin-name}_2.0.5.${forceContextQualifier}">
 			<fileset dir="${build.result.folder}/../../${plugin-name}">
 				<include name="src.zip" />
 			</fileset>
