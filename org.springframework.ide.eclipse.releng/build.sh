@@ -113,16 +113,16 @@ then
 fi
 
 # Clean previous builds
-rm -rf $STAGINGLOCATION
-rm -rf $TESTSTAGINGLOCATION
-rm -rf $WORKSPACE/build
-rm -rf $WORKSPACE/eclipse-stage
+#rm -rf $STAGINGLOCATION
+#rm -rf $TESTSTAGINGLOCATION
+#rm -rf $WORKSPACE/build
+#rm -rf $WORKSPACE/eclipse-stage
 
 # Trigger build of features
-build $ARGS
+#build $ARGS
 
 # Trigger pack
-pack
+#pack
 
 if [ "$EXECUTE_TESTS" = "1" ]
 then
@@ -135,34 +135,37 @@ then
 	JUNIT4=$WORKSPACE/eclipse/plugins/org.junit4_4.3.1
 
 	# Unzip test support zip into target eclipse
-	tar xvfz $TEST_SUPPORT_ARCHIVE
+	#tar xvfz $TEST_SUPPORT_ARCHIVE
 	rm -rf $JUNIT4
 	
 	# Install Spring IDE features into target eclipse
-	install_feature org.springframework.ide.eclipse.feature file://$STAGINGLOCATION
-	install_feature org.springframework.ide.eclipse.aop.feature file://$STAGINGLOCATION
-	install_feature org.springframework.ide.eclipse.ajdt.feature file://$STAGINGLOCATION
-	install_feature org.springframework.ide.eclipse.javaconfig.feature file://$STAGINGLOCATION
-	install_feature org.springframework.ide.eclipse.webflow.feature file://$STAGINGLOCATION
-	install_feature org.springframework.ide.eclipse.mylyn.feature file://$STAGINGLOCATION
-	install_feature org.springframework.ide.eclipse.osgi.feature file://$STAGINGLOCATION
+	#install_feature org.springframework.ide.eclipse.feature file://$STAGINGLOCATION
+	#install_feature org.springframework.ide.eclipse.aop.feature file://$STAGINGLOCATION
+	#install_feature org.springframework.ide.eclipse.ajdt.feature file://$STAGINGLOCATION
+	#install_feature org.springframework.ide.eclipse.javaconfig.feature file://$STAGINGLOCATION
+	#install_feature org.springframework.ide.eclipse.webflow.feature file://$STAGINGLOCATION
+	#install_feature org.springframework.ide.eclipse.mylyn.feature file://$STAGINGLOCATION
+	#install_feature org.springframework.ide.eclipse.osgi.feature file://$STAGINGLOCATION
 
 	# Build the tests feature
-	$JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/eclipse/startup.jar -application org.eclipse.ant.core.antRunner -buildfile $WORKSPACE/org.eclipse.releng.basebuilder/eclipse/plugins/org.eclipse.pde.build_3.2.0.v20060505a/scripts/build.xml -Dbuilder=$WORKSPACE/test-feature.builder -DforceContextQualifier=v${NAME} $ARGS
-	if [ $? -ne 0 ]
-	then
-     	exit 1
-	fi
+#	$JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/eclipse/startup.jar -application org.eclipse.ant.core.antRunner -buildfile $WORKSPACE/org.eclipse.releng.basebuilder/eclipse/plugins/org.eclipse.pde.build_3.2.0.v20060505a/scripts/build.xml -Dbuilder=$WORKSPACE/test-feature.builder -DforceContextQualifier=v${NAME} $ARGS
+#	if [ $? -ne 0 ]
+#	then
+ #    	exit 1
+#	fi
 
 	# Install the test feature into target eclipse
-	install_feature org.springframework.ide.eclipse.tests.feature file://$TEST_STAGINGLOCATION
-
+	#install_feature org.springframework.ide.eclipse.tests.feature file://$TEST_STAGINGLOCATION
+	
+	# clean out old osgi cache data
+	rm -rf $WORKSPACE/eclipse/configuration/org.eclipse.osgi
+	
 	# Run test
 	java -jar $ECLIPSELOCATION -application org.eclipse.ant.core.antRunner -application org.eclipse.ant.core.antRunner -buildfile eclipse/plugins/org.springframework.ide.eclipse.beans.core.tests*/test.xml -Declipse-home=$WORKSPACE/eclipse -Dos=macosx -Dws=carbon -Darch=x86
 
 	# Move results
-	mv $WORKSPACE/eclipse/results .
+	#mv $WORKSPACE/eclipse/results .
 
 	# Clean up
-	rm -rf $WORKSPACE/eclipse
+	#rm -rf $WORKSPACE/eclipse
 fi

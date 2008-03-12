@@ -13,7 +13,7 @@
 WORKSPACE=`pwd`
 NAME=`date +%Y%m%d%H%M`
 #NAME=200802061800
-STAGINGLOCATION=$WORKSPACE/updatesite/
+STAGINGLOCATION=http://springide.org/updatesite-nightly
 DROP_STAGINGLOCATION=$WORKSPACE/extension/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
 ECLIPSE_DISTRO_URL=http://mirror.cc.columbia.edu/pub/software/eclipse/technology/epp/downloads/release/20071103/eclipse-jee-europa-fall2-macosx-carbon.tar.gz
@@ -40,13 +40,13 @@ install_feature () {
 }
 
 # Install Spring IDE features into target eclipse
-install_feature org.springframework.ide.eclipse.feature file://$STAGINGLOCATION
-install_feature org.springframework.ide.eclipse.aop.feature file://$STAGINGLOCATION
-install_feature org.springframework.ide.eclipse.ajdt.feature file://$STAGINGLOCATION
-install_feature org.springframework.ide.eclipse.javaconfig.feature file://$STAGINGLOCATION
-install_feature org.springframework.ide.eclipse.webflow.feature file://$STAGINGLOCATION
-install_feature org.springframework.ide.eclipse.mylyn.feature file://$STAGINGLOCATION
-install_feature org.springframework.ide.eclipse.osgi.feature file://$STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.aop.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.ajdt.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.javaconfig.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.webflow.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.mylyn.feature $STAGINGLOCATION
+install_feature org.springframework.ide.eclipse.osgi.feature $STAGINGLOCATION
 
 cd $STAGINGLOCATION
 ZIP_NAME=`ls *.zip`
@@ -54,9 +54,9 @@ VERSION=`expr "$ZIP_NAME" : 'spring-ide_updatesite_\(.*\).zip'`
 ZIP_NAME=spring-ide_$VERSION.zip
 cd $DROP_STAGINGLOCATION
 zip -r $ZIP_NAME eclipse
-mv $DROP_STAGINGLOCATION/$ZIP_NAME $STAGINGLOCATION
-cd $STAGINGLOCATION
+#mv $DROP_STAGINGLOCATION/$ZIP_NAME $STAGINGLOCATION
+#cd $STAGINGLOCATION
 openssl dgst -md5 $ZIP_NAME >>$ZIP_NAME.md5
 openssl dgst -sha1 $ZIP_NAME >>$ZIP_NAME.sha1;
 
-rm -rf $DROP_STAGINGLOCATION
+#rm -rf $DROP_STAGINGLOCATION
