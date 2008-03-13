@@ -79,6 +79,38 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 				break;
 			}
 		}
+		else if (event.getSource() instanceof IProject) {
+			int eventType = event.getType();
+			switch (eventType) {
+			case IResourceChangeEvent.PRE_CLOSE:
+				IProject closedProject = (IProject) event.getSource();
+				if (SpringCoreUtils.isSpringProject(closedProject)) {
+					events.projectClosed(closedProject, eventType);
+				}
+				break;
+
+			case IResourceChangeEvent.PRE_DELETE:
+				IProject openedProject = (IProject) event.getSource();
+				if (SpringCoreUtils.isSpringProject(openedProject)) {
+					events.projectDeleted(openedProject, eventType);
+				}
+				break;
+
+			case IResourceChangeEvent.PRE_BUILD:
+			case IResourceChangeEvent.POST_BUILD:
+				IResourceDelta delta = event.getDelta();
+				if (delta != null) {
+					try {
+						delta.accept(getVisitor(eventType), VISITOR_FLAGS);
+					} catch (CoreException e) {
+						SpringCore.log("Error while traversing "
+								+ "resource change delta", e);
+					}
+				}
+				break;
+			}
+		}
+
 	}
 
 	protected IResourceDeltaVisitor getVisitor(int eventType) {
@@ -115,6 +147,7 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 		}
 
 		protected boolean resourceAdded(IResource resource) {
+			System.out.println("added " + resource);
 			if (resource instanceof IProject) {
 				if (SpringCoreUtils.isSpringProject(resource)) {
 					events.projectAdded((IProject) resource, eventType);

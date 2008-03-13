@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.ui.internal.navigator;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
@@ -121,7 +122,12 @@ public class SpringNavigatorContentProvider implements ICommonContentProvider,
 		if (event.getType() == Type.CHANGED) {
 			refreshViewerForElement(element);
 		} else {
-			refreshViewerForElement(element.getElementParent());
+			if (element.getElementParent() instanceof ISpringModel) {
+				refreshViewerForElement(ResourcesPlugin.getWorkspace().getRoot());
+			}
+			else {
+				refreshViewerForElement(element.getElementParent());
+			}
 		}
 	}
 
