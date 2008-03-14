@@ -55,7 +55,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 
 	@Override
 	protected boolean supportsBean(IBean bean, IBeansValidationContext context) {
-		return context.isBeanRegistered(
+		return !bean.isAbstract() && context.isBeanRegistered(
 				AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
 				RequiredAnnotationBeanPostProcessor.class.getName());
 	}

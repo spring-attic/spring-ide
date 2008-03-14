@@ -15,9 +15,11 @@ import junit.framework.TestSuite;
 
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRuleTest;
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 
 /**
+ * {@link TestSuite} for <code>beans.core</code> plugin.
  * @author Christian Dupuis
  * @since 2.0.3
  */
@@ -28,6 +30,7 @@ public class AllBeansCoreTests {
 		//$JUnit-BEGIN$
 		suite.addTest(new TestSuite(BeanPropertyRuleTest.class));
 		suite.addTest(new TestSuite(BeanInitDestroyMethodRuleTest.class));
+		suite.addTest(new TestSuite(RequiredPropertyRuleTest.class));
 		suite.addTest(new TestSuite(IntrospectorTest.class));
 		//$JUnit-END$
 		return suite;
