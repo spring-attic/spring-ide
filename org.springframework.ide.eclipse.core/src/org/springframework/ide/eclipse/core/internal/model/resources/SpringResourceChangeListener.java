@@ -147,7 +147,6 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 		}
 
 		protected boolean resourceAdded(IResource resource) {
-			System.out.println("added " + resource);
 			if (resource instanceof IProject) {
 				if (SpringCoreUtils.isSpringProject(resource)) {
 					events.projectAdded((IProject) resource, eventType);
