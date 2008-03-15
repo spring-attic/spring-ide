@@ -8,31 +8,31 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  org.springframework.context,org.springframework.jdbc.datasource.looku
  p,javax.sql,org.springframework.orm,org.springframework.orm.jpa.persi
  stenceunit,javax.persistence.spi,org.springframework.dao,org.springfr
- amework.transaction.support";version=2.5.2,org.springframework.schedu
+ amework.transaction.support";version=2.5.3,org.springframework.schedu
  ling.commonj;uses:="javax.naming,org.apache.commons.logging,org.sprin
  gframework.util,org.springframework.context,org.springframework.jndi,
  org.springframework.scheduling,commonj.work,commonj.timers,org.spring
- framework.core.task,org.springframework.beans.factory";version=2.5.2,
+ framework.core.task,org.springframework.beans.factory";version=2.5.3,
  org.springframework.aop.target;uses:="org.springframework.aop.support
  ,org.apache.commons.logging,org.springframework.aop,org.apache.common
  s.pool.impl,org.springframework.util,org.apache.commons.pool,org.spri
  ngframework.beans,org.springframework.beans.factory.config,org.spring
- framework.core,org.springframework.beans.factory";version=2.5.2,org.s
+ framework.core,org.springframework.beans.factory";version=2.5.3,org.s
  pringframework.web.jsf.el;uses:="javax.el,org.apache.commons.logging,
  org.springframework.beans.factory.access.el,javax.faces.context,org.s
  pringframework.beans,org.springframework.web.jsf,org.springframework.
- web.context,org.springframework.beans.factory";version=2.5.2,org.aopa
+ web.context,org.springframework.beans.factory";version=2.5.3,org.aopa
  lliance.intercept;uses:=org.aopalliance.aop;version=1.0,org.springfra
  mework.aop.target.dynamic;uses:="org.apache.commons.logging,org.sprin
  gframework.aop,org.springframework.util,org.springframework.beans.fac
- tory";version=2.5.2,org.springframework.jca.cci.object;uses:="javax.r
+ tory";version=2.5.3,org.springframework.jca.cci.object;uses:="javax.r
  esource,javax.resource.cci,org.springframework.jca.cci.core.support,o
  rg.springframework.jca.cci.core,org.springframework.dao,org.springfra
- mework.beans.factory";version=2.5.2,org.springframework.jms.config;us
+ mework.beans.factory";version=2.5.3,org.springframework.jms.config;us
  es:="org.springframework.beans.factory.support,org.springframework.ut
  il,org.springframework.beans,org.springframework.beans.factory.xml,or
  g.springframework.beans.factory.config,org.springframework.beans.fact
- ory.parsing,org.w3c.dom";version=2.5.2,org.springframework.remoting.j
+ ory.parsing,org.w3c.dom";version=2.5.3,org.springframework.remoting.j
  axrpc;uses:="org.springframework.aop.support,org.apache.commons.loggi
  ng,org.aopalliance.intercept,org.springframework.context.support,org.
  springframework.beans,javax.xml.namespace,javax.servlet,javax.xml.rpc
@@ -41,7 +41,7 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  org.springframework.util,org.springframework.context,org.springframew
  ork.web.context,javax.xml.rpc,org.springframework.remoting,org.spring
  framework.aop.framework,javax.xml.rpc.soap,org.springframework.web.co
- ntext.support";version=2.5.2,org.springframework.jmx.export;uses:="or
+ ntext.support";version=2.5.3,org.springframework.jmx.export;uses:="or
  g.springframework.aop.support,org.springframework.aop.target,org.apac
  he.commons.logging,org.springframework.jmx.export.assembler,org.sprin
  gframework.aop,org.springframework.util,org.springframework.jmx,org.s
@@ -49,43 +49,43 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  ork.core,org.springframework.jmx.support,org.springframework.jmx.expo
  rt.naming,org.springframework.aop.framework,javax.management.modelmbe
  an,org.springframework.beans.factory,org.springframework.jmx.export.n
- otification";version=2.5.2,org.springframework.beans.propertyeditors;
+ otification";version=2.5.3,org.springframework.beans.propertyeditors;
  uses:="org.springframework.util,org.springframework.core.io";version=
- 2.5.2,org.springframework.dao.support;uses:="org.apache.commons.loggi
+ 2.5.3,org.springframework.dao.support;uses:="org.apache.commons.loggi
  ng,org.aopalliance.intercept,org.springframework.util,org.springframe
  work.beans,org.springframework.dao,org.springframework.beans.factory"
- ;version=2.5.2,org.springframework.aop.framework.autoproxy.target;use
+ ;version=2.5.3,org.springframework.aop.framework.autoproxy.target;use
  s:="org.springframework.beans.factory.support,org.apache.commons.logg
  ing,org.springframework.aop.target,org.springframework.aop.framework.
  autoproxy,org.springframework.aop,org.springframework.aop.framework,o
  rg.springframework.beans.factory.config,org.springframework.beans.fac
- tory";version=2.5.2,org.springframework.beans.factory.support;uses:="
+ tory";version=2.5.3,org.springframework.beans.factory.support;uses:="
  org.apache.commons.logging,net.sf.cglib.proxy,org.springframework.uti
  l,org.springframework.beans,org.springframework.core.io,org.springfra
  mework.core.io.support,org.springframework.beans.factory.config,org.s
- pringframework.core,org.springframework.beans.factory";version=2.5.2,
+ pringframework.core,org.springframework.beans.factory";version=2.5.3,
  org.springframework.beans.factory.access.el;uses:="javax.el,org.apach
  e.commons.logging,org.springframework.util,org.springframework.beans.
- factory";version=2.5.2,org.springframework.jdbc.support.incrementer;u
+ factory";version=2.5.3,org.springframework.jdbc.support.incrementer;u
  ses:="org.springframework.jdbc.support,javax.sql,org.springframework.
  dao,org.springframework.jdbc.datasource,org.springframework.beans.fac
- tory";version=2.5.2,org.springframework.beans.factory.access;uses:="o
+ tory";version=2.5.3,org.springframework.beans.factory.access;uses:="o
  rg.springframework.beans.factory.support,org.apache.commons.logging,o
  rg.springframework.core.io,org.springframework.beans,org.springframew
  ork.beans.factory.xml,org.springframework.beans.factory.config,org.sp
  ringframework.core.io.support,org.springframework.beans.factory";vers
- ion=2.5.2,org.springframework.scripting.jruby;uses:="org.springframew
+ ion=2.5.3,org.springframework.scripting.jruby;uses:="org.springframew
  ork.aop.support,org.jruby,org.jruby.runtime,org.jruby.exceptions,org.
  springframework.util,org.jruby.javasupport,org.jruby.ast,org.springfr
  amework.core,org.jruby.runtime.builtin,org.springframework.scripting,
- org.springframework.beans.factory";version=2.5.2,org.springframework.
+ org.springframework.beans.factory";version=2.5.3,org.springframework.
  jca.context;uses:="org.apache.commons.logging,javax.resource,org.spri
  ngframework.util,org.springframework.context.support,org.springframew
  ork.beans,org.springframework.beans.factory.xml,org.springframework.c
  ontext,org.springframework.beans.factory.config,javax.resource.spi.en
  dpoint,org.springframework.beans.factory.support,javax.resource.spi,j
  avax.transaction.xa,javax.resource.spi.work,org.springframework.beans
- .factory";version=2.5.2,org.springframework.orm.jpa.vendor;uses:="org
+ .factory";version=2.5.3,org.springframework.orm.jpa.vendor;uses:="org
  .springframework.orm.jpa,org.eclipse.persistence.internal.sessions,or
  g.eclipse.persistence.internal.databaseaccess,oracle.toplink.essentia
  ls.internal.sessions,org.springframework.jdbc.datasource,javax.persis
@@ -95,24 +95,24 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  aseaccess,org.hibernate.dialect,org.hibernate,org.apache.openjpa.pers
  istence,javax.persistence.spi,oracle.toplink.essentials.sessions,org.
  springframework.dao,org.springframework.orm.hibernate3,org.hibernate.
- ejb";version=2.5.2,org.springframework.jdbc.core.metadata;uses:="org.
+ ejb";version=2.5.3,org.springframework.jdbc.core.metadata;uses:="org.
  springframework.jdbc.support,org.apache.commons.logging,org.springfra
  mework.jdbc.core.namedparam,javax.sql,org.springframework.jdbc.core,o
- rg.springframework.dao";version=2.5.2,org.springframework.jdbc.object
+ rg.springframework.dao";version=2.5.3,org.springframework.jdbc.object
  ;uses:="org.springframework.jdbc,org.apache.commons.logging,org.sprin
  gframework.jdbc.core.namedparam,org.springframework.jdbc.support.nati
  vejdbc,org.springframework.dao.support,org.springframework.jdbc.suppo
  rt,javax.sql,org.springframework.jdbc.core,org.springframework.dao,or
- g.springframework.beans.factory";version=2.5.2,org.springframework.jm
+ g.springframework.beans.factory";version=2.5.3,org.springframework.jm
  x.export.notification;uses:="org.springframework.util,org.springframe
- work.jmx,javax.management,javax.management.modelmbean";version=2.5.2,
+ work.jmx,javax.management,javax.management.modelmbean";version=2.5.3,
  org.springframework.jca.cci.connection;uses:="org.springframework.tra
  nsaction,javax.naming,javax.resource,org.apache.commons.logging,org.s
  pringframework.util,org.springframework.core,javax.resource.cci,org.s
  pringframework.jca.cci,javax.resource.spi,org.springframework.transac
- tion.support,org.springframework.beans.factory";version=2.5.2,org.spr
+ tion.support,org.springframework.beans.factory";version=2.5.3,org.spr
  ingframework.beans.factory;uses:="org.springframework.core,org.spring
- framework.util,org.springframework.beans";version=2.5.2,org.springfra
+ framework.util,org.springframework.beans";version=2.5.3,org.springfra
  mework.orm.toplink;uses:="oracle.toplink.expressions,oracle.toplink.j
  ndi,org.apache.commons.logging,org.aopalliance.intercept,org.springfr
  amework.beans,org.springframework.dao.support,oracle.toplink.sessionb
@@ -123,12 +123,12 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  oplink.exceptions,oracle.toplink.publicinterface,org.springframework.
  jdbc.support,org.springframework.orm,javax.sql,oracle.toplink.threeti
  er,oracle.toplink.internal.databaseaccess,org.springframework.dao,org
- .springframework.transaction.support";version=2.5.2,org.springframewo
+ .springframework.transaction.support";version=2.5.3,org.springframewo
  rk.ejb.support;uses:="org.apache.commons.logging,javax.ejb,javax.jms,
  org.springframework.context.access,org.springframework.beans.factory.
  access,org.springframework.util,org.springframework.beans,org.springf
- ramework.beans.factory";version=2.5.2,org.springframework.jdbc;uses:=
- org.springframework.dao;version=2.5.2,org.springframework.scripting.s
+ ramework.beans.factory";version=2.5.3,org.springframework.jdbc;uses:=
+ org.springframework.dao;version=2.5.3,org.springframework.scripting.s
  upport;uses:="org.springframework.aop.support,org.apache.commons.logg
  ing,net.sf.cglib.proxy,net.sf.cglib.asm,org.springframework.aop,org.s
  pringframework.util,org.springframework.aop.target.dynamic,org.spring
@@ -136,50 +136,50 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  xt,org.springframework.beans.factory.config,org.aopalliance.aop,org.s
  pringframework.core,org.springframework.beans.factory.support,org.spr
  ingframework.aop.framework,net.sf.cglib.core,org.springframework.scri
- pting,org.springframework.beans.factory";version=2.5.2,org.springfram
+ pting,org.springframework.beans.factory";version=2.5.3,org.springfram
  ework.jmx.export.metadata;uses:="org.springframework.metadata,org.spr
  ingframework.util,org.springframework.jmx,org.springframework.beans,j
  avax.management.modelmbean,org.springframework.beans.factory";version
- =2.5.2,org.springframework.ui.context;uses:=org.springframework.conte
- xt;version=2.5.2,org.springframework.instrument.classloading.tomcat;u
+ =2.5.3,org.springframework.ui.context;uses:=org.springframework.conte
+ xt;version=2.5.3,org.springframework.instrument.classloading.tomcat;u
  ses:="org.springframework.instrument.classloading,org.apache.catalina
- .loader";version=2.5.2,org.springframework.jdbc.core.simple;uses:="or
+ .loader";version=2.5.3,org.springframework.jdbc.core.simple;uses:="or
  g.apache.commons.logging,org.springframework.jdbc.core.namedparam,org
  .springframework.jdbc.core.support,org.springframework.util,org.sprin
  gframework.jdbc.support.nativejdbc,org.springframework.jdbc.support,j
  avax.sql,org.springframework.jdbc.core,org.springframework.jdbc.core.
- metadata,org.springframework.dao";version=2.5.2,org.springframework.j
+ metadata,org.springframework.dao";version=2.5.3,org.springframework.j
  mx.export.assembler;uses:="org.springframework.aop.support,org.spring
  framework.jmx.export.metadata,org.springframework.util,org.springfram
  ework.beans,javax.management,org.springframework.core,org.springframe
  work.jmx.support,org.springframework.aop.framework,javax.management.m
- odelmbean,org.springframework.beans.factory";version=2.5.2,org.spring
+ odelmbean,org.springframework.beans.factory";version=2.5.3,org.spring
  framework.util;uses:="org.apache.commons.logging,org.apache.log4j,org
- .apache.log4j.xml";version=2.5.2,org.springframework.jca.work.jboss;u
+ .apache.log4j.xml";version=2.5.3,org.springframework.jca.work.jboss;u
  ses:="javax.naming,org.springframework.jca.work,javax.resource.spi.wo
- rk,javax.management";version=2.5.2,org.springframework.core.io;uses:=
- "org.springframework.core,org.springframework.util";version=2.5.2,org
+ rk,javax.management";version=2.5.3,org.springframework.core.io;uses:=
+ "org.springframework.core,org.springframework.util";version=2.5.3,org
  .springframework.context;uses:="org.springframework.core.io,org.sprin
  gframework.beans,org.springframework.core.io.support,org.springframew
  ork.beans.factory.config,org.springframework.beans.factory";version=2
- .5.2,org.springframework.core.annotation;uses:="org.springframework.c
- ore,org.springframework.util";version=2.5.2,org.springframework.web.c
+ .5.3,org.springframework.core.annotation;uses:="org.springframework.c
+ ore,org.springframework.util";version=2.5.3,org.springframework.web.c
  ontext;uses:="org.apache.commons.logging,org.springframework.context.
  access,org.springframework.util,org.springframework.beans,org.springf
  ramework.core.io,org.springframework.context,org.springframework.core
  .io.support,org.springframework.core,javax.servlet,org.springframewor
  k.beans.factory.access,javax.servlet.http,org.springframework.beans.f
- actory";version=2.5.2,org.springframework.context.config;uses:="org.s
+ actory";version=2.5.3,org.springframework.context.config;uses:="org.s
  pringframework.util,org.springframework.core.io,org.springframework.b
  eans,org.springframework.beans.factory.xml,org.springframework.beans.
  factory.config,org.springframework.beans.factory.parsing,org.w3c.dom,
  org.springframework.beans.factory.support,org.springframework.core,or
- g.springframework.jndi,org.springframework.jmx.support";version=2.5.2
+ g.springframework.jndi,org.springframework.jmx.support";version=2.5.3
  ,org.springframework.jca.work;uses:="org.springframework.jndi,javax.n
  aming,org.springframework.scheduling,javax.resource.spi,org.springfra
  mework.util,javax.transaction.xa,org.springframework.jca.context,java
  x.resource.spi.work,org.springframework.core.task,org.springframework
- .beans.factory";version=2.5.2,org.springframework.aop.config;uses:="o
+ .beans.factory";version=2.5.3,org.springframework.aop.config;uses:="o
  rg.springframework.aop.support,org.springframework.aop.aspectj.autopr
  oxy,org.springframework.util,org.springframework.aop.scope,org.spring
  framework.beans,org.springframework.aop.aspectj,org.springframework.b
@@ -187,63 +187,63 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  ramework.beans.factory.parsing,org.springframework.util.xml,org.w3c.d
  om,org.springframework.beans.factory.support,org.springframework.core
  ,org.springframework.aop.framework.autoproxy,org.springframework.aop.
- framework,org.springframework.beans.factory";version=2.5.2,org.spring
+ framework,org.springframework.beans.factory";version=2.5.3,org.spring
  framework.scheduling;uses:="org.springframework.core,org.springframew
- ork.core.task";version=2.5.2,org.springframework.jms.connection;uses:
+ ork.core.task";version=2.5.3,org.springframework.jms.connection;uses:
  ="org.springframework.core,org.springframework.transaction,org.apache
  .commons.logging,javax.jms,org.springframework.util,org.springframewo
  rk.jms,org.springframework.transaction.support,org.springframework.be
- ans.factory";version=2.5.2,org.springframework.transaction.annotation
+ ans.factory";version=2.5.3,org.springframework.transaction.annotation
  ;uses:="javax.ejb,org.springframework.util,org.springframework.transa
  ction.interceptor,org.springframework.transaction.support";version=2.
- 5.2,org.springframework.jmx.export.naming;uses:="org.springframework.
+ 5.3,org.springframework.jmx.export.naming;uses:="org.springframework.
  aop.support,org.apache.commons.logging,org.springframework.jmx.export
  .metadata,org.springframework.util,org.springframework.core.io,org.sp
  ringframework.core.io.support,javax.management,org.springframework.jm
- x.support,org.springframework.beans.factory";version=2.5.2,org.spring
+ x.support,org.springframework.beans.factory";version=2.5.3,org.spring
  framework.aop.framework;uses:="org.springframework.aop.support,org.ap
  ache.commons.logging,org.springframework.aop.framework.adapter,org.sp
  ringframework.aop.target,org.aopalliance.intercept,net.sf.cglib.proxy
  ,org.springframework.aop,org.springframework.util,org.springframework
  .beans,org.aopalliance.aop,org.springframework.core,net.sf.cglib.tran
  sform.impl,net.sf.cglib.core,org.springframework.beans.factory";versi
- on=2.5.2,org.springframework.mail.javamail;uses:="javax.activation,ja
+ on=2.5.3,org.springframework.mail.javamail;uses:="javax.activation,ja
  vax.mail.internet,org.springframework.util,org.springframework.core.i
  o,javax.mail,org.springframework.mail,org.springframework.beans.facto
- ry";version=2.5.2,org.springframework.dao;uses:=org.springframework.c
- ore;version=2.5.2,org.springframework.core.task;uses:="org.springfram
- ework.core,org.springframework.util";version=2.5.2,org.springframewor
+ ry";version=2.5.3,org.springframework.dao;uses:=org.springframework.c
+ ore;version=2.5.3,org.springframework.core.task;uses:="org.springfram
+ ework.core,org.springframework.util";version=2.5.3,org.springframewor
  k.transaction.support;uses:="org.springframework.core,org.springframe
  work.transaction,org.apache.commons.logging,org.springframework.util,
- org.springframework.beans.factory";version=2.5.2,org.springframework.
+ org.springframework.beans.factory";version=2.5.3,org.springframework.
  aop.aspectj.autoproxy;uses:="org.springframework.core,org.aspectj.uti
  l,org.springframework.aop.framework.autoproxy,org.springframework.aop
  ,org.springframework.util,org.springframework.aop.aspectj,org.aopalli
- ance.aop";version=2.5.2,org.springframework.jdbc.core.support;uses:="
+ ance.aop";version=2.5.3,org.springframework.jdbc.core.support;uses:="
  org.springframework.jdbc,org.springframework.util,org.springframework
  .dao.support,org.springframework.beans.factory.support,org.springfram
  ework.jdbc.support,javax.sql,org.springframework.jdbc.support.lob,org
  .springframework.jdbc.core,org.springframework.dao,org.springframewor
- k.jdbc.datasource";version=2.5.2,org.springframework.jca.work.glassfi
+ k.jdbc.datasource";version=2.5.3,org.springframework.jca.work.glassfi
  sh;uses:="org.springframework.jca.work,org.springframework.util,javax
- .resource.spi.work";version=2.5.2,org.springframework.beans.factory.a
+ .resource.spi.work";version=2.5.3,org.springframework.beans.factory.a
  nnotation;uses:="org.apache.commons.logging,org.springframework.util,
  org.springframework.beans,org.springframework.beans.factory.config,or
  g.springframework.core.annotation,org.springframework.beans.factory.s
  upport,org.springframework.beans.factory.wiring,org.springframework.c
  ore,org.springframework.core.type,org.springframework.beans.factory";
- version=2.5.2,org.springframework.beans;uses:="org.apache.commons.log
+ version=2.5.3,org.springframework.beans;uses:="org.apache.commons.log
  ging,org.springframework.util,org.springframework.core.io,org.springf
  ramework.core.io.support,org.springframework.beans.propertyeditors,or
- g.springframework.core";version=2.5.2,org.springframework.web.jsf;use
+ g.springframework.core";version=2.5.3,org.springframework.web.jsf;use
  s:="org.apache.commons.logging,javax.faces.application,javax.faces.co
  ntext,org.springframework.util,javax.faces.el,org.springframework.web
  .util,org.springframework.web.context,javax.faces.event,org.springfra
- mework.beans.factory";version=2.5.2,org.springframework.beans.factory
+ mework.beans.factory";version=2.5.3,org.springframework.beans.factory
  .config;uses:="org.apache.commons.logging,org.springframework.beans.s
  upport,org.springframework.util,org.springframework.beans,org.springf
  ramework.core.io.support,org.springframework.core,org.springframework
- .beans.factory";version=2.5.2,org.springframework.context.annotation;
+ .beans.factory";version=2.5.3,org.springframework.context.annotation;
  uses:="javax.annotation,javax.ejb,org.springframework.beans.factory.a
  nnotation,org.springframework.beans,org.springframework.beans.factory
  .config,javax.xml.namespace,org.springframework.core,org.springframew
@@ -254,119 +254,119 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  springframework.beans.factory.parsing,org.springframework.core.io.sup
  port,org.w3c.dom,org.springframework.core.type.filter,org.springframe
  work.core.type.classreading,javax.xml.ws,org.springframework.stereoty
- pe";version=2.5.2,org.springframework.util.xml;uses:="org.apache.comm
+ pe";version=2.5.3,org.springframework.util.xml;uses:="org.apache.comm
  ons.logging,javax.xml.transform,org.springframework.util,org.w3c.dom,
- org.xml.sax";version=2.5.2,org.springframework.jndi;uses:="org.spring
+ org.xml.sax";version=2.5.3,org.springframework.jndi;uses:="org.spring
  framework.core,javax.naming,org.apache.commons.logging,org.springfram
  ework.aop,org.springframework.util,org.springframework.aop.framework,
  org.springframework.beans.propertyeditors,org.springframework.beans.f
- actory";version=2.5.2,org.springframework.remoting.support;uses:="org
+ actory";version=2.5.3,org.springframework.remoting.support;uses:="org
  .apache.commons.logging,com.sun.net.httpserver,org.aopalliance.interc
  ept,org.springframework.util,org.aopalliance.aop,org.springframework.
  core.task.support,org.springframework.aop.framework,org.springframewo
- rk.core.task,org.springframework.beans.factory";version=2.5.2,org.spr
+ rk.core.task,org.springframework.beans.factory";version=2.5.3,org.spr
  ingframework.scheduling.backportconcurrent;uses:="edu.emory.mathcs.ba
  ckport.java.util.concurrent,org.apache.commons.logging,org.springfram
  ework.scheduling,org.springframework.util,org.springframework.schedul
  ing.support,org.springframework.core.task,org.springframework.beans.f
- actory";version=2.5.2,org.springframework.jdbc.core;uses:="org.spring
+ actory";version=2.5.3,org.springframework.jdbc.core;uses:="org.spring
  framework.jdbc,org.apache.commons.logging,org.springframework.util,or
  g.springframework.beans,com.sun.rowset,org.springframework.jdbc.suppo
  rt.nativejdbc,org.springframework.jdbc.support.rowset,org.springframe
  work.dao.support,org.springframework.core,org.springframework.jdbc.su
  pport,javax.sql,javax.sql.rowset,org.springframework.dao,org.springfr
- amework.jdbc.datasource";version=2.5.2,org.springframework.core.style
+ amework.jdbc.datasource";version=2.5.3,org.springframework.core.style
  ;uses:="org.springframework.core,org.springframework.util";version=2.
- 5.2,org.springframework.validation;uses:="org.springframework.core,or
+ 5.3,org.springframework.validation;uses:="org.springframework.core,or
  g.apache.commons.logging,org.springframework.util,org.springframework
- .context.support,org.springframework.beans";version=2.5.2,org.springf
+ .context.support,org.springframework.beans";version=2.5.3,org.springf
  ramework.beans.annotation;uses:="org.springframework.util,org.springf
- ramework.beans";version=2.5.2,org.springframework.metadata.commons;us
+ ramework.beans";version=2.5.3,org.springframework.metadata.commons;us
  es:="org.springframework.metadata,org.apache.commons.attributes";vers
- ion=2.5.2,org.springframework.context.i18n;uses:="org.springframework
- .core,org.springframework.util";version=2.5.2,org.springframework.tra
+ ion=2.5.3,org.springframework.context.i18n;uses:="org.springframework
+ .core,org.springframework.util";version=2.5.3,org.springframework.tra
  nsaction.config;uses:="org.springframework.util,org.springframework.b
  eans,org.springframework.beans.factory.xml,org.springframework.beans.
  factory.config,org.springframework.beans.factory.parsing,org.springfr
  amework.transaction.interceptor,org.springframework.util.xml,org.w3c.
  dom,org.springframework.core,org.springframework.beans.factory.suppor
- t,org.springframework.aop.config";version=2.5.2,org.springframework.w
+ t,org.springframework.aop.config";version=2.5.3,org.springframework.w
  eb.filter;uses:="org.apache.commons.logging,org.springframework.conte
  xt.i18n,org.apache.log4j,org.springframework.util,org.springframework
  .beans,org.springframework.core.io,org.springframework.web.context,ja
  vax.servlet,org.springframework.web.context.request,org.springframewo
  rk.web.util,org.springframework.web.context.support,org.springframewo
- rk.beans.factory,javax.servlet.http";version=2.5.2,org.springframewor
+ rk.beans.factory,javax.servlet.http";version=2.5.3,org.springframewor
  k.orm.hibernate3.annotation;uses:="org.hibernate,org.hibernate.cfg,or
- g.springframework.orm.hibernate3";version=2.5.2,org.springframework.b
+ g.springframework.orm.hibernate3";version=2.5.3,org.springframework.b
  eans.factory.xml;uses:="org.apache.commons.logging,org.springframewor
  k.util,org.springframework.core.io,org.springframework.beans,javax.xm
  l.parsers,org.springframework.core.io.support,org.springframework.bea
  ns.factory.parsing,org.springframework.beans.factory.config,org.sprin
  gframework.util.xml,org.w3c.dom,org.xml.sax,org.springframework.beans
  .factory.support,org.springframework.core,org.springframework.beans.f
- actory";version=2.5.2,org.springframework.beans.factory.parsing;uses:
+ actory";version=2.5.3,org.springframework.beans.factory.parsing;uses:
  ="org.apache.commons.logging,org.springframework.util,org.springframe
  work.core.io,org.springframework.beans,org.springframework.beans.fact
- ory.config,org.springframework.beans.factory";version=2.5.2,org.sprin
+ ory.config,org.springframework.beans.factory";version=2.5.3,org.sprin
  gframework.transaction.interceptor;uses:="org.springframework.aop.sup
  port,org.springframework.transaction,org.apache.commons.logging,org.a
  opalliance.intercept,org.springframework.aop,org.springframework.util
  ,org.aopalliance.aop,org.springframework.beans.propertyeditors,org.sp
  ringframework.core,org.springframework.metadata,org.springframework.a
  op.framework,org.springframework.transaction.support,org.springframew
- ork.beans.factory";version=2.5.2,org.springframework.jdbc.support.nat
+ ork.beans.factory";version=2.5.3,org.springframework.jdbc.support.nat
  ivejdbc;uses:="org.springframework.util,com.mchange.v2.c3p0,org.enhyd
- ra.jdbc.core,org.springframework.jdbc.datasource";version=2.5.2,org.s
+ ra.jdbc.core,org.springframework.jdbc.datasource";version=2.5.3,org.s
  pringframework.jdbc.support.rowset;uses:=org.springframework.jdbc;ver
- sion=2.5.2,org.springframework.ejb.config;uses:="org.springframework.
+ sion=2.5.3,org.springframework.ejb.config;uses:="org.springframework.
  jndi,org.springframework.beans.factory.support,org.springframework.ut
  il,org.springframework.beans.factory.xml,org.springframework.beans.fa
- ctory.config,org.springframework.util.xml,org.w3c.dom";version=2.5.2,
+ ctory.config,org.springframework.util.xml,org.w3c.dom";version=2.5.3,
  org.springframework.context.event;uses:="org.springframework.core,org
  .aopalliance.intercept,org.springframework.beans,org.springframework.
  context,org.springframework.core.task,org.springframework.beans.facto
- ry";version=2.5.2,org.springframework.orm.jdo;uses:="org.springframew
+ ry";version=2.5.3,org.springframework.orm.jdo;uses:="org.springframew
  ork.transaction,org.apache.commons.logging,org.aopalliance.intercept,
  org.springframework.util,org.springframework.core.io,org.springframew
  ork.core.io.support,org.springframework.dao.support,javax.jdo.datasto
  re,org.springframework.jdbc.support,javax.sql,org.springframework.orm
  ,javax.jdo,org.springframework.dao,org.springframework.jdbc.datasourc
  e,org.springframework.transaction.support,org.springframework.beans.f
- actory";version=2.5.2,org.springframework.orm.toplink.support;uses:="
+ actory";version=2.5.3,org.springframework.orm.toplink.support;uses:="
  org.springframework.orm.toplink,oracle.toplink.sessions,org.apache.co
  mmons.logging,org.springframework.util,oracle.toplink.exceptions,orac
  le.toplink.logging,oracle.toplink.publicinterface,org.springframework
  .dao.support,oracle.toplink.internal.databaseaccess,org.springframewo
- rk.dao,org.springframework.beans.factory";version=2.5.2,org.springfra
+ rk.dao,org.springframework.beans.factory";version=2.5.3,org.springfra
  mework.core.type.filter;uses:="org.aspectj.weaver,org.aspectj.weaver.
  patterns,org.springframework.core.type.classreading,org.springframewo
  rk.util,org.aspectj.bridge,org.aspectj.weaver.bcel,org.springframewor
- k.core.type";version=2.5.2,org.springframework.remoting.jaxrpc.suppor
+ k.core.type";version=2.5.3,org.springframework.remoting.jaxrpc.suppor
  t;uses:="javax.xml.rpc.encoding,org.springframework.util,org.apache.a
  xis.encoding.ser,org.springframework.remoting.jaxrpc,javax.xml.rpc,or
- g.springframework.beans.factory,javax.xml.namespace";version=2.5.2,or
+ g.springframework.beans.factory,javax.xml.namespace";version=2.5.3,or
  g.springframework.jmx.support;uses:="javax.naming,org.springframework
  .aop.target,org.apache.commons.logging,org.springframework.aop,org.sp
  ringframework.util,org.springframework.jmx,javax.management,org.sprin
  gframework.jndi,org.springframework.core,javax.management.remote,org.
  springframework.aop.framework,org.springframework.beans.factory";vers
- ion=2.5.2,org.springframework.web.context.request;uses:="org.apache.c
+ ion=2.5.3,org.springframework.web.context.request;uses:="org.apache.c
  ommons.logging,org.springframework.context.i18n,org.apache.log4j,java
  x.faces.context,org.springframework.util,org.springframework.beans.fa
  ctory.config,org.springframework.core,javax.servlet,org.springframewo
  rk.ui,org.springframework.web.util,javax.servlet.http,org.springframe
- work.beans.factory";version=2.5.2,org.springframework.instrument.clas
+ work.beans.factory";version=2.5.3,org.springframework.instrument.clas
  sloading.oc4j;uses:="org.springframework.instrument.classloading,org.
- springframework.util,oracle.classloader.util";version=2.5.2,org.sprin
+ springframework.util,oracle.classloader.util";version=2.5.3,org.sprin
  gframework.remoting.jaxws;uses:="org.springframework.aop.support,java
  x.jws,org.aopalliance.intercept,org.springframework.util,javax.xml.na
  mespace,javax.xml.ws.handler,org.springframework.remoting,org.springf
  ramework.core.task.support,org.springframework.aop.framework,javax.xm
  l.soap,org.springframework.core.task,javax.xml.ws,org.springframework
  .remoting.soap,javax.xml.ws.soap,org.springframework.beans.factory";v
- ersion=2.5.2,org.springframework.mail;uses:="org.springframework.core
- ,org.springframework.util";version=2.5.2,org.springframework.orm.hibe
+ ersion=2.5.3,org.springframework.mail;uses:="org.springframework.core
+ ,org.springframework.util";version=2.5.3,org.springframework.orm.hibe
  rnate3;uses:="org.hibernate.util,org.apache.commons.logging,org.aopal
  liance.intercept,org.springframework.beans,org.hibernate.type,org.hib
  ernate.exception,org.hibernate.event,org.springframework.dao.support,
@@ -379,12 +379,12 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  g.springframework.orm,org.springframework.jdbc.support.lob,org.hibern
  ate.criterion,javax.transaction,org.hibernate.tool.hbm2ddl,org.spring
  framework.transaction.jta,org.hibernate.cache,org.springframework.dao
- ,org.springframework.transaction.support";version=2.5.2,org.springfra
- mework.stereotype;version=2.5.2,org.springframework.ui.freemarker;use
+ ,org.springframework.transaction.support";version=2.5.3,org.springfra
+ mework.stereotype;version=2.5.3,org.springframework.ui.freemarker;use
  s:="org.apache.commons.logging,freemarker.cache,org.springframework.u
  til,org.springframework.core.io,org.springframework.context,org.sprin
  gframework.core.io.support,freemarker.template,org.springframework.be
- ans.factory";version=2.5.2,org.springframework.remoting.httpinvoker;u
+ ans.factory";version=2.5.3,org.springframework.remoting.httpinvoker;u
  ses:="org.springframework.aop.support,org.springframework.web,org.apa
  che.commons.logging,com.sun.net.httpserver,org.aopalliance.intercept,
  org.springframework.util,org.apache.commons.httpclient,javax.servlet,
@@ -392,22 +392,22 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  .apache.commons.httpclient.methods,org.apache.commons.httpclient.para
  ms,org.springframework.aop.framework,org.springframework.web.util,org
  .springframework.remoting.rmi,javax.servlet.http,org.springframework.
- beans.factory";version=2.5.2,org.springframework.aop.support;uses:="o
+ beans.factory";version=2.5.3,org.springframework.aop.support;uses:="o
  rg.apache.commons.logging,org.springframework.aop,org.aopalliance.int
  ercept,org.springframework.util,org.aopalliance.aop,org.springframewo
- rk.core,org.springframework.beans.factory";version=2.5.2,org.springfr
+ rk.core,org.springframework.beans.factory";version=2.5.3,org.springfr
  amework.jms.listener;uses:="org.springframework.transaction,org.apach
  e.commons.logging,javax.jms,org.springframework.util,org.springframew
  ork.context,org.springframework.jms,org.springframework.jms.support.d
  estination,org.springframework.core,org.springframework.scheduling,or
  g.springframework.jms.connection,org.springframework.jms.support,org.
  springframework.core.task,org.springframework.transaction.support,org
- .springframework.beans.factory";version=2.5.2,org.springframework.bea
+ .springframework.beans.factory";version=2.5.3,org.springframework.bea
  ns.factory.serviceloader;uses:="org.springframework.util,org.springfr
  amework.beans.factory.config,org.springframework.beans.factory";versi
- on=2.5.2,org.springframework.jca.support;uses:="javax.resource,javax.
+ on=2.5.3,org.springframework.jca.support;uses:="javax.resource,javax.
  resource.spi,org.springframework.util,org.springframework.beans,javax
- .resource.spi.work,org.springframework.beans.factory";version=2.5.2,o
+ .resource.spi.work,org.springframework.beans.factory";version=2.5.3,o
  rg.springframework.remoting.caucho;uses:="org.springframework.web,com
  .caucho.hessian.client,org.apache.commons.logging,com.caucho.hessian.
  io,com.sun.net.httpserver,org.aopalliance.intercept,org.springframewo
@@ -415,13 +415,13 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  org.springframework.remoting.support,org.springframework.remoting,com
  .caucho.burlap.server,org.springframework.aop.framework,com.caucho.bu
  rlap.client,org.springframework.web.util,javax.servlet.http,org.sprin
- gframework.beans.factory";version=2.5.2,org.springframework.jms.liste
+ gframework.beans.factory";version=2.5.3,org.springframework.jms.liste
  ner.serversession;uses:="org.springframework.jms.listener,org.apache.
  commons.logging,javax.jms,org.springframework.jms.support,org.apache.
  commons.pool.impl,org.springframework.util,org.apache.commons.pool,or
  g.springframework.scheduling.timer,org.springframework.core.task";ver
- sion=2.5.2,org.springframework.aop;uses:="org.springframework.core,or
- g.aopalliance.intercept,org.aopalliance.aop";version=2.5.2,org.spring
+ sion=2.5.3,org.springframework.aop;uses:="org.springframework.core,or
+ g.aopalliance.intercept,org.aopalliance.aop";version=2.5.3,org.spring
  framework.context.support;uses:="org.apache.commons.logging,org.sprin
  gframework.context.i18n,org.springframework.beans.support,org.springf
  ramework.util,org.springframework.core.io,org.springframework.beans,o
@@ -429,20 +429,20 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  springframework.beans.factory.config,org.springframework.core.io.supp
  ort,org.springframework.context.event,org.xml.sax,org.springframework
  .beans.factory.support,org.springframework.core,org.springframework.b
- eans.factory";version=2.5.2,org.springframework.instrument.classloadi
+ eans.factory";version=2.5.3,org.springframework.instrument.classloadi
  ng.glassfish;uses:="org.springframework.instrument.classloading,com.s
  un.enterprise.loader,org.springframework.util,javax.persistence.spi";
- version=2.5.2,org.springframework.jmx;uses:=org.springframework.core;
- version=2.5.2,org.springframework.jmx.access;uses:="org.apache.common
+ version=2.5.3,org.springframework.jmx;uses:=org.springframework.core;
+ version=2.5.3,org.springframework.jmx.access;uses:="org.apache.common
  s.logging,javax.management.openmbean,org.aopalliance.intercept,org.sp
  ringframework.util,org.springframework.jmx,org.springframework.beans,
  javax.management,org.springframework.core,javax.management.remote,org
  .springframework.jmx.support,org.springframework.aop.framework,org.sp
- ringframework.beans.factory";version=2.5.2,org.springframework.schedu
+ ringframework.beans.factory";version=2.5.3,org.springframework.schedu
  ling.support;uses:="org.apache.commons.logging,org.springframework.be
  ans.support,org.springframework.util,org.springframework.beans.factor
- y";version=2.5.2,org.springframework.jms;uses:="org.springframework.c
- ore,javax.jms";version=2.5.2,org.springframework.orm.jpa.support;uses
+ y";version=2.5.3,org.springframework.jms;uses:="org.springframework.c
+ ore,javax.jms";version=2.5.3,org.springframework.orm.jpa.support;uses
  :="org.springframework.orm.jpa,org.apache.commons.logging,org.springf
  ramework.beans.factory.annotation,org.springframework.beans,org.sprin
  gframework.beans.factory.config,org.springframework.dao.support,org.s
@@ -452,26 +452,26 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  framework.util,org.springframework.web.context,org.springframework.ui
  ,org.springframework.web.context.request,org.springframework.dao,org.
  springframework.transaction.support,org.springframework.web.context.s
- upport,javax.servlet.http";version=2.5.2,org.springframework.core;use
+ upport,javax.servlet.http";version=2.5.3,org.springframework.core;use
  s:="org.springframework.asm,org.apache.commons.logging,org.apache.com
  mons.collections,org.springframework.util,edu.emory.mathcs.backport.j
  ava.util.concurrent,org.springframework.asm.commons,org.apache.common
- s.collections.map";version=2.5.2,org.springframework.jms.core.support
+ s.collections.map";version=2.5.3,org.springframework.jms.core.support
  ;uses:="org.apache.commons.logging,javax.jms,org.springframework.jms.
- core,org.springframework.beans.factory";version=2.5.2,org.springframe
+ core,org.springframework.beans.factory";version=2.5.3,org.springframe
  work.jca.cci;uses:="javax.resource,org.springframework.dao";version=2
- .5.2,org.springframework.orm.ibatis.support;uses:="org.springframewor
+ .5.3,org.springframework.orm.ibatis.support;uses:="org.springframewor
  k.orm.ibatis,javax.sql,org.springframework.jdbc.support.lob,com.ibati
  s.sqlmap.client,org.springframework.dao.support,org.springframework.t
- ransaction.support,com.ibatis.sqlmap.engine.type";version=2.5.2,org.s
+ ransaction.support,com.ibatis.sqlmap.engine.type";version=2.5.3,org.s
  pringframework.jca.cci.core;uses:="org.springframework.jca.cci,org.ap
  ache.commons.logging,javax.resource,javax.resource.cci,org.springfram
  ework.util,org.springframework.dao,org.springframework.jca.cci.connec
- tion";version=2.5.2,org.springframework.cache.ehcache;uses:="org.apac
+ tion";version=2.5.3,org.springframework.cache.ehcache;uses:="org.apac
  he.commons.logging,org.springframework.util,org.springframework.core.
  io,net.sf.ehcache.store,net.sf.ehcache.bootstrap,net.sf.ehcache,net.s
  f.ehcache.constructs.blocking,org.springframework.beans.factory";vers
- ion=2.5.2,org.springframework.scheduling.quartz;uses:="org.apache.com
+ ion=2.5.3,org.springframework.scheduling.quartz;uses:="org.apache.com
  mons.logging,org.quartz.xml,org.quartz.simpl,org.springframework.bean
  s,org.quartz.impl.jdbcjobstore,org.springframework.core,org.quartz.ut
  ils,org.springframework.jdbc.datasource,org.springframework.beans.fac
@@ -480,30 +480,30 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  ork.core.io,org.springframework.context,org.springframework.core.io.s
  upport,org.springframework.scheduling,org.quartz.impl,javax.sql,org.s
  pringframework.core.task,org.springframework.transaction.support";ver
- sion=2.5.2,org.springframework.util.comparator;uses:=org.springframew
- ork.util;version=2.5.2,org.springframework.orm.ibatis;uses:="org.spri
+ sion=2.5.3,org.springframework.util.comparator;uses:=org.springframew
+ ork.util;version=2.5.3,org.springframework.orm.ibatis;uses:="org.spri
  ngframework.jdbc,org.apache.commons.logging,com.ibatis.sqlmap.engine.
  impl,org.springframework.util,org.springframework.core.io,com.ibatis.
  common.util,com.ibatis.sqlmap.engine.transaction,org.springframework.
  jdbc.support,com.ibatis.sqlmap.engine.transaction.external,javax.sql,
  com.ibatis.sqlmap.client.event,org.springframework.jdbc.support.lob,c
  om.ibatis.sqlmap.client,org.springframework.dao,org.springframework.j
- dbc.datasource,org.springframework.beans.factory";version=2.5.2,org.s
+ dbc.datasource,org.springframework.beans.factory";version=2.5.3,org.s
  pringframework.ejb.access;uses:="javax.naming,org.apache.commons.logg
  ing,javax.ejb,org.aopalliance.intercept,org.springframework.util,org.
  springframework.jndi,org.springframework.core,org.springframework.rem
  oting,org.springframework.aop.framework,javax.rmi,org.springframework
- .remoting.rmi,org.springframework.beans.factory";version=2.5.2,org.sp
+ .remoting.rmi,org.springframework.beans.factory";version=2.5.3,org.sp
  ringframework.beans.support;uses:="org.apache.commons.logging,org.spr
  ingframework.util,org.springframework.core.io,org.springframework.bea
  ns,org.springframework.core.io.support,org.springframework.beans.prop
- ertyeditors";version=2.5.2,org.springframework.aop.scope;uses:="org.s
+ ertyeditors";version=2.5.3,org.springframework.aop.scope;uses:="org.s
  pringframework.aop.support,org.springframework.aop.target,org.springf
  ramework.aop,org.springframework.util,org.springframework.beans,org.s
  pringframework.beans.factory.config,org.aopalliance.aop,org.springfra
  mework.beans.factory.support,org.springframework.aop.framework.autopr
  oxy,org.springframework.aop.framework,org.springframework.beans.facto
- ry";version=2.5.2,org.springframework.aop.aspectj;uses:="org.springfr
+ ry";version=2.5.3,org.springframework.aop.aspectj;uses:="org.springfr
  amework.aop.support,org.apache.commons.logging,org.springframework.ao
  p.interceptor,org.aspectj.weaver,org.aopalliance.intercept,org.spring
  framework.aop,org.aspectj.bridge,org.aspectj.weaver.tools,org.aspectj
@@ -512,72 +512,72 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  amework.beans.factory,org.aspectj.runtime.internal,org.springframewor
  k.util,org.aopalliance.aop,org.aspectj.lang.reflect,org.aspectj.weave
  r.internal.tools,org.springframework.aop.framework,org.aspectj.weaver
- .reflect";version=2.5.2,org.springframework.instrument;version=2.5.2,
+ .reflect";version=2.5.3,org.springframework.instrument;version=2.5.3,
  org.springframework.aop.support.annotation;uses:="org.springframework
  .aop.support,org.springframework.aop,org.springframework.util,org.spr
- ingframework.core.annotation";version=2.5.2,org.aopalliance.aop;versi
+ ingframework.core.annotation";version=2.5.3,org.aopalliance.aop;versi
  on=1.0,org.springframework.jdbc.support;uses:="org.springframework.jd
  bc,org.apache.commons.logging,org.springframework.util,org.springfram
  ework.core.io,org.springframework.beans,org.springframework.beans.fac
  tory.xml,org.springframework.beans.factory.support,org.springframewor
  k.core,javax.sql,org.springframework.dao,org.springframework.jdbc.dat
- asource,org.springframework.beans.factory";version=2.5.2,org.springfr
+ asource,org.springframework.beans.factory";version=2.5.3,org.springfr
  amework.ui;uses:="org.springframework.core,org.springframework.util";
- version=2.5.2,org.springframework.metadata;version=2.5.2,org.springfr
+ version=2.5.3,org.springframework.metadata;version=2.5.3,org.springfr
  amework.jmx.export.annotation;uses:="org.springframework.beans.annota
  tion,org.springframework.jmx.export.metadata,org.springframework.jmx.
  export.assembler,org.springframework.util,org.springframework.jmx.exp
  ort.naming,org.springframework.beans,org.springframework.core.annotat
- ion,org.springframework.jmx.export";version=2.5.2,org.springframework
+ ion,org.springframework.jmx.export";version=2.5.3,org.springframework
  .scripting.groovy;uses:="groovy.lang,org.springframework.util,org.spr
  ingframework.beans,org.springframework.beans.factory.config,org.sprin
  gframework.scripting,org.springframework.beans.factory,org.codehaus.g
- roovy.control";version=2.5.2,org.springframework.orm;uses:=org.spring
- framework.dao;version=2.5.2,org.springframework.jms.support;uses:="or
+ roovy.control";version=2.5.3,org.springframework.orm;uses:=org.spring
+ framework.dao;version=2.5.3,org.springframework.jms.support;uses:="or
  g.springframework.core,org.apache.commons.logging,javax.jms,org.sprin
  gframework.util,org.springframework.jms,org.springframework.beans.fac
- tory";version=2.5.2,org.springframework.jca.cci.core.support;uses:="o
+ tory";version=2.5.3,org.springframework.jca.cci.core.support;uses:="o
  rg.springframework.jca.cci,javax.resource.cci,org.springframework.jca
  .cci.core,org.springframework.util,org.springframework.dao.support,or
- g.springframework.jca.cci.connection";version=2.5.2,org.springframewo
+ g.springframework.jca.cci.connection";version=2.5.3,org.springframewo
  rk.jdbc.support.lob;uses:="org.springframework.transaction,org.apache
  .commons.logging,org.springframework.util,org.springframework.jdbc.su
  pport.nativejdbc,javax.transaction,org.springframework.dao,org.spring
- framework.transaction.support";version=2.5.2,org.springframework.scri
+ framework.transaction.support";version=2.5.3,org.springframework.scri
  pting.config;uses:="org.springframework.beans.factory.support,org.spr
  ingframework.scripting.support,org.springframework.util,org.springfra
  mework.beans,org.springframework.beans.factory.xml,org.springframewor
  k.beans.factory.config,org.springframework.util.xml,org.w3c.dom";vers
- ion=2.5.2,org.springframework.jms.remoting;uses:="org.springframework
+ ion=2.5.3,org.springframework.jms.remoting;uses:="org.springframework
  .jms.listener,org.springframework.aop.support,org.apache.commons.logg
  ing,javax.jms,org.aopalliance.intercept,org.springframework.util,org.
  springframework.jms.support.destination,org.springframework.jms.suppo
  rt.converter,org.springframework.remoting.support,org.springframework
  .remoting,org.springframework.jms.connection,org.springframework.jms.
  support,org.springframework.aop.framework,org.springframework.beans.f
- actory";version=2.5.2,org.springframework.ui.velocity;uses:="org.apac
+ actory";version=2.5.3,org.springframework.ui.velocity;uses:="org.apac
  he.velocity.runtime,org.apache.commons.logging,org.apache.commons.col
  lections,org.springframework.util,org.apache.velocity.exception,org.a
  pache.velocity.context,org.springframework.core.io,org.springframewor
  k.context,org.springframework.core.io.support,org.apache.velocity.run
  time.log,org.apache.velocity,org.apache.velocity.app,org.apache.veloc
  ity.runtime.resource,org.apache.velocity.runtime.resource.loader,org.
- springframework.beans.factory";version=2.5.2,org.springframework.jms.
+ springframework.beans.factory";version=2.5.3,org.springframework.jms.
  core;uses:="org.springframework.jms.support.converter,org.apache.comm
  ons.logging,org.springframework.jms.connection,javax.jms,org.springfr
  amework.jms.support,org.springframework.util,org.springframework.tran
  saction.support,org.springframework.jms,org.springframework.jms.suppo
- rt.destination";version=2.5.2,org.springframework.orm.jpa.persistence
+ rt.destination";version=2.5.3,org.springframework.orm.jpa.persistence
  unit;uses:="org.apache.commons.logging,org.springframework.context.we
  aving,org.springframework.util,org.springframework.core.io,javax.xml.
  parsers,org.springframework.context,org.springframework.core.io.suppo
  rt,org.springframework.util.xml,org.w3c.dom,org.xml.sax,org.springfra
  mework.jdbc.datasource.lookup,org.springframework.core,javax.sql,org.
  springframework.instrument.classloading,javax.persistence.spi,javax.p
- ersistence,org.springframework.beans.factory";version=2.5.2,org.sprin
- gframework.scripting;uses:=org.springframework.core;version=2.5.2,org
+ ersistence,org.springframework.beans.factory";version=2.5.3,org.sprin
+ gframework.scripting;uses:=org.springframework.core;version=2.5.3,org
  .springframework.core.enums;uses:="org.springframework.util.comparato
- r,org.apache.commons.logging,org.springframework.util";version=2.5.2,
+ r,org.apache.commons.logging,org.springframework.util";version=2.5.3,
  org.springframework.web.context.support;uses:="org.apache.commons.log
  ging,org.springframework.context.support,org.springframework.beans.fa
  ctory.annotation,org.springframework.beans,org.springframework.beans.
@@ -588,26 +588,26 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  ntext,org.springframework.beans.factory.xml,org.springframework.core.
  io.support,org.springframework.web.context,org.springframework.ui.con
  text.support,org.springframework.web.context.request,javax.servlet.ht
- tp";version=2.5.2,org.springframework.instrument.classloading.weblogi
+ tp";version=2.5.3,org.springframework.instrument.classloading.weblogi
  c;uses:="org.springframework.instrument.classloading,org.springframew
- ork.util";version=2.5.2,org.springframework.aop.interceptor;uses:="or
+ ork.util";version=2.5.3,org.springframework.aop.interceptor;uses:="or
  g.springframework.aop.support,org.apache.commons.logging,org.aopallia
  nce.intercept,org.springframework.aop,org.springframework.util,org.ao
  palliance.aop,com.jamonapi,org.springframework.core,org.springframewo
- rk.beans.factory";version=2.5.2,org.springframework.context.access;us
+ rk.beans.factory";version=2.5.3,org.springframework.context.access;us
  es:="javax.naming,org.apache.commons.logging,org.springframework.util
  ,org.springframework.context.support,org.springframework.beans,org.sp
  ringframework.context,org.springframework.core.io.support,org.springf
  ramework.jndi,org.springframework.beans.factory.access,org.springfram
- ework.beans.factory";version=2.5.2,org.springframework.scripting.bsh;
+ ework.beans.factory";version=2.5.3,org.springframework.scripting.bsh;
  uses:="org.springframework.aop.support,org.springframework.core,org.s
  pringframework.util,org.springframework.scripting,bsh,org.springframe
- work.beans.factory";version=2.5.2,org.springframework.scheduling.conc
+ work.beans.factory";version=2.5.3,org.springframework.scheduling.conc
  urrent;uses:="org.apache.commons.logging,org.springframework.scheduli
  ng,org.springframework.util,org.springframework.scheduling.support,or
  g.springframework.core.task,org.springframework.beans.factory";versio
- n=2.5.2,org.springframework.core.task.support;uses:="org.springframew
- ork.util,org.springframework.core.task";version=2.5.2,org.springframe
+ n=2.5.3,org.springframework.core.task.support;uses:="org.springframew
+ ork.util,org.springframework.core.task";version=2.5.3,org.springframe
  work.orm.hibernate3.support;uses:="org.springframework.aop.support,or
  g.apache.commons.logging,org.hibernate.util,org.hibernate.event,org.s
  pringframework.dao.support,javax.servlet,org.hibernate.event.def,org.
@@ -618,105 +618,105 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  support.lob,javax.transaction,org.hibernate.usertype,org.springframew
  ork.dao,org.springframework.orm.hibernate3,org.springframework.web.co
  ntext.support,org.springframework.transaction.support,javax.servlet.h
- ttp";version=2.5.2,org.springframework.aop.framework.autoproxy;uses:=
+ ttp";version=2.5.3,org.springframework.aop.framework.autoproxy;uses:=
  "org.springframework.aop.support,org.springframework.aop.target,org.s
  pringframework.aop.framework.adapter,org.apache.commons.logging,org.s
  pringframework.aop,org.springframework.util,org.springframework.beans
  ,org.springframework.beans.factory.config,org.aopalliance.aop,org.spr
  ingframework.core,org.springframework.aop.framework,org.springframewo
- rk.beans.factory";version=2.5.2,org.springframework.instrument.classl
+ rk.beans.factory";version=2.5.3,org.springframework.instrument.classl
  oading;uses:="org.springframework.core,org.apache.commons.logging,org
- .springframework.util,org.springframework.instrument";version=2.5.2,o
+ .springframework.util,org.springframework.instrument";version=2.5.3,o
  rg.springframework.orm.jdo.support;uses:="org.apache.commons.logging,
  org.springframework.web.filter,org.springframework.web.context,org.sp
  ringframework.orm.jdo,org.springframework.dao.support,javax.servlet,o
  rg.springframework.ui,org.springframework.web.context.request,javax.j
  do,org.springframework.dao,org.springframework.web.context.support,or
  g.springframework.transaction.support,javax.servlet.http";version=2.5
- .2,org.springframework.web.util;uses:="org.apache.commons.logging,org
+ .3,org.springframework.web.util;uses:="org.apache.commons.logging,org
  .springframework.util,org.springframework.beans,javax.servlet.jsp,org
  .springframework.core,org.apache.taglibs.standard.lang.support,javax.
  servlet,javax.servlet.jsp.el,javax.servlet.jsp.tagext,javax.servlet.h
- ttp";version=2.5.2,org.springframework.jndi.support;uses:="org.spring
+ ttp";version=2.5.3,org.springframework.jndi.support;uses:="org.spring
  framework.jndi,javax.naming,org.springframework.beans,org.springframe
- work.beans.factory";version=2.5.2,org.springframework.remoting.rmi;us
+ work.beans.factory";version=2.5.3,org.springframework.remoting.rmi;us
  es:="org.springframework.aop.support,javax.naming,org.apache.commons.
  logging,org.aopalliance.intercept,org.springframework.util,org.omg.CO
  RBA,org.omg.CORBA.portable,org.springframework.jndi,org.springframewo
  rk.remoting,org.springframework.remoting.support,org.omg.CORBA_2_3.po
  rtable,org.springframework.aop.framework,javax.rmi,javax.rmi.CORBA,or
- g.springframework.beans.factory";version=2.5.2,org.springframework.co
- re.type;uses:=org.springframework.core.annotation;version=2.5.2,org.s
+ g.springframework.beans.factory";version=2.5.3,org.springframework.co
+ re.type;uses:=org.springframework.core.annotation;version=2.5.3,org.s
  pringframework.jdbc.datasource;uses:="org.springframework.transaction
  ,org.springframework.jdbc,org.apache.commons.logging,org.springframew
  ork.util,org.springframework.core,javax.sql,org.springframework.trans
- action.support,org.springframework.beans.factory";version=2.5.2,org.s
+ action.support,org.springframework.beans.factory";version=2.5.3,org.s
  pringframework.remoting.soap;uses:="org.springframework.remoting,java
- x.xml.namespace";version=2.5.2,org.springframework.web;uses:="javax.s
- ervlet,javax.servlet.http";version=2.5.2,org.springframework.transact
+ x.xml.namespace";version=2.5.3,org.springframework.web;uses:="javax.s
+ ervlet,javax.servlet.http";version=2.5.3,org.springframework.transact
  ion;uses:="org.springframework.core,org.springframework.util";version
- =2.5.2,org.springframework.context.weaving;uses:="org.aspectj.weaver.
+ =2.5.3,org.springframework.context.weaving;uses:="org.aspectj.weaver.
  loadtime,org.springframework.instrument.classloading.weblogic,org.apa
  che.commons.logging,org.springframework.util,org.springframework.inst
  rument.classloading.glassfish,org.springframework.beans,org.springfra
  mework.beans.factory.config,org.springframework.core,org.springframew
  ork.instrument.classloading,org.springframework.instrument.classloadi
- ng.oc4j,org.springframework.beans.factory";version=2.5.2,org.springfr
+ ng.oc4j,org.springframework.beans.factory";version=2.5.3,org.springfr
  amework.aop.framework.adapter;uses:="org.springframework.aop.support,
  org.apache.commons.logging,org.aopalliance.intercept,org.springframew
  ork.aop,org.springframework.util,org.springframework.beans,org.spring
- framework.beans.factory.config,org.aopalliance.aop";version=2.5.2,org
+ framework.beans.factory.config,org.aopalliance.aop";version=2.5.3,org
  .springframework.jdbc.core.namedparam;uses:="org.springframework.jdbc
  .core.support,org.springframework.util,org.springframework.beans,org.
  springframework.jdbc.support.rowset,org.springframework.dao.support,o
  rg.springframework.jdbc.support,javax.sql,org.springframework.jdbc.co
- re,org.springframework.dao";version=2.5.2,org.springframework.ui.jasp
+ re,org.springframework.dao";version=2.5.3,org.springframework.ui.jasp
  erreports;uses:="net.sf.jasperreports.engine.data,net.sf.jasperreport
- s.engine.export,net.sf.jasperreports.engine";version=2.5.2,org.spring
+ s.engine.export,net.sf.jasperreports.engine";version=2.5.3,org.spring
  framework.beans.factory.generic;uses:="org.springframework.util,org.s
- pringframework.beans,org.springframework.beans.factory";version=2.5.2
+ pringframework.beans,org.springframework.beans.factory";version=2.5.3
  ,org.springframework.core.io.support;uses:="org.apache.commons.loggin
- g,org.springframework.util,org.springframework.core.io";version=2.5.2
+ g,org.springframework.util,org.springframework.core.io";version=2.5.3
  ,org.springframework.jms.support.destination;uses:="javax.naming,org.
  apache.commons.logging,javax.jms,org.springframework.util,org.springf
  ramework.beans,org.springframework.jms,org.springframework.jndi,org.s
  pringframework.core,org.springframework.jms.support,org.springframewo
- rk.beans.factory";version=2.5.2,org.springframework.jdbc.datasource.l
+ rk.beans.factory";version=2.5.3,org.springframework.jdbc.datasource.l
  ookup;uses:="javax.naming,org.springframework.transaction,org.springf
  ramework.util,org.springframework.beans,org.springframework.jndi,org.
  springframework.core,javax.sql,org.springframework.dao,org.springfram
  ework.jdbc.datasource,org.springframework.transaction.support,org.spr
- ingframework.beans.factory";version=2.5.2,org.springframework.jms.sup
+ ingframework.beans.factory";version=2.5.3,org.springframework.jms.sup
  port.converter;uses:="javax.jms,org.springframework.util,org.springfr
- amework.jms";version=2.5.2,org.springframework.beans.factory.wiring;u
+ amework.jms";version=2.5.3,org.springframework.beans.factory.wiring;u
  ses:="org.apache.commons.logging,org.springframework.util,org.springf
  ramework.beans.factory.config,org.springframework.beans.factory";vers
- ion=2.5.2,org.springframework.remoting;uses:=org.springframework.core
- ;version=2.5.2,org.springframework.jms.listener.endpoint;uses:="org.s
+ ion=2.5.3,org.springframework.remoting;uses:=org.springframework.core
+ ;version=2.5.3,org.springframework.jms.listener.endpoint;uses:="org.s
  pringframework.jca.endpoint,javax.resource,org.apache.commons.logging
  ,javax.jms,javax.resource.spi,org.springframework.beans,javax.resourc
  e.spi.endpoint,org.springframework.jms.support.destination";version=2
- .5.2,org.springframework.jca.endpoint;uses:="org.springframework.aop.
+ .5.3,org.springframework.jca.endpoint;uses:="org.springframework.aop.
  support,javax.resource,org.apache.commons.logging,org.aopalliance.int
  ercept,org.springframework.util,org.springframework.context,org.aopal
  liance.aop,javax.resource.spi.endpoint,javax.resource.spi,javax.trans
  action,org.springframework.aop.framework,javax.transaction.xa,org.spr
  ingframework.transaction.jta,org.springframework.beans.factory";versi
- on=2.5.2,org.springframework.ui.context.support;uses:="org.apache.com
+ on=2.5.3,org.springframework.ui.context.support;uses:="org.apache.com
  mons.logging,org.springframework.ui.context,org.springframework.util,
  org.springframework.context.support,org.springframework.context";vers
- ion=2.5.2,org.springframework.core.type.classreading;uses:="org.sprin
+ ion=2.5.3,org.springframework.core.type.classreading;uses:="org.sprin
  gframework.asm,org.springframework.asm.commons,org.springframework.ut
  il,org.springframework.core.io,org.springframework.core.type";version
- =2.5.2,org.springframework.jms.listener.adapter;uses:="org.springfram
+ =2.5.3,org.springframework.jms.listener.adapter;uses:="org.springfram
  ework.jms.listener,org.springframework.jms.support.converter,org.apac
  he.commons.logging,javax.jms,org.springframework.jms.support,org.spri
  ngframework.util,org.springframework.jms,org.springframework.jms.supp
- ort.destination";version=2.5.2,org.springframework.transaction.jta;us
+ ort.destination";version=2.5.3,org.springframework.transaction.jta;us
  es:="javax.naming,org.springframework.transaction,com.ibm.wsspi.uow,o
  rg.apache.commons.logging,org.springframework.util,org.objectweb.jotm
  ,org.springframework.jndi,javax.transaction,org.springframework.trans
- action.support,org.springframework.beans.factory";version=2.5.2,org.s
+ action.support,org.springframework.beans.factory";version=2.5.3,org.s
  pringframework.aop.aspectj.annotation;uses:="org.springframework.aop.
  support,org.springframework.aop.aspectj.autoproxy,org.apache.commons.
  logging,org.springframework.aop,org.springframework.util,org.springfr
@@ -724,37 +724,37 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  lliance.aop,org.springframework.core.annotation,org.aspectj.lang.anno
  tation,org.springframework.core,org.aspectj.lang.reflect,org.springfr
  amework.aop.framework,org.springframework.beans.factory";version=2.5.
- 2,org.springframework.dao.annotation;uses:="org.springframework.aop.s
+ 3,org.springframework.dao.annotation;uses:="org.springframework.aop.s
  upport,org.springframework.aop,org.springframework.util,org.springfra
  mework.beans,org.springframework.aop.support.annotation,org.springfra
  mework.beans.factory.config,org.aopalliance.aop,org.springframework.d
  ao.support,org.springframework.core,org.springframework.aop.framework
  ,org.springframework.stereotype,org.springframework.beans.factory";ve
- rsion=2.5.2,org.springframework.scheduling.timer;uses:="org.springfra
+ rsion=2.5.3,org.springframework.scheduling.timer;uses:="org.springfra
  mework.core,org.apache.commons.logging,org.springframework.scheduling
  ,org.springframework.util,org.springframework.scheduling.support,org.
- springframework.beans.factory";version=2.5.2,org.springframework.ejb.
+ springframework.beans.factory";version=2.5.3,org.springframework.ejb.
  interceptor;uses:="javax.annotation,javax.ejb,org.springframework.con
  text.access,org.springframework.beans.factory.access,org.springframew
  ork.beans.factory.annotation,org.springframework.context,javax.interc
  eptor,org.springframework.beans.factory.config,org.springframework.be
- ans.factory";version=2.5.2
+ ans.factory";version=2.5.3
 Private-Package: org.springframework.asm,org.springframework.asm.commo
  ns,org.springframework.asm.signature
 Ignore-Package: org.springframework.asm,org.springframework.asm.common
  s,org.springframework.asm.signature
 Implementation-Title: Spring Framework
-Spring-Version: 2.5.2
-Implementation-Version: 2.5.2
+Spring-Version: 2.5.3
+Implementation-Version: 2.5.3
 Tool: Bnd-0.0.208
 Bundle-Name: spring
-Created-By: 1.6.0_04 (Sun Microsystems Inc.)
+Created-By: 1.6.0_01-dp (Apple Inc.)
 Premain-Class: org.springframework.instrument.InstrumentationSavingAge
  nt
 Ant-Version: Apache Ant 1.7.0
 DynamicImport-Package: *
-Bundle-Version: 2.5.2.v200803070100
-Bnd-LastModified: 1204324862343
+Bundle-Version: 2.5.3.v200803141806
+Bnd-LastModified: 1205543078717
 Bundle-ManifestVersion: 2
 Bundle-Description: Spring Framework
 Bundle-SymbolicName: org.springframework.bundle.spring
@@ -878,189 +878,189 @@ Import-Package: bsh;resolution:=optional,com.caucho.burlap.client;reso
  rtz.impl.jdbcjobstore;resolution:=optional,org.quartz.simpl;resolutio
  n:=optional,org.quartz.spi;resolution:=optional,org.quartz.utils;reso
  lution:=optional,org.quartz.xml;resolution:=optional,org.springframew
- ork.aop;resolution:=optional;version=2.5.2,org.springframework.aop.as
- pectj;resolution:=optional;version=2.5.2,org.springframework.aop.aspe
- ctj.annotation;resolution:=optional;version=2.5.2,org.springframework
- .aop.aspectj.autoproxy;resolution:=optional;version=2.5.2,org.springf
- ramework.aop.config;resolution:=optional;version=2.5.2,org.springfram
- ework.aop.framework;resolution:=optional;version=2.5.2,org.springfram
- ework.aop.framework.adapter;resolution:=optional;version=2.5.2,org.sp
+ ork.aop;resolution:=optional;version=2.5.3,org.springframework.aop.as
+ pectj;resolution:=optional;version=2.5.3,org.springframework.aop.aspe
+ ctj.annotation;resolution:=optional;version=2.5.3,org.springframework
+ .aop.aspectj.autoproxy;resolution:=optional;version=2.5.3,org.springf
+ ramework.aop.config;resolution:=optional;version=2.5.3,org.springfram
+ ework.aop.framework;resolution:=optional;version=2.5.3,org.springfram
+ ework.aop.framework.adapter;resolution:=optional;version=2.5.3,org.sp
  ringframework.aop.framework.autoproxy;resolution:=optional;version=2.
- 5.2,org.springframework.aop.framework.autoproxy.target;resolution:=op
- tional;version=2.5.2,org.springframework.aop.interceptor;resolution:=
- optional;version=2.5.2,org.springframework.aop.scope;resolution:=opti
- onal;version=2.5.2,org.springframework.aop.support;resolution:=option
- al;version=2.5.2,org.springframework.aop.support.annotation;resolutio
- n:=optional;version=2.5.2,org.springframework.aop.target;resolution:=
- optional;version=2.5.2,org.springframework.aop.target.dynamic;resolut
- ion:=optional;version=2.5.2,org.springframework.beans;resolution:=opt
- ional;version=2.5.2,org.springframework.beans.annotation;resolution:=
- optional;version=2.5.2,org.springframework.beans.factory;resolution:=
- optional;version=2.5.2,org.springframework.beans.factory.access;resol
- ution:=optional;version=2.5.2,org.springframework.beans.factory.acces
- s.el;resolution:=optional;version=2.5.2,org.springframework.beans.fac
- tory.annotation;resolution:=optional;version=2.5.2,org.springframewor
- k.beans.factory.config;resolution:=optional;version=2.5.2,org.springf
- ramework.beans.factory.generic;resolution:=optional;version=2.5.2,org
+ 5.3,org.springframework.aop.framework.autoproxy.target;resolution:=op
+ tional;version=2.5.3,org.springframework.aop.interceptor;resolution:=
+ optional;version=2.5.3,org.springframework.aop.scope;resolution:=opti
+ onal;version=2.5.3,org.springframework.aop.support;resolution:=option
+ al;version=2.5.3,org.springframework.aop.support.annotation;resolutio
+ n:=optional;version=2.5.3,org.springframework.aop.target;resolution:=
+ optional;version=2.5.3,org.springframework.aop.target.dynamic;resolut
+ ion:=optional;version=2.5.3,org.springframework.beans;resolution:=opt
+ ional;version=2.5.3,org.springframework.beans.annotation;resolution:=
+ optional;version=2.5.3,org.springframework.beans.factory;resolution:=
+ optional;version=2.5.3,org.springframework.beans.factory.access;resol
+ ution:=optional;version=2.5.3,org.springframework.beans.factory.acces
+ s.el;resolution:=optional;version=2.5.3,org.springframework.beans.fac
+ tory.annotation;resolution:=optional;version=2.5.3,org.springframewor
+ k.beans.factory.config;resolution:=optional;version=2.5.3,org.springf
+ ramework.beans.factory.generic;resolution:=optional;version=2.5.3,org
  .springframework.beans.factory.parsing;resolution:=optional;version=2
- .5.2,org.springframework.beans.factory.serviceloader;resolution:=opti
- onal;version=2.5.2,org.springframework.beans.factory.support;resoluti
- on:=optional;version=2.5.2,org.springframework.beans.factory.wiring;r
- esolution:=optional;version=2.5.2,org.springframework.beans.factory.x
- ml;resolution:=optional;version=2.5.2,org.springframework.beans.prope
- rtyeditors;resolution:=optional;version=2.5.2,org.springframework.bea
- ns.support;resolution:=optional;version=2.5.2,org.springframework.cac
- he.ehcache;resolution:=optional;version=2.5.2,org.springframework.con
- text;resolution:=optional;version=2.5.2,org.springframework.context.a
- ccess;resolution:=optional;version=2.5.2,org.springframework.context.
- annotation;resolution:=optional;version=2.5.2,org.springframework.con
- text.config;resolution:=optional;version=2.5.2,org.springframework.co
- ntext.event;resolution:=optional;version=2.5.2,org.springframework.co
- ntext.i18n;resolution:=optional;version=2.5.2,org.springframework.con
- text.support;resolution:=optional;version=2.5.2,org.springframework.c
- ontext.weaving;resolution:=optional;version=2.5.2,org.springframework
- .core;resolution:=optional;version=2.5.2,org.springframework.core.ann
- otation;resolution:=optional;version=2.5.2,org.springframework.core.e
- nums;resolution:=optional;version=2.5.2,org.springframework.core.io;r
- esolution:=optional;version=2.5.2,org.springframework.core.io.support
- ;resolution:=optional;version=2.5.2,org.springframework.core.style;re
- solution:=optional;version=2.5.2,org.springframework.core.task;resolu
- tion:=optional;version=2.5.2,org.springframework.core.task.support;re
- solution:=optional;version=2.5.2,org.springframework.core.type;resolu
- tion:=optional;version=2.5.2,org.springframework.core.type.classreadi
- ng;resolution:=optional;version=2.5.2,org.springframework.core.type.f
- ilter;resolution:=optional;version=2.5.2,org.springframework.dao;reso
- lution:=optional;version=2.5.2,org.springframework.dao.annotation;res
- olution:=optional;version=2.5.2,org.springframework.dao.support;resol
- ution:=optional;version=2.5.2,org.springframework.ejb.access;resoluti
- on:=optional;version=2.5.2,org.springframework.ejb.config;resolution:
- =optional;version=2.5.2,org.springframework.ejb.interceptor;resolutio
- n:=optional;version=2.5.2,org.springframework.ejb.support;resolution:
- =optional;version=2.5.2,org.springframework.instrument;resolution:=op
- tional;version=2.5.2,org.springframework.instrument.classloading;reso
- lution:=optional;version=2.5.2,org.springframework.instrument.classlo
- ading.glassfish;resolution:=optional;version=2.5.2,org.springframewor
- k.instrument.classloading.oc4j;resolution:=optional;version=2.5.2,org
+ .5.3,org.springframework.beans.factory.serviceloader;resolution:=opti
+ onal;version=2.5.3,org.springframework.beans.factory.support;resoluti
+ on:=optional;version=2.5.3,org.springframework.beans.factory.wiring;r
+ esolution:=optional;version=2.5.3,org.springframework.beans.factory.x
+ ml;resolution:=optional;version=2.5.3,org.springframework.beans.prope
+ rtyeditors;resolution:=optional;version=2.5.3,org.springframework.bea
+ ns.support;resolution:=optional;version=2.5.3,org.springframework.cac
+ he.ehcache;resolution:=optional;version=2.5.3,org.springframework.con
+ text;resolution:=optional;version=2.5.3,org.springframework.context.a
+ ccess;resolution:=optional;version=2.5.3,org.springframework.context.
+ annotation;resolution:=optional;version=2.5.3,org.springframework.con
+ text.config;resolution:=optional;version=2.5.3,org.springframework.co
+ ntext.event;resolution:=optional;version=2.5.3,org.springframework.co
+ ntext.i18n;resolution:=optional;version=2.5.3,org.springframework.con
+ text.support;resolution:=optional;version=2.5.3,org.springframework.c
+ ontext.weaving;resolution:=optional;version=2.5.3,org.springframework
+ .core;resolution:=optional;version=2.5.3,org.springframework.core.ann
+ otation;resolution:=optional;version=2.5.3,org.springframework.core.e
+ nums;resolution:=optional;version=2.5.3,org.springframework.core.io;r
+ esolution:=optional;version=2.5.3,org.springframework.core.io.support
+ ;resolution:=optional;version=2.5.3,org.springframework.core.style;re
+ solution:=optional;version=2.5.3,org.springframework.core.task;resolu
+ tion:=optional;version=2.5.3,org.springframework.core.task.support;re
+ solution:=optional;version=2.5.3,org.springframework.core.type;resolu
+ tion:=optional;version=2.5.3,org.springframework.core.type.classreadi
+ ng;resolution:=optional;version=2.5.3,org.springframework.core.type.f
+ ilter;resolution:=optional;version=2.5.3,org.springframework.dao;reso
+ lution:=optional;version=2.5.3,org.springframework.dao.annotation;res
+ olution:=optional;version=2.5.3,org.springframework.dao.support;resol
+ ution:=optional;version=2.5.3,org.springframework.ejb.access;resoluti
+ on:=optional;version=2.5.3,org.springframework.ejb.config;resolution:
+ =optional;version=2.5.3,org.springframework.ejb.interceptor;resolutio
+ n:=optional;version=2.5.3,org.springframework.ejb.support;resolution:
+ =optional;version=2.5.3,org.springframework.instrument;resolution:=op
+ tional;version=2.5.3,org.springframework.instrument.classloading;reso
+ lution:=optional;version=2.5.3,org.springframework.instrument.classlo
+ ading.glassfish;resolution:=optional;version=2.5.3,org.springframewor
+ k.instrument.classloading.oc4j;resolution:=optional;version=2.5.3,org
  .springframework.instrument.classloading.tomcat;resolution:=optional;
- version=2.5.2,org.springframework.instrument.classloading.weblogic;re
- solution:=optional;version=2.5.2,org.springframework.jca.cci;resoluti
- on:=optional;version=2.5.2,org.springframework.jca.cci.connection;res
- olution:=optional;version=2.5.2,org.springframework.jca.cci.core;reso
- lution:=optional;version=2.5.2,org.springframework.jca.cci.core.suppo
- rt;resolution:=optional;version=2.5.2,org.springframework.jca.cci.obj
- ect;resolution:=optional;version=2.5.2,org.springframework.jca.contex
- t;resolution:=optional;version=2.5.2,org.springframework.jca.endpoint
- ;resolution:=optional;version=2.5.2,org.springframework.jca.support;r
- esolution:=optional;version=2.5.2,org.springframework.jca.work;resolu
- tion:=optional;version=2.5.2,org.springframework.jca.work.glassfish;r
- esolution:=optional;version=2.5.2,org.springframework.jca.work.jboss;
- resolution:=optional;version=2.5.2,org.springframework.jdbc;resolutio
- n:=optional;version=2.5.2,org.springframework.jdbc.core;resolution:=o
- ptional;version=2.5.2,org.springframework.jdbc.core.metadata;resoluti
- on:=optional;version=2.5.2,org.springframework.jdbc.core.namedparam;r
- esolution:=optional;version=2.5.2,org.springframework.jdbc.core.simpl
- e;resolution:=optional;version=2.5.2,org.springframework.jdbc.core.su
- pport;resolution:=optional;version=2.5.2,org.springframework.jdbc.dat
- asource;resolution:=optional;version=2.5.2,org.springframework.jdbc.d
- atasource.lookup;resolution:=optional;version=2.5.2,org.springframewo
- rk.jdbc.object;resolution:=optional;version=2.5.2,org.springframework
- .jdbc.support;resolution:=optional;version=2.5.2,org.springframework.
- jdbc.support.incrementer;resolution:=optional;version=2.5.2,org.sprin
- gframework.jdbc.support.lob;resolution:=optional;version=2.5.2,org.sp
+ version=2.5.3,org.springframework.instrument.classloading.weblogic;re
+ solution:=optional;version=2.5.3,org.springframework.jca.cci;resoluti
+ on:=optional;version=2.5.3,org.springframework.jca.cci.connection;res
+ olution:=optional;version=2.5.3,org.springframework.jca.cci.core;reso
+ lution:=optional;version=2.5.3,org.springframework.jca.cci.core.suppo
+ rt;resolution:=optional;version=2.5.3,org.springframework.jca.cci.obj
+ ect;resolution:=optional;version=2.5.3,org.springframework.jca.contex
+ t;resolution:=optional;version=2.5.3,org.springframework.jca.endpoint
+ ;resolution:=optional;version=2.5.3,org.springframework.jca.support;r
+ esolution:=optional;version=2.5.3,org.springframework.jca.work;resolu
+ tion:=optional;version=2.5.3,org.springframework.jca.work.glassfish;r
+ esolution:=optional;version=2.5.3,org.springframework.jca.work.jboss;
+ resolution:=optional;version=2.5.3,org.springframework.jdbc;resolutio
+ n:=optional;version=2.5.3,org.springframework.jdbc.core;resolution:=o
+ ptional;version=2.5.3,org.springframework.jdbc.core.metadata;resoluti
+ on:=optional;version=2.5.3,org.springframework.jdbc.core.namedparam;r
+ esolution:=optional;version=2.5.3,org.springframework.jdbc.core.simpl
+ e;resolution:=optional;version=2.5.3,org.springframework.jdbc.core.su
+ pport;resolution:=optional;version=2.5.3,org.springframework.jdbc.dat
+ asource;resolution:=optional;version=2.5.3,org.springframework.jdbc.d
+ atasource.lookup;resolution:=optional;version=2.5.3,org.springframewo
+ rk.jdbc.object;resolution:=optional;version=2.5.3,org.springframework
+ .jdbc.support;resolution:=optional;version=2.5.3,org.springframework.
+ jdbc.support.incrementer;resolution:=optional;version=2.5.3,org.sprin
+ gframework.jdbc.support.lob;resolution:=optional;version=2.5.3,org.sp
  ringframework.jdbc.support.nativejdbc;resolution:=optional;version=2.
- 5.2,org.springframework.jdbc.support.rowset;resolution:=optional;vers
- ion=2.5.2,org.springframework.jms;resolution:=optional;version=2.5.2,
- org.springframework.jms.config;resolution:=optional;version=2.5.2,org
- .springframework.jms.connection;resolution:=optional;version=2.5.2,or
- g.springframework.jms.core;resolution:=optional;version=2.5.2,org.spr
- ingframework.jms.core.support;resolution:=optional;version=2.5.2,org.
- springframework.jms.listener;resolution:=optional;version=2.5.2,org.s
+ 5.3,org.springframework.jdbc.support.rowset;resolution:=optional;vers
+ ion=2.5.3,org.springframework.jms;resolution:=optional;version=2.5.3,
+ org.springframework.jms.config;resolution:=optional;version=2.5.3,org
+ .springframework.jms.connection;resolution:=optional;version=2.5.3,or
+ g.springframework.jms.core;resolution:=optional;version=2.5.3,org.spr
+ ingframework.jms.core.support;resolution:=optional;version=2.5.3,org.
+ springframework.jms.listener;resolution:=optional;version=2.5.3,org.s
  pringframework.jms.listener.adapter;resolution:=optional;version=2.5.
- 2,org.springframework.jms.listener.endpoint;resolution:=optional;vers
- ion=2.5.2,org.springframework.jms.listener.serversession;resolution:=
- optional;version=2.5.2,org.springframework.jms.remoting;resolution:=o
- ptional;version=2.5.2,org.springframework.jms.support;resolution:=opt
- ional;version=2.5.2,org.springframework.jms.support.converter;resolut
- ion:=optional;version=2.5.2,org.springframework.jms.support.destinati
- on;resolution:=optional;version=2.5.2,org.springframework.jmx;resolut
- ion:=optional;version=2.5.2,org.springframework.jmx.access;resolution
- :=optional;version=2.5.2,org.springframework.jmx.export;resolution:=o
- ptional;version=2.5.2,org.springframework.jmx.export.annotation;resol
- ution:=optional;version=2.5.2,org.springframework.jmx.export.assemble
- r;resolution:=optional;version=2.5.2,org.springframework.jmx.export.m
- etadata;resolution:=optional;version=2.5.2,org.springframework.jmx.ex
- port.naming;resolution:=optional;version=2.5.2,org.springframework.jm
- x.export.notification;resolution:=optional;version=2.5.2,org.springfr
- amework.jmx.support;resolution:=optional;version=2.5.2,org.springfram
- ework.jndi;resolution:=optional;version=2.5.2,org.springframework.jnd
- i.support;resolution:=optional;version=2.5.2,org.springframework.mail
- ;resolution:=optional;version=2.5.2,org.springframework.mail.javamail
- ;resolution:=optional;version=2.5.2,org.springframework.metadata;reso
- lution:=optional;version=2.5.2,org.springframework.metadata.commons;r
- esolution:=optional;version=2.5.2,org.springframework.orm;resolution:
- =optional;version=2.5.2,org.springframework.orm.hibernate3;resolution
- :=optional;version=2.5.2,org.springframework.orm.hibernate3.annotatio
- n;resolution:=optional;version=2.5.2,org.springframework.orm.hibernat
- e3.support;resolution:=optional;version=2.5.2,org.springframework.orm
- .ibatis;resolution:=optional;version=2.5.2,org.springframework.orm.ib
- atis.support;resolution:=optional;version=2.5.2,org.springframework.o
- rm.jdo;resolution:=optional;version=2.5.2,org.springframework.orm.jdo
- .support;resolution:=optional;version=2.5.2,org.springframework.orm.j
- pa;resolution:=optional;version=2.5.2,org.springframework.orm.jpa.per
- sistenceunit;resolution:=optional;version=2.5.2,org.springframework.o
- rm.jpa.support;resolution:=optional;version=2.5.2,org.springframework
- .orm.jpa.vendor;resolution:=optional;version=2.5.2,org.springframewor
- k.orm.toplink;resolution:=optional;version=2.5.2,org.springframework.
- orm.toplink.support;resolution:=optional;version=2.5.2,org.springfram
- ework.remoting;resolution:=optional;version=2.5.2,org.springframework
- .remoting.caucho;resolution:=optional;version=2.5.2,org.springframewo
- rk.remoting.httpinvoker;resolution:=optional;version=2.5.2,org.spring
- framework.remoting.jaxrpc;resolution:=optional;version=2.5.2,org.spri
+ 3,org.springframework.jms.listener.endpoint;resolution:=optional;vers
+ ion=2.5.3,org.springframework.jms.listener.serversession;resolution:=
+ optional;version=2.5.3,org.springframework.jms.remoting;resolution:=o
+ ptional;version=2.5.3,org.springframework.jms.support;resolution:=opt
+ ional;version=2.5.3,org.springframework.jms.support.converter;resolut
+ ion:=optional;version=2.5.3,org.springframework.jms.support.destinati
+ on;resolution:=optional;version=2.5.3,org.springframework.jmx;resolut
+ ion:=optional;version=2.5.3,org.springframework.jmx.access;resolution
+ :=optional;version=2.5.3,org.springframework.jmx.export;resolution:=o
+ ptional;version=2.5.3,org.springframework.jmx.export.annotation;resol
+ ution:=optional;version=2.5.3,org.springframework.jmx.export.assemble
+ r;resolution:=optional;version=2.5.3,org.springframework.jmx.export.m
+ etadata;resolution:=optional;version=2.5.3,org.springframework.jmx.ex
+ port.naming;resolution:=optional;version=2.5.3,org.springframework.jm
+ x.export.notification;resolution:=optional;version=2.5.3,org.springfr
+ amework.jmx.support;resolution:=optional;version=2.5.3,org.springfram
+ ework.jndi;resolution:=optional;version=2.5.3,org.springframework.jnd
+ i.support;resolution:=optional;version=2.5.3,org.springframework.mail
+ ;resolution:=optional;version=2.5.3,org.springframework.mail.javamail
+ ;resolution:=optional;version=2.5.3,org.springframework.metadata;reso
+ lution:=optional;version=2.5.3,org.springframework.metadata.commons;r
+ esolution:=optional;version=2.5.3,org.springframework.orm;resolution:
+ =optional;version=2.5.3,org.springframework.orm.hibernate3;resolution
+ :=optional;version=2.5.3,org.springframework.orm.hibernate3.annotatio
+ n;resolution:=optional;version=2.5.3,org.springframework.orm.hibernat
+ e3.support;resolution:=optional;version=2.5.3,org.springframework.orm
+ .ibatis;resolution:=optional;version=2.5.3,org.springframework.orm.ib
+ atis.support;resolution:=optional;version=2.5.3,org.springframework.o
+ rm.jdo;resolution:=optional;version=2.5.3,org.springframework.orm.jdo
+ .support;resolution:=optional;version=2.5.3,org.springframework.orm.j
+ pa;resolution:=optional;version=2.5.3,org.springframework.orm.jpa.per
+ sistenceunit;resolution:=optional;version=2.5.3,org.springframework.o
+ rm.jpa.support;resolution:=optional;version=2.5.3,org.springframework
+ .orm.jpa.vendor;resolution:=optional;version=2.5.3,org.springframewor
+ k.orm.toplink;resolution:=optional;version=2.5.3,org.springframework.
+ orm.toplink.support;resolution:=optional;version=2.5.3,org.springfram
+ ework.remoting;resolution:=optional;version=2.5.3,org.springframework
+ .remoting.caucho;resolution:=optional;version=2.5.3,org.springframewo
+ rk.remoting.httpinvoker;resolution:=optional;version=2.5.3,org.spring
+ framework.remoting.jaxrpc;resolution:=optional;version=2.5.3,org.spri
  ngframework.remoting.jaxrpc.support;resolution:=optional;version=2.5.
- 2,org.springframework.remoting.jaxws;resolution:=optional;version=2.5
- .2,org.springframework.remoting.rmi;resolution:=optional;version=2.5.
- 2,org.springframework.remoting.soap;resolution:=optional;version=2.5.
- 2,org.springframework.remoting.support;resolution:=optional;version=2
- .5.2,org.springframework.scheduling;resolution:=optional;version=2.5.
- 2,org.springframework.scheduling.backportconcurrent;resolution:=optio
- nal;version=2.5.2,org.springframework.scheduling.commonj;resolution:=
- optional;version=2.5.2,org.springframework.scheduling.concurrent;reso
- lution:=optional;version=2.5.2,org.springframework.scheduling.quartz;
- resolution:=optional;version=2.5.2,org.springframework.scheduling.sup
- port;resolution:=optional;version=2.5.2,org.springframework.schedulin
- g.timer;resolution:=optional;version=2.5.2,org.springframework.script
- ing;resolution:=optional;version=2.5.2,org.springframework.scripting.
- bsh;resolution:=optional;version=2.5.2,org.springframework.scripting.
- config;resolution:=optional;version=2.5.2,org.springframework.scripti
- ng.groovy;resolution:=optional;version=2.5.2,org.springframework.scri
- pting.jruby;resolution:=optional;version=2.5.2,org.springframework.sc
- ripting.support;resolution:=optional;version=2.5.2,org.springframewor
- k.stereotype;resolution:=optional;version=2.5.2,org.springframework.t
- ransaction;resolution:=optional;version=2.5.2,org.springframework.tra
- nsaction.annotation;resolution:=optional;version=2.5.2,org.springfram
- ework.transaction.config;resolution:=optional;version=2.5.2,org.sprin
- gframework.transaction.interceptor;resolution:=optional;version=2.5.2
+ 3,org.springframework.remoting.jaxws;resolution:=optional;version=2.5
+ .3,org.springframework.remoting.rmi;resolution:=optional;version=2.5.
+ 3,org.springframework.remoting.soap;resolution:=optional;version=2.5.
+ 3,org.springframework.remoting.support;resolution:=optional;version=2
+ .5.3,org.springframework.scheduling;resolution:=optional;version=2.5.
+ 3,org.springframework.scheduling.backportconcurrent;resolution:=optio
+ nal;version=2.5.3,org.springframework.scheduling.commonj;resolution:=
+ optional;version=2.5.3,org.springframework.scheduling.concurrent;reso
+ lution:=optional;version=2.5.3,org.springframework.scheduling.quartz;
+ resolution:=optional;version=2.5.3,org.springframework.scheduling.sup
+ port;resolution:=optional;version=2.5.3,org.springframework.schedulin
+ g.timer;resolution:=optional;version=2.5.3,org.springframework.script
+ ing;resolution:=optional;version=2.5.3,org.springframework.scripting.
+ bsh;resolution:=optional;version=2.5.3,org.springframework.scripting.
+ config;resolution:=optional;version=2.5.3,org.springframework.scripti
+ ng.groovy;resolution:=optional;version=2.5.3,org.springframework.scri
+ pting.jruby;resolution:=optional;version=2.5.3,org.springframework.sc
+ ripting.support;resolution:=optional;version=2.5.3,org.springframewor
+ k.stereotype;resolution:=optional;version=2.5.3,org.springframework.t
+ ransaction;resolution:=optional;version=2.5.3,org.springframework.tra
+ nsaction.annotation;resolution:=optional;version=2.5.3,org.springfram
+ ework.transaction.config;resolution:=optional;version=2.5.3,org.sprin
+ gframework.transaction.interceptor;resolution:=optional;version=2.5.3
  ,org.springframework.transaction.jta;resolution:=optional;version=2.5
- .2,org.springframework.transaction.support;resolution:=optional;versi
- on=2.5.2,org.springframework.ui;resolution:=optional;version=2.5.2,or
- g.springframework.ui.context;resolution:=optional;version=2.5.2,org.s
- pringframework.ui.context.support;resolution:=optional;version=2.5.2,
- org.springframework.ui.freemarker;resolution:=optional;version=2.5.2,
+ .3,org.springframework.transaction.support;resolution:=optional;versi
+ on=2.5.3,org.springframework.ui;resolution:=optional;version=2.5.3,or
+ g.springframework.ui.context;resolution:=optional;version=2.5.3,org.s
+ pringframework.ui.context.support;resolution:=optional;version=2.5.3,
+ org.springframework.ui.freemarker;resolution:=optional;version=2.5.3,
  org.springframework.ui.jasperreports;resolution:=optional;version=2.5
- .2,org.springframework.ui.velocity;resolution:=optional;version=2.5.2
- ,org.springframework.util;resolution:=optional;version=2.5.2,org.spri
- ngframework.util.comparator;resolution:=optional;version=2.5.2,org.sp
- ringframework.util.xml;resolution:=optional;version=2.5.2,org.springf
- ramework.validation;resolution:=optional;version=2.5.2,org.springfram
- ework.web;resolution:=optional;version=2.5.2,org.springframework.web.
- context;resolution:=optional;version=2.5.2,org.springframework.web.co
- ntext.request;resolution:=optional;version=2.5.2,org.springframework.
- web.context.support;resolution:=optional;version=2.5.2,org.springfram
- ework.web.filter;resolution:=optional;version=2.5.2,org.springframewo
- rk.web.jsf;resolution:=optional;version=2.5.2,org.springframework.web
- .jsf.el;resolution:=optional;version=2.5.2,org.springframework.web.ut
- il;resolution:=optional;version=2.5.2,org.w3c.dom;resolution:=optiona
+ .3,org.springframework.ui.velocity;resolution:=optional;version=2.5.3
+ ,org.springframework.util;resolution:=optional;version=2.5.3,org.spri
+ ngframework.util.comparator;resolution:=optional;version=2.5.3,org.sp
+ ringframework.util.xml;resolution:=optional;version=2.5.3,org.springf
+ ramework.validation;resolution:=optional;version=2.5.3,org.springfram
+ ework.web;resolution:=optional;version=2.5.3,org.springframework.web.
+ context;resolution:=optional;version=2.5.3,org.springframework.web.co
+ ntext.request;resolution:=optional;version=2.5.3,org.springframework.
+ web.context.support;resolution:=optional;version=2.5.3,org.springfram
+ ework.web.filter;resolution:=optional;version=2.5.3,org.springframewo
+ rk.web.jsf;resolution:=optional;version=2.5.3,org.springframework.web
+ .jsf.el;resolution:=optional;version=2.5.3,org.springframework.web.ut
+ il;resolution:=optional;version=2.5.3,org.w3c.dom;resolution:=optiona
  l,org.xml.sax;resolution:=optional
-Originally-Created-By: 10.0-b19 (Sun Microsystems Inc.)
+Originally-Created-By: 1.6.0_01-41-release (Apple Inc.)
 Bundle-ClassPath: spring.jar
 
