@@ -34,6 +34,8 @@ public class ContextOutlineLabelProvider extends JFaceNodeLabelProvider {
 				|| "spring-configured".equals(nodeName)
 				|| "include-filter".equals(nodeName)
 				|| "exclude-filter".equals(nodeName)
+				|| "mbean-export".equals(nodeName)
+				|| "mbean-server".equals(nodeName)
 				|| "property-placeholder".equals(nodeName)) {
 			return ContextUIImages.getImage(ContextUIImages.IMG_OBJS_CONTEXT);
 		}
