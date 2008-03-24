@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.properties;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -251,8 +252,19 @@ public class ConfigSetDialog extends Dialog {
 				configs.add(new BeansConfig(project, config.getElementName()));
 			}
 		}
-
 		// Add all configs from referenced projects
+		addConfigsFromReferencedProjects(project, configs, new HashSet<IProject>());
+
+		return configs;
+	}
+
+	private void addConfigsFromReferencedProjects(IBeansProject project, List<IBeansConfig> configs, Set<IProject> projects) {
+		if (projects.contains(project.getProject())) {
+			return;
+		}
+		else {
+			projects.add(project.getProject());
+		}
 		IBeansModel model = BeansCorePlugin.getModel();
 		try {
 			for (IProject proj : project.getProject().getProject()
@@ -273,12 +285,13 @@ public class ConfigSetDialog extends Dialog {
 							}
 						}
 					}
+					// Recursively add configurations to project
+					addConfigsFromReferencedProjects(bproj, configs, projects);
 				}
 			}
 		} catch (CoreException e) {
 			// We can't do anything here
 		}
-		return configs;
 	}
 
 	private void validateName() {
