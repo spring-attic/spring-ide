@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRuleTest;
@@ -28,6 +29,7 @@ public class AllBeansCoreTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllBeansCoreTests.class.getName());
 		//$JUnit-BEGIN$
+		suite.addTest(new TestSuite(BeanClassRuleTest.class));
 		suite.addTest(new TestSuite(BeanPropertyRuleTest.class));
 		suite.addTest(new TestSuite(BeanInitDestroyMethodRuleTest.class));
 		suite.addTest(new TestSuite(RequiredPropertyRuleTest.class));
