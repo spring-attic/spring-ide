@@ -41,7 +41,8 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 	 */
 	private static final List<String> CLASSES_TO_IGNORE = Arrays.asList(new String[] {
 			"org.springframework.osgi.service.importer.support.OsgiServiceProxyFactoryBean",
-			"org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean" });
+			"org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean",
+			"org.springframework.osgi.config.OsgiServiceRegistrationListenerAdapter"});
 
 	@Override
 	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
