@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,18 @@ public final class SpringCoreUtils {
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
 	/**
+	 * Folder name of OSGi bundle manifests directories
+	 * @since 2.0.5
+	 */
+	public static String BUNDLE_MANIFEST_FOLDER = "META-INF";
+
+	/**
+	 * File name of OSGi bundle manifests
+	 * @since 2.0.5
+	 */
+	public static String BUNDLE_MANIFEST_FILE = "MANIFEST.MF";
+
+	/**
 	 * Returns <code>true</code> if given text contains a placeholder, e.g.
 	 * <code>${beansRef}</code>.
 	 */
@@ -80,8 +92,7 @@ public final class SpringCoreUtils {
 	 */
 	public static Set<IProject> getSpringProjects() {
 		Set<IProject> projects = new LinkedHashSet<IProject>();
-		for (IProject project : ResourcesPlugin.getWorkspace().getRoot()
-				.getProjects()) {
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
 			if (isSpringProject(project)) {
 				projects.add(project);
 			}
@@ -92,9 +103,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Creates specified simple project.
 	 */
-	public static IProject createProject(String projectName,
-			IProjectDescription description, IProgressMonitor monitor)
-			throws CoreException {
+	public static IProject createProject(String projectName, IProjectDescription description,
+			IProgressMonitor monitor) throws CoreException {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject(projectName);
 		if (!project.exists()) {
@@ -120,8 +130,7 @@ public final class SpringCoreUtils {
 	/**
 	 * Creates given folder and (if necessary) all of it's parents.
 	 */
-	public static void createFolder(IFolder folder, IProgressMonitor monitor)
-			throws CoreException {
+	public static void createFolder(IFolder folder, IProgressMonitor monitor) throws CoreException {
 		if (!folder.exists()) {
 			IContainer parent = folder.getParent();
 			if (parent instanceof IFolder) {
@@ -134,8 +143,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Adds given nature as first nature to specified project.
 	 */
-	public static void addProjectNature(IProject project, String nature,
-			IProgressMonitor monitor) throws CoreException {
+	public static void addProjectNature(IProject project, String nature, IProgressMonitor monitor)
+			throws CoreException {
 		if (project != null && nature != null) {
 			if (!project.hasNature(nature)) {
 				IProjectDescription desc = project.getDescription();
@@ -143,8 +152,7 @@ public final class SpringCoreUtils {
 				String[] newNatures = new String[oldNatures.length + 1];
 				newNatures[0] = nature;
 				if (oldNatures.length > 0) {
-					System.arraycopy(oldNatures, 0, newNatures, 1,
-							oldNatures.length);
+					System.arraycopy(oldNatures, 0, newNatures, 1, oldNatures.length);
 				}
 				desc.setNatureIds(newNatures);
 				project.setDescription(desc, monitor);
@@ -155,16 +163,15 @@ public final class SpringCoreUtils {
 	/**
 	 * Removes given nature from specified project.
 	 */
-	public static void removeProjectNature(IProject project, String nature,
-			IProgressMonitor monitor) throws CoreException {
+	public static void removeProjectNature(IProject project, String nature, IProgressMonitor monitor)
+			throws CoreException {
 		if (project != null && nature != null) {
 			if (project.exists() && project.hasNature(nature)) {
 
 				// first remove all problem markers (including the
 				// inherited ones) from Spring beans project
 				if (nature.equals(SpringCore.NATURE_ID)) {
-					project.deleteMarkers(SpringCore.MARKER_ID, true,
-							IResource.DEPTH_INFINITE);
+					project.deleteMarkers(SpringCore.MARKER_ID, true, IResource.DEPTH_INFINITE);
 				}
 
 				// now remove project nature
@@ -214,8 +221,7 @@ public final class SpringCoreUtils {
 				if (commands[i].getBuilderName().equals(builderID)) {
 					ICommand[] newCommands = new ICommand[commands.length - 1];
 					System.arraycopy(commands, 0, newCommands, 0, i);
-					System.arraycopy(commands, i + 1, newCommands, i,
-							commands.length - i - 1);
+					System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
 					// Commit the spec change into the project
 					desc.setBuildSpec(newCommands);
 					project.setDescription(desc, monitor);
@@ -228,20 +234,16 @@ public final class SpringCoreUtils {
 	/**
 	 * Adds (or updates) a builder in given project description.
 	 */
-	public static void addProjectBuilderCommand(
-			IProjectDescription description, ICommand command)
+	public static void addProjectBuilderCommand(IProjectDescription description, ICommand command)
 			throws CoreException {
 		ICommand[] oldCommands = description.getBuildSpec();
-		ICommand oldBuilderCommand = getProjectBuilderCommand(description,
-				command.getBuilderName());
+		ICommand oldBuilderCommand = getProjectBuilderCommand(description, command.getBuilderName());
 		ICommand[] newCommands;
 		if (oldBuilderCommand == null) {
 
 			// Add given builder to the end of the builder list
 			newCommands = new ICommand[oldCommands.length + 1];
-			System
-					.arraycopy(oldCommands, 0, newCommands, 0,
-							oldCommands.length);
+			System.arraycopy(oldCommands, 0, newCommands, 0, oldCommands.length);
 			newCommands[oldCommands.length] = command;
 		}
 		else {
@@ -261,9 +263,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Returns specified builder from given project description.
 	 */
-	public static ICommand getProjectBuilderCommand(
-			IProjectDescription description, String builderID)
-			throws CoreException {
+	public static ICommand getProjectBuilderCommand(IProjectDescription description,
+			String builderID) throws CoreException {
 		ICommand[] commands = description.getBuildSpec();
 		for (int i = commands.length - 1; i >= 0; i--) {
 			if (commands[i].getBuilderName().equals(builderID)) {
@@ -302,8 +303,7 @@ public final class SpringCoreUtils {
 	 * Returns true if Eclipse's runtime bundle has the same or a newer than
 	 * given version.
 	 */
-	public static boolean isEclipseSameOrNewer(int majorVersion,
-			int minorVersion) {
+	public static boolean isEclipseSameOrNewer(int majorVersion, int minorVersion) {
 		Bundle bundle = Platform.getBundle(Platform.PI_RUNTIME);
 		if (bundle != null) {
 			String version = (String) bundle.getHeaders().get(
@@ -335,8 +335,8 @@ public final class SpringCoreUtils {
 	 * Returns true if Eclipse's runtime bundle has the same or a newer than
 	 * given version.
 	 */
-	public static boolean isVersionSameOrNewer(String version,
-			int majorVersion, int minorVersion, int patchVersion) {
+	public static boolean isVersionSameOrNewer(String version, int majorVersion, int minorVersion,
+			int patchVersion) {
 		StringTokenizer st = new StringTokenizer(version, ".");
 		try {
 			int major = Integer.parseInt(st.nextToken());
@@ -364,10 +364,25 @@ public final class SpringCoreUtils {
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks if the given {@link IResource} is a OSGi bundle manifest.
+	 * <p>
+	 * Note: only the name and last segment of the folder name are checked.
+     * @since 2.0.5
+	 */
+	public static boolean isManifest(IResource resource) {
+		return resource != null
+				&& resource.isAccessible()
+				&& resource.getType() == IResource.FILE
+				&& resource.getName().equals(BUNDLE_MANIFEST_FILE)
+				&& resource.getParent() != null
+				&& resource.getParent().getProjectRelativePath().lastSegment().equals(
+						BUNDLE_MANIFEST_FOLDER);
+	}
 
 	public static IPath getProjectLocation(IProject project) {
-		return (project.getRawLocation() != null ? project.getRawLocation()
-				: project.getLocation());
+		return (project.getRawLocation() != null ? project.getRawLocation() : project.getLocation());
 	}
 
 	/**
@@ -376,14 +391,13 @@ public final class SpringCoreUtils {
 	 */
 	public static void buildProject(IProject project) {
 		if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
-			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace()
-					.getRuleFactory().buildRule(),
-					new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD });
+			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace().getRuleFactory()
+					.buildRule(), new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD });
 		}
 	}
 
-	private static void scheduleBuildInBackground(final IProject project,
-			ISchedulingRule rule, final Object[] jobFamilies) {
+	private static void scheduleBuildInBackground(final IProject project, ISchedulingRule rule,
+			final Object[] jobFamilies) {
 		Job job = new WorkspaceJob("Build workspace") {
 
 			@Override
@@ -402,15 +416,12 @@ public final class SpringCoreUtils {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) {
 				try {
-					project
-							.build(IncrementalProjectBuilder.FULL_BUILD,
-									monitor);
+					project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 					return Status.OK_STATUS;
 				}
 				catch (CoreException e) {
 					return new MultiStatus(SpringCore.PLUGIN_ID, 1,
-							"Error during build of project ["
-									+ project.getName() + "]", e);
+							"Error during build of project [" + project.getName() + "]", e);
 				}
 			}
 		};
@@ -420,4 +431,5 @@ public final class SpringCoreUtils {
 		job.setUser(true);
 		job.schedule();
 	}
+
 }

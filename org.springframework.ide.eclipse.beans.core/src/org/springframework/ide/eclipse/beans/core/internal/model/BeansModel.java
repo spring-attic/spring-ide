@@ -470,22 +470,34 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Project description '"
 							+ file.getFullPath() + "' changed");
 				}
-				BeansProject project = null;
-				try {
-					r.lock();
-					project = (BeansProject) projects.get(file.getProject());
+				buildProject(file);
+			}
+			// Special handling for META-INF/MANIFEST.MF files on PDE
+			else if (eventType == IResourceChangeEvent.PRE_BUILD && SpringCoreUtils.isManifest(file)) {
+				if (DEBUG) {
+					System.out.println("Project manifest '"
+							+ file.getFullPath() + "' changed");
 				}
-				finally {
-					r.unlock();
-				}
-				// project can be null if the model has not been populated
-				// correctly before updating the project description
-				if (project != null) {
-					project.reset();
-					notifyListeners(project, Type.CHANGED);
-					// trigger build of project
-					SpringCoreUtils.buildProject(project.getProject());
-				}
+				buildProject(file);
+			}
+		}
+
+		private void buildProject(IFile file) {
+			BeansProject project = null;
+			try {
+				r.lock();
+				project = (BeansProject) projects.get(file.getProject());
+			}
+			finally {
+				r.unlock();
+			}
+			// project can be null if the model has not been populated
+			// correctly before updating the project description
+			if (project != null) {
+				project.reset();
+				notifyListeners(project, Type.CHANGED);
+				// trigger build of project
+				SpringCoreUtils.buildProject(project.getProject());
 			}
 		}
 

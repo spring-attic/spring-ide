@@ -61,7 +61,8 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					if (SpringCoreUtils.isSpringProject(file)) {
 						events.projectDescriptionChanged(file, eventType);
 					}
-				} else if (BeansCoreUtils.isBeansConfig(file)) {
+				}
+				else if (BeansCoreUtils.isBeansConfig(file)) {
 					events.configAdded(file, eventType);
 				}
 				return false;
@@ -78,7 +79,8 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 						if (SpringCoreUtils.isSpringProject(file)) {
 							events.projectDescriptionChanged(file, eventType);
 						}
-					} else if (BeansCoreUtils.isBeansConfig(file, true)) {
+					}
+					else if (BeansCoreUtils.isBeansConfig(file, true)) {
 						events.configChanged(file, eventType);
 					}
 				}
@@ -102,9 +104,8 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			return resource != null
 					&& resource.isAccessible()
 					&& resource.getType() == IResource.FILE
-					&& resource.getFullPath().segmentCount() == 2
-					&& resource.getName()
-							.equals(IBeansProject.DESCRIPTION_FILE);
+					&& ((resource.getFullPath().segmentCount() == 2 && resource.getName().equals(
+							IBeansProject.DESCRIPTION_FILE)) || SpringCoreUtils.isManifest(resource));
 		}
 	}
 }
