@@ -16,11 +16,11 @@ NAME=`date +%Y%m%d%H%M`
 STAGINGLOCATION=$WORKSPACE/updatesite/
 TEST_STAGINGLOCATION=$WORKSPACE/testupdatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
-ECLIPSE_DISTRO_URL=http://mirror.cc.columbia.edu/pub/software/eclipse/technology/epp/downloads/release/20071103/eclipse-jee-europa-fall2-macosx-carbon.tar.gz
+ECLIPSE_DISTRO_URL=http://mirror.cc.columbia.edu/pub/software/eclipse/technology/epp/downloads/release/europa/winter/eclipse-jee-europa-winter-macosx-carbon.tar.gz
 ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/downloads/drops/R-3.3.1.1-200710231652/eclipse-Automated-Tests-3.3.1.1.zip
 
-MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/e3.3/
+MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/weekly/e3.3/
 AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/33/update
 
 # Run the Eclipse builder on a single builder
