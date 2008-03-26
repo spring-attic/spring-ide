@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,11 +25,7 @@ import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Font;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
@@ -38,6 +34,7 @@ import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
  * This class builds the graphical representation of the model data (given as
  * {@link GraphEditorInput}) via GEF's {@link DirectedGraphLayout}.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class Graph implements IAdaptable {
 
@@ -65,68 +62,16 @@ public class Graph implements IAdaptable {
 	 * Initializes the embedded graph with nodes from GraphEditorInput's beans
 	 * and edges from GraphEditorInput's bean references.
 	 */
+	@SuppressWarnings("unchecked")
 	private void init() {
 		graph = new DirectedGraph();
 
-		// Add all beans defined in GraphEditorInput as nodes to the graph
-		Iterator beans = getBeans().iterator();
-		while (beans.hasNext()) {
-			Bean bean = (Bean) beans.next();
+		for (Bean bean : input.getBeans().values()) {
 			graph.nodes.add(bean);
-
-			// Add all beans references from bean (parent, factory or
-			// depends-on beans) to list of graph edges
-			Iterator beanRefs = BeansModelUtils
-					.getBeanReferences(
-							bean.getBean(),
-							BeansCorePlugin.getModel().getElement(
-									input.getContextId()), false).iterator();
-			while (beanRefs.hasNext()) {
-				BeansConnection beanRef = (BeansConnection) beanRefs.next();
-				Bean targetBean = getBean(beanRef.getTarget().getElementName());
-				if (targetBean != null && targetBean != bean
-						&& beanRef.getSource() instanceof IBean) {
-					graph.edges.add(new Reference(beanRef.getType(), bean,
-							targetBean));
-				}
-			}
-
-			// Add all bean references in bean's constructor arguments to list
-			// of graph edges
-			ConstructorArgument[] cargs = bean.getConstructorArguments();
-			for (ConstructorArgument carg : cargs) {
-				Iterator cargRefs = BeansModelUtils.getBeanReferences(
-						carg.getBeanConstructorArgument(),
-						BeansCorePlugin.getModel().getElement(
-								input.getContextId()), false).iterator();
-				while (cargRefs.hasNext()) {
-					BeansConnection beanRef = (BeansConnection) cargRefs.next();
-					Bean targetBean = getBean(beanRef.getTarget()
-							.getElementName());
-					if (targetBean != null && targetBean != bean) {
-						graph.edges.add(new Reference(beanRef.getType(), bean,
-								targetBean, carg));
-					}
-				}
-			}
-
-			// Add all bean references in properties to list of graph edges
-			Property[] properties = bean.getProperties();
-			for (Property property : properties) {
-				Iterator propRefs = BeansModelUtils.getBeanReferences(
-						property.getBeanProperty(),
-						BeansCorePlugin.getModel().getElement(
-								input.getContextId()), false).iterator();
-				while (propRefs.hasNext()) {
-					BeansConnection beanRef = (BeansConnection) propRefs.next();
-					Bean targetBean = getBean(beanRef.getTarget()
-							.getElementName());
-					if (targetBean != null && targetBean != bean) {
-						graph.edges.add(new Reference(beanRef.getType(), bean,
-								targetBean, property));
-					}
-				}
-			}
+		}
+		
+		for (Reference reference : input.getBeansReferences()) {
+			graph.edges.add(reference);
 		}
 	}
 
@@ -146,6 +91,7 @@ public class Graph implements IAdaptable {
 		return graph.nodes;
 	}
 
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public void layout(Font font) {
 
 		// Iterate through all graph nodes (beans) to calculate label width

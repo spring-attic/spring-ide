@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,8 +54,8 @@ public class Property extends Node implements IAdaptable {
 	 * Returns a list of all references to other beans
 	 * (RuntimeBeanReferences) of this property.
 	 */
-	public List getBeanReferences() {
-		List references = new ArrayList();
+	public List<Object> getBeanReferences() {
+		List<Object> references = new ArrayList<Object>();
 		addReferencesForValue(property.getValue(), references);
 		return references;
 	}
@@ -73,7 +73,7 @@ public class Property extends Node implements IAdaptable {
 	 * be added.
 	 * <li>An ordinary object or null, in which case it's ignored.
 	 */
-	private void addReferencesForValue(Object value, List references) {
+	private void addReferencesForValue(Object value, List<Object> references) {
 		if (value instanceof BeanDefinitionHolder) {
 			String beanName = ((BeanDefinitionHolder) value).getBeanName();
 			IBean modelBean = bean.getBean();
