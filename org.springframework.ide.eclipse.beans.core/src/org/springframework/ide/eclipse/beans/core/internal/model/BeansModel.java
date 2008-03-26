@@ -465,7 +465,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		public void projectDescriptionChanged(IFile file, int eventType) {
-			if (eventType == IResourceChangeEvent.POST_BUILD) {
+			if (eventType == IResourceChangeEvent.POST_BUILD && !SpringCoreUtils.isManifest(file)) {
 				if (DEBUG) {
 					System.out.println("Project description '"
 							+ file.getFullPath() + "' changed");
