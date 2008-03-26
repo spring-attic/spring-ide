@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,8 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -51,8 +53,8 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * Dialog for creating a beans config set.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class ConfigSetDialog extends Dialog {
 
@@ -69,6 +71,10 @@ public class ConfigSetDialog extends Dialog {
 	private static final String OVERRIDE_LABEL = PREFIX + "override.label";
 	private static final String INCOMPLETE_LABEL = PREFIX + "incomplete.label";
 	private static final String VIEWER_LABEL = PREFIX + "viewer.label";
+	private static final String SELECT_ALL_LABEL = PREFIX + "select.all.label";
+	private static final String DESELECT_ALL_LABEL = PREFIX + "deselect.all.label";
+	
+	
 
 	private static final int LIST_VIEWER_WIDTH = 400;
 	private static final int LIST_VIEWER_HEIGHT = 250;
@@ -163,7 +169,33 @@ public class ConfigSetDialog extends Dialog {
 		configsViewer.setSorter(new ConfigFilesSorter());
 		configsViewer.setInput(this); // activate content provider
 		configsViewer.setCheckedElements(configSet.getConfigs().toArray());
+		
+		// Create select all and deselect all buttons
+		Composite buttonsGroup = new Composite(composite, SWT.NULL);
+		buttonsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginTop = 0;
+		layout.marginBottom = 10;
+		buttonsGroup.setLayout(layout);
+		buttonsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+		SpringUIUtils.createButton(buttonsGroup, BeansUIPlugin
+				.getResourceString(SELECT_ALL_LABEL), new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent e) {
+				configsViewer.setAllChecked(true);
+			}
+		});
+
+		SpringUIUtils.createButton(buttonsGroup, BeansUIPlugin
+				.getResourceString(DESELECT_ALL_LABEL), new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent e) {
+				configsViewer.setAllChecked(false);
+			}
+		});
+		
 		// Create error label
 		errorLabel = new Label(composite, SWT.NONE);
 		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
