@@ -72,8 +72,8 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  springframework.beans.factory";version=2.5.3,org.springframework.bean
  s.factory.access;uses:="org.springframework.beans.factory.support,org
  .apache.commons.logging,org.springframework.core.io,org.springframewo
- rk.beans,org.springframework.beans.factory.xml,org.springframework.co
- re.io.support,org.springframework.beans.factory.config,org.springfram
+ rk.beans,org.springframework.beans.factory.xml,org.springframework.be
+ ans.factory.config,org.springframework.core.io.support,org.springfram
  ework.beans.factory";version=2.5.3,org.springframework.scripting.jrub
  y;uses:="org.springframework.aop.support,org.jruby,org.jruby.runtime,
  org.jruby.exceptions,org.springframework.util,org.jruby.javasupport,o
@@ -107,8 +107,8 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  .3,org.springframework.jmx.export.notification;uses:="org.springframe
  work.util,org.springframework.jmx,javax.management,javax.management.m
  odelmbean";version=2.5.3,org.springframework.jca.cci.connection;uses:
- ="org.springframework.transaction,javax.naming,org.apache.commons.log
- ging,javax.resource,org.springframework.util,org.springframework.core
+ ="org.springframework.transaction,javax.naming,javax.resource,org.apa
+ che.commons.logging,org.springframework.util,org.springframework.core
  ,javax.resource.cci,org.springframework.jca.cci,javax.resource.spi,or
  g.springframework.transaction.support,org.springframework.beans.facto
  ry";version=2.5.3,org.springframework.beans.factory;uses:="org.spring
@@ -166,7 +166,7 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  s:="org.springframework.core,org.springframework.util";version=2.5.3,
  org.springframework.web.context;uses:="org.apache.commons.logging,org
  .springframework.context.access,org.springframework.util,org.springfr
- amework.core.io,org.springframework.beans,org.springframework.context
+ amework.beans,org.springframework.core.io,org.springframework.context
  ,org.springframework.core.io.support,org.springframework.core,javax.s
  ervlet,org.springframework.beans.factory.access,javax.servlet.http,or
  g.springframework.beans.factory";version=2.5.3,org.springframework.co
@@ -424,8 +424,8 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  g.springframework.core,org.aopalliance.intercept,org.aopalliance.aop"
  ;version=2.5.3,org.springframework.context.support;uses:="org.apache.
  commons.logging,org.springframework.context.i18n,org.springframework.
- beans.support,org.springframework.util,org.springframework.beans,org.
- springframework.core.io,org.springframework.beans.factory.xml,org.spr
+ beans.support,org.springframework.util,org.springframework.core.io,or
+ g.springframework.beans,org.springframework.beans.factory.xml,org.spr
  ingframework.context,org.springframework.beans.factory.config,org.spr
  ingframework.core.io.support,org.springframework.context.event,org.xm
  l.sax,org.springframework.beans.factory.support,org.springframework.c
@@ -436,8 +436,8 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  org.springframework.core;version=2.5.3,org.springframework.jmx.access
  ;uses:="org.apache.commons.logging,javax.management.openmbean,org.aop
  alliance.intercept,org.springframework.util,org.springframework.jmx,o
- rg.springframework.beans,javax.management,org.springframework.core,or
- g.springframework.jmx.support,javax.management.remote,org.springframe
+ rg.springframework.beans,javax.management,org.springframework.core,ja
+ vax.management.remote,org.springframework.jmx.support,org.springframe
  work.aop.framework,org.springframework.beans.factory";version=2.5.3,o
  rg.springframework.scheduling.support;uses:="org.apache.commons.loggi
  ng,org.springframework.beans.support,org.springframework.util,org.spr
@@ -507,7 +507,7 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  rg.springframework.aop.aspectj;uses:="org.springframework.aop.support
  ,org.apache.commons.logging,org.springframework.aop.interceptor,org.a
  spectj.weaver,org.aopalliance.intercept,org.springframework.aop,org.a
- spectj.bridge,org.aspectj.lang,org.aspectj.weaver.tools,org.springfra
+ spectj.bridge,org.aspectj.weaver.tools,org.aspectj.lang,org.springfra
  mework.core,org.aspectj.weaver.patterns,org.springframework.aop.frame
  work.autoproxy,org.aspectj.weaver.ast,org.springframework.beans.facto
  ry,org.aspectj.runtime.internal,org.springframework.util,org.aopallia
@@ -518,7 +518,7 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  g.springframework.core.annotation";version=2.5.3,org.aopalliance.aop;
  version=1.0,org.springframework.jdbc.support;uses:="org.springframewo
  rk.jdbc,org.apache.commons.logging,org.springframework.util,org.sprin
- gframework.beans,org.springframework.core.io,org.springframework.bean
+ gframework.core.io,org.springframework.beans,org.springframework.bean
  s.factory.xml,org.springframework.beans.factory.support,org.springfra
  mework.core,javax.sql,org.springframework.dao,org.springframework.jdb
  c.datasource,org.springframework.beans.factory";version=2.5.3,org.spr
@@ -531,8 +531,8 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  notation,org.springframework.jmx.export";version=2.5.3,org.springfram
  ework.scripting.groovy;uses:="groovy.lang,org.springframework.util,or
  g.springframework.beans,org.springframework.beans.factory.config,org.
- springframework.scripting,org.codehaus.groovy.control,org.springframe
- work.beans.factory";version=2.5.3,org.springframework.orm;uses:=org.s
+ springframework.scripting,org.springframework.beans.factory,org.codeh
+ aus.groovy.control";version=2.5.3,org.springframework.orm;uses:=org.s
  pringframework.dao;version=2.5.3,org.springframework.jms.support;uses
  :="org.springframework.core,org.apache.commons.logging,javax.jms,org.
  springframework.util,org.springframework.jms,org.springframework.bean
@@ -679,8 +679,8 @@ Export-Package: org.springframework.orm.jpa;uses:="org.apache.commons.
  ogging,org.springframework.util,org.springframework.core.io";version=
  2.5.3,org.springframework.jms.support.destination;uses:="javax.naming
  ,org.apache.commons.logging,javax.jms,org.springframework.util,org.sp
- ringframework.beans,org.springframework.jms,org.springframework.core,
- org.springframework.jndi,org.springframework.jms.support,org.springfr
+ ringframework.beans,org.springframework.jms,org.springframework.jndi,
+ org.springframework.core,org.springframework.jms.support,org.springfr
  amework.beans.factory";version=2.5.3,org.springframework.jdbc.datasou
  rce.lookup;uses:="javax.naming,org.springframework.transaction,org.sp
  ringframework.util,org.springframework.beans,org.springframework.jndi
@@ -751,8 +751,8 @@ Bundle-Name: spring
 Created-By: 1.6.0_01-dp (Apple Inc.)
 Ant-Version: Apache Ant 1.7.0
 DynamicImport-Package: *
-Bundle-Version: 2.5.3.v200803241000
-Bnd-LastModified: 1206378888760
+Bundle-Version: 2.5.3.v200803272147
+Bnd-LastModified: 1206679527817
 Bundle-ManifestVersion: 2
 Bundle-Description: Spring Framework
 Bundle-SymbolicName: org.springframework.bundle.spring
@@ -1061,3 +1061,4 @@ Import-Package: bsh;resolution:=optional,com.caucho.burlap.client;reso
  ,org.w3c.dom;resolution:=optional,org.xml.sax;resolution:=optional
 Originally-Created-By: 1.6.0_01-41-release (Apple Inc.)
 Bundle-ClassPath: spring.jar
+
