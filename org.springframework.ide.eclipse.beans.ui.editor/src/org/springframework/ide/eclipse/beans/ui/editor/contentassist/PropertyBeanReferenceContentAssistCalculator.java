@@ -60,8 +60,8 @@ public class PropertyBeanReferenceContentAssistCalculator extends
 						String parameterTypeName = JdtUtils.resolveClassName(method
 								.getParameterTypes()[0], type);
 						if (parameterTypeName != null) {
-							IType parameterType = JdtUtils.getJavaType(type.getResource()
-									.getProject(), parameterTypeName);
+							IType parameterType = JdtUtils.getJavaType(BeansEditorUtils.getFile(
+									request).getProject(), parameterTypeName);
 							return JdtUtils
 									.getFlatListOfClassAndInterfaceNames(parameterType, type);
 						}
