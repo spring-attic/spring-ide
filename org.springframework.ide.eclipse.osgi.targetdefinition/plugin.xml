@@ -6,14 +6,14 @@
          point="org.eclipse.pde.core.targets">
 	  <!-- Target Definiton for latest released Spring DM version -->	
       <target
-            definition="targets/release/spring-dm-release.target"
+            definition="release/spring-dm-release.target"
             id="org.springframework.ide.eclipse.osgi.targetdefinition.release"
             name="%releaseTarget.name">
       </target>
    
       <!-- Target Definiton for latest snapshot Spring DM version -->	
       <target
-            definition="targets/snapshot/spring-dm-snapshot.target"
+            definition="snapshot/spring-dm-snapshot.target"
             id="org.springframework.ide.eclipse.osgi.targetdefinition.snapshot"
             name="%snapshotTarget.name">
       </target>

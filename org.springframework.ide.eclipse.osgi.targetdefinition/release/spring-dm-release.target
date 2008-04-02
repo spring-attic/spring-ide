@@ -3,7 +3,7 @@
 
 <target name="Spring DM Release">
 
-   <location path="${bundle_loc:org.springframework.ide.eclipse.osgi.targetdefinition}/targets/release/target"/>
+   <location path="${bundle_loc:org.springframework.ide.eclipse.osgi.targetdefinition}/release/target"/>
 
    <content useAllPlugins="true">
       <plugins>

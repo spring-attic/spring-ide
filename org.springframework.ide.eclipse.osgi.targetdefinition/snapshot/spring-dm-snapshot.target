@@ -3,7 +3,7 @@
 
 <target name="Spring DM Snapshot">
 
-   <location path="${bundle_loc:org.springframework.ide.eclipse.osgi.targetdefinition}/targets/snapshot/target"/>
+   <location path="${bundle_loc:org.springframework.ide.eclipse.osgi.targetdefinition}/snapshot/target"/>
 
    <content useAllPlugins="true">
       <plugins>
