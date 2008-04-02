@@ -37,7 +37,7 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel;
-import org.springframework.ide.eclipse.aop.core.internal.model.builder.AopReferenceModelBuilder;
+import org.springframework.ide.eclipse.aop.core.internal.model.builder.AopReferenceModelBuilderJob;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -67,7 +67,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link ICommonContentProvider} that contributes elements from the
- * {@link AopReferenceModel} created by {@link AopReferenceModelBuilder}.
+ * {@link AopReferenceModel} created by {@link AopReferenceModelBuilderJob}.
  * @author Christian Dupuis
  * @since 2.0
  */
