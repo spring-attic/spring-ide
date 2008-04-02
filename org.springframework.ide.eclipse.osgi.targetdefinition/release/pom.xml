@@ -10,7 +10,7 @@
     <spring.groupId>org.springframework</spring.groupId>
     <spring.version>2.5.2</spring.version>
     <spring.osgi.groupId>org.springframework.osgi</spring.osgi.groupId>
-    <spring.osgi.version>1.0.1</spring.osgi.version>
+    <spring.osgi.version>1.0.2</spring.osgi.version>
     <felix.commons.groupId>org.apache.felix.commons</felix.commons.groupId>
   </properties>
   <dependencies>

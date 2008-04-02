@@ -3,8 +3,8 @@
 SPRING_VERSION=2.5.2
 BUNDLE_SPRING_VERSION=2.5.2
 
-OSGI_VERSION=1.0.1
-BUNDLE_OSGI_VERSION=1.0.1
+OSGI_VERSION=1.0.2
+BUNDLE_OSGI_VERSION=1.0.2
 ROOT=`pwd`
 
 download_source() {	
@@ -22,11 +22,11 @@ download_source() {
 }
 
 download_spring_source() {
-	download_source org/springframework $1 $SPRING_VERSION $2 $BUNDLE_SPRING_VERSION org.springframework.spring.source http://repo1.maven.org/maven2
+	download_source org/springframework $1 $SPRING_VERSION $2 $BUNDLE_SPRING_VERSION spring.source http://repo1.maven.org/maven2
 }
 
 download_osgi_source() {
-	download_source org/springframework/osgi $1 $OSGI_VERSION $2 $BUNDLE_OSGI_VERSION org.springframework.osgi.source http://repo1.maven.org/maven2
+	download_source org/springframework/osgi $1 $OSGI_VERSION $2 $BUNDLE_OSGI_VERSION springdm.source http://repo1.maven.org/maven2
 }
 
 download_spring_source spring-aop org.springframework.bundle.spring.aop 
