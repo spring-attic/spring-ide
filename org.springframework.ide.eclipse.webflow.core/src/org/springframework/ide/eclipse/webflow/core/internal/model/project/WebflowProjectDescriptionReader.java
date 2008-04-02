@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,15 +27,14 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * 
+ * Description reader for the .springWebflow file
+ * @author Christian Dupuis
  */
 public class WebflowProjectDescriptionReader {
 
 	/**
 	 * Reads project description for given project.
-	 * 
 	 * @param project
-	 * 
 	 * @return
 	 */
 	public static WebflowProjectDescription read(IWebflowProject project) {
@@ -44,7 +43,8 @@ public class WebflowProjectDescriptionReader {
 		if (file.isAccessible()) {
 			BufferedInputStream is = null;
 			try {
-				is = new BufferedInputStream(file.getContents());
+				// Force resource refresh in case resource is not in sync
+				is = new BufferedInputStream(file.getContents(true));
 				WebflowProjectDescriptionHandler handler = new WebflowProjectDescriptionHandler(
 						project);
 				try {

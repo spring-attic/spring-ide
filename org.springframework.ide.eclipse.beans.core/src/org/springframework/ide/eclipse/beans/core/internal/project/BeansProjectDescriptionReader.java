@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,41 +30,47 @@ import org.xml.sax.SAXException;
 
 /**
  * This class reads the description for a Spring Beans project from an XML file.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansProjectDescriptionReader {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
 			+ "/project/description/debug";
+
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	/**
 	 * Reads project description for given Spring project.
 	 */
 	public static void read(BeansProject project) {
-		IFile file = ((IProject) project.getElementResource())
-				.getFile(new Path(IBeansProject.DESCRIPTION_FILE));
+		final IFile file = ((IProject) project.getElementResource()).getFile(new Path(
+				IBeansProject.DESCRIPTION_FILE));
 		if (file.isAccessible()) {
+
 			if (DEBUG) {
 				System.out.println("Reading project description from "
 						+ file.getLocation().toString());
 			}
+
 			BufferedInputStream is = null;
-			try {
-				is = new BufferedInputStream(file.getContents());
-				BeansProjectDescriptionHandler handler = new
-						BeansProjectDescriptionHandler(project);
+			try { 
+				// Force resource refresh in case resource is not in sync
+				is = new BufferedInputStream(file.getContents(true));
+				BeansProjectDescriptionHandler handler = new BeansProjectDescriptionHandler(project);
 				try {
 					SAXParserFactory factory = SAXParserFactory.newInstance();
 					factory.setNamespaceAware(true);
 					SAXParser parser = factory.newSAXParser();
 					parser.parse(new InputSource(is), handler);
-				} catch (ParserConfigurationException e) {
+				}
+				catch (ParserConfigurationException e) {
 					handler.log(IStatus.ERROR, e);
-				} catch (SAXException e) {
+				}
+				catch (SAXException e) {
 					handler.log(IStatus.ERROR, e);
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					handler.log(IStatus.ERROR, e);
 				}
 				IStatus status = handler.getStatus();
@@ -77,13 +83,16 @@ public class BeansProjectDescriptionReader {
 				case IStatus.INFO:
 					BeansCorePlugin.log(status);
 				}
-			} catch (CoreException e) {
+			}
+			catch (CoreException e) {
 				BeansCorePlugin.log(e.getStatus());
-			} finally {
+			}
+			finally {
 				if (is != null) {
 					try {
 						is.close();
-					} catch (IOException e) {
+					}
+					catch (IOException e) {
 						// ignore
 					}
 				}
