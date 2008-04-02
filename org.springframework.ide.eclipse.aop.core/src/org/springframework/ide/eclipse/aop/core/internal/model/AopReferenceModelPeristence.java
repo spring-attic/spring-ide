@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,19 +52,14 @@ public class AopReferenceModelPeristence {
 	private static final Map<String, IElementFactory> ELEMENT_FACTORIES;
 
 	static {
-		// TODO CD eventually move this to read out the elementFactory extension
-		// point
 		ELEMENT_FACTORIES = new HashMap<String, IElementFactory>();
-		ELEMENT_FACTORIES.put(
-				AnnotationAspectDefinitionElementFactory.FACTORY_ID,
+		ELEMENT_FACTORIES.put(AnnotationAspectDefinitionElementFactory.FACTORY_ID,
 				new AnnotationAspectDefinitionElementFactory());
-		ELEMENT_FACTORIES.put(
-				AnnotationIntroductionDefinitionElementFactory.FACTORY_ID,
+		ELEMENT_FACTORIES.put(AnnotationIntroductionDefinitionElementFactory.FACTORY_ID,
 				new AnnotationIntroductionDefinitionElementFactory());
 		ELEMENT_FACTORIES.put(BeanAspectDefinitionElementFactory.FACTORY_ID,
 				new BeanAspectDefinitionElementFactory());
-		ELEMENT_FACTORIES.put(
-				BeanIntroductionDefinitionElementFactory.FACTORY_ID,
+		ELEMENT_FACTORIES.put(BeanIntroductionDefinitionElementFactory.FACTORY_ID,
 				new BeanIntroductionDefinitionElementFactory());
 		ELEMENT_FACTORIES.put(JavaAdvisorDefinitionElementFactory.FACTORY_ID,
 				new JavaAdvisorDefinitionElementFactory());
@@ -87,8 +82,7 @@ public class AopReferenceModelPeristence {
 	private IPath defaultFile = null;
 
 	public AopReferenceModelPeristence() {
-		this.defaultFile = Activator.getDefault().getStateLocation().append(
-				".springAop");
+		this.defaultFile = Activator.getDefault().getStateLocation().append(".state");
 	}
 
 	private IMemento appendNewChild(IMemento memento, String type) {
@@ -108,34 +102,31 @@ public class AopReferenceModelPeristence {
 				IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 				IResource member = root.findMember(projectName);
 				if (member instanceof IProject) {
-					IJavaProject javaProject = JavaCore
-							.create((IProject) member);
+					IJavaProject javaProject = JavaCore.create((IProject) member);
 					IAopProject aopProject = model.getProject(javaProject);
 
 					createAspectDefinitions(projects, project, aopProject);
 
 					// recreate the marker
-					List<IAopReference> references = aopProject
-							.getAllReferences();
+					List<IAopReference> references = aopProject.getAllReferences();
 					for (IAopReference reference : references) {
-						AopReferenceModelMarkerUtils.createMarker(reference,
-								reference.getResource());
+						AopReferenceModelMarkerUtils.createMarker(reference, reference
+								.getResource());
 					}
 				}
 			}
 		}
 	}
 
-	private void createAopReferences(IAopProject aopProject,
-			IMemento aspectDefinitionM, IAspectDefinition aspectDefinition) {
+	private void createAopReferences(IAopProject aopProject, IMemento aspectDefinitionM,
+			IAspectDefinition aspectDefinition) {
 		String factoryId;
-		IMemento[] aopReferences = aspectDefinitionM
-				.getChildren(AOP_REFERENCE_ELEMENT);
+		IMemento[] aopReferences = aspectDefinitionM.getChildren(AOP_REFERENCE_ELEMENT);
 		if (aopReferences != null && aopReferences.length > 0) {
 			for (IMemento aopReferenceM : aopReferences) {
 				factoryId = aopReferenceM.getString(FACTORY_ID);
-				IAopReference aopReference = (IAopReference) ELEMENT_FACTORIES
-						.get(factoryId).createElement(aopReferenceM);
+				IAopReference aopReference = (IAopReference) ELEMENT_FACTORIES.get(factoryId)
+						.createElement(aopReferenceM);
 				aopReference.setDefinition(aspectDefinition);
 				aopProject.addAopReference(aopReference);
 			}
@@ -144,15 +135,13 @@ public class AopReferenceModelPeristence {
 
 	private void createAspectDefinitions(IMemento[] projects, IMemento project,
 			IAopProject aopProject) {
-		IMemento[] aspectDefinitions = project
-				.getChildren(ASPECT_DEFINITION_ELEMENT);
+		IMemento[] aspectDefinitions = project.getChildren(ASPECT_DEFINITION_ELEMENT);
 		if (projects != null && projects.length > 0) {
 			for (IMemento aspectDefinitionM : aspectDefinitions) {
 				String factoryId = aspectDefinitionM.getString(FACTORY_ID);
-				IAspectDefinition aspectDefinition = (IAspectDefinition) ELEMENT_FACTORIES
-						.get(factoryId).createElement(aspectDefinitionM);
-				createAopReferences(aopProject, aspectDefinitionM,
-						aspectDefinition);
+				IAspectDefinition aspectDefinition = (IAspectDefinition) ELEMENT_FACTORIES.get(
+						factoryId).createElement(aspectDefinitionM);
+				createAopReferences(aopProject, aspectDefinitionM, aspectDefinition);
 			}
 		}
 	}
@@ -165,7 +154,7 @@ public class AopReferenceModelPeristence {
 		if (!shouldModelByPersisted() || !isPersisted()) {
 			return;
 		}
-		
+
 		IAopReferenceModel model = Activator.getModel();
 		Reader reader = null;
 		try {
@@ -174,8 +163,8 @@ public class AopReferenceModelPeristence {
 			createAopProjects(model, memento);
 		}
 		catch (Exception e) {
-			Activator.log("Cannot load .springAop model file", e);
-			// reinit aop reference model
+			Activator.log("Cannot load .state model file", e);
+			// re-init aop reference model
 			Activator.getModel().clearProjects();
 		}
 		finally {
@@ -188,7 +177,7 @@ public class AopReferenceModelPeristence {
 			}
 		}
 	}
-	
+
 	private boolean shouldModelByPersisted() {
 		IScopeContext context = new InstanceScope();
 		IEclipsePreferences node = context.getNode(Activator.PLUGIN_ID);
@@ -202,14 +191,12 @@ public class AopReferenceModelPeristence {
 			}
 			return;
 		}
-		
-		XMLMemento memento = XMLMemento
-				.createWriteRoot(AOP_REFERENCE_MODEL_ELEMENT);
+
+		XMLMemento memento = XMLMemento.createWriteRoot(AOP_REFERENCE_MODEL_ELEMENT);
 		Collection<IAopProject> projects = Activator.getModel().getProjects();
 		for (IAopProject project : projects) {
 			IMemento projectM = appendNewChild(memento, AOP_PROJECT_ELEMENT);
-			projectM.putString(NAME_ATTRIBUTE, project.getProject()
-					.getElementName());
+			projectM.putString(NAME_ATTRIBUTE, project.getProject().getElementName());
 
 			List<IAopReference> refs = project.getAllReferences();
 			Map<IAspectDefinition, List<IAopReference>> maps = new HashMap<IAspectDefinition, List<IAopReference>>();
@@ -224,13 +211,11 @@ public class AopReferenceModelPeristence {
 				}
 			}
 
-			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : maps
-					.entrySet()) {
-				IMemento definitionM = appendNewChild(projectM,
-						ASPECT_DEFINITION_ELEMENT);
+			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : maps.entrySet()) {
+				IMemento definitionM = appendNewChild(projectM, ASPECT_DEFINITION_ELEMENT);
 				if (entry.getKey() instanceof IAdaptable) {
-					IPersistableElement pers = (IPersistableElement) ((IAdaptable) entry
-							.getKey()).getAdapter(IPersistableElement.class);
+					IPersistableElement pers = (IPersistableElement) ((IAdaptable) entry.getKey())
+							.getAdapter(IPersistableElement.class);
 					if (pers != null) {
 						pers.saveState(definitionM);
 						definitionM.putString(FACTORY_ID, pers.getFactoryId());
@@ -240,12 +225,9 @@ public class AopReferenceModelPeristence {
 							IPersistableElement pers2 = (IPersistableElement) ((IAdaptable) ref)
 									.getAdapter(IPersistableElement.class);
 							if (pers2 != null) {
-								IMemento refM = appendNewChild(definitionM,
-										AOP_REFERENCE_ELEMENT);
+								IMemento refM = appendNewChild(definitionM, AOP_REFERENCE_ELEMENT);
 								pers2.saveState(refM);
-								refM
-										.putString(FACTORY_ID, pers2
-												.getFactoryId());
+								refM.putString(FACTORY_ID, pers2.getFactoryId());
 							}
 						}
 					}

@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.aop.core.Activator;
-import org.springframework.ide.eclipse.aop.core.internal.model.builder.AopReferenceModelBuilder;
+import org.springframework.ide.eclipse.aop.core.internal.model.builder.AopReferenceModelBuilderJob;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -50,14 +50,14 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	/**
 	 * Starts creation of AOP reference model by passing the Set of
 	 * affectedResources on to a new instance of
-	 * {@link AopReferenceModelBuilder}.
+	 * {@link AopReferenceModelBuilderJob}.
 	 */
 	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor)
 			throws CoreException {
 		monitor.subTask(Activator
 				.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
 		if (affectedResources.size() > 0) {
-			Job job = new AopReferenceModelBuilder(AopReferenceModelUtils
+			Job job = new AopReferenceModelBuilderJob(AopReferenceModelUtils
 					.getAffectedFilesFromBeansConfig(affectedResources), affectedResources);
 			job.schedule();
 		}

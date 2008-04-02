@@ -136,13 +136,19 @@ public class AopReferenceModelUtils {
 								IType[] types = ((ICompilationUnit) element).getAllTypes();
 								List<String> typeNames = new ArrayList<String>();
 								for (IType type : types) {
-									typeNames.add(type.getFullyQualifiedName());
+									
+									// Check that the type is coming from the project classpath
+									IType checkType = JdtUtils.getJavaType(project.getProject(),
+											type.getFullyQualifiedName());
+									if (type == checkType) {
+										typeNames.add(type.getFullyQualifiedName());
+									}
 								}
 								for (IBeansConfig config : configs) {
 									Set<String> allBeanClasses = config.getBeanClasses();
 									for (String className : allBeanClasses) {
 										if (typeNames.contains(className)) {
-											files.add((IFile) config.getElementResource());
+											files.add(config.getElementResource());
 										}
 									}
 								}

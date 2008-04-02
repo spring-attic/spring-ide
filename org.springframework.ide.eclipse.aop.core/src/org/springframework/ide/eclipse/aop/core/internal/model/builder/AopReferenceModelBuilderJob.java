@@ -73,7 +73,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class AopReferenceModelBuilder extends Job {
+public class AopReferenceModelBuilderJob extends Job {
 
 	public static final Object CONTENT_FAMILY = new Object();
 
@@ -86,10 +86,10 @@ public class AopReferenceModelBuilder extends Job {
 	private IProjectClassLoaderSupport classLoaderSupport;
 
 	/**
-	 * Constructor to create a {@link AopReferenceModelBuilder} instance.
+	 * Constructor to create a {@link AopReferenceModelBuilderJob} instance.
 	 * @param affectedResources the set of resources that should be processed
 	 */
-	public AopReferenceModelBuilder(Set<IResource> affectedResources,
+	public AopReferenceModelBuilderJob(Set<IResource> affectedResources,
 			Set<IResource> originalResources) {
 		super(Activator
 				.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
@@ -467,8 +467,8 @@ public class AopReferenceModelBuilder extends Job {
 				Job[] buildJobs = Job.getJobManager().find(CONTENT_FAMILY);
 				for (int i = 0; i < buildJobs.length; i++) {
 					Job curr = buildJobs[i];
-					if (curr != this && curr instanceof AopReferenceModelBuilder) {
-						AopReferenceModelBuilder job = (AopReferenceModelBuilder) curr;
+					if (curr != this && curr instanceof AopReferenceModelBuilderJob) {
+						AopReferenceModelBuilderJob job = (AopReferenceModelBuilderJob) curr;
 						if (job.isCoveredBy(this)) {
 							curr.cancel();
 						}
@@ -488,7 +488,7 @@ public class AopReferenceModelBuilder extends Job {
 		return Status.OK_STATUS;
 	}
 
-	public boolean isCoveredBy(AopReferenceModelBuilder other) {
+	public boolean isCoveredBy(AopReferenceModelBuilderJob other) {
 		if (other.affectedResources != null && this.affectedResources != null) {
 			for (IResource resource : affectedResources) {
 				if (!other.affectedResources.contains(resource)) {
