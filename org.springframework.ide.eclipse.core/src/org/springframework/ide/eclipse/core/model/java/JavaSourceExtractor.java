@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
@@ -55,9 +54,7 @@ public class JavaSourceExtractor implements SourceExtractor {
 				String className = v.getClassName();
 				IType type = JdtUtils.getJavaType(project, className);
 				if (type != null) {
-					int l = JdtUtils.getLineNumber(type);
-					return new JavaModelSourceLocation(l, l, new FileResource(
-							type.getUnderlyingResource().getFullPath().toString()));
+					return new JavaModelSourceLocation(type);
 				}
 			}
 			catch (IOException e) {

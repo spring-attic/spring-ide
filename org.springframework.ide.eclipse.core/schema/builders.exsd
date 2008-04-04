@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.springframework.ide.eclipse.core">
+<schema targetNamespace="org.springframework.ide.eclipse.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
+      <appinfo>
          <meta.schema plugin="org.springframework.ide.eclipse.core" id="builders" name="Spring Project Builders"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 This extension-point is used to add one or more builders to the list of Spring project builders. These builders are called during incremental build of a Spring project.
@@ -48,9 +48,9 @@ This extension-point is used to add one or more builders to the list of Spring p
                   the full-qualified name of a class which implements 
 &lt;samp&gt;org.springframework.ide.eclipse.core.project.IProjectBuilder&lt;/samp&gt;
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.project.IProjectBuilder"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="id" type="string" use="required">
@@ -86,27 +86,34 @@ This extension-point is used to add one or more builders to the list of Spring p
                <documentation>
                   
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="resource"/>
-               </appInfo>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="order" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="since"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          1.2.0
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt;
 &lt;extension point=&quot;org.springframework.ide.eclipse.core.builders&quot;&gt;
@@ -124,19 +131,20 @@ If this extension was defined in a plug-in with id &lt;samp&gt;org.springframewo
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="apiInfo"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 Each builder must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.project.IProjectBuilder&lt;/samp&gt;.
       </documentation>
    </annotation>
 
+
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="implementation"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 This plugin itself does not have any predefined builders.
@@ -144,9 +152,9 @@ This plugin itself does not have any predefined builders.
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="copyright"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt;
 Copyright (c) 2005, 2007 Spring IDE Developers

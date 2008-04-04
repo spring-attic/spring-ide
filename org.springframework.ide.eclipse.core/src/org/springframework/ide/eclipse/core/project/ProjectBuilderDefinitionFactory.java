@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.core.project;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -47,6 +49,14 @@ public class ProjectBuilderDefinitionFactory {
 				}
 			}
 		}
+		
+		// Sort definitions based on there defined order
+		Collections.sort(builderDefinitions, new Comparator<ProjectBuilderDefinition>(){
+
+			public int compare(ProjectBuilderDefinition o1, ProjectBuilderDefinition o2) {
+				return o1.getOrder().compareTo(o2.getOrder());
+			}});
+		
 		return builderDefinitions;
 	}
 }

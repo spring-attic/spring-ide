@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
+import org.springframework.util.StringUtils;
 
 /**
  * Wraps contributions to the
@@ -28,6 +29,8 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
  */
 public class ProjectBuilderDefinition extends
 		PersistablePreferenceObjectSupport {
+	
+	private static final Long DEFAULT_ORDER = 10L;
 
 	private static final String BUILDER_PREFIX = "builders.enable.";
 
@@ -43,6 +46,8 @@ public class ProjectBuilderDefinition extends
 
 	private static final String NAME_ATTRIBUTE = "name";
 
+	private static final String ORDER_ATTRIBUTE = "order";
+
 	private String description;
 
 	private String iconUri;
@@ -52,6 +57,8 @@ public class ProjectBuilderDefinition extends
 	private String name;
 
 	private String namespaceUri;
+	
+	private Long order;
 
 	private IProjectBuilder projectBuilder;
 
@@ -117,6 +124,10 @@ public class ProjectBuilderDefinition extends
 		return projectBuilder;
 	}
 
+	public Long getOrder() {
+		return order;
+	}
+
 	private void init(IConfigurationElement element) throws CoreException {
 		Object builder = element.createExecutableExtension(CLASS_ATTRIBUTE);
 		if (builder instanceof IProjectBuilder) {
@@ -128,6 +139,13 @@ public class ProjectBuilderDefinition extends
 		this.name = element.getAttribute(NAME_ATTRIBUTE);
 		this.description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
 		this.iconUri = element.getAttribute(ICON_ATTRIBUTE);
+		String orderString = element.getAttribute(ORDER_ATTRIBUTE);
+		if (StringUtils.hasText(orderString)) {
+			this.order = Long.valueOf(orderString);
+		}
+		else {
+			this.order = DEFAULT_ORDER;
+		}
 		String enabledByDefault = element
 				.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
 		if (enabledByDefault != null) {
@@ -147,4 +165,5 @@ public class ProjectBuilderDefinition extends
 	public String toString() {
 		return id + " (" + projectBuilder.getClass().getName() + ")";
 	}
+
 }
