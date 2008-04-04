@@ -14,6 +14,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -37,7 +38,7 @@ public class OpenAopModelReferenceInplaceDialogAction implements
 	}
 
 	public void init(IWorkbenchWindow window) {
-	}
+	} 
 
 	public void run(IAction action) {
 		Shell parent = JavaPlugin.getActiveWorkbenchShell();
@@ -52,7 +53,7 @@ public class OpenAopModelReferenceInplaceDialogAction implements
 	public void selectionChanged(IAction action, ISelection selection) {
 		// Have selected something in the editor - therefore
 		// want to close the inplace view if haven't already done so
-		if (dialog != null && dialog.isOpen()) {
+		if (dialog != null && dialog.isOpen() && dialog.isOpen() && !(selection instanceof TreeSelection)) {
 			dialog.dispose();
 			dialog = null;
 		}
