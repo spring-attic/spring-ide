@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -45,6 +46,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -190,7 +195,7 @@ public class JdtUtils {
 
 	private static void covertPathToUrl(IProject project, Set<URL> paths, IPath path)
 			throws MalformedURLException {
-		if (path != null && project != null) {
+		if (path != null && project != null && path.removeFirstSegments(1) != null) {
 
 			URI uri = project.findMember(path.removeFirstSegments(1)).getRawLocationURI();
 
@@ -807,6 +812,16 @@ public class JdtUtils {
 					&& !parameterType.getFullyQualifiedName().equals(Object.class.getName()));
 		}
 		return requiredTypes;
+	}
+
+	public static void visitTypeAst(IType type, ASTVisitor visitor) {
+		if (type != null && type.getCompilationUnit() != null) {
+			ASTParser parser = ASTParser.newParser(AST.JLS3);
+			parser.setSource(type.getCompilationUnit());
+			parser.setResolveBindings(true);
+			ASTNode node = parser.createAST(new NullProgressMonitor());
+			node.accept(visitor);
+		}
 	}
 
 }
