@@ -136,7 +136,8 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 										.isAssignableFrom(advisorClass)) {
 									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
 											file, aspectNode, beanRef,
-											className, pointcutExpression);									info.setType(ADVICE_TYPES.BEFORE);
+											className, pointcutExpression);									
+									info.setType(ADVICE_TYPES.BEFORE);
 									info.setAdviceMethodName(BEFORE_ELEMENT);
 									info.setAdviceMethodParameterTypes(new String[] {
 										Method.class.getName(),
