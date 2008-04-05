@@ -16,6 +16,9 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
+import org.springframework.ide.eclipse.core.io.FileResource;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
@@ -29,19 +32,26 @@ import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAct
  */
 public class OpenJavaElementAction extends AbstractNavigatorAction {
 
-	private ISourceModelElement element;
+	private Object element;
 
 	public OpenJavaElementAction(ICommonActionExtensionSite site) {
 		super(site);
-		setText("Open Java &Element");	// TODO externalize text
+		setText("Open Java &Element"); // TODO externalize text
 	}
 
 	public boolean isEnabled(IStructuredSelection selection) {
 		if (selection.size() == 1) {
 			Object sElement = selection.getFirstElement();
-			if (sElement instanceof IBean
-					|| sElement instanceof IBeanProperty) {
+			if (sElement instanceof IBean || sElement instanceof IBeanProperty) {
 				element = (ISourceModelElement) sElement;
+				return true;
+			}
+			else if (sElement instanceof IJavaElement) {
+				element = sElement;
+				return true;
+			}
+			else if (sElement instanceof BeanMetadataNode) {
+				element = ((BeanMetadataNode) sElement).getLocation();
 				return true;
 			}
 		}
@@ -53,14 +63,22 @@ public class OpenJavaElementAction extends AbstractNavigatorAction {
 		IJavaElement javaElement;
 		if (element instanceof IBean) {
 			javaElement = BeansModelUtils.getBeanType((IBean) element, null);
-		} else if (element instanceof IBeanProperty) {
-			javaElement = BeansModelUtils.getPropertyMethod(
-					(IBeanProperty) element, null);
-		} else {
+		}
+		else if (element instanceof IBeanProperty) {
+			javaElement = BeansModelUtils.getPropertyMethod((IBeanProperty) element, null);
+		}
+		else if (element instanceof IJavaElement) {
+			javaElement = (IJavaElement) element;
+		}
+		else {
 			javaElement = null;
 		}
 		if (javaElement != null) {
 			SpringUIUtils.openInEditor(javaElement);
+		}
+		if (element instanceof IModelSourceLocation) {
+			IModelSourceLocation location = (IModelSourceLocation) element;
+			SpringUIUtils.openInEditor(((FileResource) ((IModelSourceLocation) element).getResource()).getRawFile(), location.getStartLine(), true);
 		}
 	}
 }

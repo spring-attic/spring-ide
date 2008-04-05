@@ -17,13 +17,15 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
+import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
 import org.springframework.ide.eclipse.core.MessageUtils;
 
 /**
@@ -32,7 +34,7 @@ import org.springframework.ide.eclipse.core.MessageUtils;
  * 
  * @author Torsten Juergeleit
  */
-public class BeansCorePlugin extends Plugin {
+public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/**
 	 * Plugin identifier for Spring Beans Core (value
@@ -47,6 +49,8 @@ public class BeansCorePlugin extends Plugin {
 
 	/** The singleton beans model */
 	private static BeansModel model;
+	
+	private static BeanMetadataModel metaDataModel;
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
@@ -60,6 +64,7 @@ public class BeansCorePlugin extends Plugin {
 	public BeansCorePlugin() {
 		plugin = this;
 		model = new BeansModel();
+		metaDataModel = new BeanMetadataModel();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
 		}
@@ -72,11 +77,13 @@ public class BeansCorePlugin extends Plugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		model.startup();
+		metaDataModel.startup();
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		model.shutdown();
+		metaDataModel.shutdown();
 		super.stop(context);
 	}
 
@@ -92,6 +99,10 @@ public class BeansCorePlugin extends Plugin {
 	 */
 	public static final IBeansModel getModel() {
 		return model;
+	}
+	
+	public static final IBeanMetadataModel getMetaDataModel() {
+		return metaDataModel;
 	}
 
 	/**

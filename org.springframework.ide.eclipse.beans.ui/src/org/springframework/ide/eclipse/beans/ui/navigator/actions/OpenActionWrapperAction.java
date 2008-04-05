@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAct
  * {@link Action} implementation that wraps {@link OpenConfigFileAction} and
  * {@link OpenJavaElementAction} and gets installed as global double click
  * action.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -43,19 +42,34 @@ public class OpenActionWrapperAction extends AbstractNavigatorAction {
 
 	public boolean isEnabled(IStructuredSelection selection) {
 		if (selection.size() == 1) {
-			if (this.openJavaElementAction.isEnabled(selection)) {
-				if (BeansUIUtils.shouldOpenConfigFile()) {
+			boolean javaActionCanRun = openJavaElementAction.isEnabled(selection); 
+			boolean configActionCanRun = openConfigFileAction.isEnabled(selection);
+			
+			if (BeansUIUtils.shouldOpenConfigFile()) {
+				if (configActionCanRun) {
 					this.action = openConfigFileAction;
-					return openConfigFileAction.isEnabled(selection);
+					return true;
+				}
+				else if (javaActionCanRun) {
+					this.action = openJavaElementAction;
+					return true;
 				}
 				else {
-					this.action = openJavaElementAction;
-					return openJavaElementAction.isEnabled(selection);
+					return false;
 				}
 			}
 			else {
-				this.action = openConfigFileAction;
-				return openConfigFileAction.isEnabled(selection);
+				if (javaActionCanRun) {
+					this.action = openJavaElementAction;
+					return true;
+				}
+				else if (configActionCanRun) {
+					this.action = openConfigFileAction;
+					return true;
+				}
+				else {
+					return false;
+				}
 			}
 		}
 		return false;
@@ -65,4 +79,5 @@ public class OpenActionWrapperAction extends AbstractNavigatorAction {
 	public void run() {
 		this.action.run();
 	}
+	
 }

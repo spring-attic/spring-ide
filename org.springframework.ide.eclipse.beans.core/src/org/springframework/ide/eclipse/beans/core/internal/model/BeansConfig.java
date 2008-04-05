@@ -89,8 +89,7 @@ import org.xml.sax.SAXParseException;
 public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		ILazyInitializedModelElement {
 
-	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = 
-		new DefaultModelElementProvider();
+	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
 	public BeansConfig(IBeansProject project, String name) {
 		super(project, name);
@@ -104,16 +103,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		try {
 			r.lock();
-			List<ISourceModelElement> children = new ArrayList<ISourceModelElement>(
-					imports);
+			List<ISourceModelElement> children = new ArrayList<ISourceModelElement>(imports);
 			children.addAll(aliases.values());
 			children.addAll(components);
 			children.addAll(beans.values());
 			Collections.sort(children, new Comparator<ISourceModelElement>() {
-				public int compare(ISourceModelElement element1,
-						ISourceModelElement element2) {
-					return element1.getElementStartLine()
-							- element2.getElementStartLine();
+				public int compare(ISourceModelElement element1, ISourceModelElement element2) {
+					return element1.getElementStartLine() - element2.getElementStartLine();
 				}
 			});
 			return children.toArray(new IModelElement[children.size()]);
@@ -133,7 +129,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * to reloading of the corresponding beans config file.
 	 */
 	public void reload() {
-		if (file != null && file.isAccessible()&& super.resourceChanged()) {
+		if (file != null && file.isAccessible() && super.resourceChanged()) {
 			try {
 				w.lock();
 				isModelPopulated = false;
@@ -199,8 +195,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
 			problems = new LinkedHashSet<ValidationProblem>();
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg,
-					file, -1));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
@@ -211,21 +206,22 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	protected void readConfig() {
 		if (!this.isModelPopulated) {
 			try {
-				
+
 				// Only install Eclipse-based resource loader if enabled in
 				// project properties
-				// IMPORTANT: the following block needs to stay before the w.lock()
+				// IMPORTANT: the following block needs to stay before the
+				// w.lock()
 				// as it could otherwise create a runtime deadlock
 				ResourceLoader resourceLoader = null;
 				if (((IBeansProject) getElementParent()).isImportsEnabled()) {
-					resourceLoader = new EclipsePathMatchingResourcePatternResolver(
-						file.getProject());
+					resourceLoader = new EclipsePathMatchingResourcePatternResolver(file
+							.getProject());
 				}
 				else {
-					resourceLoader =  new PathMatchingResourcePatternResolver(
-							JdtUtils.getClassLoader(getElementResource()));
+					resourceLoader = new PathMatchingResourcePatternResolver(JdtUtils
+							.getClassLoader(getElementResource()));
 				}
-				
+
 				w.lock();
 				if (this.isModelPopulated) {
 					return;
@@ -239,8 +235,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					modificationTimestamp = file.getModificationStamp();
 					Resource resource;
 					if (isArchived) {
-						resource = new StorageResource(new ZipEntryStorage(file
-								.getProject(), getElementName()));
+						resource = new StorageResource(new ZipEntryStorage(file.getProject(),
+								getElementName()));
 					}
 					else {
 						resource = new FileResource(file);
@@ -248,23 +244,18 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 					DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry();
 					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
-							new BeansDtdResolver(),
-							new PluggableSchemaResolver(
-									PluggableSchemaResolver.class
-											.getClassLoader()));
+							new BeansDtdResolver(), new PluggableSchemaResolver(
+									PluggableSchemaResolver.class.getClassLoader()));
 					BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(
 							this, resource);
 					ProblemReporter problemReporter = new BeansConfigProblemReporter();
-					BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(
-							this);
-					XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
-							registry);
+					BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(this);
+					XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
 					reader.setDocumentLoader(new XercesDocumentLoader());
 					reader.setResourceLoader(resourceLoader);
-					
+
 					reader.setEntityResolver(resolver);
-					reader.setSourceExtractor(new DelegatingSourceExtractor(
-							file.getProject()));
+					reader.setSourceExtractor(new DelegatingSourceExtractor(file.getProject()));
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
@@ -275,17 +266,15 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 						reader.loadBeanDefinitions(resource);
 						eventListener.registerComponents();
 						// post process beans config if required
-						postProcess(problemReporter, beanNameGenerator,
-								resource);
+						postProcess(problemReporter, beanNameGenerator, resource);
 					}
 					catch (Throwable e) { // handle ALL exceptions
 
 						// Skip SAXParseExceptions because they're already
 						// handled by the SAX ErrorHandler
 						if (!(e.getCause() instanceof SAXParseException)) {
-							problems.add(new ValidationProblem(
-									IMarker.SEVERITY_ERROR, e.getMessage(),
-									file, -1));
+							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e
+									.getMessage(), file, -1));
 							BeansCorePlugin.log(e);
 						}
 					}
@@ -301,37 +290,37 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	protected final class BeansConfigErrorHandler implements ErrorHandler {
 
 		public void warning(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, e
-					.getMessage(), file, e.getLineNumber()));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, e.getMessage(), file, e
+					.getLineNumber()));
 		}
 
 		public void error(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e
-					.getMessage(), file, e.getLineNumber()));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(), file, e
+					.getLineNumber()));
 		}
 
 		public void fatalError(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e
-					.getMessage(), file, e.getLineNumber()));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(), file, e
+					.getLineNumber()));
 		}
 	}
-	
+
 	protected final class BeansConfigProblemReporter implements ProblemReporter {
 
 		public void fatal(Problem problem) {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
-					getMessage(problem), file, getLine(problem)));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, getMessage(problem), file,
+					getLine(problem)));
 			throw new BeanDefinitionParsingException(problem);
 		}
 
 		public void error(Problem problem) {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
-					getMessage(problem), file, getLine(problem)));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, getMessage(problem), file,
+					getLine(problem)));
 		}
 
 		public void warning(Problem problem) {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING,
-					getMessage(problem), file, getLine(problem)));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, getMessage(problem), file,
+					getLine(problem)));
 		}
 
 		private String getMessage(Problem problem) {
@@ -355,8 +344,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				return ((XmlSourceLocation) source).getStartLine();
 			}
 			else if (source instanceof Node) {
-				return LineNumberPreservingDOMParser
-						.getStartLineNumber((Node) source);
+				return LineNumberPreservingDOMParser.getStartLineNumber((Node) source);
 			}
 			return -1;
 		}
@@ -376,8 +364,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 	protected void postProcess(ProblemReporter problemReporter,
 			BeanNameGenerator beanNameGenerator, Resource resource) {
-		ReaderEventListener readerEventListener = new BeansConfigReaderEventListener(
-				this, resource);
+		ReaderEventListener readerEventListener = new BeansConfigReaderEventListener(this, resource);
 
 		// TODO CD do we need to check the components map as well?
 		List<IBean> beansClone = new ArrayList<IBean>();
@@ -386,22 +373,17 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			// for now only handle postprocessor that have a direct bean class
 			String beanClassName = bean.getClassName();
 			if (beanClassName != null) {
-				IType type = JdtUtils.getJavaType(getElementResource()
-						.getProject(), beanClassName);
+				IType type = JdtUtils.getJavaType(getElementResource().getProject(), beanClassName);
 				if (type != null
-						&& (Introspector.doesImplement(type,
-								BeanFactoryPostProcessor.class.getName()) || Introspector
-								.doesImplement(type, BeanPostProcessor.class
-										.getName()))) {
+						&& (Introspector.doesImplement(type, BeanFactoryPostProcessor.class
+								.getName()) || Introspector.doesImplement(type,
+								BeanPostProcessor.class.getName()))) {
 					IBeansConfigPostProcessor postProcessor = BeansConfigPostProcessorFactory
 							.createPostProcessor(beanClassName);
 					if (postProcessor != null) {
-						postProcessor
-								.postProcess(BeansConfigPostProcessorFactory
-										.createPostProcessingContext(beans
-												.values(), readerEventListener,
-												problemReporter,
-												beanNameGenerator));
+						postProcessor.postProcess(BeansConfigPostProcessorFactory
+								.createPostProcessingContext(beans.values(), readerEventListener,
+										problemReporter, beanNameGenerator));
 					}
 				}
 			}
@@ -413,8 +395,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * instance of {@link IBeansConfig} with data from the XML bean definition
 	 * reader events.
 	 */
-	protected final class BeansConfigReaderEventListener implements
-			ReaderEventListener {
+	protected final class BeansConfigReaderEventListener implements ReaderEventListener {
 
 		private IBeansConfig config;
 
@@ -430,8 +411,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		private Map<Resource, DocumentDefaultsDefinition> defaultDefinitionsCache;
 
-		public BeansConfigReaderEventListener(IBeansConfig config,
-				Resource resource) {
+		public BeansConfigReaderEventListener(IBeansConfig config, Resource resource) {
 			this.config = config;
 			this.resource = resource;
 			this.elementProviders = NamespaceUtils.getElementProviders();
@@ -447,11 +427,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				Object source = defaultsDefinition.getSource();
 
 				if (source instanceof IModelSourceLocation) {
-					Resource resource = ((IModelSourceLocation) source)
-							.getResource();
-					addDefaultToCache(
-							(DocumentDefaultsDefinition) defaultsDefinition,
-							resource);
+					Resource resource = ((IModelSourceLocation) source).getResource();
+					addDefaultToCache((DocumentDefaultsDefinition) defaultsDefinition, resource);
 				}
 			}
 		}
@@ -460,8 +437,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			Object source = importDefinition.getSource();
 
 			if (source instanceof IModelSourceLocation) {
-				Resource resource = ((IModelSourceLocation) source)
-						.getResource();
+				Resource resource = ((IModelSourceLocation) source).getResource();
 				addImportToCache(importDefinition, resource);
 			}
 		}
@@ -470,14 +446,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			Object source = aliasDefinition.getSource();
 
 			if (source instanceof IModelSourceLocation) {
-				Resource resource = ((IModelSourceLocation) source)
-						.getResource();
+				Resource resource = ((IModelSourceLocation) source).getResource();
 				addAliasToCache(aliasDefinition, resource);
 			}
 		}
 
-		private void addAliasToCache(AliasDefinition aliasDefinition,
-				Resource resource) {
+		private void addAliasToCache(AliasDefinition aliasDefinition, Resource resource) {
 			if (aliasDefinitionsCache.containsKey(resource)) {
 				aliasDefinitionsCache.get(resource).add(aliasDefinition);
 			}
@@ -499,17 +473,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			Object source = componentDefinition.getSource();
 
 			if (source instanceof IModelSourceLocation) {
-				Resource resource = ((IModelSourceLocation) source)
-						.getResource();
+				Resource resource = ((IModelSourceLocation) source).getResource();
 				addComponentToCache(componentDefinition, resource);
 			}
 		}
 
-		private void addComponentToCache(
-				ComponentDefinition componentDefinition, Resource resource) {
+		private void addComponentToCache(ComponentDefinition componentDefinition, Resource resource) {
 			if (componentDefinitionsCache.containsKey(resource)) {
-				componentDefinitionsCache.get(resource)
-						.add(componentDefinition);
+				componentDefinitionsCache.get(resource).add(componentDefinition);
 			}
 			else {
 				Set<ComponentDefinition> componentDefinitions = new LinkedHashSet<ComponentDefinition>();
@@ -518,13 +489,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			}
 		}
 
-		private void addDefaultToCache(
-				DocumentDefaultsDefinition defaultsDefinition, Resource resource) {
+		private void addDefaultToCache(DocumentDefaultsDefinition defaultsDefinition,
+				Resource resource) {
 			defaultDefinitionsCache.put(resource, defaultsDefinition);
 		}
 
-		private void addImportToCache(ImportDefinition importDefinition,
-				Resource resource) {
+		private void addImportToCache(ImportDefinition importDefinition, Resource resource) {
 			if (importDefinitionsCache.containsKey(resource)) {
 				importDefinitionsCache.get(resource).add(importDefinition);
 			}
@@ -539,18 +509,15 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 			// Start with the root resource.
 			defaults = defaultDefinitionsCache.get(resource);
-			Set<ComponentDefinition> componentDefinitions = componentDefinitionsCache
-					.get(resource);
+			Set<ComponentDefinition> componentDefinitions = componentDefinitionsCache.get(resource);
 			if (componentDefinitions != null) {
 				for (ComponentDefinition componentDefinition : componentDefinitions) {
-					String uri = NamespaceUtils
-							.getNameSpaceURI(componentDefinition);
+					String uri = NamespaceUtils.getNameSpaceURI(componentDefinition);
 					IModelElementProvider provider = elementProviders.get(uri);
 					if (provider == null) {
 						provider = DEFAULT_ELEMENT_PROVIDER;
 					}
-					ISourceModelElement element = provider.getElement(config,
-							componentDefinition);
+					ISourceModelElement element = provider.getElement(config, componentDefinition);
 					if (element instanceof IBean) {
 						beans.put(element.getElementName(), (IBean) element);
 					}
@@ -560,17 +527,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				}
 			}
 
-			Set<AliasDefinition> aliasDefinitions = aliasDefinitionsCache
-					.get(resource);
+			Set<AliasDefinition> aliasDefinitions = aliasDefinitionsCache.get(resource);
 			if (aliasDefinitions != null) {
 				for (AliasDefinition aliasDefinition : aliasDefinitions) {
-					aliases.put(aliasDefinition.getAlias(), new BeanAlias(
-							config, aliasDefinition));
+					aliases.put(aliasDefinition.getAlias(), new BeanAlias(config, aliasDefinition));
 				}
 			}
 
-			Set<ImportDefinition> importDefinitions = importDefinitionsCache
-					.get(resource);
+			Set<ImportDefinition> importDefinitions = importDefinitionsCache.get(resource);
 			if (importDefinitions != null) {
 				for (ImportDefinition importDefinition : importDefinitions) {
 					processImportDefinition(importDefinition, config);
@@ -578,8 +542,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			}
 		}
 
-		private void processImportDefinition(ImportDefinition importDefinition,
-				IBeansConfig config) {
+		private void processImportDefinition(ImportDefinition importDefinition, IBeansConfig config) {
 			BeansImport beansImport = new BeansImport(config, importDefinition);
 
 			if (config instanceof BeansConfig) {
@@ -588,61 +551,55 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			else if (config instanceof ImportedBeansConfig) {
 				((ImportedBeansConfig) config).addImport(beansImport);
 			}
-			
+
 			if (((IBeansProject) getElementParent()).isImportsEnabled()) {
-	 			Resource[] importedResources = importDefinition
-						.getActualResources();
-	
+				Resource[] importedResources = importDefinition.getActualResources();
+
 				for (Resource importedResource : importedResources) {
-					ImportedBeansConfig importedBeansConfig = new ImportedBeansConfig(
-							beansImport, importedResource);
+					ImportedBeansConfig importedBeansConfig = new ImportedBeansConfig(beansImport,
+							importedResource);
 					importedBeansConfig.readConfig();
 					beansImport.addImportedBeansConfig(importedBeansConfig);
-	
-					importedBeansConfig.setDefaults(defaultDefinitionsCache
-							.get(importedResource));
+
+					importedBeansConfig.setDefaults(defaultDefinitionsCache.get(importedResource));
 					Set<ComponentDefinition> componentDefinitions = componentDefinitionsCache
 							.get(importedResource);
 					if (componentDefinitions != null) {
 						for (ComponentDefinition componentDefinition : componentDefinitions) {
-							String uri = NamespaceUtils
-									.getNameSpaceURI(componentDefinition);
-							IModelElementProvider provider = elementProviders
-									.get(uri);
+							String uri = NamespaceUtils.getNameSpaceURI(componentDefinition);
+							IModelElementProvider provider = elementProviders.get(uri);
 							if (provider == null) {
 								provider = DEFAULT_ELEMENT_PROVIDER;
 							}
-							ISourceModelElement element = provider.getElement(
-									importedBeansConfig, componentDefinition);
+							ISourceModelElement element = provider.getElement(importedBeansConfig,
+									componentDefinition);
 							if (element instanceof IBean) {
 								importedBeansConfig.addBean((IBean) element);
 							}
 							else if (element instanceof IBeansComponent) {
-								importedBeansConfig
-										.addComponent((IBeansComponent) element);
+								importedBeansConfig.addComponent((IBeansComponent) element);
 							}
 						}
 					}
-	
+
 					Set<AliasDefinition> aliasDefinitions = aliasDefinitionsCache
 							.get(importedResource);
 					if (aliasDefinitions != null) {
 						for (AliasDefinition aliasDefinition : aliasDefinitions) {
-							importedBeansConfig.addAlias(new BeanAlias(
-									importedBeansConfig, aliasDefinition));
+							importedBeansConfig.addAlias(new BeanAlias(importedBeansConfig,
+									aliasDefinition));
 						}
 					}
-	
+
 					// process nested imports
 					Set<ImportDefinition> importDefinitions = importDefinitionsCache
 							.get(importedResource);
 					if (importDefinitions != null) {
 						for (ImportDefinition nestedImportDefinition : importDefinitions) {
-							processImportDefinition(nestedImportDefinition,
-									importedBeansConfig);
+							processImportDefinition(nestedImportDefinition, importedBeansConfig);
 						}
 					}
-	
+
 					importedBeansConfig.readFinish();
 				}
 			}

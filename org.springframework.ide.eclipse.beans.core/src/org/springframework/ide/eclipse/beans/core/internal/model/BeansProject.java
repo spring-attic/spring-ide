@@ -70,7 +70,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	/** the internal flag to specify if import processing is enabled */
 	protected volatile boolean isImportsEnabled = DEFAULT_IMPORTS_ENABLED;
 
-	protected volatile String version = BeansCorePlugin.getPluginVersion();
+	/** Internal version number; intentionally set to lower value */
+	protected volatile String version = "2.0.0";
 
 	protected volatile Map<String, IBeansConfig> configs;
 

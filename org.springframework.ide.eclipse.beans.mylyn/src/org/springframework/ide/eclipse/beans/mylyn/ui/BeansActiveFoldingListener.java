@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,9 +43,9 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * {@link IInteractionContextListener} that handles collapsing and expanding of
- * Xml nodes in the {@link XMLMultiPageEditorPart}.
+ * XML nodes in the {@link XMLMultiPageEditorPart}.
  * @author Christian Dupuis
- * @since 2.0
+ * @since 2.0.1
  */
 @SuppressWarnings( { "restriction", "deprecation" })
 public class BeansActiveFoldingListener implements IInteractionContextListener {
@@ -85,7 +85,6 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 		updateFolding();
 	}
 
-	@SuppressWarnings("unchecked")
 	private void collapseDocument(ProjectionAnnotationModel annotationModel) {
 		if (annotationModel != null) {
 			Iterator annotations = annotationModel.getAnnotationIterator();
@@ -119,7 +118,6 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 		// ignore
 	}
 
-	@SuppressWarnings("unchecked")
 	private void expandDocument(ProjectionAnnotationModel annotationModel) {
 		Iterator annotations = annotationModel.getAnnotationIterator();
 		while (annotations.hasNext()) {

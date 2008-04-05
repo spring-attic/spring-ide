@@ -70,7 +70,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	 * The table of Spring Beans projects
 	 */
 	private volatile Map<IProject, IBeansProject> projects;
-
+	
 	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
@@ -115,7 +115,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 			// Check for update actions
 			BeansModelUpdater.updateModel(projects.values());
-
 		}
 		finally {
 			w.unlock();
@@ -152,7 +151,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		if (DEBUG) {
 			System.out.println("Beans Model shutdown");
 		}
-
+		
 		// Remove the ResourceChangeListener from the Eclipse Workspace
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(workspaceListener);
@@ -599,6 +598,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				}
 			}
 		}
-	}
 
+		public void javaStructureChanged(IFile file, int eventType) {
+		}
+	}
+	
 }

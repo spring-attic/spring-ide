@@ -19,10 +19,13 @@ import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -37,8 +40,8 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
-		implements ICommonLabelProvider {
+public class BeansNavigatorLabelProvider extends BeansModelLabelProvider implements
+		ICommonLabelProvider { 
 
 	private String providerID;
 
@@ -61,7 +64,12 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 	}
 
 	public String getDescription(Object element) {
-		if (element instanceof IBeansProject) {
+		if (element instanceof IBeanMetadata
+				&& BeanMetadataUtils.getLabelProvider((IBeanMetadata) element) != null) {
+			return BeanMetadataUtils.getLabelProvider((IBeanMetadata) element).getDescription(
+					element);
+		}
+		else if (element instanceof IBeansProject) {
 			return "Beans" // TODO Externalize string
 					+ " - " + ((IBeansProject) element).getProject().getName();
 		}
@@ -69,8 +77,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 			INamespaceLabelProvider provider = NamespaceUtils
 					.getLabelProvider((ISourceModelElement) element);
 			if (provider != null && provider instanceof IDescriptionProvider) {
-				return ((IDescriptionProvider) provider)
-						.getDescription(element);
+				return ((IDescriptionProvider) provider).getDescription(element);
 			}
 			else {
 				return DEFAULT_NAMESPACE_LABEL_PROVIDER.getDescription(element);
@@ -81,11 +88,10 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 					BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
 		}
 		if (element instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					(IFile) element);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
 			if (config != null) {
-				return BeansModelLabels.getElementLabel(config,
-						BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
+				return BeansModelLabels.getElementLabel(config, BeansUILabels.APPEND_PATH
+						| BeansUILabels.DESCRIPTION);
 			}
 		}
 		else if (element instanceof ZipEntryStorage) {
@@ -98,6 +104,11 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 			builder.append(" - ");
 			builder.append(storage.getFile().getFullPath().toString());
 			return builder.toString();
+		}
+		else if (element instanceof BeanMetadataReference
+				&& BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element) != null) {
+			return BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element)
+					.getDescription(element);
 		}
 		return null;
 	}
@@ -114,8 +125,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 	@Override
 	protected Image getImage(Object element, Object parentElement) {
 		if (element instanceof IBeansProject) {
-			Image image = BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_VIRTUAL_FOLDER);
+			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_VIRTUAL_FOLDER);
 			return image;
 		}
 		return super.getImage(element, parentElement);
@@ -130,12 +140,9 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 				&& (parentElement instanceof ISpringProject || parentElement instanceof IBeansProject)) {
 			return ((IBeansConfig) element).getElementName();
 		}
-		else if (element instanceof IFile
-				&& parentElement instanceof IModelElement) {
-			return ((IFile) element).getName()
-					+ " - "
-					+ ((IFile) element).getProjectRelativePath()
-							.removeLastSegments(1).toString();
+		else if (element instanceof IFile && parentElement instanceof IModelElement) {
+			return ((IFile) element).getName() + " - "
+					+ ((IFile) element).getProjectRelativePath().removeLastSegments(1).toString();
 		}
 		else if (element instanceof ILazyInitializedModelElement
 				&& !((ILazyInitializedModelElement) element).isInitialized()) {

@@ -51,15 +51,14 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansNavigatorContentProvider extends BeansModelContentProvider
-		implements ICommonContentProvider {
+public class BeansNavigatorContentProvider extends BeansModelContentProvider implements
+		ICommonContentProvider {
 
 	private String providerID;
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
-				.equals(providerID)) {
+		if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
 			return SpringCoreUtils.getSpringProjects().toArray();
 		}
 		return super.getElements(inputElement);
@@ -76,8 +75,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
 					((ISpringProject) parentElement).getProject());
 			if (beansProject != null
-					&& (!beansProject.getConfigs().isEmpty() || !beansProject
-							.getConfigSets().isEmpty())) {
+					&& (!beansProject.getConfigs().isEmpty() || !beansProject.getConfigSets()
+							.isEmpty())) {
 				return new Object[] { beansProject };
 			}
 		}
@@ -90,10 +89,9 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		// element (use parent because IBeansConfigSets need to be updated as
 		// well)
 		else if (parentElement instanceof ILazyInitializedModelElement
-				&& !((ILazyInitializedModelElement) parentElement)
-						.isInitialized()) {
-			triggerDeferredElementLoading(parentElement,
-					((IModelElement) parentElement).getElementParent());
+				&& !((ILazyInitializedModelElement) parentElement).isInitialized()) {
+			triggerDeferredElementLoading(parentElement, ((IModelElement) parentElement)
+					.getElementParent());
 			return IModelElement.NO_CHILDREN;
 		}
 		else if (parentElement instanceof IBeansImport) {
@@ -131,12 +129,19 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		return children.toArray();
 	}
 
-	private void triggerDeferredElementLoading(final Object config,
-			final Object parent) {
+	@Override
+	protected Object[] getJavaTypeChildren(IType type) {
+		// Prevent showing the Java -> Bean reference node in Spring Explorer
+		if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
+			return IModelElement.NO_CHILDREN;
+		}
+		return super.getJavaTypeChildren(type);
+	}
+
+	private void triggerDeferredElementLoading(final Object config, final Object parent) {
 		// first check if a matching job is already scheduled
 		synchronized (getClass()) {
-			Job[] buildJobs = Job.getJobManager().find(
-					ModelJob.MODEL_CONTENT_FAMILY);
+			Job[] buildJobs = Job.getJobManager().find(ModelJob.MODEL_CONTENT_FAMILY);
 			for (int i = 0; i < buildJobs.length; i++) {
 				Job curr = buildJobs[i];
 				if (curr instanceof ModelJob) {
@@ -149,8 +154,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		}
 		Job job = new ModelJob(config, parent, this);
 		job.setPriority(Job.INTERACTIVE);
-		job.setProperty(IProgressConstants.ICON_PROPERTY,
-				BeansUIImages.DESC_OBJS_SPRING);
+		job.setProperty(IProgressConstants.ICON_PROPERTY, BeansUIImages.DESC_OBJS_SPRING);
 		job.schedule();
 	}
 
@@ -164,15 +168,12 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 
 		if (element instanceof IBeansProject) {
 			IProject project = ((IBeansProject) element).getProject();
-			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
-					.equals(providerID)) {
+			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
 				refreshViewerForElement(project);
 				refreshViewerForElement(JdtUtils.getJavaProject(project));
 			}
-			else if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
-					.equals(providerID)) {
-				refreshViewerForElement(SpringCore.getModel().getProject(
-						project));
+			else if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
+				refreshViewerForElement(SpringCore.getModel().getProject(project));
 			}
 			else {
 				super.elementChanged(event);
@@ -184,10 +185,13 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 
 			// For a changed Spring beans config in the Eclipse Project Explorer
 			// refresh all corresponding bean classes
-			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
-					.equals(providerID)) {
+			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
 				refreshBeanClasses(config);
 			}
+
+			// In order to refresh the meta data contributeions we need refresh
+			// the entire project
+			refreshViewerForElement(config.getElementParent());
 		}
 		else {
 			super.elementChanged(event);
@@ -200,8 +204,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	protected void refreshBeanClasses(IBeansConfig config) {
 		Set<String> classes = config.getBeanClasses();
 		for (String clazz : classes) {
-			IType type = JdtUtils.getJavaType(config.getElementResource()
-					.getProject(), clazz);
+			IType type = JdtUtils.getJavaType(config.getElementResource().getProject(), clazz);
 			if (type != null) {
 				refreshViewerForElement(type);
 			}
@@ -229,16 +232,16 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	 */
 	private static class ModelJob extends Job {
 
+		public static final Object MODEL_CONTENT_FAMILY = new Object();
+
 		private final Object config;
 
 		private final Object parent;
 
 		private final BeansNavigatorContentProvider contentProvider;
 
-		public static final Object MODEL_CONTENT_FAMILY = new Object();
 
-		public ModelJob(Object config, Object parent,
-				BeansNavigatorContentProvider contentProvider) {
+		public ModelJob(Object config, Object parent, BeansNavigatorContentProvider contentProvider) {
 			super("Loading model content");
 			this.config = config;
 			this.parent = parent;
@@ -248,14 +251,13 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask("Loading model content from resource '"
-					+ ((IResourceModelElement) config).getElementResource()
-							.getFullPath().toString() + "'", 2);
+					+ ((IResourceModelElement) config).getElementResource().getFullPath()
+							.toString() + "'", 2);
 			synchronized (getClass()) {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
-				Job[] buildJobs = Job.getJobManager()
-						.find(MODEL_CONTENT_FAMILY);
+				Job[] buildJobs = Job.getJobManager().find(MODEL_CONTENT_FAMILY);
 				for (int i = 0; i < buildJobs.length; i++) {
 					Job curr = buildJobs[i];
 					if (curr != this && curr instanceof ModelJob) {
@@ -273,16 +275,14 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 					contentProvider.refreshViewerForElement(config);
 					contentProvider.refreshViewerForElement(parent);
 					if (parent instanceof IBeansProject) {
-						contentProvider.refreshViewerForElement(SpringCore
-								.getModel().getProject(
-										((IBeansProject) parent).getProject()));
+						contentProvider.refreshViewerForElement(SpringCore.getModel().getProject(
+								((IBeansProject) parent).getProject()));
 					}
 					if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
 							.equals(contentProvider.providerID)
 							&& config instanceof IResourceModelElement) {
-						contentProvider
-								.refreshViewerForElement(((IResourceModelElement) config)
-										.getElementResource());
+						contentProvider.refreshViewerForElement(((IResourceModelElement) config)
+								.getElementResource());
 					}
 				}
 			});

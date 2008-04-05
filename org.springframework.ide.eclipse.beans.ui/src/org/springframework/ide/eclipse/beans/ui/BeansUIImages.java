@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,6 +76,7 @@ public class BeansUIImages {
 	 * Available cached Images in the Spring Beans UI plugin image registry.
 	 */
 	public static final String IMG_OBJS_PROJECT = NAME_PREFIX + "project_obj.gif";
+	public static final String IMG_OBJS_ANNOTATION = NAME_PREFIX + "annotation_obj.gif";
 	public static final String IMG_OBJS_CONFIG = NAME_PREFIX + "config_obj.gif";
 	public static final String IMG_OBJS_CONFIG_SET = NAME_PREFIX + "configset_obj.gif";
 	public static final String IMG_OBJS_IMPORT = NAME_PREFIX + "import_obj.gif";
@@ -92,6 +93,7 @@ public class BeansUIImages {
     public static final String IMG_OBJS_MAP = NAME_PREFIX + "map_obj.gif";
     public static final String IMG_OBJS_METHOD_OVERRIDE = NAME_PREFIX + "method_override_obj.gif";
     public static final String IMG_OBJS_PROPERTIES = NAME_PREFIX + "properties_obj.gif";
+    public static final String IMG_OBJS_REQUEST_MAPPING = NAME_PREFIX + "request_mapping_obj.gif";
     public static final String IMG_OBJS_KEY = NAME_PREFIX + "key_obj.gif";
     public static final String IMG_OBJS_CONSTANT = NAME_PREFIX + "constant_obj.gif";
     public static final String IMG_OBJS_PROPERTY_PATH = NAME_PREFIX + "property_path_obj.gif";
@@ -124,6 +126,7 @@ public class BeansUIImages {
 	private final static String OVR = "ovr16/"; //basic colors - size 7x8
 
 	public static final ImageDescriptor DESC_OBJS_PROJECT = createManaged(OBJECT, IMG_OBJS_PROJECT);
+	public static final ImageDescriptor DESC_OBJS_ANNOTATION = createManaged(OBJECT, IMG_OBJS_ANNOTATION);
 	public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(OBJECT, IMG_OBJS_CONFIG);
 	public static final ImageDescriptor DESC_OBJS_CONFIG_SET = createManaged(OBJECT, IMG_OBJS_CONFIG_SET);
 	public static final ImageDescriptor DESC_OBJS_IMPORT = createManaged(OBJECT, IMG_OBJS_IMPORT);
@@ -140,6 +143,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_MAP = createManaged(OBJECT, IMG_OBJS_MAP);
 	public static final ImageDescriptor DESC_OBJS_METHOD_OVERRIDE = createManaged(OBJECT, IMG_OBJS_METHOD_OVERRIDE);
 	public static final ImageDescriptor DESC_OBJS_PROPERTIES = createManaged(OBJECT, IMG_OBJS_PROPERTIES);
+	public static final ImageDescriptor DESC_OBJS_REQUEST_MAPPING = createManaged(OBJECT, IMG_OBJS_REQUEST_MAPPING);
 	public static final ImageDescriptor DESC_OBJS_KEY = createManaged(OBJECT, IMG_OBJS_KEY);
 	public static final ImageDescriptor DESC_OBJS_CONSTANT = createManaged(OBJECT, IMG_OBJS_CONSTANT);
 	public static final ImageDescriptor DESC_OBJS_PROPERTY_PATH = createManaged(OBJECT, IMG_OBJS_PROPERTY_PATH);

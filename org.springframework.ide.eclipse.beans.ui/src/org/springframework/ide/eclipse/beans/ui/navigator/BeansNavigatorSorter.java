@@ -15,6 +15,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -36,13 +38,15 @@ public class BeansNavigatorSorter extends ViewerSorter {
 		if (element instanceof IBeansConfigSet) {
 			return 1;
 		}
+		else if (element instanceof BeanMetadataReference) {
+			return 2;
+		}
 		return 0;
 	}
 
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
-		if (SpringUIUtils.isSortingEnabled()
-				&& SpringUIUtils.isSpringExplorer(viewer)) {
+		if (SpringUIUtils.isSortingEnabled() && SpringUIUtils.isSpringExplorer(viewer)) {
 			// add hack for beans config sorting
 			if (e1 instanceof IFile && e2 instanceof IFile) {
 				String f1 = getFileLabel((IFile) e1);
@@ -53,15 +57,19 @@ public class BeansNavigatorSorter extends ViewerSorter {
 				return super.compare(viewer, e1, e2);
 			}
 		}
+		// Add sorting for bean meta data based on their IModelSourceLocation
+		else if (e1 instanceof BeanMetadataNode && e2 instanceof BeanMetadataNode) {
+			int first = ((BeanMetadataNode) e1).getLocation().getStartLine();
+			int second = ((BeanMetadataNode) e2).getLocation().getStartLine();
+			return Integer.valueOf(first).compareTo(Integer.valueOf(second));
+		}
 		// We don't want to sort it, just show it in the order it's found
 		// in the file
 		return 0;
 	}
 
 	private String getFileLabel(IFile file) {
-		return file.getName()
-				+ " - "
-				+ file.getProjectRelativePath().removeLastSegments(1)
-						.toString();
+		return file.getName() + " - "
+				+ file.getProjectRelativePath().removeLastSegments(1).toString();
 	}
 }

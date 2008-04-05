@@ -14,8 +14,12 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
+import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
@@ -30,11 +34,9 @@ import org.springframework.ide.eclipse.ui.viewers.DecoratingWorkbenchTreePathLab
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansModelLabelProvider extends
-		DecoratingWorkbenchTreePathLabelProvider {
+public class BeansModelLabelProvider extends DecoratingWorkbenchTreePathLabelProvider {
 
-	public static final DefaultNamespaceLabelProvider
-		DEFAULT_NAMESPACE_LABEL_PROVIDER = new DefaultNamespaceLabelProvider();
+	public static final DefaultNamespaceLabelProvider DEFAULT_NAMESPACE_LABEL_PROVIDER = new DefaultNamespaceLabelProvider();
 
 	public BeansModelLabelProvider() {
 		super(false);
@@ -47,18 +49,24 @@ public class BeansModelLabelProvider extends
 	@Override
 	protected Image getImage(Object element, Object parentElement) {
 		Image image = null;
-		if (element instanceof ISourceModelElement) {
+		if (element instanceof IBeanMetadata
+				&& BeanMetadataUtils.getLabelProvider((IBeanMetadata) element) != null) {
+			image = BeanMetadataUtils.getLabelProvider((IBeanMetadata) element).getImage(element);
+		}
+		else if (element instanceof BeanMetadataNode) {
+			return ((BeanMetadataNode) element).getImage();
+		}
+		else if (element instanceof ISourceModelElement) {
 			INamespaceLabelProvider provider = NamespaceUtils
 					.getLabelProvider((ISourceModelElement) element);
-			IModelElement context = (parentElement instanceof IModelElement
-					? (IModelElement) parentElement : null);
+			IModelElement context = (parentElement instanceof IModelElement ? (IModelElement) parentElement
+					: null);
 			if (provider != null) {
-				image = provider.getImage((ISourceModelElement) element,
-						context, isDecorating());
+				image = provider.getImage((ISourceModelElement) element, context, isDecorating());
 			}
 			else {
-				image = DEFAULT_NAMESPACE_LABEL_PROVIDER.getImage(
-						(ISourceModelElement) element, context, isDecorating());
+				image = DEFAULT_NAMESPACE_LABEL_PROVIDER.getImage((ISourceModelElement) element,
+						context, isDecorating());
 			}
 		}
 		else if (element instanceof IModelElement) {
@@ -71,16 +79,21 @@ public class BeansModelLabelProvider extends
 			}
 		}
 		else if (element instanceof ZipEntryStorage) {
-			return super.getImage(((ZipEntryStorage) element).getFile(),
-					parentElement);
+			return super.getImage(((ZipEntryStorage) element).getFile(), parentElement);
 		}
 		else if (element instanceof BeanClassReferences) {
 			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
 		}
+		else if (element instanceof BeanMetadataReference
+				&& BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element) != null) {
+			image = BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element).getImage(
+					element);
+		}
+		// Add decorations if required
 		if (image != null) {
 			if (isDecorating()) {
-				image = PlatformUI.getWorkbench().getDecoratorManager()
-             		.getLabelDecorator().decorateImage(image, element);
+				image = PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()
+						.decorateImage(image, element);
 			}
 			return image;
 		}
@@ -89,24 +102,32 @@ public class BeansModelLabelProvider extends
 
 	@Override
 	protected String getText(Object element, Object parentElement) {
-		if (element instanceof ISourceModelElement) {
+		if (element instanceof IBeanMetadata
+				&& BeanMetadataUtils.getLabelProvider((IBeanMetadata) element) != null) {
+			return BeanMetadataUtils.getLabelProvider((IBeanMetadata) element).getText(element);
+		}
+		else if (element instanceof BeanMetadataNode) {
+			return ((BeanMetadataNode) element).getLabel();
+		}
+		else if (element instanceof ISourceModelElement) {
 			INamespaceLabelProvider provider = NamespaceUtils
 					.getLabelProvider((ISourceModelElement) element);
-			IModelElement context = (parentElement instanceof IModelElement
-					? (IModelElement) parentElement : null);
+			IModelElement context = (parentElement instanceof IModelElement ? (IModelElement) parentElement
+					: null);
 			if (provider != null) {
 				return provider.getText((ISourceModelElement) element, context, isDecorating());
 			}
 			else {
-				return DEFAULT_NAMESPACE_LABEL_PROVIDER.getText(
-						(ISourceModelElement) element, context, isDecorating());
+				return DEFAULT_NAMESPACE_LABEL_PROVIDER.getText((ISourceModelElement) element,
+						context, isDecorating());
 			}
 		}
 		else if (element instanceof IModelElement) {
 			return BeansModelLabels.getElementLabel((IModelElement) element, 0);
 		}
 		else if (element instanceof ZipEntryStorage) {
-			// create zip entry label right here as it is not a core model element 
+			// create zip entry label right here as it is not a core model
+			// element
 			ZipEntryStorage storage = (ZipEntryStorage) element;
 			StringBuilder builder = new StringBuilder();
 			builder.append(storage.getFullPath().lastSegment());
@@ -118,6 +139,10 @@ public class BeansModelLabelProvider extends
 		}
 		else if (element instanceof BeanClassReferences) {
 			return BeansUIPlugin.getResourceString("BeanClassReferences.label");
+		}
+		else if (element instanceof BeanMetadataReference
+				&& BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element) != null) {
+			return BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element).getText(element);
 		}
 		return super.getText(element, parentElement);
 	}

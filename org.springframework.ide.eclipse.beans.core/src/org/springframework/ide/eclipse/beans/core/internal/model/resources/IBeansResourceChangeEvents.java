@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,8 @@ import org.springframework.ide.eclipse.core.internal.model.resources.ISpringReso
 
 /**
  * Defines callbacks for the {@link BeansResourceChangeListener}.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public interface IBeansResourceChangeEvents
 		extends ISpringResourceChangeEvents {
@@ -28,4 +28,10 @@ public interface IBeansResourceChangeEvents
 	void configChanged(IFile file, int eventType);
 
 	void configRemoved(IFile file, int eventType);
+	
+	/**
+	 * Notify that the java structure of a bean class has been changed.
+	 * @since 2.0.5
+	 */
+	void javaStructureChanged(IFile file, int eventType);
 }

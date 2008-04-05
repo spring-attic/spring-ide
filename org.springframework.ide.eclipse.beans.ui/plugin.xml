@@ -6,6 +6,10 @@
          name="%extensionNamespaces.name"
          schema="schema/namespaces.exsd"/>
 
+   <extension-point id="metadataproviders"
+         name="%extensionMetadataproviders.name"
+         schema="schema/metadataproviders.exsd"/>
+
    <extension
          point="org.springframework.ide.eclipse.beans.ui.namespaces">
       <namespace
@@ -262,6 +266,7 @@
 			<or>
 				<instanceof value="org.eclipse.core.resources.IResource"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
+				<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
 			</or>
          </possibleChildren>
          <commonSorter
@@ -278,6 +283,8 @@
 					</and>
 					<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
 					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
+					<instanceof value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode"/>
+					<instanceof value="org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata"/>
 	            </or>
 	         </enablement>
          </actionProvider>
@@ -317,6 +324,8 @@
 				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 				<instanceof value="org.eclipse.jdt.core.IType"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>

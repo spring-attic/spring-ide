@@ -32,6 +32,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceContentProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -135,7 +139,15 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof ISourceModelElement) {
+		if (parentElement instanceof IBeanMetadata
+				&& BeanMetadataUtils.getContenProvider((IBeanMetadata) parentElement) != null) {
+			return BeanMetadataUtils.getContenProvider((IBeanMetadata) parentElement).getChildren(
+					parentElement);
+		}
+		else if (parentElement instanceof BeanMetadataNode) {
+			return ((BeanMetadataNode) parentElement).getChildren();
+		}
+		else if (parentElement instanceof ISourceModelElement) {
 			ITreeContentProvider provider = NamespaceUtils
 					.getContentProvider((ISourceModelElement) parentElement);
 			if (provider != null) {
@@ -174,6 +186,9 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			Set<IBean> beans = ((BeanClassReferences) parentElement).getBeans();
 			return beans.toArray(new IBean[beans.size()]);
 		}
+		else if (parentElement instanceof BeanMetadataReference) {
+			return ((BeanMetadataReference) parentElement).getChildren();
+		}
 		return IModelElement.NO_CHILDREN;
 	}
 
@@ -190,6 +205,8 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			}
 		}
 		children.addAll(project.getConfigSets());
+		
+		children.addAll(BeanMetadataUtils.getProjectChildren(project));
 		return children.toArray();
 	}
 
@@ -258,6 +275,9 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 		}
 		else if (element instanceof BeanClassReferences) {
 			return ((BeanClassReferences) element).getBeanClass();
+		}
+		else if (element instanceof BeanMetadataReference) {
+			return ((BeanMetadataReference) element).getBeansProject();
 		}
 		return null;
 	}
