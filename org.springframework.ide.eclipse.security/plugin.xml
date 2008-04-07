@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+	<extension
+       point="org.springframework.ide.eclipse.aop.core.aspectdefinitionbuilder">
+	     <aspectDefinitionBuilder
+    	       class="org.springframework.ide.eclipse.security.core.aop.model.builder.SecurityXmlAspectDefinitionBuilder">
+     	</aspectDefinitionBuilder>
+ 	</extension>
+ 	
+ 	<extension point="org.eclipse.wst.xml.core.catalogContributions">
+		<catalogContribution>
+			<public
+				publicId="http://www.springframework.org/schema/security"
+				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.xsd"
+				webURL="http://www.springframework.org/schema/security/spring-security-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/security/spring-security.xsd"
+				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/security/spring-security-2.0.xsd"
+				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.xsd" />
+		</catalogContribution>
+	</extension>
+
+</plugin>
