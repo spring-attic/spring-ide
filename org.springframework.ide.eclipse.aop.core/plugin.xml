@@ -190,9 +190,6 @@
     	<aspectDefinitionBuilder
           	class="org.springframework.ide.eclipse.aop.core.internal.model.builder.AnnotationAspectDefinitionBuilder">
     	</aspectDefinitionBuilder>
-     <aspectDefinitionBuilder
-           class="org.springframework.ide.eclipse.aop.core.internal.model.builder.SecurityXmlAspectDefinitionBuilder">
-     </aspectDefinitionBuilder>
  	</extension>
 
 </plugin>
