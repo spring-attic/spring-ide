@@ -18,3 +18,5 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
+Export-Package: org.springframework.ide.eclipse.security,
+ org.springframework.ide.eclipse.security.core.aop.model.builder
