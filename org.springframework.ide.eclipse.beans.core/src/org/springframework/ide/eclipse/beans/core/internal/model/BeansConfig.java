@@ -265,7 +265,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					
 					// Install the project class loader as bean class loader 
 					// TODO CD needs further testing before actually using
-					// reader.setBeanClassLoader(JdtUtils.getClassLoader(getElementResource()));
+					reader.setBeanClassLoader(JdtUtils.getClassLoader(getElementResource()));
 					
 					try {
 						reader.loadBeanDefinitions(resource);
