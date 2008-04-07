@@ -78,8 +78,7 @@ public class ExportAction extends WorkbenchPartAction {
 		dialog.setTitle("Export to image");
 		dialog.setOriginalFile(editorFile);
 		dialog.create();
-		dialog
-				.setMessage("Specify a name and location for the image. Either enter .png, .jpg or .bmp extension.");
+		dialog.setMessage("Specify a name and location for the image. Either enter .png, .jpg or .bmp extension.");
 		dialog.open();
 		IPath path = dialog.getResult();
 		if (path != null) {
