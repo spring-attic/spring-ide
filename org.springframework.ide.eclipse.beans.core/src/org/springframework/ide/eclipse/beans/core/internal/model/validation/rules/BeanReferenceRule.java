@@ -44,7 +44,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * {@link IBean} instances or its children that does not extend
  * {@link AbstractNonInfrastructureBeanValidationRule}. This is on purpose as
  * we only want to validate bean references for infrastructure beans.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
@@ -60,26 +59,29 @@ public class BeanReferenceRule implements
 	 * are validated instead.
 	 */
 	public boolean supports(IModelElement element, IValidationContext context) {
+		IBean parentBean = BeansModelUtils.getParentOfClass(element, IBean.class);
 		return (element instanceof Bean || element instanceof IBeansValueHolder
-				|| element instanceof IBeansList
-				|| element instanceof IBeansSet
-//				|| element instanceof IBeansMap
-				);
+				|| element instanceof IBeansList || element instanceof IBeansSet)
+				&& ((element instanceof IBean && !((IBean) element).isInfrastructure()) 
+					|| (parentBean != null && !parentBean.isInfrastructure()));
 	}
 
-	public void validate(IBeansModelElement element,
-			IBeansValidationContext context, IProgressMonitor monitor) {
+	public void validate(IBeansModelElement element, IBeansValidationContext context,
+			IProgressMonitor monitor) {
 		if (element instanceof Bean) {
 			validateBean((Bean) element, context);
-		} else if (element instanceof IBeansValueHolder) {
+		}
+		else if (element instanceof IBeansValueHolder) {
 			IBeansValueHolder holder = (IBeansValueHolder) element;
 			validateValue(holder, holder.getValue(), context);
-		} else if (element instanceof IBeansList) {
+		}
+		else if (element instanceof IBeansList) {
 			IBeansList list = (IBeansList) element;
 			for (Object entry : list.getList()) {
 				validateValue(list, entry, context);
 			}
-		} else if (element instanceof IBeansSet) {
+		}
+		else if (element instanceof IBeansSet) {
 			IBeansSet set = (IBeansSet) element;
 			for (Object entry : set.getSet()) {
 				validateValue(set, entry, context);
@@ -88,27 +90,26 @@ public class BeanReferenceRule implements
 	}
 
 	private void validateBean(Bean bean, IBeansValidationContext context) {
-		AbstractBeanDefinition bd = (AbstractBeanDefinition) bean
-				.getBeanDefinition();
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) bean.getBeanDefinition();
 
 		// Validate parent bean
 		if (bean.isChildBean()) {
 			String parentName = bean.getParentName();
-			if (parentName != null
-					&& !SpringCoreUtils.hasPlaceHolder(parentName)) {
+			if (parentName != null && !SpringCoreUtils.hasPlaceHolder(parentName)) {
 				try {
-					context.getCompleteRegistry()
-									.getBeanDefinition(parentName);
-				} catch (NoSuchBeanDefinitionException e) {
-					context.warning(bean, "UNDEFINED_PARENT_BEAN",
-							"Parent bean '" + parentName + "' not found");
-				} catch (BeanDefinitionStoreException e) {
-					context.warning(bean, "UNDEFINED_PARENT_BEAN",
-							"Parent bean '" + parentName + "' not found");
+					context.getCompleteRegistry().getBeanDefinition(parentName);
+				}
+				catch (NoSuchBeanDefinitionException e) {
+					context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName
+							+ "' not found");
+				}
+				catch (BeanDefinitionStoreException e) {
+					context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName
+							+ "' not found");
 				}
 			}
 		}
-		
+
 		// Validate depends-on beans
 		if (bd.getDependsOn() != null) {
 			for (String beanName : bd.getDependsOn()) {
@@ -117,26 +118,24 @@ public class BeanReferenceRule implements
 		}
 	}
 
-	private void validateDependsOnBean(IBean bean, String beanName,
-			IBeansValidationContext context) {
+	private void validateDependsOnBean(IBean bean, String beanName, IBeansValidationContext context) {
 		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName)) {
 			try {
 				BeanDefinition dependsBd = context.getCompleteRegistry()
-					.getBeanDefinition(beanName);
+						.getBeanDefinition(beanName);
 				if (dependsBd.isAbstract()
-						|| (dependsBd.getBeanClassName() == null && dependsBd
-								.getFactoryBeanName() == null)) {
-					context.error(bean, "INVALID_DEPENDS_ON_BEAN",
-							"Referenced depends-on bean '" + beanName
-							+ "' is invalid (abstract or no bean class and no "
+						|| (dependsBd.getBeanClassName() == null && dependsBd.getFactoryBeanName() == null)) {
+					context.error(bean, "INVALID_DEPENDS_ON_BEAN", "Referenced depends-on bean '"
+							+ beanName + "' is invalid (abstract or no bean class and no "
 							+ "factory bean)");
 				}
-			} catch (NoSuchBeanDefinitionException e) {
+			}
+			catch (NoSuchBeanDefinitionException e) {
 
 				// Skip error "parent name is equal to bean name"
 				if (!e.getBeanName().equals(bean.getElementName())) {
-					context.error(bean, "UNDEFINED_DEPENDS_ON_BEAN",
-							"Depends-on bean '" + beanName + "' not found");
+					context.error(bean, "UNDEFINED_DEPENDS_ON_BEAN", "Depends-on bean '" + beanName
+							+ "' not found");
 				}
 			}
 		}
@@ -153,14 +152,12 @@ public class BeanReferenceRule implements
 		}
 		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName)) {
 			try {
-				BeanDefinition refBd = context.getCompleteRegistry().
-					getBeanDefinition(beanName);
-				if (refBd.isAbstract() || (refBd.getBeanClassName() == null
-						&& refBd.getFactoryBeanName() == null)) {
-					context.error(element, "INVALID_REFERENCED_BEAN",
-							"Referenced bean '" + beanName + "' is invalid "
-									+ "(abstract or no bean class and "
-									+ "no factory bean)");
+				BeanDefinition refBd = context.getCompleteRegistry().getBeanDefinition(beanName);
+				if (refBd.isAbstract()
+						|| (refBd.getBeanClassName() == null && refBd.getFactoryBeanName() == null)) {
+					context.error(element, "INVALID_REFERENCED_BEAN", "Referenced bean '"
+							+ beanName + "' is invalid " + "(abstract or no bean class and "
+							+ "no factory bean)");
 				}
 			}
 			catch (NoSuchBeanDefinitionException e) {
@@ -168,48 +165,40 @@ public class BeanReferenceRule implements
 				// Handle factory bean references
 				if (ValidationRuleUtils.isFactoryBeanReference(beanName)) {
 					String tempBeanName = beanName.replaceFirst(
-							ValidationRuleUtils.FACTORY_BEAN_REFERENCE_REGEXP,
-							"");
+							ValidationRuleUtils.FACTORY_BEAN_REFERENCE_REGEXP, "");
 					try {
-						BeanDefinition def = context.getCompleteRegistry()
-								.getBeanDefinition(tempBeanName);
+						BeanDefinition def = context.getCompleteRegistry().getBeanDefinition(
+								tempBeanName);
 						String beanClassName = def.getBeanClassName();
 						if (beanClassName != null) {
-							IType type = JdtUtils.getJavaType(BeansModelUtils
-									.getProject(element).getProject(),
-									beanClassName);
+							IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(element)
+									.getProject(), beanClassName);
 							if (type != null) {
-								if (!Introspector.doesImplement(type,
-										FactoryBean.class.getName())) {
-									context.error(element,
-											"INVALID_FACTORY_BEAN",
-											"Referenced factory bean '"
-												+ tempBeanName
-												+ "' does not implement the "
-												+ "interface 'FactoryBean'");
+								if (!Introspector.doesImplement(type, FactoryBean.class.getName())) {
+									context.error(element, "INVALID_FACTORY_BEAN",
+											"Referenced factory bean '" + tempBeanName
+													+ "' does not implement the "
+													+ "interface 'FactoryBean'");
 								}
 							}
 							else {
-								context.warning(element,
-										"INVALID_REFERENCED_BEAN",
-										"Referenced factory bean '"
-										+ tempBeanName
-										+ "' implementation class not found");
+								context.warning(element, "INVALID_REFERENCED_BEAN",
+										"Referenced factory bean '" + tempBeanName
+												+ "' implementation class not found");
 							}
 						}
 					}
 					catch (NoSuchBeanDefinitionException be) {
 						context.warning(element, "UNDEFINED_FACTORY_BEAN",
-								"Referenced factory bean '" + tempBeanName
-										+ "' not found");
+								"Referenced factory bean '" + tempBeanName + "' not found");
 					}
 					catch (BeanDefinitionStoreException be) {
 						// ignore unresolvable parent bean exceptions
 					}
 				}
 				else {
-					context.warning(element, "UNDEFINED_REFERENCED_BEAN",
-							"Referenced bean '" + beanName + "' not found");
+					context.warning(element, "UNDEFINED_REFERENCED_BEAN", "Referenced bean '"
+							+ beanName + "' not found");
 				}
 			}
 			catch (BeanDefinitionStoreException e) {
