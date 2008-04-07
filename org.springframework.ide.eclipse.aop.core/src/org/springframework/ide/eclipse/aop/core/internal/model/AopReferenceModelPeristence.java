@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -108,7 +109,7 @@ public class AopReferenceModelPeristence {
 					createAspectDefinitions(projects, project, aopProject);
 
 					// recreate the marker
-					List<IAopReference> references = aopProject.getAllReferences();
+					Set<IAopReference> references = aopProject.getAllReferences();
 					for (IAopReference reference : references) {
 						AopReferenceModelMarkerUtils.createMarker(reference, reference
 								.getResource());
@@ -198,7 +199,7 @@ public class AopReferenceModelPeristence {
 			IMemento projectM = appendNewChild(memento, AOP_PROJECT_ELEMENT);
 			projectM.putString(NAME_ATTRIBUTE, project.getProject().getElementName());
 
-			List<IAopReference> refs = project.getAllReferences();
+			Set<IAopReference> refs = project.getAllReferences();
 			Map<IAspectDefinition, List<IAopReference>> maps = new HashMap<IAspectDefinition, List<IAopReference>>();
 			for (IAopReference ref : refs) {
 				if (maps.containsKey(ref.getDefinition())) {

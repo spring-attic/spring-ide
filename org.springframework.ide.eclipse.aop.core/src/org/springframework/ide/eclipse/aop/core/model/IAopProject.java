@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.model;
 
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
 
 public interface IAopProject {
 
-	List<IAopReference> getAllReferences();
+	Set<IAopReference> getAllReferences();
 
 	void addAopReference(IAopReference reference);
 
@@ -25,5 +25,5 @@ public interface IAopProject {
 
 	void clearReferencesForResource(IResource resource);
 
-	List<IAopReference> getReferencesForResource(IResource resource);
+	Set<IAopReference> getReferencesForResource(IResource resource);
 }

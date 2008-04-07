@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.aop.core.internal.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -29,7 +31,7 @@ public class AopProject implements IAopProject {
 
 	private IJavaProject project;
 
-	private List<IAopReference> references = new ArrayList<IAopReference>();
+	private Set<IAopReference> references = new LinkedHashSet<IAopReference>();
 
 	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -68,7 +70,7 @@ public class AopProject implements IAopProject {
 		}
 	}
 
-	public List<IAopReference> getAllReferences() {
+	public Set<IAopReference> getAllReferences() {
 		return this.references;
 	}
 
@@ -76,10 +78,10 @@ public class AopProject implements IAopProject {
 		return this.project;
 	}
 
-	public List<IAopReference> getReferencesForResource(IResource resource) {
+	public Set<IAopReference> getReferencesForResource(IResource resource) {
 		try {
 			r.lock();
-			List<IAopReference> list = new ArrayList<IAopReference>();
+			Set<IAopReference> list = new LinkedHashSet<IAopReference>();
 			for (IAopReference reference : this.references) {
 				if (reference.getResource().equals(resource)
 						|| reference.getDefinition().getResource().equals(resource)) {

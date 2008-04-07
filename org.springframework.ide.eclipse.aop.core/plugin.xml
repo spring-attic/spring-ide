@@ -2,6 +2,9 @@
 <?eclipse version="3.0"?>
 <plugin>
 
+	<extension-point id="aspectdefinitionbuilder" name="%extensionAspectDefinitionBuilder.name"
+		schema="schema/aspectdefinitionbuilder.exsd" />
+
 	<extension 
 		point="org.springframework.ide.eclipse.core.builders">
 		<builder
@@ -178,5 +181,18 @@
 			icon="icons/markers/itd.gif">
 		</specification>
 	</extension>
+	
+	<extension
+       point="org.springframework.ide.eclipse.aop.core.aspectdefinitionbuilder">
+    	<aspectDefinitionBuilder
+        	  class="org.springframework.ide.eclipse.aop.core.internal.model.builder.XmlAspectDefinitionBuilder">
+    	</aspectDefinitionBuilder>
+    	<aspectDefinitionBuilder
+          	class="org.springframework.ide.eclipse.aop.core.internal.model.builder.AnnotationAspectDefinitionBuilder">
+    	</aspectDefinitionBuilder>
+     <aspectDefinitionBuilder
+           class="org.springframework.ide.eclipse.aop.core.internal.model.builder.SecurityXmlAspectDefinitionBuilder">
+     </aspectDefinitionBuilder>
+ 	</extension>
 
 </plugin>

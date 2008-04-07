@@ -135,14 +135,11 @@ public class AopReferenceModelBuilderJob extends Job {
 
 					markerJob.addResource(currentFile);
 					IAopProject aopProject = buildAopReferencesForFile(currentFile, monitor);
-					AopLog
-							.log(
-									AopLog.BUILDER_MESSAGES,
-									Activator
-											.getFormattedMessage("AopReferenceModelBuilder.constructedAopReferenceModel"));
+					AopLog.log(AopLog.BUILDER_MESSAGES,	Activator
+						.getFormattedMessage("AopReferenceModelBuilder.constructedAopReferenceModel"));
 
 					if (aopProject != null) {
-						List<IAopReference> references = aopProject.getAllReferences();
+						Set<IAopReference> references = aopProject.getAllReferences();
 						markerJob.addAopReference(currentResource, references);
 					}
 
@@ -366,7 +363,7 @@ public class AopReferenceModelBuilderJob extends Job {
 										.getProjectClassLoader()).getURLs(), ";")));
 
 				List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
-				Set<IAspectDefinitionBuilder> builders = AspectDefinitionBuilderFactory
+				Set<IAspectDefinitionBuilder> builders = AspectDefinitionBuilderUtils
 						.getAspectDefinitionBuilder();
 				for (IAspectDefinitionBuilder builder : builders) {
 					aspectInfos.addAll(builder.buildAspectDefinitions(currentFile,
@@ -569,7 +566,7 @@ public class AopReferenceModelBuilderJob extends Job {
 			this.resources.add(resource);
 		}
 
-		public void addAopReference(IResource resource, List<IAopReference> references) {
+		public void addAopReference(IResource resource, Set<IAopReference> references) {
 			// create new list to prevent concurrent modification problems
 			this.references.put(resource, new ArrayList<IAopReference>(references));
 		}

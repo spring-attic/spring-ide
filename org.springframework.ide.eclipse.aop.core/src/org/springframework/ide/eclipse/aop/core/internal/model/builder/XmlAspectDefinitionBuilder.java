@@ -350,8 +350,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 						.getNodeValue());
 				if (proxyTargetClass) {
 					for (IAspectDefinition def : aspectDefinitions) {
-						((BeanAspectDefinition) def)
-								.setProxyTargetClass(proxyTargetClass);
+						((BeanAspectDefinition) def).setProxyTargetClass(proxyTargetClass);
 					}
 				}
 			}
@@ -368,7 +367,6 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 		info.setPointcutExpression(pointcutExpression);
 		info.setAspectClassName(className);
 		info.setAspectName(beanRef);
-		info.setAspectClassName(className);
 		info.setResource(file);
 		return info;
 	}

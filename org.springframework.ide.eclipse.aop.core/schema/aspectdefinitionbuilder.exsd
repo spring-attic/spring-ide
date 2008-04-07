@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.springframework.ide.eclipse.aop.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<annotation>
+      <appinfo>
+         <meta.schema plugin="org.springframework.ide.eclipse.aop.core" id="aspectdefinitionbuilders" name="Aspect Definition Builders"/>
+      </appinfo>
+      <documentation>
+         &lt;p&gt;
+This extension point is used to add aspect definition providers
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="aspectDefinitionBuilder" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a fully-qualified name of the target extension point
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  an optional id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  an optional name
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="aspectDefinitionBuilder">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder&lt;/samp&gt;
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="since"/>
+      </appinfo>
+      <documentation>
+         2.0.5
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="examples"/>
+      </appinfo>
+      <documentation>
+         &lt;pre&gt;
+ &lt;extension
+       point=&quot;org.springframework.ide.eclipse.aop.core.aspectdefinitionbuilder&quot;&gt;
+    	&lt;aspectDefinitionBuilder
+        	  class=&quot;org.springframework.ide.eclipse.aop.core.internal.model.builder.XmlAspectDefinitionBuilder&quot;&gt;
+    	&lt;/aspectDefinitionBuilder&gt;
+    	&lt;aspectDefinitionBuilder
+          	class=&quot;org.springframework.ide.eclipse.aop.core.internal.model.builder.AnnotationAspectDefinitionBuilder&quot;&gt;
+    	&lt;/aspectDefinitionBuilder&gt;
+ 	&lt;/extension&gt;
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="apiInfo"/>
+      </appinfo>
+      <documentation>
+         &lt;p&gt;
+Each aspect definition builder must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder&lt;/samp&gt;.
+      </documentation>
+   </annotation>
+
+
+   <annotation>
+      <appinfo>
+         <meta.section type="implementation"/>
+      </appinfo>
+      <documentation>
+         &lt;p&gt;
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="copyright"/>
+      </appinfo>
+      <documentation>
+         &lt;pre&gt;
+Copyright (c) 2005, 2008 Spring IDE Developers
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+ 
+Contributors:
+    Spring IDE Developers - initial API and implementation
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+</schema>

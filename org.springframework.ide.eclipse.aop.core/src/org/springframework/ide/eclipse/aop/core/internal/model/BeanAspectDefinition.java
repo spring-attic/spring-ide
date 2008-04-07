@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,19 +57,56 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 
 	protected IAopReference.ADVICE_TYPES type;
 
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof BeanAspectDefinition) {
-			BeanAspectDefinition other = (BeanAspectDefinition) obj;
-			return other.getAspectStartLineNumber() == getAspectStartLineNumber()
-					&& other.getAspectEndLineNumber() == getAspectEndLineNumber()
-					&& other.getAspectName().equals(aspectName)
-					&& other.getType().equals(type);
-		}
-		return false;
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(adivceMethodName);
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(adivceMethodParameterTypes);
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(argNames);
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(aspectClassName);
+		hashCode = hashCode + aspectEndLineNumber;
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(aspectName);
+		hashCode = hashCode + aspectStartLineNumber;
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(returning);
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(file);
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(type);
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(pointcutExpressionString);
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(throwing);
+		return 12 * hashCode;
 	}
-
+	
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeanAspectDefinition)) {
+			return false;
+		}
+		BeanAspectDefinition that = (BeanAspectDefinition) other;
+		if (!ObjectUtils.nullSafeEquals(this.adivceMethodName, that.adivceMethodName))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.adivceMethodParameterTypes, that.adivceMethodParameterTypes))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.argNames, that.argNames))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.aspectClassName, that.aspectClassName))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.aspectName, that.aspectName))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.aspectEndLineNumber, that.aspectEndLineNumber))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.aspectStartLineNumber, that.aspectStartLineNumber))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.returning, that.returning))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.file, that.file))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.type, that.type))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.pointcutExpressionString, that.pointcutExpressionString))
+			return false;
+		return ObjectUtils.nullSafeEquals(this.throwing, that.throwing);
+	}
+	
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(IPersistableElement.class)) {
 			return this;
@@ -136,14 +174,6 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		return type;
 	}
 
-	@Override
-	public int hashCode() {
-		int hc = aspectName.hashCode();
-		hc = 23 * hc + type.hashCode();
-		hc = 25 * hc + aspectStartLineNumber;
-		hc = 25 * hc + aspectEndLineNumber;
-		return hc;
-	}
 
 	public boolean isProxyTargetClass() {
 		return this.isProxyTargetClass;
