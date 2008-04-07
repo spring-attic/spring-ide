@@ -41,6 +41,10 @@
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.osgi.feature" />
 		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.security.feature" />
+		</ant>
  	</target>
  
  	<!-- ===================================================================== -->
@@ -88,6 +92,11 @@
  	<target name="assemble.org.springframework.ide.eclipse.osgi.feature">
 		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
 			<property name="archiveName" value="springide-osgi.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.security.feature">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-security.zip" />
 		</ant>
  	</target>
 

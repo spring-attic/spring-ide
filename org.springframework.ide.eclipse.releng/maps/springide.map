@@ -18,6 +18,8 @@ feature@org.springframework.ide.eclipse.javaconfig.feature=SVN,trunk,https://src
 feature@org.springframework.ide.eclipse.javaconfig.feature.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.javaconfig.feature.source
 feature@org.springframework.ide.eclipse.osgi.feature=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.osgi.feature
 feature@org.springframework.ide.eclipse.osgi.feature.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.osgi.feature.source
+feature@org.springframework.ide.eclipse.security.feature=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.security.feature
+feature@org.springframework.ide.eclipse.security.feature.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.security.feature.source
 feature@org.springframework.ide.eclipse.tests.feature=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.tests.feature
 
 plugin@org.springframework.ide.eclipse=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse
@@ -30,6 +32,8 @@ plugin@org.springframework.ide.eclipse.mylyn.source=SVN,trunk,https://src.spring
 plugin@org.springframework.ide.eclipse.mylyn=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.mylyn
 plugin@org.springframework.ide.eclipse.osgi=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.osgi
 plugin@org.springframework.ide.eclipse.osgi.targetdefinition=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.osgi.targetdefinition
+plugin@org.springframework.ide.eclipse.security=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.security
+plugin@org.springframework.ide.eclipse.security.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.security.source
 plugin@org.springframework.ide.eclipse.aop.core=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.aop.core
 plugin@org.springframework.ide.eclipse.aop.ui=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.aop.ui
 plugin@org.springframework.ide.eclipse.aop.ui.matcher=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.aop.ui.matcher
@@ -79,4 +83,5 @@ plugin@org.springframework.bundle.osgi.io=SVN,trunk,https://src.springframework.
 plugin@org.springframework.osgi.backport.util.concurrent=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/backport-util-concurrent
 plugin@org.springframework.javaconfig=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-javaconfig
 plugin@org.objectweb.asm=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/asm
-
+plugin@org.springframework.bundle.security.core=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-security-core
+plugin@org.springframework.bundle.security.core.tiger=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-security-core-tiger

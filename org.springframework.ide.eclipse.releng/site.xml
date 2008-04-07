@@ -52,6 +52,12 @@
 		version="@VERSION@">
 		<category name="Extensions"/>
 	</feature>
+
+	<feature url="features/org.springframework.ide.eclipse.security.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.security.feature" 
+		version="@VERSION@">
+		<category name="Extensions"/>
+	</feature>
 	
 	<category-def name="Core" label="Core" />
 	<category-def name="Extensions" label="Extensions" />
