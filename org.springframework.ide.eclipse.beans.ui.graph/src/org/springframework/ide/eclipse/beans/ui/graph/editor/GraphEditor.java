@@ -83,6 +83,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
+import org.springframework.ide.eclipse.beans.ui.graph.actions.ExportAction;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.GraphContextMenuProvider;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenConfigFile;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenJavaType;
@@ -255,6 +256,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		IAction zoomOut = new ZoomOutAction(root.getZoomManager());
 		getActionRegistry().registerAction(zoomIn);
 		getActionRegistry().registerAction(zoomOut);
+		getActionRegistry().registerAction(new ExportAction(this));
 		getSite().getKeyBindingService().registerAction(zoomIn);
 		getSite().getKeyBindingService().registerAction(zoomOut);
 
@@ -333,6 +335,9 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	protected void createActions() {
 		ActionRegistry registry = getActionRegistry();
 		IAction action;
+		
+		action = new ExportAction(this);
+		registry.registerAction(action);
 
 		action = new OpenJavaType(this);
 		registry.registerAction(action);
