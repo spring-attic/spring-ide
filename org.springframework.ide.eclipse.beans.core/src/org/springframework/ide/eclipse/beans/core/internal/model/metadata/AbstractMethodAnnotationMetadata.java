@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationMemberValuePair;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
+import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.util.ObjectUtils;
 
@@ -67,7 +67,7 @@ public abstract class AbstractMethodAnnotationMetadata implements IMethodMetadat
 	public String getValueAsText() {
 		if (value instanceof Set) {
 			StringBuilder buf = new StringBuilder();
-			for (IAnnotationMemberValuePair pair : (Set<IAnnotationMemberValuePair>) value) {
+			for (AnnotationMemberValuePair pair : (Set<AnnotationMemberValuePair>) value) {
 				if (pair.getName() != null) {
 					buf.append(pair.getName());
 					buf.append(" = ");

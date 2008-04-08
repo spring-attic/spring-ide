@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.annotation.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 
 /**

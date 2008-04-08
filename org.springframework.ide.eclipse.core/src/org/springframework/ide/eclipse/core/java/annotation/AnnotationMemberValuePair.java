@@ -8,23 +8,35 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.model.metadata;
+package org.springframework.ide.eclipse.core.java.annotation;
+
+import java.io.Serializable;
+
 
 /**
- * Represents one member of an annotation.
+ * Default implementation of {@link IAnnotationMemberValuePair}
  * @author Christian Dupuis
  * @since 2.0.5
  */
-public interface IAnnotationMemberValuePair {
-		
-	/**
-	 * Returns the name of the member.
-	 */
-	String getName();
+public class AnnotationMemberValuePair implements Serializable {
 	
-	/**
-	 * Returns the value of the member in a String-based representation.
-	 */
-	String getValue();
+	private static final long serialVersionUID = 7480231952618333532L;
+
+	private String name;
 	
+	private String value;
+	
+	public AnnotationMemberValuePair(String name, String value) {
+		this.name = name;
+		this.value = value;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
 }

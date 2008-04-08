@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.beans.core.model.metadata;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IType;
-import org.springframework.ide.eclipse.beans.core.internal.model.metadata.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
 
 /**
  * A specialized meta data provider that creates {@link IBeanMetadata} from annotation processing.
@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
  * @since 2.0.5
  */
 public interface IAnnotationBeanMetadataProvider {
-	
+	 
 	/**
 	 * Contribute {@link IBeanMetadata} for a given {@link IBean}.
 	 * <p>
@@ -30,10 +30,10 @@ public interface IAnnotationBeanMetadataProvider {
 	 * <code>null</code>.
 	 * @param bean the current {@link IBean} to search for bean meta data
 	 * @param type the {@link IType}
-	 * @param visitor a pre-populated {@link AnnotationMetadataReadingVisitor} 
+	 * @param visitor a pre-populated {@link IAnnotationMetadata} 
 	 * @return a {@link Set} of {@link IBeanMetadata}
-	 */
+	 */ 
 	Set<IBeanMetadata> provideBeanMetadata(IBean bean, IType type,	
-			AnnotationMetadataReadingVisitor visitor);
+			IAnnotationMetadata metadata);
 
 }

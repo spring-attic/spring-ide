@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
+import org.springframework.ide.eclipse.core.java.annotation.AnnotationMetadataReadingVisitor;
 
 /**
  * {@link IBeanMetadataProvider} that simply delegates the processing to the

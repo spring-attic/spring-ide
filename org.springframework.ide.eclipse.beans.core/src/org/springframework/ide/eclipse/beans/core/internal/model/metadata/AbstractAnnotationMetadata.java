@@ -17,9 +17,9 @@ import java.util.Set;
 import org.eclipse.core.runtime.IAdaptable;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationMemberValuePair;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IClassMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
+import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.util.ObjectUtils;
 
@@ -107,7 +107,7 @@ public abstract class AbstractAnnotationMetadata implements IClassMetadata, IAda
 	public String getValueAsText() {
 		if (getValue() instanceof Set) {
 			StringBuilder buf = new StringBuilder();
-			for (IAnnotationMemberValuePair pair : (Set<IAnnotationMemberValuePair>) getValue()) {
+			for (AnnotationMemberValuePair pair : (Set<AnnotationMemberValuePair>) getValue()) {
 				if (pair.getName() != null) {
 					buf.append(pair.getName());
 					buf.append(" = ");

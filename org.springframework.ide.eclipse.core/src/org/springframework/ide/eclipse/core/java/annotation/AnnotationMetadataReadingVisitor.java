@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.core.java.annotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +26,6 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationMemberValuePair;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.type.asm.ClassMetadataReadingVisitor;
 import org.springframework.util.ClassUtils;
@@ -38,11 +37,8 @@ import org.springframework.util.ClassUtils;
  * @author Christian Dupuis
  * @since 2.0.5
  */
-/**
- * TODO CD extract interface to be used by
- * {@link AbstractAnnotationReadingMetadataProvider}
- */
-public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor {
+public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements
+		IAnnotationMetadata {
 
 	private static EmptyVisitor EMPTY_VISITOR = new EmptyVisitor();
 
@@ -224,30 +220,6 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 			annotation.addMember(new AnnotationMemberValuePair(name, ClassUtils
 					.getShortName(className)
 					+ "." + enumValue));
-		}
-	}
-
-	public static class Annotation {
-
-		private String annotationClass;
-
-		private Set<IAnnotationMemberValuePair> members;
-
-		public Annotation(String annotationClass) {
-			this.annotationClass = annotationClass;
-			this.members = new LinkedHashSet<IAnnotationMemberValuePair>();
-		}
-
-		public void addMember(IAnnotationMemberValuePair member) {
-			this.members.add(member);
-		}
-
-		public String getAnnotationClass() {
-			return annotationClass;
-		}
-
-		public Set<IAnnotationMemberValuePair> getMembers() {
-			return members;
 		}
 	}
 }
