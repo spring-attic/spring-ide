@@ -10,20 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -121,20 +114,9 @@ public class BeansConfigValidator extends AbstractValidator {
 				}
 			}
 			else {
-
-				// Now check for a bean class or source file
-				IJavaElement element = JavaCore.create(resource);
-				if (element != null && element.exists()) {
-					if (element instanceof IClassFile) {
-						IType type = ((IClassFile) element).getType();
-						resources.addAll(getBeanConfigResources(type));
-					}
-					else if (element instanceof ICompilationUnit) {
-						for (IType type : ((ICompilationUnit) element)
-								.getTypes()) {
-							resources.addAll(getBeanConfigResources(type));
-						}
-					}
+				// Now check for bean classes and java structure
+				for (IBeansConfig config :BeansModelUtils.getConfigsByContainingTypes(resource)) {
+					resources.add(config.getElementResource());
 				}
 			}
 		}
@@ -154,19 +136,8 @@ public class BeansConfigValidator extends AbstractValidator {
 
 	@Override
 	protected boolean supports(IModelElement element) {
-		// Stop at imports because the contents is validated on the root config
-		// level
+		// Stop at imports because the contents is validated on the root config level
 		return (element instanceof IBeansModelElement || element instanceof IBeansImport);
-	}
-
-	private List<IResource> getBeanConfigResources(IType beanClass) {
-		List<IResource> resources = new ArrayList<IResource>();
-		String className = beanClass.getFullyQualifiedName();
-		for (IBeansConfig config : BeansCorePlugin.getModel().getConfigs(
-				className)) {
-			resources.add(config.getElementResource());
-		}
-		return resources;
 	}
 
 	@Override

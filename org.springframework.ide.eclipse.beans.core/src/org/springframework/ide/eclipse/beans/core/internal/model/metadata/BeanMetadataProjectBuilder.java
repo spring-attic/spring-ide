@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -20,11 +18,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
@@ -33,11 +26,9 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
@@ -76,40 +67,8 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 		Set<IResource> files = new HashSet<IResource>();
 
 		if (resource instanceof IFile && resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
-			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
-			if (projects != null) {
-				for (IBeansProject project : projects) {
-					if (project != null) {
-						Set<IBeansConfig> configs = project.getConfigs();
-						IJavaElement element = JavaCore.create(resource);
-						if (element instanceof ICompilationUnit) {
-							try {
-								IType[] types = ((ICompilationUnit) element).getAllTypes();
-								List<String> typeNames = new ArrayList<String>();
-								for (IType type : types) {
-
-									// Check that the type is coming from the
-									// project classpath
-									IType checkType = JdtUtils.getJavaType(project.getProject(),
-											type.getFullyQualifiedName());
-									if (type == checkType) {
-										typeNames.add(type.getFullyQualifiedName());
-									}
-								}
-								for (IBeansConfig config : configs) {
-									Set<String> allBeanClasses = config.getBeanClasses();
-									for (String className : allBeanClasses) {
-										if (typeNames.contains(className)) {
-											files.add(config.getElementResource());
-										}
-									}
-								}
-							}
-							catch (JavaModelException e) {
-							}
-						}
-					}
-				}
+			for (IBeansConfig config :BeansModelUtils.getConfigsByContainingTypes(resource)) {
+				files.add(config.getElementResource());
 			}
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {

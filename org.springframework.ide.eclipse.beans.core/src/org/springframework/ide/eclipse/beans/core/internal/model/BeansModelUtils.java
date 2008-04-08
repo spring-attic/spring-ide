@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -428,51 +427,6 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns all {@link IBeansConfig}s that use the <code>className</code>
-	 * as bean class.
-	 * <p>
-	 * <code>null</code> will never be returned.
-	 * @since 2.0.5
-	 */
-	public static Set<IBeansConfig> getConfigsByClassName(String className) {
-		return BeansCorePlugin.getModel().getConfigs(className);
-	}
-
-	/**
-	 * Returns all {@link IBeansConfig}s that use the given <code>type</code>
-	 * as bean class.
-	 * <p>
-	 * This implementation considers <b>only</b> the root {@link IType} as
-	 * potential bean classes. <code>null</code> will never be returned.
-	 * @since 2.0.5
-	 */
-	public static Set<IBeansConfig> getConfigsByType(IType type) {
-		return getConfigsByClassName(type.getFullyQualifiedName());
-	}
-
-	/**
-	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the
-	 * given <code>cu</code> as bean class.
-	 * <p>
-	 * This implementation considers <b>all</b> inner classes as potential bean
-	 * classes as well. <code>null</code> will never be returned.
-	 * @since 2.0.5
-	 */
-	public static Set<IBeansConfig> getConfigsByTypes(ICompilationUnit cu) {
-		Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
-		try {
-			// Iterate over every nested type
-			for (IType type : cu.getTypes()) {
-				configs.addAll(getConfigsByType(type));
-			}
-		}
-		catch (JavaModelException e) {
-			// nothing to recover here
-		}
-		return configs;
-	}
-
-	/**
 	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the
 	 * given <code>file</code> as bean class.
 	 * <p>
@@ -481,12 +435,7 @@ public abstract class BeansModelUtils {
 	 * @since 2.0.5
 	 */
 	public static Set<IBeansConfig> getConfigsByTypes(IFile file) {
-		IJavaElement javaElement = JavaCore.create(file);
-		if (javaElement != null && javaElement instanceof ICompilationUnit) {
-			ICompilationUnit type = (ICompilationUnit) javaElement;
-			return getConfigsByTypes(type);
-		}
-		return Collections.emptySet();
+		return getConfigsByContainingTypes(file);
 	}
 
 	/**
@@ -839,11 +788,7 @@ public abstract class BeansModelUtils {
 	 * @since 2.0.5
 	 */
 	public static boolean isBeanClass(IFile file) {
-		IJavaElement javaElement = JavaCore.create(file);
-		if (javaElement != null && javaElement instanceof ICompilationUnit) {
-			return getConfigsByTypes((ICompilationUnit) javaElement).size() > 0;
-		}
-		return false;
+		return getConfigsByContainingTypes(file).size() > 0;
 	}
 
 	/**
@@ -1284,6 +1229,90 @@ public abstract class BeansModelUtils {
 			// Register bean definitions from components
 			registerComponents(component.getComponents(), registry);
 		}
+	}
+
+	/**
+	 * Returns a list of all configs which contain a bean that uses a bean class
+	 * that is part of the java structure represented by the given
+	 * <code>cu</code>.
+	 * <p>
+	 * This implementation considers <b>all</b> inner classes as potential bean
+	 * classes as well.
+	 * @since 2.0.5
+	 */
+	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource) {
+		Set<IBeansConfig> files = new LinkedHashSet<IBeansConfig>();
+		if (resource != null && resource.isAccessible()
+				&& resource.isSynchronized(IResource.DEPTH_ZERO)
+				&& resource.getName().endsWith(".java")) {
+			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
+			if (projects != null) {
+				for (IBeansProject project : projects) {
+					if (project != null) {
+						Set<IBeansConfig> configs = project.getConfigs();
+						IJavaElement element = JavaCore.create(resource);
+						if (element instanceof ICompilationUnit) {
+							try {
+								IType[] types = ((ICompilationUnit) element).getAllTypes();
+								List<IType> relevantTypes = new ArrayList<IType>();
+
+								for (IType type : types) {
+
+									// Check that the type is coming from the
+									// project classpath
+									IType checkType = JdtUtils.getJavaType(project.getProject(),
+											type.getFullyQualifiedName());
+									if (type == checkType) {
+										relevantTypes.add(type);
+									}
+								}
+								for (IBeansConfig config : configs) {
+									Set<String> allBeanClasses = config.getBeanClasses();
+									for (String className : allBeanClasses) {
+										IType type = JdtUtils.getJavaType(project.getProject(),
+												className);
+										if (type != null) {
+											// 1. check if the bean class is
+											// clear match
+											if (relevantTypes.contains(type)) {
+												files.add(config);
+											}
+											// 2. check the class structure
+											// 2a. implements the interface
+											for (IType typeToCheck : relevantTypes) {
+												if (typeToCheck.isInterface()) {
+													if (Introspector.doesImplement(type,
+															typeToCheck.getFullyQualifiedName())) {
+														files.add(config);
+														break;
+													}
+												}
+												// 2b. extends the class
+												else if (Introspector.doesExtend(type, typeToCheck
+														.getFullyQualifiedName())) {
+													files.add(config);
+													break;
+												}
+											}
+											// 3. break the for loop if file is
+											// already in
+											if (files.contains(config)) {
+												break;
+											}
+										}
+									}
+								}
+							}
+							catch (JavaModelException e) {
+								BeansCorePlugin.log(e);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return files;
 	}
 
 	/**

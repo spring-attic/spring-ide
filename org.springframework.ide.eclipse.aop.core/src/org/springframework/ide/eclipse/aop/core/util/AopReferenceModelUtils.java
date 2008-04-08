@@ -10,22 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.util;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -125,39 +120,8 @@ public class AopReferenceModelUtils {
 		// following check.
 		if ((kind == IncrementalProjectBuilder.AUTO_BUILD || kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
 				&& resource instanceof IFile && resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
-			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
-			if (projects != null) {
-				for (IBeansProject project : projects) {
-					if (project != null) {
-						Set<IBeansConfig> configs = project.getConfigs();
-						IJavaElement element = JavaCore.create(resource);
-						if (element instanceof ICompilationUnit) {
-							try {
-								IType[] types = ((ICompilationUnit) element).getAllTypes();
-								List<String> typeNames = new ArrayList<String>();
-								for (IType type : types) {
-									
-									// Check that the type is coming from the project classpath
-									IType checkType = JdtUtils.getJavaType(project.getProject(),
-											type.getFullyQualifiedName());
-									if (type == checkType) {
-										typeNames.add(type.getFullyQualifiedName());
-									}
-								}
-								for (IBeansConfig config : configs) {
-									Set<String> allBeanClasses = config.getBeanClasses();
-									for (String className : allBeanClasses) {
-										if (typeNames.contains(className)) {
-											files.add(config.getElementResource());
-										}
-									}
-								}
-							}
-							catch (JavaModelException e) {
-							}
-						}
-					}
-				}
+			for (IBeansConfig config :BeansModelUtils.getConfigsByContainingTypes(resource)) {
+				files.add(config.getElementResource());
 			}
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {

@@ -92,4 +92,5 @@ public interface IBeansModel extends IBeansModelElement, IModel {
 	 * Returns a list of all configs which contain a bean with given bean class.
 	 */
 	Set<IBeansConfig> getConfigs(String className);
+	
 }
