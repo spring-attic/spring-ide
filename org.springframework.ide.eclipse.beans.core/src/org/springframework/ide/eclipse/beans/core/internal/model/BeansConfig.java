@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -88,6 +90,12 @@ import org.xml.sax.SAXParseException;
  */
 public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		ILazyInitializedModelElement {
+
+	/** Regular expressions to that must be ignored and not reported to the user */
+	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays
+			.asList(new Pattern[] {
+					Pattern.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
+					Pattern.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
 
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
@@ -262,11 +270,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
 							NamespaceHandlerResolver.class.getClassLoader(), this));
 					reader.setBeanNameGenerator(beanNameGenerator);
-					
-					// Install the project class loader as bean class loader 
+
+					// Install the project class loader as bean class loader
 					// TODO CD needs further testing before actually using
 					reader.setBeanClassLoader(JdtUtils.getClassLoader(getElementResource()));
-					
+
 					try {
 						reader.loadBeanDefinitions(resource);
 						eventListener.registerComponents();
@@ -319,13 +327,27 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 
 		public void error(Problem problem) {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, getMessage(problem), file,
-					getLine(problem)));
+			if (!isMessageIgnorable(problem.getMessage())) {
+				problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, getMessage(problem),
+						file, getLine(problem)));
+			}
 		}
 
+
 		public void warning(Problem problem) {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, getMessage(problem), file,
-					getLine(problem)));
+			if (!isMessageIgnorable(problem.getMessage())) {
+				problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, getMessage(problem),
+						file, getLine(problem)));
+			}
+		}
+
+		private boolean isMessageIgnorable(String message) {
+			for (Pattern pattern : IGNORABLE_ERROR_MESSAGE_PATTERNS) {
+				if (pattern.matcher(message).matches()) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private String getMessage(Problem problem) {
