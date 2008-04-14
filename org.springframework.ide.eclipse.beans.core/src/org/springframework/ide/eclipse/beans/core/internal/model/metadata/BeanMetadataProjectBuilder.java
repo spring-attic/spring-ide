@@ -71,19 +71,20 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 	}
 
 	public Set<IResource> getAffectedResources(IResource resource, int kind) throws CoreException {
-		Set<IResource> files = new HashSet<IResource>();
+		Set<IResource> resources = new HashSet<IResource>();
 
 		if (resource instanceof IFile && resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
 			for (IBean bean : BeansModelUtils.getBeansByContainingTypes(resource)) {
-				if (affectedBeans.containsKey(BeansModelUtils.getConfig(bean))) {
-					affectedBeans.get(BeansModelUtils.getConfig(bean)).add(bean);
+				IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
+				resources.add(beansConfig.getElementResource());
+				if (affectedBeans.containsKey(beansConfig)) {
+					affectedBeans.get(beansConfig).add(bean);
 				}
 				else {
 					Set<IBean> beans = new LinkedHashSet<IBean>();
 					beans.add(bean);
-					affectedBeans.put(BeansModelUtils.getConfig(bean), beans);
+					affectedBeans.put(beansConfig, beans);
 				}
-				files.add(BeansModelUtils.getConfig(bean).getElementResource());
 			}
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
@@ -95,14 +96,14 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 			for (IBeansImport beansImport : beansConfig.getImports()) {
 				for (IImportedBeansConfig importedBeansConfig : beansImport
 						.getImportedBeansConfigs()) {
-					files.add(importedBeansConfig.getElementResource());
+					resources.add(importedBeansConfig.getElementResource());
 					addBeans(importedBeansConfig);
 				}
 			}
-			files.add(beansConfig.getElementResource());
+			resources.add(beansConfig.getElementResource());
 			addBeans(beansConfig);
 		}
-		return files;
+		return resources;
 	}
 	
 	private void addBeans(IBeansConfig beansConfig) {

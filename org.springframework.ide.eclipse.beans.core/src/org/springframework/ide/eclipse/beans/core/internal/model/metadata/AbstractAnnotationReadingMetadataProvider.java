@@ -89,14 +89,14 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 			ClassReaderFactory classReaderFactory, IType type) {
 		IType orginalType = type;
 
-		// Check cache first
-		if (metadataCache.containsKey(orginalType)) {
-			return metadataCache.get(orginalType);
-		}
-
 		// No support for binary types (class files)
 		if (type == null || type.isBinary()) {
 			return null;
+		}
+
+		// Check cache first
+		if (metadataCache.containsKey(orginalType)) {
+			return metadataCache.get(orginalType);
 		}
 
 		// Create new annotation meta data
