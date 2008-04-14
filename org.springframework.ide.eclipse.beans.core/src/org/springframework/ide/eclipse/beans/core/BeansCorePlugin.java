@@ -77,13 +77,13 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		model.startup();
-		metaDataModel.startup();
+		metaDataModel.start();
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		model.shutdown();
-		metaDataModel.shutdown();
+		metaDataModel.stop();
 		super.stop(context);
 	}
 
@@ -101,7 +101,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		return model;
 	}
 	
-	public static final IBeanMetadataModel getMetaDataModel() {
+	public static final IBeanMetadataModel getMetadataModel() {
 		return metaDataModel;
 	}
 

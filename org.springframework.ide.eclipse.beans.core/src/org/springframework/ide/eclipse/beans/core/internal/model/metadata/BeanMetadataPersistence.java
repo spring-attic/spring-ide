@@ -35,24 +35,34 @@ public class BeanMetadataPersistence {
 
 	private static final String METADATA_FOLDER_NAME = "/metadata/";
 
+	private static final String BEANPROPERTIES_FOLDER_NAME = "/properties/";
+
 	public static void storeMetaData(Map<String, BeanMetadataHolder> metaData) {
+		File file = BeansCorePlugin.getDefault().getStateLocation().append(
+				METADATA_FOLDER_NAME + STATE_FILE_NAME).toFile();
+		store(metaData, file);
+	}
+
+	public static void storeProperties(Map<String, BeanPropertyDataHolder> properties) {
+		File file = BeansCorePlugin.getDefault().getStateLocation().append(
+				BEANPROPERTIES_FOLDER_NAME + STATE_FILE_NAME).toFile();
+		store(properties, file);
+	}
+
+	private static void store(Object obj, File file) {
 		ObjectOutputStream out = null;
 
 		try {
-			File folder = BeansCorePlugin.getDefault().getStateLocation().append(
-					METADATA_FOLDER_NAME).toFile();
-			File file = BeansCorePlugin.getDefault().getStateLocation().append(
-					METADATA_FOLDER_NAME + STATE_FILE_NAME).toFile();
 			if (!file.exists()) {
-				folder.mkdirs();
+				file.getParentFile().mkdirs();
 				file.createNewFile();
 			}
 			out = new ObjectOutputStream(new FileOutputStream(file));
-			out.writeObject(metaData);
+			out.writeObject(obj);
 		}
 		catch (IOException e) {
 			BeansCorePlugin.log(new Status(IStatus.ERROR, BeansCorePlugin.PLUGIN_ID,
-					"Exception saving meta data model", e));
+					"Exception saving meta data model for class " + obj.getClass(), e));
 		}
 		finally {
 			try {
@@ -66,19 +76,41 @@ public class BeanMetadataPersistence {
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, BeanMetadataHolder> loadMetaData() {
+		File f = BeansCorePlugin.getDefault().getStateLocation().append(
+				METADATA_FOLDER_NAME + STATE_FILE_NAME).toFile();
+		Map<String, BeanMetadataHolder> metaData = load(f, Map.class);
+		if (metaData != null) {
+			return metaData;
+		}
+		// create new empty model
+		return new ConcurrentHashMap<String, BeanMetadataHolder>();
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String, BeanPropertyDataHolder> loadProperties() {
+		File f = BeansCorePlugin.getDefault().getStateLocation().append(
+				BEANPROPERTIES_FOLDER_NAME + STATE_FILE_NAME).toFile();
+		Map<String, BeanPropertyDataHolder> metaData = load(f, Map.class);
+		if (metaData != null) {
+			return metaData;
+		}
+		// create new empty model
+		return new ConcurrentHashMap<String, BeanPropertyDataHolder>();
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T load(File file, Class<T> clazz) {
 		ObjectInputStream in = null;
 
 		try {
-			File f = BeansCorePlugin.getDefault().getStateLocation().append(
-					METADATA_FOLDER_NAME + STATE_FILE_NAME).toFile();
-			if (f.exists()) {
-				in = new ObjectInputStream(new FileInputStream(f));
-				return (Map) in.readObject();
+			if (file.exists()) {
+				in = new ObjectInputStream(new FileInputStream(file));
+				return (T) in.readObject();
 			}
 		}
 		catch (Exception e) {
 			BeansCorePlugin.log(new Status(IStatus.ERROR, BeansCorePlugin.PLUGIN_ID,
-					"Exception restoring meta data model", e));
+					"Exception restoring meta data model for class " + clazz, e));
 		}
 		finally {
 			try {
@@ -88,8 +120,7 @@ public class BeanMetadataPersistence {
 			catch (IOException e) {
 			}
 		}
-		// create new empty model
-		return new ConcurrentHashMap<String, BeanMetadataHolder>();
+		return null;
 	}
 
 }

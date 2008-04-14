@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -25,26 +26,41 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
-import org.springframework.ide.eclipse.core.java.annotation.AnnotationMetadataReadingVisitor;
+import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
 
 /**
- * {@link IBeanMetadataProvider} that simply delegates the processing to the
- * contributed {@link IAnnotationBeanMetadataProvider}s.
+ * {@link IBeanMetadataProvider} that simply delegates the processing to the contributed
+ * {@link IAnnotationBeanMetadataProvider}s.
  * @author Christian Dupuis
  * @since 2.0.5
  */
 public class DelegatingAnnotationReadingMetadataProvider extends
 		AbstractAnnotationReadingMetadataProvider {
 
+	/** The class attribute in the extension point contribution */
+	private static final String CLASS_ATTRIBUTE = "class";
+	
+	/** The metadataProvider element in the extension point contribution */
+	private static final String ANNOTATION_METADATA_PROVIDER_ELEMENT = "annotationMetadataProvider";
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void processFoundAnnotations(IBean bean, Set<IBeanMetadata> beanMetaDataSet,
-			IType type, AnnotationMetadataReadingVisitor visitor) {
-
+			IType type, IAnnotationMetadata metadata, IProgressMonitor progressMonitor) {
 		for (IAnnotationBeanMetadataProvider provider : getMetadataProviders()) {
-			beanMetaDataSet.addAll(provider.provideBeanMetadata(bean, type, visitor));
+			if (progressMonitor.isCanceled()) {
+				return;
+			}
+			beanMetaDataSet.addAll(provider.provideBeanMetadata(bean, type, metadata));
 		}
 	}
 
+	/**
+	 * Returns the contributed {@link IAnnotationBeanMetadataProvider} from the Eclipse extension
+	 * registry.
+	 */
 	protected IAnnotationBeanMetadataProvider[] getMetadataProviders() {
 		List<IAnnotationBeanMetadataProvider> providers = new ArrayList<IAnnotationBeanMetadataProvider>();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
@@ -52,10 +68,10 @@ public class DelegatingAnnotationReadingMetadataProvider extends
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
-					if ("annotationMetadataProvider".equals(config.getName())
-							&& config.getAttribute("class") != null) {
+					if (ANNOTATION_METADATA_PROVIDER_ELEMENT.equals(config.getName())
+							&& config.getAttribute(CLASS_ATTRIBUTE) != null) {
 						try {
-							Object handler = config.createExecutableExtension("class");
+							Object handler = config.createExecutableExtension(CLASS_ATTRIBUTE);
 							if (handler instanceof IAnnotationBeanMetadataProvider) {
 								IAnnotationBeanMetadataProvider entityResolver = (IAnnotationBeanMetadataProvider) handler;
 								providers.add(entityResolver);

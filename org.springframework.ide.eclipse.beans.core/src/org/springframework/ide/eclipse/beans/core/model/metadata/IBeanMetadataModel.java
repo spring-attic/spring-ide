@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.model.metadata;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 
 /**
  * The global {@link IBeanMetadata} model to retrieve {@link IBeanMetadata} for
@@ -30,11 +31,26 @@ public interface IBeanMetadataModel {
 	/**
 	 * Set {@link IBeanMetadata}s for a certain {@link IBean}. 
 	 */
-	void setBeanMetaData(IBean bean, Set<IBeanMetadata> beanMetaData,
+	void setBeanMetadata(IBean bean, Set<IBeanMetadata> beanMetaData,
 			Set<IMethodMetadata> methodMetaData);
 	/**
-	 * Clears the meta data for a certian {@link IBean}. 
+	 * Clears the meta data for a certain {@link IBean}. 
 	 */
 	void clearBeanMetaData(IBean bean);
+
+	/**
+	 * Returns the {@link IBeanProperty}s for the given {@link IBean}.
+	 */
+	Set<IBeanProperty> getBeanProperties(IBean bean);
+	
+	/**
+	 * Set {@link IBeanProperty}s for a certain {@link IBean}. 
+	 */
+	void setBeanProperties(IBean bean, Set<IBeanProperty> beanProperties);
+	
+	/**
+	 * Clears the meta data for a certain {@link IBean}. 
+	 */
+	void clearBeanProperties(IBean bean);
 	
 }

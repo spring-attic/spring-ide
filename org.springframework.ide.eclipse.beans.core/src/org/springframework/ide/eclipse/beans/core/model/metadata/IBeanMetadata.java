@@ -10,16 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model.metadata;
 
+import java.io.Serializable;
+
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 
 /**
  * Base interface to be implemented by different types of Spring meta data.
  * <p>
  * This interface is totally independent from the type of meta data.
+ * <p>
+ * IMPORTANT: Implementations of this interface need to be {@link Serializable}
  * @author Christian Dupuis
  * @since 2.0.5
  */
-public interface IBeanMetadata {
+public interface IBeanMetadata extends Serializable {
 
 	/**
 	 * Returns the globally unique handle that this meta data is coming from.

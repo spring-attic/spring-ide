@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.namespaces;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
@@ -37,7 +41,14 @@ public class DefaultNamespaceContentProvider implements ITreeContentProvider {
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof ISourceModelElement) {
+		// Special handling for IBean to get annotated IBeanProperties into the tree
+		if (parentElement instanceof IBean) {
+			java.util.List<IModelElement> children = new ArrayList<IModelElement>();
+			children.addAll(Arrays.asList(((ISourceModelElement) parentElement).getElementChildren()));
+			children.addAll(BeansCorePlugin.getMetadataModel().getBeanProperties((IBean) parentElement));
+			return children.toArray(new Object[children.size()]);
+		}
+		else if (parentElement instanceof ISourceModelElement) {
 			return ((ISourceModelElement) parentElement).getElementChildren();
 		}
 		return IModelElement.NO_CHILDREN;

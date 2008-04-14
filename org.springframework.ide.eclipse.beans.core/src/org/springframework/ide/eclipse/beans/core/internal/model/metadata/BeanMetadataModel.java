@@ -13,9 +13,12 @@ package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
@@ -31,41 +34,109 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/metadata/debug";
 
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
+	
+	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
+	private final Lock r = rwl.readLock();
+
+	private final Lock w = rwl.writeLock();
 
 	private Map<String, BeanMetadataHolder> beanMetadata = null;
+	
+	private Map<String, BeanPropertyDataHolder> beanPropertyData = null;
 
 	public Set<IBeanMetadata> getBeanMetaData(IBean bean) {
-		if (beanMetadata.containsKey(bean.getElementID())) {
-			return beanMetadata.get(bean.getElementID()).getBeanMetaData();
+		try {
+			r.lock();
+			if (beanMetadata.containsKey(bean.getElementID())) {
+				return beanMetadata.get(bean.getElementID()).getBeanMetaData();
+			}
+			return Collections.emptySet();
 		}
-		return Collections.emptySet();
+		finally {
+			r.unlock();
+		}
 	}
 
-	public void setBeanMetaData(IBean bean, Set<IBeanMetadata> bMetaData,
+	public void setBeanMetadata(IBean bean, Set<IBeanMetadata> bMetaData,
 			Set<IMethodMetadata> methodMetaData) {
-		BeanMetadataHolder holder = new BeanMetadataHolder();
-		holder.setElemenetId(bean.getElementID());
-		holder.setBeanMetaData(bMetaData);
-		holder.setMethodMetaData(methodMetaData);
-		beanMetadata.put(bean.getElementID(), holder);
+		try {
+			w.lock();
+			BeanMetadataHolder holder = new BeanMetadataHolder();
+			holder.setElemenetId(bean.getElementID());
+			holder.setBeanMetaData(bMetaData);
+			holder.setMethodMetaData(methodMetaData);
+			// safe time so we can purge very old entries after a while 
+			holder.setLastModified(System.currentTimeMillis());
+			beanMetadata.put(bean.getElementID(), holder);
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	public void clearBeanMetaData(IBean bean) {
-		beanMetadata.remove(bean.getElementID());
+		try {
+			w.lock();
+			beanMetadata.remove(bean.getElementID());
+		}
+		finally {
+			w.unlock();
+		}
+	}
+
+	public Set<IBeanProperty> getBeanProperties(IBean bean) {
+		try {
+			r.lock();
+			if (beanPropertyData.containsKey(bean.getElementID())) {
+				return beanPropertyData.get(bean.getElementID()).getBeanProperties();
+			}
+			return Collections.emptySet();
+		}
+		finally {
+			r.unlock();
+		}
+	}
+	
+	public void setBeanProperties(IBean bean, Set<IBeanProperty> beanProperties) {
+		try {
+			w.lock();
+			BeanPropertyDataHolder holder = new BeanPropertyDataHolder();
+			holder.setElemenetId(bean.getElementID());
+			holder.setBeanProperties(beanProperties);
+			// safe time so we can purge very old entries after a while 
+			holder.setLastModified(System.currentTimeMillis());
+			beanPropertyData.put(bean.getElementID(), holder);
+		}
+		finally {
+			w.unlock();
+		}
+	}
+	
+	public void clearBeanProperties(IBean bean) {
+		try {
+			w.lock();
+			beanPropertyData.remove(bean.getElementID());
+		}
+		finally {
+			w.unlock();
+		}
 	}
 	
 	/**
 	 * Starts and loads the internal model.
 	 */
-	public void startup() {
+	public void start() {
 		this.beanMetadata = BeanMetadataPersistence.loadMetaData();
+		this.beanPropertyData = BeanMetadataPersistence.loadProperties();
 	}
 	
 	/**
 	 * Stops and saves the internal model. 
 	 */
-	public void shutdown() {
+	public void stop() {
 		BeanMetadataPersistence.storeMetaData(beanMetadata);
+		BeanMetadataPersistence.storeProperties(beanPropertyData);
 	}
 
 }

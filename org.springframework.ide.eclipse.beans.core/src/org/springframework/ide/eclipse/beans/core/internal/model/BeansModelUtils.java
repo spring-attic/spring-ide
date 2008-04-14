@@ -86,12 +86,11 @@ import org.w3c.dom.Node;
 public abstract class BeansModelUtils {
 
 	/**
-	 * Returns the <code>IBean</code> for a given bean name from specified
-	 * context (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
-	 * If the corresponding bean is not found then the context's list of
-	 * <code>IBeanAlias</code>es is checked too.
-	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the beans are looked-up
+	 * Returns the <code>IBean</code> for a given bean name from specified context (<code>IBeansConfig</code>
+	 * or <code>IBeansConfigSet</code>). If the corresponding bean is not found then the
+	 * context's list of <code>IBeanAlias</code>es is checked too.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
+	 * the beans are looked-up
 	 * @return <code>IBean</code> or <code>null</code> if bean not found
 	 * @throws IllegalArgumentException if unsupported context specified
 	 */
@@ -126,10 +125,9 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the given bean's class name.
 	 * @param bean the bean to lookup the bean class name for
-	 * @param context the context ({@link IBeanConfig} or
-	 * {@link IBeanConfigSet}) the beans are looked-up; if <code>null</code>
-	 * then the bean's config will be first used; if the bean class name cannot
-	 * be resolved in the bean's configs, the algorithm will look in all bean
+	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are
+	 * looked-up; if <code>null</code> then the bean's config will be first used; if the bean
+	 * class name cannot be resolved in the bean's configs, the algorithm will look in all bean
 	 * config sets that contain the bean's config
 	 */
 	public static String getBeanClass(IBean bean, IModelElement context) {
@@ -161,8 +159,8 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the given bean's class name.
 	 * @param bean the bean to lookup the bean class name for
-	 * @param context the context ({@link IBeanConfig} or
-	 * {@link IBeanConfigSet}) the beans are looked-up
+	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are
+	 * looked-up
 	 * @throws IllegalArgumentException if context of bean is <code>null</code>
 	 */
 	public static String getBeanClassFromContext(IBean bean, IModelElement context) {
@@ -197,18 +195,15 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns a collection of {@link BeansConnection}s holding all
-	 * {@link IBean<}s which are referenced from given model element. For a
-	 * bean it's parent bean (for child beans only), constructor argument values
-	 * and property values are checked. {@link IBean} look-up is done from the
-	 * specified {@link IBeanConfig} or {@link IBeanConfigSet}.
-	 * @param element the element ({@link IBean},
-	 * {@link IBeanConstructorArgument} or {@link IBeanProperty}) to get all
-	 * referenced beans from
-	 * @param context the context ({@link IBeanConfig} or
-	 * {@link IBeanConfigSet}) the referenced beans are looked-up
-	 * @param recursive set to <code>true</code> if the dependeny graph is
-	 * traversed recursively
+	 * Returns a collection of {@link BeansConnection}s holding all {@link IBean<}s which are
+	 * referenced from given model element. For a bean it's parent bean (for child beans only),
+	 * constructor argument values and property values are checked. {@link IBean} look-up is done
+	 * from the specified {@link IBeanConfig} or {@link IBeanConfigSet}.
+	 * @param element the element ({@link IBean}, {@link IBeanConstructorArgument} or
+	 * {@link IBeanProperty}) to get all referenced beans from
+	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the referenced
+	 * beans are looked-up
+	 * @param recursive set to <code>true</code> if the dependeny graph is traversed recursively
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static Set<BeansConnection> getBeanReferences(IModelElement element,
@@ -222,8 +217,8 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns a list of all beans which belong to the given model element.
 	 * @param element the model element which contains beans
-	 * @param monitor the progress monitor to indicate progess; mark the monitor
-	 * done after completing the work
+	 * @param monitor the progress monitor to indicate progess; mark the monitor done after
+	 * completing the work
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static Set<IBean> getBeans(IModelElement element, IProgressMonitor monitor) {
@@ -313,11 +308,10 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the corresponding Java type for given bean's class.
 	 * @param bean the bean to lookup the bean class' Java type
-	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the beans are looked-up; if
-	 * <code>null</code> then the bean's config is used
-	 * @return the Java type of given bean's class or <code>null</code> if no
-	 * bean class defined or type not found
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
+	 * the beans are looked-up; if <code>null</code> then the bean's config is used
+	 * @return the Java type of given bean's class or <code>null</code> if no bean class defined
+	 * or type not found
 	 */
 	public static IType getBeanType(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
@@ -345,9 +339,9 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the child of given parent element's subtree the specified element
-	 * belongs to. If the given element does not belong to the subtree of the
-	 * specified parent element <code>null</code> is returned.
+	 * Returns the child of given parent element's subtree the specified element belongs to. If the
+	 * given element does not belong to the subtree of the specified parent element
+	 * <code>null</code> is returned.
 	 */
 	public static IModelElement getChildForElement(IModelElement parent, IModelElement element) {
 		while (element != null) {
@@ -361,8 +355,7 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the {@link IBeanConfig} the given {@link IModelElement} belongs
-	 * to.
+	 * Returns the {@link IBeanConfig} the given {@link IModelElement} belongs to.
 	 * @param element the model element to get the beans config for
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
@@ -380,9 +373,9 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns config for given name from specified context (<code>IBeansProject</code>
-	 * or <code>IBeansConfigSet</code>). Externally referenced configs
-	 * (config name starts with '/') are recognized too.
+	 * Returns config for given name from specified context (<code>IBeansProject</code> or
+	 * <code>IBeansConfigSet</code>). Externally referenced configs (config name starts with '/')
+	 * are recognized too.
 	 * @param configName the name of the config to look for
 	 * @param context the context used for config look-up
 	 * @throws IllegalArgumentException if unsupported context specified
@@ -427,11 +420,11 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the
-	 * given <code>file</code> as bean class.
+	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the given
+	 * <code>file</code> as bean class.
 	 * <p>
-	 * This implementation considers <b>all</b> inner classes as potential bean
-	 * classes as well. <code>null</code> will never be returned.
+	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
+	 * <code>null</code> will never be returned.
 	 * @since 2.0.5
 	 */
 	public static Set<IBeansConfig> getConfigsByTypes(IFile file) {
@@ -439,8 +432,7 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns all {@link IBeansConfigSet} the given {@link IModelElement}
-	 * belongs to.
+	 * Returns all {@link IBeansConfigSet} the given {@link IModelElement} belongs to.
 	 * @param element the model element to get the beans config for
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
@@ -490,8 +482,8 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the first constructor argument defined for given bean.
 	 * @param bean the bean to lookup the first constructor argument
-	 * @return the first constructor argument or <code>null</code> if no
-	 * constructor argument is defined
+	 * @return the first constructor argument or <code>null</code> if no constructor argument is
+	 * defined
 	 */
 	public static IBeanConstructorArgument getFirstConstructorArgument(IBean bean) {
 		IBeanConstructorArgument firstCarg = null;
@@ -506,11 +498,9 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the importing {@link IBeansConfig} from a
-	 * {@link IImportedBeansConfig}.
+	 * Returns the importing {@link IBeansConfig} from a {@link IImportedBeansConfig}.
 	 * <p>
-	 * <code>null</code> can be returned if the given {@link IBeansConfig} is
-	 * not imported.
+	 * <code>null</code> can be returned if the given {@link IBeansConfig} is not imported.
 	 * @since 2.0.4
 	 */
 	public static IBeansConfig getImportingBeansConfig(IBeansConfig beansConfig) {
@@ -540,12 +530,11 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the merged bean definition for a given bean from specified
-	 * context ({@link IBeansConfig} or {@link IBeansConfigSet}). Any
-	 * cyclic-references are ignored.
+	 * Returns the merged bean definition for a given bean from specified context ({@link IBeansConfig}
+	 * or {@link IBeansConfigSet}). Any cyclic-references are ignored.
 	 * @param bean the bean the merged bean definition is requested for
-	 * @param context the context ({@link IBeanConfig} or
-	 * {@link IBeanConfigSet}) the beans are looked-up
+	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are
+	 * looked-up
 	 * @return given bean's merged bean definition
 	 * @throws IllegalArgumentException if unsupported context specified
 	 */
@@ -620,8 +609,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the most specific {@link IModelElement} that corresponds to the
-	 * given <code>startLine</code> and <code>endLine</code> line numbers.
+	 * Returns the most specific {@link IModelElement} that corresponds to the given
+	 * <code>startLine</code> and <code>endLine</code> line numbers.
 	 * <p>
 	 * Client should be aware of possible <code>null</code> returns in case on
 	 * {@link IModelElement} can be found at the given location.
@@ -645,8 +634,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Iterates up the model tree to find the first parent element that is of
-	 * the given <code>parentType</code>.
+	 * Iterates up the model tree to find the first parent element that is of the given
+	 * <code>parentType</code>.
 	 * @since 2.0.4
 	 */
 	@SuppressWarnings("unchecked")
@@ -664,8 +653,7 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the <code>IBeansProject</code> the given model element belongs
-	 * to.
+	 * Returns the <code>IBeansProject</code> the given model element belongs to.
 	 * @param element the model element to get the beans project for
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
@@ -686,11 +674,10 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the corresponding Java set method for given bean property.
 	 * @param property the property to lookup the Java method for
-	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the beans are looked-up; if
-	 * <code>null</code> then the bean's config is used
-	 * @return the Java method of given bean property or <code>null</code> if
-	 * no bean class defined or set method not found
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
+	 * the beans are looked-up; if <code>null</code> then the bean's config is used
+	 * @return the Java method of given bean property or <code>null</code> if no bean class
+	 * defined or set method not found
 	 */
 	public static IMethod getPropertyMethod(IBeanProperty property, IModelElement context) {
 		Assert.notNull(property);
@@ -780,11 +767,10 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Checks if a the {@link IType}s contained in the given <code>file</code>
-	 * instance are used as Bean classes anywhere in the core model.
+	 * Checks if a the {@link IType}s contained in the given <code>file</code> instance are used
+	 * as Bean classes anywhere in the core model.
 	 * <p>
-	 * This implementation considers <b>all</b> inner classes as potential bean
-	 * classes as well.
+	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
 	 */
 	public static boolean isBeanClass(IFile file) {
@@ -792,9 +778,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Checks if a given <code>className</code> is used as a bean class. The
-	 * check iterates the complete {@link IBeansModel} and not "only" the
-	 * current {@link IBeansProject}.
+	 * Checks if a given <code>className</code> is used as a bean class. The check iterates the
+	 * complete {@link IBeansModel} and not "only" the current {@link IBeansProject}.
 	 * @param className
 	 * @return
 	 */
@@ -808,10 +793,9 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Registers all bean definitions and aliases from given
-	 * {@link IBeansConfig} in specified {@link BeanDefinitionRegistry}. All
-	 * {@link BeansException}s thrown by the {@link BeanDefinitionRegistry} are
-	 * ignored.
+	 * Registers all bean definitions and aliases from given {@link IBeansConfig} in specified
+	 * {@link BeanDefinitionRegistry}. All {@link BeansException}s thrown by the
+	 * {@link BeanDefinitionRegistry} are ignored.
 	 */
 	public static void register(IBeansConfig config, BeanDefinitionRegistry registry) {
 
@@ -911,10 +895,9 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * If given target is not equal to source then a {@link BeansConnection} is
-	 * created. This bean reference is added to the given list of bean
-	 * references (if not already). If given target is not already checked for
-	 * bean references then <code>true</code> is returned else
+	 * If given target is not equal to source then a {@link BeansConnection} is created. This bean
+	 * reference is added to the given list of bean references (if not already). If given target is
+	 * not already checked for bean references then <code>true</code> is returned else
 	 * <code>false</code>.
 	 */
 	private static boolean addBeanReference(BeanType type, IModelElement source, IBean target,
@@ -934,10 +917,10 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Adds the all beans which are referenced by the specified bean to the
-	 * given list as an instance of {@link BeansConnection}.
-	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the referenced beans are looked-up
+	 * Adds the all beans which are referenced by the specified bean to the given list as an
+	 * instance of {@link BeansConnection}.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
+	 * the referenced beans are looked-up
 	 * @param referencedBeans used to break from cycles
 	 */
 	private static void addBeanReferencesForBean(IBean element, IModelElement context,
@@ -956,11 +939,10 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Adds the all beans which are referenced by the specified
-	 * {@link IBeansComponent} to the given list as an instance of
-	 * {@link BeansConnection}.
-	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the referenced beans are looked-up
+	 * Adds the all beans which are referenced by the specified {@link IBeansComponent} to the given
+	 * list as an instance of {@link BeansConnection}.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
+	 * the referenced beans are looked-up
 	 * @param referencedBeans used to break from cycles
 	 */
 	private static void addBeanReferencesForBeansComponent(IBeansComponent component,
@@ -976,20 +958,19 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Given a bean property's or constructor argument's value, adds any beans
-	 * referenced by this value. This value could be:
+	 * Given a bean property's or constructor argument's value, adds any beans referenced by this
+	 * value. This value could be:
 	 * <li>An {@link IBeanReference}, which bean will be added.
-	 * <li>An inner {@link IBean}. This is an inner {@link IBean} that may
-	 * contain {@link IBeanReference}s which will be added too.
-	 * <li>An {@link IBeansList}. This is a collection that may contain
-	 * {@link IBeanReference}s which will be added.
-	 * <li>An {@link IBeansSet}. May also contain {@link IBeanReference}s
-	 * that will be added.
-	 * <li>An {@link IBeansMap}. In this case the value may be a
-	 * {@link IBeanReference} that will be added.
+	 * <li>An inner {@link IBean}. This is an inner {@link IBean} that may contain
+	 * {@link IBeanReference}s which will be added too.
+	 * <li>An {@link IBeansList}. This is a collection that may contain {@link IBeanReference}s
+	 * which will be added.
+	 * <li>An {@link IBeansSet}. May also contain {@link IBeanReference}s that will be added.
+	 * <li>An {@link IBeansMap}. In this case the value may be a {@link IBeanReference} that will
+	 * be added.
 	 * <li>An ordinary object or null, in which case it's ignored.
-	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the referenced beans are looked-up
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
+	 * the referenced beans are looked-up
 	 */
 	private static void addBeanReferencesForValue(IModelElement element, Object value,
 			IModelElement context, Set<BeansConnection> references, Set<IBean> referencedBeans,
@@ -1177,6 +1158,13 @@ public abstract class BeansModelUtils {
 				addBeanReferencesForValue(property, property.getValue(), context, references,
 						referencedBeans, recursive);
 			}
+
+			// Add referenced beans from bean annotations contributed into the bean meta data model
+			for (IBeanProperty property : BeansCorePlugin.getMetadataModel()
+					.getBeanProperties(bean)) {
+				addBeanReferencesForValue(property, property.getValue(), context, references,
+						referencedBeans, recursive);
+			}
 		}
 		else if (element instanceof IBeanConstructorArgument) {
 
@@ -1200,8 +1188,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Registers all {@link IBean}s and {@link IBeansComponent}s that are
-	 * nested within the given <code>components</code>.
+	 * Registers all {@link IBean}s and {@link IBeansComponent}s that are nested within the given
+	 * <code>components</code>.
 	 */
 	private static void registerComponents(Set<IBeansComponent> components,
 			BeanDefinitionRegistry registry) {
@@ -1232,12 +1220,10 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns a list of all configs which contain a bean that uses a bean class
-	 * that is part of the java structure represented by the given
-	 * <code>cu</code>.
+	 * Returns a list of all configs which contain a bean that uses a bean class that is part of the
+	 * java structure represented by the given <code>resource</code>.
 	 * <p>
-	 * This implementation considers <b>all</b> inner classes as potential bean
-	 * classes as well.
+	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
 	 */
 	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource) {
@@ -1311,14 +1297,94 @@ public abstract class BeansModelUtils {
 				}
 			}
 		}
-		
+
 		return files;
 	}
 
 	/**
-	 * A {@link IModelElementVisitor} that tries to determine the closest
-	 * {@link IModelElement} by looking at <code>startLine</code> and
-	 * <code>endLine</code> information.
+	 * Returns a list of all beans which use a bean class that is part of the java structure
+	 * represented by the given <code>resource</code>.
+	 * <p>
+	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
+	 * @since 2.0.5
+	 */
+	public static Set<IBean> getBeansByContainingTypes(IResource resource) {
+		Set<IBean> files = new LinkedHashSet<IBean>();
+		if (resource != null && resource.isAccessible()
+				&& resource.isSynchronized(IResource.DEPTH_ZERO)
+				&& resource.getName().endsWith(".java")) {
+			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
+			if (projects != null) {
+				for (IBeansProject project : projects) {
+					if (project != null) {
+						Set<IBeansConfig> configs = project.getConfigs();
+						IJavaElement element = JavaCore.create(resource);
+						if (element instanceof ICompilationUnit) {
+							try {
+								IType[] types = ((ICompilationUnit) element).getAllTypes();
+								List<IType> relevantTypes = new ArrayList<IType>();
+
+								for (IType type : types) {
+
+									// Check that the type is coming from the
+									// project classpath
+									IType checkType = JdtUtils.getJavaType(project.getProject(),
+											type.getFullyQualifiedName());
+									if (type == checkType) {
+										relevantTypes.add(type);
+									}
+								}
+								for (IBeansConfig config : configs) {
+									Set<IBean> allBeans = config.getBeans();
+									for (IBean bean : allBeans) {
+										if (bean.getClassName() != null) {
+											String className = bean.getClassName();
+											IType type = JdtUtils.getJavaType(project.getProject(),
+													className);
+											if (type != null) {
+												// 1. check if the bean class is
+												// clear match
+												if (relevantTypes.contains(type)) {
+													files.add(bean);
+												}
+												// 2. check the class structure
+												// 2a. implements the interface
+												for (IType typeToCheck : relevantTypes) {
+													if (typeToCheck.isInterface()) {
+														if (Introspector
+																.doesImplement(type, typeToCheck
+																		.getFullyQualifiedName())) {
+															files.add(bean);
+															break;
+														}
+													}
+													// 2b. extends the class
+													else if (Introspector.doesExtend(type,
+															typeToCheck.getFullyQualifiedName())) {
+														files.add(bean);
+														break;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+							catch (JavaModelException e) {
+								BeansCorePlugin.log(e);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return files;
+	}
+
+	/**
+	 * A {@link IModelElementVisitor} that tries to determine the closest {@link IModelElement} by
+	 * looking at <code>startLine</code> and <code>endLine</code> information.
 	 * @author Christian Dupuis
 	 */
 	private static class ModelElementDetermingModelVisitor implements IModelElementVisitor {

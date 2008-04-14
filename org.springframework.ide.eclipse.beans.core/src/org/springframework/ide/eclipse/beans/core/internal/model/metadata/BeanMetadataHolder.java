@@ -26,6 +26,8 @@ public class BeanMetadataHolder implements Serializable {
 
 	private static final long serialVersionUID = 5275241662588816808L;
 
+	private long lastModified = -1;
+	
 	private String elemenetId;
 
 	private Set<IBeanMetadata> beanMetaData;
@@ -54,5 +56,13 @@ public class BeanMetadataHolder implements Serializable {
 
 	public void setMethodMetaData(Set<IMethodMetadata> methodMetaData) {
 		this.methodMetaData = methodMetaData;
+	}
+
+	public long getLastModified() {
+		return lastModified;
+	}
+
+	public void setLastModified(long lastModified) {
+		this.lastModified = lastModified;
 	}
 }

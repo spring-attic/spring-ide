@@ -11,14 +11,12 @@
 package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -32,75 +30,81 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.springframework.ide.eclipse.beans.core.BeansCoreImages;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
-import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
-import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 
 /**
- * {@link Job} implementation that handles loading and attaching
- * {@link IBeanMetadata} for {@link IBeansConfig}.
+ * {@link Job} implementation that handles loading and attaching {@link IBeanMetadata} for
+ * {@link IBeansConfig}.
  * @author Christian Dupuis
  * @since 2.0.5
  */
 public class BeanMetadataBuilderJob extends Job {
 
+	/** The metadataProvider element in the extension point contribution */
+	private static final String METADATA_PROVIDER_ELEMENT = "metadataProvider";
+
+	/** The class attribute in the extension point contribution */
+	private static final String CLASS_ATTRIBUTE = "class";
+
+	/** The id of the metadata providers extension point */
 	public static final String META_DATA_PROVIDERS_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID
 			+ ".metadataproviders";
 
-	public static final Object CONTENT_FAMILY = new Object();
+	/** Object identifying the job family */
+	private static final Object CONTENT_FAMILY = new Object();
 
-	private Set<IResource> affectedResources;
+	/** Internal cache of the affected {@link IBean}s keyed by the containing {@link IBeansConfig} */
+	private Map<IBeansConfig, Set<IBean>> affectedBeans;
 
-	private Map<IProject, ClassReaderFactory> classReaderFactoryCache = 
-		new HashMap<IProject, ClassReaderFactory>();
-
-	public BeanMetadataBuilderJob(Set<IResource> affectedResources) {
+	/**
+	 * Constructor
+	 * @param affectedBeans the list of affected {@link IBean} keyed by a corresponding
+	 * {@link IBeansConfig}.
+	 */
+	public BeanMetadataBuilderJob(Map<IBeansConfig, Set<IBean>> affectedBeans) {
 		super("Attaching Spring meta data");
-		this.affectedResources = affectedResources;
+		this.affectedBeans = affectedBeans;
 		setPriority(Job.BUILD);
 		setProperty(IProgressConstants.ICON_PROPERTY, BeansCoreImages.DESC_OBJS_ANNOTATATION);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean belongsTo(Object family) {
 		return CONTENT_FAMILY == family;
 	}
 
-	private ClassReaderFactory getClassReaderFactory(IProject project) {
-		synchronized (this) {
-			if (!classReaderFactoryCache.containsKey(project)) {
-				classReaderFactoryCache.put(project, new CachingClassReaderFactory(JdtUtils
-						.getClassLoader(project, false)));
-			}
-			return classReaderFactoryCache.get(project);
-		}
-	}
-
 	public boolean isCoveredBy(BeanMetadataBuilderJob other) {
-		if (other.affectedResources != null && this.affectedResources != null) {
-			for (IResource resource : affectedResources) {
-				if (!other.affectedResources.contains(resource)) {
-					return false;
-				}
+		if (other.affectedBeans != null && this.affectedBeans != null) {
+			Set<IBean> allBeans = new HashSet<IBean>();
+			for (Set<IBean> beans : other.affectedBeans.values()) {
+				allBeans.addAll(beans);
 			}
-			return true;
+			Set<IBean> allMyBeans = new HashSet<IBean>();
+			for (Set<IBean> beans : this.affectedBeans.values()) {
+				allMyBeans.addAll(beans);
+			}
+			return allBeans.containsAll(allMyBeans);
 		}
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public IStatus run(IProgressMonitor monitor) {
 		try {
-			// Remove similar jobs from the chain 
+			// Remove similar jobs from the chain
 			synchronized (getClass()) {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
@@ -116,65 +120,64 @@ public class BeanMetadataBuilderJob extends Job {
 					}
 				}
 			}
-			monitor.beginTask("Attaching Spring bean meta data", affectedResources.size());
+			monitor.beginTask("Attaching Spring bean meta data", affectedBeans.size());
 			int worked = 0;
-			for (IResource resource : affectedResources) {
-				if (BeansCoreUtils.isBeansConfig(resource) && resource instanceof IFile) {
-					if (monitor.isCanceled()) {
-						return Status.CANCEL_STATUS;
-					}
 
-					// Do some profiling
-					long start = System.currentTimeMillis();
+			// Reading contributed IBeanMetadataProviders from the extension point
+			IBeanMetadataProvider[] providers = getMetadataProviders();
 
-					monitor.subTask("Attaching Spring bean meta data to file ["
-							+ resource.getFullPath().toString() + "]");
-					attachMetaData(BeansCorePlugin.getModel().getConfig((IFile) resource), monitor,
-							getClassReaderFactory(resource.getProject()));
-					worked++;
-					monitor.worked(worked);
-					if (BeanMetadataModel.DEBUG) {
-						System.out.println("Attaching meta data ["
-								+ resource.getFullPath().toString() + "] took "
-								+ (System.currentTimeMillis() - start) + "ms");
-					}
+			for (Map.Entry<IBeansConfig, Set<IBean>> entry : affectedBeans.entrySet()) {
+				// Do some profiling
+				long start = System.currentTimeMillis();
+				IResource resource = entry.getKey().getElementResource();
+
+				monitor.subTask("Attaching Spring bean meta data to file ["
+						+ resource.getFullPath().toString() + "]");
+				attachMetadata(entry.getKey(), entry.getValue(), monitor, providers);
+				worked++;
+				monitor.worked(worked);
+
+				if (BeanMetadataModel.DEBUG) {
+					System.out.println("Attaching meta data [" + resource.getFullPath().toString()
+							+ "] took " + (System.currentTimeMillis() - start) + "ms");
 				}
 			}
 		}
 		finally {
-			affectedResources = null;
+			affectedBeans = null;
 		}
 		return Status.OK_STATUS;
 	}
 
-	protected void attachMetaData(IBeansConfig beansConfig, IProgressMonitor progressMonitor,
-			ClassReaderFactory classReaderFactory) {
+	/**
+	 * Iterates over the provided list of {@link IBeanMetadataProvider}s and attaches
+	 * {@link IBeanMetadata} and {@link IBeanProperty}s to the given {@link IBean} instance.
+	 */
+	protected void attachMetadata(IBeansConfig beansConfig, Set<IBean> beans,
+			IProgressMonitor progressMonitor, IBeanMetadataProvider[] providers) {
 
-		IBeanMetadataProvider[] providers = getMetadataProviders();
-		for (IBean bean : beansConfig.getBeans()) {
-			attachMetaDataToBean(beansConfig, progressMonitor, classReaderFactory, providers, bean);
+		for (IBean bean : beans) {
+			attachMetadataToBean(beansConfig, progressMonitor, providers, bean);
 		}
-		for (IBeansComponent beanComponent : beansConfig.getComponents()) {
-			for (IBean bean : beanComponent.getBeans()) {
-				attachMetaDataToBean(beansConfig, progressMonitor, classReaderFactory, providers,
-						bean);
-			}
-		}
-
 		// Notify that the model has changed.
 		((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansConfig, Type.CHANGED);
-
 	}
 
-	private void attachMetaDataToBean(IBeansConfig beansConfig, IProgressMonitor progressMonitor,
-			ClassReaderFactory classReaderFactory, IBeanMetadataProvider[] providers, IBean bean) {
+	/**
+	 * Attaches {@link IBeanMetadata} and {@link IBeanProperty} to a single {@link IBean}.
+	 */
+	private void attachMetadataToBean(IBeansConfig beansConfig, IProgressMonitor progressMonitor,
+			IBeanMetadataProvider[] providers, IBean bean) {
 		// Reset meta data attachment before adding
-		BeansCorePlugin.getMetaDataModel().clearBeanMetaData(bean);
-		Set<IBeanMetadata> beanMetaData = new HashSet<IBeanMetadata>();
-		Set<IMethodMetadata> methodMetaData = new HashSet<IMethodMetadata>();
+		BeansCorePlugin.getMetadataModel().clearBeanMetaData(bean);
+		BeansCorePlugin.getMetadataModel().clearBeanProperties(bean);
+
+		Set<IBeanMetadata> beanMetaData = new LinkedHashSet<IBeanMetadata>();
+		Set<IMethodMetadata> methodMetaData = new LinkedHashSet<IMethodMetadata>();
+		Set<IBeanProperty> beanProperties = new LinkedHashSet<IBeanProperty>();
 		for (IBeanMetadataProvider provider : providers) {
 			Set<IBeanMetadata> beanMetaDataSet = provider.provideBeanMetadata(bean, beansConfig,
-					progressMonitor, classReaderFactory);
+					progressMonitor);
 			for (IBeanMetadata metaData : beanMetaDataSet) {
 				if (metaData instanceof IMethodMetadata) {
 					methodMetaData.add((IMethodMetadata) beanMetaData);
@@ -183,12 +186,21 @@ public class BeanMetadataBuilderJob extends Job {
 					beanMetaData.add(metaData);
 				}
 			}
+			beanProperties.addAll(provider
+					.provideBeanProperties(bean, beansConfig, progressMonitor));
 		}
 		if (beanMetaData.size() > 0 || methodMetaData.size() > 0) {
-			BeansCorePlugin.getMetaDataModel().setBeanMetaData(bean, beanMetaData, methodMetaData);
+			BeansCorePlugin.getMetadataModel().setBeanMetadata(bean, beanMetaData, methodMetaData);
+		}
+		if (beanProperties.size() > 0) {
+			BeansCorePlugin.getMetadataModel().setBeanProperties(bean, beanProperties);
 		}
 	}
 
+	/**
+	 * Returns the {@link IBeanMetadataProvider}s contributed to the Eclipse extension point
+	 * registry.
+	 */
 	protected IBeanMetadataProvider[] getMetadataProviders() {
 		List<IBeanMetadataProvider> providers = new ArrayList<IBeanMetadataProvider>();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
@@ -196,10 +208,10 @@ public class BeanMetadataBuilderJob extends Job {
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
-					if ("metadataProvider".equals(config.getName())
-							&& config.getAttribute("class") != null) {
+					if (METADATA_PROVIDER_ELEMENT.equals(config.getName())
+							&& config.getAttribute(CLASS_ATTRIBUTE) != null) {
 						try {
-							Object handler = config.createExecutableExtension("class");
+							Object handler = config.createExecutableExtension(CLASS_ATTRIBUTE);
 							if (handler instanceof IBeanMetadataProvider) {
 								IBeanMetadataProvider entityResolver = (IBeanMetadataProvider) handler;
 								providers.add(entityResolver);
@@ -214,4 +226,5 @@ public class BeanMetadataBuilderJob extends Job {
 		}
 		return providers.toArray(new IBeanMetadataProvider[providers.size()]);
 	}
+	
 }

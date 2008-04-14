@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -82,12 +83,17 @@ public class Bean extends Node implements IAdaptable {
 	}
 
 	public boolean hasProperties() {
-		return bean.getProperties().size() > 0;
+		return getProperties().length > 0;
 	}
 
 	public Property[] getProperties() {
 		ArrayList<Property> list = new ArrayList<Property>();
 		Iterator props = bean.getProperties().iterator();
+		while (props.hasNext()) {
+			IBeanProperty prop = (IBeanProperty) props.next();
+			list.add(new Property(this, prop));
+		}
+		props = BeansCorePlugin.getMetadataModel().getBeanProperties(bean).iterator();
 		while (props.hasNext()) {
 			IBeanProperty prop = (IBeanProperty) props.next();
 			list.add(new Property(this, prop));
