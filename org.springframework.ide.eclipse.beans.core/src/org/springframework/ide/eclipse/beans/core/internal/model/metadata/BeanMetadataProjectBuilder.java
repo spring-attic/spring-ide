@@ -84,9 +84,6 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 					affectedBeans.put(BeansModelUtils.getConfig(bean), beans);
 				}
 				files.add(BeansModelUtils.getConfig(bean).getElementResource());
-				
-				// add beans that use this bean in a RuntimeBeanReference
-				// TODO CD fill in implementation		
 			}
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
@@ -99,19 +96,28 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 				for (IImportedBeansConfig importedBeansConfig : beansImport
 						.getImportedBeansConfigs()) {
 					files.add(importedBeansConfig.getElementResource());
-					// TODO CD add to affectedBeans map
+					addBeans(importedBeansConfig);
 				}
 			}
 			files.add(beansConfig.getElementResource());
-			
-			Set<IBean> beans = new LinkedHashSet<IBean>();
-			beans.addAll(beansConfig.getBeans());
-			for (IBeansComponent component : beansConfig.getComponents()) {
-				beans.addAll(component.getBeans());
-			}
-			affectedBeans.put(beansConfig, beans);
+			addBeans(beansConfig);
 		}
 		return files;
+	}
+	
+	private void addBeans(IBeansConfig beansConfig) {
+		if (affectedBeans.containsKey(beansConfig)) {
+			affectedBeans.get(beansConfig).addAll(beansConfig.getBeans());
+			for (IBeansComponent component : beansConfig.getComponents()) {
+				affectedBeans.get(beansConfig).addAll(component.getBeans());
+			}
+		}
+		else {
+			affectedBeans.put(beansConfig, beansConfig.getBeans());
+			for (IBeansComponent component : beansConfig.getComponents()) {
+				affectedBeans.get(beansConfig).addAll(component.getBeans());
+			}
+		}
 	}
 
 }
