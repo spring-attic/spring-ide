@@ -28,14 +28,13 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 
 /**
- * Utility class that encapsulates the loading of a {@link IDOMDocument} from
- * the given {@link IFile}.
+ * Utility class that encapsulates the loading of a {@link IDOMDocument} from the given
+ * {@link IFile}.
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public abstract class AbstractAspectDefinitionBuilder implements
-		IAspectDefinitionBuilder {
+public abstract class AbstractAspectDefinitionBuilder implements IAspectDefinitionBuilder {
 
 	protected static final String ADVICE_REF_ATTRIBUTE = "advice-ref";
 
@@ -101,17 +100,19 @@ public abstract class AbstractAspectDefinitionBuilder implements
 
 		IStructuredModel model = null;
 		try {
-			model = StructuredModelManager.getModelManager()
-					.getExistingModelForRead(file);
+			try {
+				model = StructuredModelManager.getModelManager().getExistingModelForRead(file);
+			}
+			catch (RuntimeException e) {
+				// sometimes WTP throws a NPE in concurrency situations
+			}
 			if (model == null) {
-				model = StructuredModelManager.getModelManager()
-						.getModelForRead(file);
+				model = StructuredModelManager.getModelManager().getModelForRead(file);
 			}
 			if (model != null) {
 				IDOMDocument document = ((DOMModelImpl) model).getDocument();
 				if (document != null && document.getDocumentElement() != null) {
-					doBuildAspectDefinitions(document, file, aspectInfos,
-							classLoaderSupport);
+					doBuildAspectDefinitions(document, file, aspectInfos, classLoaderSupport);
 				}
 			}
 		}
@@ -131,8 +132,7 @@ public abstract class AbstractAspectDefinitionBuilder implements
 
 	protected String getAttribute(Node node, String attributeName) {
 		if (hasAttribute(node, attributeName)) {
-			String value = node.getAttributes().getNamedItem(attributeName)
-					.getNodeValue();
+			String value = node.getAttributes().getNamedItem(attributeName).getNodeValue();
 			value = StringUtils.replace(value, "\n", " ");
 			value = StringUtils.replace(value, "\t", " ");
 			return StringUtils.replace(value, "\r", " ");
@@ -141,11 +141,10 @@ public abstract class AbstractAspectDefinitionBuilder implements
 	}
 
 	protected boolean hasAttribute(Node node, String attributeName) {
-		return (node != null && node.hasAttributes() && node.getAttributes()
-				.getNamedItem(attributeName) != null);
+		return (node != null && node.hasAttributes() && node.getAttributes().getNamedItem(
+				attributeName) != null);
 	}
 
-	protected abstract void doBuildAspectDefinitions(IDOMDocument document,
-			IFile file, List<IAspectDefinition> aspectInfos,
-			IProjectClassLoaderSupport classLoaderSupport);
+	protected abstract void doBuildAspectDefinitions(IDOMDocument document, IFile file,
+			List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport);
 }
