@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
@@ -153,10 +152,7 @@ public class BeansConfigValidator extends AbstractValidator {
 	}
 
 	private void addBeans(IBeansConfig beansConfig) {
-		affectedBeans.addAll(beansConfig.getBeans());
-		for (IBeansComponent component : beansConfig.getComponents()) {
-			affectedBeans.addAll(component.getBeans());
-		}
+		affectedBeans.addAll(BeansModelUtils.getBeans(beansConfig));
 	}
 
 	@Override

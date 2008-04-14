@@ -61,7 +61,7 @@ public class DelegatingAnnotationReadingMetadataProvider extends
 			SafeRunner.run(new ISafeRunnable() {
 
 				public void handleException(Throwable exception) {
-					// nothing to do here
+					// nothing to do here 
 				}
 
 				public void run() throws Exception {

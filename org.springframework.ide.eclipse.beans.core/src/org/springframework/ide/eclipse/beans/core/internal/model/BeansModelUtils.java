@@ -218,6 +218,15 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns a list of all beans which belong to the given model element.
 	 * @param element the model element which contains beans
+	 * @throws IllegalArgumentException if unsupported model element specified
+	 */
+	public static Set<IBean> getBeans(IModelElement element) {
+		return getBeans(element, null);
+	}
+
+	/**
+	 * Returns a list of all beans which belong to the given model element.
+	 * @param element the model element which contains beans
 	 * @param monitor the progress monitor to indicate progress; mark the monitor done after
 	 * completing the work
 	 * @throws IllegalArgumentException if unsupported model element specified
@@ -288,13 +297,16 @@ public abstract class BeansModelUtils {
 		else if (element instanceof IBeansConfig) {
 			beans.addAll(((IBeansConfig) element).getBeans());
 			for (IBeansComponent component : ((IBeansConfig) element).getComponents()) {
-				beans.addAll(component.getBeans());
+				beans.addAll(getBeans(component, monitor));
 			}
 		}
 		else if (element instanceof IBeansConfigSet) {
 			beans.addAll(((IBeansConfigSet) element).getBeans());
 		}
 		else if (element instanceof IBeansComponent) {
+			for (IBeansComponent component : ((IBeansComponent) element).getComponents()) {
+				beans.addAll(getBeans(component, monitor));
+			}
 			beans.addAll(((IBeansComponent) element).getBeans());
 		}
 		else if (element instanceof IBean) {
@@ -1334,7 +1346,8 @@ public abstract class BeansModelUtils {
 									}
 								}
 								for (IBeansConfig config : configs) {
-									Set<IBean> allBeans = config.getBeans();
+									Set<IBean> allBeans = getBeans(config);
+									
 									for (IBean bean : allBeans) {
 										IType type = resolveBeanType(bean);
 										if (type != null) {
@@ -1379,9 +1392,9 @@ public abstract class BeansModelUtils {
 
 		return files;
 	}
-	
-	/** 
-	 * Resolves the {@link IBean} bean class by looking at parent, factory-bean and factory-method. 
+
+	/**
+	 * Resolves the {@link IBean} bean class by looking at parent, factory-bean and factory-method.
 	 */
 	public static IType resolveBeanType(IBean bean) {
 		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils

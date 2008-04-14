@@ -28,7 +28,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
@@ -110,17 +109,11 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 
 	private void addBeans(IBeansConfig beansConfig) {
 		if (affectedBeans.containsKey(beansConfig)) {
-			affectedBeans.get(beansConfig).addAll(beansConfig.getBeans());
-			for (IBeansComponent component : beansConfig.getComponents()) {
-				affectedBeans.get(beansConfig).addAll(component.getBeans());
-			}
+			affectedBeans.get(beansConfig).addAll(BeansModelUtils.getBeans(beansConfig));
 		}
 		else {
-			Set<IBean> beans = new LinkedHashSet<IBean>(beansConfig.getBeans());
+			Set<IBean> beans = BeansModelUtils.getBeans(beansConfig);
 			affectedBeans.put(beansConfig, beans);
-			for (IBeansComponent component : beansConfig.getComponents()) {
-				affectedBeans.get(beansConfig).addAll(component.getBeans());
-			}
 		}
 	}
 
