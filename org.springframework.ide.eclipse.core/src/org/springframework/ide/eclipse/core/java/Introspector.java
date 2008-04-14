@@ -42,8 +42,8 @@ public final class Introspector {
 	/**
 	 * Utility method that handles property names.
 	 * <p>
-	 * See {@link java.beans.Introspector#decapitalize(String)} for the reverse
-	 * operation done in the Java SDK.
+	 * See {@link java.beans.Introspector#decapitalize(String)} for the reverse operation done in
+	 * the Java SDK.
 	 * @see java.beans.Introspector#decapitalize(String)
 	 */
 	private static String capitalize(String name) {
@@ -60,8 +60,7 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given Java type extends or is the
-	 * specified class.
+	 * Returns <code>true</code> if the given Java type extends or is the specified class.
 	 * @param type the Java type to be examined
 	 * @param className the full qualified name of the class we are looking for
 	 */
@@ -70,11 +69,9 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given Java type implements the
-	 * specified interface.
+	 * Returns <code>true</code> if the given Java type implements the specified interface.
 	 * @param type the Java type to be examined
-	 * @param interfaceName the full qualified name of the interface we are
-	 * looking for
+	 * @param interfaceName the full qualified name of the interface we are looking for
 	 */
 	public static boolean doesImplement(IType type, String interfaceName) {
 		return hasSuperType(type, interfaceName, true);
@@ -83,8 +80,7 @@ public final class Introspector {
 	/**
 	 * Returns a list of all constructors from given type.
 	 */
-	public static Set<IMethod> findAllConstructors(IType type)
-			throws JavaModelException {
+	public static Set<IMethod> findAllConstructors(IType type) throws JavaModelException {
 		Map<String, IMethod> allConstructors = new HashMap<String, IMethod>();
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
@@ -99,8 +95,8 @@ public final class Introspector {
 	}
 
 	/**
-	 * Finds all {@link IMethod}s in the given {@link IType}'s hierarchy that
-	 * match the given filter.
+	 * Finds all {@link IMethod}s in the given {@link IType}'s hierarchy that match the given
+	 * filter.
 	 * <p>
 	 * Note: calling this method is equivalent to calling
 	 * {@link #findAllMethods(IType, String, IMethodFilter)}.
@@ -111,18 +107,16 @@ public final class Introspector {
 	}
 
 	/**
-	 * Finds all {@link IMethod}s in the given {@link IType}'s hierarchy that
-	 * match the given filter, applying the prefix.
+	 * Finds all {@link IMethod}s in the given {@link IType}'s hierarchy that match the given
+	 * filter, applying the prefix.
 	 * @since 2.0.2
 	 */
-	public static Set<IMethod> findAllMethods(IType type, String prefix,
-			IMethodFilter filter) {
+	public static Set<IMethod> findAllMethods(IType type, String prefix, IMethodFilter filter) {
 		Set<IMethod> methods = new HashSet<IMethod>();
 		try {
 			while (type != null) {
 				for (IMethod method : type.getMethods()) {
-					if (!method.isConstructor()
-							&& filter.matches(method, prefix)) {
+					if (!method.isConstructor() && filter.matches(method, prefix)) {
 						methods.add(method);
 					}
 				}
@@ -138,31 +132,28 @@ public final class Introspector {
 	/**
 	 * Returns a list of all methods from given type with specified features.
 	 */
-	public static Set<IMethod> findAllMethods(IType type, String methodPrefix,
-			int argCount, Public publics, Static statics)
-			throws JavaModelException {
-		return findAllMethods(type, methodPrefix, argCount, publics, statics,
-				false);
+	public static Set<IMethod> findAllMethods(IType type, String methodPrefix, int argCount,
+			Public publics, Static statics) throws JavaModelException {
+		return findAllMethods(type, methodPrefix, argCount, publics, statics, false);
 	}
 
 	/**
 	 * Returns a list of all methods from given type with specified features.
 	 */
-	public static Set<IMethod> findAllMethods(IType type, String methodPrefix,
-			int argCount, Public publics, Static statics, boolean ignoreCase)
-			throws JavaModelException {
+	public static Set<IMethod> findAllMethods(IType type, String methodPrefix, int argCount,
+			Public publics, Static statics, boolean ignoreCase) throws JavaModelException {
 		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
-				checkMethod(type, methodPrefix, argCount, publics, statics,
-						ignoreCase, allMethods, method);
+				checkMethod(type, methodPrefix, argCount, publics, statics, ignoreCase, allMethods,
+						method);
 			}
 
 			// Add intertype declared methods
 			if (JdtUtils.isAjdtProject(type.getResource())) {
 				for (IMethod method : AjdtUtils.getDeclaredMethods(type)) {
-					checkMethod(type, methodPrefix, argCount, publics, statics,
-							ignoreCase, allMethods, method);
+					checkMethod(type, methodPrefix, argCount, publics, statics, ignoreCase,
+							allMethods, method);
 				}
 			}
 
@@ -171,18 +162,18 @@ public final class Introspector {
 		return new HashSet<IMethod>(allMethods.values());
 	}
 
-	private static void checkMethod(IType type, String methodPrefix,
-			int argCount, Public publics, Static statics, boolean ignoreCase,
-			Map<String, IMethod> allMethods, IMethod method)
+	private static void checkMethod(IType type, String methodPrefix, int argCount, Public publics,
+			Static statics, boolean ignoreCase, Map<String, IMethod> allMethods, IMethod method)
 			throws JavaModelException {
 		int flags = method.getFlags();
 		String key = method.getElementName() + method.getSignature();
-		if (!allMethods.containsKey(key) && !method.isConstructor()
+		if (!allMethods.containsKey(key)
+				&& !method.isConstructor()
 				&& (publics == Public.DONT_CARE
-						|| (publics == Public.YES && (Flags.isPublic(flags) || Flags.isInterface(type.getFlags()))) 
-						|| (publics == Public.NO && (!Flags.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
-				&& (statics == Static.DONT_CARE
-						|| (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
+						|| (publics == Public.YES && (Flags.isPublic(flags) || Flags
+								.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
+						.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
+				&& (statics == Static.DONT_CARE || (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
 						.isStatic(flags)))
 				&& (argCount == -1 || method.getNumberOfParameters() == argCount)
 				&& checkMethodName(method, type, methodPrefix, ignoreCase)) {
@@ -190,51 +181,46 @@ public final class Introspector {
 		}
 	}
 
-	private static boolean checkMethodName(IMethod method, IType type,
-			String methodPrefix, boolean ignoreCase) {
+	private static boolean checkMethodName(IMethod method, IType type, String methodPrefix,
+			boolean ignoreCase) {
 		String methodName = method.getElementName();
 		int index = methodName.lastIndexOf('.');
 		if (index > 0) {
 			methodName = methodName.substring(index + 1);
 		}
 		return ((!ignoreCase && methodName.startsWith(methodPrefix)))
-				|| (ignoreCase && methodName.toLowerCase().startsWith(
-						methodPrefix.toLowerCase()));
+				|| (ignoreCase && methodName.toLowerCase().startsWith(methodPrefix.toLowerCase()));
 	}
 
 	/**
-	 * Returns a list of all methods from given type with given prefix and no
-	 * arguments.
+	 * Returns a list of all methods from given type with given prefix and no arguments.
 	 */
-	public static Set<IMethod> findAllNoParameterMethods(IType type,
-			String prefix) throws JavaModelException {
+	public static Set<IMethod> findAllNoParameterMethods(IType type, String prefix)
+			throws JavaModelException {
 		if (prefix == null) {
 			prefix = "";
 		}
-		return findAllMethods(type, prefix, 0, Public.DONT_CARE,
-				Static.DONT_CARE);
+		return findAllMethods(type, prefix, 0, Public.DONT_CARE, Static.DONT_CARE);
 	}
 
 	/**
 	 * Returns a list of all setters.
 	 */
-	public static Set<IMethod> findAllWritableProperties(IType type)
-			throws JavaModelException {
+	public static Set<IMethod> findAllWritableProperties(IType type) throws JavaModelException {
 		return findAllMethods(type, "set", 1, Public.YES, Static.NO);
 	}
 
 	/**
-	 * Finds a target methodName with specific number of arguments on the type
-	 * hierarchy of given type.
+	 * Finds a target methodName with specific number of arguments on the type hierarchy of given
+	 * type.
 	 * @param type the Java type object on which to retrieve the method
 	 * @param methodName the name of the method
 	 * @param argCount the number of arguments for the desired method
 	 * @param isPublic <code>true</code> if public method is requested
 	 * @param statics one of the <code>Statics</code> constants
 	 */
-	public static IMethod findMethod(IType type, String methodName,
-			int argCount, Public publics, Static statics)
-			throws JavaModelException {
+	public static IMethod findMethod(IType type, String methodName, int argCount, Public publics,
+			Static statics) throws JavaModelException {
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
 				int flags = method.getFlags();
@@ -243,8 +229,7 @@ public final class Introspector {
 								.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
 						.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
 						&& (statics == Static.DONT_CARE
-								|| (statics == Static.YES && Flags
-										.isStatic(flags)) || (statics == Static.NO && !Flags
+								|| (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
 								.isStatic(flags)))
 						&& (argCount == -1 || method.getNumberOfParameters() == argCount)
 						&& methodName.equals(method.getElementName())) {
@@ -259,14 +244,11 @@ public final class Introspector {
 					if ((publics == Public.DONT_CARE
 							|| (publics == Public.YES && (Flags.isPublic(flags) || Flags
 									.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
-							.isPublic(flags) && !Flags.isInterface(type
-							.getFlags()))))
+							.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
 							&& (statics == Static.DONT_CARE
-									|| (statics == Static.YES && Flags
-											.isStatic(flags)) || (statics == Static.NO && !Flags
+									|| (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
 									.isStatic(flags)))
-							&& (argCount == -1 || method
-									.getNumberOfParameters() == argCount)) {
+							&& (argCount == -1 || method.getNumberOfParameters() == argCount)) {
 						String elementName = method.getElementName();
 						int index = elementName.lastIndexOf('.');
 						if (index > 0) {
@@ -286,8 +268,8 @@ public final class Introspector {
 	/**
 	 * Returns a list of all getters with the given prefix.
 	 */
-	public static Set<IMethod> findReadableProperties(IType type,
-			String methodPrefix) throws JavaModelException {
+	public static Set<IMethod> findReadableProperties(IType type, String methodPrefix)
+			throws JavaModelException {
 		String base = capitalize(methodPrefix);
 		return findAllMethods(type, "get" + base, 0, Public.YES, Static.NO);
 	}
@@ -295,18 +277,17 @@ public final class Introspector {
 	/**
 	 * Returns a list of all getters with the given prefix.
 	 */
-	public static Set<IMethod> findReadableProperties(IType type,
-			String methodPrefix, boolean ignoreCase) throws JavaModelException {
+	public static Set<IMethod> findReadableProperties(IType type, String methodPrefix,
+			boolean ignoreCase) throws JavaModelException {
 		String base = capitalize(methodPrefix);
-		return findAllMethods(type, "get" + base, 0, Public.YES, Static.NO,
-				ignoreCase);
+		return findAllMethods(type, "get" + base, 0, Public.YES, Static.NO, ignoreCase);
 	}
 
 	/**
 	 * Returns a list of all setters with the given prefix.
 	 */
-	public static Set<IMethod> findWritableProperties(IType type,
-			String methodPrefix) throws JavaModelException {
+	public static Set<IMethod> findWritableProperties(IType type, String methodPrefix)
+			throws JavaModelException {
 		String base = capitalize(methodPrefix);
 		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO);
 	}
@@ -314,11 +295,10 @@ public final class Introspector {
 	/**
 	 * Returns a list of all setters with the given prefix.
 	 */
-	public static Set<IMethod> findWritableProperties(IType type,
-			String methodPrefix, boolean ignoreCase) throws JavaModelException {
+	public static Set<IMethod> findWritableProperties(IType type, String methodPrefix,
+			boolean ignoreCase) throws JavaModelException {
 		String base = capitalize(methodPrefix);
-		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO,
-				ignoreCase);
+		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO, ignoreCase);
 	}
 
 	public static Set<IType> getAllImplementedInterfaces(IType type) {
@@ -329,8 +309,7 @@ public final class Introspector {
 				if (interfaces != null) {
 					for (String iface : interfaces) {
 						String fqin = JdtUtils.resolveClassName(iface, type);
-						IType interfaceType = type.getJavaProject().findType(
-								fqin);
+						IType interfaceType = type.getJavaProject().findType(fqin);
 						if (interfaceType != null) {
 							allInterfaces.add(interfaceType);
 						}
@@ -347,14 +326,12 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns <strong>all</strong> methods of the given {@link IType}
-	 * instance.
+	 * Returns <strong>all</strong> methods of the given {@link IType} instance.
 	 * @param type the type
 	 * @return set of {@link IMethod}
 	 * @throws JavaModelException
 	 */
-	public static Set<IMethod> getAllMethods(IType type)
-			throws JavaModelException {
+	public static Set<IMethod> getAllMethods(IType type) throws JavaModelException {
 		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
@@ -385,8 +362,8 @@ public final class Introspector {
 			}
 			String[][] resolvedNames = type.resolveType(name);
 			if (resolvedNames != null && resolvedNames.length > 0) {
-				String resolvedName = StringUtils.concatenate(
-						resolvedNames[0][0], resolvedNames[0][1], ".");
+				String resolvedName = StringUtils.concatenate(resolvedNames[0][0],
+						resolvedNames[0][1], ".");
 				return type.getJavaProject().findType(resolvedName);
 			}
 		}
@@ -400,17 +377,15 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given type has a public constructor
-	 * with the specified number of arguments. If a constructor with no
-	 * arguments is requested then the absence of a constructor (the JVM adds an
-	 * implicit constructor here) results in <code>true</code>.
+	 * Returns <code>true</code> if the given type has a public constructor with the specified
+	 * number of arguments. If a constructor with no arguments is requested then the absence of a
+	 * constructor (the JVM adds an implicit constructor here) results in <code>true</code>.
 	 * @param type the Java type object on which to retrieve the method
 	 * @param argCount the number of arguments for the constructor
-	 * @param isNonPublicAllowed <code>true</code> if non-public constructurs
-	 * are recognized too
+	 * @param isNonPublicAllowed <code>true</code> if non-public constructurs are recognized too
 	 */
-	public static boolean hasConstructor(IType type, int argCount,
-			boolean isNonPublicAllowed) throws JavaModelException {
+	public static boolean hasConstructor(IType type, int argCount, boolean isNonPublicAllowed)
+			throws JavaModelException {
 		IMethod[] methods = type.getMethods();
 
 		// First check for implicit constructor
@@ -441,17 +416,30 @@ public final class Introspector {
 		return false;
 	}
 
-	private static boolean hasSuperType(IType type, String className,
-			boolean isInterface) {
-		if (type != null && type.exists() && className != null
-				&& className.length() > 0) {
+	private static boolean hasSuperType(IType type, String className, boolean isInterface) {
+		if (type != null && type.exists() && className != null && className.length() > 0) {
 			try {
 				IType requiredType = type.getJavaProject().findType(className);
 				if (requiredType != null
 						&& ((isInterface && requiredType.isInterface()) || (!isInterface && !requiredType
 								.isInterface()))) {
-					ITypeHierarchy hierachy = SuperTypeHierarchyCache
-							.getTypeHierarchy(type);
+					ITypeHierarchy hierachy = SuperTypeHierarchyCache.getTypeHierarchy(type);
+					return hierachy.contains(requiredType);
+				}
+			}
+			catch (JavaModelException e) {
+				SpringCore.log(e);
+			}
+		}
+		return false;
+	}
+
+	public static boolean hasSuperType(IType type, String className) {
+		if (type != null && type.exists() && className != null && className.length() > 0) {
+			try {
+				IType requiredType = type.getJavaProject().findType(className);
+				if (requiredType != null) {
+					ITypeHierarchy hierachy = SuperTypeHierarchyCache.getTypeHierarchy(type);
 					return hierachy.contains(requiredType);
 				}
 			}
@@ -463,9 +451,8 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns true if the given type has a public setter (one-argument method
-	 * named "set" + property name with an uppercase first character) for the
-	 * specified property.
+	 * Returns true if the given type has a public setter (one-argument method named "set" +
+	 * property name with an uppercase first character) for the specified property.
 	 * @param type the Java type object on which to retrieve the method
 	 * @param propertyName the name of the property
 	 */
@@ -476,17 +463,14 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given name is a valid JavaBeans
-	 * property name. This normally means that a property name starts with a
-	 * lower case character, but in the (unusual) special case when there is
-	 * more than one character and both the first and second characters are
-	 * upper case, then an upper case character is valid too.
+	 * Returns <code>true</code> if the given name is a valid JavaBeans property name. This
+	 * normally means that a property name starts with a lower case character, but in the (unusual)
+	 * special case when there is more than one character and both the first and second characters
+	 * are upper case, then an upper case character is valid too.
 	 * <p>
-	 * Thus "fooBah" corresponds to "FooBah" and "x" to "X", but "URL" stays the
-	 * same as "URL".
+	 * Thus "fooBah" corresponds to "FooBah" and "x" to "X", but "URL" stays the same as "URL".
 	 * <p>
-	 * This conforms to section "8.8 Capitalization of inferred names" of the
-	 * JavaBeans specs.
+	 * This conforms to section "8.8 Capitalization of inferred names" of the JavaBeans specs.
 	 * @param name the name to be checked
 	 */
 	public static boolean isValidPropertyName(String name) {
@@ -502,5 +486,5 @@ public final class Introspector {
 		}
 		return true;
 	}
-	
+
 }

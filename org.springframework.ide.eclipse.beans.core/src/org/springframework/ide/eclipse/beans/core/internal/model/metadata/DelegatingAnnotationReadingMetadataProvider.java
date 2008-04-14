@@ -19,7 +19,9 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -39,7 +41,7 @@ public class DelegatingAnnotationReadingMetadataProvider extends
 
 	/** The class attribute in the extension point contribution */
 	private static final String CLASS_ATTRIBUTE = "class";
-	
+
 	/** The metadataProvider element in the extension point contribution */
 	private static final String ANNOTATION_METADATA_PROVIDER_ELEMENT = "annotationMetadataProvider";
 
@@ -47,13 +49,25 @@ public class DelegatingAnnotationReadingMetadataProvider extends
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void processFoundAnnotations(IBean bean, Set<IBeanMetadata> beanMetaDataSet,
-			IType type, IAnnotationMetadata metadata, IProgressMonitor progressMonitor) {
-		for (IAnnotationBeanMetadataProvider provider : getMetadataProviders()) {
+	protected void processFoundAnnotations(final IBean bean,
+			final Set<IBeanMetadata> beanMetaDataSet, final IType type,
+			final IAnnotationMetadata metadata, IProgressMonitor progressMonitor) {
+		for (final IAnnotationBeanMetadataProvider provider : getMetadataProviders()) {
 			if (progressMonitor.isCanceled()) {
 				return;
 			}
-			beanMetaDataSet.addAll(provider.provideBeanMetadata(bean, type, metadata));
+			
+			// make sure that third-party extension don't crash us
+			SafeRunner.run(new ISafeRunnable() {
+
+				public void handleException(Throwable exception) {
+					// nothing to do here
+				}
+
+				public void run() throws Exception {
+					beanMetaDataSet.addAll(provider.provideBeanMetadata(bean, type, metadata));
+				}
+			});
 		}
 	}
 

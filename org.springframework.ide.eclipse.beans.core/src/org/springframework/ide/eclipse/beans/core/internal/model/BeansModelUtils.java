@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
@@ -203,7 +204,7 @@ public abstract class BeansModelUtils {
 	 * {@link IBeanProperty}) to get all referenced beans from
 	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the referenced
 	 * beans are looked-up
-	 * @param recursive set to <code>true</code> if the dependeny graph is traversed recursively
+	 * @param recursive set to <code>true</code> if the dependency graph is traversed recursively
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static Set<BeansConnection> getBeanReferences(IModelElement element,
@@ -217,7 +218,7 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns a list of all beans which belong to the given model element.
 	 * @param element the model element which contains beans
-	 * @param monitor the progress monitor to indicate progess; mark the monitor done after
+	 * @param monitor the progress monitor to indicate progress; mark the monitor done after
 	 * completing the work
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
@@ -549,8 +550,8 @@ public abstract class BeansModelUtils {
 
 			// Fill a set with all bean definitions belonging to the
 			// hierarchy of the requested bean definition
-			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>(); // used
-			// to detect a cycle
+			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>();
+			// used to detect a cycle
 			beanDefinitions.add(bd);
 			addBeanDefinition(bean, context, beanDefinitions);
 
@@ -1325,9 +1326,7 @@ public abstract class BeansModelUtils {
 								List<IType> relevantTypes = new ArrayList<IType>();
 
 								for (IType type : types) {
-
-									// Check that the type is coming from the
-									// project classpath
+									// Check that the type is coming from the project classpath
 									IType checkType = JdtUtils.getJavaType(project.getProject(),
 											type.getFullyQualifiedName());
 									if (type == checkType) {
@@ -1337,35 +1336,34 @@ public abstract class BeansModelUtils {
 								for (IBeansConfig config : configs) {
 									Set<IBean> allBeans = config.getBeans();
 									for (IBean bean : allBeans) {
-										if (bean.getClassName() != null) {
-											String className = bean.getClassName();
-											IType type = JdtUtils.getJavaType(project.getProject(),
-													className);
-											if (type != null) {
-												// 1. check if the bean class is
-												// clear match
-												if (relevantTypes.contains(type)) {
-													files.add(bean);
-												}
-												// 2. check the class structure
-												// 2a. implements the interface
-												for (IType typeToCheck : relevantTypes) {
-													if (typeToCheck.isInterface()) {
-														if (Introspector
-																.doesImplement(type, typeToCheck
-																		.getFullyQualifiedName())) {
-															files.add(bean);
-															break;
-														}
-													}
-													// 2b. extends the class
-													else if (Introspector.doesExtend(type,
+										IType type = resolveBeanType(bean);
+										if (type != null) {
+											// 1. check if the bean class is clear match
+											if (relevantTypes.contains(type)) {
+												files.add(bean);
+											}
+											// 2. check the class structure
+											// 2a. implements the interface
+											for (IType typeToCheck : relevantTypes) {
+												if (typeToCheck.isInterface()) {
+													if (Introspector.doesImplement(type,
 															typeToCheck.getFullyQualifiedName())) {
 														files.add(bean);
 														break;
 													}
 												}
+												// 2b. extends the class
+												else if (Introspector.doesExtend(type, typeToCheck
+														.getFullyQualifiedName())) {
+													files.add(bean);
+													break;
+												}
 											}
+										}
+										else {
+											// we can't determine the beans type so don't be
+											// cleverer as we can and let it be processed again
+											files.add(bean);
 										}
 									}
 								}
@@ -1380,6 +1378,75 @@ public abstract class BeansModelUtils {
 		}
 
 		return files;
+	}
+	
+	/** 
+	 * Resolves the {@link IBean} bean class by looking at parent, factory-bean and factory-method. 
+	 */
+	public static IType resolveBeanType(IBean bean) {
+		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils
+				.getMergedBeanDefinition(bean, null);
+		String mergedClassName = mergedBd.getBeanClassName();
+		return extractBeanClass(mergedBd, bean, mergedClassName, getParentOfClass(bean,
+				BeansConfig.class));
+	}
+
+	/**
+	 * Extracts the {@link IType} of a bean definition.
+	 * <p>
+	 * Honors <code>factory-method</code>s and <code>factory-bean</code>.
+	 */
+	private static IType extractBeanClass(BeanDefinition bd, IBean bean, String mergedClassName,
+			IBeansConfig beansConfig) {
+
+		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(),
+				mergedClassName);
+		// 1. factory-method on bean
+		if (bd.getFactoryMethodName() != null && bd.getFactoryBeanName() == null) {
+			type = extractTypeFromFactoryMethod(bd, type);
+		}
+		// 2. factory-method on factory-bean
+		else if (bd.getFactoryMethodName() != null && bd.getFactoryBeanName() != null) {
+			try {
+				IBean factoryB = getBeanWithConfigSets(bd.getFactoryBeanName(), beansConfig);
+				if (factoryB != null) {
+					BeanDefinition factoryBd = BeansModelUtils.getMergedBeanDefinition(bean, null);
+					IType factoryBeanType = extractBeanClass(factoryBd, bean, factoryBd
+							.getBeanClassName(), beansConfig);
+					if (factoryBeanType != null) {
+						type = extractTypeFromFactoryMethod(bd, factoryBeanType);
+					}
+				}
+			}
+			catch (NoSuchBeanDefinitionException e) {
+
+			}
+		}
+		return type;
+	}
+
+	/**
+	 * Extracts the {@link IType} of a {@link BeanDefinition} by only looking at the
+	 * <code>factory-method</code>. The passed in {@link IType} <b>must</b> be the bean class or
+	 * the resolved type of the factory bean in use.
+	 */
+	private static IType extractTypeFromFactoryMethod(BeanDefinition bd, IType type) {
+		String factoryMethod = bd.getFactoryMethodName();
+		try {
+			int argCount = (!bd.isAbstract() ? bd.getConstructorArgumentValues().getArgumentCount()
+					: -1);
+			Set<IMethod> methods = Introspector.getAllMethods(type);
+			for (IMethod method : methods) {
+				if (factoryMethod.equals(method.getElementName())
+						&& method.getParameterNames().length == argCount) {
+					type = JdtUtils.getJavaTypeFromSignatureClassName(method.getReturnType(), type);
+					break;
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		return type;
 	}
 
 	/**

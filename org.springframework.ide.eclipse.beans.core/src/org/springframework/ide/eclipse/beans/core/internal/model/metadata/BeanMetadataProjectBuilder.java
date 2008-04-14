@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -37,15 +38,15 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
- * {@link IProjectBuilder} that triggers the creation and maintenance of
- * {@link IBeanMetadata} stored in the {@link IBeanMetadataModel}.
+ * {@link IProjectBuilder} that triggers the creation and maintenance of {@link IBeanMetadata}
+ * stored in the {@link IBeanMetadataModel}.
  * @author Christian Dupuis
  * @since 2.0.5
  */
 public class BeanMetadataProjectBuilder implements IProjectBuilder {
 
 	private static final String JAVA_FILE_EXTENSION = ".java";
-	
+
 	private Map<IBeansConfig, Set<IBean>> affectedBeans = new HashMap<IBeansConfig, Set<IBean>>();
 
 	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor)
@@ -73,7 +74,8 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 	public Set<IResource> getAffectedResources(IResource resource, int kind) throws CoreException {
 		Set<IResource> resources = new HashSet<IResource>();
 
-		if (resource instanceof IFile && resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
+		if (kind != IncrementalProjectBuilder.FULL_BUILD && resource instanceof IFile
+				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
 			for (IBean bean : BeansModelUtils.getBeansByContainingTypes(resource)) {
 				IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 				resources.add(beansConfig.getElementResource());
@@ -105,7 +107,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 		}
 		return resources;
 	}
-	
+
 	private void addBeans(IBeansConfig beansConfig) {
 		if (affectedBeans.containsKey(beansConfig)) {
 			affectedBeans.get(beansConfig).addAll(beansConfig.getBeans());
@@ -114,7 +116,8 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 			}
 		}
 		else {
-			affectedBeans.put(beansConfig, beansConfig.getBeans());
+			Set<IBean> beans = new LinkedHashSet<IBean>(beansConfig.getBeans());
+			affectedBeans.put(beansConfig, beans);
 			for (IBeansComponent component : beansConfig.getComponents()) {
 				affectedBeans.get(beansConfig).addAll(component.getBeans());
 			}

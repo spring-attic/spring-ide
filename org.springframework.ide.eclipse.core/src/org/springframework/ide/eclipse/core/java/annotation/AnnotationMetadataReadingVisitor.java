@@ -44,7 +44,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	private Set<Annotation> classAnnotations = new HashSet<Annotation>();
 
-	private Map<IMethod, Set<Annotation>> methodAnnotations = new LinkedHashMap<IMethod, Set<Annotation>>();
+	private Map<IMethod, Set<Annotation>> methodAnnotations = 
+		new LinkedHashMap<IMethod, Set<Annotation>>();
 
 	private IType type;
 

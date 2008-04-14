@@ -117,6 +117,7 @@ public final class ValidationRuleUtils {
 	 */
 	public static IType extractBeanClass(BeanDefinition bd, IBean bean,
 			String mergedClassName, IBeansValidationContext context) {
+		
 		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 				.getProject(), mergedClassName);
 		// 1. factory-method on bean

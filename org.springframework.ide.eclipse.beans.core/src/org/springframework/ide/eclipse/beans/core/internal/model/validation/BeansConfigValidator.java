@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -29,6 +30,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -104,7 +106,7 @@ public class BeansConfigValidator extends AbstractValidator {
 					}
 				}
 			}
-			else if (JdtUtils.isClassPathFile(resource)) {
+			else if (JdtUtils.isClassPathFile(resource) || SpringCoreUtils.isManifest(resource)) {
 				IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
 						resource.getProject());
 				if (beansProject != null) {
@@ -115,11 +117,13 @@ public class BeansConfigValidator extends AbstractValidator {
 				}
 			}
 			else {
-				// Now check for bean classes and java structure
-				for (IBean bean : BeansModelUtils.getBeansByContainingTypes(resource)) {
-					IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
-					resources.add(beansConfig.getElementResource());
-					affectedBeans.add(bean);
+				if (kind != IncrementalProjectBuilder.FULL_BUILD) {
+					// Now check for bean classes and java structure
+					for (IBean bean : BeansModelUtils.getBeansByContainingTypes(resource)) {
+						IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
+						resources.add(beansConfig.getElementResource());
+						affectedBeans.add(bean);
+					}
 				}
 			}
 		}

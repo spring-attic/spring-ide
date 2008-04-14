@@ -271,10 +271,6 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 							NamespaceHandlerResolver.class.getClassLoader(), this));
 					reader.setBeanNameGenerator(beanNameGenerator);
 
-					// Install the project class loader as bean class loader
-					// TODO CD needs further testing before actually using
-					// reader.setBeanClassLoader(JdtUtils.getClassLoader(getElementResource()));
-
 					try {
 						reader.loadBeanDefinitions(resource);
 						eventListener.registerComponents();

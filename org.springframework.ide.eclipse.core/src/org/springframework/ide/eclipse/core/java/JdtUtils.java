@@ -693,7 +693,7 @@ public class JdtUtils {
 
 		return className;
 	}
-
+	
 	public static IType getJavaTypeFromSignatureClassName(String className, IType contextType) {
 		if (contextType == null || className == null) {
 			return null;

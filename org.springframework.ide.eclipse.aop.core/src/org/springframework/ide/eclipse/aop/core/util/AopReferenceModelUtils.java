@@ -118,9 +118,9 @@ public class AopReferenceModelUtils {
 
 		// since we moved to the new AbstractProjectBuilder we don't need the
 		// following check.
-		if ((kind == IncrementalProjectBuilder.AUTO_BUILD || kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
-				&& resource instanceof IFile && resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
-			for (IBeansConfig config :BeansModelUtils.getConfigsByContainingTypes(resource)) {
+		if (kind != IncrementalProjectBuilder.FULL_BUILD && resource instanceof IFile
+				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
+			for (IBeansConfig config : BeansModelUtils.getConfigsByContainingTypes(resource)) {
 				files.add(config.getElementResource());
 			}
 		}

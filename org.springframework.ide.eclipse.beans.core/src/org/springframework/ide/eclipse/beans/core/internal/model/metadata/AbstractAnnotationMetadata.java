@@ -30,6 +30,8 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractAnnotationMetadata implements IClassMetadata, IAdaptable,
 		Serializable {
+	
+	private static final Set<IMethodMetadata> EMPTY_METHOD_METADATA = Collections.emptySet();
 
 	private static final long serialVersionUID = -8338005903818492219L;
 
@@ -41,13 +43,22 @@ public abstract class AbstractAnnotationMetadata implements IClassMetadata, IAda
 
 	private Object value;
 
+	private Set<IMethodMetadata> methodMetadata;
+
 	public AbstractAnnotationMetadata(IBean bean, String handle, Object value,
 			IModelSourceLocation location) {
+		this(bean, handle, value, location, EMPTY_METHOD_METADATA);
+	}
+
+	public AbstractAnnotationMetadata(IBean bean, String handle, Object value,
+			IModelSourceLocation location, Set<IMethodMetadata> methodMetadata) {
 		this.handle = handle;
 		this.value = value;
 		this.beanId = bean.getElementID();
 		this.location = location;
+		this.methodMetadata = methodMetadata;
 	}
+
 
 	@Override
 	public boolean equals(Object other) {
@@ -78,7 +89,7 @@ public abstract class AbstractAnnotationMetadata implements IClassMetadata, IAda
 	public IBean getBean() {
 		return (IBean) BeansCorePlugin.getModel().getElement(beanId);
 	}
-	
+
 	public String getClassHandle() {
 		return handle;
 	}
@@ -96,7 +107,7 @@ public abstract class AbstractAnnotationMetadata implements IClassMetadata, IAda
 	}
 
 	public Set<IMethodMetadata> getMethodMetaData() {
-		return Collections.emptySet();
+		return methodMetadata;
 	}
 
 	public Object getValue() {
@@ -132,5 +143,5 @@ public abstract class AbstractAnnotationMetadata implements IClassMetadata, IAda
 		hashCode = hashCode + ObjectUtils.nullSafeHashCode(location);
 		return 12 * hashCode;
 	}
-	
+
 }

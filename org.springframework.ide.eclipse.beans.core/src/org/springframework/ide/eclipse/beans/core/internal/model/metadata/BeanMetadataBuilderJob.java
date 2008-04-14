@@ -23,8 +23,10 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.progress.IProgressConstants;
@@ -166,18 +168,35 @@ public class BeanMetadataBuilderJob extends Job {
 	/**
 	 * Attaches {@link IBeanMetadata} and {@link IBeanProperty} to a single {@link IBean}.
 	 */
-	private void attachMetadataToBean(IBeansConfig beansConfig, IProgressMonitor progressMonitor,
-			IBeanMetadataProvider[] providers, IBean bean) {
+	private void attachMetadataToBean(final IBeansConfig beansConfig,
+			final IProgressMonitor progressMonitor, IBeanMetadataProvider[] providers,
+			final IBean bean) {
 		// Reset meta data attachment before adding
 		BeansCorePlugin.getMetadataModel().clearBeanMetaData(bean);
 		BeansCorePlugin.getMetadataModel().clearBeanProperties(bean);
 
 		Set<IBeanMetadata> beanMetaData = new LinkedHashSet<IBeanMetadata>();
 		Set<IMethodMetadata> methodMetaData = new LinkedHashSet<IMethodMetadata>();
-		Set<IBeanProperty> beanProperties = new LinkedHashSet<IBeanProperty>();
-		for (IBeanMetadataProvider provider : providers) {
-			Set<IBeanMetadata> beanMetaDataSet = provider.provideBeanMetadata(bean, beansConfig,
-					progressMonitor);
+
+		final Set<IBeanMetadata> beanMetaDataSet = new LinkedHashSet<IBeanMetadata>();
+		final Set<IBeanProperty> beanProperties = new LinkedHashSet<IBeanProperty>();
+		for (final IBeanMetadataProvider provider : providers) {
+
+			// make sure third-party extensions don't crash the build
+			SafeRunner.run(new ISafeRunnable() {
+
+				public void handleException(Throwable exception) {
+					// nothing to do here
+				}
+
+				public void run() throws Exception {
+					beanMetaDataSet.addAll(provider.provideBeanMetadata(bean, beansConfig,
+							progressMonitor));
+					beanProperties.addAll(provider.provideBeanProperties(bean, beansConfig,
+							progressMonitor));
+				}
+			});
+
 			for (IBeanMetadata metaData : beanMetaDataSet) {
 				if (metaData instanceof IMethodMetadata) {
 					methodMetaData.add((IMethodMetadata) beanMetaData);
@@ -186,8 +205,6 @@ public class BeanMetadataBuilderJob extends Job {
 					beanMetaData.add(metaData);
 				}
 			}
-			beanProperties.addAll(provider
-					.provideBeanProperties(bean, beansConfig, progressMonitor));
 		}
 		if (beanMetaData.size() > 0 || methodMetaData.size() > 0) {
 			BeansCorePlugin.getMetadataModel().setBeanMetadata(bean, beanMetaData, methodMetaData);
@@ -226,5 +243,5 @@ public class BeanMetadataBuilderJob extends Job {
 		}
 		return providers.toArray(new IBeanMetadataProvider[providers.size()]);
 	}
-	
+
 }
