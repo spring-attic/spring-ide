@@ -267,6 +267,8 @@
 				<instanceof value="org.eclipse.core.resources.IResource"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 				<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata"/>
 			</or>
          </possibleChildren>
          <commonSorter
@@ -335,6 +337,8 @@
 					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 				</and>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata"/>
 			</or>
          </possibleChildren>
          <commonSorter

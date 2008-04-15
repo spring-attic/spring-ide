@@ -99,7 +99,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 		BeansProject beansProject = getProject(file);
 		
 		if (beansProject != null) {
-			beansProject.addConfig(file);
+			beansProject.addConfig(file, IBeansConfig.Type.MANUAL);
 			newConfig = beansProject.getConfig(file);
 
 			Set<IBeansConfigSet> configSets = linkPage.getBeansConfigSets();

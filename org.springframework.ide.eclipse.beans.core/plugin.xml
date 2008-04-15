@@ -14,6 +14,9 @@
 	<extension-point id="metadataproviders" name="%extensionMetadataproviders.name"
 		schema="schema/metadataproviders.exsd" />
 
+	<extension-point id="beansconfiglocators" name="%extensionBeanconfiglocators.name"
+		schema="schema/beansconfiglocators.exsd" />
+
 	<extension point="org.eclipse.core.resources.markers"
 			id="problemmarker"
 			name="%beansProblemMarker">

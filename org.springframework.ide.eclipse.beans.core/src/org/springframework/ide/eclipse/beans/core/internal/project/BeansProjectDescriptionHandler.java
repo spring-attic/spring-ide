@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -180,7 +181,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 						config = config.substring(projectPath.length());
 					}
 				}
-				project.addConfig(config);
+				project.addConfig(config, IBeansConfig.Type.MANUAL);
 				state = State.CONFIGS;
 			}
 		} else if (state == State.CONFIG_SETS) {

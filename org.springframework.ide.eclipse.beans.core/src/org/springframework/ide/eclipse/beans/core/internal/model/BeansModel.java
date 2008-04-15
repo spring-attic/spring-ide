@@ -65,7 +65,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	private final Lock r = rwl.readLock();
 
 	private final Lock w = rwl.writeLock();
-
+	
 	/**
 	 * The table of Spring Beans projects
 	 */
@@ -500,7 +500,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 
-		public void configAdded(IFile file, int eventType) {
+		public void configAdded(IFile file, int eventType, IBeansConfig.Type type) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
 					System.out.println("Config '" + file.getFullPath()
@@ -514,12 +514,16 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				finally {
 					r.unlock();
 				}
-				if (project.addConfig(file)) {
+				if (project.addConfig(file, type)) {
 					project.saveDescription();
 				}
 				IBeansConfig config = project.getConfig(file);
 				notifyListeners(config, Type.ADDED);
 			}
+		}
+
+		public void configAdded(IFile file, int eventType) {
+			configAdded(file, eventType, IBeansConfig.Type.MANUAL);
 		}
 
 		public void configChanged(IFile file, int eventType) {
@@ -599,8 +603,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 
-		public void javaStructureChanged(IFile file, int eventType) {
-		}
 	}
 	
 }

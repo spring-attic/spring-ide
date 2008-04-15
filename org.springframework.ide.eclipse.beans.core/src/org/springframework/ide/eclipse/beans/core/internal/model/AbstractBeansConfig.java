@@ -70,6 +70,8 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 	/** List of bean names mapped beans (in registration order) */
 	protected volatile Map<String, IBean> beans;
+	
+	protected volatile Type type;
 
 	/**
 	 * List of bean class names mapped to list of beans implementing the
@@ -92,8 +94,9 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 	 */
 	protected Set<ValidationProblem> problems;
 
-	public AbstractBeansConfig(IBeansModelElement project, String name) {
+	public AbstractBeansConfig(IBeansModelElement project, String name, Type type) {
 		super(project, name);
+		this.type = type;
 	}
 
 	@Override
@@ -603,6 +606,10 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 	@Override
 	public String toString() {
 		return getElementName() + ": " + getBeans();
+	}
+	
+	public Type getType() {
+		return type;
 	}
 
 }

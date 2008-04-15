@@ -3,19 +3,18 @@
 <schema targetNamespace="org.springframework.ide.eclipse.beans.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="metadataproviders" name="Metadata Proivders"/>
+         <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="beansconfiglocators" name="BeansConfig Locators"/>
       </appinfo>
       <documentation>
          &lt;p&gt;
-This extension point is used to add meta data providers
+This extension point is used to add bean configuration locators
       </documentation>
    </annotation>
 
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="metadataProvider" minOccurs="0" maxOccurs="unbounded"/>
-            <element ref="annotationMetadataProvider" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="beansConfigLocator" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -41,30 +40,15 @@ This extension point is used to add meta data providers
       </complexType>
    </element>
 
-   <element name="metadataProvider">
+   <element name="beansConfigLocator">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider&lt;/samp&gt;
+                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator&lt;/samp&gt;
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-      </complexType>
-   </element>
-
-   <element name="annotationMetadataProvider">
-      <complexType>
-         <attribute name="class" type="string" use="required">
-            <annotation>
-               <documentation>
-                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider&lt;/samp&gt;
-               </documentation>
-               <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider"/>
+                  <meta.attribute kind="java" basedOn=":org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -87,11 +71,11 @@ This extension point is used to add meta data providers
       <documentation>
          &lt;pre&gt;
     &lt;extension
-         point=&quot;org.springframework.ide.eclipse.beans.core.metadataproviders&quot;&gt;
-        &lt;metadataProvider
-           class=&quot;org.springframework.ide.eclipse.beans.core.internal.model.metadata.DelegatingAnnotationReadingMetadataProvider&quot;&gt;
-        &lt;/metadataProvider&gt;
-    &lt;/extension&gt;
+          point=&quot;org.springframework.ide.eclipse.beans.core.beansconfiglocators&quot;&gt;
+       &lt;beansConfigLocator
+             class=&quot;org.springframework.ide.eclipse.beans.core.internal.model.SpringDMBeansConfigLocator&quot;&gt;
+       &lt;/beansConfigLocator&gt;
+    &lt;/extension&gt; 
 &lt;/pre&gt;
       </documentation>
    </annotation>
@@ -102,9 +86,7 @@ This extension point is used to add meta data providers
       </appinfo>
       <documentation>
          &lt;p&gt;
-Each meta data provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider&lt;/samp&gt;.
-
-Each annotation meta data provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider&lt;/samp&gt;.
+Each bean config locator must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator&lt;/samp&gt;.
       </documentation>
    </annotation>
 

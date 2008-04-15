@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
@@ -383,7 +384,7 @@ public class ConfigFilesTab {
 						IFile file = (IFile) element;
 						config = file.getProjectRelativePath().toString();
 					}
-					project.addConfig(config);
+					project.addConfig(config, IBeansConfig.Type.MANUAL);
 				}
 				configsViewer.refresh(false);
 				hasUserMadeChanges = true;
@@ -419,7 +420,14 @@ public class ConfigFilesTab {
 		}
 
 		public Object[] getElements(Object obj) {
-			return project.getConfigs().toArray();
+			Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
+			Set<IBeansConfig> allconfigs = project.getConfigs();
+			for (IBeansConfig config : allconfigs) {
+				if (config.getType() == Type.MANUAL) {
+					configs.add(config);
+				}
+			}
+			return configs.toArray();
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -457,7 +465,11 @@ public class ConfigFilesTab {
 		protected boolean selectFile(IFile element) {
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
 					element.getProject());
-			return project != null && !project.hasConfig(element);
+			if (project != null) {
+				IBeansConfig beansConfig = project.getConfig(element);
+				return beansConfig == null || beansConfig.getType() == Type.AUTO_DETECTED;
+			}
+			return false;
 		}
 	}
 	

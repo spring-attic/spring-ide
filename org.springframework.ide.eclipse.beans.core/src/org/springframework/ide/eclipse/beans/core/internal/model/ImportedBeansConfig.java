@@ -40,8 +40,8 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  */ 
 public class ImportedBeansConfig extends AbstractBeansConfig implements IImportedBeansConfig {
 
-	public ImportedBeansConfig(IBeansImport beansImport, Resource resource) {
-		super(beansImport, resource.getDescription());
+	public ImportedBeansConfig(IBeansImport beansImport, Resource resource, Type type) {
+		super(beansImport, resource.getDescription(), type);
 		init(resource);
 	}
 

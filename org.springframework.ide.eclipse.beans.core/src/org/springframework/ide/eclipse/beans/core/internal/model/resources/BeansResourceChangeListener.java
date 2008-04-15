@@ -16,8 +16,10 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorUtils;
+import org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 
@@ -66,9 +68,12 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				else if (BeansCoreUtils.isBeansConfig(file)) {
 					events.configAdded(file, eventType);
 				}
-				else if (BeansModelUtils.isBeanClass(file)) {
-					events.javaStructureChanged(file, eventType);
+				else if (isAutoDetectedConfig(file)) {
+					events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
 				}
+				/*else if (BeansModelUtils.isBeanClass(file)) {
+					events.javaStructureChanged(file, eventType);
+				}*/
 				return false;
 			}
 			return super.resourceAdded(resource);
@@ -87,9 +92,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					else if (BeansCoreUtils.isBeansConfig(file, true)) {
 						events.configChanged(file, eventType);
 					}
-					else if (BeansModelUtils.isBeanClass(file)) {
+					/*else if (BeansModelUtils.isBeanClass(file)) {
 						events.javaStructureChanged(file, eventType);
-					}
+					}*/
 				}
 				return false;
 			}
@@ -99,14 +104,12 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 		@Override
 		protected boolean resourceRemoved(IResource resource) {
 			if (resource instanceof IFile) {
-				IFile file = (IFile) resource;
-				
 				if (BeansCoreUtils.isBeansConfig(resource)) {
 					events.configRemoved((IFile) resource, eventType);
 				}
-				else if (BeansModelUtils.isBeanClass(file)) {
+				/*else if (BeansModelUtils.isBeanClass(file)) {
 					events.javaStructureChanged(file, eventType);
-				}
+				}*/
 				return false;
 			}
 			return super.resourceRemoved(resource);
@@ -118,6 +121,15 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					&& resource.getType() == IResource.FILE
 					&& ((resource.getFullPath().segmentCount() == 2 && resource.getName().equals(
 							IBeansProject.DESCRIPTION_FILE)) || SpringCoreUtils.isManifest(resource));
+		}
+		
+		private boolean isAutoDetectedConfig(IFile file) {
+			for (IBeansConfigLocator locator : BeansConfigLocatorUtils.getBeansConfigLocators()) {
+				if (locator.isBeansConfig(file)) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }

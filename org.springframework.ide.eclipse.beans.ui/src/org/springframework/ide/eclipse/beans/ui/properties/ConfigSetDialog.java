@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
@@ -281,7 +282,7 @@ public class ConfigSetDialog extends Dialog {
 		// Add missing configs from project
 		for (IBeansConfig config : project.getConfigs()) {
 			if (!configSet.hasConfig(config.getElementName())) {
-				configs.add(new BeansConfig(project, config.getElementName()));
+				configs.add(new BeansConfig(project, config.getElementName(), Type.MANUAL));
 			}
 		}
 		// Add all configs from referenced projects
@@ -313,7 +314,7 @@ public class ConfigSetDialog extends Dialog {
 							String name = projectPath + "/"
 									+ config.getElementName();
 							if (!configSet.hasConfig(name)) {
-								configs.add(new BeansConfig(project, name));
+								configs.add(new BeansConfig(project, name, Type.MANUAL));
 							}
 						}
 					}

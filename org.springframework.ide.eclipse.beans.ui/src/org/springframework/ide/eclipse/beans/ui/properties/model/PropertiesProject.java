@@ -21,11 +21,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
- * This class holds information for a Spring Beans project. The information is
- * retrieved from a given Spring Beans project instead being read from the
- * corresponding project description XML file defined in
- * {@link IBeansProject#DESCRIPTION_FILE}. The information can be persisted by
- * calling the method {@link #saveDescription()}.
+ * This class holds information for a Spring Beans project. The information is retrieved from a
+ * given Spring Beans project instead being read from the corresponding project description XML file
+ * defined in {@link IBeansProject#DESCRIPTION_FILE}. The information can be persisted by calling
+ * the method {@link #saveDescription()}.
  * 
  * @author Torsten Juergeleit
  */
@@ -41,22 +40,28 @@ public class PropertiesProject extends BeansProject {
 		// class accidently tries to populate the project from the config file
 		modelPopulated = true;
 
-		configSuffixes = new LinkedHashSet<String>(project
-				.getConfigSuffixes());
-		
+		configSuffixes = new LinkedHashSet<String>(project.getConfigSuffixes());
+
 		isImportsEnabled = project.isImportsEnabled();
 
 		configs = new LinkedHashMap<String, IBeansConfig>();
+		autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
 		for (IBeansConfig config : project.getConfigs()) {
-			configs.put(config.getElementName(), new PropertiesConfig(this,
-					config.getElementName()));
+			if (config.getType() == IBeansConfig.Type.MANUAL) {
+				configs.put(config.getElementName(), new PropertiesConfig(this, config
+						.getElementName(), config.getType()));
+			}
+			else {
+				autoDetectedConfigs.put(config.getElementName(), new PropertiesConfig(this, config
+						.getElementName(), config.getType()));
+			}
 		}
 
 		configSets = new LinkedHashMap<String, IBeansConfigSet>();
 		for (IBeansConfigSet configSet : project.getConfigSets()) {
-			configSets.put(configSet.getElementName(), new PropertiesConfigSet(
-					this, configSet));
+			configSets.put(configSet.getElementName(), new PropertiesConfigSet(this, configSet));
 		}
+
 	}
 
 	@Override
@@ -78,10 +83,10 @@ public class PropertiesProject extends BeansProject {
 		super.setConfigs(configNames);
 		notifyListeners();
 	}
-		
+
 	@Override
-	public boolean addConfig(String configName) {
-		if (super.addConfig(configName)) {
+	public boolean addConfig(String configName, IBeansConfig.Type type) {
+		if (super.addConfig(configName, type)) {
 			notifyListeners();
 			return true;
 		}

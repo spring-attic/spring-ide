@@ -132,7 +132,7 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 				IProject project = getProject(parent);
 				if (resource.getProject().equals(project)
 						&& !beansProject.hasConfig(file)) {
-					beansProject.addConfig(file);
+					beansProject.addConfig(file, IBeansConfig.Type.MANUAL);
 					return saveProject(beansProject);
 				}
 			}
@@ -155,7 +155,7 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 						beansConfigSet.addConfig(bc.getElementName());
 					}
 					else {
-						beansProject.addConfig(file);
+						beansProject.addConfig(file, IBeansConfig.Type.MANUAL);
 						bc = beansProject.getConfig(file);
 						beansConfigSet.addConfig(bc.getElementName());
 					}

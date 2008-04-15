@@ -99,8 +99,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
-	public BeansConfig(IBeansProject project, String name) {
-		super(project, name);
+	public BeansConfig(IBeansProject project, String name, Type type) {
+		super(project, name, type);
 		init(name);
 	}
 
@@ -580,7 +580,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 				for (Resource importedResource : importedResources) {
 					ImportedBeansConfig importedBeansConfig = new ImportedBeansConfig(beansImport,
-							importedResource);
+							importedResource, getType());
 					importedBeansConfig.readConfig();
 					beansImport.addImportedBeansConfig(importedBeansConfig);
 

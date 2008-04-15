@@ -85,7 +85,7 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	public Set<IBeansConfig> getConfigs() {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
 		for (String configName : configNames) {
-			IBeansConfig config = new PropertiesConfig(this, configName);
+			IBeansConfig config = new PropertiesConfig(this, configName, IBeansConfig.Type.MANUAL);
 			if (config != null) {
 				configs.add(config);
 			}

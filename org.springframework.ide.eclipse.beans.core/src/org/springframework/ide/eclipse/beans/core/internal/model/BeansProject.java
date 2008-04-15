@@ -36,6 +36,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorUtils;
+import org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
@@ -45,15 +48,14 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This class holds information for a Spring Beans project. The information is
- * lazily read from the corresponding project description XML file defined in
- * {@link IBeansProject#DESCRIPTION_FILE}. The information can be persisted by
- * calling the method {@link #saveDescription()}.
+ * This class holds information for a Spring Beans project. The information is lazily read from the
+ * corresponding project description XML file defined in {@link IBeansProject#DESCRIPTION_FILE}.
+ * <p>
+ * The information can be persisted by calling the method {@link #saveDescription()}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansProject extends AbstractResourceModelElement implements
-		IBeansProject {
+public class BeansProject extends AbstractResourceModelElement implements IBeansProject {
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -75,6 +77,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	protected volatile Map<String, IBeansConfig> configs;
 
+	protected volatile Map<String, IBeansConfig> autoDetectedConfigs;
+
 	protected volatile Map<String, IBeansConfigSet> configSets;
 
 	public BeansProject(IBeansModel model, IProject project) {
@@ -88,8 +92,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	@Override
 	public IModelElement[] getElementChildren() {
-		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
-				getConfigs());
+		Set<IModelElement> children = new LinkedHashSet<IModelElement>(getConfigs());
 		children.addAll(getConfigSets());
 		return children.toArray(new IModelElement[children.size()]);
 	}
@@ -183,7 +186,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * @deprecated user {@link #getConfigSuffixes()} instead.
+	 * @deprecated use {@link #getConfigSuffixes()} instead.
 	 */
 	@Deprecated
 	public Set<String> getConfigExtensions() {
@@ -201,7 +204,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * @deprecated user {@link #hasConfigSuffix(String)} instead.
+	 * @deprecated use {@link #hasConfigSuffix(String)} instead.
 	 */
 	@Deprecated
 	public boolean hasConfigExtension(String extension) {
@@ -209,8 +212,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Updates the list of configs (by name) belonging to this project. From all
-	 * removed configs the Spring IDE problem markers are deleted.
+	 * Updates the list of configs (by name) belonging to this project. From all removed configs the
+	 * Spring IDE problem markers are deleted.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
@@ -240,7 +243,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			// Create new list of configs
 			configs.clear();
 			for (String configName : configNames) {
-				configs.put(configName, new BeansConfig(this, configName));
+				configs.put(configName, new BeansConfig(this, configName, Type.MANUAL));
 			}
 		}
 		finally {
@@ -263,8 +266,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * @param file the config file to add
 	 * @return <code>true</code> if config file was added to this project
 	 */
-	public boolean addConfig(IFile file) {
-		return addConfig(getConfigName(file));
+	public boolean addConfig(IFile file, IBeansConfig.Type type) {
+		return addConfig(getConfigName(file), type);
 	}
 
 	/**
@@ -275,15 +278,24 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * @param configName the config name to add
 	 * @return <code>true</code> if config was added to this project
 	 */
-	public boolean addConfig(String configName) {
+	public boolean addConfig(String configName, IBeansConfig.Type type) {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
 		try {
 			w.lock();
 			if (configName.length() > 0 && !configs.containsKey(configName)) {
-				configs.put(configName, new BeansConfig(this, configName));
-				return true;
+				if (type == IBeansConfig.Type.MANUAL) {
+					configs.put(configName, new BeansConfig(this, configName, type));
+					if (autoDetectedConfigs.containsKey(configName)) {
+						autoDetectedConfigs.remove(configName);
+					}
+					return true;
+				}
+				else if (type == IBeansConfig.Type.AUTO_DETECTED) {
+					autoDetectedConfigs.put(configName, new BeansConfig(this, configName, type));
+					return true;
+				}
 			}
 		}
 		finally {
@@ -293,8 +305,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Removes the given beans config from the list of configs and from all
-	 * config sets.
+	 * Removes the given beans config from the list of configs and from all config sets.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
@@ -311,8 +322,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Removes the given beans config from the list of configs and from all
-	 * config sets.
+	 * Removes the given beans config from the list of configs and from all config sets.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
@@ -324,6 +334,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			try {
 				w.lock();
 				configs.remove(configName);
+				autoDetectedConfigs.remove(configName);
 			}
 			finally {
 				w.unlock();
@@ -344,7 +355,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		}
 		try {
 			r.lock();
-			return configs.containsKey(configName);
+			return (configs.containsKey(configName) || autoDetectedConfigs.containsKey(configName));
 		}
 		finally {
 			r.unlock();
@@ -404,8 +415,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public IBeansConfig getConfig(String configName) {
-		if (configName != null && configName.length() > 0
-				&& configName.charAt(0) == '/') {
+		if (configName != null && configName.length() > 0 && configName.charAt(0) == '/') {
 			return BeansCorePlugin.getModel().getConfig(configName);
 		}
 		if (!this.modelPopulated) {
@@ -413,7 +423,13 @@ public class BeansProject extends AbstractResourceModelElement implements
 		}
 		try {
 			r.lock();
-			return configs.get(configName);
+			if (configs.containsKey(configName)) {
+				return configs.get(configName);
+			}
+			else if (autoDetectedConfigs.containsKey(configName)) {
+				return autoDetectedConfigs.get(configName);
+			}
+			return null;
 		}
 		finally {
 			r.unlock();
@@ -421,6 +437,21 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public Set<String> getConfigNames() {
+		if (!this.modelPopulated) {
+			populateModel();
+		}
+		try {
+			r.lock();
+			Set<String> configNames = new LinkedHashSet<String>(configs.keySet());
+			configNames.addAll(autoDetectedConfigs.keySet());
+			return configNames;
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	public Set<String> getManualConfigNames() {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
@@ -439,7 +470,9 @@ public class BeansProject extends AbstractResourceModelElement implements
 		}
 		try {
 			r.lock();
-			return new LinkedHashSet<IBeansConfig>(configs.values());
+			Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>(configs.values());
+			beansConfigs.addAll(autoDetectedConfigs.values());
+			return beansConfigs;
 		}
 		finally {
 			r.unlock();
@@ -563,8 +596,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Writes the current project description to the corresponding XML file
-	 * defined in {@link IBeansProject#DESCRIPTION_FILE}.
+	 * Writes the current project description to the corresponding XML file defined in
+	 * {@link IBeansProject#DESCRIPTION_FILE}.
 	 */
 	public void saveDescription() {
 
@@ -575,9 +608,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Resets the internal data. Any further access to the data of this instance
-	 * of {@link BeansProject} leads to reloading of this beans project's config
-	 * description file.
+	 * Resets the internal data. Any further access to the data of this instance of
+	 * {@link BeansProject} leads to reloading of this beans project's config description file.
 	 */
 	public void reset() {
 		try {
@@ -586,6 +618,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			configSuffixes = null;
 			configs = null;
 			configSets = null;
+			autoDetectedConfigs = null;
 		}
 		finally {
 			w.unlock();
@@ -616,9 +649,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	public String toString() {
 		try {
 			r.lock();
-			return "Project=" + getElementName() + ", ConfigExtensions="
-					+ configSuffixes + ", Configs=" + configs.values()
-					+ ", ConfigsSets=" + configSets;
+			return "Project=" + getElementName() + ", ConfigExtensions=" + configSuffixes
+					+ ", Configs=" + configs.values() + ", ConfigsSets=" + configSets;
 		}
 		finally {
 			r.unlock();
@@ -646,9 +678,9 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Returns the config name from given file. If the file belongs to this
-	 * project then the config name is the project-relativ path of the given
-	 * file otherwise it's the workspace-relativ path with a leading '/'.
+	 * Returns the config name from given file. If the file belongs to this project then the config
+	 * name is the project-relative path of the given file otherwise it's the workspace-relative
+	 * path with a leading '/'.
 	 */
 	private String getConfigName(IFile file) {
 		String configName;
@@ -662,9 +694,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Populate the project's model with the information read from project
-	 * description (an XML file defined in
-	 * {@link ISpringProject.DESCRIPTION_FILE}).
+	 * Populate the project's model with the information read from project description (an XML file
+	 * defined in {@link ISpringProject.DESCRIPTION_FILE}).
 	 */
 	private void populateModel() {
 		try {
@@ -677,14 +708,27 @@ public class BeansProject extends AbstractResourceModelElement implements
 			configSuffixes = new LinkedHashSet<String>();
 			configs = new LinkedHashMap<String, IBeansConfig>();
 			configSets = new LinkedHashMap<String, IBeansConfigSet>();
+			autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
 			this.modelPopulated = true;
 			BeansProjectDescriptionReader.read(this);
 
 			// Remove all invalid configs from this project
-
 			for (IBeansConfig config : getConfigs()) {
 				if (config.getElementResource() == null) {
 					removeConfig(config.getElementName());
+				}
+			}
+			
+			// Add auto detected beans configs
+			for (IBeansConfigLocator locator : BeansConfigLocatorUtils.getBeansConfigLocators()) {
+				Set<IFile> files = locator.locateBeansConfigs(getProject());
+				for (IFile file : files) {
+					BeansConfig config = new BeansConfig(this, file.getProjectRelativePath()
+							.toString(), Type.AUTO_DETECTED);
+					String configName = getConfigName(file);
+					if (!hasConfig(configName)) {
+						autoDetectedConfigs.put(getConfigName(file), config);
+					}
 				}
 			}
 
@@ -693,12 +737,12 @@ public class BeansProject extends AbstractResourceModelElement implements
 			IBeansModel model = BeansCorePlugin.getModel();
 			for (IBeansConfigSet configSet : configSets.values()) {
 				for (String configName : configSet.getConfigNames()) {
-					if (!hasConfig(configName)
-							&& model.getConfig(configName) == null) {
+					if (!hasConfig(configName) && model.getConfig(configName) == null) {
 						((BeansConfigSet) configSet).removeConfig(configName);
 					}
 				}
 			}
+
 		}
 		finally {
 			w.unlock();
@@ -740,8 +784,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public boolean isUpdatable() {
-		IFile file = project.getProject().getFile(
-				new Path(IBeansProject.DESCRIPTION_FILE));
+		IFile file = project.getProject().getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		return !file.isReadOnly();
 	}
 }

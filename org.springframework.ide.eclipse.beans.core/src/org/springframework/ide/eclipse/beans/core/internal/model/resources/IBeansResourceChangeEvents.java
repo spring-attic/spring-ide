@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.model.resources;
 
 import org.eclipse.core.resources.IFile;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.internal.model.resources.ISpringResourceChangeEvents;
 
 /**
@@ -25,6 +26,8 @@ public interface IBeansResourceChangeEvents
 
 	void configAdded(IFile file, int eventType);
 
+	void configAdded(IFile file, int eventType, IBeansConfig.Type type);
+
 	void configChanged(IFile file, int eventType);
 
 	void configRemoved(IFile file, int eventType);
@@ -33,5 +36,5 @@ public interface IBeansResourceChangeEvents
 	 * Notify that the java structure of a bean class has been changed.
 	 * @since 2.0.5
 	 */
-	void javaStructureChanged(IFile file, int eventType);
+	//void javaStructureChanged(IFile file, int eventType);
 }
