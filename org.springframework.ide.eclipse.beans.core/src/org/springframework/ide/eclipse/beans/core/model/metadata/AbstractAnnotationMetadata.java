@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.model.metadata;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -17,8 +17,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.IAdaptable;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IClassMetadata;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.util.ObjectUtils;

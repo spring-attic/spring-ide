@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.metadata.AbstractAnnotationReadingMetadataProvider;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;

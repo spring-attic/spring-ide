@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.model.metadata;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -21,11 +21,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.objectweb.asm.ClassReader;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.metadata.BeanMetadataProviderAdapter;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
