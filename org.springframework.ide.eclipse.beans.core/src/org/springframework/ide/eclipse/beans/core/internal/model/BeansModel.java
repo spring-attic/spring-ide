@@ -516,6 +516,11 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				}
 				if (project.addConfig(file, type)) {
 					project.saveDescription();
+					// In case this is a auto detected config make sure to refresh the
+					// project too, as the project description file will not change
+					if (type == IBeansConfig.Type.AUTO_DETECTED) {
+						notifyListeners(project, Type.CHANGED);
+					}
 				}
 				IBeansConfig config = project.getConfig(file);
 				notifyListeners(config, Type.ADDED);
