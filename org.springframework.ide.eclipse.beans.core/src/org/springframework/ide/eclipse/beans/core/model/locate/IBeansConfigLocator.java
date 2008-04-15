@@ -23,6 +23,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
  * <p>
  * This extension point can be used to provide for autodecting default locations. like e.g. for the
  * established Spring DM best practice of placing all config files in META-INF/spring/*.xml.
+ * <p>
+ * Note: implementations of this interface do not need to be thread-safe.
  * @author Christian Dupuis
  * @since 2.0.5
  */

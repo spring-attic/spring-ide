@@ -25,7 +25,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SafeRunner;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
@@ -718,18 +720,28 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					removeConfig(config.getElementName());
 				}
 			}
-			
+
 			// Add auto detected beans configs
-			for (IBeansConfigLocator locator : BeansConfigLocatorUtils.getBeansConfigLocators()) {
-				Set<IFile> files = locator.locateBeansConfigs(getProject());
-				for (IFile file : files) {
-					BeansConfig config = new BeansConfig(this, file.getProjectRelativePath()
-							.toString(), Type.AUTO_DETECTED);
-					String configName = getConfigName(file);
-					if (!hasConfig(configName)) {
-						autoDetectedConfigs.put(getConfigName(file), config);
+			for (final IBeansConfigLocator locator : BeansConfigLocatorUtils.getBeansConfigLocators()) {
+				
+				// Prevent extension contribution from crashing the model creation
+				SafeRunner.run(new ISafeRunnable() {
+
+					public void handleException(Throwable exception) {
+						// nothing to handle here
 					}
-				}
+
+					public void run() throws Exception {
+						Set<IFile> files = locator.locateBeansConfigs(getProject());
+						for (IFile file : files) {
+							BeansConfig config = new BeansConfig(BeansProject.this, file.getProjectRelativePath()
+									.toString(), Type.AUTO_DETECTED);
+							String configName = getConfigName(file);
+							if (!hasConfig(configName)) {
+								autoDetectedConfigs.put(getConfigName(file), config);
+							}
+						}
+					}});
 			}
 
 			// Remove all invalid config names from from this project's config

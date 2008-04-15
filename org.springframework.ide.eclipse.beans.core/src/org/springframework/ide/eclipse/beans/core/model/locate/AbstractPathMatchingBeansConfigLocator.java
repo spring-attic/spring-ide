@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.model.locate;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -19,7 +20,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -56,13 +56,6 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 	public final Set<IFile> locateBeansConfigs(IProject project) {
 		Set<IFile> files = new LinkedHashSet<IFile>();
 		if (canLocateInProject(project)) {
-			try {
-				// first make sure the project is in sync with the file system
-				project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-			}
-			catch (CoreException e) {
-				BeansCorePlugin.log(e);
-			}
 			IJavaProject javaProject = JdtUtils.getJavaProject(project);
 			if (javaProject != null) {
 				try {
@@ -96,9 +89,11 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 				if (resource instanceof IFile) {
 					IPath filePath = resource.getProjectRelativePath().removeFirstSegments(1);
 					for (String pattern : getAllowedFilePatterns()) {
-						if (pathMatcher.match(pattern, filePath.toString())) {
+						if (getAllowedFileExtensions().contains(resource.getFileExtension())
+								&& pathMatcher.match(pattern, filePath.toString())) {
 							files.add((IFile) resource);
 						}
+						doLocateConfig(files, javaProject, (IFile) resource);
 					}
 				}
 				else if (resource instanceof IFolder) {
@@ -106,6 +101,18 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 				}
 			}
 		}
+	}
+
+	/**
+	 * Sub-classes may override this method to provide additional locating logic.
+	 * <p>
+	 * This default implementation is just empty.
+	 * @param files the already located files
+	 * @param javaProject the current java project
+	 * @param file the file we are currently looking at
+	 */
+	protected void doLocateConfig(Set<IFile> files, IJavaProject javaProject, IFile file) {
+		// no-op
 	}
 
 	/**
@@ -134,7 +141,10 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 	protected Set<IFile> filterMatchingFiles(Set<IFile> files) {
 		return files;
 	}
-
-	protected abstract String[] getAllowedFilePatterns();
+	
+	/**
+	 * Method to provide file patterns that should be used for searching.
+	 */
+	protected abstract List<String> getAllowedFilePatterns();
 
 }

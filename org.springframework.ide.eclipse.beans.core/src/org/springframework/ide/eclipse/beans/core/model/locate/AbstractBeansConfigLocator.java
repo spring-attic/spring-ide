@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.model.locate;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 
@@ -24,15 +25,14 @@ import org.eclipse.core.resources.IFile;
 public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator {
 
 	/** Internal list of allowed file extensions */
-	protected static final String[] FILE_EXTENSIONS = new String[] { "xml" };
+	protected static final List<String> FILE_EXTENSIONS = Arrays.asList(new String[] { "xml" });
 
 	/**
 	 * Checks if the given <code>file</code> is accessible and its file extension is in the list
 	 * of allowed file extensions.
 	 */
 	public final boolean isBeansConfig(IFile file) {
-		if (file.isAccessible()
-				&& Arrays.asList(getAllowedFileExtensions()).contains(file.getFileExtension())) {
+		if (file.isAccessible() && getAllowedFileExtensions().contains(file.getFileExtension())) {
 			return locateBeansConfigs(file.getProject()).contains(file);
 		}
 		return false;
@@ -43,7 +43,7 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	 * other allowed file extensions.
 	 * @return list of allowed file extensions.
 	 */
-	protected String[] getAllowedFileExtensions() {
+	protected List<String> getAllowedFileExtensions() {
 		return FILE_EXTENSIONS;
 	}
 

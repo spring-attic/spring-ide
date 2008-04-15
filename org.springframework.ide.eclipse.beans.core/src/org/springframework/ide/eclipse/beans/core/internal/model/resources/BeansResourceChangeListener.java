@@ -24,12 +24,12 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 
 /**
- * Implementation of {@link IResourceChangeListener} which detects modifications
- * to Spring projects (add/remove Spring beans nature, open/close and delete)
- * and Spring beans configurations (change and delete).
+ * Implementation of {@link IResourceChangeListener} which detects modifications to Spring projects
+ * (add/remove Spring beans nature, open/close and delete) and Spring beans configurations (change
+ * and delete).
  * <p>
- * An implementation of {@link IBeansResourceChangeEvents} has to be provided.
- * Here are callbacks defined for the different events.
+ * An implementation of {@link IBeansResourceChangeEvents} has to be provided. Here are callbacks
+ * defined for the different events.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -71,9 +71,10 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				else if (isAutoDetectedConfig(file)) {
 					events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
 				}
-				/*else if (BeansModelUtils.isBeanClass(file)) {
-					events.javaStructureChanged(file, eventType);
-				}*/
+				/*
+				 * else if (BeansModelUtils.isBeanClass(file)) { events.javaStructureChanged(file,
+				 * eventType); }
+				 */
 				return false;
 			}
 			return super.resourceAdded(resource);
@@ -92,9 +93,10 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					else if (BeansCoreUtils.isBeansConfig(file, true)) {
 						events.configChanged(file, eventType);
 					}
-					/*else if (BeansModelUtils.isBeanClass(file)) {
-						events.javaStructureChanged(file, eventType);
-					}*/
+					/*
+					 * else if (BeansModelUtils.isBeanClass(file)) {
+					 * events.javaStructureChanged(file, eventType); }
+					 */
 				}
 				return false;
 			}
@@ -107,9 +109,10 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				if (BeansCoreUtils.isBeansConfig(resource)) {
 					events.configRemoved((IFile) resource, eventType);
 				}
-				/*else if (BeansModelUtils.isBeanClass(file)) {
-					events.javaStructureChanged(file, eventType);
-				}*/
+				/*
+				 * else if (BeansModelUtils.isBeanClass(file)) { events.javaStructureChanged(file,
+				 * eventType); }
+				 */
 				return false;
 			}
 			return super.resourceRemoved(resource);
@@ -120,13 +123,20 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					&& resource.isAccessible()
 					&& resource.getType() == IResource.FILE
 					&& ((resource.getFullPath().segmentCount() == 2 && resource.getName().equals(
-							IBeansProject.DESCRIPTION_FILE)) || SpringCoreUtils.isManifest(resource));
+							IBeansProject.DESCRIPTION_FILE)) || SpringCoreUtils
+							.isManifest(resource));
 		}
-		
+
 		private boolean isAutoDetectedConfig(IFile file) {
-			for (IBeansConfigLocator locator : BeansConfigLocatorUtils.getBeansConfigLocators()) {
-				if (locator.isBeansConfig(file)) {
-					return true;
+			for (final IBeansConfigLocator locator : BeansConfigLocatorUtils
+					.getBeansConfigLocators()) {
+				try {
+					if (locator.isBeansConfig(file)) {
+						return true;
+					}
+				}
+				catch (Exception e) {
+					// Make sure that a extension contribution can't crash the resource listener
 				}
 			}
 			return false;
