@@ -23,5 +23,29 @@
 				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.xsd" />
 		</catalogContribution>
 	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.namespaces">
+		<namespace
+			name="Spring Security"
+			labelProvider="org.springframework.ide.eclipse.security.ui.namespaces.SecurityConfigNamespaceLabelProvider"
+			uri="http://www.springframework.org/schema/security" 
+			prefix="sec" 
+			icon="icons/full/obj16/spring_security_obj.gif"
+			defaultSchemaLocation="http://www.springframework.org/schema/security/spring-security.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/osgi/spring-security-2.0.xsd" />
+		</namespace>
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.security.ui.editor.contentassist.security.SecurityContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.security.ui.editor.hyperlink.security.SecurityHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.security.ui.editor.outline.security.SecurityOutlineLabelProvider"
+			name="Spring Security"
+			uri="http://www.springframework.org/schema/security" />
+	</extension>
 
 </plugin>
