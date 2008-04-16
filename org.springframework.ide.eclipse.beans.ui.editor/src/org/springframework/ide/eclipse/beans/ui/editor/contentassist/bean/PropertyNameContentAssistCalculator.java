@@ -27,45 +27,37 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
- * {@link IContentAssistCalculator} implementation that calculates proposals for
- * property names.
+ * {@link IContentAssistCalculator} implementation that calculates proposals for property names.
  * @author Christian Dupuis
  * @since 2.0.2
  */
 @SuppressWarnings("restriction")
-public class PropertyNameContentAssistCalculator implements
-		IContentAssistCalculator {
+public class PropertyNameContentAssistCalculator implements IContentAssistCalculator {
 
 	public static final int PROPERTY_RELEVANCE = 10;
 
 	private JavaElementImageProvider imageProvider = new JavaElementImageProvider();
 
-	public void computeProposals(ContentAssistRequest request,
-			String matchString, String attributeName, String namespace,
-			String namepacePrefix) {
+	public void computeProposals(ContentAssistRequest request, String matchString,
+			String attributeName, String namespace, String namepacePrefix) {
 
-		if (request.getParent() != null
-				&& request.getParent().getParentNode() != null
-				&& "bean".equals(request.getParent().getParentNode()
-						.getLocalName())) {
+		if (request.getParent() != null && request.getParent().getParentNode() != null
+				&& "bean".equals(request.getParent().getParentNode().getLocalName())) {
 
-			String className = BeansEditorUtils.getClassNameForBean(
-					BeansEditorUtils.getFile(request), request.getParent()
-							.getParentNode().getOwnerDocument(), request
-							.getParent().getParentNode());
-			IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request)
-					.getProject(), className);
+			String className = BeansEditorUtils.getClassNameForBean(BeansEditorUtils
+					.getFile(request), request.getParent().getParentNode().getOwnerDocument(),
+					request.getParent().getParentNode());
+			IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request).getProject(),
+					className);
 			if (type != null) {
-				addPropertyNameAttributeValueProposals(request, matchString,
-						"", type);
+				addPropertyNameAttributeValueProposals(request, matchString, "", type);
 			}
 		}
 	}
 
-	private void addPropertyNameAttributeValueProposals(
-			ContentAssistRequest request, String prefix, String oldPrefix,
-			IType type) {
-		
+	private void addPropertyNameAttributeValueProposals(ContentAssistRequest request,
+			String prefix, String oldPrefix, IType type) {
+
 		// resolve type of indexed and nested property path
 		if (prefix.lastIndexOf(".") >= 0) {
 			int firstIndex = prefix.indexOf(".");
@@ -78,20 +70,19 @@ public class PropertyNameContentAssistCalculator implements
 				lastPrefix = lastPrefix.substring(1);
 			}
 			try {
-				Collection<?> methods = Introspector.findReadableProperties(
-						type, firstPrefix, true);
+				Collection<?> methods = Introspector
+						.findReadableProperties(type, firstPrefix, true);
 				if (methods != null && methods.size() == 1) {
 
 					Iterator<?> iterator = methods.iterator();
 					while (iterator.hasNext()) {
 						IMethod method = (IMethod) iterator.next();
-						IType returnType = JdtUtils
-								.getJavaTypeForMethodReturnType(method, type);
+						IType returnType = JdtUtils.getJavaTypeForMethodReturnType(method, type);
 						if (returnType != null) {
 							String newPrefix = oldPrefix + firstPrefix + ".";
 
-							addPropertyNameAttributeValueProposals(request,
-									lastPrefix, newPrefix, returnType);
+							addPropertyNameAttributeValueProposals(request, lastPrefix, newPrefix,
+									returnType);
 						}
 						return;
 					}
@@ -103,13 +94,11 @@ public class PropertyNameContentAssistCalculator implements
 		}
 		else {
 			try {
-				Collection<?> methods = Introspector.findWritableProperties(
-						type, prefix, true);
+				Collection<?> methods = Introspector.findWritableProperties(type, prefix, true);
 				if (methods != null && methods.size() > 0) {
 					Iterator<?> iterator = methods.iterator();
 					while (iterator.hasNext()) {
-						createMethodProposal(request,
-								(IMethod) iterator.next(), oldPrefix);
+						createMethodProposal(request, (IMethod) iterator.next(), oldPrefix);
 					}
 				}
 			}
@@ -119,13 +108,11 @@ public class PropertyNameContentAssistCalculator implements
 		}
 	}
 
-	private void createMethodProposal(ContentAssistRequest request,
-			IMethod method, String prefix) {
+	private void createMethodProposal(ContentAssistRequest request, IMethod method, String prefix) {
 		try {
 			String[] parameterNames = method.getParameterNames();
 			String[] parameterTypes = JdtUtils.getParameterTypesString(method);
-			String propertyName = JdtUtils
-					.getPropertyNameFromMethodName(method);
+			String propertyName = JdtUtils.getPropertyNameFromMethodName(method);
 
 			String replaceText = prefix + propertyName;
 
@@ -136,19 +123,21 @@ public class PropertyNameContentAssistCalculator implements
 			buf.append('.');
 			buf.append(method.getElementName());
 			buf.append('(');
-			buf.append(parameterTypes[0]);
-			buf.append(' ');
-			buf.append(parameterNames[0]);
+			if (parameterTypes != null && parameterNames != null && parameterTypes.length > 0
+					&& parameterNames.length > 0) {
+				buf.append(parameterTypes[0]);
+				buf.append(' ');
+				buf.append(parameterNames[0]);
+			}
 			buf.append(')');
 			String displayText = buf.toString();
 
 			Image image = imageProvider.getImageLabel(method, method.getFlags()
 					| JavaElementImageProvider.SMALL_ICONS);
 
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-					replaceText, request.getReplacementBeginPosition(), request
-							.getReplacementLength(), replaceText.length(),
-					image, displayText, null, PROPERTY_RELEVANCE, method);
+			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(replaceText,
+					request.getReplacementBeginPosition(), request.getReplacementLength(),
+					replaceText.length(), image, displayText, null, PROPERTY_RELEVANCE, method);
 			request.addProposal(proposal);
 		}
 		catch (JavaModelException e) {
