@@ -252,7 +252,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		assertTrue(xmlFile.getLocation().toFile().exists());
 
 		// BeansProject beansProject = createBeansProject();
-		beansProject.addConfig(xmlFile);
+		beansProject.addConfig(xmlFile, IBeansConfig.Type.MANUAL);
 		project.waitForAutoBuild();
 
 		IBeansConfig beansConfig = beansProject.getConfig(xmlFile);
