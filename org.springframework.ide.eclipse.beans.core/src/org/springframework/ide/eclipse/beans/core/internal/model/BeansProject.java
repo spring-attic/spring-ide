@@ -850,6 +850,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			}
 			if (configs != null) {
 				for (String configName : configs) {
+					// Before actually removing make sure to delete ALL markers
+					MarkerUtils.deleteAllMarkers(getConfig(configName)
+							.getElementResource(), SpringCore.MARKER_ID);
+					
+					// Remove the config from the internal list
 					autoDetectedConfigs.remove(configName);
 					locatorByAutoDetectedConfig.remove(configName);
 				}
