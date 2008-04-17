@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model.resources;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator;
 import org.springframework.ide.eclipse.core.internal.model.resources.ISpringResourceChangeEvents;
 
 /**
@@ -19,8 +20,7 @@ import org.springframework.ide.eclipse.core.internal.model.resources.ISpringReso
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public interface IBeansResourceChangeEvents
-		extends ISpringResourceChangeEvents {
+public interface IBeansResourceChangeEvents extends ISpringResourceChangeEvents {
 
 	void projectDescriptionChanged(IFile file, int eventType);
 
@@ -31,10 +31,10 @@ public interface IBeansResourceChangeEvents
 	void configChanged(IFile file, int eventType);
 
 	void configRemoved(IFile file, int eventType);
-	
+
 	/**
-	 * Notify that the java structure of a bean class has been changed.
+	 * A file listened by one of the {@link IBeansConfigLocator}s changed. 
 	 * @since 2.0.5
 	 */
-	//void javaStructureChanged(IFile file, int eventType);
+	void listenedFileChanged(IFile file, int eventType);
 }

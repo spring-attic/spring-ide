@@ -36,7 +36,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.osgi.framework.Bundle;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * Some helper methods.
@@ -71,8 +73,8 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns the specified adapter for the given object or <code>null</code>
-	 * if adapter is not supported.
+	 * Returns the specified adapter for the given object or <code>null</code> if adapter is not
+	 * supported.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getAdapter(Object object, Class<T> adapter) {
@@ -300,8 +302,7 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns true if Eclipse's runtime bundle has the same or a newer than
-	 * given version.
+	 * Returns true if Eclipse's runtime bundle has the same or a newer than given version.
 	 */
 	public static boolean isEclipseSameOrNewer(int majorVersion, int minorVersion) {
 		Bundle bundle = Platform.getBundle(Platform.PI_RUNTIME);
@@ -332,8 +333,7 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns true if Eclipse's runtime bundle has the same or a newer than
-	 * given version.
+	 * Returns true if Eclipse's runtime bundle has the same or a newer than given version.
 	 */
 	public static boolean isVersionSameOrNewer(String version, int majorVersion, int minorVersion,
 			int patchVersion) {
@@ -364,12 +364,12 @@ public final class SpringCoreUtils {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks if the given {@link IResource} is a OSGi bundle manifest.
 	 * <p>
 	 * Note: only the name and last segment of the folder name are checked.
-     * @since 2.0.5
+	 * @since 2.0.5
 	 */
 	public static boolean isManifest(IResource resource) {
 		return resource != null
@@ -430,6 +430,19 @@ public final class SpringCoreUtils {
 		}
 		job.setUser(true);
 		job.schedule();
+	}
+
+	public static boolean hasProjectFacet(IResource resource, String facetId) {
+		if (resource != null && resource.isAccessible()) {
+			try {
+				return JdtUtils.isJavaProject(resource)
+						&& FacetedProjectFramework.hasProjectFacet(resource.getProject(), facetId);
+			}
+			catch (CoreException e) {
+				// TODO CD handle exception
+			}
+		}
+		return false;
 	}
 
 }

@@ -44,19 +44,17 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This model manages instances of {@link IBeansProject}s. It's populated from
- * Eclipse's current workspace and receives {@link IResourceChangeEvent}s for
- * workspaces changes.
+ * This model manages instances of {@link IBeansProject}s. It's populated from Eclipse's current
+ * workspace and receives {@link IResourceChangeEvent}s for workspaces changes.
  * <p>
- * The single instance of {@link IBeansModel} is available from the static
- * method {@link BeansCorePlugin#getModel()}.
+ * The single instance of {@link IBeansModel} is available from the static method
+ * {@link BeansCorePlugin#getModel()}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
 
-	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
-			+ "/model/debug";
+	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/debug";
 
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
@@ -65,12 +63,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	private final Lock r = rwl.readLock();
 
 	private final Lock w = rwl.writeLock();
-	
+
 	/**
 	 * The table of Spring Beans projects
 	 */
 	private volatile Map<IProject, IBeansProject> projects;
-	
+
 	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
@@ -124,23 +122,20 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		// initializeModel();
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
-		workspaceListener = new BeansResourceChangeListener(
-				new ResourceChangeEventHandler());
+		workspaceListener = new BeansResourceChangeListener(new ResourceChangeEventHandler());
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
 	}
 
 	/*
-	 * private void initializeModel() { Job job = new Job("Initializing Spring
-	 * Model") {
+	 * private void initializeModel() { Job job = new Job("Initializing Spring Model") {
 	 * 
-	 * @Override protected IStatus run(IProgressMonitor monitor) {
-	 * SubProgressMonitor subMonitor = new SubProgressMonitor(monitor,
-	 * IProgressMonitor.UNKNOWN); TrueModelElementVisitor visitor = new
-	 * TrueModelElementVisitor(); accept(visitor, subMonitor);
-	 * subMonitor.done(); return Status.OK_STATUS; } }; job.setSystem(true);
-	 * job.setPriority(Job.SHORT); // process asap job.schedule(); }
+	 * @Override protected IStatus run(IProgressMonitor monitor) { SubProgressMonitor subMonitor =
+	 * new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN); TrueModelElementVisitor visitor =
+	 * new TrueModelElementVisitor(); accept(visitor, subMonitor); subMonitor.done(); return
+	 * Status.OK_STATUS; } }; job.setSystem(true); job.setPriority(Job.SHORT); // process asap
+	 * job.schedule(); }
 	 */
 
 	protected void addProject(IBeansProject project) {
@@ -151,7 +146,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		if (DEBUG) {
 			System.out.println("Beans Model shutdown");
 		}
-		
+
 		// Remove the ResourceChangeListener from the Eclipse Workspace
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(workspaceListener);
@@ -196,8 +191,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	public Set<IBeansProject> getProjects() {
 		try {
 			r.lock();
-			return Collections.unmodifiableSet(new HashSet<IBeansProject>(
-					projects.values()));
+			return Collections.unmodifiableSet(new HashSet<IBeansProject>(projects.values()));
 		}
 		finally {
 			r.unlock();
@@ -212,8 +206,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		if (configFile != null) {
 			IBeansProject project = getProject(configFile.getProject());
 			if (project != null) {
-				IBeansConfig bc = project
-						.getConfig(configFile, includeImported);
+				IBeansConfig bc = project.getConfig(configFile, includeImported);
 				if (bc != null) {
 					return bc;
 				}
@@ -229,8 +222,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		return null;
 	}
 
-	public Set<IBeansConfig> getConfigs(IFile configFile,
-			boolean includeImported) {
+	public Set<IBeansConfig> getConfigs(IFile configFile, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
 		if (configFile != null) {
 			for (IBeansProject p : getProjects()) {
@@ -244,13 +236,11 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 		// Extract config name from given full-qualified name
 		// External config files (with a leading '/') are handled too
-		int configNamePos = configName.indexOf('/',
-				(configName.charAt(0) == '/' ? 1 : 0));
+		int configNamePos = configName.indexOf('/', (configName.charAt(0) == '/' ? 1 : 0));
 		if (configNamePos > 0) {
 			String projectName = configName.substring(1, configNamePos);
 			configName = configName.substring(configNamePos + 1);
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-					projectName);
+			IBeansProject project = BeansCorePlugin.getModel().getProject(projectName);
 			if (project != null) {
 				return project.getConfig(configName);
 			}
@@ -259,8 +249,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	}
 
 	/**
-	 * Returns a list of all configs from this model which contain a bean with
-	 * given bean class.
+	 * Returns a list of all configs from this model which contain a bean with given bean class.
 	 */
 	public Set<IBeansConfig> getConfigs(String className) {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
@@ -344,8 +333,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	/**
 	 * Internal resource change event handler.
 	 */
-	private class ResourceChangeEventHandler implements
-			IBeansResourceChangeEvents {
+	private class ResourceChangeEventHandler implements IBeansResourceChangeEvents {
 
 		public boolean isSpringProject(IProject project, int eventType) {
 			return getProject(project) != null;
@@ -354,8 +342,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void springNatureAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature added to "
-							+ "project '" + project.getName() + "'");
+					System.out.println("Spring beans nature added to " + "project '"
+							+ project.getName() + "'");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
 				try {
@@ -372,8 +360,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void springNatureRemoved(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature removed from "
-							+ "project '" + project.getName() + "'");
+					System.out.println("Spring beans nature removed from " + "project '"
+							+ project.getName() + "'");
 				}
 				IBeansProject proj = null;
 				try {
@@ -392,8 +380,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void projectAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Project '" + project.getName()
-							+ "' added");
+					System.out.println("Project '" + project.getName() + "' added");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
 				try {
@@ -411,8 +398,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void projectOpened(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Project '" + project.getName()
-							+ "' opened");
+					System.out.println("Project '" + project.getName() + "' opened");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
 				try {
@@ -429,8 +415,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 		public void projectClosed(IProject project, int eventType) {
 			if (DEBUG) {
-				System.out
-						.println("Project '" + project.getName() + "' closed");
+				System.out.println("Project '" + project.getName() + "' closed");
 			}
 			IBeansProject proj = null;
 			try {
@@ -447,8 +432,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 		public void projectDeleted(IProject project, int eventType) {
 			if (DEBUG) {
-				System.out.println("Project '" + project.getName()
-						+ "' deleted");
+				System.out.println("Project '" + project.getName() + "' deleted");
 			}
 			IBeansProject proj = null;
 			try {
@@ -466,22 +450,21 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void projectDescriptionChanged(IFile file, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD && !SpringCoreUtils.isManifest(file)) {
 				if (DEBUG) {
-					System.out.println("Project description '"
-							+ file.getFullPath() + "' changed");
+					System.out.println("Project description '" + file.getFullPath() + "' changed");
 				}
-				buildProject(file);
+				buildProject(file, true);
 			}
 			// Special handling for META-INF/MANIFEST.MF files on PDE
-			else if (eventType == IResourceChangeEvent.PRE_BUILD && SpringCoreUtils.isManifest(file)) {
+			else if (eventType == IResourceChangeEvent.PRE_BUILD
+					&& SpringCoreUtils.isManifest(file)) {
 				if (DEBUG) {
-					System.out.println("Project manifest '"
-							+ file.getFullPath() + "' changed");
+					System.out.println("Project manifest '" + file.getFullPath() + "' changed");
 				}
-				buildProject(file);
+				buildProject(file, true);
 			}
 		}
 
-		private void buildProject(IFile file) {
+		private void buildProject(IFile file, boolean build) {
 			BeansProject project = null;
 			try {
 				r.lock();
@@ -495,16 +478,17 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			if (project != null) {
 				project.reset();
 				notifyListeners(project, Type.CHANGED);
-				// trigger build of project
-				SpringCoreUtils.buildProject(project.getProject());
+				if (build) {
+					// trigger build of project
+					SpringCoreUtils.buildProject(project.getProject());
+				}
 			}
 		}
 
 		public void configAdded(IFile file, int eventType, IBeansConfig.Type type) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Config '" + file.getFullPath()
-							+ "' added");
+					System.out.println("Config '" + file.getFullPath() + "' added");
 				}
 				BeansProject project = null;
 				try {
@@ -538,8 +522,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				Set<IBeansConfig> bcs = getConfigs(file, true);
 				for (IBeansConfig bc : bcs) {
 					if (bc instanceof IImportedBeansConfig) {
-						configs.add(BeansModelUtils.getParentOfClass(bc,
-								BeansConfig.class));
+						configs.add(BeansModelUtils.getParentOfClass(bc, BeansConfig.class));
 					}
 					else {
 						configs.add((BeansConfig) bc);
@@ -551,8 +534,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Config '" + file.getFullPath()
-							+ "' changed");
+					System.out.println("Config '" + file.getFullPath() + "' changed");
 				}
 				for (BeansConfig config : configs) {
 					notifyListeners(config, Type.CHANGED);
@@ -570,8 +552,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void configRemoved(IFile file, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Config '" + file.getFullPath()
-							+ "' removed");
+					System.out.println("Config '" + file.getFullPath() + "' removed");
 				}
 				BeansProject project = null;
 				try {
@@ -608,6 +589,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 
+		public void listenedFileChanged(IFile file, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Watched resource '" + file.getFullPath() + "' changed");
+				}
+				buildProject(file, false);
+			}
+		}
+
 	}
-	
+
 }

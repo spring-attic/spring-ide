@@ -70,7 +70,7 @@ public class ProjectPropertyPage extends PropertyPage {
 
 	private Map<String, Object> pageData;
 
-	private ConfigLocatorPropertyTab configLocatorTab;
+	private ConfigLocatorTab configLocatorTab;
 
 	public ProjectPropertyPage() {
 		this(null, 0);
@@ -112,7 +112,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		item.setControl(configSetsTab.createControl(folder));
 
 		if (BeansConfigLocatorFactory.hasEnabledBeansConfigLocatorDefinitions(project)) {
-			configLocatorTab = new ConfigLocatorPropertyTab(modelProject.getProject());
+			configLocatorTab = new ConfigLocatorTab(modelProject.getProject());
 			item = new TabItem(folder, SWT.NONE);
 			item.setText(BeansUIPlugin.getResourceString(CONFIG_LOCATORS_LABEL));
 			item.setControl(configLocatorTab.createContents(folder));

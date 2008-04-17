@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jface.resource.JFaceColors;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -32,11 +33,13 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
@@ -46,7 +49,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
@@ -63,16 +66,15 @@ import org.springframework.ide.eclipse.ui.dialogs.StorageSelectionValidator;
 import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
 
 /**
- * Property page tab for defining the list of beans config file extensions and
- * the selected beans config files.
+ * Property page tab for defining the list of beans config file extensions and the selected beans
+ * config files.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 @SuppressWarnings("deprecation")
 public class ConfigFilesTab {
 
-	private static final String PREFIX = "ConfigurationPropertyPage."
-			+ "tabConfigFiles.";
+	private static final String PREFIX = "ConfigurationPropertyPage." + "tabConfigFiles.";
 
 	private static final String DESCRIPTION = PREFIX + "description";
 
@@ -80,8 +82,7 @@ public class ConfigFilesTab {
 
 	private static final String ERROR_NO_SUFFIXES = PREFIX + "error.noSuffixes";
 
-	private static final String ERROR_INVALID_SUFFIXES = PREFIX
-			+ "error.invalidSuffixes";
+	private static final String ERROR_INVALID_SUFFIXES = PREFIX + "error.invalidSuffixes";
 
 	private static final String ADD_BUTTON = PREFIX + "addButton";
 
@@ -89,12 +90,13 @@ public class ConfigFilesTab {
 
 	private static final String DIALOG_TITLE = PREFIX + "addConfigDialog.title";
 
-	private static final String DIALOG_MESSAGE = PREFIX
-			+ "addConfigDialog.message";
+	private static final String DIALOG_MESSAGE = PREFIX + "addConfigDialog.message";
 
 	private static final int TABLE_WIDTH = 250;
 
 	private static final String ENABLE_IMPORT_LABEL = PREFIX + "enableImports.label";
+
+	private static final String NOTE_LABEL = PREFIX + "note.label";
 
 	private PropertiesModel model;
 
@@ -114,6 +116,8 @@ public class ConfigFilesTab {
 
 	private IModelElement selectedElement;
 
+	private Color grayColor = new Color(Display.getDefault(), 150, 150, 150);
+
 	private SelectionListener buttonListener = new SelectionAdapter() {
 		@Override
 		public void widgetSelected(SelectionEvent e) {
@@ -123,15 +127,13 @@ public class ConfigFilesTab {
 
 	private IModelChangeListener modelChangeListener = new IModelChangeListener() {
 		public void elementChanged(ModelChangeEvent event) {
-			if (configsViewer != null
-					&& !configsViewer.getControl().isDisposed()) {
+			if (configsViewer != null && !configsViewer.getControl().isDisposed()) {
 				configsViewer.refresh();
 			}
 		}
 	};
 
 	private boolean hasUserMadeChanges;
-
 
 	public ConfigFilesTab(PropertiesModel model, PropertiesProject project,
 			IModelElement selectedModelElement) {
@@ -142,8 +144,7 @@ public class ConfigFilesTab {
 
 	private void calculateSelectedElement(IModelElement modelElement) {
 		if (modelElement != null && this.project != null) {
-			this.selectedElement = this.project.getConfig(modelElement
-					.getElementName());
+			this.selectedElement = this.project.getConfig(modelElement.getElementName());
 		}
 	}
 
@@ -172,8 +173,8 @@ public class ConfigFilesTab {
 		tableAndButtons.setLayout(layout);
 
 		// Create table and viewer for Spring bean config files
-		configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL
-				| SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL
+				| SWT.FULL_SELECTION | SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.widthHint = TABLE_WIDTH;
 		configsTable.setLayoutData(data);
@@ -190,14 +191,19 @@ public class ConfigFilesTab {
 		configsViewer.setSorter(new ConfigFilesSorter());
 
 		if (this.selectedElement != null) {
-			configsViewer.setSelection(
-					new StructuredSelection(selectedElement), true);
+			configsViewer.setSelection(new StructuredSelection(selectedElement), true);
 		}
-		
+
+		if (BeansConfigLocatorFactory.hasEnabledBeansConfigLocatorDefinitions(project.getProject())) {
+			Label note = new Label(composite, SWT.WRAP);
+			note.setText(BeansUIPlugin.getResourceString(NOTE_LABEL));
+			note.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		}
+
 		Label options = new Label(composite, SWT.WRAP);
 		options.setText("Options:");
 		options.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		// Create enable import checkbox
 		enableImportText = SpringUIUtils.createCheckBox(composite, BeansUIPlugin
 				.getResourceString(ENABLE_IMPORT_LABEL));
@@ -212,8 +218,8 @@ public class ConfigFilesTab {
 		// Create suffix text field
 		suffixesText = SpringUIUtils.createTextField(composite, BeansUIPlugin
 				.getResourceString(SUFFIXES_LABEL));
-		suffixesText.setText(StringUtils.collectionToDelimitedString(project
-				.getConfigSuffixes(), ","));
+		suffixesText.setText(StringUtils.collectionToDelimitedString(project.getConfigSuffixes(),
+				","));
 		suffixesText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				handleSuffixesTextModified();
@@ -225,8 +231,7 @@ public class ConfigFilesTab {
 		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
 				| GridData.HORIZONTAL_ALIGN_FILL));
 		errorLabel.setForeground(JFaceColors.getErrorText(parent.getDisplay()));
-		errorLabel.setBackground(JFaceColors.getErrorBackground(parent
-				.getDisplay()));
+		errorLabel.setBackground(JFaceColors.getErrorBackground(parent.getDisplay()));
 		// Create button area
 		Composite buttonArea = new Composite(tableAndButtons, SWT.NONE);
 		layout = new GridLayout();
@@ -240,9 +245,9 @@ public class ConfigFilesTab {
 				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
 		model.addChangeListener(modelChangeListener);
 		handleSuffixesTextModified();
-		hasUserMadeChanges = false; 
+		hasUserMadeChanges = false;
 		// handleSuffixTextModified() has set this to true
-		
+
 		handleTableSelectionChanged();
 		return composite;
 	}
@@ -252,7 +257,7 @@ public class ConfigFilesTab {
 			hasUserMadeChanges = true;
 			project.setImportsEnabled(enableImportText.getSelection());
 		}
-		else if  (!project.isImportsEnabled() && enableImportText.getSelection()) {
+		else if (!project.isImportsEnabled() && enableImportText.getSelection()) {
 			hasUserMadeChanges = true;
 			project.setImportsEnabled(enableImportText.getSelection());
 		}
@@ -263,9 +268,8 @@ public class ConfigFilesTab {
 	}
 
 	/**
-	 * The user has modified the comma-separated list of config suffixes.
-	 * Validate the input and update the "Add" button enablement and error label
-	 * accordingly.
+	 * The user has modified the comma-separated list of config suffixes. Validate the input and
+	 * update the "Add" button enablement and error label accordingly.
 	 */
 	private void handleSuffixesTextModified() {
 		String errorMessage = null;
@@ -282,8 +286,7 @@ public class ConfigFilesTab {
 					suffixes.add(suffix);
 				}
 				else {
-					errorMessage = BeansUIPlugin
-							.getResourceString(ERROR_INVALID_SUFFIXES);
+					errorMessage = BeansUIPlugin.getResourceString(ERROR_INVALID_SUFFIXES);
 					break;
 				}
 			}
@@ -311,17 +314,21 @@ public class ConfigFilesTab {
 	}
 
 	/**
-	 * The user has selected a different configuration in table. Update button
-	 * enablement.
+	 * The user has selected a different configuration in table. Update button enablement.
 	 */
 	private void handleTableSelectionChanged() {
-		IStructuredSelection selection = (IStructuredSelection) configsViewer
-				.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) configsViewer.getSelection();
 		if (selection.isEmpty()) {
 			removeButton.setEnabled(false);
 		}
 		else {
-			removeButton.setEnabled(true);
+			if (selection.getFirstElement() instanceof IBeansConfig
+					&& ((IBeansConfig) selection.getFirstElement()).getType() == IBeansConfig.Type.MANUAL) {
+				removeButton.setEnabled(true);
+			}
+			else {
+				removeButton.setEnabled(false);
+			}
 		}
 	}
 
@@ -340,30 +347,26 @@ public class ConfigFilesTab {
 	}
 
 	/**
-	 * The user has pressed the add button. Opens the configuration selection
-	 * dialog and adds the selected configuration.
+	 * The user has pressed the add button. Opens the configuration selection dialog and adds the
+	 * selected configuration.
 	 */
 	private void handleAddButtonPressed() {
 		SelectionStatusDialog dialog;
 		if (SpringCoreUtils.isEclipseSameOrNewer(3, 2)) {
 			FilteredElementTreeSelectionDialog selDialog = new FilteredElementTreeSelectionDialog(
-					SpringUIUtils.getStandardDisplay().getActiveShell(),
-					new LabelProvider(),
+					SpringUIUtils.getStandardDisplay().getActiveShell(), new LabelProvider(),
 					new NonJavaResourceContentProvider());
-			selDialog.addFilter(new ConfigFileFilter(project
-					.getConfigSuffixes()));
+			selDialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());
 			dialog = selDialog;
 		}
 		else {
-			ElementTreeSelectionDialog selDialog = new ElementTreeSelectionDialog(
-					SpringUIUtils.getStandardDisplay().getActiveShell(),
-					new LabelProvider(),
+			ElementTreeSelectionDialog selDialog = new ElementTreeSelectionDialog(SpringUIUtils
+					.getStandardDisplay().getActiveShell(), new LabelProvider(),
 					new NonJavaResourceContentProvider());
-			selDialog.addFilter(new ConfigFileFilter(project
-					.getConfigSuffixes()));
+			selDialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());
@@ -393,12 +396,10 @@ public class ConfigFilesTab {
 	}
 
 	/**
-	 * The user has pressed the remove button. Delete the selected
-	 * configuration.
+	 * The user has pressed the remove button. Delete the selected configuration.
 	 */
 	private void handleRemoveButtonPressed() {
-		IStructuredSelection selection = (IStructuredSelection) configsViewer
-				.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) configsViewer.getSelection();
 		if (!selection.isEmpty()) {
 			Iterator elements = selection.iterator();
 			while (elements.hasNext()) {
@@ -410,8 +411,7 @@ public class ConfigFilesTab {
 		}
 	}
 
-	private static class ConfigFilesContentProvider implements
-			IStructuredContentProvider {
+	private class ConfigFilesContentProvider implements IStructuredContentProvider {
 
 		private IBeansProject project;
 
@@ -420,20 +420,14 @@ public class ConfigFilesTab {
 		}
 
 		public Object[] getElements(Object obj) {
-			Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
-			Set<IBeansConfig> allconfigs = project.getConfigs();
-			for (IBeansConfig config : allconfigs) {
-				if (config.getType() == Type.MANUAL) {
-					configs.add(config);
-				}
-			}
-			return configs.toArray();
+			return new LinkedHashSet<IBeansConfig>(project.getConfigs()).toArray();
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
 		public void dispose() {
+			grayColor.dispose();
 		}
 	}
 
@@ -463,21 +457,17 @@ public class ConfigFilesTab {
 
 		@Override
 		protected boolean selectFile(IFile element) {
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-					element.getProject());
+			IBeansProject project = BeansCorePlugin.getModel().getProject(element.getProject());
 			if (project != null) {
 				IBeansConfig beansConfig = project.getConfig(element);
-				return beansConfig == null || beansConfig.getType() == Type.AUTO_DETECTED;
+				return beansConfig == null;
 			}
 			return false;
 		}
 	}
-	
-	private static class LabelProvider extends JavaElementLabelProvider {
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getText(java.lang.Object)
-		 */
+
+	private class LabelProvider extends JavaElementLabelProvider implements IColorProvider {
+
 		@Override
 		public String getText(Object element) {
 			String label = super.getText(element);
@@ -486,8 +476,23 @@ public class ConfigFilesTab {
 				if (bc instanceof IImportedBeansConfig) {
 					label += " [imported]";
 				}
+				if (bc != null && bc.getType() == IBeansConfig.Type.AUTO_DETECTED) {
+					label += " [auto detected]";
+				}
 			}
 			return label;
+		}
+
+		public Color getBackground(Object element) {
+			return null;
+		}
+
+		public Color getForeground(Object element) {
+			if (element instanceof IBeansConfig
+					&& ((IBeansConfig) element).getType() == IBeansConfig.Type.AUTO_DETECTED) {
+				return grayColor;
+			}
+			return null;
 		}
 	}
 }

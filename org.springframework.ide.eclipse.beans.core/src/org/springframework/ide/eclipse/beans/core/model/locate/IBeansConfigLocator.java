@@ -59,4 +59,12 @@ public interface IBeansConfigLocator {
 	 */
 	boolean supports(IProject project);
 
+	/**
+	 * Checks if the given <code>file</code> requires the project to rescan for autodetected
+	 * config files.
+	 * @param file the file to check
+	 * @return <code>true</code> if the project needs to rescan for auto dectected configs
+	 */
+	boolean requiresRefresh(IFile file);
+
 }

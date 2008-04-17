@@ -31,8 +31,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.bundle.spring;bundle-version="2.5.0";visibility:=reexport,
  org.apache.xerces;bundle-version="2.8.0";visibility:=reexport,
  org.objectweb.asm,
- org.eclipse.core.variables
+ org.eclipse.core.variables,
+ org.eclipse.wst.common.project.facet.core
 Eclipse-LazyStart: true
 DynamicImport-Package: *
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
 

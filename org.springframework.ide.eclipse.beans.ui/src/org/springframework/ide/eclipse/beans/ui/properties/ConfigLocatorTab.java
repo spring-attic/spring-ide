@@ -50,7 +50,7 @@ import org.springframework.ide.eclipse.ui.SpringUIMessages;
  * @author Christian Dupuis
  * @since 2.0.5
  */
-public class ConfigLocatorPropertyTab {
+public class ConfigLocatorTab {
 
 	private static class BeansConfigLocatorDefinitionContentProvider implements
 			IStructuredContentProvider {
@@ -118,7 +118,7 @@ public class ConfigLocatorPropertyTab {
 
 	private Color grayColor = new Color(Display.getDefault(), 150, 150, 150);
 
-	public ConfigLocatorPropertyTab(IProject project) {
+	public ConfigLocatorTab(IProject project) {
 		this.beansConfigLocatorDefinitions = BeansConfigLocatorFactory
 				.getBeansConfigLocatorDefinitions();
 		this.project = project;
@@ -214,7 +214,7 @@ public class ConfigLocatorPropertyTab {
 		}
 		String text = "";
 		if (!definition.getBeansConfigLocator().supports(project)) {
-			text = "This Beans Config Locator does not support the current project!\n\r";
+			text = "This configuration file detector does not support the current project!\n\r";
 		}
 		text += definition.getDescription();
 

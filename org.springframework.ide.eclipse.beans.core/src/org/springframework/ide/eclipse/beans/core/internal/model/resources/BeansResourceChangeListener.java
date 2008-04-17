@@ -71,10 +71,6 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				else if (isAutoDetectedConfig(file)) {
 					events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
 				}
-				/*
-				 * else if (BeansModelUtils.isBeanClass(file)) { events.javaStructureChanged(file,
-				 * eventType); }
-				 */
 				return false;
 			}
 			return super.resourceAdded(resource);
@@ -96,10 +92,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					else if (isAutoDetectedConfig(file)) {
 						events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
 					}
-					/*
-					 * else if (BeansModelUtils.isBeanClass(file)) {
-					 * events.javaStructureChanged(file, eventType); }
-					 */
+					else if (requiresRefresh(file)) {
+						events.listenedFileChanged(file, eventType);
+					}
 				}
 				return false;
 			}
@@ -112,10 +107,6 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				if (BeansCoreUtils.isBeansConfig(resource)) {
 					events.configRemoved((IFile) resource, eventType);
 				}
-				/*
-				 * else if (BeansModelUtils.isBeanClass(file)) { events.javaStructureChanged(file,
-				 * eventType); }
-				 */
 				return false;
 			}
 			return super.resourceRemoved(resource);
@@ -139,6 +130,23 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 						if (locator.getBeansConfigLocator().isBeansConfig(file)) {
 							return true;
 						}
+					}
+				}
+				catch (Exception e) {
+					// Make sure that a extension contribution can't crash the resource listener
+				}
+			}
+			return false;
+		}
+
+		private boolean requiresRefresh(IFile file) {
+			for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory
+					.getBeansConfigLocatorDefinitions()) {
+				try {
+					if (locator.isEnabled(file.getProject())
+							&& locator.getBeansConfigLocator().supports(file.getProject())
+							&& locator.getBeansConfigLocator().requiresRefresh(file)) {
+						return true;
 					}
 				}
 				catch (Exception e) {
