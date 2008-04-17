@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -29,7 +30,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @since 2.0.5
  */
 public class BeansConfigLocatorFactory {
-	
+
 	/** The beansconfig locator extension point */
 	public static final String BEANSCONFIG_LOCATORS_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID
 			+ ".beansconfiglocators";
@@ -39,15 +40,14 @@ public class BeansConfigLocatorFactory {
 	 */
 	public static List<BeansConfigLocatorDefinition> getBeansConfigLocatorDefinitions() {
 		List<BeansConfigLocatorDefinition> handlers = new ArrayList<BeansConfigLocatorDefinition>();
-		IExtensionPoint point = Platform.getExtensionRegistry()
-				.getExtensionPoint(BEANSCONFIG_LOCATORS_EXTENSION_POINT);
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
+				BEANSCONFIG_LOCATORS_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension
-						.getConfigurationElements()) {
+				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					try {
-						BeansConfigLocatorDefinition builderDefinition =
-								new BeansConfigLocatorDefinition(config);
+						BeansConfigLocatorDefinition builderDefinition = new BeansConfigLocatorDefinition(
+								config);
 						handlers.add(builderDefinition);
 					}
 					catch (CoreException e) {
@@ -56,16 +56,32 @@ public class BeansConfigLocatorFactory {
 				}
 			}
 		}
-		
+
 		// Sort definitions based on there defined order
-		Collections.sort(handlers, new Comparator<BeansConfigLocatorDefinition>(){
+		Collections.sort(handlers, new Comparator<BeansConfigLocatorDefinition>() {
 
 			public int compare(BeansConfigLocatorDefinition o1, BeansConfigLocatorDefinition o2) {
 				return o1.getOrder().compareTo(o2.getOrder());
-			}});
-		
+			}
+		});
+
 		return handlers;
-		
+
+	}
+
+	/**
+	 * Returns if there is at least one {@link IBeansConfigLocator} is enabled for the given
+	 * <code>project</code>.
+	 * @return true if at least one {@link IBeansConfigLocator} is enabled for the given
+	 * <code>project</code>
+	 */
+	public static boolean hasEnabledBeansConfigLocatorDefinitions(IProject project) {
+		for (BeansConfigLocatorDefinition builderDefinition : getBeansConfigLocatorDefinitions()) {
+			if (builderDefinition.getBeansConfigLocator().supports(project)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

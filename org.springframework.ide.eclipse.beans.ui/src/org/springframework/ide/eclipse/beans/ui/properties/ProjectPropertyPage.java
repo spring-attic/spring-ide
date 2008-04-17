@@ -25,6 +25,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
@@ -41,8 +42,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public class ProjectPropertyPage extends PropertyPage {
 
-	public static final String ID = BeansUIPlugin.PLUGIN_ID
-			+ ".properties.ProjectPropertyPage";
+	public static final String ID = BeansUIPlugin.PLUGIN_ID + ".properties.ProjectPropertyPage";
 
 	public static final String BLOCK_ID = ID + ".blockId";
 
@@ -52,14 +52,11 @@ public class ProjectPropertyPage extends PropertyPage {
 
 	private static final String TITLE = PREFIX + "title";
 
-	private static final String CONFIG_FILES_LABEL = PREFIX
-			+ "tabConfigFiles.label";
+	private static final String CONFIG_FILES_LABEL = PREFIX + "tabConfigFiles.label";
 
-	private static final String CONFIG_SETS_LABEL = PREFIX
-			+ "tabConfigSets.label";
+	private static final String CONFIG_SETS_LABEL = PREFIX + "tabConfigSets.label";
 
-	private static final String CONFIG_LOCATORS_LABEL = PREFIX
-		+ "tabConfigLocators.label";
+	private static final String CONFIG_LOCATORS_LABEL = PREFIX + "tabConfigLocators.label";
 
 	private PropertiesModel model;
 
@@ -96,31 +93,30 @@ public class ProjectPropertyPage extends PropertyPage {
 		// Build temporary beans core model with a cloned "real" Spring project
 		IProject project = (IProject) getElement();
 		model = new PropertiesModel();
-		PropertiesProject modelProject = new PropertiesProject(model,
-				BeansCorePlugin.getModel().getProject(project));
+		PropertiesProject modelProject = new PropertiesProject(model, BeansCorePlugin.getModel()
+				.getProject(project));
 		model.addProject(modelProject);
 
 		// Build folder with tabs
 		TabFolder folder = new TabFolder(parent, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		configFilesTab = new ConfigFilesTab(model, modelProject,
-				selectedModelElement);
+		configFilesTab = new ConfigFilesTab(model, modelProject, selectedModelElement);
 		TabItem item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_FILES_LABEL));
 		item.setControl(configFilesTab.createControl(folder));
 
-		configSetsTab = new ConfigSetsTab(model, modelProject,
-				selectedModelElement);
+		configSetsTab = new ConfigSetsTab(model, modelProject, selectedModelElement);
 		item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_SETS_LABEL));
 		item.setControl(configSetsTab.createControl(folder));
-		
-		configLocatorTab = new ConfigLocatorPropertyTab(modelProject.getProject());
-		item = new TabItem(folder, SWT.NONE);
-		item.setText(BeansUIPlugin.getResourceString(CONFIG_LOCATORS_LABEL));
-		item.setControl(configLocatorTab.createContents(folder));
-		
+
+		if (BeansConfigLocatorFactory.hasEnabledBeansConfigLocatorDefinitions(project)) {
+			configLocatorTab = new ConfigLocatorPropertyTab(modelProject.getProject());
+			item = new TabItem(folder, SWT.NONE);
+			item.setText(BeansUIPlugin.getResourceString(CONFIG_LOCATORS_LABEL));
+			item.setControl(configLocatorTab.createContents(folder));
+		}
 		Dialog.applyDialogFont(folder);
 
 		// Pre-select specified tab item
@@ -131,11 +127,10 @@ public class ProjectPropertyPage extends PropertyPage {
 	@Override
 	public boolean performOk() {
 		IProject project = (IProject) getElement();
-		IBeansProject currentProject = BeansCorePlugin.getModel().getProject(
-				project);
+		IBeansProject currentProject = BeansCorePlugin.getModel().getProject(project);
 		boolean userMadeChanges = configFilesTab.hasUserMadeChanges()
 				|| configSetsTab.hasUserMadeChanges();
-		
+
 		if (userMadeChanges && !currentProject.isUpdatable()) {
 			MessageDialog
 					.openInformation(
@@ -146,15 +141,14 @@ public class ProjectPropertyPage extends PropertyPage {
 			return super.performOk();
 		}
 
-		PropertiesProject newProject = (PropertiesProject) model
-				.getProject(project);
+		PropertiesProject newProject = (PropertiesProject) model.getProject(project);
 
 		// At first delete all problem markers from the removed config files
 		if (configFilesTab.hasUserMadeChanges()) {
 			for (IBeansConfig currentConfig : currentProject.getConfigs()) {
 				if (!newProject.hasConfig(currentConfig.getElementName())) {
-					MarkerUtils.deleteAllMarkers(currentConfig
-							.getElementResource(), SpringCore.MARKER_ID);
+					MarkerUtils.deleteAllMarkers(currentConfig.getElementResource(),
+							SpringCore.MARKER_ID);
 				}
 			}
 		}
@@ -164,8 +158,9 @@ public class ProjectPropertyPage extends PropertyPage {
 			newProject.saveDescription();
 		}
 		
-		configLocatorTab.performOk();
-		
+		if (configLocatorTab != null) {
+			configLocatorTab.performOk();
+		}
 
 		// Finally (after saving the modified project description!!!) refresh
 		// the label decoration of all config files
@@ -195,8 +190,7 @@ public class ProjectPropertyPage extends PropertyPage {
 			this.selectedTab = (Integer) this.pageData.get(BLOCK_ID);
 			if (this.pageData.containsKey(SELECTED_RESOURCE)
 					&& this.pageData.get(SELECTED_RESOURCE) instanceof IModelElement) {
-				this.selectedModelElement = (IModelElement) this.pageData
-						.get(SELECTED_RESOURCE);
+				this.selectedModelElement = (IModelElement) this.pageData.get(SELECTED_RESOURCE);
 			}
 		}
 	}
