@@ -58,6 +58,9 @@ public class ProjectPropertyPage extends PropertyPage {
 	private static final String CONFIG_SETS_LABEL = PREFIX
 			+ "tabConfigSets.label";
 
+	private static final String CONFIG_LOCATORS_LABEL = PREFIX
+		+ "tabConfigLocators.label";
+
 	private PropertiesModel model;
 
 	private ConfigFilesTab configFilesTab;
@@ -69,6 +72,8 @@ public class ProjectPropertyPage extends PropertyPage {
 	private IModelElement selectedModelElement;
 
 	private Map<String, Object> pageData;
+
+	private ConfigLocatorPropertyTab configLocatorTab;
 
 	public ProjectPropertyPage() {
 		this(null, 0);
@@ -110,7 +115,12 @@ public class ProjectPropertyPage extends PropertyPage {
 		item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_SETS_LABEL));
 		item.setControl(configSetsTab.createControl(folder));
-
+		
+		configLocatorTab = new ConfigLocatorPropertyTab(modelProject.getProject());
+		item = new TabItem(folder, SWT.NONE);
+		item.setText(BeansUIPlugin.getResourceString(CONFIG_LOCATORS_LABEL));
+		item.setControl(configLocatorTab.createContents(folder));
+		
 		Dialog.applyDialogFont(folder);
 
 		// Pre-select specified tab item
@@ -153,6 +163,9 @@ public class ProjectPropertyPage extends PropertyPage {
 		if (userMadeChanges) {
 			newProject.saveDescription();
 		}
+		
+		configLocatorTab.performOk();
+		
 
 		// Finally (after saving the modified project description!!!) refresh
 		// the label decoration of all config files
