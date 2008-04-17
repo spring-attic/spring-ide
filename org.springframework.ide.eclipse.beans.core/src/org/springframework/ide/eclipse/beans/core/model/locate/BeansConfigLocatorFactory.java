@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model.locate;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -19,50 +21,51 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * Some helper methods that deal with loading extension point contributions.
  * @author Christian Dupuis
  * @since 2.0.5
  */
-public class BeansConfigLocatorUtils {
-	
-	/** The class extension point attribute */
-	private static final String CLASS_ATTRIBUTE = "class";
+public class BeansConfigLocatorFactory {
 	
 	/** The beansconfig locator extension point */
 	public static final String BEANSCONFIG_LOCATORS_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID
 			+ ".beansconfiglocators";
 
 	/**
-	 * Returns a {@link Set} with all registered {@link IBeansConfigLocator}s.
+	 * Returns a {@link List} with all registered {@link BeansConfigLocatorDefinition}s.
 	 */
-	public static Set<IBeansConfigLocator> getBeansConfigLocators() {
-		Set<IBeansConfigLocator> handlers = new HashSet<IBeansConfigLocator>();
+	public static List<BeansConfigLocatorDefinition> getBeansConfigLocatorDefinitions() {
+		List<BeansConfigLocatorDefinition> handlers = new ArrayList<BeansConfigLocatorDefinition>();
 		IExtensionPoint point = Platform.getExtensionRegistry()
 				.getExtensionPoint(BEANSCONFIG_LOCATORS_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension
 						.getConfigurationElements()) {
-					String clazz = config.getAttribute(CLASS_ATTRIBUTE);
-					if (clazz != null) {
-						try {
-							Object handler = config
-									.createExecutableExtension(CLASS_ATTRIBUTE);
-							if (handler instanceof IBeansConfigLocator) {
-								IBeansConfigLocator namespaceHandler = (IBeansConfigLocator) handler;
-								handlers.add(namespaceHandler);
-							}
-						}
-						catch (CoreException e) {
-							BeansCorePlugin.log(e);
-						}
+					try {
+						BeansConfigLocatorDefinition builderDefinition =
+								new BeansConfigLocatorDefinition(config);
+						handlers.add(builderDefinition);
+					}
+					catch (CoreException e) {
+						SpringCore.log(e);
 					}
 				}
 			}
 		}
+		
+		// Sort definitions based on there defined order
+		Collections.sort(handlers, new Comparator<BeansConfigLocatorDefinition>(){
+
+			public int compare(BeansConfigLocatorDefinition o1, BeansConfigLocatorDefinition o2) {
+				return o1.getOrder().compareTo(o2.getOrder());
+			}});
+		
 		return handlers;
+		
 	}
 
 }

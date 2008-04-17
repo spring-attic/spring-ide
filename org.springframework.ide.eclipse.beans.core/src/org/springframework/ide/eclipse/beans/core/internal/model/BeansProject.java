@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -39,8 +40,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
-import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorUtils;
-import org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
@@ -80,6 +81,10 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	protected volatile Map<String, IBeansConfig> configs;
 
 	protected volatile Map<String, IBeansConfig> autoDetectedConfigs;
+
+	protected volatile Map<String, Set<String>> autoDetectedConfigsByLocator;
+
+	protected volatile Map<String, String> locatorByAutoDetectedConfig;
 
 	protected volatile Map<String, IBeansConfigSet> configSets;
 
@@ -291,6 +296,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					configs.put(configName, new BeansConfig(this, configName, type));
 					if (autoDetectedConfigs.containsKey(configName)) {
 						autoDetectedConfigs.remove(configName);
+						String locatorId = locatorByAutoDetectedConfig.remove(configName);
+						if (locatorId != null
+								&& autoDetectedConfigsByLocator.containsKey(locatorId)) {
+							autoDetectedConfigsByLocator.get(locatorId).remove(configName);
+						}
 					}
 					return true;
 				}
@@ -337,6 +347,10 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 				w.lock();
 				configs.remove(configName);
 				autoDetectedConfigs.remove(configName);
+				String locatorId = locatorByAutoDetectedConfig.remove(configName);
+				if (locatorId != null && autoDetectedConfigsByLocator.containsKey(locatorId)) {
+					autoDetectedConfigsByLocator.get(locatorId).remove(configName);
+				}
 			}
 			finally {
 				w.unlock();
@@ -621,6 +635,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			configs = null;
 			configSets = null;
 			autoDetectedConfigs = null;
+			autoDetectedConfigsByLocator = null;
+			locatorByAutoDetectedConfig = null;
 		}
 		finally {
 			w.unlock();
@@ -711,6 +727,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			configs = new LinkedHashMap<String, IBeansConfig>();
 			configSets = new LinkedHashMap<String, IBeansConfigSet>();
 			autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
+			autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<String>>();
+			locatorByAutoDetectedConfig = new LinkedHashMap<String, String>();
 			this.modelPopulated = true;
 			BeansProjectDescriptionReader.read(this);
 
@@ -722,26 +740,49 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			}
 
 			// Add auto detected beans configs
-			for (final IBeansConfigLocator locator : BeansConfigLocatorUtils.getBeansConfigLocators()) {
-				
-				// Prevent extension contribution from crashing the model creation
-				SafeRunner.run(new ISafeRunnable() {
+			for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory
+					.getBeansConfigLocatorDefinitions()) {
+				if (locator.isEnabled(getProject())
+						&& locator.getBeansConfigLocator().supports(getProject())) {
+					final Map<String, IBeansConfig> detectedConfigs = new HashMap<String, IBeansConfig>();
 
-					public void handleException(Throwable exception) {
-						// nothing to handle here
-					}
+					// Prevent extension contribution from crashing the model creation
+					SafeRunner.run(new ISafeRunnable() {
 
-					public void run() throws Exception {
-						Set<IFile> files = locator.locateBeansConfigs(getProject());
-						for (IFile file : files) {
-							BeansConfig config = new BeansConfig(BeansProject.this, file.getProjectRelativePath()
-									.toString(), Type.AUTO_DETECTED);
-							String configName = getConfigName(file);
-							if (!hasConfig(configName)) {
-								autoDetectedConfigs.put(getConfigName(file), config);
+						public void handleException(Throwable exception) {
+							// nothing to handle here
+						}
+
+						public void run() throws Exception {
+							Set<IFile> files = locator.getBeansConfigLocator().locateBeansConfigs(
+									getProject());
+							for (IFile file : files) {
+								BeansConfig config = new BeansConfig(BeansProject.this, file
+										.getProjectRelativePath().toString(), Type.AUTO_DETECTED);
+								String configName = getConfigName(file);
+								if (!hasConfig(configName)) {
+									detectedConfigs.put(configName, config);
+								}
 							}
 						}
-					}});
+					});
+
+					if (detectedConfigs.size() > 0) {
+						Set<String> configByLocator = new LinkedHashSet<String>();
+						for (Map.Entry<String, IBeansConfig> detectedConfig : detectedConfigs
+								.entrySet()) {
+							autoDetectedConfigs.put(detectedConfig.getKey(), detectedConfig
+									.getValue());
+							configByLocator.add(getConfigName((IFile) detectedConfig.getValue()
+									.getElementResource()));
+							locatorByAutoDetectedConfig.put(getConfigName((IFile) detectedConfig
+									.getValue().getElementResource()), locator.getNamespaceUri()
+									+ "." + locator.getId());
+						}
+						autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "."
+								+ locator.getId(), configByLocator);
+					}
+				}
 			}
 
 			// Remove all invalid config names from from this project's config
@@ -799,4 +840,24 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		IFile file = project.getProject().getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		return !file.isReadOnly();
 	}
+
+	public void removeAutoDetectedConfigs(String locatorId) {
+		try {
+			w.lock();
+			Set<String> configs = autoDetectedConfigsByLocator.get(locatorId);
+			if (configs != null) {
+				autoDetectedConfigsByLocator.remove(locatorId);
+			}
+			if (configs != null) {
+				for (String configName : configs) {
+					autoDetectedConfigs.remove(configName);
+					locatorByAutoDetectedConfig.remove(configName);
+				}
+			}
+		}
+		finally {
+			w.unlock();
+		}
+	}
+
 }

@@ -51,4 +51,12 @@ public interface IBeansConfigLocator {
 	 */
 	boolean isBeansConfig(IFile file);
 
+	/**
+	 * Checks if the given <code>project</code> is at all supported by the
+	 * {@link IBeansConfigLocator}.
+	 * @param project the project to check
+	 * @return <code>true</code> if supported
+	 */
+	boolean supports(IProject project);
+
 }

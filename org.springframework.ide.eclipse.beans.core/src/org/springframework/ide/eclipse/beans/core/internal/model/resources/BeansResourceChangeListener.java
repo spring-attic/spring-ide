@@ -18,8 +18,8 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorUtils;
-import org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 
@@ -93,6 +93,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					else if (BeansCoreUtils.isBeansConfig(file, true)) {
 						events.configChanged(file, eventType);
 					}
+					else if (isAutoDetectedConfig(file)) {
+						events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
+					}
 					/*
 					 * else if (BeansModelUtils.isBeanClass(file)) {
 					 * events.javaStructureChanged(file, eventType); }
@@ -128,11 +131,14 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 		}
 
 		private boolean isAutoDetectedConfig(IFile file) {
-			for (final IBeansConfigLocator locator : BeansConfigLocatorUtils
-					.getBeansConfigLocators()) {
+			for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory
+					.getBeansConfigLocatorDefinitions()) {
 				try {
-					if (locator.isBeansConfig(file)) {
-						return true;
+					if (locator.isEnabled(file.getProject())
+							&& locator.getBeansConfigLocator().supports(file.getProject())) {
+						if (locator.getBeansConfigLocator().isBeansConfig(file)) {
+							return true;
+						}
 					}
 				}
 				catch (Exception e) {
