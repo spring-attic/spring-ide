@@ -7,15 +7,16 @@
 	    	id="org.eclipse.mylyn.ui.projectexplorer.filter" 
    		    targetID="org.springframework.ide.eclipse.ui.navigator.springExplorer">
 	    	<action
-	           label="%filterSpringExplorerAction.label"
-	           tooltip="%filterSpringExplorerAction.tooltip"
-	           menubarPath="mylyn"
-	           toolbarPath="mylyn"
-	           id="org.springframework.ide.eclipse.beans.mylyn.ui.actions.filterSpringExplorerAction"
-	           class="org.springframework.ide.eclipse.mylyn.ui.actions.FocusSpringExplorerAction"
-	           style="toggle"
-	           icon="icons/elcl16/interest-filtering.gif"
-	           enablesFor="*" />
+            class="org.springframework.ide.eclipse.mylyn.ui.actions.FocusSpringExplorerAction"
+            disabledIcon="icons/elcl16/focus-disabled.gif"
+            enablesFor="*"
+            icon="icons/elcl16/interest-filtering.gif"
+            id="org.springframework.ide.eclipse.beans.mylyn.ui.actions.filterSpringExplorerAction"
+            label="%filterSpringExplorerAction.label"
+            menubarPath="mylyn"
+            style="toggle"
+            toolbarPath="mylyn"
+            tooltip="%filterSpringExplorerAction.tooltip"/>
 	  	</viewContribution> 
 	</extension>
 	
