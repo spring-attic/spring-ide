@@ -59,8 +59,15 @@
 		<category name="Extensions"/>
 	</feature>
 	
+	<feature url="features/org.springframework.ide.eclipse.autowire.feature_@VERSION@.jar" 
+		id="org.springframework.ide.eclipse.autowire.feature" 
+		version="@VERSION@">
+		<category name="Extensions (Incubuation)"/>
+	</feature>
+	
 	<category-def name="Core" label="Core" />
 	<category-def name="Extensions" label="Extensions" />
+	<category-def name="Extensions (Incubation)" label="Extensions (Incubuation)" />
 	<category-def name="Integrations" label="Integrations" />
 	<category-def name="Dependencies" label="Dependencies" />
 </site>
