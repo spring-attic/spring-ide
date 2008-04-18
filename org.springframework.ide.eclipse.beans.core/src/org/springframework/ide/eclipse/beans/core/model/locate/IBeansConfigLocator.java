@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
@@ -39,7 +40,7 @@ public interface IBeansConfigLocator {
 	 * <code>null</code>.
 	 * @return a set of {@link IFile}
 	 */
-	Set<IFile> locateBeansConfigs(IProject project);
+	Set<IFile> locateBeansConfigs(IProject project, IProgressMonitor progressMonitor);
 
 	/**
 	 * Checks if the given <code>file</code> is a {@link IBeansConfig} in the algorithm of this

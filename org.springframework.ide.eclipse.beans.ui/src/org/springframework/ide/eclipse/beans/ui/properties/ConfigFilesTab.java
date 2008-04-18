@@ -10,18 +10,24 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.properties;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -43,6 +49,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -50,6 +57,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
+import org.springframework.ide.eclipse.beans.core.model.locate.ProjectScanningBeansConfigLocator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
@@ -110,7 +118,7 @@ public class ConfigFilesTab {
 
 	private Label errorLabel;
 
-	private Button addButton, removeButton;
+	private Button addButton, removeButton, scanButton;
 
 	private Button enableImportText;
 
@@ -243,6 +251,7 @@ public class ConfigFilesTab {
 				.getResourceString(ADD_BUTTON), buttonListener);
 		removeButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin
 				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
+		scanButton = SpringUIUtils.createButton(buttonArea, "Scan...", buttonListener);
 		model.addChangeListener(modelChangeListener);
 		handleSuffixesTextModified();
 		hasUserMadeChanges = false;
@@ -342,8 +351,45 @@ public class ConfigFilesTab {
 		else if (button == removeButton) {
 			handleRemoveButtonPressed();
 		}
+		else if (button == scanButton) {
+			handleScanButtonPressed();
+		}
 		handleTableSelectionChanged();
 		configsTable.setFocus();
+	}
+
+	private void handleScanButtonPressed() {
+		ScannedFilesContentProvider contentProvider = new ScannedFilesContentProvider();
+		CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(SpringUIUtils
+				.getStandardDisplay().getActiveShell(), new ScannedFilesLabelProvider(),
+				contentProvider);
+		dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
+		dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
+		dialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
+		dialog.setValidator(new StorageSelectionValidator(true));
+		dialog.setInput(project.getProject());
+		dialog.setSorter(new JavaElementSorter());
+		dialog.setInitialSelections(contentProvider.getElements(project.getProject()));
+		
+		if (dialog.open() == Window.OK) {
+			Object[] selection = dialog.getResult();
+			if (selection != null && selection.length > 0) {
+				for (Object element : selection) {
+					String config;
+					if (element instanceof ZipEntryStorage) {
+						ZipEntryStorage storage = (ZipEntryStorage) element;
+						config = storage.getFullName();
+					}
+					else {
+						IFile file = (IFile) element;
+						config = file.getProjectRelativePath().toString();
+					}
+					project.addConfig(config, IBeansConfig.Type.MANUAL);
+				}
+				configsViewer.refresh(false);
+				hasUserMadeChanges = true;
+			}
+		}
 	}
 
 	/**
@@ -408,6 +454,56 @@ public class ConfigFilesTab {
 			}
 			configsViewer.refresh(false);
 			hasUserMadeChanges = true;
+		}
+	}
+
+	private final class ScannedFilesContentProvider implements ITreeContentProvider {
+		
+		private Object[] scannedFiles = null;
+		
+		public ScannedFilesContentProvider() {
+			final Set<IFile> files = new LinkedHashSet<IFile>();
+			IRunnableWithProgress runnable = new IRunnableWithProgress() {
+				public void run(final IProgressMonitor monitor) throws InvocationTargetException,
+				InterruptedException {
+					ProjectScanningBeansConfigLocator locator = new ProjectScanningBeansConfigLocator();
+					files.addAll(locator.locateBeansConfigs(project.getProject(), monitor));
+				}
+			};
+			
+			try {
+				IRunnableContext context = new ProgressMonitorDialog(SpringUIUtils
+						.getStandardDisplay().getActiveShell());
+				context.run(true, true, runnable);
+			}
+			catch (InvocationTargetException e) {
+			}
+			catch (InterruptedException e) {
+			}
+			scannedFiles = files.toArray();
+			
+		}
+		
+		public void dispose() {
+		}
+
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+
+		public Object[] getChildren(Object parentElement) {
+			return IModelElement.NO_CHILDREN;
+		}
+
+		public Object getParent(Object element) {
+			return null;
+		}
+
+		public boolean hasChildren(Object element) {
+			return false;
+		}
+
+		public Object[] getElements(Object inputElement) {
+			return scannedFiles;
 		}
 	}
 
@@ -495,4 +591,17 @@ public class ConfigFilesTab {
 			return null;
 		}
 	}
+
+	private class ScannedFilesLabelProvider extends JavaElementLabelProvider {
+
+		@Override
+		public String getText(Object element) {
+			if (element instanceof IFile) {
+				return ((IFile) element).getProjectRelativePath().toString();
+			}
+			return super.getText(element);
+		}
+
+	}
+
 }

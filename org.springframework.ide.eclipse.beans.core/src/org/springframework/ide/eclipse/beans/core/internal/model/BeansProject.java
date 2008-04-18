@@ -755,7 +755,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 						public void run() throws Exception {
 							Set<IFile> files = locator.getBeansConfigLocator().locateBeansConfigs(
-									getProject());
+									getProject(), null);
 							for (IFile file : files) {
 								BeansConfig config = new BeansConfig(BeansProject.this, file
 										.getProjectRelativePath().toString(), Type.AUTO_DETECTED);

@@ -21,38 +21,35 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 
 /**
- * This {@link NamespaceHandlerResolver} provides a {@link NamespaceHandler} for
- * a given namespace URI. Depending on this namespace URI the returned namespace
- * handler is one of the following (in the provided order):
+ * This {@link NamespaceHandlerResolver} provides a {@link NamespaceHandler} for a given namespace
+ * URI. Depending on this namespace URI the returned namespace handler is one of the following (in
+ * the provided order):
  * <ol>
  * <li>a namespace handler provided by the Spring framework</li>
  * <li>a namespace handler contributed via the extension point
  * <code>org.springframework.ide.eclipse.beans.core.namespaces</code></li>
- * <li>a namespace handler resolved by a NemespaceHandlerResolver published as
- * OSGi service</li> *
+ * <li>a namespace handler resolved by a NemespaceHandlerResolver published as OSGi service</li> *
  * <li>a {@link ToolAnnotationBasedNamespaceHandler}</li>
  * </ol> *
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0.3
  */
-public class DelegatingNamespaceHandlerResolver extends
-		DefaultNamespaceHandlerResolver {
+public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerResolver {
 
-	private final NamespaceHandler toolAnnotationNamespaceHandler;
+	private NamespaceHandler toolAnnotationNamespaceHandler;
 
 	private final Map<String, NamespaceHandler> namespaceHandlers;
 
 	private final Set<NamespaceHandlerResolver> namespaceHandlerResolvers;
 
-	public DelegatingNamespaceHandlerResolver(ClassLoader classLoader,
-			IBeansConfig beansConfig) {
+	public DelegatingNamespaceHandlerResolver(ClassLoader classLoader, IBeansConfig beansConfig) {
 		super(classLoader);
 		namespaceHandlers = NamespaceUtils.getNamespaceHandlers();
-		namespaceHandlerResolvers = NamespaceUtils
-				.getNamespaceHandlerResolvers();
-		toolAnnotationNamespaceHandler = new ToolAnnotationBasedNamespaceHandler(
-				beansConfig);
+		namespaceHandlerResolvers = NamespaceUtils.getNamespaceHandlerResolvers();
+		if (beansConfig != null) {
+			toolAnnotationNamespaceHandler = new ToolAnnotationBasedNamespaceHandler(beansConfig);
+		}
 	}
 
 	@Override

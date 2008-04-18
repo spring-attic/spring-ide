@@ -267,7 +267,7 @@ public class ConfigSetDialog extends Dialog {
 				}
 			}
 
-			// Readd updated or newly created config set
+			// Read updated or newly created config set
 			project.addConfigSet(configSet);
 		}
 		super.buttonPressed(buttonId);

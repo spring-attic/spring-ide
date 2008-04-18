@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.properties.model;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -41,6 +42,8 @@ public class PropertiesProject extends BeansProject {
 		modelPopulated = true;
 
 		configSuffixes = new LinkedHashSet<String>(project.getConfigSuffixes());
+		locatorByAutoDetectedConfig = new HashMap<String, String>();
+		autoDetectedConfigsByLocator = new HashMap<String, Set<String>>();
 
 		isImportsEnabled = project.isImportsEnabled();
 

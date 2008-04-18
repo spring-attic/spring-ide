@@ -33,7 +33,7 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	 */
 	public final boolean isBeansConfig(IFile file) {
 		if (file.isAccessible() && getAllowedFileExtensions().contains(file.getFileExtension())) {
-			return locateBeansConfigs(file.getProject()).contains(file);
+			return locateBeansConfigs(file.getProject(), null).contains(file);
 		}
 		return false;
 	}

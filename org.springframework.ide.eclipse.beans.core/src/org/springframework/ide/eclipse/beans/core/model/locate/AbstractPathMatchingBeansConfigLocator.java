@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model.locate;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -21,6 +23,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -35,7 +39,7 @@ import org.springframework.util.PathMatcher;
  * the matching process this implementation offers the {@link #canLocateInProject(IProject)} and
  * {@link #filterMatchingFiles(Set)}.
  * <p>
- * Root directories to recursivly search need to be provided by sub-classes by implementing the
+ * Root directories to recursively search need to be provided by sub-classes by implementing the
  * {@link #getRootDirectories(IProject)} method.
  * @author Christian Dupuis
  * @since 2.0.5
@@ -52,26 +56,54 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 	 * @see #filterMatchingFiles(Set)
 	 * @see #getAllowedFilePatterns()
 	 */
-	public final Set<IFile> locateBeansConfigs(IProject project) {
-		Set<IFile> files = new LinkedHashSet<IFile>();
-		if (canLocateInProject(project)) {
-			try {
-				for (IPath rootDir : getRootDirectories(project)) {
-					IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(
-							rootDir);
-					if (resource instanceof IFolder) {
-						locateConfigsInFolder(files, project, (IFolder) resource, rootDir);
+	public final Set<IFile> locateBeansConfigs(IProject project, IProgressMonitor progressMonitor) {
+		if (progressMonitor == null) {
+			progressMonitor = new NullProgressMonitor();
+		}
+		progressMonitor.beginTask(String.format(
+				"Scanning for Spring configuration files in project '%s'", project.getName()), 3);
+		try {
+			Set<IFile> files = new LinkedHashSet<IFile>();
+			if (canLocateInProject(project)) {
+				progressMonitor.worked(1);
+				try {
+					for (IPath rootDir : getRootDirectories(project)) {
+						if (progressMonitor.isCanceled()) {
+							return Collections.emptySet();
+						}
+						progressMonitor.subTask(String.format(
+								"Scanning for Spring configuration files in folder '%s'",
+								rootDir.toString()));
+						IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(
+								rootDir);
+						if (resource instanceof IFolder) {
+							locateConfigsInFolder(files, project, (IFolder) resource, rootDir);
+						}
+						else if (resource instanceof IContainer) {
+							for (IResource res : ((IContainer) resource).members()) {
+								if (res instanceof IFolder) {
+									locateConfigsInFolder(files, project, (IFolder) res, rootDir);
+								}
+							}
+						}
 					}
 				}
+				catch (JavaModelException e) {
+					BeansCorePlugin.log(e);
+				}
+				catch (CoreException e) {
+					BeansCorePlugin.log(e);
+				}
 			}
-			catch (JavaModelException e) {
-				BeansCorePlugin.log(e);
+			if (progressMonitor.isCanceled()) {
+				return Collections.emptySet();
 			}
-			catch (CoreException e) {
-				BeansCorePlugin.log(e);
-			}
+			progressMonitor.worked(2);
+			return filterMatchingFiles(files);
 		}
-		return filterMatchingFiles(files);
+		finally {
+			progressMonitor.done();
+		}
 	}
 
 	/**
