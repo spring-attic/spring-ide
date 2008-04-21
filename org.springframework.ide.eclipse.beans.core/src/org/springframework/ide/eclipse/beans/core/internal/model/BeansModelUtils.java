@@ -1423,7 +1423,7 @@ public abstract class BeansModelUtils {
 			try {
 				IBean factoryB = getBeanWithConfigSets(bd.getFactoryBeanName(), beansConfig);
 				if (factoryB != null) {
-					BeanDefinition factoryBd = BeansModelUtils.getMergedBeanDefinition(bean, null);
+					BeanDefinition factoryBd = BeansModelUtils.getMergedBeanDefinition(factoryB, null);
 					IType factoryBeanType = extractBeanClass(factoryBd, bean, factoryBd
 							.getBeanClassName(), beansConfig);
 					if (factoryBeanType != null) {
