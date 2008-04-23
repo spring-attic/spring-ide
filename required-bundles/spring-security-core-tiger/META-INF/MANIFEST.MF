@@ -3,12 +3,12 @@ Built-By: nebhale
 Created-By: Apache Maven Bundle Plugin
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Import-Package: javax.annotation.security;resolution:=optional,org.spr
- ingframework.core.annotation;resolution:=optional;version="[2.0,2.5.3]"
- ,org.springframework.security;resolution:=optional;version="[2.0,2.5.3]
+ ingframework.core.annotation;resolution:=optional;version="[2.0,3]"
+ ,org.springframework.security;resolution:=optional;version="[2.0,3]
  ",org.springframework.security.annotation;resolution:=optional;versio
- n="[2.0,2.5.3]",org.springframework.security.intercept.method;resolutio
- n:=optional;version="[2.0,2.5.3]",org.springframework.security.vote;res
- olution:=optional;version="[2.0,2.5.3]"
+ n="[2.0,3]",org.springframework.security.intercept.method;resolutio
+ n:=optional;version="[2.0,3]",org.springframework.security.vote;res
+ olution:=optional;version="[2.0,3]"
 Bnd-LastModified: 1207078095276
 Export-Package: org.springframework.security.annotation;uses:="org.spr
  ingframework.security,org.springframework.core.annotation,org.springf
