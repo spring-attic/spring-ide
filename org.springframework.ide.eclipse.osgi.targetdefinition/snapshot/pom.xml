@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>${spring.osgi.groupId}</groupId>
   <artifactId>${spring.osgi.groupId}.target</artifactId>
-  <version>1.1.0-m1-SNAPSHOT</version>
+  <version>1.1.0-m2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Target Platform for Spring Dynamic Modules for OSGi(tm) Service Platforms</name>
   <properties>
     <spring.groupId>org.springframework</spring.groupId>
-    <spring.version>2.5.1</spring.version>
+    <spring.version>2.5.2</spring.version>
     <spring.osgi.groupId>org.springframework.osgi</spring.osgi.groupId>
-    <spring.osgi.version>1.1.0-m1-SNAPSHOT</spring.osgi.version>
+    <spring.osgi.version>1.1.0-m2-SNAPSHOT</spring.osgi.version>
     <felix.commons.groupId>org.apache.felix.commons</felix.commons.groupId>
   </properties>
   <dependencies>
@@ -142,11 +142,6 @@
   </build>
   <repositories>
     <repository>
-      <id>org.apache.snapshots</id>
-      <name>Apache Snapshots Repository</name>
-      <url>http://cvs.apache.org/maven-snapshot-repository</url>
-    </repository>
-    <repository>
       <id>org.springframework.external</id>
       <name>Spring External Dependencies Repository</name>
       <url>https://springframework.svn.sourceforge.net/svnroot/springframework/repos/repo-ext</url>
@@ -159,8 +154,17 @@
     <repository>
       <id>i21-s3-osgi-repo</id>
       <name>i21 S3 OSGi repo</name>
+      <snapshots>
+         <enabled>true</enabled>
+      </snapshots>
       <url>http://s3.amazonaws.com/maven.springframework.org/osgi</url>
     </repository>
-    
+	<!-- snapshot repository -->
+	<repository>
+	 <id>spring-maven-snapshot</id>
+	  <snapshots><enabled>true</enabled></snapshots>
+	  <name>Springframework Maven SNAPSHOT Repository</name>
+	  <url>http://maven.springframework.org/snapshot</url>
+	</repository>     
   </repositories>
 </project>
