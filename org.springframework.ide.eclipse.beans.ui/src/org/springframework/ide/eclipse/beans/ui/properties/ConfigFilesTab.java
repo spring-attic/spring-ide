@@ -358,7 +358,7 @@ public class ConfigFilesTab {
 		configsTable.setFocus();
 	}
 
-	private void handleScanButtonPressed() {
+	protected void handleScanButtonPressed() {
 		ScannedFilesContentProvider contentProvider = new ScannedFilesContentProvider();
 		CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(SpringUIUtils
 				.getStandardDisplay().getActiveShell(), new ScannedFilesLabelProvider(),

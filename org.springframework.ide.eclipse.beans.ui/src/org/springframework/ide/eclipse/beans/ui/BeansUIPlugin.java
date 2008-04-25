@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
@@ -28,8 +29,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.model.SpringNatureAddedEventHandler;
+import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 
 /**
@@ -65,12 +69,14 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	private ImageDescriptorRegistry imageDescriptorRegistry;
 
 	private ILabelProvider labelProvider;
+	
+	/** {@link IResourceChangeListener} that gets notified for project nature added events */
+	private IResourceChangeListener changeListener;
 
 	/**
 	 * Creates the Spring Beans UI plug-in.
 	 * <p>
-	 * The plug-in instance is created automatically by the Eclipse platform.
-	 * Clients must not call.
+	 * The plug-in instance is created automatically by the Eclipse platform. Clients must not call.
 	 */
 	public BeansUIPlugin() {
 		plugin = this;
@@ -104,14 +110,18 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 			imageDescriptorRegistry.dispose();
 			imageDescriptorRegistry = null;
 		}
+		if (changeListener != null) {
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(changeListener);
+		}
 		super.stop(context);
 	}
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-
-		getPreferenceStore().setDefault(
-				DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
+		changeListener = new SpringResourceChangeListener(new SpringNatureAddedEventHandler());
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(changeListener,
+				BeansResourceChangeListener.LISTENER_FLAGS);
+		getPreferenceStore().setDefault(DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
 	}
 
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
@@ -128,8 +138,8 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns then singleton instance of {@link BeansModelLabelProvider}.
 	 * <p>
-	 * <b>For this instance the dispose method must never be called!! This is
-	 * done by {@link Plugin.stop()} instead.</b>
+	 * <b>For this instance the dispose method must never be called!! This is done by
+	 * {@link Plugin.stop()} instead.</b>
 	 */
 	public static ILabelProvider getLabelProvider() {
 		return getDefault().internalGetLabelProvider();
@@ -137,16 +147,14 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 
 	private synchronized ILabelProvider internalGetLabelProvider() {
 		if (labelProvider == null) {
-			labelProvider = new DecoratingLabelProvider(
-					new BeansModelLabelProvider(true),
+			labelProvider = new DecoratingLabelProvider(new BeansModelLabelProvider(true),
 					new BeansModelLabelDecorator());
 		}
 		return labelProvider;
 	}
 
 	/**
-	 * Returns an {@link ImageDescriptor} for the image file at the given
-	 * plug-in relative path
+	 * Returns an {@link ImageDescriptor} for the image file at the given plug-in relative path
 	 * 
 	 * @param path the path
 	 * @return the image descriptor
@@ -180,8 +188,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle, or 'key' if not
-	 * found.
+	 * Returns the string from the plugin's resource bundle, or 'key' if not found.
 	 */
 	public static String getResourceString(String key) {
 		String bundleString;
@@ -222,8 +229,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 
 	public static void log(Throwable exception) {
 		getDefault().getLog().log(
-				createErrorStatus(getResourceString("Plugin.internal_error"),
-						exception));
+				createErrorStatus(getResourceString("Plugin.internal_error"), exception));
 	}
 
 	/**
