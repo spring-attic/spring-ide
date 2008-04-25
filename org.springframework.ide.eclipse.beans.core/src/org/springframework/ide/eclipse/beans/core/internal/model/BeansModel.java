@@ -342,7 +342,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void springNatureAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature added to " + "project '"
+					System.out.println("Spring beans nature added to project '"
 							+ project.getName() + "'");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
@@ -360,7 +360,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void springNatureRemoved(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature removed from " + "project '"
+					System.out.println("Spring beans nature removed from project '"
 							+ project.getName() + "'");
 				}
 				IBeansProject proj = null;
