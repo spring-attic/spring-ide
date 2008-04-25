@@ -7,6 +7,10 @@ public class SubClass extends Base implements Serializable{
 	public SubClass(String test) {
 		
 	}
+
+	public SubClass() {
+		
+	}
 	
 	private Object dao;
 	

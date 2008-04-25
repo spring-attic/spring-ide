@@ -10,6 +10,7 @@
 		<config>src/ide-798.xml</config>
 		<config>src/ide-771.xml</config>
 		<config>src/ide-832.xml</config>
+		<config>src/ide-855.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

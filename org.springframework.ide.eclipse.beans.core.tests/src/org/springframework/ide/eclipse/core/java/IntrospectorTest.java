@@ -66,7 +66,7 @@ public class IntrospectorTest extends BeansCoreTestCase {
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		Set<IMethod> cons = Introspector.findAllConstructors(foo);
 		assertTrue(!cons.isEmpty());
-		assertTrue(cons.toArray().length == 3);
+		assertTrue(cons.toArray().length == 4);
 	}
 
 	public void testFindAllMethodsWithFilter() throws CoreException, IOException {

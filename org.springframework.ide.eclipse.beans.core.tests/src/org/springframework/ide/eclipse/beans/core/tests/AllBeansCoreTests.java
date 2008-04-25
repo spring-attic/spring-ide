@@ -14,6 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRuleTest;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentRuleTests;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRuleTest;
@@ -30,6 +31,7 @@ public class AllBeansCoreTests {
 		TestSuite suite = new TestSuite(AllBeansCoreTests.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTest(new TestSuite(BeanClassRuleTest.class));
+		suite.addTest(new TestSuite(BeanConstructorArgumentRuleTests.class));
 		suite.addTest(new TestSuite(BeanPropertyRuleTest.class));
 		suite.addTest(new TestSuite(BeanInitDestroyMethodRuleTest.class));
 		suite.addTest(new TestSuite(RequiredPropertyRuleTest.class));

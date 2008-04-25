@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<bean id="correct" class="org.springframework.Factory"
+		factory-method="newInstance">
+		<constructor-arg index="0" value="true" />
+		<constructor-arg index="1" value="false" />
+		<constructor-arg index="2" value="false" />
+		<constructor-arg index="3" value="K" />
+	</bean>
+	
+	<bean id="correctChild" parent="correct" >
+		<constructor-arg index="3" value="K" />
+	</bean>   
+	
+	<!-- this is should give an error -->
+	<bean id="incorrect" class="org.springframework.Factory" /> 
+
+	<!-- this is should give an error -->
+	<bean id="incorrectWithArgs" class="org.springframework.Factory" >
+		<constructor-arg index="0" value="true" />
+		<constructor-arg index="1" value="false" />
+		<constructor-arg index="2" value="false" />
+	</bean> 
+	
+</beans>
