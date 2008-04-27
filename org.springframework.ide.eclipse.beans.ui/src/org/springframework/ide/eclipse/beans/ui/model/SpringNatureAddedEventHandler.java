@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.ISpringResourceChangeEvents;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeEventsAdapter;
 
@@ -49,7 +50,7 @@ public class SpringNatureAddedEventHandler extends SpringResourceChangeEventsAda
 	}
 
 	public boolean isSpringProject(IProject project, int eventType) {
-		return false;
+		return SpringCoreUtils.isSpringProject(project);
 	}
 
 }
