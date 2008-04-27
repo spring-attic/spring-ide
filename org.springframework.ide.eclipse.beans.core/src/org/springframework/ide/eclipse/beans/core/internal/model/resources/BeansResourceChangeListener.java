@@ -107,6 +107,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				if (BeansCoreUtils.isBeansConfig(resource)) {
 					events.configRemoved((IFile) resource, eventType);
 				}
+				else if (requiresRefresh((IFile) resource)) {
+					events.listenedFileChanged((IFile) resource, eventType);
+				}
 				return false;
 			}
 			return super.resourceRemoved(resource);
@@ -156,4 +159,5 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			return false;
 		}
 	}
+	
 }
