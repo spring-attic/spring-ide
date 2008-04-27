@@ -101,7 +101,7 @@ public abstract class AbstractAnnotationMetadata implements IClassMetadata, IAda
 	}
 
 	public String getKey() {
-		return getClassHandle();
+		return handle;
 	}
 
 	public Set<IMethodMetadata> getMethodMetaData() {
