@@ -14,17 +14,8 @@
    <feature url="features/org.springframework.ide.eclipse.aop.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.aop.feature" version="@VERSION@">
       <category name="Extensions"/>
    </feature>
-   <feature url="features/org.springframework.ide.eclipse.ajdt.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.ajdt.feature" version="@VERSION@">
-      <category name="Integrations"/>
-   </feature>
-   <feature url="features/org.springframework.ide.eclipse.javaconfig.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.javaconfig.feature" version="@VERSION@">
-      <category name="Extensions (Incubuation)"/>
-   </feature>
    <feature url="features/org.springframework.ide.eclipse.webflow.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.webflow.feature" version="@VERSION@">
       <category name="Extensions"/>
-   </feature>
-   <feature url="features/org.springframework.ide.eclipse.mylyn.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.mylyn.feature" version="@VERSION@">
-      <category name="Integrations"/>
    </feature>
    <feature url="features/org.springframework.ide.eclipse.osgi.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.osgi.feature" version="@VERSION@">
       <category name="Extensions"/>
@@ -32,14 +23,23 @@
    <feature url="features/org.springframework.ide.eclipse.security.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.security.feature" version="@VERSION@">
       <category name="Extensions"/>
    </feature>
+   <feature url="features/org.springframework.ide.eclipse.javaconfig.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.javaconfig.feature" version="@VERSION@">
+      <category name="Extensions (Incubation)"/>
+   </feature>
    <feature url="features/org.springframework.ide.eclipse.autowire.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.autowire.feature" version="@VERSION@">
-      <category name="Extensions (Incubuation)"/>
+      <category name="Extensions (Incubation)"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.ajdt.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.ajdt.feature" version="@VERSION@">
+      <category name="Integrations"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.mylyn.feature_@VERSION@.jar" id="org.springframework.ide.eclipse.mylyn.feature" version="@VERSION@">
+      <category name="Integrations"/>
    </feature>
    
    <category-def name="Core" label="Core"/>
+   <category-def name="Dependencies" label="Dependencies"/>
    <category-def name="Extensions" label="Extensions"/>
    <category-def name="Extensions (Incubation)" label="Extensions (Incubation)"/>
    <category-def name="Integrations" label="Integrations"/>
-   <category-def name="Dependencies" label="Dependencies"/>
    
 </site>
