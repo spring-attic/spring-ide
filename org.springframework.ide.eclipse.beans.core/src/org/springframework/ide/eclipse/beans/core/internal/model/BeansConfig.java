@@ -36,6 +36,7 @@ import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.DefaultsDefinition;
+import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
 import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -97,7 +98,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					Pattern.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
 					Pattern.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
 
-	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
+	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = 
+		new DefaultModelElementProvider();
 
 	public BeansConfig(IBeansProject project, String name, Type type) {
 		super(project, name, type);
@@ -132,9 +134,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	}
 
 	/**
-	 * Sets internal list of {@link IBean}s to <code>null</code>. Any
-	 * further access to the data of this instance of {@link IBeansConfig} leads
-	 * to reloading of the corresponding beans config file.
+	 * Sets internal list of {@link IBean}s to <code>null</code>. Any further access to the data
+	 * of this instance of {@link IBeansConfig} leads to reloading of the corresponding beans config
+	 * file.
 	 */
 	public void reload() {
 		if (file != null && file.isAccessible() && super.resourceChanged()) {
@@ -165,12 +167,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	}
 
 	/**
-	 * Checks the file for the given name. If the given name defines an external
-	 * resource (leading '/' -> not part of the project this config belongs to)
-	 * get the file from the workspace else from the project. If the name
-	 * specifies an entry in an archive then the {@link #isArchived} flag is
-	 * set. If the corresponding file is not available or accessible then an
-	 * entry is added to the config's list of errors.
+	 * Checks the file for the given name. If the given name defines an external resource (leading
+	 * '/' -> not part of the project this config belongs to) get the file from the workspace else
+	 * from the project. If the name specifies an entry in an archive then the {@link #isArchived}
+	 * flag is set. If the corresponding file is not available or accessible then an entry is added
+	 * to the config's list of errors.
 	 */
 	protected void init(String name) {
 		IContainer container;
@@ -273,9 +274,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 					try {
 						reader.loadBeanDefinitions(resource);
+
+						// finally register post processed beans and components
 						eventListener.registerComponents();
+
 						// post process beans config if required
 						postProcess(problemReporter, beanNameGenerator, resource);
+
 					}
 					catch (Throwable e) { // handle ALL exceptions
 
@@ -328,7 +333,6 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 						file, getLine(problem)));
 			}
 		}
-
 
 		public void warning(Problem problem) {
 			if (!isMessageIgnorable(problem.getMessage())) {
@@ -387,7 +391,20 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 	protected void postProcess(ProblemReporter problemReporter,
 			BeanNameGenerator beanNameGenerator, Resource resource) {
-		ReaderEventListener readerEventListener = new BeansConfigReaderEventListener(this, resource);
+
+		// Create special ReaderEventListener that essentially just passes through component
+		// definitions
+		ReaderEventListener eventListener = new EmptyReaderEventListener() {
+
+			// Keep the contributed model element provider
+			final Map<String, IModelElementProvider> elementProviders = NamespaceUtils
+					.getElementProviders();
+
+			@Override
+			public void componentRegistered(ComponentDefinition componentDefinition) {
+				registerComponentDefinition(componentDefinition, elementProviders);
+			}
+		};
 
 		// TODO CD do we need to check the components map as well?
 		List<IBean> beansClone = new ArrayList<IBean>();
@@ -405,7 +422,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 							.createPostProcessor(beanClassName);
 					if (postProcessor != null) {
 						postProcessor.postProcess(BeansConfigPostProcessorFactory
-								.createPostProcessingContext(beans.values(), readerEventListener,
+								.createPostProcessingContext(beans.values(), eventListener,
 										problemReporter, beanNameGenerator));
 					}
 				}
@@ -414,9 +431,28 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	}
 
 	/**
-	 * Implementation of {@link ReaderEventListener} which populates the current
-	 * instance of {@link IBeansConfig} with data from the XML bean definition
-	 * reader events.
+	 * Registers the given component definition with this {@link BeansConfig}'s beans and component
+	 * storage.
+	 */
+	private void registerComponentDefinition(ComponentDefinition componentDefinition,
+			Map<String, IModelElementProvider> elementProviders) {
+		String uri = NamespaceUtils.getNameSpaceURI(componentDefinition);
+		IModelElementProvider provider = elementProviders.get(uri);
+		if (provider == null) {
+			provider = DEFAULT_ELEMENT_PROVIDER;
+		}
+		ISourceModelElement element = provider.getElement(BeansConfig.this, componentDefinition);
+		if (element instanceof IBean) {
+			beans.put(element.getElementName(), (IBean) element);
+		}
+		else if (element instanceof IBeansComponent) {
+			components.add((IBeansComponent) element);
+		}
+	}
+
+	/**
+	 * Implementation of {@link ReaderEventListener} which populates the current instance of
+	 * {@link IBeansConfig} with data from the XML bean definition reader events.
 	 */
 	protected final class BeansConfigReaderEventListener implements ReaderEventListener {
 
@@ -487,9 +523,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		/**
 		 * Converts the given {@link ComponentDefinition} into a corresponding
-		 * {@link ISourceModelElement} via a namespace-specific
-		 * {@link IModelElementProvider}. These providers are registered via
-		 * the extension point
+		 * {@link ISourceModelElement} via a namespace-specific {@link IModelElementProvider}.
+		 * These providers are registered via the extension point
 		 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code>.
 		 */
 		public void componentRegistered(ComponentDefinition componentDefinition) {
@@ -535,18 +570,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			Set<ComponentDefinition> componentDefinitions = componentDefinitionsCache.get(resource);
 			if (componentDefinitions != null) {
 				for (ComponentDefinition componentDefinition : componentDefinitions) {
-					String uri = NamespaceUtils.getNameSpaceURI(componentDefinition);
-					IModelElementProvider provider = elementProviders.get(uri);
-					if (provider == null) {
-						provider = DEFAULT_ELEMENT_PROVIDER;
-					}
-					ISourceModelElement element = provider.getElement(config, componentDefinition);
-					if (element instanceof IBean) {
-						beans.put(element.getElementName(), (IBean) element);
-					}
-					else if (element instanceof IBeansComponent) {
-						components.add((IBeansComponent) element);
-					}
+					registerComponentDefinition(componentDefinition, elementProviders);
 				}
 			}
 

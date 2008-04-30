@@ -193,8 +193,8 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		if (!resource.equals(getRootElementResource())) {
 			IBeansImport beansImport = BeansModelUtils.getParentOfClass(
 					element, IBeansImport.class);
-
-			do {
+			
+			while (beansImport != null) {
 				if (severity == IValidationProblemMarker.SEVERITY_ERROR) {
 					problems.add(createProblem(beansImport, "",
 							IValidationProblemMarker.SEVERITY_ERROR,
@@ -213,7 +213,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 				}
 				beansImport = BeansModelUtils.getParentOfClass(beansImport,
 						IBeansImport.class);
-			} while (beansImport != null);
+			}
 		}
 
 		return problems;
