@@ -172,7 +172,7 @@ public class BeanMetadataBuilderJob extends Job {
 			final IProgressMonitor progressMonitor, IBeanMetadataProvider[] providers,
 			final IBean bean) {
 		// Reset meta data attachment before adding
-		BeansCorePlugin.getMetadataModel().clearBeanMetaData(bean);
+		BeansCorePlugin.getMetadataModel().clearBeanMetadata(bean);
 		BeansCorePlugin.getMetadataModel().clearBeanProperties(bean);
 
 		Set<IBeanMetadata> beanMetaData = new LinkedHashSet<IBeanMetadata>();

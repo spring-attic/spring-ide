@@ -45,7 +45,7 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 	
 	private Map<String, BeanPropertyDataHolder> beanPropertyData = null;
 
-	public Set<IBeanMetadata> getBeanMetaData(IBean bean) {
+	public Set<IBeanMetadata> getBeanMetadata(IBean bean) {
 		try {
 			r.lock();
 			if (beanMetadata.containsKey(bean.getElementID())) {
@@ -75,7 +75,7 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 		}
 	}
 
-	public void clearBeanMetaData(IBean bean) {
+	public void clearBeanMetadata(IBean bean) {
 		try {
 			w.lock();
 			beanMetadata.remove(bean.getElementID());

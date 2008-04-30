@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.model.metadata;
 
 import java.util.Set;
 
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 
@@ -21,22 +22,25 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
  * @author Christian Dupuis
  * @since 2.0.5
  */
+/**
+ * TODO CD this interface needs methods to provide {@link ConstructorArgumentValues} as well.
+ */
 public interface IBeanMetadataModel {
 	
 	/**
 	 * Returns the {@link IBeanMetadata}s for the given {@link IBean}.
 	 */
-	Set<IBeanMetadata> getBeanMetaData(IBean bean);
+	Set<IBeanMetadata> getBeanMetadata(IBean bean);
 	
 	/**
 	 * Set {@link IBeanMetadata}s for a certain {@link IBean}. 
 	 */
-	void setBeanMetadata(IBean bean, Set<IBeanMetadata> beanMetaData,
-			Set<IMethodMetadata> methodMetaData);
+	void setBeanMetadata(IBean bean, Set<IBeanMetadata> beanMetadata,
+			Set<IMethodMetadata> methodMetadata);
 	/**
 	 * Clears the meta data for a certain {@link IBean}. 
 	 */
-	void clearBeanMetaData(IBean bean);
+	void clearBeanMetadata(IBean bean);
 
 	/**
 	 * Returns the {@link IBeanProperty}s for the given {@link IBean}.

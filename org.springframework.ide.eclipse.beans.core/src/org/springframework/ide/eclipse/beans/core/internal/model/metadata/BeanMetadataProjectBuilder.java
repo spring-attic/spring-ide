@@ -62,7 +62,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 		if (BeansCoreUtils.isBeansConfig(resource) && resource instanceof IFile) {
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource);
 			for (IBean bean : beansConfig.getBeans()) {
-				BeansCorePlugin.getMetadataModel().clearBeanMetaData(bean);
+				BeansCorePlugin.getMetadataModel().clearBeanMetadata(bean);
 				BeansCorePlugin.getMetadataModel().clearBeanProperties(bean);
 			}
 			// Notify that the model has changed.
