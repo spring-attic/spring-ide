@@ -2,8 +2,8 @@
 
 <!DOCTYPE xsl:stylesheet [
     <!ENTITY db_xsl_path        "../lib/docbook-xsl/">
-    <!ENTITY callout_gfx_path   "../images/callouts/">
-    <!ENTITY admon_gfx_path     "../images/admons/">
+    <!ENTITY callout_gfx_path   "images/callouts/">
+    <!ENTITY admon_gfx_path     "images/admons/">
 ]>
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"

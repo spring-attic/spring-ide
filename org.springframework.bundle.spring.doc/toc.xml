@@ -174,6 +174,7 @@
          <topic label="Glue code and the evil singleton" href="beans.html#beans-glue-code-and-singletons"/>
          <topic label="Deploying a Spring ApplicationContext as a J2EE RAR file" href="beans.html#beans-rar-deployment"/>
          <topic label="Annotation-based configuration" href="beans.html#beans-annotation-config">
+            <topic label="@Required" href="beans.html#beans-required-annotation"/>
             <topic label="@Autowired" href="beans.html#beans-autowired-annotation"/>
             <topic label="Fine-tuning annotation-based autowiring with qualifiers" href="beans.html#beans-autowired-annotation-qualifiers"/>
             <topic label="CustomAutowireConfigurer" href="beans.html#beans-custom-autowire-configurer"/>
@@ -458,8 +459,9 @@
          </topic>
          <topic label="Choosing between programmatic and declarative transaction management" href="transaction.html#tx-decl-vs-prog"/>
          <topic label="Application server-specific integration" href="transaction.html#transaction-application-server-integration">
-            <topic label="BEA WebLogic" href="transaction.html#transaction-application-server-integration-weblogic"/>
             <topic label="IBM WebSphere" href="transaction.html#transaction-application-server-integration-websphere"/>
+            <topic label="BEA WebLogic" href="transaction.html#transaction-application-server-integration-weblogic"/>
+            <topic label="Oracle OC4J" href="transaction.html#transaction-application-server-integration-oc4j"/>
          </topic>
          <topic label="Solutions to common problems" href="transaction.html#transaction-solutions-to-common-problems">
             <topic label="Use of the wrong transaction manager for a specific DataSource" href="transaction.html#transaction-solutions-to-common-problems-wrong-ptm"/>
@@ -627,22 +629,6 @@
             <topic label="Using the&#xA;      MultipartResolver" href="mvc.html#mvc-multipart-resolver"/>
             <topic label="Handling a file upload in a form" href="mvc.html#mvc-multipart-forms"/>
          </topic>
-         <topic label="Using Spring's form tag library" href="mvc.html#mvc-formtaglib">
-            <topic label="Configuration" href="mvc.html#mvc-formtaglib-configuration"/>
-            <topic label="The form tag" href="mvc.html#mvc-formtaglib-formtag"/>
-            <topic label="The input tag" href="mvc.html#mvc-formtaglib-inputtag"/>
-            <topic label="The checkbox tag" href="mvc.html#mvc-formtaglib-checkboxtag"/>
-            <topic label="The checkboxes tag" href="mvc.html#mvc-formtaglib-checkboxestag"/>
-            <topic label="The radiobutton tag" href="mvc.html#mvc-formtaglib-radiobuttontag"/>
-            <topic label="The radiobuttons tag" href="mvc.html#mvc-formtaglib-radiobuttonstag"/>
-            <topic label="The password tag" href="mvc.html#mvc-formtaglib-passwordtag"/>
-            <topic label="The select tag" href="mvc.html#mvc-formtaglib-selecttag"/>
-            <topic label="The option tag" href="mvc.html#mvc-formtaglib-optiontag"/>
-            <topic label="The options tag" href="mvc.html#mvc-formtaglib-optionstag"/>
-            <topic label="The textarea tag" href="mvc.html#mvc-formtaglib-textAreatag"/>
-            <topic label="The hidden tag" href="mvc.html#mvc-formtaglib-hiddeninputtag"/>
-            <topic label="The errors tag" href="mvc.html#mvc-formtaglib-errorstag"/>
-         </topic>
          <topic label="Handling exceptions" href="mvc.html#mvc-exceptionhandlers"/>
          <topic label="Convention over configuration" href="mvc.html#mvc-coc">
             <topic label="The Controller -&#xA;      ControllerClassNameHandlerMapping" href="mvc.html#mvc-coc-ccnhm"/>
@@ -652,7 +638,10 @@
          <topic label="Annotation-based controller configuration" href="mvc.html#mvc-annotation">
             <topic label="Setting up the dispatcher for annotation support" href="mvc.html#mvc-ann-setup"/>
             <topic label="Defining a controller with&#xA;      @Controller" href="mvc.html#mvc-ann-controller"/>
-            <topic label="Mapping requests with&#xA;      @RequestMapping" href="mvc.html#mvc-ann-requestmapping"/>
+            <topic label="Mapping requests with&#xA;      @RequestMapping" href="mvc.html#mvc-ann-requestmapping">
+               <topic label="Advanced @RequestMapping options" href="mvc.html#mvc-ann-requestmapping-advanced"/>
+            </topic>
+            <topic label="Supported handler method arguments and return types" href="mvc.html#mvc-ann-requestmapping-arguments"/>
             <topic label="Binding request parameters to method parameters with&#xA;      @RequestParam" href="mvc.html#mvc-ann-requestparam"/>
             <topic label="Providing a link to data from the model with&#xA;      @ModelAttribute" href="mvc.html#mvc-ann-modelattrib"/>
             <topic label="Specifying attributes to store in a Session with&#xA;      @SessionAttributes" href="mvc.html#mvc-ann-sessionattrib"/>
@@ -663,12 +652,28 @@
          </topic>
          <topic label="Further Resources" href="mvc.html#mvc-resources"/>
       </topic>
-      <topic label="Integrating view technologies" href="view.html">
+      <topic label="View technologies" href="view.html">
          <topic label="Introduction" href="view.html#view-introduction"/>
          <topic label="JSP &amp; JSTL" href="view.html#view-jsp">
             <topic label="View resolvers" href="view.html#view-jsp-resolver"/>
             <topic label="'Plain-old' JSPs versus JSTL" href="view.html#view-jsp-jstl"/>
             <topic label="Additional tags facilitating development" href="view.html#view-jsp-tags"/>
+            <topic label="Using Spring's form tag library" href="view.html#view-jsp-formtaglib">
+               <topic label="Configuration" href="view.html#view-jsp-formtaglib-configuration"/>
+               <topic label="The form tag" href="view.html#view-jsp-formtaglib-formtag"/>
+               <topic label="The input tag" href="view.html#view-jsp-formtaglib-inputtag"/>
+               <topic label="The checkbox tag" href="view.html#view-jsp-formtaglib-checkboxtag"/>
+               <topic label="The checkboxes tag" href="view.html#view-jsp-formtaglib-checkboxestag"/>
+               <topic label="The radiobutton tag" href="view.html#view-jsp-formtaglib-radiobuttontag"/>
+               <topic label="The radiobuttons tag" href="view.html#view-jsp-formtaglib-radiobuttonstag"/>
+               <topic label="The password tag" href="view.html#view-jsp-formtaglib-passwordtag"/>
+               <topic label="The select tag" href="view.html#view-jsp-formtaglib-selecttag"/>
+               <topic label="The option tag" href="view.html#view-jsp-formtaglib-optiontag"/>
+               <topic label="The options tag" href="view.html#view-jsp-formtaglib-optionstag"/>
+               <topic label="The textarea tag" href="view.html#view-jsp-formtaglib-textAreatag"/>
+               <topic label="The hidden tag" href="view.html#view-jsp-formtaglib-hiddeninputtag"/>
+               <topic label="The errors tag" href="view.html#view-jsp-formtaglib-errorstag"/>
+            </topic>
          </topic>
          <topic label="Tiles" href="view.html#view-tiles">
             <topic label="Dependencies" href="view.html#view-tiles-dependencies"/>
@@ -731,30 +736,32 @@
             <topic label="Configuring Exporter Parameters" href="view.html#view-jasper-reports-exporter-parameters"/>
          </topic>
       </topic>
-      <topic label="Integrating with other web frameworks" href="webintegration.html">
-         <topic label="Introduction" href="webintegration.html#intro"/>
-         <topic label="Common configuration" href="webintegration.html#webintegration-common"/>
-         <topic label="JavaServer Faces" href="webintegration.html#jsf">
-            <topic label="DelegatingVariableResolver" href="webintegration.html#jsf-delegatingvariableresolver"/>
-            <topic label="FacesContextUtils" href="webintegration.html#jsf-facescontextutils"/>
+      <topic label="Integrating with other web frameworks" href="web-integration.html">
+         <topic label="Introduction" href="web-integration.html#intro"/>
+         <topic label="Common configuration" href="web-integration.html#web-integration-common"/>
+         <topic label="JavaServer Faces 1.1 and 1.2" href="web-integration.html#jsf">
+            <topic label="DelegatingVariableResolver (JSF 1.1/1.2)" href="web-integration.html#jsf-delegatingvariableresolver"/>
+            <topic label="SpringBeanVariableResolver (JSF 1.1/1.2)" href="web-integration.html#jsf-springbeanvariableresolver"/>
+            <topic label="SpringBeanFacesELResolver (JSF 1.2+)" href="web-integration.html#jsf-springbeanfaceselresolver"/>
+            <topic label="FacesContextUtils" href="web-integration.html#jsf-facescontextutils"/>
          </topic>
-         <topic label="Struts" href="webintegration.html#struts">
-            <topic label="ContextLoaderPlugin" href="webintegration.html#struts-contextloaderplugin">
-               <topic label="DelegatingRequestProcessor" href="webintegration.html#struts-delegatingrequestprocessor"/>
-               <topic label="DelegatingActionProxy" href="webintegration.html#struts-delegatingactionproxy"/>
+         <topic label="Apache Struts 1.x and 2.x" href="web-integration.html#struts">
+            <topic label="ContextLoaderPlugin" href="web-integration.html#struts-contextloaderplugin">
+               <topic label="DelegatingRequestProcessor" href="web-integration.html#struts-delegatingrequestprocessor"/>
+               <topic label="DelegatingActionProxy" href="web-integration.html#struts-delegatingactionproxy"/>
             </topic>
-            <topic label="ActionSupport Classes" href="webintegration.html#struts-actionsupport"/>
+            <topic label="ActionSupport Classes" href="web-integration.html#struts-actionsupport"/>
          </topic>
-         <topic label="Tapestry" href="webintegration.html#view-tapestry">
-            <topic label="Injecting Spring-managed beans" href="webintegration.html#view-tapestry-di">
-               <topic label="Dependency Injecting Spring Beans into Tapestry pages" href="webintegration.html#view-tapestry-pre40-style-di"/>
-               <topic label="Component definition files" href="webintegration.html#view-tapestry-componentdefs"/>
-               <topic label="Adding abstract accessors" href="webintegration.html#view-tapestry-getters"/>
-               <topic label="Dependency Injecting Spring Beans into Tapestry pages - Tapestry 4.0+ style" href="webintegration.html#view-tapestry-40-style-di"/>
+         <topic label="WebWork 2.x" href="web-integration.html#webwork"/>
+         <topic label="Tapestry 3.x and 4.x" href="web-integration.html#tapestry">
+            <topic label="Injecting Spring-managed beans" href="web-integration.html#tapestry-di">
+               <topic label="Dependency Injecting Spring Beans into Tapestry pages" href="web-integration.html#tapestry-pre4-style-di"/>
+               <topic label="Component definition files" href="web-integration.html#tapestry-componentdefs"/>
+               <topic label="Adding abstract accessors" href="web-integration.html#tapestry-getters"/>
+               <topic label="Dependency Injecting Spring Beans into Tapestry pages - Tapestry 4.x style" href="web-integration.html#tapestry-4-style-di"/>
             </topic>
          </topic>
-         <topic label="WebWork" href="webintegration.html#webwork"/>
-         <topic label="Further Resources" href="webintegration.html#webintegration-resources"/>
+         <topic label="Further Resources" href="web-integration.html#web-integration-resources"/>
       </topic>
       <topic label="Portlet MVC Framework" href="portlet.html">
          <topic label="Introduction" href="portlet.html#portlet-introduction">
@@ -784,6 +791,19 @@
             <topic label="Handling a file upload in a form" href="portlet.html#portlet-multipart-forms"/>
          </topic>
          <topic label="Handling exceptions" href="portlet.html#portlet-exceptionresolver"/>
+         <topic label="Annotation-based controller configuration" href="portlet.html#portlet-annotation">
+            <topic label="Setting up the dispatcher for annotation support" href="portlet.html#portlet-ann-setup"/>
+            <topic label="Defining a controller with&#xA;      @Controller" href="portlet.html#portlet-ann-controller"/>
+            <topic label="Mapping requests with&#xA;      @RequestMapping" href="portlet.html#portlet-ann-requestmapping"/>
+            <topic label="Supported handler method arguments" href="portlet.html#portlet-ann-requestmapping-arguments"/>
+            <topic label="Binding request parameters to method parameters with&#xA;      @RequestParam" href="portlet.html#portlet-ann-requestparam"/>
+            <topic label="Providing a link to data from the model with&#xA;      @ModelAttribute" href="portlet.html#portlet-ann-modelattrib"/>
+            <topic label="Specifying attributes to store in a Session with&#xA;      @SessionAttributes" href="portlet.html#portlet-ann-sessionattrib"/>
+            <topic label="Customizing WebDataBinder&#xA;      initialization" href="portlet.html#portlet-ann-webdatabinder">
+               <topic label="Customizing data binding with&#xA;        @InitBinder" href="portlet.html#portlet-ann-initbinder"/>
+               <topic label="Configuring a custom&#xA;        WebBindingInitializer" href="portlet.html#portlet-ann-webbindinginitializer"/>
+            </topic>
+         </topic>
          <topic label="Portlet application deployment" href="portlet.html#portlet-deployment"/>
       </topic>
    </topic>
@@ -995,22 +1015,6 @@
          <topic label="Metadata and Spring AOP autoproxying" href="metadata.html#metadata-uses">
             <topic label="Fundamentals" href="metadata.html#metadata-fundamentals"/>
             <topic label="Declarative transaction management" href="metadata.html#metadata-tx"/>
-            <topic label="Pooling" href="metadata.html#metadata-pool"/>
-            <topic label="Custom metadata" href="metadata.html#metadata-arbitrary"/>
-         </topic>
-         <topic label="Using attributes to minimize MVC web tier configuration" href="metadata.html#metadata-attributes-mvc"/>
-      </topic>
-   </topic>
-   <topic label="Sample applications" href="spring-samples.html">
-      <topic label="Showcase applications" href="showcases.html">
-         <topic label="Introduction" href="showcases.html#showcases-introduction"/>
-         <topic label="Spring MVC Controllers implemented in a dynamic language" href="showcases.html#showcases-dynamvc">
-            <topic label="Build and deployment" href="showcases.html#showcases-dynamvc-build"/>
-         </topic>
-         <topic label="Implementing DAOs using SimpleJdbcTemplate and @Repository&#xA;	" href="showcases.html#showcases-java5-dao">
-            <topic label="The domain" href="showcases.html#showcases-java5-dao-the-domain"/>
-            <topic label="The data access objects" href="showcases.html#showcases-java5-dao-the-daos"/>
-            <topic label="Build" href="showcases.html#showcases-java5-dao-build"/>
          </topic>
       </topic>
    </topic>
@@ -1093,6 +1097,7 @@
    <topic label="spring-form.tld" href="spring-form.tld.html">
       <topic label="Introduction" href="spring-form.tld.html#spring-form.tld-intro"/>
       <topic label="The checkbox tag" href="spring-form.tld.html#spring-form.tld.checkbox"/>
+      <topic label="The checkboxes tag" href="spring-form.tld.html#spring-form.tld.checkboxes"/>
       <topic label="The errors tag" href="spring-form.tld.html#spring-form.tld.errors"/>
       <topic label="The form tag" href="spring-form.tld.html#spring-form.tld.form"/>
       <topic label="The hidden tag" href="spring-form.tld.html#spring-form.tld.hidden"/>
@@ -1102,6 +1107,7 @@
       <topic label="The options tag" href="spring-form.tld.html#spring-form.tld.options"/>
       <topic label="The password tag" href="spring-form.tld.html#spring-form.tld.password"/>
       <topic label="The radiobutton tag" href="spring-form.tld.html#spring-form.tld.radiobutton"/>
+      <topic label="The radiobuttons tag" href="spring-form.tld.html#spring-form.tld.radiobuttons"/>
       <topic label="The select tag" href="spring-form.tld.html#spring-form.tld.select"/>
       <topic label="The textarea tag" href="spring-form.tld.html#spring-form.tld.textarea"/>
    </topic>

@@ -63,13 +63,19 @@
 		</java>
 
 		<move file="${basedir}/${dist.ref.dir}/toc.xml" todir="${basedir}" />
-
+		
 		<zip destfile="${basedir}/doc.zip">
+			<fileset dir="${basedir}/${doc.ref.dir}">
+				<include name="images/**" />
+			</fileset>
 			<fileset dir="${basedir}/${doc.ref.dir}/src">
-				<include name="images/*" />
+				<include name="images/**" />
 			</fileset>
 			<fileset file="${basedir}/${doc.ref.dir}/styles/html.css" />
-			<fileset dir="${basedir}/${dist.ref.dir}" excludes="toc.xml" />
+			<fileset dir="${basedir}/${dist.ref.dir}" >
+				<include name="**/*" />
+				<exclude name="toc.xml" />
+			</fileset>
 		</zip>
 	</target>
 
