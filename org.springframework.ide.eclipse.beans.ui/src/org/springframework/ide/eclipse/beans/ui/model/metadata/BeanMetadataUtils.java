@@ -151,7 +151,7 @@ public class BeanMetadataUtils {
 
 	private static void addMetaDataForBean(IBeansProject project,
 			Map<String, BeanMetadataReference> metaDataMapping, IBean bean) {
-		for (IBeanMetadata metaData : BeansCorePlugin.getMetadataModel().getBeanMetaData(bean)) {
+		for (IBeanMetadata metaData : BeansCorePlugin.getMetadataModel().getBeanMetadata(bean)) {
 			if (!metaDataMapping.containsKey(metaData.getKey())) {
 				metaDataMapping.put(metaData.getKey(), getContenProvider(metaData)
 						.getBeanMetadataReference(metaData, project));
