@@ -55,8 +55,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  */
 public class ConfigSetsTab {
 
-	private static class ConfigSetContentProvider implements
-			ITreeContentProvider {
+	private static class ConfigSetContentProvider implements ITreeContentProvider {
 
 		private PropertiesProject project;
 
@@ -74,8 +73,7 @@ public class ConfigSetsTab {
 				return configSets.toArray();
 			}
 			else if (parentElement instanceof PropertiesConfigSet) {
-				Set<IBeansConfig> configs = ((PropertiesConfigSet) parentElement)
-						.getConfigs();
+				Set<IBeansConfig> configs = ((PropertiesConfigSet) parentElement).getConfigs();
 				return configs.toArray();
 			}
 			return IModelElement.NO_CHILDREN;
@@ -90,8 +88,7 @@ public class ConfigSetsTab {
 				return ((PropertiesConfigSet) element).getElementParent();
 			}
 			else if (element instanceof PropertiesConfig) {
-				return ((PropertiesConfig) element).getElementParent()
-						.getElementParent();
+				return ((PropertiesConfig) element).getElementParent().getElementParent();
 			}
 			return null;
 		}
@@ -115,8 +112,7 @@ public class ConfigSetsTab {
 		}
 	}
 
-	private static final String PREFIX = "ConfigurationPropertyPage."
-			+ "tabConfigSets.";
+	private static final String PREFIX = "ConfigurationPropertyPage." + "tabConfigSets.";
 
 	private static final String DESCRIPTION = PREFIX + "description";
 
@@ -153,8 +149,7 @@ public class ConfigSetsTab {
 
 	private IModelChangeListener modelChangeListener = new IModelChangeListener() {
 		public void elementChanged(ModelChangeEvent event) {
-			if (configSetsViewer != null
-					&& !configSetsViewer.getControl().isDisposed()) {
+			if (configSetsViewer != null && !configSetsViewer.getControl().isDisposed()) {
 				configSetsViewer.refresh();
 			}
 		}
@@ -171,8 +166,7 @@ public class ConfigSetsTab {
 
 	private void calculateSelectedElement(IModelElement modelElement) {
 		if (modelElement != null && this.project != null) {
-			this.selectedElement = this.project.getConfigSet(modelElement
-					.getElementName());
+			this.selectedElement = this.project.getConfigSet(modelElement.getElementName());
 		}
 	}
 
@@ -197,8 +191,7 @@ public class ConfigSetsTab {
 		tableAndButtons.setLayout(layout);
 
 		// Create table and viewer for Spring bean configurations
-		configSetsTree = new Tree(tableAndButtons, SWT.H_SCROLL | SWT.V_SCROLL
-				| SWT.BORDER);
+		configSetsTree = new Tree(tableAndButtons, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.widthHint = TABLE_WIDTH;
 		configSetsTree.setLayoutData(data);
@@ -209,8 +202,7 @@ public class ConfigSetsTab {
 			}
 		});
 		configSetsViewer = new TreeViewer(configSetsTree);
-		configSetsViewer.setContentProvider(new ConfigSetContentProvider(
-				project));
+		configSetsViewer.setContentProvider(new ConfigSetContentProvider(project));
 		configSetsViewer.setLabelProvider(new PropertiesModelLabelProvider());
 		configSetsViewer.setSorter(new ConfigSetsSorter());
 		configSetsViewer.setInput(project.getProject()); // activate content
@@ -223,8 +215,7 @@ public class ConfigSetsTab {
 		});
 
 		if (this.selectedElement != null) {
-			configSetsViewer.setSelection(new StructuredSelection(
-					this.selectedElement), true);
+			configSetsViewer.setSelection(new StructuredSelection(this.selectedElement), true);
 		}
 
 		// Create button area
@@ -286,8 +277,7 @@ public class ConfigSetsTab {
 
 				// Expand or collapse selected project
 				if (configSetsViewer.getExpandedState(elem)) {
-					configSetsViewer.collapseToLevel(elem,
-							AbstractTreeViewer.ALL_LEVELS);
+					configSetsViewer.collapseToLevel(elem, AbstractTreeViewer.ALL_LEVELS);
 				}
 				else {
 					configSetsViewer.expandToLevel(elem, 1);
@@ -305,11 +295,9 @@ public class ConfigSetsTab {
 	 * The user has pressed the down button. Move the selected config down.
 	 */
 	private void handleDownButtonPressed() {
-		if (selectedElement != null
-				&& selectedElement instanceof PropertiesConfig) {
+		if (selectedElement != null && selectedElement instanceof PropertiesConfig) {
 			PropertiesConfig config = (PropertiesConfig) selectedElement;
-			PropertiesConfigSet configSet = (PropertiesConfigSet) config
-					.getElementParent();
+			PropertiesConfigSet configSet = (PropertiesConfigSet) config.getElementParent();
 			configSet.moveConfigDown(config);
 			configSetsViewer.refresh(false);
 			hasUserMadeChanges = true;
@@ -317,15 +305,14 @@ public class ConfigSetsTab {
 	}
 
 	/**
-	 * The user has pressed the add button. Opens the configuration selection
-	 * dialog and adds the selected configuration.
+	 * The user has pressed the add button. Opens the configuration selection dialog and adds the
+	 * selected configuration.
 	 */
 	private void handleEditButtonPressed() {
-		if (selectedElement != null
-				&& selectedElement instanceof PropertiesConfigSet) {
-			ConfigSetDialog dialog = new ConfigSetDialog(SpringUIUtils
-					.getStandardDisplay().getActiveShell(), project,
-					selectedElement.getElementName());
+		if (selectedElement != null && selectedElement instanceof PropertiesConfigSet) {
+			ConfigSetDialog dialog = new ConfigSetDialog(SpringUIUtils.getStandardDisplay()
+					.getActiveShell(), project, selectedElement.getElementName(),
+					((PropertiesConfigSet) selectedElement).getType());
 			if (dialog.open() == Window.OK) {
 				configSetsViewer.refresh(false);
 				hasUserMadeChanges = true;
@@ -334,12 +321,12 @@ public class ConfigSetsTab {
 	}
 
 	/**
-	 * The user has pressed the new button. Opens the config set definition
-	 * dialog and adds the specified config set.
+	 * The user has pressed the new button. Opens the config set definition dialog and adds the
+	 * specified config set.
 	 */
 	private void handleNewButtonPressed() {
-		ConfigSetDialog dialog = new ConfigSetDialog(SpringUIUtils
-				.getStandardDisplay().getActiveShell(), project, null);
+		ConfigSetDialog dialog = new ConfigSetDialog(SpringUIUtils.getStandardDisplay()
+				.getActiveShell(), project, null, IBeansConfigSet.Type.MANUAL);
 		if (dialog.open() == Window.OK) {
 			configSetsViewer.refresh(false);
 			hasUserMadeChanges = true;
@@ -350,8 +337,7 @@ public class ConfigSetsTab {
 	 * The user has pressed the remove button. Delete the selected config set.
 	 */
 	private void handleRemoveButtonPressed() {
-		if (selectedElement != null
-				&& selectedElement instanceof PropertiesConfigSet) {
+		if (selectedElement != null && selectedElement instanceof PropertiesConfigSet) {
 			project.removeConfigSet(selectedElement.getElementName());
 			configSetsViewer.refresh(false);
 			hasUserMadeChanges = true;
@@ -359,24 +345,22 @@ public class ConfigSetsTab {
 	}
 
 	/**
-	 * The user has selected a different configuration in table. Update button
-	 * enablement.
+	 * The user has selected a different configuration in table. Update button enablement.
 	 */
 	private void handleTreeSelectionChanged() {
-		boolean configSetButtonsEnabled = false;
 		boolean moveButtonsEnabled = false;
-		IStructuredSelection selection = (IStructuredSelection) configSetsViewer
-				.getSelection();
+		boolean editButtonsEnabled = false;
+		IStructuredSelection selection = (IStructuredSelection) configSetsViewer.getSelection();
 		Object selected = selection.getFirstElement();
 		if (selected != null) {
 			if (selected instanceof PropertiesConfigSet) {
 				selectedElement = (PropertiesConfigSet) selected;
-				configSetButtonsEnabled = true;
+				editButtonsEnabled = ((PropertiesConfigSet) selectedElement).getType() 
+					== IBeansConfigSet.Type.MANUAL;
 			}
 			else if (selected instanceof PropertiesConfig) {
 				PropertiesConfig config = (PropertiesConfig) selected;
-				PropertiesConfigSet configSet = (PropertiesConfigSet) config
-						.getElementParent();
+				PropertiesConfigSet configSet = (PropertiesConfigSet) config.getElementParent();
 				if (configSet != null && configSet.getConfigs().size() > 1) {
 					selectedElement = config;
 					moveButtonsEnabled = true;
@@ -389,8 +373,8 @@ public class ConfigSetsTab {
 		else {
 			selectedElement = null;
 		}
-		editButton.setEnabled(configSetButtonsEnabled);
-		removeButton.setEnabled(configSetButtonsEnabled);
+		editButton.setEnabled(editButtonsEnabled);
+		removeButton.setEnabled(editButtonsEnabled);
 		upButton.setEnabled(moveButtonsEnabled);
 		downButton.setEnabled(moveButtonsEnabled);
 	}
@@ -399,11 +383,9 @@ public class ConfigSetsTab {
 	 * The user has pressed the up button. Move the selected config up.
 	 */
 	private void handleUpButtonPressed() {
-		if (selectedElement != null
-				&& selectedElement instanceof PropertiesConfig) {
+		if (selectedElement != null && selectedElement instanceof PropertiesConfig) {
 			PropertiesConfig config = (PropertiesConfig) selectedElement;
-			PropertiesConfigSet configSet = (PropertiesConfigSet) config
-					.getElementParent();
+			PropertiesConfigSet configSet = (PropertiesConfigSet) config.getElementParent();
 			configSet.moveConfigUp(config);
 			configSetsViewer.refresh(false);
 			hasUserMadeChanges = true;

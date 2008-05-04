@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -196,7 +197,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.CONFIG_SET_NAME) {
 			if (elementName.equals(NAME)) {
 				String name = charBuffer.toString().trim();
-				configSet = new BeansConfigSet(project, name);
+				configSet = new BeansConfigSet(project, name, IBeansConfigSet.Type.MANUAL);
 				state = State.CONFIG_SET;
 			}
 		} else if (state == State.CONFIG_SET_OVERRIDING) {

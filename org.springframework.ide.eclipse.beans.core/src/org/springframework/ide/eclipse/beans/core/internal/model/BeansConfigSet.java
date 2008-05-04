@@ -38,50 +38,61 @@ import org.springframework.util.ObjectUtils;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansConfigSet extends AbstractResourceModelElement implements
-		IBeansConfigSet {
+public class BeansConfigSet extends AbstractResourceModelElement implements IBeansConfigSet {
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
 	private final Lock r = rwl.readLock();
-	private final Lock w = rwl.writeLock(); 
-	
+
+	private final Lock w = rwl.writeLock();
+
 	protected Set<String> configNames;
 
 	private boolean allowAliasOverriding;
+
 	private boolean allowBeanDefinitionOverriding;
+
 	private boolean isIncomplete;
 
 	private volatile Map<String, IBeanAlias> aliasesMap;
-	private volatile boolean isAliasesMapPopulated = false;
-	private volatile Set<IBeansComponent> components;
-	private volatile boolean isComponentsPopulated = false;
-	private volatile Map<String, IBean> beansMap;
-	private volatile boolean isBeansMapPopulated = false;
-	private volatile Map<String, Set<IBean>> beanClassesMap;
-	private volatile boolean isBeanClassesMapPopulated = false;
 
-	public BeansConfigSet(IBeansProject project, String name) {
-		this(project, name, new HashSet<String>());
+	private volatile boolean isAliasesMapPopulated = false;
+
+	private volatile Set<IBeansComponent> components;
+
+	private volatile boolean isComponentsPopulated = false;
+
+	private volatile Map<String, IBean> beansMap;
+
+	private volatile boolean isBeansMapPopulated = false;
+
+	private volatile Map<String, Set<IBean>> beanClassesMap;
+
+	private volatile boolean isBeanClassesMapPopulated = false;
+	
+	private volatile Type type;
+
+	public BeansConfigSet(IBeansProject project, String name, Type type) {
+		this(project, name, new HashSet<String>(), type);
 	}
 
-	public BeansConfigSet(IBeansProject project, String name,
-			Set<String> configNames) {
+	public BeansConfigSet(IBeansProject project, String name, Set<String> configNames, Type type) {
 		super(project, name);
 		this.configNames = new LinkedHashSet<String>(configNames);
 		allowAliasOverriding = true;
 		allowBeanDefinitionOverriding = true;
+		this.type = type;
 	}
 
 	/**
-	 * Sets internal maps with <code>IBean</code>s and bean classes to
-	 * <code>null</code>.
+	 * Sets internal maps with <code>IBean</code>s and bean classes to <code>null</code>.
 	 */
 	public void reset() {
 		try {
 			w.lock();
 			aliasesMap = null;
 			isAliasesMapPopulated = false;
-			components= null;
+			components = null;
 			isComponentsPopulated = false;
 			beansMap = null;
 			isBeansMapPopulated = false;
@@ -120,8 +131,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		return allowAliasOverriding;
 	}
 
-	public void setAllowBeanDefinitionOverriding(
-									   boolean allowBeanDefinitionOverriding) {
+	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
 		reset();
 	}
@@ -156,10 +166,8 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	}
 
 	public boolean hasConfig(IFile file) {
-		if (file.getProject().equals(
-				((IBeansProject) getElementParent()).getProject())) {
-			return getConfigNames().contains(file.getProjectRelativePath()
-					.toString());
+		if (file.getProject().equals(((IBeansProject) getElementParent()).getProject())) {
+			return getConfigNames().contains(file.getProjectRelativePath().toString());
 		}
 		return getConfigNames().contains(file.getFullPath().toString());
 	}
@@ -263,8 +271,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 			BeansConfigSet that = (BeansConfigSet) other;
 			if (!ObjectUtils.nullSafeEquals(this.configNames, that.configNames))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.allowAliasOverriding,
-					that.allowAliasOverriding))
+			if (!ObjectUtils.nullSafeEquals(this.allowAliasOverriding, that.allowAliasOverriding))
 				return false;
 			if (!ObjectUtils.nullSafeEquals(this.allowBeanDefinitionOverriding,
 					that.allowBeanDefinitionOverriding))
@@ -287,8 +294,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 					+ ObjectUtils.nullSafeHashCode(allowAliasOverriding);
 			hashCode = getElementType() * hashCode
 					+ ObjectUtils.nullSafeHashCode(allowBeanDefinitionOverriding);
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(isIncomplete);
+			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(isIncomplete);
 			return getElementType() * hashCode + super.hashCode();
 		}
 		finally {
@@ -319,13 +325,11 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 				}
 				aliasesMap = new LinkedHashMap<String, IBeanAlias>();
 				for (String configName : configNames) {
-					IBeansConfig config = BeansModelUtils.getConfig(configName,
-							this);
+					IBeansConfig config = BeansModelUtils.getConfig(configName, this);
 					if (config != null) {
 						for (IBeanAlias alias : config.getAliases()) {
 							if (allowAliasOverriding
-									|| !aliasesMap.containsKey(alias
-											.getElementName())) {
+									|| !aliasesMap.containsKey(alias.getElementName())) {
 								aliasesMap.put(alias.getElementName(), alias);
 							}
 						}
@@ -347,8 +351,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Returns lazily initialized list with all componets defined in this
-	 * config set.
+	 * Returns lazily initialized list with all componets defined in this config set.
 	 */
 	private Set<IBeansComponent> getComponentsList() {
 		if (!this.isComponentsPopulated) {
@@ -359,8 +362,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 				}
 				components = new LinkedHashSet<IBeansComponent>();
 				for (String configName : configNames) {
-					IBeansConfig config = BeansModelUtils.getConfig(configName,
-							this);
+					IBeansConfig config = BeansModelUtils.getConfig(configName, this);
 					if (config != null) {
 						for (IBeansComponent component : config.getComponents()) {
 							components.add(component);
@@ -394,12 +396,11 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 				}
 				beansMap = new LinkedHashMap<String, IBean>();
 				for (String configName : configNames) {
-					IBeansConfig config = BeansModelUtils.getConfig(configName,
-							this);
+					IBeansConfig config = BeansModelUtils.getConfig(configName, this);
 					if (config != null) {
 						for (IBean bean : config.getBeans()) {
-							if (allowBeanDefinitionOverriding ||
-									 !beansMap.containsKey(bean.getElementName())) {
+							if (allowBeanDefinitionOverriding
+									|| !beansMap.containsKey(bean.getElementName())) {
 								beansMap.put(bean.getElementName(), bean);
 							}
 						}
@@ -421,8 +422,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Returns lazily initialized map with all bean classes used in this config
-	 * set.
+	 * Returns lazily initialized map with all bean classes used in this config set.
 	 */
 	private Map<String, Set<IBean>> getBeanClassesMap() {
 		if (!this.isBeanClassesMapPopulated) {
@@ -459,7 +459,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		String className = bean.getClassName();
 		if (className != null) {
 			int pos = className.indexOf('$');
-			if  (pos > 0) {
+			if (pos > 0) {
 				className = className.substring(0, pos);
 			}
 
@@ -473,7 +473,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 			beanClassBeans.add(bean);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object getAdapter(Class adapter) {
@@ -486,5 +486,9 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 			}
 		}
 		return super.getAdapter(adapter);
+	}
+
+	public Type getType() {
+		return type;
 	}
 }

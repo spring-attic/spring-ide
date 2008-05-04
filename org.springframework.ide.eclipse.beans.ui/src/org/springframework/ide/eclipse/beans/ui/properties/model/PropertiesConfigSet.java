@@ -18,7 +18,7 @@ import java.util.Set;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
  */
 public class PropertiesConfigSet extends BeansConfigSet {
 
-	public PropertiesConfigSet(PropertiesProject project, String name) {
-		super(project, name, new HashSet<String>());
+	public PropertiesConfigSet(PropertiesProject project, String name, Type type) {
+		super(project, name, new HashSet<String>(), type);
 	}
 
 	/**
@@ -36,8 +36,8 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	 * project.
 	 */
 	public PropertiesConfigSet(PropertiesProject project,
-			IBeansConfigSet configSet) {
-		super(project, configSet.getElementName(), configSet.getConfigNames());
+			IBeansConfigSet configSet, Type type) {
+		super(project, configSet.getElementName(), configSet.getConfigNames(), type);
 		super.setAllowAliasOverriding(configSet.isAllowAliasOverriding());
 		super.setAllowBeanDefinitionOverriding(configSet
 				.isAllowBeanDefinitionOverriding());
@@ -128,6 +128,6 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	protected final void notifyListeners() {
 		PropertiesModel model = (PropertiesModel) getElementParent()
 				.getElementParent();
-		model.notifyListeners(this, Type.CHANGED);
+		model.notifyListeners(this, ModelChangeEvent.Type.CHANGED);
 	}
 }

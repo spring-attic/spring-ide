@@ -88,6 +88,10 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 	protected volatile Map<String, IBeansConfigSet> configSets;
 
+	protected volatile Map<String, IBeansConfigSet> autoDetectedConfigSets;
+
+	protected volatile Map<String, String> autoDetectedConfigSetsByLocator;
+
 	public BeansProject(IBeansModel model, IProject project) {
 		super(model, project.getName());
 		this.project = project;
@@ -480,6 +484,19 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
+	public Set<String> getManualConfigSetNames() {
+		if (!this.modelPopulated) {
+			populateModel();
+		}
+		try {
+			r.lock();
+			return new LinkedHashSet<String>(configSets.keySet());
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
 	public Set<IBeansConfig> getConfigs() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -526,6 +543,12 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			r.lock();
 			if (!configSets.values().contains(configSet)) {
 				configSets.put(configSet.getElementName(), configSet);
+
+				if (autoDetectedConfigSets.containsKey(configSet.getElementName())) {
+					autoDetectedConfigSets.remove(configSet.getElementName());
+					autoDetectedConfigSetsByLocator.remove(configSet.getElementName());
+				}
+
 				return true;
 			}
 		}
@@ -564,7 +587,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 		try {
 			r.lock();
-			return configSets.get(configSetName);
+			IBeansConfigSet set = configSets.get(configSetName);
+			if (set != null) {
+				return set;
+			}
+			return autoDetectedConfigSets.get(configSetName);
 		}
 		finally {
 			r.unlock();
@@ -577,7 +604,10 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 		try {
 			r.lock();
-			return new LinkedHashSet<IBeansConfigSet>(configSets.values());
+			Set<IBeansConfigSet> configSets = new LinkedHashSet<IBeansConfigSet>(this.configSets
+					.values());
+			configSets.addAll(autoDetectedConfigSets.values());
+			return configSets;
 		}
 		finally {
 			r.unlock();
@@ -637,6 +667,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			autoDetectedConfigs = null;
 			autoDetectedConfigsByLocator = null;
 			locatorByAutoDetectedConfig = null;
+			autoDetectedConfigSets = null;
+			autoDetectedConfigSetsByLocator = null;
 		}
 		finally {
 			w.unlock();
@@ -688,6 +720,12 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					hasRemoved = true;
 				}
 			}
+			for (IBeansConfigSet configSet : autoDetectedConfigSets.values()) {
+				if (configSet.hasConfig(configName)) {
+					((BeansConfigSet) configSet).removeConfig(configName);
+					hasRemoved = true;
+				}
+			}
 		}
 		finally {
 			r.unlock();
@@ -729,6 +767,9 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
 			autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<String>>();
 			locatorByAutoDetectedConfig = new LinkedHashMap<String, String>();
+			autoDetectedConfigSets = new LinkedHashMap<String, IBeansConfigSet>();
+			autoDetectedConfigSetsByLocator = new LinkedHashMap<String, String>();
+
 			this.modelPopulated = true;
 			BeansProjectDescriptionReader.read(this);
 
@@ -745,6 +786,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 				if (locator.isEnabled(getProject())
 						&& locator.getBeansConfigLocator().supports(getProject())) {
 					final Map<String, IBeansConfig> detectedConfigs = new HashMap<String, IBeansConfig>();
+					final StringBuilder configSetName = new StringBuilder();
 
 					// Prevent extension contribution from crashing the model creation
 					SafeRunner.run(new ISafeRunnable() {
@@ -764,23 +806,38 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 									detectedConfigs.put(configName, config);
 								}
 							}
+							if (files.size() > 1) {
+								String configSet = locator.getBeansConfigLocator()
+										.getBeansConfigSetName(files);
+								configSetName.append(configSet);
+							}
 						}
 					});
 
 					if (detectedConfigs.size() > 0) {
-						Set<String> configByLocator = new LinkedHashSet<String>();
+						Set<String> configNamesByLocator = new LinkedHashSet<String>();
+
 						for (Map.Entry<String, IBeansConfig> detectedConfig : detectedConfigs
 								.entrySet()) {
 							autoDetectedConfigs.put(detectedConfig.getKey(), detectedConfig
 									.getValue());
-							configByLocator.add(getConfigName((IFile) detectedConfig.getValue()
-									.getElementResource()));
+							configNamesByLocator.add(getConfigName((IFile) detectedConfig
+									.getValue().getElementResource()));
 							locatorByAutoDetectedConfig.put(getConfigName((IFile) detectedConfig
 									.getValue().getElementResource()), locator.getNamespaceUri()
 									+ "." + locator.getId());
 						}
 						autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "."
-								+ locator.getId(), configByLocator);
+								+ locator.getId(), configNamesByLocator);
+
+						if (configSetName.length() > 0) {
+							autoDetectedConfigSets.put(configSetName.toString(),
+									new BeansConfigSet(this, configSetName.toString(),
+											configNamesByLocator,
+											IBeansConfigSet.Type.AUTO_DETECTED));
+							autoDetectedConfigSetsByLocator.put(locator.getNamespaceUri() + "."
+									+ locator.getId(), configSetName.toString());
+						}
 					}
 				}
 			}
@@ -851,13 +908,19 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			if (configs != null) {
 				for (String configName : configs) {
 					// Before actually removing make sure to delete ALL markers
-					MarkerUtils.deleteAllMarkers(getConfig(configName)
-							.getElementResource(), SpringCore.MARKER_ID);
-					
+					MarkerUtils.deleteAllMarkers(getConfig(configName).getElementResource(),
+							SpringCore.MARKER_ID);
+
 					// Remove the config from the internal list
 					autoDetectedConfigs.remove(configName);
 					locatorByAutoDetectedConfig.remove(configName);
 				}
+			}
+
+			String configSet = autoDetectedConfigSetsByLocator.get(locatorId);
+			if (configSets != null) {
+				autoDetectedConfigSets.remove(configSet);
+				autoDetectedConfigSetsByLocator.remove(configSet);
 			}
 		}
 		finally {

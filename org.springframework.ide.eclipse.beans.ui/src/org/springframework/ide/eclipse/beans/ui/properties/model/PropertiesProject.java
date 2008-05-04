@@ -44,7 +44,9 @@ public class PropertiesProject extends BeansProject {
 		configSuffixes = new LinkedHashSet<String>(project.getConfigSuffixes());
 		locatorByAutoDetectedConfig = new HashMap<String, String>();
 		autoDetectedConfigsByLocator = new HashMap<String, Set<String>>();
-
+		autoDetectedConfigSets = new HashMap<String, IBeansConfigSet>();
+		autoDetectedConfigSetsByLocator = new HashMap<String, String>();
+		
 		isImportsEnabled = project.isImportsEnabled();
 
 		configs = new LinkedHashMap<String, IBeansConfig>();
@@ -62,7 +64,8 @@ public class PropertiesProject extends BeansProject {
 
 		configSets = new LinkedHashMap<String, IBeansConfigSet>();
 		for (IBeansConfigSet configSet : project.getConfigSets()) {
-			configSets.put(configSet.getElementName(), new PropertiesConfigSet(this, configSet));
+			configSets.put(configSet.getElementName(), new PropertiesConfigSet(this, configSet,
+					configSet.getType()));
 		}
 
 	}

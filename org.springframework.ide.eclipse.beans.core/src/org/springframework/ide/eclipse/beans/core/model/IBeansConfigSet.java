@@ -24,6 +24,10 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 public interface IBeansConfigSet extends IBeansModelElement,
 		IResourceModelElement, IBeanClassAware {
 
+	enum Type {
+		MANUAL, AUTO_DETECTED
+	}
+	
 	/** Name prefix of a config which belongs to a different project */
 	char EXTERNAL_CONFIG_NAME_PREFIX = '/';
 
@@ -54,4 +58,10 @@ public interface IBeansConfigSet extends IBeansModelElement,
 	IBean getBean(String name);
 
 	public Set<IBean> getBeans();
+	
+	/**
+	 * Type of this configuration file. Could either be manual or automatic configured
+	 * @since 2.0.5
+	 */
+	Type getType();
 }

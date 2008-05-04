@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
@@ -96,11 +97,11 @@ public class ConfigSetDialog extends Dialog {
 	private Mode mode;
 
 	public ConfigSetDialog(Shell parent, PropertiesProject project,
-			String configSetName) {
+			String configSetName, IBeansConfigSet.Type type) {
 		super(parent);
 		this.project = project;
 		if (configSetName == null) {
-			configSet = new PropertiesConfigSet(project, (String) null);
+			configSet = new PropertiesConfigSet(project, (String) null, type);
 			title = BeansUIPlugin.getResourceString(TITLE_NEW);
 			mode = Mode.NEW;
 		} else {

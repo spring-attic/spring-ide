@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
@@ -67,5 +68,13 @@ public interface IBeansConfigLocator {
 	 * @return <code>true</code> if the project needs to rescan for auto dectected configs
 	 */
 	boolean requiresRefresh(IFile file);
+
+	/**
+	 * Returns the name of a {@link IBeansConfigSet} that should be created for auto detected
+	 * configs.
+	 * @param files the auto detected config files
+	 * @return a config set name
+	 */
+	String getBeansConfigSetName(Set<IFile> files);
 
 }

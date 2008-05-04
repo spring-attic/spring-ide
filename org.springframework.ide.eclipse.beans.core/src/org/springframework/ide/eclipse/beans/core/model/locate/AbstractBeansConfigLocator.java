@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.model.locate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
@@ -45,6 +46,14 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	 */
 	protected List<String> getAllowedFileExtensions() {
 		return FILE_EXTENSIONS;
+	}
+
+	/**
+	 * Returns <code>null</code> to express that this locater does not want to organize located
+	 * files in a config set.
+	 */
+	public String getBeansConfigSetName(Set<IFile> files) {
+		return null;
 	}
 
 }

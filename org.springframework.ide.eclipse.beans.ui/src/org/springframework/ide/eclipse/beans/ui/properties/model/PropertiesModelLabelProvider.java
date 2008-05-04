@@ -15,13 +15,14 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
  * This {@link ILabelProvider}Êdelegates to the {@link BeansModelLabelProvider}
  * and uses the {@link IBeansConfig}'s name.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class PropertiesModelLabelProvider extends BeansModelLabelProvider implements IColorProvider {
@@ -43,6 +44,10 @@ public class PropertiesModelLabelProvider extends BeansModelLabelProvider implem
 	public Color getForeground(Object element) {
 		if (element instanceof IBeansConfig
 				&& ((IBeansConfig) element).getType() == IBeansConfig.Type.AUTO_DETECTED) {
+			return grayColor;
+		}
+		else if (element instanceof IBeansConfigSet
+				&& ((IBeansConfigSet) element).getType() == IBeansConfigSet.Type.AUTO_DETECTED) {
 			return grayColor;
 		}
 		return null;

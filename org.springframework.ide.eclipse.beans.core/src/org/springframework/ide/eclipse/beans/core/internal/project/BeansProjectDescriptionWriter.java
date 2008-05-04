@@ -30,8 +30,7 @@ import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
  * 
  * @author Torsten Juergeleit
  */
-public class BeansProjectDescriptionWriter implements
-		IBeansProjectDescriptionConstants {
+public class BeansProjectDescriptionWriter implements IBeansProjectDescriptionConstants {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
 			+ "/project/description/debug";
@@ -39,11 +38,9 @@ public class BeansProjectDescriptionWriter implements
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	public static void write(BeansProject project) {
-		IFile file = project.getProject().getFile(
-				new Path(IBeansProject.DESCRIPTION_FILE));
+		IFile file = project.getProject().getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		if (DEBUG) {
-			System.out.println("Writing project description to "
-					+ file.getLocation().toString());
+			System.out.println("Writing project description to " + file.getLocation().toString());
 		}
 		try {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -52,19 +49,21 @@ public class BeansProjectDescriptionWriter implements
 				write(project, writer);
 				writer.flush();
 				writer.close();
-			} finally {
+			}
+			finally {
 				os.close();
 			}
 			if (!file.exists()) {
-				file.create(new ByteArrayInputStream(os.toByteArray()),
-						IResource.FORCE, null);
-			} else {
-				file.setContents(new ByteArrayInputStream(os.toByteArray()),
-						IResource.FORCE, null);
+				file.create(new ByteArrayInputStream(os.toByteArray()), IResource.FORCE, null);
 			}
-		} catch (IOException e) {
+			else {
+				file.setContents(new ByteArrayInputStream(os.toByteArray()), IResource.FORCE, null);
+			}
+		}
+		catch (IOException e) {
 			BeansCorePlugin.log("Error writing " + file.getFullPath(), e);
-		} catch (CoreException e) {
+		}
+		catch (CoreException e) {
 			BeansCorePlugin.log(e.getStatus());
 		}
 	}
@@ -75,8 +74,7 @@ public class BeansProjectDescriptionWriter implements
 		writer.printSimpleTag(VERSION, CURRENT_VERSION);
 		// add plugin version number
 		writer.printCDataTag(PLUGIN_VERSION, BeansCorePlugin.getPluginVersion());
-		writeCData(CONFIG_SUFFIXES, CONFIG_SUFFIX, project
-				.getConfigSuffixes(), writer);
+		writeCData(CONFIG_SUFFIXES, CONFIG_SUFFIX, project.getConfigSuffixes(), writer);
 		writer.printCDataTag(ENABLE_IMPORTS, project.isImportsEnabled());
 		write(CONFIGS, CONFIG, project.getManualConfigNames(), writer);
 		write(CONFIG_SETS, project.getConfigSets(), writer);
@@ -86,27 +84,26 @@ public class BeansProjectDescriptionWriter implements
 	protected static void write(IBeansConfigSet configSet, XMLWriter writer) {
 		writer.startTag(CONFIG_SET, null);
 		writer.printCDataTag(NAME, configSet.getElementName());
-		writer.printSimpleTag(OVERRIDING, new Boolean(configSet
-				.isAllowBeanDefinitionOverriding()).toString());
-		writer.printSimpleTag(INCOMPLETE, new Boolean(configSet.isIncomplete())
+		writer.printSimpleTag(OVERRIDING, new Boolean(configSet.isAllowBeanDefinitionOverriding())
 				.toString());
+		writer.printSimpleTag(INCOMPLETE, new Boolean(configSet.isIncomplete()).toString());
 		write(CONFIGS, CONFIG, configSet.getConfigNames(), writer);
 		writer.endTag(CONFIG_SET);
 	}
 
-	protected static void write(String name, Set<?> elements,
-			XMLWriter writer) {
+	protected static void write(String name, Set<?> elements, XMLWriter writer) {
 		writer.startTag(name, null);
 		for (Object element : elements) {
-			if (element instanceof IBeansConfigSet) {
+			if (element instanceof IBeansConfigSet
+					&& ((IBeansConfigSet) element).getType() == IBeansConfigSet.Type.MANUAL) {
 				write((IBeansConfigSet) element, writer);
 			}
 		}
 		writer.endTag(name);
 	}
 
-	protected static void write(String name, String elementTagName,
-			String[] values, XMLWriter writer) {
+	protected static void write(String name, String elementTagName, String[] values,
+			XMLWriter writer) {
 		writer.startTag(name, null);
 		for (String value : values) {
 			writer.printSimpleTag(elementTagName, value);
@@ -114,8 +111,7 @@ public class BeansProjectDescriptionWriter implements
 		writer.endTag(name);
 	}
 
-	protected static void write(String name, String elementTagName,
-			Set<?> values, XMLWriter writer) {
+	protected static void write(String name, String elementTagName, Set<?> values, XMLWriter writer) {
 		writer.startTag(name, null);
 		for (Object value : values) {
 			writer.printSimpleTag(elementTagName, value);
@@ -123,8 +119,8 @@ public class BeansProjectDescriptionWriter implements
 		writer.endTag(name);
 	}
 
-	protected static void writeCData(String name, String elementTagName,
-			Set<?> values, XMLWriter writer) {
+	protected static void writeCData(String name, String elementTagName, Set<?> values,
+			XMLWriter writer) {
 		writer.startTag(name, null);
 		for (Object value : values) {
 			writer.printCDataTag(elementTagName, value);
