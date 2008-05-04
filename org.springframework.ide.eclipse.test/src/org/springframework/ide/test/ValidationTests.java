@@ -203,7 +203,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		configNames.add("xml/a.xml");
 		configNames.add("xml/b.xml");
 		BeansConfigSet b = new BeansConfigSet(beansProject, "configSet",
-				configNames);
+				configNames, IBeansConfigSet.Type.MANUAL);
 		b.setAllowBeanDefinitionOverriding(false);
 		// TODO: really should run this test twice, with this flag set and unset
 
