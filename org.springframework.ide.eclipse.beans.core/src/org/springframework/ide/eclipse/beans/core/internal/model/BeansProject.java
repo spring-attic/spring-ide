@@ -786,7 +786,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 				if (locator.isEnabled(getProject())
 						&& locator.getBeansConfigLocator().supports(getProject())) {
 					final Map<String, IBeansConfig> detectedConfigs = new HashMap<String, IBeansConfig>();
-					final StringBuilder configSetName = new StringBuilder();
+					final String[] configSetName = new String[1];
 
 					// Prevent extension contribution from crashing the model creation
 					SafeRunner.run(new ISafeRunnable() {
@@ -809,7 +809,9 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 							if (files.size() > 1) {
 								String configSet = locator.getBeansConfigLocator()
 										.getBeansConfigSetName(files);
-								configSetName.append(configSet);
+								if (configSet.length() > 0) {
+									configSetName[0] = configSet;
+								}
 							}
 						}
 					});
@@ -829,8 +831,9 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 						}
 						autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "."
 								+ locator.getId(), configNamesByLocator);
-
-						if (configSetName.length() > 0) {
+						
+						// Create a config set for auto detected configs if desired by the extension
+						if (configSetName[0].length() > 0) {
 							autoDetectedConfigSets.put(configSetName.toString(),
 									new BeansConfigSet(this, configSetName.toString(),
 											configNamesByLocator,
