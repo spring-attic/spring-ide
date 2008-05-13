@@ -833,7 +833,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 								+ locator.getId(), configNamesByLocator);
 						
 						// Create a config set for auto detected configs if desired by the extension
-						if (configSetName[0].length() > 0) {
+						if (configSetName[0] != null && configSetName[0].length() > 0) {
 							autoDetectedConfigSets.put(configSetName.toString(),
 									new BeansConfigSet(this, configSetName.toString(),
 											configNamesByLocator,
