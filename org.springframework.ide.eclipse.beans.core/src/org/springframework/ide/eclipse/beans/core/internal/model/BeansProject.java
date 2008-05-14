@@ -764,7 +764,12 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			configSuffixes = new LinkedHashSet<String>();
 			configs = new LinkedHashMap<String, IBeansConfig>();
 			configSets = new LinkedHashMap<String, IBeansConfigSet>();
-
+			autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
+			autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<String>>();
+			locatorByAutoDetectedConfig = new LinkedHashMap<String, String>();
+			autoDetectedConfigSets = new LinkedHashMap<String, IBeansConfigSet>();
+			autoDetectedConfigSetsByLocator = new LinkedHashMap<String, String>();
+			
 			this.modelPopulated = true;
 			BeansProjectDescriptionReader.read(this);
 
@@ -803,11 +808,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 */
 	private void populateAutoDetectedConfigsAndConfigSets() {
 		
-		autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
-		autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<String>>();
-		locatorByAutoDetectedConfig = new LinkedHashMap<String, String>();
-		autoDetectedConfigSets = new LinkedHashMap<String, IBeansConfigSet>();
-		autoDetectedConfigSetsByLocator = new LinkedHashMap<String, String>();
+		autoDetectedConfigs.clear();
+		autoDetectedConfigsByLocator.clear();
+		locatorByAutoDetectedConfig.clear();
+		autoDetectedConfigSets.clear();
+		autoDetectedConfigSetsByLocator.clear();
 
 		// Add auto detected beans configs
 		for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory
