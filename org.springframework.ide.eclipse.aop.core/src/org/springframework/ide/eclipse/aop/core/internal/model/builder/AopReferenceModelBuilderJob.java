@@ -117,7 +117,6 @@ public class AopReferenceModelBuilderJob extends Job {
 				.getFormattedMessage("AopReferenceModelBuilder.startBuildingAopReferenceModel"),
 				affectedResources.size());
 		try {
-			int worked = 0;
 			for (IResource currentResource : affectedResources) {
 				if (currentResource instanceof IFile) {
 					IFile currentFile = (IFile) currentResource;
@@ -143,8 +142,7 @@ public class AopReferenceModelBuilderJob extends Job {
 						markerJob.addAopReference(currentResource, references);
 					}
 
-					worked++;
-					monitor.worked(worked);
+					monitor.worked(1);
 					AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 							"AopReferenceModelBuilder.doneBuildingReferenceModel", currentFile
 									.getFullPath().toString()));

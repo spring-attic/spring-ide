@@ -239,7 +239,6 @@ public abstract class BeansModelUtils {
 		Set<IBean> beans = new LinkedHashSet<IBean>();
 		if (element instanceof IBeansModel) {
 			Set<IBeansProject> projects = ((IBeansModel) element).getProjects();
-			int worked = 0;
 			monitor.beginTask("Locating bean definitions", projects.size());
 			try {
 				for (IBeansProject project : projects) {
@@ -259,7 +258,7 @@ public abstract class BeansModelUtils {
 							throw new OperationCanceledException();
 						}
 					}
-					monitor.worked(worked++);
+					monitor.worked(1);
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
@@ -271,7 +270,6 @@ public abstract class BeansModelUtils {
 		}
 		else if (element instanceof IBeansProject) {
 			Set<IBeansConfig> configs = ((IBeansProject) element).getConfigs();
-			int worked = 0;
 			monitor.beginTask("Locating bean definitions", configs.size());
 			try {
 				for (IBeansConfig config : configs) {
@@ -284,7 +282,7 @@ public abstract class BeansModelUtils {
 					for (IBeansComponent component : config.getComponents()) {
 						beans.addAll(component.getBeans());
 					}
-					monitor.worked(worked++);
+					monitor.worked(1);
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}

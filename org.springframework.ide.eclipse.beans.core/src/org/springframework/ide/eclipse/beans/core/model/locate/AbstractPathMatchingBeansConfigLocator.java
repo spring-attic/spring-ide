@@ -98,10 +98,11 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 			if (progressMonitor.isCanceled()) {
 				return Collections.emptySet();
 			}
-			progressMonitor.worked(2);
+			progressMonitor.worked(1);
 			return filterMatchingFiles(files);
 		}
 		finally {
+			progressMonitor.worked(1);
 			progressMonitor.done();
 		}
 	}

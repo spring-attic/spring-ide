@@ -286,7 +286,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 					}
 				}
 			});
-			monitor.worked(2);
+			monitor.worked(1);
 			monitor.done();
 			return Status.OK_STATUS;
 		}

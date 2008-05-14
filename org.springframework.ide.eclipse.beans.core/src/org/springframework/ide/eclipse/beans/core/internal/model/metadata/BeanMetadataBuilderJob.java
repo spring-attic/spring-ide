@@ -123,7 +123,6 @@ public class BeanMetadataBuilderJob extends Job {
 				}
 			}
 			monitor.beginTask("Attaching Spring bean meta data", affectedBeans.size());
-			int worked = 0;
 
 			// Reading contributed IBeanMetadataProviders from the extension point
 			IBeanMetadataProvider[] providers = getMetadataProviders();
@@ -136,8 +135,7 @@ public class BeanMetadataBuilderJob extends Job {
 				monitor.subTask("Attaching Spring bean meta data to file ["
 						+ resource.getFullPath().toString() + "]");
 				attachMetadata(entry.getKey(), entry.getValue(), monitor, providers);
-				worked++;
-				monitor.worked(worked);
+				monitor.worked(1);
 
 				if (BeanMetadataModel.DEBUG) {
 					System.out.println("Attaching meta data [" + resource.getFullPath().toString()

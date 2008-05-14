@@ -91,12 +91,11 @@ public class ValidationAction extends AbstractNavigatorAction {
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask("Validating selected model elements",
 						validatorResources.size());
-				int i = 0;
 				for (final ValidatorDefinition validatorDefinition
 						: validatorResources.keySet()) {
 					runValidator(validatorDefinition, validatorResources
 							.get(validatorDefinition), monitor);
-					monitor.worked(i++);
+					monitor.worked(1);
 				}
 				monitor.done();
 				return Status.OK_STATUS;
