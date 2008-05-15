@@ -15,12 +15,19 @@
 				publicId="http://www.springframework.org/schema/security"
 				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.xsd"
 				webURL="http://www.springframework.org/schema/security/spring-security-2.0.xsd" />
+			<public
+				publicId="http://www.springframework.org/schema/security"
+				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.1.xsd"
+				webURL="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/security/spring-security.xsd"
-				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.xsd" />
+				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.1.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/security/spring-security-2.0.xsd"
 				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd"
+				uri="platform:/plugin/org.springframework.bundle.security.core/org/springframework/security/config/spring-security-2.0.1.xsd" />
 		</catalogContribution>
 	</extension>
 	
@@ -32,8 +39,9 @@
 			uri="http://www.springframework.org/schema/security" 
 			prefix="sec" 
 			icon="icons/full/obj16/spring_security_obj.gif"
-			defaultSchemaLocation="http://www.springframework.org/schema/security/spring-security.xsd">
-			<schemaLocation url="http://www.springframework.org/schema/osgi/spring-security-2.0.xsd" />
+			defaultSchemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/security/spring-security-2.0.xsd" />
+			<schemaLocation url="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd" />
 		</namespace>
 	</extension>
 	

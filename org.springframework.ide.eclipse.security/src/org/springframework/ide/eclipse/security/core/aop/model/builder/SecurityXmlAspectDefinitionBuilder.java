@@ -36,11 +36,13 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("restriction")
 public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder implements
 		IAspectDefinitionBuilder {
+	
+	private static final String EXPRESSION_ATTRIBUTE = "expression";
 
 	private static final String GLOBAL_METHOD_SECURITY_ELEMENT = "global-method-security";
 
-	private static final String JSR250_ANNOTATION_EXPRESSION = 
-		"(@within(javax.annotation.security.DenyAll) || @annotation(javax.annotation.security.DenyAll) || @within(javax.annotation.security.PermitAll) || @annotation(javax.annotation.security.PermitAll) || @within(javax.annotation.security.RolesAllowed) || @annotation(javax.annotation.security.RolesAllowed)) && execution(* *..*(..))";
+	//private static final String JSR250_ANNOTATION_EXPRESSION = 
+	//	"(@within(javax.annotation.security.DenyAll) || @annotation(javax.annotation.security.DenyAll) || @within(javax.annotation.security.PermitAll) || @annotation(javax.annotation.security.PermitAll) || @within(javax.annotation.security.RolesAllowed) || @annotation(javax.annotation.security.RolesAllowed)) && execution(* *..*(..))";
 
 	private static final String METHOD_SECURITY_INTERCEPTOR_BEAN_ID = "_methodSecurityInterceptor";
 
@@ -49,8 +51,8 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 	
 	private static final String PROTECT_POINTCUT_ELEMENT = "protect-pointcut";
 
-	private static final String SECURED_ANNOTATION_EXPRESSION = 
-		"(@within(org.springframework.security.annotation.Secured) || @annotation(org.springframework.security.annotation.Secured)) && execution(* *..*(..))";
+	//private static final String SECURED_ANNOTATION_EXPRESSION = 
+	//	"(@within(org.springframework.security.annotation.Secured) || @annotation(org.springframework.security.annotation.Secured)) && execution(* *..*(..))";
 
 	private static final String SECURITY_NAMESPACE_URI = 
 		"http://www.springframework.org/schema/security";
@@ -82,16 +84,19 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 
 		for (int i = 0; i < list.getLength(); i++) {
 			List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
-			Node node = list.item(i);
-			String securedAnnotations = getAttribute(node, "secured-annotations");
-			String jsr250Annoatations = getAttribute(node, "jsr250-annotations");
 
-			if ("enabled".equals(securedAnnotations)) {
-				createAnnotationInfo(file, aspectInfos, node, SECURED_ANNOTATION_EXPRESSION);
-			}
-			if ("enabled".equals(jsr250Annoatations)) {
-				createAnnotationInfo(file, aspectInfos, node, JSR250_ANNOTATION_EXPRESSION);
-			}
+			Node node = list.item(i);
+			// TODO CD Spring Security currently only correctly supports annotations on the interface
+			// which the following can't support as per AspectJ semantics. Waiting to Spring
+			// Security to fix the problem.
+//			String securedAnnotations = getAttribute(node, "secured-annotations");
+//			String jsr250Annoatations = getAttribute(node, "jsr250-annotations");
+//			if ("enabled".equals(securedAnnotations)) {
+//				createAnnotationInfo(file, aspectInfos, node, SECURED_ANNOTATION_EXPRESSION);
+//			}
+//			if ("enabled".equals(jsr250Annoatations)) {
+//				createAnnotationInfo(file, aspectInfos, node, JSR250_ANNOTATION_EXPRESSION);
+//			}
 
 			NodeList children = node.getChildNodes();
 			for (int j = 0; j < children.getLength(); j++) {
@@ -105,15 +110,15 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 		}
 	}
 
-	private void createAnnotationInfo(IFile file, final List<IAspectDefinition> aspectInfos,
-			Node node, String expression) {
-		JavaAdvisorDefinition info1 = prepareJavaAdvisorDefinition(file, node, expression);
-		info1.setProxyTargetClass(true);
-		addAspectDefinition(info1, aspectInfos);
-		JavaAdvisorDefinition info2 = prepareJavaAdvisorDefinition(file, node, expression);
-		info2.setProxyTargetClass(false);
-		addAspectDefinition(info2, aspectInfos);
-	} 
+//	private void createAnnotationInfo(IFile file, final List<IAspectDefinition> aspectInfos,
+//			Node node, String expression) {
+//		JavaAdvisorDefinition info1 = prepareJavaAdvisorDefinition(file, node, expression);
+//		info1.setProxyTargetClass(true);
+//		addAspectDefinition(info1, aspectInfos);
+//		JavaAdvisorDefinition info2 = prepareJavaAdvisorDefinition(file, node, expression);
+//		info2.setProxyTargetClass(false);
+//		addAspectDefinition(info2, aspectInfos);
+//	} 
 
 	private void parseProtectPointcutElement(IFile file, Node protectPointcutNode,
 			List<IAspectDefinition> aspectInfos) {
