@@ -14,7 +14,7 @@ Export-Package: org.springframework.security.annotation;uses:="org.spr
  ingframework.security,org.springframework.core.annotation,org.springf
  ramework.security.intercept.method,javax.annotation.security,org.spri
  ngframework.security.vote";version="2.0.0.RC1"
-Bundle-Version: 2.0.0.v200804971020
+Bundle-Version: 2.0.1.v200805150000
 Bundle-Name: Spring Security - Java 5 (Tiger)
 Bundle-Description: Spring Security
 Build-Jdk: 1.5.0_13

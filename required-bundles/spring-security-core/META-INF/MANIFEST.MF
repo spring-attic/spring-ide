@@ -851,7 +851,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.context,
    org.springframework.util,
    org.springframework.security.ui"
-Bundle-Version: 2.0.0.v200804971020
+Bundle-Version: 2.0.1.v200805150000
 Bundle-Name: Spring Security - Core
 Bundle-Description: Spring Security
 Build-Jdk: 1.5.0_13
