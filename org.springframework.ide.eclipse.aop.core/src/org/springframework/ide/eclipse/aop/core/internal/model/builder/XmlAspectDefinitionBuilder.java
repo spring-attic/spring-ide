@@ -50,16 +50,64 @@ import org.w3c.dom.NodeList;
 public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 		implements IAspectDefinitionBuilder {
 
-	private void addAspectDefinition(IAspectDefinition info,
-			List<IAspectDefinition> aspectInfos) {
-		AopLog.log(AopLog.BUILDER_MESSAGES, info.toString());
-		aspectInfos.add(info);
-	}
+	private static final String ADVICE_REF_ATTRIBUTE = "advice-ref";
+
+	private static final String ADVISOR_ELEMENT = "advisor";
+
+	private static final String AFTER_ELEMENT = "after";
+
+	private static final String AFTER_RETURNING_ELEMENT = "after-returning";
+
+	private static final String AFTER_THROWING_ELEMENT = "after-throwing";
+
+	private static final String AOP_NAMESPACE_URI = "http://www.springframework.org/schema/aop";
+
+	private static final String ARG_NAMES_ATTRIBUTE = "arg-names";
+
+	private static final String AROUND_ELEMENT = "around";
+
+	private static final String ASPECT_ELEMENT = "aspect";
+
+	private static final String BEFORE_ELEMENT = "before";
+
+	private static final String CONFIG_ELEMENT = "config";
+
+	private static final String DECLARE_PARENTS_ELEMENT = "declare-parents";
+
+	private static final String DEFAULT_IMPL_ATTRIBUTE = "default-impl";
+
+	private static final String DELEGATE_REF_ATTRIBUTE = "delegate-ref";
+
+	private static final String EXPRESSION_ATTRIBUTE = "expression";
+
+	private static final String ID_ATTRIBUTE = "id";
+
+	private static final String IMPLEMENT_INTERFACE_ATTRIBUTE = "implement-interface";
+
+	private static final String METHOD_ATTRIBUTE = "method";
+
+	private static final String POINTCUT_ELEMENT = "pointcut";
+
+	private static final String POINTCUT_REF_ATTRIBUTE = "pointcut-ref";
+
+	private static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
+
+	private static final String RETURNING_ATTRIBUTE = "returning";
+
+	private static final String THROWING_ATTRIBUTE = "throwing";
+
+	private static final String TYPES_MATCHING_ATTRIBUTE = "types-matching";
 
 	public void doBuildAspectDefinitions(IDOMDocument document, IFile file,
 			List<IAspectDefinition> aspectInfos,
 			IProjectClassLoaderSupport classLoaderSupport) {
 		parseAopConfigElement(document, file, aspectInfos, classLoaderSupport);
+	}
+
+	private void addAspectDefinition(IAspectDefinition info,
+			List<IAspectDefinition> aspectInfos) {
+		AopLog.log(AopLog.BUILDER_MESSAGES, info.toString());
+		aspectInfos.add(info);
 	}
 
 	private void extractLineNumbers(IAspectDefinition def, IDOMNode node) {
@@ -185,31 +233,44 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 		}
 	}
 
-	private BeanAspectDefinition repareBeanAspectDefinition(Map<String, String> pointcuts,
-			Map<String, String> rootPointcuts, Node aspectNode,
-			IAopReference.ADVICE_TYPES type) {
-		BeanAspectDefinition info = new BeanAspectDefinition();
-		String pointcut = getAttribute(aspectNode, POINTCUT_ELEMENT);
-		String pointcutRef = getAttribute(aspectNode, POINTCUT_REF_ATTRIBUTE);
-		if (!StringUtils.hasText(pointcut)) {
-			pointcut = pointcuts.get(pointcutRef);
-			if (!StringUtils.hasText(pointcut)) {
-				pointcut = rootPointcuts.get(pointcutRef);
+	private void parseAopConfigElement(final IDOMDocument document, IFile file,
+			final List<IAspectDefinition> aspectInfos,
+			IProjectClassLoaderSupport classLoaderSupport) {
+		NodeList list = document.getDocumentElement().getElementsByTagNameNS(
+				AOP_NAMESPACE_URI, CONFIG_ELEMENT);
+
+		for (int i = 0; i < list.getLength(); i++) {
+			List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
+			Map<String, String> rootPointcuts = new HashMap<String, String>();
+			Node node = list.item(i);
+			NodeList children = node.getChildNodes();
+
+			parsePointcuts(rootPointcuts, children);
+
+			for (int j = 0; j < children.getLength(); j++) {
+				Node child = children.item(j);
+				if (ASPECT_ELEMENT.equals(child.getLocalName())) {
+					parseAspectElement(file, child, rootPointcuts, aspectDefinitions);
+				}
+				else if (ADVISOR_ELEMENT.equals(child.getLocalName())) {
+					parseAdvisorElement(file, child, rootPointcuts,
+							aspectDefinitions, classLoaderSupport);
+				}
 			}
+
+			if (node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE) != null) {
+				boolean proxyTargetClass = Boolean.valueOf(node.getAttributes()
+						.getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE)
+						.getNodeValue());
+				if (proxyTargetClass) {
+					for (IAspectDefinition def : aspectDefinitions) {
+						((BeanAspectDefinition) def).setProxyTargetClass(proxyTargetClass);
+					}
+				}
+			}
+
+			aspectInfos.addAll(aspectDefinitions);
 		}
-		String argNames = getAttribute(aspectNode, ARG_NAMES_ATTRIBUTE);
-		String method = getAttribute(aspectNode, METHOD_ATTRIBUTE);
-		String[] argNamesArray = null;
-		if (argNames != null) {
-			argNamesArray = StringUtils
-					.commaDelimitedListToStringArray(argNames);
-		}
-		info.setArgNames(argNamesArray);
-		extractLineNumbers(info, (IDOMNode) aspectNode);
-		info.setPointcutExpression(pointcut);
-		info.setType(type);
-		info.setAdviceMethodName(method);
-		return info;
 	}
 
 	private void parseAspectElement(IFile file, Node child,
@@ -319,46 +380,6 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 		}
 	}
 
-	private void parseAopConfigElement(final IDOMDocument document, IFile file,
-			final List<IAspectDefinition> aspectInfos,
-			IProjectClassLoaderSupport classLoaderSupport) {
-		NodeList list = document.getDocumentElement().getElementsByTagNameNS(
-				AOP_NAMESPACE_URI, CONFIG_ELEMENT);
-
-		for (int i = 0; i < list.getLength(); i++) {
-			List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
-			Map<String, String> rootPointcuts = new HashMap<String, String>();
-			Node node = list.item(i);
-			NodeList children = node.getChildNodes();
-
-			parsePointcuts(rootPointcuts, children);
-
-			for (int j = 0; j < children.getLength(); j++) {
-				Node child = children.item(j);
-				if (ASPECT_ELEMENT.equals(child.getLocalName())) {
-					parseAspectElement(file, child, rootPointcuts, aspectDefinitions);
-				}
-				else if (ADVISOR_ELEMENT.equals(child.getLocalName())) {
-					parseAdvisorElement(file, child, rootPointcuts,
-							aspectDefinitions, classLoaderSupport);
-				}
-			}
-
-			if (node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE) != null) {
-				boolean proxyTargetClass = Boolean.valueOf(node.getAttributes()
-						.getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE)
-						.getNodeValue());
-				if (proxyTargetClass) {
-					for (IAspectDefinition def : aspectDefinitions) {
-						((BeanAspectDefinition) def).setProxyTargetClass(proxyTargetClass);
-					}
-				}
-			}
-
-			aspectInfos.addAll(aspectDefinitions);
-		}
-	}
-
 	private JavaAdvisorDefinition prepareJavaAdvisorDefinition(
 			final IFile file, final Node aspectNode, final String beanRef,
 			final String className, final String pointcutExpression) {
@@ -368,6 +389,33 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 		info.setAspectClassName(className);
 		info.setAspectName(beanRef);
 		info.setResource(file);
+		return info;
+	}
+
+	private BeanAspectDefinition repareBeanAspectDefinition(Map<String, String> pointcuts,
+			Map<String, String> rootPointcuts, Node aspectNode,
+			IAopReference.ADVICE_TYPES type) {
+		BeanAspectDefinition info = new BeanAspectDefinition();
+		String pointcut = getAttribute(aspectNode, POINTCUT_ELEMENT);
+		String pointcutRef = getAttribute(aspectNode, POINTCUT_REF_ATTRIBUTE);
+		if (!StringUtils.hasText(pointcut)) {
+			pointcut = pointcuts.get(pointcutRef);
+			if (!StringUtils.hasText(pointcut)) {
+				pointcut = rootPointcuts.get(pointcutRef);
+			}
+		}
+		String argNames = getAttribute(aspectNode, ARG_NAMES_ATTRIBUTE);
+		String method = getAttribute(aspectNode, METHOD_ATTRIBUTE);
+		String[] argNamesArray = null;
+		if (argNames != null) {
+			argNamesArray = StringUtils
+					.commaDelimitedListToStringArray(argNames);
+		}
+		info.setArgNames(argNamesArray);
+		extractLineNumbers(info, (IDOMNode) aspectNode);
+		info.setPointcutExpression(pointcut);
+		info.setType(type);
+		info.setAdviceMethodName(method);
 		return info;
 	}
 }
