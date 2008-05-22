@@ -96,10 +96,10 @@
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
 		<replace file="feature.xml" summary="yes">
-			<replacetoken>version="2.0.5"</replacetoken>
+			<replacetoken>version="2.1.0"</replacetoken>
 			<replacevalue>version="@VERSION@"</replacevalue>
 		</replace>
-		<replace file="feature.xml" token="@VERSION@" value="2.0.5.${forceContextQualifier}" 
+		<replace file="feature.xml" token="@VERSION@" value="2.1.0.${forceContextQualifier}" 
 			summary="yes" />
 	</target>
 

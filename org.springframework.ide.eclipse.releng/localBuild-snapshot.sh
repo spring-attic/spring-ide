@@ -11,7 +11,7 @@
 ################################################################################
 
 WORKSPACE=`pwd`
-REMOTE_PATH=updatesite_nightly
+REMOTE_PATH=updatesite_stage
 shift
 ARGS=$@
 

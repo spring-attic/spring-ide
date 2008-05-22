@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,12 @@ package org.springframework.ide.eclipse.core.internal.model;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -34,17 +36,22 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This model manages instances of {@link IProject}s. It's populated from
- * Eclipse's current workspace and receives {@link IResourceChangeEvent}s for
- * workspaces changes.
+ * This model manages instances of {@link IProject}s. It's populated from Eclipse's current
+ * workspace and receives {@link IResourceChangeEvent}s for workspaces changes.
  * <p>
- * The single instance of {@link ISpringModel} is available from the static
- * method {@link SpringCore#getModel()}.
- * 
+ * The single instance of {@link ISpringModel} is available from the static method
+ * {@link SpringCore#getModel()}.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class SpringModel extends AbstractModel implements ISpringModel {
+
+	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
+	private final Lock r = rwl.readLock();
+
+	private final Lock w = rwl.writeLock();
 
 	/**
 	 * The table of Spring projects (synchronized for concurrent access)
@@ -55,30 +62,37 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 
 	public SpringModel() {
 		super(null, ISpringModel.ELEMENT_NAME);
-		projects = Collections
-				.synchronizedMap(new HashMap<IProject, ISpringProject>());
+		projects = new ConcurrentHashMap<IProject, ISpringProject>();
 	}
 
 	@Override
 	public IModelElement[] getElementChildren() {
-		Collection<ISpringProject> elements = projects.values();
-		return elements.toArray(new IModelElement[elements.size()]);
+		try {
+			r.lock();
+			Collection<ISpringProject> elements = projects.values();
+			return elements.toArray(new IModelElement[elements.size()]);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public void startup() {
-
-		// Load all projects
-		synchronized (projects) {
+		try {
+			w.lock();
+			// Load all projects
 			projects.clear();
 			for (IProject project : SpringCoreUtils.getSpringProjects()) {
 				ISpringProject proj = new SpringProject(this, project);
 				projects.put(project, proj);
 			}
 		}
+		finally {
+			w.unlock();
+		}
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
-		workspaceListener = new SpringResourceChangeListener(
-				new ResourceChangeEventHandler());
+		workspaceListener = new SpringResourceChangeListener(new ResourceChangeEventHandler());
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				SpringResourceChangeListener.LISTENER_FLAGS);
@@ -90,22 +104,47 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(workspaceListener);
 		workspaceListener = null;
-
-		// Remove all projects
-		projects.clear();
+		
+		try {
+			w.lock();
+			// Remove all projects
+			projects.clear();
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	public boolean hasProject(IProject project) {
-		return projects.containsKey(project);
+		try {
+			r.lock();
+			return projects.containsKey(project);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public ISpringProject getProject(IProject project) {
-		return projects.get(project);
+		try {
+			r.lock();
+			return projects.get(project);
+		}
+		finally {
+			r.unlock();
+		}
+
 	}
 
 	public Set<ISpringProject> getProjects() {
-		return Collections.unmodifiableSet(new HashSet<ISpringProject>(projects
-				.values()));
+		try {
+			r.lock();
+			return Collections.unmodifiableSet(new HashSet<ISpringProject>(projects.values()));
+		}
+		finally {
+			r.unlock();
+		}
+
 	}
 
 	@Override
@@ -133,7 +172,7 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 		StringBuffer text = new StringBuffer("Spring model:\n");
 		synchronized (projects) {
 			int count = projects.size();
-			for (ISpringProject project : projects.values()) { 
+			for (ISpringProject project : projects.values()) {
 				text.append(project.getElementName());
 				if (--count > 0) {
 					text.append(", ");
@@ -146,20 +185,30 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 	/**
 	 * Internal resource change event handler.
 	 */
-	private class ResourceChangeEventHandler implements
-			ISpringResourceChangeEvents {
+	private class ResourceChangeEventHandler implements ISpringResourceChangeEvents {
 
 		public boolean isSpringProject(IProject project, int eventType) {
-			return projects.get(project) != null;
+			try {
+				r.lock();
+				return projects.get(project) != null;
+			}
+			finally {
+				r.unlock();
+			}
 		}
 
 		public void springNatureAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
-				ISpringProject proj = new SpringProject(SpringModel.this,
-						project);
-				projects.put(project, proj);
+				ISpringProject proj = new SpringProject(SpringModel.this, project);
+				try {
+					w.lock();
+					projects.put(project, proj);
+				}
+				finally {
+					w.unlock();
+				}
 
-				// Need ADD here because for the SpringExplorer the accoring
+				// Need ADD here because for the SpringExplorer the according
 				// ISpringProject node has to be appear in the CommonNavigator
 				notifyListeners(proj, Type.ADDED);
 			}
@@ -167,7 +216,14 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 
 		public void springNatureRemoved(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
-				ISpringProject proj = projects.remove(project);
+				ISpringProject proj = null;
+				try {
+					w.lock();
+					proj = projects.remove(project);
+				}
+				finally {
+					w.unlock();
+				}
 
 				// Need REMOVE here because for the SpringExplorer the according
 				// ISpringProject node has to be disappear in the
@@ -180,34 +236,59 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 
 		public void projectAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
-				ISpringProject proj = new SpringProject(SpringModel.this,
-						project);
-				projects.put(project, proj);
+				ISpringProject proj = new SpringProject(SpringModel.this, project);
+				try {
+					w.lock();
+					projects.put(project, proj);
+				}
+				finally {
+					w.unlock();
+				}
 				notifyListeners(proj, Type.ADDED);
 			}
 		}
 
 		public void projectOpened(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
-				ISpringProject proj = new SpringProject(SpringModel.this,
-						project);
-				projects.put(project, proj);
+				ISpringProject proj = new SpringProject(SpringModel.this, project);
+				try {
+					w.lock();
+					projects.put(project, proj);
+				}
+				finally {
+					w.unlock();
+				}
 				notifyListeners(proj, Type.ADDED);
 			}
 		}
 
 		public void projectClosed(IProject project, int eventType) {
-			ISpringProject proj = projects.remove(project);
+			ISpringProject proj = null;
+			try {
+				w.lock();
+				proj = projects.remove(project);
+			}
+			finally {
+				w.unlock();
+			}
 			if (proj != null) {
 				notifyListeners(proj, Type.REMOVED);
 			}
 		}
 
 		public void projectDeleted(IProject project, int eventType) {
-			ISpringProject proj = projects.remove(project);
+			ISpringProject proj = null;
+			try {
+				w.lock();
+				proj = projects.remove(project);
+			}
+			finally {
+				w.unlock();
+			}
 			if (proj != null) {
 				notifyListeners(proj, Type.REMOVED);
 			}
 		}
 	}
+	
 }
