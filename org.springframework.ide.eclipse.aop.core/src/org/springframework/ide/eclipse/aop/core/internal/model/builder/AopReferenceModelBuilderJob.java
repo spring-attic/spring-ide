@@ -96,8 +96,7 @@ public class AopReferenceModelBuilderJob extends Job {
 		this.affectedResources = affectedResources;
 		// this.originalResources = originalResources;
 		setPriority(Job.BUILD);
-		// make sure that only one Job at a time runs but without blocking the
-		// UI
+		// make sure that only one Job at a time runs but without blocking the UI
 		setRule(new BlockingOnSelfSchedulingRule());
 		setProperty(IProgressConstants.ICON_PROPERTY, AopCoreImages.DESC_OBJS_ASPECT);
 	}
@@ -124,7 +123,7 @@ public class AopReferenceModelBuilderJob extends Job {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-
+					
 					AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 							"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile
 									.getFullPath().toString()));
