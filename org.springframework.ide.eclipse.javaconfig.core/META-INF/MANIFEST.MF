@@ -9,7 +9,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.ui,
  org.eclipse.jdt.core,
- org.objectweb.asm,
+ org.objectweb.asm;bundle-version="[2.2.3,2.2.3]",
  org.springframework.ide.eclipse,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.beans.core,
@@ -18,3 +18,4 @@ Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: org.springframework.ide.eclipse.javaconfig.core.model
+Bundle-ActivationPolicy: lazy
