@@ -19,8 +19,8 @@
    </license>
 
    <url>
-      <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
-      <discovery label="%updateSiteName" url="http://springide.org/updatesite"/>
+      <update label="%updateSiteName" url="http://dist.springframework.org/release/IDE"/>
+      <discovery label="%updateSiteName" url="http://dist.springframework.org/release/IDE"/>
    </url>
 
    <includes
