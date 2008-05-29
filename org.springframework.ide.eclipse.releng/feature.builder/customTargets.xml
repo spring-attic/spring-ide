@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Generic targets" default="noDefault">
-	
+
 	<property name="updateSiteStagingLocation" value="${buildDirectory}/../updatesite" />
 	<property name="eclipseStagingLocation" value="${buildDirectory}/../eclipse-stage" />
-	
-	
+	<property file="${user.home}/.svn.properties" />
+
 	<!-- ===================================================================== -->
 	<!-- Run a given ${target} on all elements being built -->
 	<!-- Add on <ant> task for each top level element being built. -->
 	<!-- ===================================================================== -->
 	<property name="allElementsFile" value="${builder}/allElements.xml" />
 	<import file="${allElementsFile}" />
+
 	<target name="allElements">
 		<antcall target="allElementsDelegator" />
 	</target>
@@ -31,7 +32,7 @@
 	<!-- Replace values for mapsCheckoutTag as desired. -->
 	<!-- ===================================================================== -->
 	<target name="getMapFiles" depends="checkLocalMaps" unless="skipMaps">
-				
+
 		<svn javahl="false" username="${svn.username}" password="${svn.password}">
 			<export srcurl="${mapsRepo}" destpath="${buildDirectory}/maps" force="true" />
 		</svn>
@@ -148,10 +149,13 @@
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
 		<antcall target="generateUpdateSite" />
+		
+		<antcall target="pack200" />
+		<antcall target="s3.publish" />
 	</target>
-	
+
 	<target name="generateUpdateSite">
-	
+
 		<!-- Create the directory structure -->
 		<mkdir dir="${updateSiteStagingLocation}" />
 		<mkdir dir="${updateSiteStagingLocation}/features" />
@@ -161,48 +165,87 @@
 			<param name="genericTargets" value="${builder}/customTargets.xml" />
 			<param name="target" value="updateSiteExport" />
 		</antcall>
-		
+
 		<!--Copy site.xml template  -->
 		<copy file="${builder}/../site.xml" tofile="${updateSiteStagingLocation}/site.xml" overwrite="false" />
 		<replace file="${updateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
-		
+
 		<!-- Create zip archive of update site -->
 		<antcall target="createBuildDist" />
 	</target>
-	
+
 	<target name="updateSiteExport">
 		<ant antfile="build.xml" dir="${buildDirectory}/features/${id}/" target="build.update.jar">
 			<property name="feature.destination" value="${updateSiteStagingLocation}/features" />
 			<property name="plugin.destination" value="${updateSiteStagingLocation}/plugins" />
 		</ant>
 	</target>
-	
+
 	<target name="createBuildDist">
 		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
 		<property name="buildDist.file" value="${updateSiteStagingLocation}/${buildDist.name}.zip" />
 		<delete file="${buildDist.file}" />
 		<zip zipfile="${buildDist.file}" filesonly="true">
 			<zipfileset dir="${updateSiteStagingLocation}">
-				<exclude name="*.zip"/>
-				<exclude name="**/*.gz"/>
+				<exclude name="*.zip" />
+				<exclude name="**/*.gz" />
 			</zipfileset>
 		</zip>
 		<checksum file="${buildDist.file}" algorithm="SHA1" fileext=".sha1" />
 		<checksum file="${buildDist.file}" algorithm="MD5" fileext=".md5" />
 	</target>
-	
+
 	<!-- ===================================================================== -->
 	<!-- Steps to do to test the build results -->
 	<!-- ===================================================================== -->
 	<target name="test">
 	</target>
-	
+
 	<!-- ===================================================================== -->
 	<!-- Steps to do to publish the build results -->
 	<!-- ===================================================================== -->
 	<target name="publish">
 	</target>
-	
+
+	<target name="s3.publish" if="s3.publish">
+
+		<echo>Publishing to Amazon S3</echo>
+
+		<taskdef name="s3" classname="org.springframework.build.aws.ant.SimpleStorageService" />
+
+		<s3 accessKey="${accessKey}" secretKey="${secretKey}">
+
+			<delete bucketName="dist.springframework.org">
+				<fileset dir="snapshot/IDE/${s3.publish}">
+					<include name="site.xml" />
+					<include name="plugins/**" />
+					<include name="features/**" />
+				</fileset>
+			</delete>
+
+			<upload bucketName="dist.springframework.org" toDir="snapshot/IDE/${s3.publish}" publicRead="true">
+
+				<fileset dir="${updateSiteStagingLocation}">
+					<include name="**/*" />
+					<include name="**" />
+				</fileset>
+
+			</upload>
+
+		</s3>
+
+	</target>
+
+	<target name="pack200" if="pack200.enable">
+
+		<java jvm="${java.home}/bin/java" jar="${builder}/../org.eclipse.releng.basebuilder/eclipse/startup.jar" fork="true"
+			failonerror="true" maxmemory="256m" dir="${buildDirectory}">
+			<arg line="-application org.eclipse.update.core.siteOptimizer" />
+			<arg line="-jarProcessor -verbose -processAll -repack -pack -outputDir ${updateSiteStagingLocation} ${updateSiteStagingLocation}" />
+		</java>
+
+	</target>
+
 	<!-- ===================================================================== -->
 	<!-- Default target                                                        -->
 	<!-- ===================================================================== -->

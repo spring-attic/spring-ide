@@ -10,4 +10,4 @@
 #     Spring IDE Developers - initial API and implementation
 ################################################################################
 
-./build.sh -Djava.rt=/System/Library/Frameworks/JavaVM.framework/Versions/1.5.0/Classes/classes.jar $@
+./build.sh -Djava.rt=/System/Library/Frameworks/JavaVM.framework/Versions/1.5.0/Classes/classes.jar -Dpack200.enable=true $@

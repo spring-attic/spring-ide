@@ -23,6 +23,8 @@ ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/dow
 MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/weekly/e3.3/
 AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/33/update
 
+#-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y
+
 # Run the Eclipse builder on a single builder
 build() {
     p=$@
@@ -122,7 +124,7 @@ rm -rf $WORKSPACE/eclipse-stage
 build $ARGS
 
 # Trigger pack
-pack
+#pack now done during the ant build phase
 
 if [ "$EXECUTE_TESTS" = "1" ]
 then

@@ -12,13 +12,14 @@
 
 WORKSPACE=`pwd`
 REMOTE_PATH=$1
+S3_FILE=$2
+shift
 shift
 ARGS=$@
 
-./build.sh $ARGS
+./build.sh -Ds3.publish=$REMOTE_PATH -Dpack200.enable=true -propertyfile $S3_FILE $ARGS
+
 if [ $? -ne 0 ]
 then
     exit 1
 fi
-
-scp -r $WORKSPACE/updatesite/* ${USER}@springide.org:/home/springide/htdocs/$REMOTE_PATH
