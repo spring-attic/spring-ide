@@ -759,8 +759,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			if (this.modelPopulated) {
 				return;
 			}
-			// Initialize the model's data structures and read the project
-			// description file
+			// Initialize the model's data structures and read the project description file
 			configSuffixes = new LinkedHashSet<String>();
 			configs = new LinkedHashMap<String, IBeansConfig>();
 			configSets = new LinkedHashMap<String, IBeansConfigSet>();
@@ -769,12 +768,13 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			locatorByAutoDetectedConfig = new LinkedHashMap<String, String>();
 			autoDetectedConfigSets = new LinkedHashMap<String, IBeansConfigSet>();
 			autoDetectedConfigSetsByLocator = new LinkedHashMap<String, String>();
-			
+
 			this.modelPopulated = true;
 			BeansProjectDescriptionReader.read(this);
 
 			// Remove all invalid configs from this project
-			for (IBeansConfig config : configs.values()) {
+			Set<IBeansConfig> configuredConfigs = new LinkedHashSet<IBeansConfig>(configs.values());
+			for (IBeansConfig config : configuredConfigs) {
 				if (config.getElementResource() == null) {
 					removeConfig(config.getElementName());
 				}
@@ -783,8 +783,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			// Add auto detected configs and config sets
 			populateAutoDetectedConfigsAndConfigSets();
 
-			// Remove all invalid config names from from this project's config
-			// sets
+			// Remove all invalid config names from from this project's config sets
 			IBeansModel model = BeansCorePlugin.getModel();
 			for (IBeansConfigSet configSet : configSets.values()) {
 				for (String configName : configSet.getConfigNames()) {
