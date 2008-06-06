@@ -20,9 +20,9 @@ import org.springframework.util.ObjectUtils;
 public class ValidationProblemAttribute {
 
 	private String key;
-	private String value;
+	private Object value;
 
-	public ValidationProblemAttribute(String key, String value) {
+	public ValidationProblemAttribute(String key, Object value) {
 		this.key = key;
 		this.value = value;
 	}
@@ -31,7 +31,7 @@ public class ValidationProblemAttribute {
 		return key;
 	}
 
-	public String getValue() {
+	public Object getValue() {
 		return value;
 	}
 
