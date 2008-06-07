@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>${spring.osgi.groupId}</groupId>
   <artifactId>${spring.osgi.groupId}.target</artifactId>
-  <version>1.1.0-m2-SNAPSHOT</version>
+  <version>1.1.0-rc1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Target Platform for Spring Dynamic Modules for OSGi(tm) Service Platforms</name>
   <properties>
     <spring.groupId>org.springframework</spring.groupId>
-    <spring.version>2.5.2</spring.version>
+    <spring.version>2.5.4</spring.version>
     <spring.osgi.groupId>org.springframework.osgi</spring.osgi.groupId>
-    <spring.osgi.version>1.1.0-m2-SNAPSHOT</spring.osgi.version>
+    <spring.osgi.version>1.1.0-rc1-SNAPSHOT</spring.osgi.version>
     <felix.commons.groupId>org.apache.felix.commons</felix.commons.groupId>
   </properties>
   <dependencies>
@@ -68,29 +68,33 @@
     </dependency>
     <!-- Required libraries repackaged as OSGi bundles -->
     <dependency>
-      <groupId>${spring.osgi.groupId}</groupId>
-      <artifactId>aopalliance.osgi</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <groupId>org.aopalliance</groupId>
+      <artifactId>com.springsource.org.aopalliance</artifactId>
+      <version>1.0.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${spring.osgi.groupId}</groupId>
-      <artifactId>asm.osgi</artifactId>
-      <version>2.2.3-SNAPSHOT</version>
+      <groupId>org.objectweb.asm</groupId>
+      <artifactId>com.springsource.org.objectweb.asm</artifactId>
+      <version>2.2.0</version>
     </dependency>
     <dependency>
-      <groupId>${spring.osgi.groupId}</groupId>
-      <artifactId>backport-util-concurrent.osgi</artifactId>
-      <version>3.1-SNAPSHOT</version>
+      <groupId>edu.emory.mathcs.backport</groupId>
+      <artifactId>com.springsource.edu.emory.mathcs.backport</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
     </dependency>
+	<dependency>
+      <groupId>net.sourceforge.cglib</groupId>
+      <artifactId>com.springsource.net.sf.cglib</artifactId>
+      <version>2.1.3</version>
+      <scope>provided</scope>
+    </dependency> 
     <dependency>
-      <groupId>${spring.osgi.groupId}</groupId>
-      <artifactId>cglib-nodep.osgi</artifactId>
-      <version>2.1.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>${spring.osgi.groupId}</groupId>
-      <artifactId>junit.osgi</artifactId>
-      <version>3.8.2-SNAPSHOT</version>
+      <groupId>org.junit</groupId>
+      <artifactId>com.springsource.junit</artifactId>
+      <version>3.8.2</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>${spring.osgi.groupId}</groupId>
@@ -99,18 +103,27 @@
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>jcl104-over-slf4j</artifactId>
-      <version>1.4.3</version>
+      <artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
+      <version>1.5.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.4.3</version>
+      <artifactId>com.springsource.slf4j.api</artifactId>
+      <version>1.5.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.4.3</version>
+      <artifactId>com.springsource.slf4j.log4j</artifactId>
+      <version>1.5.0</version>
+      <scope>provided</scope>
+	  <exclusions>
+		<exclusion>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</exclusion>
+	  </exclusions>      
     </dependency>
     <!-- OSGi frameworks bundles -->
     <dependency>
@@ -140,7 +153,13 @@
       </plugin>
     </plugins>
   </build>
+
   <repositories>
+	<repository>
+	   <id>com.springsource.repository.bundles.external</id>
+	   <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+	   <url>http://repository.springsource.com/maven/bundles/external</url>
+	</repository>
     <repository>
       <id>org.springframework.external</id>
       <name>Spring External Dependencies Repository</name>
@@ -165,6 +184,7 @@
 	  <snapshots><enabled>true</enabled></snapshots>
 	  <name>Springframework Maven SNAPSHOT Repository</name>
 	  <url>http://maven.springframework.org/snapshot</url>
-	</repository>     
+	</repository>
   </repositories>
+  
 </project>
