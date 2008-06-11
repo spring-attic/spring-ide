@@ -161,14 +161,17 @@
 			<!-- JEE namespace -->
 			<public 
 				publicId="http://www.springframework.org/schema/jee"
-				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/ejb/config/spring-jee-2.0.xsd"
+				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/ejb/config/spring-jee-2.5.xsd"
 				webURL="http://www.springframework.org/schema/jee/spring-jee.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/jee/spring-jee.xsd"
-				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/ejb/config/spring-jee-2.0.xsd" />
+				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/ejb/config/spring-jee-2.5.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd"
 				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/ejb/config/spring-jee-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/jee/spring-jee-2.5.xsd"
+				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/ejb/config/spring-jee-2.5.xsd" />
 			
 			<!-- Tool namespace -->
 			<public

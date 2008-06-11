@@ -49,6 +49,7 @@
             icon="icons/full/obj16/ejb_obj.gif"
             defaultSchemaLocation="http://www.springframework.org/schema/jee/spring-jee.xsd">
             <schemaLocation url="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd" />
+            <schemaLocation url="http://www.springframework.org/schema/jee/spring-jee-2.5.xsd" />
       </namespace> 
       <namespace
             name="util Namespace"
