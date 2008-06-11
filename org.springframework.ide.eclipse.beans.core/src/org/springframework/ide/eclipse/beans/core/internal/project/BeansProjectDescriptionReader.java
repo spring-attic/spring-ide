@@ -11,6 +11,9 @@
 package org.springframework.ide.eclipse.beans.core.internal.project;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,7 +22,6 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -44,9 +46,11 @@ public class BeansProjectDescriptionReader {
 	 * Reads project description for given Spring project.
 	 */
 	public static void read(BeansProject project) {
-		final IFile file = ((IProject) project.getElementResource()).getFile(new Path(
+		IFile file = ((IProject) project.getElementResource()).getFile(new Path(
 				IBeansProject.DESCRIPTION_FILE));
-		if (file.isAccessible()) {
+		File rawFile = file.getLocation().toFile();
+		
+		if (rawFile.exists()) {
 
 			if (DEBUG) {
 				System.out.println("Reading project description from "
@@ -55,8 +59,7 @@ public class BeansProjectDescriptionReader {
 
 			BufferedInputStream is = null;
 			try { 
-				// Force resource refresh in case resource is not in sync
-				is = new BufferedInputStream(file.getContents(true));
+				is = new BufferedInputStream(new FileInputStream(rawFile));
 				BeansProjectDescriptionHandler handler = new BeansProjectDescriptionHandler(project);
 				try {
 					SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -84,8 +87,8 @@ public class BeansProjectDescriptionReader {
 					BeansCorePlugin.log(status);
 				}
 			}
-			catch (CoreException e) {
-				BeansCorePlugin.log(e.getStatus());
+			catch (FileNotFoundException e) {
+				BeansCorePlugin.log(e);
 			}
 			finally {
 				if (is != null) {
