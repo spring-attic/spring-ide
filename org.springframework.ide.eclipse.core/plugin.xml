@@ -71,13 +71,14 @@
 	          description="%springValidator.description"
 			  icon="icons/full/obj16/spring_obj.gif"
 			  markerId="validationproblemmarker"
-			  enabledByDefault="true" 
+			  enabledByDefault="false" 
 			  order="1" />
 	    <rules validatorId="org.springframework.ide.eclipse.core.springvalidator">
 		    <rule id="springClasspath"
 		            class="org.springframework.ide.eclipse.core.internal.model.validation.rules.SpringClasspathRule"
 		            name="%springValidator.rule.springClasspath.name"
-		            description="%springValidator.rule.springClasspath.description" />
+		            description="%springValidator.rule.springClasspath.description" 
+		            enabledByDefault="false"/>
 	    </rules>
 	</extension>
 	
