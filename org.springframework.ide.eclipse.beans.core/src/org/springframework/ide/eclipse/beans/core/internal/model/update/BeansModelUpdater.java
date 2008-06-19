@@ -55,6 +55,8 @@ public abstract class BeansModelUpdater {
 	 */
 	public static void updateProject(IBeansProject project) {
 		for (IBeansModelUpdate update : UPDATES) {
+			// Do dummy access to the model object to load the model
+			project.getConfigs();
 			if (update.requiresUpdate(project)) {
 				UpdateJob job = new UpdateJob(project, update);
 				job.setPriority(Job.BUILD);
