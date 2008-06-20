@@ -95,11 +95,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	/** Regular expressions to that must be ignored and not reported to the user */
 	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays
 			.asList(new Pattern[] {
-					Pattern.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
-					Pattern.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
+					Pattern
+							.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
+					Pattern
+							.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
 
-	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = 
-		new DefaultModelElementProvider();
+	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
 	public BeansConfig(IBeansProject project, String name, Type type) {
 		super(project, name, type);
@@ -134,12 +135,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	}
 
 	/**
-	 * Sets internal list of {@link IBean}s to <code>null</code>. Any further access to the data
-	 * of this instance of {@link IBeansConfig} leads to reloading of the corresponding beans config
+	 * Sets internal list of {@link IBean}s to <code>null</code>. Any further access to the data of
+	 * this instance of {@link IBeansConfig} leads to reloading of the corresponding beans config
 	 * file.
 	 */
 	public void reload() {
-		if (file != null && file.isAccessible() && super.resourceChanged()) {
+		if (file != null && super.resourceChanged()) {
 			try {
 				w.lock();
 				isModelPopulated = false;
@@ -200,7 +201,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 
 		file = (IFile) container.findMember(fileName);
-		if (file == null || !file.isAccessible()) {
+		if (file == null) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
 			problems = new LinkedHashSet<ValidationProblem>();
@@ -216,10 +217,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		if (!this.isModelPopulated) {
 			try {
 
-				// Only install Eclipse-based resource loader if enabled in
-				// project properties
-				// IMPORTANT: the following block needs to stay before the
-				// w.lock()
+				// Only install Eclipse-based resource loader if enabled in project properties
+				// IMPORTANT: the following block needs to stay before the w.lock()
 				// as it could otherwise create a runtime deadlock
 				ResourceLoader resourceLoader = null;
 				if (((IBeansProject) getElementParent()).isImportsEnabled()) {
@@ -240,7 +239,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				components = new LinkedHashSet<IBeansComponent>();
 				beans = new LinkedHashMap<String, IBean>();
 				problems = new LinkedHashSet<ValidationProblem>();
-				if (file != null && file.isAccessible()) {
+				if (file != null) {
 					modificationTimestamp = file.getModificationStamp();
 					Resource resource;
 					if (isArchived) {
@@ -523,8 +522,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		/**
 		 * Converts the given {@link ComponentDefinition} into a corresponding
-		 * {@link ISourceModelElement} via a namespace-specific {@link IModelElementProvider}.
-		 * These providers are registered via the extension point
+		 * {@link ISourceModelElement} via a namespace-specific {@link IModelElementProvider}. These
+		 * providers are registered via the extension point
 		 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code>.
 		 */
 		public void componentRegistered(ComponentDefinition componentDefinition) {
