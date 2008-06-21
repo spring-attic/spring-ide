@@ -44,6 +44,7 @@ pack() {
     then
         exit 1
     fi
+	rm $STAGINGLOCATION/plugins/org.springframework.ide.eclipse.osgi.targetdefinition*.pack.gz
 }
 
 # Install given feature into downloaded Eclipse
@@ -115,13 +116,15 @@ then
 fi
 
 # Clean previous builds
-rm -rf $STAGINGLOCATION
+#rm -rf $STAGINGLOCATION
 rm -rf $TESTSTAGINGLOCATION
 rm -rf $WORKSPACE/build
 rm -rf $WORKSPACE/eclipse-stage
 
 # Trigger build of features
 build $ARGS
+
+pack
 
 # Trigger pack
 #pack now done during the ant build phase
