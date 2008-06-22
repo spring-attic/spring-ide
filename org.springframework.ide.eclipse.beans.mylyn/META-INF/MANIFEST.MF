@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.mylyn;singleton:=true
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 2.0.6.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.mylyn.Activator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
@@ -17,13 +17,13 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.xml.ui,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.sse.ui,
- org.eclipse.mylyn.context.core,
- org.eclipse.mylyn.context.ui,
- org.eclipse.mylyn.monitor.ui,
- org.eclipse.mylyn.monitor.core,
- org.eclipse.mylyn.java.ui,
- org.eclipse.mylyn.ide.ui,
- org.eclipse.mylyn.resources.ui,
+ org.eclipse.mylyn.context.core;bundle-version="[2.3.2,3.0.0)",
+ org.eclipse.mylyn.context.ui;bundle-version="[2.3.2,3.0.0)",
+ org.eclipse.mylyn.monitor.ui;bundle-version="[2.3.2,3.0.0)",
+ org.eclipse.mylyn.monitor.core;bundle-version="[2.3.2,3.0.0)",
+ org.eclipse.mylyn.java.ui;bundle-version="[2.3.2,3.0.0)",
+ org.eclipse.mylyn.ide.ui;bundle-version="[2.3.2,3.0.0)",
+ org.eclipse.mylyn.resources.ui;bundle-version="[2.3.2,3.0.0)",
  org.springframework.ide.eclipse.beans.ui.editor,
  org.eclipse.jdt.core,
  org.eclipse.jdt.ui,
@@ -33,3 +33,4 @@ Require-Bundle: org.eclipse.ui,
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
