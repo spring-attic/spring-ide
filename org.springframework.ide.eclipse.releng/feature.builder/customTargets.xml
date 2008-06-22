@@ -246,9 +246,7 @@
 			<arg line="-application org.eclipse.update.core.siteOptimizer" />
 			<arg line="-jarProcessor -verbose -processAll -repack -pack -outputDir ${updateSiteStagingLocation} ${updateSiteStagingLocation}" />
 		</java>
-		<!--
-		<delete file="${updateSiteStagingLocation}/plugins/org.springframework.ide.eclipse.osgi.targetdefinition*.pack.gz" />
-		-->
+
 	</target>
 
 	<target name="p2" if="p2.enable">
