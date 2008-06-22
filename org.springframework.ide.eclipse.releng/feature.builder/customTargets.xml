@@ -219,6 +219,8 @@
 			<delete bucketName="dist.springframework.org">
 				<fileset dir="snapshot/IDE/${s3.publish}">
 					<include name="site.xml" />
+					<include name="content.jar" />
+					<include name="artifacts.jar" />
 					<include name="plugins/**" />
 					<include name="features/**" />
 				</fileset>
