@@ -82,6 +82,7 @@ install_eclipse() {
 	tar zxvf ./$ECLIPSE_TEMP_NAME
 	
 	unzip ./org.eclipse.releng.basebuilder.zip
+	rm -rf ./__MACOSX/
 }
 
 #echo Command line: $@
