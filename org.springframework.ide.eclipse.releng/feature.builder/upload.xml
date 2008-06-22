@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Generic targets" default="s3.publish">
+	
+	<property file="s3.properties" />
+	
+	<target name="s3.publish">
+
+		<echo>Publishing to Amazon S3</echo>
+
+		<taskdef name="s3" classname="org.springframework.build.aws.ant.SimpleStorageService" />
+
+		<s3 accessKey="${accessKey}" secretKey="${secretKey}">
+	
+			<delete bucketName="dist.springframework.org">
+				<fileset dir="release/IDE">
+					<include name="**"/>
+				</fileset>
+			</delete>
+			
+			<upload bucketName="dist.springframework.org" toDir="release/IDE" publicRead="true">
+
+				<fileset dir="/home/springide/htdocs/updatesite">
+					<include name="**/*" />
+					<include name="**" />
+				</fileset>
+
+			</upload>
+
+		</s3>
+
+	</target>
+
+</project>

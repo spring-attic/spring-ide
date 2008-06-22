@@ -16,11 +16,12 @@ NAME=`date +%Y%m%d%H%M`
 STAGINGLOCATION=$WORKSPACE/updatesite/
 TEST_STAGINGLOCATION=$WORKSPACE/testupdatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
+#ECLIPSE_DISTRO_URL=http://mirror.cc.columbia.edu/pub/software/eclipse/technology/epp/downloads/release/europa/winter/eclipse-jee-europa-winter-macosx-carbon.tar.gz
 ECLIPSE_DISTRO_URL=http://mirror.cc.columbia.edu/pub/software/eclipse/technology/epp/downloads/release/europa/winter/eclipse-jee-europa-winter-macosx-carbon.tar.gz
 ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/downloads/drops/R-3.3.1.1-200710231652/eclipse-Automated-Tests-3.3.1.1.zip
 
-MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/weekly/e3.3/
+MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/e3.3/
 AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/33/update
 
 #-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y
@@ -28,7 +29,7 @@ AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/33/update
 # Run the Eclipse builder on a single builder
 build() {
     p=$@
-    $JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/eclipse/startup.jar -application org.eclipse.ant.core.antRunner -buildfile $WORKSPACE/org.eclipse.releng.basebuilder/eclipse/plugins/org.eclipse.pde.build_3.2.0.v20060505a/scripts/build.xml -Dbuilder=$WORKSPACE/feature.builder -DforceContextQualifier=v${NAME} $p
+    $JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar -application org.eclipse.ant.core.antRunner -buildfile $WORKSPACE/org.eclipse.releng.basebuilder/plugins/org.eclipse.pde.build_3.4.0.v20080522/scripts/build.xml -Dbuilder=$WORKSPACE/feature.builder -DforceContextQualifier=v${NAME} $p
 
     if [ $? -ne 0 ]
     then
@@ -44,7 +45,11 @@ pack() {
     then
         exit 1
     fi
-	rm $STAGINGLOCATION/plugins/org.springframework.ide.eclipse.osgi.targetdefinition*.pack.gz
+}
+
+# Run p2 metadata generation
+p2() {
+	$JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator -updateSite $STAGINGLOCATION -site file://$STAGINGLOCATION/site.xml -metadataRepository file://$STAGINGLOCATION -metadataRepositoryName "Spring IDE Update Site" -artifactRepository file://$STAGINGLOCATION -artifactRepositoryName "Spring IDE Artifacts" -compress -reusePack200Files -noDefaultIUs -vmargs -Xmx256m
 }
 
 # Install given feature into downloaded Eclipse
@@ -75,6 +80,8 @@ install_eclipse() {
 		fi
 	fi
 	tar zxvf ./$ECLIPSE_TEMP_NAME
+	
+	unzip ./org.eclipse.releng.basebuilder.zip
 }
 
 #echo Command line: $@
@@ -116,7 +123,7 @@ then
 fi
 
 # Clean previous builds
-#rm -rf $STAGINGLOCATION
+rm -rf $STAGINGLOCATION
 rm -rf $TESTSTAGINGLOCATION
 rm -rf $WORKSPACE/build
 rm -rf $WORKSPACE/eclipse-stage
@@ -124,10 +131,13 @@ rm -rf $WORKSPACE/eclipse-stage
 # Trigger build of features
 build $ARGS
 
-pack
+
 
 # Trigger pack
 #pack now done during the ant build phase
+
+# Trigger p2 metadata creation
+#p2
 
 if [ "$EXECUTE_TESTS" = "1" ]
 then

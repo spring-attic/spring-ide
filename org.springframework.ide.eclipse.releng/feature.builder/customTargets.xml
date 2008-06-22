@@ -151,6 +151,7 @@
 		<antcall target="generateUpdateSite" />
 		
 		<antcall target="pack200" />
+		<antcall target="p2" />
 		<antcall target="s3.publish" />
 	</target>
 
@@ -238,12 +239,24 @@
 
 	<target name="pack200" if="pack200.enable">
 
-		<java jvm="${java.home}/bin/java" jar="${builder}/../org.eclipse.releng.basebuilder/eclipse/startup.jar" fork="true"
+		<java jvm="${java.home}/bin/java" jar="${builder}/../org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar" fork="true"
 			failonerror="true" maxmemory="256m" dir="${buildDirectory}">
 			<arg line="-application org.eclipse.update.core.siteOptimizer" />
 			<arg line="-jarProcessor -verbose -processAll -repack -pack -outputDir ${updateSiteStagingLocation} ${updateSiteStagingLocation}" />
 		</java>
+		<!--
+		<delete file="${updateSiteStagingLocation}/plugins/org.springframework.ide.eclipse.osgi.targetdefinition*.pack.gz" />
+		-->
+	</target>
 
+	<target name="p2" if="p2.enable">
+
+		<java jvm="${java.home}/bin/java" jar="${builder}/../org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar" fork="true"
+			failonerror="true" maxmemory="256m" dir="${buildDirectory}">
+			<arg line="-application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator" />
+			<arg line="-updateSite ${updateSiteStagingLocation} -site file://${updateSiteStagingLocation}/site.xml -metadataRepository file://${updateSiteStagingLocation} -metadataRepositoryName 'Spring IDE Update Site' -artifactRepository file://${updateSiteStagingLocation} -artifactRepositoryName 'Spring IDE Artifacts' -compress -reusePack200Files -noDefaultIUs" />
+		</java>
+		
 	</target>
 
 	<!-- ===================================================================== -->
