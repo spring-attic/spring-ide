@@ -17,7 +17,7 @@ shift
 shift
 ARGS=$@
 
-./build.sh -Ds3.publish=$REMOTE_PATH -Dpack200.enable=true -propertyfile $S3_FILE $ARGS
+./build.sh -Ds3.publish=$REMOTE_PATH -Dpack200.enable=true -Dp2.enable=true -propertyfile $S3_FILE $ARGS
 
 if [ $? -ne 0 ]
 then
