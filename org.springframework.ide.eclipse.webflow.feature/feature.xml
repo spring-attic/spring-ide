@@ -22,10 +22,12 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
+   <!--
    <includes
          id="org.springframework.ide.eclipse.webflow.feature.source"
          version="0.0.0"
          name=""/>
+   -->
 
    <requires>
       <import feature="org.springframework.ide.eclipse.feature" version="2.1.0" />

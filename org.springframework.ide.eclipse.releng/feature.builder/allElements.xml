@@ -49,6 +49,46 @@
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.autowire.feature" />
 		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.feature" />
+		</ant>
+		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.dependency.feature.source" />
+		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.aop.feature.source" />
+		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.ajdt.feature.source" />
+		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.javaconfig.feature.source" />
+		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.webflow.feature.source" />
+		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.mylyn.feature.source" />
+		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.osgi.feature.source" />
+		</ant>
+ 		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.security.feature.source" />
+		</ant>
+		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.autowire.feature.source" />
+		</ant>
  	</target>
  
  	<!-- ===================================================================== -->
@@ -106,6 +146,56 @@
  	<target name="assemble.org.springframework.ide.eclipse.autowire.feature">
 		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
 			<property name="archiveName" value="springide-autowire.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.dependency.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-aop..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.aop.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-aop..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.ajdt.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-ajdt..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.javaconfig.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-javaconfig..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.webflow.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-webflow..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.mylyn.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-mylyn..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.osgi.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-osgi..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.security.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-security..source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.autowire.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-autowire..source.zip" />
 		</ant>
  	</target>
 

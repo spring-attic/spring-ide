@@ -22,10 +22,11 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
+   <!--
    <includes
          id="org.springframework.ide.eclipse.javaconfig.feature.source"
          version="0.0.0"/>
-
+   -->
    <requires>
       <import feature="org.springframework.ide.eclipse.feature" version="2.1.0"/>
       <import feature="org.springframework.ide.eclipse.aop.feature" version="2.1.0"/>

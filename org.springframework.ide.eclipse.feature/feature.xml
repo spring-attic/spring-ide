@@ -23,10 +23,12 @@
       <discovery label="%updateSiteName" url="http://dist.springframework.org/release/IDE"/>
    </url>
 
+   <!--
    <includes
          id="org.springframework.ide.eclipse.feature.source"
          version="0.0.0"/>
-
+   -->
+   
    <requires>
       <import feature="org.eclipse.wst.xml_ui.feature" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
