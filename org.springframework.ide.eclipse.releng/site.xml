@@ -91,12 +91,6 @@
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.dependency.feature.source_@VERSION@.jar"
-		id="org.springframework.ide.eclipse.dependency.feature.source" version="@VERSION@">
-		<category name="Resources" />
-	</feature>
-	
-	<feature
 		url="features/org.springframework.ide.eclipse.aop.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.aop.feature.source" version="@VERSION@">
 		<category name="Resources" />
