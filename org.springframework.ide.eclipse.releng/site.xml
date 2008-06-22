@@ -20,66 +20,66 @@
 	
 	<!-- Core features -->
 	<feature
-		url="features/org.springframework.ide.eclipse.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
 		<category name="Core" />
 	</feature>
 	
 	<!-- Dependency features -->
 	<feature
-		url="features/org.springframework.ide.eclipse.dependency.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.dependency.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.dependency.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.dependency.feature" version="@VERSION@">
 		<category name="Dependencies" />
 	</feature>
 	
 	<!-- Extensions features -->
 	<feature
-		url="features/org.springframework.ide.eclipse.aop.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.aop.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.aop.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.aop.feature" version="@VERSION@">
 		<category name="Extensions" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.osgi.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.osgi.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.osgi.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.osgi.feature" version="@VERSION@">
 		<category name="Extensions" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.security.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.security.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.security.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.security.feature" version="@VERSION@">
 		<category name="Extensions" />
 	</feature>
 
 	<feature
-		url="features/org.springframework.ide.eclipse.webflow.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.webflow.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.webflow.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.webflow.feature" version="@VERSION@">
 		<category name="Extensions" />
 	</feature>
 	
 	<!-- Extensions (Incubation) features -->	
 	<feature
-		url="features/org.springframework.ide.eclipse.autowire.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.autowire.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.autowire.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.autowire.feature" version="@VERSION@">
 		<category name="Extensions (Incubation)" />
 	</feature>
 
 	<feature
-		url="features/org.springframework.ide.eclipse.javaconfig.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.javaconfig.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.javaconfig.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.javaconfig.feature" version="@VERSION@">
 		<category name="Extensions (Incubation)" />
 	</feature>
 	
 	<!-- Integration features -->
 	<feature
-		url="features/org.springframework.ide.eclipse.ajdt.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.ajdt.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.ajdt.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.ajdt.feature" version="@VERSION@">
 		<category name="Integrations" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.mylyn.feature_2.0.5.v200805211800.jar"
-		id="org.springframework.ide.eclipse.mylyn.feature" version="2.0.5.v200805211800">
+		url="features/org.springframework.ide.eclipse.mylyn.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.mylyn.feature" version="@VERSION@">
 		<category name="Integrations" />
 	</feature>
 	
