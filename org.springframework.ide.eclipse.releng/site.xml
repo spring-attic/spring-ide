@@ -86,7 +86,7 @@
 	<!-- Resources features -->
 	<feature
 		url="features/org.springframework.ide.eclipse.feature.source_@VERSION@.jar"
-		id="org.springframework.ide.eclipse.feature.source.source" version="@VERSION@">
+		id="org.springframework.ide.eclipse.feature.source" version="@VERSION@">
 		<category name="Resources" />
 	</feature>
 	
