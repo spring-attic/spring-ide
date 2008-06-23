@@ -99,10 +99,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	/** Regular expressions to that must be ignored and not reported to the user */
 	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays
 			.asList(new Pattern[] {
-					Pattern
-							.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
-					Pattern
-							.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
+					Pattern.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
+					Pattern.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
 
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
