@@ -20,6 +20,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
@@ -241,7 +245,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				problems = new LinkedHashSet<ValidationProblem>();
 				if (file != null) {
 					modificationTimestamp = file.getModificationStamp();
-					Resource resource;
+					final Resource resource;
 					if (isArchived) {
 						resource = new StorageResource(new ZipEntryStorage(file.getProject(),
 								getElementName()));
@@ -254,11 +258,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
 							new BeansDtdResolver(), new PluggableSchemaResolver(
 									PluggableSchemaResolver.class.getClassLoader()));
-					BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(
+					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(
 							this, resource);
-					ProblemReporter problemReporter = new BeansConfigProblemReporter();
-					BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(this);
-					XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
+					final ProblemReporter problemReporter = new BeansConfigProblemReporter();
+					final BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(this);
+					final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
 					reader.setDocumentLoader(new XercesDocumentLoader());
 					reader.setResourceLoader(resourceLoader);
 
@@ -272,13 +276,40 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					reader.setBeanNameGenerator(beanNameGenerator);
 
 					try {
-						reader.loadBeanDefinitions(resource);
 
-						// finally register post processed beans and components
-						eventListener.registerComponents();
+						Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
 
-						// post process beans config if required
-						postProcess(problemReporter, beanNameGenerator, resource);
+							public Integer call() throws Exception {
+
+								// load bean definitions
+								int count = reader.loadBeanDefinitions(resource);
+
+								// finally register post processed beans and components
+								eventListener.registerComponents();
+
+								// post process beans config if required
+								postProcess(problemReporter, beanNameGenerator, resource);
+
+								return count;
+							}
+
+						};
+
+						try {
+							FutureTask<Integer> task = new FutureTask<Integer>(
+									loadBeanDefinitionOperation);
+							BeansCorePlugin.getExecutorService().submit(task);
+							int count = task.get(60, TimeUnit.SECONDS);
+							if (BeansModel.DEBUG) {
+								System.out.println(count + " bean definitions loaded from '"
+										+ resource.getFile().getAbsolutePath() + "'");
+							}
+						}
+						catch (TimeoutException e) {
+							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
+									"Loading of resource '" + resource.getFile().getAbsolutePath()
+											+ "' took more than 60sec", file, -1));
+						}
 
 					}
 					catch (Throwable e) { // handle ALL exceptions

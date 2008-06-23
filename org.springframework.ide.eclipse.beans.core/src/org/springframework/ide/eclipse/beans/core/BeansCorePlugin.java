@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.beans.core;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -52,8 +54,12 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	
 	private static BeanMetadataModel metaDataModel;
 
+	/** Internal executor service */
+	private static ExecutorService executorService;
+
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
+	
 
 	/**
 	 * Creates the Spring Beans Core plug-in.
@@ -65,6 +71,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		plugin = this;
 		model = new BeansModel();
 		metaDataModel = new BeanMetadataModel();
+		executorService = Executors.newCachedThreadPool();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
 		}
@@ -103,6 +110,10 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	
 	public static final IBeanMetadataModel getMetadataModel() {
 		return metaDataModel;
+	}
+	
+	public static final ExecutorService getExecutorService() {
+		return executorService;
 	}
 
 	/**
