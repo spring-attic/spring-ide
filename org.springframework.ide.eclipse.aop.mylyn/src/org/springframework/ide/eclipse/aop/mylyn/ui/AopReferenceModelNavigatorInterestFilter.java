@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.mylyn.context.core.AbstractContextStructureBridge;
-import org.eclipse.mylyn.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.context.core.ContextCore;
 import org.eclipse.mylyn.context.core.IImplicitlyIntersting;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.context.ui.InterestFilter;
@@ -26,8 +26,8 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 
 /**
- * Extension to the Mylyn {@link InterestFilter} that is used to filter the
- * Spring Aop cross references view.
+ * Extension to the Mylyn {@link InterestFilter} that is used to filter the Spring Aop cross
+ * references view.
  * @author Christian Dupuis
  * @since 2.0.1
  */
@@ -45,8 +45,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 			if (isTemporarilyUnfiltered(parent)) {
 				return true;
 			}
-			else if (temporarilyUnfiltered instanceof Tree
-					&& isRootElement(object)) {
+			else if (temporarilyUnfiltered instanceof Tree && isRootElement(object)) {
 				return true;
 			}
 
@@ -76,16 +75,14 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 				if (element instanceof IAspectDefinition) {
 					IAspectDefinition def = (IAspectDefinition) element;
 					element = BeansModelUtils.getMostSpecificModelElement(def
-							.getAspectStartLineNumber(), def
-							.getAspectEndLineNumber(), (IFile) def
+							.getAspectStartLineNumber(), def.getAspectEndLineNumber(), (IFile) def
 							.getResource(), null);
 				}
-				AbstractContextStructureBridge bridge = ContextCorePlugin
-						.getDefault().getStructureBridge(element);
+				AbstractContextStructureBridge bridge = ContextCore.getStructureBridge(element);
 				if (bridge != null) {
 					String handle = bridge.getHandleIdentifier(element);
-					IInteractionElement interestElement = ContextCorePlugin
-							.getContextManager().getElement(handle);
+					IInteractionElement interestElement = ContextCore.getContextManager()
+							.getElement(handle);
 					if (element != null && isInteresting(interestElement)) {
 						return true;
 					}
@@ -128,8 +125,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 			TreePath treePath = (TreePath) parent;
 			parent = treePath.getLastSegment();
 		}
-		return temporarilyUnfiltered != null
-				&& temporarilyUnfiltered.equals(parent);
+		return temporarilyUnfiltered != null && temporarilyUnfiltered.equals(parent);
 	}
 
 	protected boolean containsMylynInterestFilter(StructuredViewer viewer) {

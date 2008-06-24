@@ -8,7 +8,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.mylyn.context.core.AbstractContextStructureBridge;
-import org.eclipse.mylyn.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.context.core.ContextCore;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.internal.resources.ui.ResourceStructureBridge;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -22,20 +22,18 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
- * {@link AbstractContextStructureBridge} extension that integrates the
- * {@link IWebflowModel} with Mylyn.
+ * {@link AbstractContextStructureBridge} extension that integrates the {@link IWebflowModel} with
+ * Mylyn.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowContextStructureBridge extends
-		AbstractContextStructureBridge {
+public class WebflowContextStructureBridge extends AbstractContextStructureBridge {
 
 	public static final String CONTENT_TYPE = "spring/webflow";
 
 	@Override
 	public boolean acceptsObject(Object object) {
-		return (object instanceof IWebflowModelElement
-				|| object instanceof IWebflowProject
+		return (object instanceof IWebflowModelElement || object instanceof IWebflowProject
 				|| object instanceof ISpringProject || (object instanceof IResource && WebflowModelUtils
 				.isWebflowConfig((IResource) object)));
 	}
@@ -52,9 +50,8 @@ public class WebflowContextStructureBridge extends
 
 			IModelElement[] children = modelElement.getElementChildren();
 			for (IModelElement child : children) {
-				IInteractionElement node = ContextCorePlugin
-						.getContextManager().getElement(
-								getHandleIdentifier(child));
+				IInteractionElement node = ContextCore.getContextManager().getElement(
+						getHandleIdentifier(child));
 				if (node != null && node.getInterest().isInteresting()) {
 					return false;
 				}
@@ -62,24 +59,22 @@ public class WebflowContextStructureBridge extends
 
 			if (modelElement instanceof ISpringProject) {
 				IProject project = ((ISpringProject) modelElement).getProject();
-				IWebflowProject webflowProject = Activator.getModel()
-						.getProject(project);
+				IWebflowProject webflowProject = Activator.getModel().getProject(project);
 				return canFilter(webflowProject);
 			}
 
-			IInteractionElement node = ContextCorePlugin.getContextManager()
-					.getElement(getHandleIdentifier(obj));
+			IInteractionElement node = ContextCore.getContextManager().getElement(
+					getHandleIdentifier(obj));
 			if (node != null && node.getInterest().isInteresting()) {
 				return false;
 			}
 		}
-		else if ((obj instanceof IFile && WebflowModelUtils
-				.isWebflowConfig((IResource) obj))) {
+		else if ((obj instanceof IFile && WebflowModelUtils.isWebflowConfig((IResource) obj))) {
 			return canFilter(WebflowModelUtils.getWebflowConfig((IFile) obj));
 		}
 
-		AbstractContextStructureBridge parentBridge = ContextCorePlugin
-				.getDefault().getStructureBridge(parentContentType);
+		AbstractContextStructureBridge parentBridge = ContextCore
+				.getStructureBridge(parentContentType);
 		if (parentBridge != null && !parentBridge.canFilter(obj)) {
 			return false;
 		}
@@ -92,8 +87,7 @@ public class WebflowContextStructureBridge extends
 		Object obj = getObjectForHandle(handle);
 		if (obj != null && obj instanceof IModelElement) {
 			List<String> childHandles = new ArrayList<String>();
-			IModelElement[] children = ((IModelElement) obj)
-					.getElementChildren();
+			IModelElement[] children = ((IModelElement) obj).getElementChildren();
 			for (IModelElement child : children) {
 				childHandles.add(child.getElementID());
 			}
@@ -114,7 +108,7 @@ public class WebflowContextStructureBridge extends
 			return CONTENT_TYPE;
 		}
 		else {
-			return ContextCorePlugin.CONTENT_TYPE_RESOURCE;
+			return ContextCore.CONTENT_TYPE_RESOURCE;
 		}
 	}
 
@@ -124,10 +118,8 @@ public class WebflowContextStructureBridge extends
 		if (obj instanceof IModelElement) {
 			return ((IModelElement) obj).getElementID();
 		}
-		else if (obj instanceof IFile
-				&& WebflowModelUtils.isWebflowConfig((IFile) obj)) {
-			return WebflowModelUtils.getWebflowConfig((IFile) obj)
-					.getElementID();
+		else if (obj instanceof IFile && WebflowModelUtils.isWebflowConfig((IFile) obj)) {
+			return WebflowModelUtils.getWebflowConfig((IFile) obj).getElementID();
 		}
 		return null;
 	}
@@ -137,10 +129,8 @@ public class WebflowContextStructureBridge extends
 		if (obj instanceof IModelElement) {
 			return ((IModelElement) obj).getElementName();
 		}
-		else if (obj instanceof IFile
-				&& WebflowModelUtils.isWebflowConfig((IFile) obj)) {
-			return WebflowModelUtils.getWebflowConfig((IFile) obj)
-					.getElementName();
+		else if (obj instanceof IFile && WebflowModelUtils.isWebflowConfig((IFile) obj)) {
+			return WebflowModelUtils.getWebflowConfig((IFile) obj).getElementName();
 		}
 		return null;
 	}
@@ -158,12 +148,12 @@ public class WebflowContextStructureBridge extends
 				return obj;
 			}
 		}
-		AbstractContextStructureBridge parentBridge = ContextCorePlugin
-				.getDefault().getStructureBridge(parentContentType);
+		AbstractContextStructureBridge parentBridge = ContextCore
+				.getStructureBridge(parentContentType);
 		if (parentBridge != null) {
 			obj = parentBridge.getObjectForHandle(handle);
 		}
-		
+
 		return null;
 	}
 
@@ -178,12 +168,10 @@ public class WebflowContextStructureBridge extends
 			}
 		}
 		else if (obj instanceof ISpringProject) {
-			AbstractContextStructureBridge parentBridge = ContextCorePlugin
-					.getDefault().getStructureBridge(parentContentType);
-			if (parentBridge != null
-					&& parentBridge instanceof ResourceStructureBridge) {
-				return parentBridge.getHandleIdentifier(((ISpringProject) obj)
-						.getProject());
+			AbstractContextStructureBridge parentBridge = ContextCore
+					.getStructureBridge(parentContentType);
+			if (parentBridge != null && parentBridge instanceof ResourceStructureBridge) {
+				return parentBridge.getHandleIdentifier(((ISpringProject) obj).getProject());
 			}
 		}
 		else if (obj != null && obj instanceof IModelElement) {
@@ -193,11 +181,10 @@ public class WebflowContextStructureBridge extends
 			}
 		}
 		else {
-			AbstractContextStructureBridge parentBridge = ContextCorePlugin
-					.getDefault().getStructureBridge(parentContentType);
+			AbstractContextStructureBridge parentBridge = ContextCore
+					.getStructureBridge(parentContentType);
 
-			if (parentBridge != null
-					&& parentBridge instanceof ResourceStructureBridge) {
+			if (parentBridge != null && parentBridge instanceof ResourceStructureBridge) {
 				return parentBridge.getParentHandle(handle);
 			}
 		}

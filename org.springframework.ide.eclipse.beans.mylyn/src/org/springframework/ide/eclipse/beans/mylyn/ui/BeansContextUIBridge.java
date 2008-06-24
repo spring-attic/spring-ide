@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.mylyn.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.context.core.ContextCore;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.context.ui.AbstractContextUiBridge;
 import org.eclipse.ui.IEditorInput;
@@ -104,9 +104,9 @@ public class BeansContextUIBridge extends AbstractContextUiBridge {
 			IResource resource = ((IFileEditorInput) editorInput).getFile();
 			IModelElement modelElement = BeansModelUtils
 					.getResourceModelElement(resource);
-			String handle = ContextCorePlugin.getDefault().getStructureBridge(
+			String handle = ContextCore.getStructureBridge(
 					modelElement).getHandleIdentifier(modelElement);
-			return ContextCorePlugin.getContextManager().getElement(handle);
+			return ContextCore.getContextManager().getElement(handle);
 		}
 		return null;
 	}

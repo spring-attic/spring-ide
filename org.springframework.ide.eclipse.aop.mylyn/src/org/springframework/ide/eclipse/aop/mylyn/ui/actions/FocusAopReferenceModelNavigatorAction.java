@@ -16,15 +16,14 @@ import java.util.List;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.mylyn.context.ui.InterestFilter;
-import org.eclipse.mylyn.internal.ide.ui.actions.FocusProjectExplorerAction;
-import org.eclipse.mylyn.internal.resources.ui.FocusCommonNavigatorAction;
+import org.eclipse.mylyn.resources.ui.FocusCommonNavigatorAction;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.springframework.ide.eclipse.aop.mylyn.ui.AopReferenceModelNavigatorInterestFilter;
 import org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator;
 
 /**
- * Extension of {@link FocusProjectExplorerAction} class that serves as a
+ * Extension of {@link FocusCommonNavigatorAction} class that serves as a
  * placeholder to future customizations.
  * @author Christian Dupuis
  * @since 2.0

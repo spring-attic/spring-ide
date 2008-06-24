@@ -15,15 +15,14 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.mylyn.context.ui.InterestFilter;
-import org.eclipse.mylyn.internal.ide.ui.actions.FocusProjectExplorerAction;
-import org.eclipse.mylyn.internal.resources.ui.FocusCommonNavigatorAction;
+import org.eclipse.mylyn.resources.ui.FocusCommonNavigatorAction;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.springframework.ide.eclipse.mylyn.ui.SpringExplorerInterestFilter;
 
 /**
- * Extension of {@link FocusProjectExplorerAction} class that serves as a
- * placeholder to future customizations.
+ * Extension of {@link FocusCommonNavigatorAction} class that serves as a placeholder to future
+ * customizations.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -36,7 +35,7 @@ public class FocusSpringExplorerAction extends FocusCommonNavigatorAction {
 	protected FocusSpringExplorerAction(InterestFilter filter) {
 		super(filter, true, true, true);
 	}
-	
+
 	@Override
 	public List<StructuredViewer> getViewers() {
 		List<StructuredViewer> viewers = new ArrayList<StructuredViewer>();

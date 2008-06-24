@@ -20,12 +20,13 @@ import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
-import org.eclipse.mylyn.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.context.core.AbstractContextListener;
+import org.eclipse.mylyn.context.core.ContextCore;
 import org.eclipse.mylyn.context.core.IInteractionContext;
-import org.eclipse.mylyn.context.core.IInteractionContextListener;
 import org.eclipse.mylyn.context.core.IInteractionElement;
-import org.eclipse.mylyn.context.ui.ContextUiPlugin;
-import org.eclipse.mylyn.internal.context.ui.ContextUiPrefContstants;
+import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.internal.context.ui.ContextUiPlugin;
+import org.eclipse.mylyn.internal.java.ui.JavaUiBridgePlugin;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -42,17 +43,16 @@ import org.springframework.ide.eclipse.beans.mylyn.core.BeansContextStructureBri
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * {@link IInteractionContextListener} that handles collapsing and expanding of
- * XML nodes in the {@link XMLMultiPageEditorPart}.
+ * {@link IInteractionContextListener} that handles collapsing and expanding of XML nodes in the
+ * {@link XMLMultiPageEditorPart}.
  * @author Christian Dupuis
  * @since 2.0.1
  */
 @SuppressWarnings( { "restriction", "deprecation" })
-public class BeansActiveFoldingListener implements IInteractionContextListener {
+public class BeansActiveFoldingListener extends AbstractContextListener {
 
-	private static BeansContextStructureBridge BRIDGE = (BeansContextStructureBridge) ContextCorePlugin
-			.getDefault().getStructureBridge(
-					BeansContextStructureBridge.CONTENT_TYPE);
+	private static BeansContextStructureBridge BRIDGE = (BeansContextStructureBridge) ContextCore
+			.getStructureBridge(BeansContextStructureBridge.CONTENT_TYPE);
 
 	private final XMLMultiPageEditorPart editor;
 
@@ -60,8 +60,7 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 
 	private IPropertyChangeListener PREFERENCE_LISTENER = new IPropertyChangeListener() {
 		public void propertyChange(PropertyChangeEvent event) {
-			if (event.getProperty().equals(
-					ContextUiPrefContstants.ACTIVE_FOLDING_ENABLED)) {
+			if (event.getProperty().equals(JavaUiBridgePlugin.AUTO_FOLDING_ENABLED)) {
 				if (event.getNewValue().equals(Boolean.TRUE.toString())) {
 					enabled = true;
 				}
@@ -76,11 +75,11 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 	public BeansActiveFoldingListener(XMLMultiPageEditorPart editor) {
 		this.editor = editor;
 		ContextCorePlugin.getContextManager().addListener(this);
-		ContextUiPlugin.getDefault().getPluginPreferences()
-				.addPropertyChangeListener(PREFERENCE_LISTENER);
+		JavaUiBridgePlugin.getDefault().getPluginPreferences().addPropertyChangeListener(
+				PREFERENCE_LISTENER);
 
-		enabled = ContextUiPlugin.getDefault().getPreferenceStore().getBoolean(
-				ContextUiPrefContstants.ACTIVE_FOLDING_ENABLED);
+		enabled = JavaUiBridgePlugin.getDefault().getPreferenceStore().getBoolean(
+				JavaUiBridgePlugin.AUTO_FOLDING_ENABLED);
 
 		updateFolding();
 	}
@@ -110,8 +109,8 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 
 	public void dispose() {
 		ContextCorePlugin.getContextManager().removeListener(this);
-		ContextUiPlugin.getDefault().getPluginPreferences()
-				.removePropertyChangeListener(PREFERENCE_LISTENER);
+		ContextUiPlugin.getDefault().getPluginPreferences().removePropertyChangeListener(
+				PREFERENCE_LISTENER);
 	}
 
 	public void elementDeleted(IInteractionElement node) {
@@ -126,20 +125,15 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 		}
 	}
 
-	private void expandIfElementIsOfInterest(
-			ProjectionAnnotationModel annotationModel,
+	private void expandIfElementIsOfInterest(ProjectionAnnotationModel annotationModel,
 			IStructuredDocument document, ISourceModelElement modelElement) {
 		if (annotationModel != null) {
-			IInteractionElement mylynElement = ContextCorePlugin
-					.getContextManager().getElement(
-							BRIDGE.getHandleIdentifier(modelElement));
-			if (mylynElement != null
-					&& mylynElement.getInterest().isInteresting()) {
+			IInteractionElement mylynElement = ContextCorePlugin.getContextManager().getElement(
+					BRIDGE.getHandleIdentifier(modelElement));
+			if (mylynElement != null && mylynElement.getInterest().isInteresting()) {
 				try {
-					int startOffset = document.getLineOffset(modelElement
-							.getElementStartLine());
-					int endOffset = document.getLineOffset(modelElement
-							.getElementEndLine());
+					int startOffset = document.getLineOffset(modelElement.getElementStartLine());
+					int endOffset = document.getLineOffset(modelElement.getElementEndLine());
 					int length = endOffset - startOffset;
 					annotationModel.expandAll(startOffset, length);
 				}
@@ -150,8 +144,7 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 	}
 
 	public void interestChanged(List<IInteractionElement> elements) {
-		final ITextEditor viewer = (ITextEditor) editor
-				.getAdapter(ITextEditor.class);
+		final ITextEditor viewer = (ITextEditor) editor.getAdapter(ITextEditor.class);
 		final IWorkbench workbench = PlatformUI.getWorkbench();
 		for (final IInteractionElement element : elements) {
 			workbench.getDisplay().asyncExec(new Runnable() {
@@ -159,19 +152,16 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 					if (viewer instanceof StructuredTextEditor
 							&& ((StructuredTextEditor) viewer).getTextViewer() != null) {
 
-						IStructuredDocument document = ((StructuredTextEditor) viewer)
-								.getModel().getStructuredDocument();
+						IStructuredDocument document = ((StructuredTextEditor) viewer).getModel()
+								.getStructuredDocument();
 						ProjectionAnnotationModel annotationModel = ((StructuredTextEditor) viewer)
 								.getTextViewer().getProjectionAnnotationModel();
 
 						if (element != null) {
-							Object modelElement = (Object) BRIDGE
-									.getObjectForHandle(element
-											.getHandleIdentifier());
-							if (modelElement != null
-									&& modelElement instanceof ISourceModelElement) {
-								expandIfElementIsOfInterest(annotationModel,
-										document,
+							Object modelElement = (Object) BRIDGE.getObjectForHandle(element
+									.getHandleIdentifier());
+							if (modelElement != null && modelElement instanceof ISourceModelElement) {
+								expandIfElementIsOfInterest(annotationModel, document,
 										(ISourceModelElement) modelElement);
 							}
 						}
@@ -194,12 +184,10 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 	}
 
 	public void updateFolding() {
-		final ITextEditor viewer = (ITextEditor) editor
-				.getAdapter(ITextEditor.class);
+		final ITextEditor viewer = (ITextEditor) editor.getAdapter(ITextEditor.class);
 		final IWorkbench workbench = PlatformUI.getWorkbench();
 
-		if (!enabled
-				|| !ContextCorePlugin.getContextManager().isContextActive()) {
+		if (!enabled || !ContextCorePlugin.getContextManager().isContextActive()) {
 			workbench.getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					if (viewer instanceof StructuredTextEditor
@@ -219,33 +207,28 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 		}
 		else {
 
-			IFileEditorInput editorInput = (IFileEditorInput) editor
-					.getEditorInput();
+			IFileEditorInput editorInput = (IFileEditorInput) editor.getEditorInput();
 			IFile file = editorInput.getFile();
 
 			if (file != null && BeansCoreUtils.isBeansConfig(file)) {
 
-				final IBeansConfig beansConfig = BeansCorePlugin.getModel()
-						.getConfig(file);
+				final IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(file);
 
 				workbench.getDisplay().asyncExec(new Runnable() {
 
 					public void run() {
 						if (viewer instanceof StructuredTextEditor
-								&& ((StructuredTextEditor) viewer)
-										.getTextViewer() != null) {
+								&& ((StructuredTextEditor) viewer).getTextViewer() != null) {
 
 							ProjectionAnnotationModel annotationModel = ((StructuredTextEditor) viewer)
-									.getTextViewer()
-									.getProjectionAnnotationModel();
+									.getTextViewer().getProjectionAnnotationModel();
 							collapseDocument(annotationModel);
 
 							IStructuredDocument document = ((StructuredTextEditor) viewer)
 									.getModel().getStructuredDocument();
-							for (IBean bean : BeansModelUtils.getBeans(
-									beansConfig, new NullProgressMonitor())) {
-								expandIfElementIsOfInterest(annotationModel,
-										document, bean);
+							for (IBean bean : BeansModelUtils.getBeans(beansConfig,
+									new NullProgressMonitor())) {
+								expandIfElementIsOfInterest(annotationModel, document, bean);
 							}
 						}
 					}
