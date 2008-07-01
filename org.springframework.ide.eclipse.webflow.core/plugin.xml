@@ -5,7 +5,7 @@
 	<extension
 		point="org.springframework.ide.eclipse.beans.core.namespaces">
 		<namespace
-			namespaceHandler="org.springframework.webflow.config.WebFlowConfigNamespaceHandler"
+			namespaceHandler="org.springframework.ide.eclipse.webflow.core.config.CombiningWebFlowConfigNamespaceHandler"
 			uri="http://www.springframework.org/schema/webflow-config" />
 	</extension>
 

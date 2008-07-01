@@ -1,23 +1,37 @@
 Manifest-Version: 1.0
-Implementation-Title: Spring Binding
-Implementation-Version: 1.0.2
+Bundle-Name: Spring Binding
+Created-By: 1.5.0_13-119 (Apple Inc.)
+Ant-Version: Apache Ant 1.7.0
+Import-Package: javax.el;version="[2.1.0,3.0.0)";resolution:=optional,
+ ognl;version="[2.6.9,3.0.0)";resolution:=optional,
+ org.apache.commons.logging;version="[1.0.0,2.0.0)",
+ org.springframework.beans;version="[2.5.4,3.0.0)",
+ org.springframework.beans.factory;version="[2.5.4,3.0.0)",
+ org.springframework.context;version="[2.5.4,3.0.0)",
+ org.springframework.context.i18n;version="[2.5.4,3.0.0)",
+ org.springframework.context.support;version="[2.5.4,3.0.0)",
+ org.springframework.core;version="[2.5.4,3.0.0)",
+ org.springframework.core.enums;version="[2.5.4,3.0.0)",
+ org.springframework.core.style;version="[2.5.4,3.0.0)",
+ org.springframework.util;version="[2.5.4,3.0.0)",
+ org.springframework.validation;version="[2.5.4,3.0.0)"
 Bundle-ManifestVersion: 2
+Bundle-Vendor: SpringSource
 Bundle-SymbolicName: org.springframework.binding
-Bundle-Name: org.springframework.binding
-Bundle-Version: 1.0.3.1
-Bundle-Vendor: Spring Binding
-Bundle-ClassPath: spring-binding.jar
-Export-Package: 
- org.springframework.binding.collection,
- org.springframework.binding.convert,
- org.springframework.binding.convert.support,
- org.springframework.binding.expression,
- org.springframework.binding.expression.support,
- org.springframework.binding.format,
- org.springframework.binding.format.support,
- org.springframework.binding.mapping,
- org.springframework.binding.method
-Require-Bundle: org.springframework.bundle.spring
-Eclipse-LazyStart: false
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: org.springframework.binding.collection;version="2.0.3.BUILD-20080701003730",
+ org.springframework.binding.convert;version="2.0.3.BUILD-20080701003730",
+ org.springframework.binding.convert.converters;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.binding.convert,org.springframework.binding.format",
+ org.springframework.binding.convert.service;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.binding.convert,org.springframework.binding.convert.converters",
+ org.springframework.binding.expression;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.core.style",
+ org.springframework.binding.expression.el;version="2.0.3.BUILD-20080701003730";uses:="javax.el,org.springframework.binding.expression",
+ org.springframework.binding.expression.ognl;version="2.0.3.BUILD-20080701003730";uses:="ognl,org.springframework.binding.expression",
+ org.springframework.binding.expression.support;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.binding.expression",
+ org.springframework.binding.format;version="2.0.3.BUILD-20080701003730",
+ org.springframework.binding.mapping;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.binding.expression",
+ org.springframework.binding.mapping.impl;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.binding.convert,org.springframework.binding.expression,org.springframework.binding.mapping",
+ org.springframework.binding.mapping.results;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.binding.convert,org.springframework.binding.expression",
+ org.springframework.binding.message;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.context,org.springframework.validation",
+ org.springframework.binding.method;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.binding.convert,org.springframework.binding.expression"
+Bundle-Version: 2.0.3.v20080701003730
+Bundle-ClassPath: org.springframework.binding.jar
 

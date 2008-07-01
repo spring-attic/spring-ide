@@ -95,7 +95,7 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
-		<unzip src="spring-binding.jar" dest="${target.folder}">
+		<unzip src="org.springframework.binding.jar" dest="${target.folder}">
 			<patternset>
 				<exclude name="META-INF/MANIFEST.MF" />
 			</patternset>
@@ -110,7 +110,7 @@
 	<!-- ===================================================================== -->
 	<target name="post.gather.bin.parts">
 		<replace file="${target.folder}/META-INF/MANIFEST.MF" summary="yes">
-			<replacetoken>spring-binding.jar</replacetoken>
+			<replacetoken>org.springframework.binding.jar</replacetoken>
 			<replacevalue>.</replacevalue>
 		</replace>
 	</target>
