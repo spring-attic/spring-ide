@@ -59,6 +59,14 @@ public interface IInputAttribute extends IWebflowModelElement {
 	 * @return the required
 	 */
 	boolean getRequired();
+	
+	void setType(String type);
+	
+	String getType();
+	
+	void setValue(String value);
+	
+	String getValue();
 
 	/**
 	 * Creates the new.

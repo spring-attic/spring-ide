@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
@@ -57,58 +58,30 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Properties {@link Dialog} implemantation that enables the edition of
- * {@link IStateTransition} elements.
+ * Properties {@link Dialog} implementation that enables the edition of {@link IStateTransition}
+ * elements.
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
-		IDialogValidator {
+public class StateTransitionPropertiesDialog extends TitleAreaDialog implements IDialogValidator {
 
-	/**
-	 * 
-	 */
 	private static final String EXPRESSION_PREFIX = "${";
 
-	/**
-	 * 
-	 */
 	private static final String EXPRESSION_SUFFIX = "}";
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> actions;
 
-	/**
-	 * 
-	 */
 	private Button ognlButton;
 
-	/**
-	 * 
-	 */
 	private Button okButton;
 
-	/**
-	 * 
-	 */
 	private Text onText;
 
-	/**
-	 * 
-	 */
 	private Text onExceptionText;
 
-	/**
-	 * 
-	 */
 	private Button browseExceptionButton;
 
-	/**
-	 * 
-	 */
 	private SelectionListener buttonListener = new SelectionAdapter() {
 
 		public void widgetSelected(SelectionEvent e) {
@@ -116,50 +89,37 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		}
 	};
 
-	/**
-	 * 
-	 */
 	private IWebflowModelElement parent;
 
-	/**
-	 * 
-	 */
 	private IStateTransition transition;
 
-	/**
-	 * 
-	 */
 	private IStateTransition transitionClone;
 
-	/**
-	 * 
-	 */
 	private ActionComposite actionProperties;
 
-	/**
-	 * 
-	 */
 	private PropertiesComposite properties;
 
 	private boolean displayToBlock = false;
 
 	private Combo toStateText;
 
-	/**
-	 * @param parentShell
-	 * @param state
-	 * @param parent
-	 */
+	private Label historyLabel;
+
+	private Combo historyText;
+
+	private Button bindText;
+
+	private Label bindLabel;
+
 	@SuppressWarnings("unchecked")
-	public StateTransitionPropertiesDialog(Shell parentShell,
-			IWebflowModelElement parent, IStateTransition state) {
+	public StateTransitionPropertiesDialog(Shell parentShell, IWebflowModelElement parent,
+			IStateTransition state) {
 		this(parentShell, parent, state, false);
 	}
 
 	@SuppressWarnings("unchecked")
-	public StateTransitionPropertiesDialog(Shell parentShell,
-			IWebflowModelElement parent, IStateTransition state,
-			boolean displayToBlock) {
+	public StateTransitionPropertiesDialog(Shell parentShell, IWebflowModelElement parent,
+			IStateTransition state, boolean displayToBlock) {
 		super(parentShell);
 		this.transition = state;
 		this.parent = parent;
@@ -175,16 +135,12 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 
 	protected void handleButtonPressed(Button widget) {
 		try {
-			IType throwable = JdtUtils.getJavaType(WebflowUtils
-					.getActiveWebflowConfig().getProject().getProject(),
-					"java.lang.Throwable");
-			IJavaSearchScope searchScope = SearchEngine
-					.createJavaSearchScope(throwable.newTypeHierarchy(
-							new NullProgressMonitor())
-							.getAllSubtypes(throwable));
-			TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(),
-					false, new ProgressMonitorDialog(getShell()), searchScope,
-					IJavaSearchConstants.CLASS);
+			IType throwable = JdtUtils.getJavaType(WebflowUtils.getActiveWebflowConfig()
+					.getProject().getProject(), "java.lang.Throwable");
+			IJavaSearchScope searchScope = SearchEngine.createJavaSearchScope(throwable
+					.newTypeHierarchy(new NullProgressMonitor()).getAllSubtypes(throwable));
+			TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(), false,
+					new ProgressMonitorDialog(getShell()), searchScope, IJavaSearchConstants.CLASS);
 			dialog.setBlockOnOpen(true);
 			dialog.setTitle("Type Selection");
 			// dialog.setFilter("*");
@@ -201,18 +157,22 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	@SuppressWarnings("unchecked")
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 			this.transitionClone.setOn(trimString(this.onText.getText()));
-			this.transitionClone.setOnException(trimString(this.onExceptionText
-					.getText()));
+			this.transitionClone.setOnException(trimString(this.onExceptionText.getText()));
 
+			if (!WebflowModelXmlUtils.isVersion1Flow(transition)) {
+				this.transitionClone.setBind(Boolean.toString(bindText.getSelection()));
+				this.transitionClone.setHistory(trimString(historyText.getText()));
+			}
+			
 			if (this.displayToBlock) {
-				this.transitionClone.setToStateId(trimString(this.toStateText
-						.getText()));
+				this.transitionClone.setToStateId(trimString(this.toStateText.getText()));
 			}
 
 			if (this.actions != null && this.actions.size() > 0) {
@@ -231,32 +191,21 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		super.buttonPressed(buttonId);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
-	 */
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(getShellTitle());
 		shell.setImage(getImage());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
-	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		okButton = createButton(parent, IDialogConstants.OK_ID,
-				IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		// do this here because setting the text will set enablement on the
 		// ok button
 		onText.setFocus();
 		if (this.transition != null
-				&& (this.transition.getOn() != null || this.transition
-						.getOnException() != null)) {
+				&& (this.transition.getOn() != null || this.transition.getOnException() != null)) {
 			okButton.setEnabled(true);
 		}
 		else {
@@ -264,10 +213,6 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
-	 */
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
 		setTitle(getTitle());
@@ -275,10 +220,6 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		return contents;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite parentComposite = (Composite) super.createDialogArea(parent);
 
@@ -292,8 +233,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		folder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		TabItem item1 = new TabItem(folder, SWT.NULL);
 		item1.setText("General");
-		item1.setImage(WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_TRANSITION));
+		item1.setImage(WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_TRANSITION));
 		TabItem item2 = new TabItem(folder, SWT.NULL);
 		TabItem item4 = new TabItem(folder, SWT.NULL);
 
@@ -355,18 +295,15 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 
 		browseExceptionButton = new Button(groupActionType, SWT.PUSH);
 		browseExceptionButton.setText("...");
-		browseExceptionButton.setLayoutData(new GridData(
-				GridData.HORIZONTAL_ALIGN_END));
+		browseExceptionButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		browseExceptionButton.addSelectionListener(buttonListener);
 
 		if (this.displayToBlock) {
 			Label toStateLabel = new Label(groupActionType, SWT.NONE);
 			toStateLabel.setText("To State");
-			toStateText = new Combo(groupActionType, SWT.DROP_DOWN
-					| SWT.READ_ONLY);
+			toStateText = new Combo(groupActionType, SWT.DROP_DOWN | SWT.READ_ONLY);
 			toStateText.setItems(WebflowUtils.getStateId(this.parent));
-			if (this.transition != null
-					&& this.transition.getToStateId() != null) {
+			if (this.transition != null && this.transition.getToStateId() != null) {
 				this.toStateText.setText(this.transition.getToStateId());
 			}
 			toStateText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -379,11 +316,32 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 			new Label(groupActionType, SWT.NONE);
 		}
 
+		if (!WebflowModelXmlUtils.isVersion1Flow(transition)) {
+			
+			bindLabel = new Label(groupActionType, SWT.NONE);
+			bindLabel.setText("Bind");
+			bindText = new Button(groupActionType, SWT.CHECK | SWT.BORDER);
+			if (this.transition != null && this.transition.getBind() != null
+					&& this.transition.getBind().equalsIgnoreCase("true")) {
+				this.bindText.setSelection(true);
+			}
+			bindText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			new Label(groupActionType, SWT.NONE);
+			historyLabel = new Label(groupActionType, SWT.NONE);
+			historyLabel.setText("History");
+			historyText = new Combo(groupActionType, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+			historyText.setItems(new String[] { "", "preserve", "discard", "invalidate" });
+			if (this.transition != null && this.transition.getHistory() != null) {
+				this.historyText.setText(this.transition.getHistory());
+			}
+			historyText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			new Label(groupActionType, SWT.NONE);
+		}
+
 		item1.setControl(nameGroup);
 
-		actionProperties = new ActionComposite(this, item2, getShell(),
-				this.actions, this.transitionClone,
-				IActionElement.ACTION_TYPE.ACTION);
+		actionProperties = new ActionComposite(this, item2, getShell(), this.actions,
+				this.transitionClone, IActionElement.ACTION_TYPE.ACTION);
 		item2.setControl(actionProperties.createDialogArea(folder));
 
 		properties = new PropertiesComposite(this, item4, getShell(),
@@ -395,40 +353,23 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		return parentComposite;
 	}
 
-	/**
-	 * Cut the expression from given criteria string and return it.
-	 * @param encodedCriteria
-	 * @return
-	 */
 	private String cutExpression(String encodedCriteria) {
-		return encodedCriteria.substring(EXPRESSION_PREFIX.length(),
-				encodedCriteria.length() - EXPRESSION_SUFFIX.length());
+		return encodedCriteria.substring(EXPRESSION_PREFIX.length(), encodedCriteria.length()
+				- EXPRESSION_SUFFIX.length());
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getMessage() {
 		return "Enter the details for the state transition";
 	}
 
-	/**
-	 * @return
-	 */
 	public IWebflowModelElement getModelElementParent() {
 		return this.parent;
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getShellTitle() {
 		return "Transition";
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getTitle() {
 		return "Transition properties";
 	}
@@ -437,24 +378,13 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_TRANSITION);
 	}
 
-	/**
-	 * 
-	 */
 	protected void handleTableSelectionChanged() {
-		// TODO Auto-generated method stub
 	}
 
-	/**
-	 * @param error
-	 */
 	protected void showError(String error) {
 		super.setErrorMessage(error);
 	}
 
-	/**
-	 * @param string
-	 * @return
-	 */
 	public String trimString(String string) {
 		if (string != null && string == "") {
 			string = null;
@@ -462,23 +392,17 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		return string;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
-	 */
 	public void validateInput() {
 		String id = this.onText.getText();
 		String onexception = this.onExceptionText.getText();
 		boolean error = false;
 		StringBuffer errorMessage = new StringBuffer();
 		if (!StringUtils.hasText(id) && !StringUtils.hasText(onexception)) {
-			errorMessage
-					.append("A valid on or on-exception attribute is required. ");
+			errorMessage.append("A valid on or on-exception attribute is required. ");
 			error = true;
 		}
 		if (this.ognlButton.getSelection()) {
-			if (!id.startsWith(EXPRESSION_PREFIX)
-					|| !id.endsWith(EXPRESSION_SUFFIX)) {
+			if (!id.startsWith(EXPRESSION_PREFIX) || !id.endsWith(EXPRESSION_SUFFIX)) {
 				errorMessage
 						.append("A valid OGNL expression needs to start with '${' and ends with '}'. ");
 				error = true;

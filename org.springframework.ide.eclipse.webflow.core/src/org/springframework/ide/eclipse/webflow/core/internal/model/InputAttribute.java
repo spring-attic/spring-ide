@@ -25,8 +25,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class InputAttribute extends AbstractModelElement implements
-		IInputAttribute {
+public class InputAttribute extends AbstractModelElement implements IInputAttribute {
 
 	public String getName() {
 		return getAttribute("name");
@@ -58,18 +57,38 @@ public class InputAttribute extends AbstractModelElement implements
 	}
 
 	public void createNew(IWebflowModelElement parent) {
-		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
-				.createElement("input-attribute");
+		IDOMNode node = null;
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("input-attribute");
+		}
+		else {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("input");
+		}
 		init(node, parent);
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
 	}
-	
+
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		return children.toArray(new IModelElement[children.size()]);
+	}
+
+	public String getType() {
+		return getAttribute("type");
+	}
+
+	public String getValue() {
+		return getAttribute("value");
+	}
+
+	public void setType(String type) {
+		setAttribute("type", type);
+	}
+
+	public void setValue(String value) {
+		setAttribute("value", value);
 	}
 }

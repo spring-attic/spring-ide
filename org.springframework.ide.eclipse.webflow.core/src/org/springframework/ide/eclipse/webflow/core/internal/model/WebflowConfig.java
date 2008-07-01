@@ -48,7 +48,7 @@ public class WebflowConfig extends AbstractModelElement implements
 	private IFile resource;
 
 	private String name;
-
+	
 	private final IWebflowProject project;
 
 	public IWebflowProject getProject() {
@@ -188,4 +188,5 @@ public class WebflowConfig extends AbstractModelElement implements
 	public boolean isElementArchived() {
 		return false;
 	}
+
 }

@@ -16,6 +16,8 @@ import java.util.List;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -33,6 +35,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.ExitActions;
 import org.springframework.ide.eclipse.webflow.core.internal.model.GlobalTransitions;
 import org.springframework.ide.eclipse.webflow.core.internal.model.InputMapper;
 import org.springframework.ide.eclipse.webflow.core.internal.model.OutputMapper;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
@@ -44,65 +47,28 @@ import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
-/**
- * 
- */
-public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
-		IDialogValidator {
+public class WebflowStatePropertiesDialog extends TitleAreaDialog implements IDialogValidator {
 
-	/**
-	 * 
-	 */
 	private IWebflowState state;
 
-	/**
-	 * 
-	 */
 	private IWebflowState stateClone;
 
-	/**
-	 * 
-	 */
 	private Label startStateLabel;
 
-	/**
-	 * 
-	 */
 	private Text startStateText;
 
-	/**
-	 * 
-	 */
 	private Button okButton;
 
-	/**
-	 * 
-	 */
 	private PropertiesComposite properties;
 
-	/**
-	 * 
-	 */
 	private ActionComposite entryActionsComposite;
 
-	/**
-	 * 
-	 */
 	private ActionComposite exitActionsComposite;
 
-	/**
-	 * 
-	 */
 	private ExceptionHandlerComposite exceptionHandlerComposite;
 
-	/**
-	 * 
-	 */
 	private OutputMapperComposite outputMapperComposite;
 
-	/**
-	 * 
-	 */
 	private InputMapperComposite inputMapperComposite;
 
 	private VarComposite varComposite;
@@ -111,50 +77,34 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 
 	private GlobalTransitionsComposite globalTransitionComposite;
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> entryActions;
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> exitActions;
 
-	/**
-	 * 
-	 */
 	private List<IStateTransition> globalTransitions;
 
-	/**
-	 * 
-	 */
 	private List<IOutputAttribute> outputAttributes;
 
-	/**
-	 * 
-	 */
 	private List<IMapping> outputMapping;
 
-	/**
-	 * 
-	 */
 	private List<IInputAttribute> inputAttributes;
 
-	/**
-	 * 
-	 */
 	private List<IMapping> inputMapping;
 
-	/**
-	 * 
-	 */
 	private List<org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler> exceptionHandler;
 
-	/**
-	 * @param parentShell
-	 * @param state
-	 */
+	private Label parentLabel;
+
+	private Text parentText;
+
+	private Label abstractLabel;
+
+	private Button abstractText;
+
+	private Label persistenceContextLabel;
+
+	private Button persistenceContextText;
+
 	public WebflowStatePropertiesDialog(Shell parentShell, IWebflowState state) {
 		super(parentShell);
 		this.state = state;
@@ -163,8 +113,7 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 
 		if (this.stateClone.getEntryActions() != null) {
 			entryActions = new ArrayList<IActionElement>();
-			entryActions.addAll(this.stateClone.getEntryActions()
-					.getEntryActions());
+			entryActions.addAll(this.stateClone.getEntryActions().getEntryActions());
 		}
 		else {
 			entryActions = new ArrayList<IActionElement>();
@@ -174,8 +123,7 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		}
 		if (this.stateClone.getExitActions() != null) {
 			exitActions = new ArrayList<IActionElement>();
-			exitActions.addAll(this.stateClone.getExitActions()
-					.getExitActions());
+			exitActions.addAll(this.stateClone.getExitActions().getExitActions());
 		}
 		else {
 			exitActions = new ArrayList<IActionElement>();
@@ -189,31 +137,48 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		inputAttributes = new ArrayList<IInputAttribute>();
 		inputMapping = new ArrayList<IMapping>();
 
-		if (this.stateClone.getOutputMapper() != null) {
-			outputAttributes = new ArrayList<IOutputAttribute>();
-			outputMapping = new ArrayList<IMapping>();
-			outputAttributes.addAll(this.stateClone.getOutputMapper()
-					.getOutputAttributes());
-			outputMapping
-					.addAll(this.stateClone.getOutputMapper().getMapping());
+		if (WebflowModelXmlUtils.isVersion1Flow(state)) {
+			if (this.stateClone.getOutputMapper() != null) {
+				outputAttributes = new ArrayList<IOutputAttribute>();
+				outputMapping = new ArrayList<IMapping>();
+				outputAttributes.addAll(this.stateClone.getOutputMapper().getOutputAttributes());
+				outputMapping.addAll(this.stateClone.getOutputMapper().getMapping());
+			}
+			else {
+				outputAttributes = new ArrayList<IOutputAttribute>();
+				outputMapping = new ArrayList<IMapping>();
+				OutputMapper entry = new OutputMapper();
+				entry.createNew(stateClone);
+				stateClone.setOutputMapper(entry);
+			}
 		}
 		else {
 			outputAttributes = new ArrayList<IOutputAttribute>();
+			outputAttributes.addAll(this.stateClone.getOutputAttributes());
 			outputMapping = new ArrayList<IMapping>();
 			OutputMapper entry = new OutputMapper();
 			entry.createNew(stateClone);
 			stateClone.setOutputMapper(entry);
 		}
 
-		if (this.stateClone.getInputMapper() != null) {
-			inputAttributes = new ArrayList<IInputAttribute>();
-			inputMapping = new ArrayList<IMapping>();
-			inputAttributes.addAll(this.stateClone.getInputMapper()
-					.getInputAttributes());
-			inputMapping.addAll(this.stateClone.getInputMapper().getMapping());
+		if (WebflowModelXmlUtils.isVersion1Flow(state)) {
+			if (this.stateClone.getInputMapper() != null) {
+				inputAttributes = new ArrayList<IInputAttribute>();
+				inputMapping = new ArrayList<IMapping>();
+				inputAttributes.addAll(this.stateClone.getInputMapper().getInputAttributes());
+				inputMapping.addAll(this.stateClone.getInputMapper().getMapping());
+			}
+			else {
+				inputAttributes = new ArrayList<IInputAttribute>();
+				inputMapping = new ArrayList<IMapping>();
+				InputMapper entry = new InputMapper();
+				entry.createNew(stateClone);
+				stateClone.setInputMapper(entry);
+			}
 		}
 		else {
 			inputAttributes = new ArrayList<IInputAttribute>();
+			inputAttributes.addAll(this.stateClone.getInputAttributes());
 			inputMapping = new ArrayList<IMapping>();
 			InputMapper entry = new InputMapper();
 			entry.createNew(stateClone);
@@ -222,8 +187,7 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 
 		if (this.stateClone.getGlobalTransitions() != null) {
 			globalTransitions = new ArrayList<IStateTransition>();
-			globalTransitions.addAll(this.stateClone.getGlobalTransitions()
-					.getGlobalTransitions());
+			globalTransitions.addAll(this.stateClone.getGlobalTransitions().getGlobalTransitions());
 		}
 		else {
 			globalTransitions = new ArrayList<IStateTransition>();
@@ -238,12 +202,19 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
-	 */
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
+
+			if (!WebflowModelXmlUtils.isVersion1Flow(state)) {
+				this.stateClone.setAbstract(Boolean.toString(abstractText.getSelection()));
+				this.stateClone.setParent(trimString(parentText.getText()));
+				if (this.persistenceContextText.getSelection()) {
+					this.stateClone.addPersistenceContext();
+				}
+				else {
+					this.stateClone.removePersistenceContext();
+				}
+			}
 
 			if (state.getEntryActions() == null && this.entryActions.size() > 0) {
 				EntryActions entry = new EntryActions();
@@ -281,8 +252,7 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 				}
 			}
 
-			if (this.exceptionHandler != null
-					&& this.exceptionHandler.size() > 0) {
+			if (this.exceptionHandler != null && this.exceptionHandler.size() > 0) {
 				stateClone.removeAllExceptionHandler();
 				for (org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler a : this.exceptionHandler) {
 					stateClone.addExceptionHandler(a);
@@ -293,28 +263,34 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 			}
 
 			if (state.getOutputMapper() == null
-					&& (this.outputAttributes.size() > 0 || this.outputMapping
-							.size() > 0)) {
-				OutputMapper entry = new OutputMapper();
-				entry.createNew(stateClone);
-				for (IInputAttribute a : this.outputAttributes) {
-					entry.addOutputAttribute((IOutputAttribute) a);
+					&& (this.outputAttributes.size() > 0 || this.outputMapping.size() > 0)) {
+				if (WebflowModelXmlUtils.isVersion1Flow(state)) {
+					OutputMapper entry = new OutputMapper();
+					entry.createNew(stateClone);
+					for (IInputAttribute a : this.outputAttributes) {
+						entry.addOutputAttribute((IOutputAttribute) a);
+					}
+					for (IMapping a : this.outputMapping) {
+						entry.addMapping(a);
+					}
+					stateClone.setOutputMapper(entry);
 				}
-				for (IMapping a : this.outputMapping) {
-					entry.addMapping(a);
+				else {
+					stateClone.removeAllOutputAttribute();
+					for (IInputAttribute a : this.outputAttributes) {
+						stateClone.addOutputAttribute((IOutputAttribute) a);
+					}
+					stateClone.setOutputMapper(null);
 				}
-				stateClone.setOutputMapper(entry);
 			}
-			else if (this.outputAttributes.size() == 0
-					&& this.outputMapping.size() == 0) {
+			else if (this.outputAttributes.size() == 0 && this.outputMapping.size() == 0) {
 				stateClone.setOutputMapper(null);
 			}
 			else {
 				stateClone.getOutputMapper().removeAllOutputAttribute();
 				stateClone.getOutputMapper().removeAllMapping();
 				for (IInputAttribute a : this.outputAttributes) {
-					stateClone.getOutputMapper().addOutputAttribute(
-							(IOutputAttribute) a);
+					stateClone.getOutputMapper().addOutputAttribute((IOutputAttribute) a);
 				}
 				for (IMapping a : this.outputMapping) {
 					stateClone.getOutputMapper().addMapping(a);
@@ -322,20 +298,27 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 			}
 
 			if (state.getInputMapper() == null
-					&& (this.inputAttributes.size() > 0 || this.inputMapping
-							.size() > 0)) {
-				InputMapper entry = new InputMapper();
-				entry.createNew(stateClone);
-				for (IInputAttribute a : this.inputAttributes) {
-					entry.addInputAttribute(a);
+					&& (this.inputAttributes.size() > 0 || this.inputMapping.size() > 0)) {
+				if (WebflowModelXmlUtils.isVersion1Flow(state)) {
+					InputMapper entry = new InputMapper();
+					entry.createNew(stateClone);
+					for (IInputAttribute a : this.inputAttributes) {
+						entry.addInputAttribute(a);
+					}
+					for (IMapping a : this.inputMapping) {
+						entry.addMapping(a);
+					}
+					stateClone.setInputMapper(entry);
 				}
-				for (IMapping a : this.inputMapping) {
-					entry.addMapping(a);
+				else {
+					stateClone.removeAllInputAttribute();
+					for (IInputAttribute a : this.inputAttributes) {
+						stateClone.addInputAttribute(a);
+					}
+					stateClone.setInputMapper(null);
 				}
-				stateClone.setInputMapper(entry);
 			}
-			else if (this.inputAttributes.size() == 0
-					&& this.inputMapping.size() == 0) {
+			else if (this.inputAttributes.size() == 0 && this.inputMapping.size() == 0) {
 				stateClone.setInputMapper(null);
 			}
 			else {
@@ -349,8 +332,7 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 				}
 			}
 
-			if (state.getGlobalTransitions() == null
-					&& this.globalTransitions.size() > 0) {
+			if (state.getGlobalTransitions() == null && this.globalTransitions.size() > 0) {
 				GlobalTransitions entry = new GlobalTransitions();
 				entry.createNew(stateClone);
 				for (IStateTransition a : this.globalTransitions) {
@@ -368,14 +350,14 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 				}
 			}
 
-			((ICloneableModelElement<IWebflowState>) this.state)
-					.applyCloneValues(this.stateClone);
+			((ICloneableModelElement<IWebflowState>) this.state).applyCloneValues(this.stateClone);
 		}
 		super.buttonPressed(buttonId);
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
 	protected void configureShell(Shell shell) {
@@ -386,14 +368,14 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		okButton = createButton(parent, IDialogConstants.OK_ID,
-				IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		// do this here because setting the text will set enablement on the
 		// ok button
 		if (this.state != null) {
@@ -406,7 +388,9 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
@@ -417,7 +401,9 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite parentComposite = (Composite) super.createDialogArea(parent);
@@ -457,8 +443,7 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		nameGroup.setLayout(layout1);
 		startStateLabel = new Label(nameGroup, SWT.NONE);
 		startStateLabel.setText("Start State id");
-		startStateText = new Text(nameGroup, SWT.READ_ONLY | SWT.SINGLE
-				| SWT.BORDER);
+		startStateText = new Text(nameGroup, SWT.READ_ONLY | SWT.SINGLE | SWT.BORDER);
 		if (this.state != null && this.state.getStartState() != null
 				&& this.state.getStartState().getId() != null) {
 			this.startStateText.setText(this.state.getStartState().getId());
@@ -469,12 +454,43 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		 * modifyText(ModifyEvent e) { validateInput(); } });
 		 */
 
+		if (!WebflowModelXmlUtils.isVersion1Flow(state)) {
+			parentLabel = new Label(nameGroup, SWT.NONE);
+			parentLabel.setText("Parent state id");
+			parentText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+			if (this.state != null && this.state.getParent() != null) {
+				this.parentText.setText(this.state.getParent());
+			}
+			parentText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			parentText.addModifyListener(new ModifyListener() {
+
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
+			abstractLabel = new Label(nameGroup, SWT.NONE);
+			abstractLabel.setText("Abstract");
+			abstractText = new Button(nameGroup, SWT.CHECK | SWT.BORDER);
+			if (this.state != null && this.state.getAbstract() != null
+					&& this.state.getAbstract().equalsIgnoreCase("true")) {
+				this.abstractText.setSelection(true);
+			}
+			abstractText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			persistenceContextLabel = new Label(nameGroup, SWT.NONE);
+			persistenceContextLabel.setText("Persistence context");
+			persistenceContextText = new Button(nameGroup, SWT.CHECK | SWT.BORDER);
+			if (this.state != null && this.state.hasPersitenceContext()) {
+				this.persistenceContextText.setSelection(true);
+			}
+			persistenceContextText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		}
+
 		item1.setControl(groupActionType);
 
 		// add attribute mapper
 		item4.setText("Attribute Mapping");
-		item4.setImage(WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_ATTRIBUTE_MAPPER));
+		item4.setImage(WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_ATTRIBUTE_MAPPER));
 
 		Composite attributeMapperGroup = new Composite(folder, SWT.NULL);
 		attributeMapperGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -489,14 +505,12 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		TabItem item21 = new TabItem(folder2, SWT.NULL);
 		TabItem item22 = new TabItem(folder2, SWT.NULL);
 
-		inputMapperComposite = new InputMapperComposite(this, item21,
-				getShell(), this.inputAttributes, this.inputMapping,
-				this.stateClone.getInputMapper());
+		inputMapperComposite = new InputMapperComposite(this, item21, getShell(),
+				this.inputAttributes, this.inputMapping, this.stateClone.getInputMapper());
 		item21.setControl(inputMapperComposite.createDialogArea(folder2));
 
-		outputMapperComposite = new OutputMapperComposite(this, item22,
-				getShell(), this.outputAttributes, this.outputMapping,
-				this.stateClone.getOutputMapper());
+		outputMapperComposite = new OutputMapperComposite(this, item22, getShell(),
+				this.outputAttributes, this.outputMapping, this.stateClone.getOutputMapper());
 		item22.setControl(outputMapperComposite.createDialogArea(folder2));
 
 		item4.setControl(attributeMapperGroup);
@@ -505,31 +519,26 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 				(IAttributeEnabled) this.stateClone);
 		item2.setControl(properties.createDialogArea(folder));
 
-		varComposite = new VarComposite(this, item3, getShell(),
-				this.stateClone);
+		varComposite = new VarComposite(this, item3, getShell(), this.stateClone);
 		item3.setControl(varComposite.createDialogArea(folder));
 
-		entryActionsComposite = new ActionComposite(this, item5, getShell(),
-				this.entryActions, this.stateClone.getEntryActions(),
-				IActionElement.ACTION_TYPE.ENTRY_ACTION);
+		entryActionsComposite = new ActionComposite(this, item5, getShell(), this.entryActions,
+				this.stateClone.getEntryActions(), IActionElement.ACTION_TYPE.ENTRY_ACTION);
 		item5.setControl(entryActionsComposite.createDialogArea(folder));
 
-		globalTransitionComposite = new GlobalTransitionsComposite(this, item6,
-				getShell(), this.globalTransitions, this.stateClone
-						.getGlobalTransitions(), this.stateClone);
+		globalTransitionComposite = new GlobalTransitionsComposite(this, item6, getShell(),
+				this.globalTransitions, this.stateClone.getGlobalTransitions(), this.stateClone);
 		item6.setControl(globalTransitionComposite.createDialogArea(folder));
 
-		exitActionsComposite = new ActionComposite(this, item7, getShell(),
-				this.exitActions, this.stateClone.getExitActions(),
-				IActionElement.ACTION_TYPE.EXIT_ACTION);
+		exitActionsComposite = new ActionComposite(this, item7, getShell(), this.exitActions,
+				this.stateClone.getExitActions(), IActionElement.ACTION_TYPE.EXIT_ACTION);
 		item7.setControl(exitActionsComposite.createDialogArea(folder));
 
-		exceptionHandlerComposite = new ExceptionHandlerComposite(this, item8,
-				getShell(), this.exceptionHandler, this.stateClone);
+		exceptionHandlerComposite = new ExceptionHandlerComposite(this, item8, getShell(),
+				this.exceptionHandler, this.stateClone);
 		item8.setControl(exceptionHandlerComposite.createDialogArea(folder));
 
-		importComposite = new ImportComposite(this, item9, getShell(),
-				this.stateClone);
+		importComposite = new ImportComposite(this, item9, getShell(), this.stateClone);
 		item9.setControl(importComposite.createDialogArea(folder));
 
 		applyDialogFont(parentComposite);
@@ -537,45 +546,26 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		return parentComposite;
 	}
 
-	/**
-	 * @return
-	 */
 	protected Image getImage() {
 		return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getMessage() {
 		return "Enter the details for the web flow";
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getShellTitle() {
 		return "Flow";
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getTitle() {
 		return "Flow properties";
 	}
 
-	/**
-	 * @param error
-	 */
 	protected void showError(String error) {
 		super.setErrorMessage(error);
 	}
 
-	/**
-	 * @param string
-	 * @return
-	 */
 	public String trimString(String string) {
 		if (string != null && string == "") {
 			string = null;
@@ -583,10 +573,6 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		return string;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
-	 */
 	public void validateInput() {
 		String id = "";
 		boolean error = false;
@@ -598,10 +584,9 @@ public class WebflowStatePropertiesDialog extends TitleAreaDialog implements
 		}
 		else {
 			/*
-			 * if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent,
-			 * actionState, id)) { errorMessage .append("The entered id
-			 * attribute must be unique within a single web flow. "); error =
-			 * true; }
+			 * if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent, actionState, id)) {
+			 * errorMessage .append("The entered id attribute must be unique within a single web
+			 * flow. "); error = true; }
 			 */
 		}
 

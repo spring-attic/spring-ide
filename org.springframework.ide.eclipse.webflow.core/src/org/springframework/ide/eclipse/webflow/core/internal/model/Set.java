@@ -30,7 +30,12 @@ public class Set extends AbstractAction implements ISet,
 		ICloneableModelElement<Set> {
 
 	public String getAttribute() {
-		return getAttribute("attribute");
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			return getAttribute("attribute");
+		}
+		else {
+			return getAttribute("name");
+		}
 	}
 
 	public String getScope() {
@@ -42,7 +47,12 @@ public class Set extends AbstractAction implements ISet,
 	}
 
 	public void setAttribute(String attribute) {
-		setAttribute("attribute", attribute);
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			setAttribute("attribute", attribute);
+		}
+		else {
+			setAttribute("name", attribute);
+		}
 	}
 
 	public void setScope(String scope) {
@@ -87,5 +97,13 @@ public class Set extends AbstractAction implements ISet,
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		return children.toArray(new IModelElement[children.size()]);
+	}
+
+	public String getSetType() {
+		return getAttribute("type");
+	}
+
+	public void setSetType(String type) {
+		setAttribute("type", type);
 	}
 }

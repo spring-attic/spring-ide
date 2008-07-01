@@ -31,5 +31,9 @@ public interface IEndState extends ITransitionableTo, IViewEnabled {
 	 * @return the output mapper
 	 */
 	IOutputMapper getOutputMapper();
+	
+	void setCommit(String commit);
+	
+	String getCommit();
 
 }

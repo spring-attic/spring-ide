@@ -60,6 +60,12 @@ public class StateTransition extends Transition implements IStateTransition,
 					action.setType(IActionElement.ACTION_TYPE.ACTION);
 					this.actions.add(action);
 				}
+				else if ("render".equals(child.getLocalName())) {
+					Action action = new Action();
+					action.init(child, this);
+					action.setType(IActionElement.ACTION_TYPE.ACTION);
+					this.actions.add(action);
+				}
 				else if ("bean-action".equals(child.getLocalName())) {
 					BeanAction action = new BeanAction();
 					action.init(child, this);
@@ -67,6 +73,12 @@ public class StateTransition extends Transition implements IStateTransition,
 					this.actions.add(action);
 				}
 				else if ("evaluate-action".equals(child.getLocalName())) {
+					EvaluateAction action = new EvaluateAction();
+					action.init(child, this);
+					action.setType(IActionElement.ACTION_TYPE.ACTION);
+					this.actions.add(action);
+				}
+				else if ("evaluate".equals(child.getLocalName())) {
 					EvaluateAction action = new EvaluateAction();
 					action.init(child, this);
 					action.setType(IActionElement.ACTION_TYPE.ACTION);
@@ -185,6 +197,11 @@ public class StateTransition extends Transition implements IStateTransition,
 					action.init(child, this);
 					this.actions.add(action);
 				}
+				else if ("render".equals(child.getLocalName())) {
+					Action action = new Action();
+					action.init(child, this);
+					this.actions.add(action);
+				}
 				else if ("bean-action".equals(child.getLocalName())) {
 					BeanAction action = new BeanAction();
 					action.init(child, this);
@@ -261,5 +278,21 @@ public class StateTransition extends Transition implements IStateTransition,
 		children.addAll(getAttributes());
 		children.addAll(getActions());
 		return children.toArray(new IModelElement[children.size()]);
+	}
+
+	public String getBind() {
+		return getAttribute("bind");
+	}
+
+	public void setBind(String bind) {
+		setAttribute("bind", bind);
+	}
+
+	public String getHistory() {
+		return getAttribute("history");
+	}
+
+	public void setHistory(String history) {
+		setAttribute("history", history);
 	}
 }

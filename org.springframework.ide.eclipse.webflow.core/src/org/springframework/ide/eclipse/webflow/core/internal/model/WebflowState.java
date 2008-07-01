@@ -28,7 +28,9 @@ import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IImport;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
+import org.springframework.ide.eclipse.webflow.core.model.IInputAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IInputMapper;
+import org.springframework.ide.eclipse.webflow.core.model.IOutputAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IOutputMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
@@ -47,8 +49,8 @@ import org.w3c.dom.NodeList;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WebflowState extends AbstractTransitionableFrom implements
-		IWebflowState, ICloneableModelElement<IWebflowState> {
+public class WebflowState extends AbstractTransitionableFrom implements IWebflowState,
+		ICloneableModelElement<IWebflowState> {
 
 	private final IWebflowConfig webflowConfig;
 
@@ -88,6 +90,10 @@ public class WebflowState extends AbstractTransitionableFrom implements
 
 	private IGlobalTransitions globalTransition;
 
+	private List<IInputAttribute> inputAttributes = null;
+
+	private List<IOutputAttribute> outputAttributes = null;
+
 	/**
 	 * @param node
 	 * @param parent
@@ -99,6 +105,8 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		this.inlineFlows = new ArrayList<IInlineFlowState>();
 		this.states = new ArrayList<IState>();
 		this.vars = new ArrayList<IVar>();
+		this.inputAttributes = new ArrayList<IInputAttribute>();
+		this.outputAttributes = new ArrayList<IOutputAttribute>();
 
 		if (node != null) {
 
@@ -141,6 +149,11 @@ public class WebflowState extends AbstractTransitionableFrom implements
 						im.init(child, this);
 						this.imports.add(im);
 					}
+					else if ("bean-import".equals(child.getLocalName())) {
+						Import im = new Import();
+						im.init(child, this);
+						this.imports.add(im);
+					}
 					else if ("var".equals(child.getLocalName())) {
 						Variable var = new Variable();
 						var.init(child, this);
@@ -150,7 +163,15 @@ public class WebflowState extends AbstractTransitionableFrom implements
 						this.entryActions = new EntryActions();
 						this.entryActions.init(child, this);
 					}
+					else if ("on-start".equals(child.getLocalName())) {
+						this.entryActions = new EntryActions();
+						this.entryActions.init(child, this);
+					}
 					else if ("end-actions".equals(child.getLocalName())) {
+						this.exitActions = new ExitActions();
+						this.exitActions.init(child, this);
+					}
+					else if ("on-end".equals(child.getLocalName())) {
 						this.exitActions = new ExitActions();
 						this.exitActions.init(child, this);
 					}
@@ -162,13 +183,19 @@ public class WebflowState extends AbstractTransitionableFrom implements
 						this.outputMapper = new OutputMapper();
 						this.outputMapper.init(child, this);
 					}
-					else if ("output-mapper".equals(child.getLocalName())) {
-						this.outputMapper = new OutputMapper();
-						this.outputMapper.init(child, this);
-					}
 					else if ("global-transitions".equals(child.getLocalName())) {
 						this.globalTransition = new GlobalTransitions();
 						this.globalTransition.init(child, this);
+					}
+					else if ("input".equals(child.getLocalName())) {
+						InputAttribute attr = new InputAttribute();
+						attr.init(child, this);
+						this.inputAttributes.add(attr);
+					}
+					else if ("output".equals(child.getLocalName())) {
+						OutputAttribute attr = new OutputAttribute();
+						attr.init(child, this);
+						this.outputAttributes.add(attr);
 					}
 				}
 			}
@@ -176,12 +203,11 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			// reconnect transistions
 			for (IState state : this.states) {
 				if (state instanceof ITransitionableFrom) {
-					for (ITransition trans : ((ITransitionableFrom) state)
-							.getOutputTransitions()) {
+					for (ITransition trans : ((ITransitionableFrom) state).getOutputTransitions()) {
 						if (trans instanceof IStateTransition) {
 							if (((IStateTransition) trans).getToState() != null) {
-								((IStateTransition) trans).getToState()
-										.getInputTransitions().add(trans);
+								((IStateTransition) trans).getToState().getInputTransitions().add(
+										trans);
 							}
 						}
 					}
@@ -189,21 +215,17 @@ public class WebflowState extends AbstractTransitionableFrom implements
 						for (IIf i : ((IDecisionState) state).getIfs()) {
 							if (i.getThenTransition() != null
 									&& i.getThenTransition().getToState() != null
-									&& !i.getThenTransition().getToState()
-											.getInputTransitions().contains(
-													i.getThenTransition())) {
-								i.getThenTransition().getToState()
-										.getInputTransitions().add(
-												i.getThenTransition());
+									&& !i.getThenTransition().getToState().getInputTransitions()
+											.contains(i.getThenTransition())) {
+								i.getThenTransition().getToState().getInputTransitions().add(
+										i.getThenTransition());
 							}
 							if (i.getElseTransition() != null
 									&& i.getElseTransition().getToState() != null
-									&& !i.getElseTransition().getToState()
-											.getInputTransitions().contains(
-													i.getElseTransition())) {
-								i.getElseTransition().getToState()
-										.getInputTransitions().add(
-												i.getElseTransition());
+									&& !i.getElseTransition().getToState().getInputTransitions()
+											.contains(i.getElseTransition())) {
+								i.getElseTransition().getToState().getInputTransitions().add(
+										i.getElseTransition());
 							}
 						}
 					}
@@ -219,8 +241,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		if (!getImports().contains(ip)) {
 			this.getImports().add(ip);
 			WebflowModelXmlUtils.insertNode(ip.getNode(), node);
-			super.firePropertyChange(ADD_CHILDREN, new Integer(this.getStates()
-					.indexOf(ip)), ip);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.getStates().indexOf(ip)), ip);
 		}
 	}
 
@@ -250,27 +271,21 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			// attach to xml after last state
 			WebflowModelXmlUtils.insertNode(state.getNode(), node);
 			this.states.add(state);
-			super.firePropertyChange(ADD_CHILDREN, new Integer(this.states
-					.indexOf(state)), state);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.states.indexOf(state)), state);
 
 			// add possible dead transitions to new state
 			if (state instanceof ITransitionableTo) {
 				for (IState s : this.states) {
 					if (s instanceof ITransitionableFrom) {
-						for (ITransition trans : ((ITransitionableFrom) s)
-								.getOutputTransitions()) {
+						for (ITransition trans : ((ITransitionableFrom) s).getOutputTransitions()) {
 							if (trans instanceof IStateTransition) {
 								IStateTransition stateTrans = (IStateTransition) trans;
-								if (state.getId().equals(
-										stateTrans.getToStateId())) {
-									if (!((ITransitionableTo) state)
-											.getInputTransitions().contains(
-													trans)) {
-										stateTrans.getFromState()
-												.fireStructureChange(OUTPUTS,
-														stateTrans);
-										((ITransitionableTo) state)
-												.addInputTransition(trans);
+								if (state.getId().equals(stateTrans.getToStateId())) {
+									if (!((ITransitionableTo) state).getInputTransitions()
+											.contains(trans)) {
+										stateTrans.getFromState().fireStructureChange(OUTPUTS,
+												stateTrans);
+										((ITransitionableTo) state).addInputTransition(trans);
 									}
 								}
 							}
@@ -279,36 +294,24 @@ public class WebflowState extends AbstractTransitionableFrom implements
 					if (s instanceof IDecisionState) {
 						for (IIf i : ((IDecisionState) s).getIfs()) {
 							if (i.getThenTransition() != null) {
-								IIfTransition ifTrans = (IIfTransition) i
-										.getThenTransition();
-								if (state.getId()
-										.equals(ifTrans.getToStateId())) {
-									if (!((ITransitionableTo) state)
-											.getInputTransitions().contains(
-													ifTrans)) {
-										((IWebflowModelElement) ifTrans
-												.getElementParent())
-												.fireStructureChange(OUTPUTS,
-														ifTrans);
-										((ITransitionableTo) state)
-												.addInputTransition(ifTrans);
+								IIfTransition ifTrans = (IIfTransition) i.getThenTransition();
+								if (state.getId().equals(ifTrans.getToStateId())) {
+									if (!((ITransitionableTo) state).getInputTransitions()
+											.contains(ifTrans)) {
+										((IWebflowModelElement) ifTrans.getElementParent())
+												.fireStructureChange(OUTPUTS, ifTrans);
+										((ITransitionableTo) state).addInputTransition(ifTrans);
 									}
 								}
 							}
 							if (i.getElseTransition() != null) {
-								IIfTransition ifTrans = (IIfTransition) i
-										.getElseTransition();
-								if (state.getId()
-										.equals(ifTrans.getToStateId())) {
-									if (!((ITransitionableTo) state)
-											.getInputTransitions().contains(
-													ifTrans)) {
-										((IWebflowModelElement) ifTrans
-												.getElementParent())
-												.fireStructureChange(OUTPUTS,
-														ifTrans);
-										((ITransitionableTo) state)
-												.addInputTransition(ifTrans);
+								IIfTransition ifTrans = (IIfTransition) i.getElseTransition();
+								if (state.getId().equals(ifTrans.getToStateId())) {
+									if (!((ITransitionableTo) state).getInputTransitions()
+											.contains(ifTrans)) {
+										((IWebflowModelElement) ifTrans.getElementParent())
+												.fireStructureChange(OUTPUTS, ifTrans);
+										((ITransitionableTo) state).addInputTransition(ifTrans);
 									}
 								}
 							}
@@ -331,8 +334,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 			IState refState = getStates().get(refIndex);
 			this.states.add(i, state);
-			WebflowModelXmlUtils.insertBefore(state.getNode(), refState
-					.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), state);
 		}
 
@@ -345,8 +347,8 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		if (!getVars().contains(state)) {
 			this.getVars().add(state);
 			WebflowModelXmlUtils.insertNode(state.getNode(), node);
-			super.firePropertyChange(ADD_CHILDREN, new Integer(this.getVars()
-					.indexOf(state)), state);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.getVars().indexOf(state)),
+					state);
 		}
 	}
 
@@ -362,8 +364,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 			IVar refState = this.vars.get(refIndex);
 			this.getVars().add(i, state);
-			WebflowModelXmlUtils.insertBefore(state.getNode(), refState
-					.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), state);
 		}
 	}
@@ -394,10 +395,21 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 */
 	public IState getStartState() {
 		if (hasStartState()) {
-			List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
-			IDOMNode node = nodes.get(0);
-			return WebflowModelXmlUtils.getStateById(this, getAttribute(node,
-					"idref"));
+			if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+				List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
+				IDOMNode node = nodes.get(0);
+				return WebflowModelXmlUtils.getStateById(this, getAttribute(node, "idref"));
+			}
+			else {
+				IState state = WebflowModelXmlUtils.getStateById(this, getAttribute(node,
+						"start-state"));
+				if (state != null) {
+					return state;
+				}
+				else {
+					return getStates().get(0);
+				}
+			}
 		}
 		return null;
 	}
@@ -427,8 +439,13 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 * @return
 	 */
 	public boolean hasStartState() {
-		List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
-		return nodes != null && nodes.size() == 1;
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
+			return nodes != null && nodes.size() == 1;
+		}
+		else {
+			return (getAttribute("start-state") != null || getStates().size() > 0);
+		}
 	}
 
 	/**
@@ -436,8 +453,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 * @return
 	 */
 	public boolean isStartState(IState state) {
-		return hasStartState() && state.getId() != null
-				&& state.equals(getStartState());
+		return hasStartState() && state.getId() != null && state.equals(getStartState());
 	}
 
 	/**
@@ -461,8 +477,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			IState refState = getStates().get(refIndex);
 			removeState(state);
 			this.states.add(i, state);
-			WebflowModelXmlUtils.insertBefore(state.getNode(), refState
-					.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
 			super.firePropertyChange(MOVE_CHILDREN, new Integer(i), state);
 		}
 	}
@@ -522,16 +537,20 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void setStartState(IState state) {
 		IState oldState = getStartState();
 
-		List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
-		if (nodes != null && nodes.size() > 0) {
-			IDOMNode node = nodes.get(0);
-			setAttribute(node, "idref", state.getId());
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
+			if (nodes != null && nodes.size() > 0) {
+				IDOMNode node = nodes.get(0);
+				setAttribute(node, "idref", state.getId());
+			}
+			else {
+				Element startNode = getNode().getOwnerDocument().createElement("start-state");
+				WebflowModelXmlUtils.insertNode(startNode, node);
+				setAttribute((IDOMNode) startNode, "idref", state.getId());
+			}
 		}
 		else {
-			Element startNode = getNode().getOwnerDocument().createElement(
-					"start-state");
-			WebflowModelXmlUtils.insertNode(startNode, node);
-			setAttribute((IDOMNode) startNode, "idref", state.getId());
+			setAttribute("start-state", state.getId());
 		}
 
 		// removeState(state);
@@ -546,8 +565,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 * @param parent
 	 */
 	public void createNew(IWebflowState parent) {
-		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
-				.createElement("flow");
+		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("flow");
 		init(node, parent);
 	}
 
@@ -566,8 +584,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void applyCloneValues(IWebflowState element) {
 		if (element != null) {
 			if (this.node.getParentNode() != null) {
-				this.parent.getNode()
-						.replaceChild(element.getNode(), this.node);
+				this.parent.getNode().replaceChild(element.getNode(), this.node);
 			}
 			init(element.getNode(), parent);
 		}
@@ -609,8 +626,8 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			// attach to xml after last state
 			WebflowModelXmlUtils.insertNode(state.getNode(), node);
 			this.inlineFlows.add(state);
-			super.firePropertyChange(ADD_CHILDREN, new Integer(this.inlineFlows
-					.indexOf(state)), state);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.inlineFlows.indexOf(state)),
+					state);
 		}
 	}
 
@@ -626,8 +643,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 			IState refState = getStates().get(refIndex);
 			this.inlineFlows.add(i, state);
-			WebflowModelXmlUtils.insertBefore(state.getNode(), refState
-					.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), state);
 		}
 
@@ -678,6 +694,18 @@ public class WebflowState extends AbstractTransitionableFrom implements
 				}
 				state.accept(visitor, monitor);
 			}
+			for (IInputAttribute state : getInputAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (IOutputAttribute state : getOutputAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
 			for (IVar state : getVars()) {
 				if (monitor.isCanceled()) {
 					return;
@@ -709,8 +737,9 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		children.addAll(getInlineFlowStates());
 		children.addAll(getAttributes());
 		children.addAll(getVars());
+		children.addAll(getInputAttributes());
+		children.addAll(getOutputAttributes());
 		children.addAll(getExceptionHandlers());
-		children.add(getInputMapper());
 		children.add(getInputMapper());
 		return children.toArray(new IModelElement[children.size()]);
 	}
@@ -732,5 +761,108 @@ public class WebflowState extends AbstractTransitionableFrom implements
 
 	public IModelElement getElementParent() {
 		return this.webflowConfig;
+	}
+
+	public String getAbstract() {
+		return getAttribute("abstract");
+	}
+
+	public void setAbstract(String abstrakt) {
+		setAttribute("abstract", abstrakt);
+	}
+
+	public List<IInputAttribute> getInputAttributes() {
+		return this.inputAttributes;
+	}
+
+	public void addInputAttribute(IInputAttribute action) {
+		if (!this.inputAttributes.contains(action)) {
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
+			this.inputAttributes.add(action);
+			super.firePropertyChange(ADD_CHILDREN,
+					new Integer(this.inputAttributes.indexOf(action)), action);
+		}
+	}
+
+	public void addInputAttribute(IInputAttribute action, int i) {
+		if (!this.inputAttributes.contains(action)) {
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
+			this.inputAttributes.add(i, action);
+			super.firePropertyChange(ADD_CHILDREN,
+					new Integer(this.inputAttributes.indexOf(action)), action);
+		}
+	}
+
+	public void removeAllInputAttribute() {
+		for (IInputAttribute action : this.inputAttributes) {
+			getNode().removeChild(action.getNode());
+		}
+		this.inputAttributes = new ArrayList<IInputAttribute>();
+	}
+
+	public void removeInputAttribute(IInputAttribute action) {
+		if (this.inputAttributes.contains(action)) {
+			this.inputAttributes.remove(action);
+			getNode().removeChild(action.getNode());
+			super.fireStructureChange(REMOVE_CHILDREN, action);
+		}
+	}
+
+	public List<IOutputAttribute> getOutputAttributes() {
+		return this.outputAttributes;
+	}
+
+	public void addOutputAttribute(IOutputAttribute action) {
+		if (!this.outputAttributes.contains(action)) {
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
+			this.outputAttributes.add(action);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.outputAttributes
+					.indexOf(action)), action);
+		}
+	}
+
+	public void addOutputAttribute(IOutputAttribute action, int i) {
+		if (!this.outputAttributes.contains(action)) {
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
+			this.outputAttributes.add(i, action);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.outputAttributes
+					.indexOf(action)), action);
+		}
+	}
+
+	public void removeAllOutputAttribute() {
+		for (IInputAttribute action : this.outputAttributes) {
+			getNode().removeChild(action.getNode());
+		}
+		this.outputAttributes = new ArrayList<IOutputAttribute>();
+	}
+
+	public void removeOutputAttribute(IOutputAttribute action) {
+		if (this.outputAttributes.contains(action)) {
+			this.outputAttributes.remove(action);
+			getNode().removeChild(action.getNode());
+			super.fireStructureChange(REMOVE_CHILDREN, action);
+		}
+	}
+
+	public void addPersistenceContext() {
+		if (!hasPersitenceContext()) {
+			Element startNode = getNode().getOwnerDocument().createElement("persistence-context");
+			WebflowModelXmlUtils.insertNode(startNode, node);
+		}
+	}
+
+	public boolean hasPersitenceContext() {
+		List<IDOMNode> nodes = getChildrenNodeByTagName("persistence-context");
+		return nodes.size() > 0;
+	}
+
+	public void removePersistenceContext() {
+		if (hasPersitenceContext()) {
+			List<IDOMNode> nodes = getChildrenNodeByTagName("persistence-context");
+			for (IDOMNode node : nodes) {
+				getNode().removeChild(node);
+			}
+		}
 	}
 }

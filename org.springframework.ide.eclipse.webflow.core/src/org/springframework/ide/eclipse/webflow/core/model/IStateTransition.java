@@ -95,4 +95,12 @@ public interface IStateTransition extends ITransition {
 	void setOnException(String exception);
 
 	String getToStateId();
+	
+	String getBind();
+	
+	void setBind(String bind);
+
+	String getHistory();
+	
+	void setHistory(String history);
 }

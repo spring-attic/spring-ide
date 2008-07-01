@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.model.ISecured;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
@@ -35,6 +36,22 @@ public abstract class AbstractTransitionableFrom extends
 	 * The output transitions.
 	 */
 	private List<ITransition> outputTransitions = new ArrayList<ITransition>();
+	
+	private ISecured secured;
+
+	/**
+	 * @return the secured
+	 */
+	public ISecured getSecured() {
+		return secured;
+	}
+
+	/**
+	 * @param secured the secured to set
+	 */
+	public void setSecured(ISecured secured) {
+		this.secured = secured;
+	}
 
 	/**
 	 * Init.
@@ -58,11 +75,16 @@ public abstract class AbstractTransitionableFrom extends
 						trans.init(child, this);
 						this.outputTransitions.add(trans);
 					}
+					else if ("secured".equals(child.getLocalName())) {
+						ISecured secured = new Secured();
+						secured.init(child, this);
+						this.secured = secured;
+					}
 				}
 			}
 		}
 	}
-
+	
 	/**
 	 * Gets the output transitions.
 	 * 

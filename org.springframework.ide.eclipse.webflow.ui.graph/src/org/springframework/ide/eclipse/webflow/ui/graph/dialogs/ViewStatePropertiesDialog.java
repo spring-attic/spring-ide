@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.EntryActions;
 import org.springframework.ide.eclipse.webflow.core.internal.model.ExitActions;
 import org.springframework.ide.eclipse.webflow.core.internal.model.RenderActions;
 import org.springframework.ide.eclipse.webflow.core.internal.model.ViewState;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
@@ -41,114 +42,67 @@ import org.springframework.ide.eclipse.webflow.core.model.IViewState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
-/**
- * 
- */
-public class ViewStatePropertiesDialog extends TitleAreaDialog implements
-		IDialogValidator {
+public class ViewStatePropertiesDialog extends TitleAreaDialog implements IDialogValidator {
 
-	/**
-	 * 
-	 */
 	private IViewState viewState;
 
-	/**
-	 * 
-	 */
 	private IViewState viewStateClone;
 
-	/**
-	 * 
-	 */
 	private Label nameLabel;
 
-	/**
-	 * 
-	 */
 	private Text nameText;
 
-	/**
-	 * 
-	 */
 	private Label viewLabel;
 
-	/**
-	 * 
-	 */
 	private Text viewText;
 
-	/**
-	 * 
-	 */
 	private Button okButton;
 
-	/**
-	 * 
-	 */
 	private IWebflowModelElement parentElement;
 
-	/**
-	 * 
-	 */
 	private PropertiesComposite properties;
 
-	/**
-	 * 
-	 */
 	private ActionComposite renderActionsComposite;
 
-	/**
-	 * 
-	 */
 	private ActionComposite entryActionsComposite;
 
-	/**
-	 * 
-	 */
 	private ActionComposite exitActionsComposite;
 
-	/**
-	 * 
-	 */
 	private ExceptionHandlerComposite exceptionHandlerComposite;
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> entryActions;
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> exitActions;
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> renderActions;
 
-	/**
-	 * 
-	 */
 	private List<org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler> exceptionHandler;
 
-	/**
-	 * 
-	 * 
-	 * @param parentShell 
-	 * @param state 
-	 * @param parent 
-	 */
-	public ViewStatePropertiesDialog(Shell parentShell,
-			IWebflowModelElement parent, IViewState state) {
+	private Label parentLabel;
+
+	private Text parentText;
+
+	private Label redirectLabel;
+
+	private Button redirectText;
+
+	private Label popupLabel;
+
+	private Button popupText;
+
+	private Label modelLabel;
+
+	private Text modelText;
+
+	public ViewStatePropertiesDialog(Shell parentShell, IWebflowModelElement parent,
+			IViewState state) {
 		super(parentShell);
 		this.viewState = state;
 		this.parentElement = parent;
 		this.viewStateClone = ((ViewState) state).cloneModelElement();
 		if (this.viewStateClone.getEntryActions() != null) {
 			entryActions = new ArrayList<IActionElement>();
-			entryActions.addAll(this.viewStateClone.getEntryActions()
-					.getEntryActions());
+			entryActions.addAll(this.viewStateClone.getEntryActions().getEntryActions());
 		}
 		else {
 			entryActions = new ArrayList<IActionElement>();
@@ -158,8 +112,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 		}
 		if (this.viewStateClone.getExitActions() != null) {
 			exitActions = new ArrayList<IActionElement>();
-			exitActions.addAll(this.viewStateClone.getExitActions()
-					.getExitActions());
+			exitActions.addAll(this.viewStateClone.getExitActions().getExitActions());
 		}
 		else {
 			exitActions = new ArrayList<IActionElement>();
@@ -169,8 +122,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 		}
 		if (this.viewStateClone.getRenderActions() != null) {
 			renderActions = new ArrayList<IActionElement>();
-			renderActions.addAll(this.viewStateClone.getRenderActions()
-					.getRenderActions());
+			renderActions.addAll(this.viewStateClone.getRenderActions().getRenderActions());
 		}
 		else {
 			renderActions = new ArrayList<IActionElement>();
@@ -178,24 +130,26 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 			entry.createNew(viewStateClone);
 			viewStateClone.setRenderActions(entry);
 		}
-		
+
 		exceptionHandler = new ArrayList<org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler>();
 		if (this.viewStateClone.getExceptionHandlers() != null) {
-			exceptionHandler.addAll(this.viewStateClone
-					.getExceptionHandlers());
+			exceptionHandler.addAll(this.viewStateClone.getExceptionHandlers());
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
-	 */
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 			this.viewStateClone.setId(trimString(this.nameText.getText()));
 			this.viewStateClone.setView(trimString(this.viewText.getText()));
-
-			if (viewState.getEntryActions() == null
-					&& this.entryActions.size() > 0) {
+			
+			if (!WebflowModelXmlUtils.isVersion1Flow(viewState)) {
+				this.viewStateClone.setParent(trimString(this.parentText.getText()));
+				this.viewStateClone.setRedirect(Boolean.toString(this.redirectText.getSelection()));
+				this.viewStateClone.setPopup(Boolean.toString(this.popupText.getSelection()));
+				this.viewStateClone.setModel(trimString(this.modelText.getText()));
+			}
+			
+			if (viewState.getEntryActions() == null && this.entryActions.size() > 0) {
 				EntryActions entry = new EntryActions();
 				entry.createNew(viewStateClone);
 				for (IActionElement a : this.entryActions) {
@@ -213,8 +167,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 				}
 			}
 
-			if (viewState.getExitActions() == null
-					&& this.exitActions.size() > 0) {
+			if (viewState.getExitActions() == null && this.exitActions.size() > 0) {
 				ExitActions exit = new ExitActions();
 				exit.createNew(viewStateClone);
 				for (IActionElement a : this.exitActions) {
@@ -232,8 +185,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 				}
 			}
 
-			if (viewState.getRenderActions() == null
-					&& this.renderActions.size() > 0) {
+			if (viewState.getRenderActions() == null && this.renderActions.size() > 0) {
 				RenderActions exit = new RenderActions();
 				exit.createNew(viewStateClone);
 				for (IActionElement a : this.renderActions) {
@@ -250,9 +202,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 					viewStateClone.getRenderActions().addRenderAction(a);
 				}
 			}
-			
-			if (this.exceptionHandler != null
-					&& this.exceptionHandler.size() > 0) {
+
+			if (this.exceptionHandler != null && this.exceptionHandler.size() > 0) {
 				viewStateClone.removeAllExceptionHandler();
 				for (org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler a : this.exceptionHandler) {
 					viewStateClone.addExceptionHandler(a);
@@ -268,24 +219,16 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 		super.buttonPressed(buttonId);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
-	 */
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(getShellTitle());
 		shell.setImage(getImage());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
-	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		okButton = createButton(parent, IDialogConstants.OK_ID,
-				IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		// do this here because setting the text will set enablement on the
 		// ok button
 		nameText.setFocus();
@@ -297,9 +240,6 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
-	 */
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
 		setTitle(getTitle());
@@ -307,9 +247,6 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 		return contents;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite parentComposite = (Composite) super.createDialogArea(parent);
 		Composite composite = new Composite(parentComposite, SWT.NULL);
@@ -371,25 +308,65 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 			}
 		});
 
+		if (!WebflowModelXmlUtils.isVersion1Flow(viewState)) {
+			parentLabel = new Label(nameGroup, SWT.NONE);
+			parentLabel.setText("Parent state id");
+			parentText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+			if (this.viewState != null && this.viewState.getParent() != null) {
+				this.parentText.setText(this.viewState.getParent());
+			}
+			parentText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			parentText.addModifyListener(new ModifyListener() {
+
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
+
+			redirectLabel = new Label(nameGroup, SWT.NONE);
+			redirectLabel.setText("Redirect");
+			redirectText = new Button(nameGroup, SWT.CHECK | SWT.BORDER);
+			if (this.viewState != null && this.viewState.getRedirect() != null
+					&& this.viewState.getRedirect().equalsIgnoreCase("true")) {
+				this.redirectText.setSelection(true);
+			}
+			redirectText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			popupLabel = new Label(nameGroup, SWT.NONE);
+			popupLabel.setText("Popup");
+			popupText = new Button(nameGroup, SWT.CHECK | SWT.BORDER);
+			if (this.viewState != null && this.viewState.getPopup() != null
+					&& this.viewState.getPopup().equalsIgnoreCase("true")) {
+				this.popupText.setSelection(true);
+			}
+			popupText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			modelLabel = new Label(nameGroup, SWT.NONE);
+			modelLabel.setText("Model");
+			modelText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+			if (this.viewState != null && this.viewState.getModel() != null) {
+				this.modelText.setText(this.viewState.getModel());
+			}
+			modelText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		}			
+
 		item1.setControl(groupActionType);
 
-		renderActionsComposite = new ActionComposite(this, item2, getShell(),
-				this.renderActions, this.viewStateClone,
-				IActionElement.ACTION_TYPE.RENDER_ACTION);
+		renderActionsComposite = new ActionComposite(this, item2, getShell(), this.renderActions,
+				this.viewStateClone, IActionElement.ACTION_TYPE.RENDER_ACTION);
 		item2.setControl(renderActionsComposite.createDialogArea(folder));
 
-		entryActionsComposite = new ActionComposite(this, item3, getShell(),
-				this.entryActions, this.viewStateClone.getEntryActions(),
-				IActionElement.ACTION_TYPE.ENTRY_ACTION);
+		entryActionsComposite = new ActionComposite(this, item3, getShell(), this.entryActions,
+				this.viewStateClone.getEntryActions(), IActionElement.ACTION_TYPE.ENTRY_ACTION);
 		item3.setControl(entryActionsComposite.createDialogArea(folder));
 
-		exitActionsComposite = new ActionComposite(this, item4, getShell(),
-				this.exitActions, this.viewStateClone.getExitActions(),
-				IActionElement.ACTION_TYPE.EXIT_ACTION);
+		exitActionsComposite = new ActionComposite(this, item4, getShell(), this.exitActions,
+				this.viewStateClone.getExitActions(), IActionElement.ACTION_TYPE.EXIT_ACTION);
 		item4.setControl(exitActionsComposite.createDialogArea(folder));
 
-		exceptionHandlerComposite = new ExceptionHandlerComposite(this, item5,
-				getShell(), this.exceptionHandler, this.viewStateClone);
+		exceptionHandlerComposite = new ExceptionHandlerComposite(this, item5, getShell(),
+				this.exceptionHandler, this.viewStateClone);
 		item5.setControl(exceptionHandlerComposite.createDialogArea(folder));
 
 		properties = new PropertiesComposite(this, item6, getShell(),
@@ -404,7 +381,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getId() {
 		return this.nameText.getText();
@@ -413,7 +390,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected Image getImage() {
 		return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_VIEW_STATE);
@@ -422,7 +399,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getMessage() {
 		return "Enter the details for the view state";
@@ -431,7 +408,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IWebflowModelElement getModelElementParent() {
 		return this.parentElement;
@@ -440,7 +417,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getShellTitle() {
 		return "View State";
@@ -449,7 +426,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getTitle() {
 		return "View State properties";
@@ -458,7 +435,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @param error 
+	 * @param error
 	 */
 	protected void showError(String error) {
 		super.setErrorMessage(error);
@@ -467,9 +444,9 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @param string 
+	 * @param string
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String trimString(String string) {
 		if (string != null && string == "") {
@@ -478,8 +455,11 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 		return string;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
 	 */
 	public void validateInput() {
 		String id = this.nameText.getText();
@@ -492,10 +472,9 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 		}
 		else {
 			/*
-			 * if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent,
-			 * actionState, id)) { errorMessage .append("The entered id
-			 * attribute must be unique within a single web flow. "); error =
-			 * true; }
+			 * if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent, actionState, id)) {
+			 * errorMessage .append("The entered id attribute must be unique within a single web
+			 * flow. "); error = true; }
 			 */
 		}
 

@@ -35,4 +35,6 @@ public interface ITransition extends IWebflowModelElement {
 	void setToStateId(String id);
 
 	String getToStateId();
+	
+	
 }

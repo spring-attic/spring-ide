@@ -29,16 +29,20 @@ public class OutputAttribute extends InputAttribute implements IOutputAttribute 
 
 	@Override
 	public void createNew(IWebflowModelElement parent) {
-		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
-				.createElement("output-attribute");
+		IDOMNode node = null;
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("output-attribute");
+		}
+		else {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("output");
+		}
 		init(node, parent);
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
 	}
-	
+
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		return children.toArray(new IModelElement[children.size()]);

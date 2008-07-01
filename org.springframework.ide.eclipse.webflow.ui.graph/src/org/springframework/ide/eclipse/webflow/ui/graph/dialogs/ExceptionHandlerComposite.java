@@ -37,106 +37,45 @@ import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.Webflow
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelDecorator;
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelProvider;
 
-/**
- * 
- */
 public class ExceptionHandlerComposite {
 
-	/**
-	 * 
-	 */
 	private class ExceptionHandlerContentProvider implements
 			IStructuredContentProvider {
 
-		/**
-		 * 
-		 */
 		private List<IExceptionHandler> actions;
 
-		/**
-		 * 
-		 * 
-		 * @param actions 
-		 */
 		public ExceptionHandlerContentProvider(List<IExceptionHandler> actions) {
 			this.actions = actions;
 		}
 
-		/**
-		 * 
-		 */
 		public void dispose() {
 		}
 
-		/**
-		 * 
-		 * 
-		 * @param obj 
-		 * 
-		 * @return 
-		 */
 		public Object[] getElements(Object obj) {
 			return actions.toArray();
 		}
 
-		/**
-		 * 
-		 * 
-		 * @param arg1 
-		 * @param arg0 
-		 * @param arg2 
-		 */
 		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private TableViewer configsViewer;
 
-	/**
-	 * 
-	 */
 	private Button editButton;
 
-	/**
-	 * 
-	 */
 	private Button addButton;
 
-	/**
-	 * 
-	 */
 	private Button deleteButton;
 
 	// private IDialogValidator validator;
 
-	/**
-	 * 
-	 */
 	@SuppressWarnings("unused")
 	private Shell parentShell;
 
-	/**
-	 * 
-	 */
 	private List<IExceptionHandler> exceptionHandler;
 
-	/**
-	 * 
-	 */
 	private IWebflowModelElement parentElement;
 
-	/**
-	 * 
-	 * 
-	 * @param item 
-	 * @param parentElement 
-	 * @param parentShell 
-	 * @param validator 
-	 * @param actions 
-	 */
 	public ExceptionHandlerComposite(IDialogValidator validator, TabItem item,
 			Shell parentShell, List<IExceptionHandler> actions,
 			IWebflowModelElement parentElement) {
@@ -150,13 +89,6 @@ public class ExceptionHandlerComposite {
 		// this.validator = validator;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param parent 
-	 * 
-	 * @return 
-	 */
 	protected Control createDialogArea(Composite parent) {
 		Group groupActionType = new Group(parent, SWT.NULL);
 		GridLayout layoutAttMap = new GridLayout();
@@ -203,7 +135,6 @@ public class ExceptionHandlerComposite {
 		addButton = new Button(buttonArea, SWT.PUSH);
 		addButton.setText("Add");
 		GridData data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data1.widthHint = 40;
 		addButton.setLayoutData(data1);
 		addButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -219,7 +150,6 @@ public class ExceptionHandlerComposite {
 		editButton = new Button(buttonArea, SWT.PUSH);
 		editButton.setText("Edit");
 		data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data1.widthHint = 40;
 		editButton.setLayoutData(data1);
 		editButton.addSelectionListener(new SelectionAdapter() {
 
@@ -241,7 +171,6 @@ public class ExceptionHandlerComposite {
 		deleteButton = new Button(buttonArea, SWT.PUSH);
 		deleteButton.setText("Delete");
 		data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data1.widthHint = 40;
 		deleteButton.setLayoutData(data1);
 		deleteButton.addSelectionListener(new SelectionAdapter() {
 
@@ -265,9 +194,6 @@ public class ExceptionHandlerComposite {
 		return groupActionType;
 	}
 
-	/**
-	 * 
-	 */
 	protected void handleTableSelectionChanged() {
 		IStructuredSelection selection = (IStructuredSelection) configsViewer
 				.getSelection();

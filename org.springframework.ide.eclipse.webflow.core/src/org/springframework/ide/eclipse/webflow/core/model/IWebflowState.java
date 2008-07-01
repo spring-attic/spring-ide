@@ -77,5 +77,84 @@ public interface IWebflowState extends ITransitionableFrom {
 	IGlobalTransitions getGlobalTransitions();
 
 	void setGlobalTransitions(IGlobalTransitions inputMapper);
+	
+	void setAbstract(String abstrakt);
+	
+	String getAbstract();
+	
+	void addPersistenceContext();
+
+	void removePersistenceContext();
+
+	boolean hasPersitenceContext();
+	
+	/**
+	 * Gets the output attributes.
+	 * 
+	 * @return the output attributes
+	 */
+	List<IOutputAttribute> getOutputAttributes();
+
+	/**
+	 * Adds the output attribute.
+	 * 
+	 * @param action the action
+	 */
+	void addOutputAttribute(IOutputAttribute action);
+
+	/**
+	 * Adds the output attribute.
+	 * 
+	 * @param i the i
+	 * @param action the action
+	 */
+	void addOutputAttribute(IOutputAttribute action, int i);
+
+	/**
+	 * Removes the output attribute.
+	 * 
+	 * @param action the action
+	 */
+	void removeOutputAttribute(IOutputAttribute action);
+
+	/**
+	 * Removes the all output attribute.
+	 */
+	void removeAllOutputAttribute();
+	
+	/**
+	 * Gets the input attributes.
+	 * 
+	 * @return the input attributes
+	 */
+	List<IInputAttribute> getInputAttributes();
+
+	/**
+	 * Adds the input attribute.
+	 * 
+	 * @param action the action
+	 */
+	void addInputAttribute(IInputAttribute action);
+
+	/**
+	 * Adds the input attribute.
+	 * 
+	 * @param i the i
+	 * @param action the action
+	 */
+	void addInputAttribute(IInputAttribute action, int i);
+
+	/**
+	 * Removes the input attribute.
+	 * 
+	 * @param action the action
+	 */
+	void removeInputAttribute(IInputAttribute action);
+
+	/**
+	 * Removes the all input attribute.
+	 */
+	void removeAllInputAttribute();
+
 
 }

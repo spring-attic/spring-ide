@@ -93,6 +93,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.provisional.format.FormatProcessorXML;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
@@ -631,7 +632,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 
 	protected PaletteRoot getPaletteRoot() {
 		if (root == null)
-			root = WebflowEditorPaletteFactory.createPalette();
+			root = WebflowEditorPaletteFactory.createPalette(WebflowModelXmlUtils.isVersion1Flow(diagram));
 		return root;
 	}
 

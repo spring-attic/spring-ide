@@ -51,6 +51,11 @@ public class OutputMapper extends AbstractModelElement implements IOutputMapper 
 					attr.init(child, this);
 					this.outputAttributes.add(attr);
 				}
+				else if ("output".equals(child.getLocalName())) {
+					OutputAttribute attr = new OutputAttribute();
+					attr.init(child, this);
+					this.outputAttributes.add(attr);
+				}
 				else if ("mapping".equals(child.getLocalName())) {
 					Mapping map = new Mapping();
 					map.init(child, this);

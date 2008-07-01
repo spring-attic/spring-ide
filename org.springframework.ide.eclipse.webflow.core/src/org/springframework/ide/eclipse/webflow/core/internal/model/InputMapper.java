@@ -50,6 +50,11 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 					attr.init(child, this);
 					this.inputAttributes.add(attr);
 				}
+				else if ("input".equals(child.getLocalName())) {
+					InputAttribute attr = new InputAttribute();
+					attr.init(child, this);
+					this.inputAttributes.add(attr);
+				}
 				else if ("mapping".equals(child.getLocalName())) {
 					Mapping map = new Mapping();
 					map.init(child, this);

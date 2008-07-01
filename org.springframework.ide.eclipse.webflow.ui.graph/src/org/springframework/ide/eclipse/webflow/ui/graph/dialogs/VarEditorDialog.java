@@ -37,24 +37,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IVar;
 import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
-/**
- * 
- */
 @SuppressWarnings("restriction")
-public class VarEditorDialog extends TitleAreaDialog implements
-		IDialogValidator {
+public class VarEditorDialog extends TitleAreaDialog implements IDialogValidator {
 
-	/**
-	 * 
-	 */
 	private IVar property;
 
-	/**
-	 * 
-	 */
 	private SelectionListener buttonListener = new SelectionAdapter() {
 
 		public void widgetSelected(SelectionEvent e) {
@@ -62,95 +53,55 @@ public class VarEditorDialog extends TitleAreaDialog implements
 		}
 	};
 
-	/**
-	 * 
-	 */
 	private Label nameLabel;
 
-	/**
-	 * 
-	 */
 	private Text nameText;
 
-	/**
-	 * 
-	 */
 	private Label scopeLabel;
 
-	/**
-	 * 
-	 */
 	private Combo scopeText;
 
-	/**
-	 * 
-	 */
 	private Label beanLabel;
 
-	/**
-	 * 
-	 */
 	private Text beanText;
 
-	/**
-	 * 
-	 */
 	private Label classLabel;
 
-	/**
-	 * 
-	 */
 	private Text classText;
 
-	/**
-	 * 
-	 */
 	private Button okButton;
 
 	private Button browseTypeButton;
 
 	private Button browseBeanButton;
 
-	/**
-	 * @param parentShell
-	 * @param state
-	 */
 	public VarEditorDialog(Shell parentShell, IVar state) {
 		super(parentShell);
 		this.property = state;
 	}
 
-	/**
-	 * @param buttonId
-	 */
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
+			if (WebflowModelXmlUtils.isVersion1Flow(property)) {
+				this.property.setScope(trimString(this.scopeText.getText()));
+				this.property.setBean(trimString(this.beanText.getText()));
+			}
 			this.property.setName(trimString(this.nameText.getText()));
 			this.property.setClazz(trimString(this.classText.getText()));
-			this.property.setScope(trimString(this.scopeText.getText()));
-			this.property.setBean(trimString(this.beanText.getText()));
 		}
 		super.buttonPressed(buttonId);
 	}
 
-	/**
-	 * @param shell
-	 */
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(getShellTitle());
 		shell.setImage(getImage());
 	}
 
-	/**
-	 * @param parent
-	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		okButton = createButton(parent, IDialogConstants.OK_ID,
-				IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		// do this here because setting the text will set enablement on the
 		// ok button
 		nameText.setFocus();
@@ -164,10 +115,6 @@ public class VarEditorDialog extends TitleAreaDialog implements
 		this.validateInput();
 	}
 
-	/**
-	 * @param parent
-	 * @return
-	 */
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
 		setTitle(getTitle());
@@ -175,10 +122,6 @@ public class VarEditorDialog extends TitleAreaDialog implements
 		return contents;
 	}
 
-	/**
-	 * @param parent
-	 * @return
-	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite parentComposite = (Composite) super.createDialogArea(parent);
 		Composite composite = new Composite(parentComposite, SWT.NULL);
@@ -209,23 +152,25 @@ public class VarEditorDialog extends TitleAreaDialog implements
 
 		new Label(nameGroup, SWT.NONE);
 
-		scopeLabel = new Label(nameGroup, SWT.NONE);
-		scopeLabel.setText("Scope");
-		scopeText = new Combo(nameGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-		scopeText.setItems(new String[] { "", "request", "flash", "flow",
-				"conversation", "default" });
-		if (this.property != null && this.property.getScope() != null) {
-			this.scopeText.setText(this.property.getScope());
-		}
-		scopeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		scopeText.addModifyListener(new ModifyListener() {
-
-			public void modifyText(ModifyEvent e) {
-				validateInput();
+		if (WebflowModelXmlUtils.isVersion1Flow(property)) {
+			scopeLabel = new Label(nameGroup, SWT.NONE);
+			scopeLabel.setText("Scope");
+			scopeText = new Combo(nameGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+			scopeText.setItems(new String[] { "", "request", "flash", "flow", "conversation",
+					"default" });
+			if (this.property != null && this.property.getScope() != null) {
+				this.scopeText.setText(this.property.getScope());
 			}
-		});
+			scopeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			scopeText.addModifyListener(new ModifyListener() {
 
-		new Label(nameGroup, SWT.NONE);
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
+
+			new Label(nameGroup, SWT.NONE);
+		}
 
 		classLabel = new Label(nameGroup, SWT.NONE);
 		classLabel.setText("Class");
@@ -243,30 +188,29 @@ public class VarEditorDialog extends TitleAreaDialog implements
 
 		browseTypeButton = new Button(nameGroup, SWT.PUSH);
 		browseTypeButton.setText("...");
-		browseTypeButton.setLayoutData(new GridData(
-				GridData.HORIZONTAL_ALIGN_END));
+		browseTypeButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		browseTypeButton.addSelectionListener(buttonListener);
 
-		beanLabel = new Label(nameGroup, SWT.NONE);
-		beanLabel.setText("Bean");
-		beanText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
-		if (this.property != null && this.property.getBean() != null) {
-			this.beanText.setText(this.property.getBean());
-		}
-		beanText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		beanText.addModifyListener(new ModifyListener() {
-
-			public void modifyText(ModifyEvent e) {
-				validateInput();
+		if (WebflowModelXmlUtils.isVersion1Flow(property)) {
+			beanLabel = new Label(nameGroup, SWT.NONE);
+			beanLabel.setText("Bean");
+			beanText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+			if (this.property != null && this.property.getBean() != null) {
+				this.beanText.setText(this.property.getBean());
 			}
-		});
+			beanText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			beanText.addModifyListener(new ModifyListener() {
 
-		browseBeanButton = new Button(nameGroup, SWT.PUSH);
-		browseBeanButton.setText("...");
-		browseBeanButton.setLayoutData(new GridData(
-				GridData.HORIZONTAL_ALIGN_END));
-		browseBeanButton.addSelectionListener(buttonListener);
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
 
+			browseBeanButton = new Button(nameGroup, SWT.PUSH);
+			browseBeanButton.setText("...");
+			browseBeanButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+			browseBeanButton.addSelectionListener(buttonListener);
+		}
 		applyDialogFont(parentComposite);
 
 		return parentComposite;
@@ -316,9 +260,8 @@ public class VarEditorDialog extends TitleAreaDialog implements
 		if (button.equals(this.browseTypeButton)) {
 
 			IJavaSearchScope searchScope = SearchEngine.createWorkspaceScope();
-			TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(),
-					false, new ProgressMonitorDialog(getShell()), searchScope,
-					IJavaSearchConstants.CLASS);
+			TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(), false,
+					new ProgressMonitorDialog(getShell()), searchScope, IJavaSearchConstants.CLASS);
 
 			dialog.setMessage("Select an type"); //$NON-NLS-1$
 			dialog.setBlockOnOpen(true);
@@ -328,12 +271,11 @@ public class VarEditorDialog extends TitleAreaDialog implements
 				this.classText.setText(obj.getFullyQualifiedName());
 			}
 		}
-		else if (button.equals(this.browseBeanButton)){
-			ElementListSelectionDialog dialog = DialogUtils
-					.openBeanReferenceDialog(this.beanText.getText(), false);
+		else if (button.equals(this.browseBeanButton)) {
+			ElementListSelectionDialog dialog = DialogUtils.openBeanReferenceDialog(this.beanText
+					.getText(), false);
 			if (Dialog.OK == dialog.open()) {
-				this.beanText.setText(((IBean) dialog.getFirstResult())
-						.getElementName());
+				this.beanText.setText(((IBean) dialog.getFirstResult()).getElementName());
 			}
 		}
 		this.validateInput();

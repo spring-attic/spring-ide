@@ -102,4 +102,8 @@ public interface IState extends IAttributeEnabled {
 	 * @param parent the parent
 	 */
 	void createNew(IWebflowState parent);
+	
+	void setParent(String parent);
+	
+	String getParent();
 }

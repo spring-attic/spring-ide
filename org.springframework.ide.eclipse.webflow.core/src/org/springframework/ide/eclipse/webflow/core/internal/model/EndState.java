@@ -179,4 +179,12 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
 		children.addAll(getExceptionHandlers());
 		return children.toArray(new IModelElement[children.size()]);
 	}
+	
+	public void setCommit(String commit) {
+		setAttribute("commit", commit);
+	}
+	
+	public String getCommit() {
+		return getAttribute("commit");
+	}
 }

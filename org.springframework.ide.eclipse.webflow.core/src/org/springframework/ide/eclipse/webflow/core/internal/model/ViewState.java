@@ -62,6 +62,10 @@ public class ViewState extends AbstractTransitionableFrom implements
 					this.renderActions = new RenderActions();
 					this.renderActions.init(child, this);
 				}
+				else if ("on-render".equals(child.getLocalName())) {
+					this.renderActions = new RenderActions();
+					this.renderActions.init(child, this);
+				}
 			}
 		}
 	}
@@ -202,5 +206,29 @@ public class ViewState extends AbstractTransitionableFrom implements
 		children.addAll(getExceptionHandlers());
 		children.addAll(getOutputTransitions());
 		return children.toArray(new IModelElement[children.size()]);
+	}
+
+	public String getModel() {
+		return getAttribute("model");
+	}
+
+	public String getPopup() {
+		return getAttribute("popup");
+	}
+
+	public String getRedirect() {
+		return getAttribute("redirect");
+	}
+
+	public void setModel(String model) {
+		setAttribute("model", model);
+	}
+
+	public void setPopup(String popup) {
+		setAttribute("popup", popup);
+	}
+
+	public void setRedirect(String redirect) {
+		setAttribute("redirect", redirect);
 	}
 }

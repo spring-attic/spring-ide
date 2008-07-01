@@ -31,8 +31,8 @@ import org.w3c.dom.NodeList;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class EvaluateAction extends AbstractActionElement implements
-		IEvaluateAction, ICloneableModelElement<EvaluateAction> {
+public class EvaluateAction extends AbstractActionElement implements IEvaluateAction,
+		ICloneableModelElement<EvaluateAction> {
 
 	/**
 	 * 
@@ -78,8 +78,7 @@ public class EvaluateAction extends AbstractActionElement implements
 				IDOMNode child = (IDOMNode) children.item(i);
 				if ("evaluation-result".equals(child.getLocalName())) {
 					this.evaluationResult = new EvaluationResult();
-					((EvaluationResult) this.evaluationResult)
-							.init(child, this);
+					((EvaluationResult) this.evaluationResult).init(child, this);
 				}
 			}
 		}
@@ -114,8 +113,7 @@ public class EvaluateAction extends AbstractActionElement implements
 		}
 		this.evaluationResult = evaluationResult;
 		if (evaluationResult != null) {
-			WebflowModelXmlUtils.insertNode(evaluationResult.getNode(),
-					getNode());
+			WebflowModelXmlUtils.insertNode(evaluationResult.getNode(), getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}
@@ -167,8 +165,7 @@ public class EvaluateAction extends AbstractActionElement implements
 	public void applyCloneValues(EvaluateAction element) {
 		if (element != null) {
 			if (this.node.getParentNode() != null) {
-				this.parent.getNode()
-						.replaceChild(element.getNode(), this.node);
+				this.parent.getNode().replaceChild(element.getNode(), this.node);
 			}
 			setType(element.getType());
 			init(element.getNode(), parent);
@@ -201,13 +198,17 @@ public class EvaluateAction extends AbstractActionElement implements
 	 * @param parent the parent
 	 */
 	public void createNew(IWebflowModelElement parent) {
-		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
-				.createElement("evaluate-action");
+		IDOMNode node = null;
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("evaluate-action");
+		}
+		else {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("evaluate");
+		}
 		init(node, parent);
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			for (IAttribute state : getAttributes()) {
@@ -221,11 +222,27 @@ public class EvaluateAction extends AbstractActionElement implements
 			}
 		}
 	}
-	
+
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		children.addAll(getAttributes());
 		children.add(getEvaluationResult());
 		return children.toArray(new IModelElement[children.size()]);
+	}
+
+	public String getResult() {
+		return getAttribute("result");
+	}
+
+	public String getResultType() {
+		return getAttribute("result-type");
+	}
+
+	public void setResult(String result) {
+		setAttribute("result", result);
+	}
+
+	public void setResultType(String resultType) {
+		setAttribute("result-type", resultType);
 	}
 }

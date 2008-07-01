@@ -30,108 +30,57 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EvaluateAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EvaluationResult;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
-/**
- * 
- */
-public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
-		IDialogValidator {
+public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements IDialogValidator {
 
-	/**
-	 * 
-	 */
 	private EvaluateAction action;
 
-	/**
-	 * 
-	 */
 	private EvaluateAction actionClone;
 
-	/**
-	 * 
-	 */
 	private Label nameLabel;
 
-	/**
-	 * 
-	 */
 	private Text nameText;
 
-	/**
-	 * 
-	 */
 	private Label expressionLabel;
 
-	/**
-	 * 
-	 */
 	private Text expressionText;
 
-	/**
-	 * 
-	 */
 	private Button okButton;
 
-	/**
-	 * 
-	 */
 	private int LABEL_WIDTH = 70;
 
-	/**
-	 * 
-	 */
 	private IDialogValidator validator;
 
-	/**
-	 * 
-	 */
 	private PropertiesComposite properties;
 
-	/**
-	 * 
-	 */
 	private Combo scopeText;
 
-	/**
-	 * 
-	 */
 	private Label scopeLabel;
 
-	/**
-	 * 
-	 */
 	private Label resultNameLabel;
 
-	/**
-	 * 
-	 */
 	private Text resultNameText;
 
-	/**
-	 * 
-	 * 
-	 * @param parentShell 
-	 * @param state 
-	 * @param parent 
-	 */
-	public EvaluateActionPropertiesDialog(Shell parentShell,
-			IWebflowModelElement parent, EvaluateAction state) {
+	private Label resultLabel;
+
+	private Text resultText;
+
+	private Label resultTypeLabel;
+
+	private Text resultTypeText;
+
+	public EvaluateActionPropertiesDialog(Shell parentShell, IWebflowModelElement parent,
+			EvaluateAction state) {
 		super(parentShell);
 		this.action = state;
 		this.actionClone = this.action.cloneModelElement();
 
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param string 
-	 * 
-	 * @return 
-	 */
 	private String trimString(String string) {
 		if (string != null && string == "") {
 			string = null;
@@ -139,40 +88,46 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 		return string;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
-			this.actionClone.setName(trimString(this.nameText.getText()));
 			this.actionClone.setExpression(trimString(this.expressionText.getText()));
-			
-			if (trimString(this.scopeText.getText()) == null
-					&& trimString(this.resultNameText.getText()) == null) {
-				this.actionClone.setEvaluationResult(null);
+
+			if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+				this.actionClone.setName(trimString(this.nameText.getText()));
+				if (trimString(this.scopeText.getText()) == null
+						&& trimString(this.resultNameText.getText()) == null) {
+					this.actionClone.setEvaluationResult(null);
+				}
+				else if (this.action.getEvaluationResult() != null) {
+					this.actionClone.getEvaluationResult().setName(this.resultNameText.getText());
+					this.actionClone.getEvaluationResult().setScope(this.scopeText.getText());
+				}
+				else if (this.action.getEvaluationResult() == null) {
+					EvaluationResult result = new EvaluationResult();
+					result.createNew(actionClone);
+					this.actionClone.setEvaluationResult(result);
+					this.actionClone.getEvaluationResult().setName(this.resultNameText.getText());
+					this.actionClone.getEvaluationResult().setScope(this.scopeText.getText());
+				}
 			}
-			else if (this.action.getEvaluationResult() != null) {
-				this.actionClone.getEvaluationResult().setName(
-						this.resultNameText.getText());
-				this.actionClone.getEvaluationResult().setScope(
-						this.scopeText.getText());
+			else {
+				this.actionClone.setResult(trimString(resultText.getText()));
+				this.actionClone.setResultType(trimString(resultTypeText.getText()));
 			}
-			else if (this.action.getEvaluationResult() == null) {
-				EvaluationResult result = new EvaluationResult();
-				result.createNew(actionClone);
-				this.actionClone.setEvaluationResult(result);
-				this.actionClone.getEvaluationResult().setName(
-						this.resultNameText.getText());
-				this.actionClone.getEvaluationResult().setScope(
-						this.scopeText.getText());
-			}
-			
+
 			this.action.applyCloneValues(this.actionClone);
 		}
 		super.buttonPressed(buttonId);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
 	protected void configureShell(Shell shell) {
@@ -181,18 +136,21 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 		shell.setImage(getImage());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		okButton = createButton(parent, IDialogConstants.OK_ID,
-				IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		// do this here because setting the text will set enablement on the
 		// ok button
-		nameText.setFocus();
+		if (nameText != null) {
+			nameText.setFocus();
+		}
 		if (this.action != null && this.action.getName() != null) {
 			okButton.setEnabled(true);
 		}
@@ -203,8 +161,11 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 		this.validateInput();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
@@ -213,8 +174,11 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 		return contents;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite parentComposite = (Composite) super.createDialogArea(parent);
@@ -246,19 +210,22 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 		layout1.numColumns = 2;
 		layout1.marginWidth = 5;
 		nameGroup.setLayout(layout1);
-		nameLabel = new Label(nameGroup, SWT.NONE);
-		nameLabel.setText("Name");
-		nameText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
-		if (this.action != null && this.action.getName() != null) {
-			this.nameText.setText(this.action.getName());
-		}
-		nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		nameText.addModifyListener(new ModifyListener() {
 
-			public void modifyText(ModifyEvent e) {
-				validateInput();
+		if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+			nameLabel = new Label(nameGroup, SWT.NONE);
+			nameLabel.setText("Name");
+			nameText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+			if (this.action != null && this.action.getName() != null) {
+				this.nameText.setText(this.action.getName());
 			}
-		});
+			nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			nameText.addModifyListener(new ModifyListener() {
+
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
+		}
 
 		expressionLabel = new Label(nameGroup, SWT.NONE);
 		expressionLabel.setText("Expression");
@@ -274,57 +241,88 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 			}
 		});
 
-		Group groupMethodResult = new Group(groupActionType, SWT.NULL);
-		layoutAttMap = new GridLayout();
-		layoutAttMap.marginWidth = 3;
-		layoutAttMap.marginHeight = 3;
-		layoutAttMap.numColumns = 3;
-		layoutAttMap.marginWidth = 5;
-		groupMethodResult.setLayout(layoutAttMap);
-		groupMethodResult.setText(" Evaluation Result ");
-		groupMethodResult.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		if (!WebflowModelXmlUtils.isVersion1Flow(action)) {
 
-		resultNameLabel = new Label(groupMethodResult, SWT.NONE);
-		resultNameLabel.setText("Name");
-		resultNameText = new Text(groupMethodResult, SWT.SINGLE | SWT.BORDER);
-		if (this.action != null && this.action.getEvaluationResult() != null) {
-			this.resultNameText.setText(this.action.getEvaluationResult()
-					.getName());
-		}
-		resultNameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		resultNameText.addModifyListener(new ModifyListener() {
-
-			public void modifyText(ModifyEvent e) {
-				validateInput();
+			resultLabel = new Label(nameGroup, SWT.NONE);
+			resultLabel.setText("Result");
+			resultText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+			if (this.action != null && this.action.getResult() != null) {
+				this.resultText.setText(this.action.getResult());
 			}
-		});
+			resultText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			resultText.addModifyListener(new ModifyListener() {
 
-		new Label(groupMethodResult, SWT.NONE);
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
 
-		// Label field.
-		scopeLabel = new Label(groupMethodResult, SWT.NONE);
-		scopeLabel.setText("Scope");
-		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gridData.widthHint = LABEL_WIDTH;
-		scopeLabel.setLayoutData(gridData);
-
-		// Add the text box for action classname.
-		scopeText = new Combo(groupMethodResult, SWT.SINGLE | SWT.BORDER
-				| SWT.READ_ONLY);
-		scopeText.setItems(new String[] { "", "request", "flash", "flow",
-				"conversation", "default" });
-		if (this.action != null && this.action.getEvaluationResult() != null) {
-			scopeText.setText(this.action.getEvaluationResult().getScope());
-		}
-		scopeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		scopeText.addModifyListener(new ModifyListener() {
-
-			public void modifyText(ModifyEvent e) {
-				validator.validateInput();
+			resultTypeLabel = new Label(nameGroup, SWT.NONE);
+			resultTypeLabel.setText("Result type");
+			resultTypeText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+			if (this.action != null && this.action.getResultType() != null) {
+				this.resultTypeText.setText(this.action.getResultType());
 			}
-		});
+			resultTypeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			resultTypeText.addModifyListener(new ModifyListener() {
 
-		new Label(groupMethodResult, SWT.NONE);
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
+		}
+
+		if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+			Group groupMethodResult = new Group(groupActionType, SWT.NULL);
+			layoutAttMap = new GridLayout();
+			layoutAttMap.marginWidth = 3;
+			layoutAttMap.marginHeight = 3;
+			layoutAttMap.numColumns = 3;
+			layoutAttMap.marginWidth = 5;
+			groupMethodResult.setLayout(layoutAttMap);
+			groupMethodResult.setText(" Evaluation Result ");
+			groupMethodResult.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			resultNameLabel = new Label(groupMethodResult, SWT.NONE);
+			resultNameLabel.setText("Name");
+			resultNameText = new Text(groupMethodResult, SWT.SINGLE | SWT.BORDER);
+			if (this.action != null && this.action.getEvaluationResult() != null) {
+				this.resultNameText.setText(this.action.getEvaluationResult().getName());
+			}
+			resultNameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			resultNameText.addModifyListener(new ModifyListener() {
+
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
+
+			new Label(groupMethodResult, SWT.NONE);
+
+			// Label field.
+			scopeLabel = new Label(groupMethodResult, SWT.NONE);
+			scopeLabel.setText("Scope");
+			GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+			gridData.widthHint = LABEL_WIDTH;
+			scopeLabel.setLayoutData(gridData);
+
+			// Add the text box for action classname.
+			scopeText = new Combo(groupMethodResult, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+			scopeText.setItems(new String[] { "", "request", "flash", "flow", "conversation",
+					"default" });
+			if (this.action != null && this.action.getEvaluationResult() != null) {
+				scopeText.setText(this.action.getEvaluationResult().getScope());
+			}
+			scopeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			scopeText.addModifyListener(new ModifyListener() {
+
+				public void modifyText(ModifyEvent e) {
+					validator.validateInput();
+				}
+			});
+
+			new Label(groupMethodResult, SWT.NONE);
+		}
 
 		item1.setControl(groupActionType);
 
@@ -340,7 +338,7 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected Image getImage() {
 		return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_ACTION);
@@ -349,7 +347,7 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getMessage() {
 		return "Enter the details for the Evaluate action";
@@ -358,7 +356,7 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getName() {
 		return this.nameText.getText();
@@ -367,7 +365,7 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getShellTitle() {
 		return "Evaluate Action";
@@ -376,7 +374,7 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getTitle() {
 		return "Evaluate Action properties";
@@ -385,14 +383,17 @@ public class EvaluateActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @param error 
+	 * @param error
 	 */
 	protected void showError(String error) {
 		super.setErrorMessage(error);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
 	 */
 	public void validateInput() {
 		boolean error = false;

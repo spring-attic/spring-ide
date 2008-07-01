@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.webflow.core.internal.model.DecisionState;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EntryActions;
 import org.springframework.ide.eclipse.webflow.core.internal.model.ExitActions;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
@@ -52,133 +53,62 @@ import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.Webflow
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelDecorator;
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelProvider;
 
-/**
- * 
- */
 public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
 		IDialogValidator {
 
-	/**
-	 * 
-	 */
 	private class IfContentProvider implements IStructuredContentProvider {
 
-		/**
-		 * 
-		 */
 		private IDecisionState project;
 
-		/**
-		 * 
-		 * 
-		 * @param project 
-		 */
 		public IfContentProvider(IDecisionState project) {
 			this.project = project;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-		 */
 		public void dispose() {
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-		 */
 		public Object[] getElements(Object obj) {
 			return project.getIfs().toArray();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-		 */
 		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private IDecisionState decisionState;
 
-	/**
-	 * 
-	 */
 	private IDecisionState decisionStateClone;
 
-	/**
-	 * 
-	 */
 	private Label nameLabel;
 
-	/**
-	 * 
-	 */
 	private Text nameText;
 
-	/**
-	 * 
-	 */
 	private Button okButton;
 
-	/**
-	 * 
-	 */
 	private IWebflowModelElement parent;
 
-	/**
-	 * 
-	 */
 	private PropertiesComposite properties;
 
-	/**
-	 * 
-	 */
 	private ActionComposite entryActionsComposite;
 
-	/**
-	 * 
-	 */
 	private ActionComposite exitActionsComposite;
 
-	/**
-	 * 
-	 */
 	private ExceptionHandlerComposite exceptionHandlerComposite;
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> entryActions;
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> exitActions;
 
-	/**
-	 * 
-	 */
 	private TableViewer configsViewer;
 
-	/**
-	 * 
-	 */
 	private Button editButton;
 
-	/**
-	 * 
-	 */
 	private List<org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler> exceptionHandler;
 
-	/**
-	 * 
-	 * 
-	 * @param parentShell 
-	 * @param state 
-	 * @param parent 
-	 */
+	private Label parentLabel;
+
+	private Text parentText;
+
 	public DecisionStatePropertiesDialog(Shell parentShell,
 			IWebflowModelElement parent, IDecisionState state) {
 		super(parentShell);
@@ -216,13 +146,13 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
-	 */
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 			this.decisionStateClone.setId(trimString(getId()));
-
+			if (!WebflowModelXmlUtils.isVersion1Flow(decisionState)) {
+				this.decisionStateClone.setParent(trimString(getParent()));
+			}
+			
 			if (decisionState.getEntryActions() == null
 					&& this.entryActions.size() > 0) {
 				EntryActions entry = new EntryActions();
@@ -365,7 +295,23 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
 				validateInput();
 			}
 		});
+		
+		if (!WebflowModelXmlUtils.isVersion1Flow(decisionState)) {
+			parentLabel = new Label(nameGroup, SWT.NONE);
+			parentLabel.setText("Parent state id");
+			parentText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+			if (this.decisionState != null && this.decisionState.getParent() != null) {
+				this.parentText.setText(this.decisionState.getParent());
+			}
+			parentText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			parentText.addModifyListener(new ModifyListener() {
 
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
+		}
+		
 		Group groupIfsType = new Group(groupActionType, SWT.NULL);
 		layoutAttMap = new GridLayout();
 		layoutAttMap.marginWidth = 3;
@@ -457,77 +403,39 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
 		return parentComposite;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return 
-	 */
 	public String getId() {
 		return this.nameText.getText();
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return 
-	 */
+	public String getParent() {
+		return this.parentText.getText();
+	}
+
 	protected Image getImage() {
 		return WebflowUIImages
 				.getImage(WebflowUIImages.IMG_OBJS_DECISION_STATE);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return 
-	 */
 	protected String getMessage() {
 		return "Enter the details for the decision state";
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return 
-	 */
 	public IWebflowModelElement getModelElementParent() {
 		return this.parent;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return 
-	 */
 	protected String getShellTitle() {
 		return "Decision State";
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return 
-	 */
 	protected String getTitle() {
 		return "Decision State properties";
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param error 
-	 */
 	protected void showError(String error) {
 		super.setErrorMessage(error);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param string 
-	 * 
-	 * @return 
-	 */
 	public String trimString(String string) {
 		if (string != null && string == "") {
 			string = null;
@@ -535,9 +443,6 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
 		return string;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
-	 */
 	public void validateInput() {
 		String id = this.nameText.getText();
 		boolean error = false;
@@ -566,9 +471,6 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
 		}
 	}
 
-	/**
-	 * 
-	 */
 	protected void handleTableSelectionChanged() {
 		IStructuredSelection selection = (IStructuredSelection) configsViewer
 				.getSelection();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,58 +17,44 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.webflow.core.model.IImport;
+import org.springframework.ide.eclipse.webflow.core.model.ISecured;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 
 /**
- * 
- * 
  * @author Christian Dupuis
- * @since 2.0
+ * @since 2.1.0
  */
 @SuppressWarnings("restriction")
-public class Import extends AbstractModelElement implements IImport {
+public class Secured extends AbstractModelElement implements ISecured {
 
-	/**
-	 * Gets the resource.
-	 * 
-	 * @return the resource
-	 */
-	public String getResource() {
-		return getAttribute("resource");
+	public String getMatchType() {
+		return getAttribute("match-type");
 	}
 
-	/**
-	 * Sets the resource.
-	 * 
-	 * @param resource the resource
-	 */
-	public void setResource(String resource) {
-		setAttribute("resource", resource);
+	public void setMatchType(String matchType) {
+		setAttribute("match-type", matchType);
+	}
+
+	public void createNew(IWebflowModelElement parent) {
+		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("secured");
+		init(node, parent);
 	}
 
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
 	}
 
-	/**
-	 * Creates the new.
-	 * 
-	 * @param parent the parent
-	 */
-	public void createNew(IWebflowModelElement parent) {
-		IDOMNode node = null;
-		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
-			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("import");
-		}
-		else {
-			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("bean-import");
-		}
-		init(node, parent);
-	}
-
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		return children.toArray(new IModelElement[children.size()]);
 	}
+
+	public String getRoleAttributes() {
+		return getAttribute("attributes");
+	}
+
+	public void setRoleAttributes(String attributes) {
+		setAttribute("attributes",  attributes);
+	}
+
 }

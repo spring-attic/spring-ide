@@ -61,6 +61,12 @@ public class ActionState extends AbstractTransitionableFrom implements
 					action.setType(IActionElement.ACTION_TYPE.ACTION);
 					this.actions.add(action);
 				}
+				else if ("render".equals(child.getLocalName())) {
+					Action action = new Action();
+					action.init(child, this);
+					action.setType(IActionElement.ACTION_TYPE.ACTION);
+					this.actions.add(action);
+				}
 				else if ("bean-action".equals(child.getLocalName())) {
 					BeanAction action = new BeanAction();
 					action.init(child, this);
@@ -68,6 +74,12 @@ public class ActionState extends AbstractTransitionableFrom implements
 					this.actions.add(action);
 				}
 				else if ("evaluate-action".equals(child.getLocalName())) {
+					EvaluateAction action = new EvaluateAction();
+					action.init(child, this);
+					action.setType(IActionElement.ACTION_TYPE.ACTION);
+					this.actions.add(action);
+				}
+				else if ("evaluate".equals(child.getLocalName())) {
 					EvaluateAction action = new EvaluateAction();
 					action.init(child, this);
 					action.setType(IActionElement.ACTION_TYPE.ACTION);

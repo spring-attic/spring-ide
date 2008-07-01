@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
@@ -47,8 +48,7 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 /**
  * 
  */
-public class ActionPropertiesDialog extends TitleAreaDialog implements
-		IDialogValidator {
+public class ActionPropertiesDialog extends TitleAreaDialog implements IDialogValidator {
 
 	/**
 	 * 
@@ -135,8 +135,7 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	 * @param state
 	 * @param parent
 	 */
-	public ActionPropertiesDialog(Shell parentShell,
-			IWebflowModelElement parent, Action state) {
+	public ActionPropertiesDialog(Shell parentShell, IWebflowModelElement parent, Action state) {
 		super(parentShell);
 		this.action = state;
 		this.actionClone = this.action.cloneModelElement();
@@ -156,13 +155,16 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 			this.actionClone.setName(trimString(this.nameText.getText()));
-			this.actionClone.setMethod(trimString(this.methodText.getText()));
-			this.actionClone.setBean(trimString(this.beanText.getText()));
+			if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+				this.actionClone.setMethod(trimString(this.methodText.getText()));
+				this.actionClone.setBean(trimString(this.beanText.getText()));
+			}
 			this.action.applyCloneValues(this.actionClone);
 		}
 		super.buttonPressed(buttonId);
@@ -170,6 +172,7 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
 	protected void configureShell(Shell shell) {
@@ -180,14 +183,14 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		okButton = createButton(parent, IDialogConstants.OK_ID,
-				IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		// do this here because setting the text will set enablement on the
 		// ok button
 		nameText.setFocus();
@@ -203,7 +206,9 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
@@ -214,7 +219,9 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 * 
+	 * @see
+	 * org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite parentComposite = (Composite) super.createDialogArea(parent);
@@ -236,7 +243,12 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 		layoutAttMap.marginWidth = 3;
 		layoutAttMap.marginHeight = 3;
 		groupActionType.setLayout(layoutAttMap);
-		groupActionType.setText(" Action ");
+		if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+			groupActionType.setText(" Action ");
+		}
+		else {
+			groupActionType.setText(" Render ");
+		}
 		GridData grid = new GridData();
 		groupActionType.setLayoutData(grid);
 
@@ -247,7 +259,12 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 		layout1.marginWidth = 5;
 		nameGroup.setLayout(layout1);
 		nameLabel = new Label(nameGroup, SWT.NONE);
-		nameLabel.setText("Name");
+		if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+			nameLabel.setText("Name");
+		}
+		else {
+			nameLabel.setText("Fragments");
+		}
 		nameText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
 		if (this.action != null && this.action.getName() != null) {
 			this.nameText.setText(this.action.getName());
@@ -262,84 +279,78 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
 		new Label(nameGroup, SWT.NONE);
 
-		// Label field.
-		beanLabel = new Label(nameGroup, SWT.NONE);
-		beanLabel.setText("Bean");
-		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gridData.widthHint = LABEL_WIDTH;
-		beanLabel.setLayoutData(gridData);
+		if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+			// Label field.
+			beanLabel = new Label(nameGroup, SWT.NONE);
+			beanLabel.setText("Bean");
+			GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+			gridData.widthHint = LABEL_WIDTH;
+			beanLabel.setLayoutData(gridData);
 
-		// Create a decorated field with a required field decoration.
-		DecoratedField beanField = new DecoratedField(nameGroup, SWT.SINGLE
-				| SWT.BORDER, new TextControlCreator());
-		FieldDecoration requiredFieldIndicator = FieldDecorationRegistry
-				.getDefault().getFieldDecoration(
-						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
-		beanField.addFieldDecoration(requiredFieldIndicator,
-				SWT.TOP | SWT.LEFT, true);
-		beanText = (Text) beanField.getControl();
-		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		beanField.getLayoutControl().setLayoutData(data);
+			// Create a decorated field with a required field decoration.
+			DecoratedField beanField = new DecoratedField(nameGroup, SWT.SINGLE | SWT.BORDER,
+					new TextControlCreator());
+			FieldDecoration requiredFieldIndicator = FieldDecorationRegistry.getDefault()
+					.getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+			beanField.addFieldDecoration(requiredFieldIndicator, SWT.TOP | SWT.LEFT, true);
+			beanText = (Text) beanField.getControl();
+			GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			beanField.getLayoutControl().setLayoutData(data);
 
-		if (this.action != null && this.action.getBean() != null) {
-			beanText.setText(this.action.getBean());
-		}
-		beanText.addModifyListener(new ModifyListener() {
+			if (this.action != null && this.action.getBean() != null) {
+				beanText.setText(this.action.getBean());
+			}
+			beanText.addModifyListener(new ModifyListener() {
 
-			public void modifyText(ModifyEvent e) {
-				if (validator != null) {
-					validator.validateInput();
+				public void modifyText(ModifyEvent e) {
+					if (validator != null) {
+						validator.validateInput();
+					}
 				}
+			});
+
+			DialogUtils.attachContentAssist(beanText, WebflowUtils.getBeansFromEditorInput()
+					.toArray());
+
+			browseBeanButton = new Button(nameGroup, SWT.PUSH);
+			browseBeanButton.setText("...");
+			browseBeanButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+			browseBeanButton.addSelectionListener(buttonListener);
+
+			methodLabel = new Label(nameGroup, SWT.NONE);
+			methodLabel.setText("Method");
+
+			// Create a decorated field with a required field decoration.
+			DecoratedField methodField = new DecoratedField(nameGroup, SWT.SINGLE | SWT.BORDER,
+					new TextControlCreator());
+			FieldDecoration requiredFieldIndicator1 = FieldDecorationRegistry.getDefault()
+					.getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+			methodField.addFieldDecoration(requiredFieldIndicator1, SWT.TOP | SWT.LEFT, true);
+			methodText = (Text) methodField.getControl();
+			data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			methodField.getLayoutControl().setLayoutData(data);
+
+			if (this.action != null && this.action.getMethod() != null) {
+				this.methodText.setText(this.action.getMethod());
 			}
-		});
+			methodText.addModifyListener(new ModifyListener() {
 
-		DialogUtils.attachContentAssist(beanText, WebflowUtils
-				.getBeansFromEditorInput().toArray());
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
 
-		browseBeanButton = new Button(nameGroup, SWT.PUSH);
-		browseBeanButton.setText("...");
-		browseBeanButton.setLayoutData(new GridData(
-				GridData.HORIZONTAL_ALIGN_END));
-		browseBeanButton.addSelectionListener(buttonListener);
+			DialogUtils.attachContentAssist(methodText, WebflowUtils.getActionMethods(
+					this.actionClone.getNode()).toArray());
 
-		methodLabel = new Label(nameGroup, SWT.NONE);
-		methodLabel.setText("Method");
-
-		// Create a decorated field with a required field decoration.
-		DecoratedField methodField = new DecoratedField(nameGroup, SWT.SINGLE
-				| SWT.BORDER, new TextControlCreator());
-		FieldDecoration requiredFieldIndicator1 = FieldDecorationRegistry
-				.getDefault().getFieldDecoration(
-						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
-		methodField.addFieldDecoration(requiredFieldIndicator1, SWT.TOP
-				| SWT.LEFT, true);
-		methodText = (Text) methodField.getControl();
-		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		methodField.getLayoutControl().setLayoutData(data);
-
-		if (this.action != null && this.action.getMethod() != null) {
-			this.methodText.setText(this.action.getMethod());
+			browseMethodButton = new Button(nameGroup, SWT.PUSH);
+			browseMethodButton.setText("...");
+			browseMethodButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+			browseMethodButton.addSelectionListener(buttonListener);
 		}
-		methodText.addModifyListener(new ModifyListener() {
-
-			public void modifyText(ModifyEvent e) {
-				validateInput();
-			}
-		});
-
-		DialogUtils.attachContentAssist(methodText, WebflowUtils
-				.getActionMethods(this.actionClone.getNode()).toArray());
-
-		browseMethodButton = new Button(nameGroup, SWT.PUSH);
-		browseMethodButton.setText("...");
-		browseMethodButton.setLayoutData(new GridData(
-				GridData.HORIZONTAL_ALIGN_END));
-		browseMethodButton.addSelectionListener(buttonListener);
-
 		// add the indent after getting the decorated field
-		data = new GridData(GridData.FILL_HORIZONTAL);
-		data.horizontalIndent = FieldDecorationRegistry.getDefault()
-				.getMaximumDecorationWidth();
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		data.horizontalIndent = FieldDecorationRegistry.getDefault().getMaximumDecorationWidth();
 		nameText.setLayoutData(data);
 
 		item1.setControl(groupActionType);
@@ -364,7 +375,12 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	 * @return
 	 */
 	protected String getMessage() {
-		return "Enter the details for the action";
+		if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+			return "Enter the details for the action";
+		}
+		else {
+			return "Enter the details for the render action";
+		}
 	}
 
 	/**
@@ -378,14 +394,24 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	 * @return
 	 */
 	protected String getShellTitle() {
-		return "Action";
+		if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+			return "Action";
+		}
+		else {
+			return "Render";
+		}
 	}
 
 	/**
 	 * @return
 	 */
 	protected String getTitle() {
-		return "Action properties";
+		if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+			return "Action properties";
+		}
+		else {
+			return "Render properties";
+		}
 	}
 
 	/**
@@ -397,7 +423,9 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
+	 * 
+	 * @see
+	 * org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
 	 */
 	public void validateInput() {
 		boolean error = false;
@@ -418,19 +446,17 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	private void handleButtonPressed(Button button) {
 
 		if (button.equals(browseBeanButton)) {
-			ElementListSelectionDialog dialog = DialogUtils
-					.openBeanReferenceDialog(this.beanText.getText(), false);
+			ElementListSelectionDialog dialog = DialogUtils.openBeanReferenceDialog(this.beanText
+					.getText(), false);
 			if (Dialog.OK == dialog.open()) {
-				this.beanText.setText(((IBean) dialog.getFirstResult())
-						.getElementName());
+				this.beanText.setText(((IBean) dialog.getFirstResult()).getElementName());
 			}
 		}
 		else if (button.equals(browseMethodButton)) {
 			ElementListSelectionDialog dialog = DialogUtils
 					.openActionMethodReferenceDialog(this.actionClone.getNode());
 			if (Dialog.OK == dialog.open()) {
-				this.methodText.setText(((IMethod) dialog.getFirstResult())
-						.getElementName());
+				this.methodText.setText(((IMethod) dialog.getFirstResult()).getElementName());
 			}
 		}
 	}

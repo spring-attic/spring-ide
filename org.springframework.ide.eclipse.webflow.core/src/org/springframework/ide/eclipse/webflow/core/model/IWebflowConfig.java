@@ -34,5 +34,5 @@ public interface IWebflowConfig extends IWebflowModelElement {
 	void setName(String name);
 
 	String getName();
-
+	
 }

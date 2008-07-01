@@ -59,5 +59,9 @@ public interface ISet extends IAction {
 	 * @return the attribute
 	 */
 	String getAttribute();
+	
+	String getSetType();
+	
+	void setSetType(String type);
 
 }

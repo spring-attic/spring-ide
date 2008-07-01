@@ -40,4 +40,8 @@ public interface ITransitionableFrom extends IState {
 	 * @param transition the transition
 	 */
 	void removeOutputTransition(ITransition transition);
+	
+	void setSecured(ISecured secured);
+	
+	ISecured getSecured();
 }

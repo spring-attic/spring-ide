@@ -26,63 +26,28 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.springframework.ide.eclipse.webflow.core.internal.model.Attribute;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Variable;
-import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
-import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IVar;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
-/**
- * 
- */
 @SuppressWarnings("unused")
 public class VarComposite {
 
-	/**
-	 * 
-	 */
 	private IWebflowState state;
 
-	/**
-	 * 
-	 */
 	private Button removeButton;
 
-	/**
-	 * 
-	 */
 	private Button addButton;
 
-	/**
-	 * 
-	 */
 	private Button editButton;
 
-	/**
-	 * 
-	 */
 	private TableViewer configsViewer;
 
-	/**
-	 * 
-	 */
 	private IDialogValidator validator;
 
-	/**
-	 * 
-	 */
 	private Shell parentShell;
 
-	/**
-	 * 
-	 * 
-	 * @param item 
-	 * @param parentShell 
-	 * @param validator 
-	 * @param state 
-	 */
 	public VarComposite(IDialogValidator validator, TabItem item,
 			Shell parentShell, IWebflowState state) {
 		this.state = state;
@@ -93,13 +58,6 @@ public class VarComposite {
 		this.parentShell = parentShell;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param parent 
-	 * 
-	 * @return 
-	 */
 	protected Control createDialogArea(Composite parent) {
 		Group groupPropertyType = new Group(parent, SWT.NULL);
 		GridLayout layoutPropMap = new GridLayout();

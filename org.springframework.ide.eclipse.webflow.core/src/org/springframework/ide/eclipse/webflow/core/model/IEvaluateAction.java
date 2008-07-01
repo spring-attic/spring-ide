@@ -11,8 +11,6 @@
 package org.springframework.ide.eclipse.webflow.core.model;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -59,4 +57,13 @@ public interface IEvaluateAction extends IAction {
 	 * @return the evaluation result
 	 */
 	IEvaluationResult getEvaluationResult();
+	
+	void setResult(String result);
+	
+	String getResult();
+	
+	void setResultType(String resultType);
+	
+	String getResultType();
+	
 }

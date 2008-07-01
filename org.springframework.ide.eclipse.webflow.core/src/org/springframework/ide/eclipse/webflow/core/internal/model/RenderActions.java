@@ -27,8 +27,7 @@ import org.w3c.dom.NodeList;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class RenderActions extends AbstractModelElement implements
-		IRenderActions {
+public class RenderActions extends AbstractModelElement implements IRenderActions {
 
 	private List<IActionElement> renderActions = null;
 
@@ -47,6 +46,12 @@ public class RenderActions extends AbstractModelElement implements
 					action.setType(IActionElement.ACTION_TYPE.RENDER_ACTION);
 					this.renderActions.add(action);
 				}
+				else if ("render".equals(child.getLocalName())) {
+					Action action = new Action();
+					action.init(child, this);
+					action.setType(IActionElement.ACTION_TYPE.RENDER_ACTION);
+					this.renderActions.add(action);
+				}
 				else if ("bean-action".equals(child.getLocalName())) {
 					BeanAction action = new BeanAction();
 					action.init(child, this);
@@ -54,6 +59,12 @@ public class RenderActions extends AbstractModelElement implements
 					this.renderActions.add(action);
 				}
 				else if ("evaluate-action".equals(child.getLocalName())) {
+					EvaluateAction action = new EvaluateAction();
+					action.init(child, this);
+					action.setType(IActionElement.ACTION_TYPE.RENDER_ACTION);
+					this.renderActions.add(action);
+				}
+				else if ("evaluate".equals(child.getLocalName())) {
 					EvaluateAction action = new EvaluateAction();
 					action.init(child, this);
 					action.setType(IActionElement.ACTION_TYPE.RENDER_ACTION);
@@ -73,8 +84,8 @@ public class RenderActions extends AbstractModelElement implements
 		if (!this.renderActions.contains(action)) {
 			this.renderActions.add(action);
 			WebflowModelXmlUtils.insertNode(action.getNode(), node);
-			super.firePropertyChange(ADD_CHILDREN, new Integer(
-					this.renderActions.indexOf(action)), action);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.renderActions.indexOf(action)),
+					action);
 			parent.fireStructureChange(MOVE_CHILDREN, this);
 		}
 	}
@@ -83,8 +94,7 @@ public class RenderActions extends AbstractModelElement implements
 		if (!this.renderActions.contains(action)) {
 			if (this.renderActions.size() > i) {
 				IActionElement ref = this.renderActions.get(i);
-				WebflowModelXmlUtils.insertBefore(action.getNode(), ref
-						.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
 			}
 			else {
 				WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -109,8 +119,13 @@ public class RenderActions extends AbstractModelElement implements
 	}
 
 	public void createNew(IWebflowModelElement parent) {
-		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
-				.createElement("render-actions");
+		IDOMNode node = null;
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("render-actions");
+		}
+		else {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("on-render");
+		}
 		init(node, parent);
 	}
 
@@ -121,8 +136,7 @@ public class RenderActions extends AbstractModelElement implements
 		this.renderActions = new ArrayList<IActionElement>();
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			for (IActionElement state : getRenderActions()) {
@@ -133,7 +147,7 @@ public class RenderActions extends AbstractModelElement implements
 			}
 		}
 	}
-	
+
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		children.addAll(getRenderActions());

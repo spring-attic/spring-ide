@@ -16,6 +16,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IAction;
 import org.springframework.ide.eclipse.webflow.core.model.IActionState;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
@@ -42,65 +43,56 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * @author Christian Dupuis
- * @since 2.0 
+ * @since 2.0
  */
 public class WebflowModelLabelProvider extends LabelProvider {
 
 	/**
 	 * 
 	 */
-	private final BeansModelLabelProvider BEANS_LABEL_PROVIDER = new BeansModelLabelProvider(
-			true);
+	private final BeansModelLabelProvider BEANS_LABEL_PROVIDER = new BeansModelLabelProvider(true);
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 	 */
 	public Image getImage(Object obj) {
 		if (obj instanceof IActionState) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_ACTION_STATE);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_ACTION_STATE);
 		}
 		else if (obj instanceof IViewState) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_VIEW_STATE);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_VIEW_STATE);
 		}
 		else if (obj instanceof IEndState) {
 			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_END_STATE);
 		}
 		else if (obj instanceof ISubflowState) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_SUBFLOW_STATE);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_SUBFLOW_STATE);
 		}
 		else if (obj instanceof IBeanAction) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_BEAN_ACTION);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_BEAN_ACTION);
 		}
 		else if (obj instanceof ISet) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_SET_ACTION);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_SET_ACTION);
 		}
 		else if (obj instanceof IEvaluateAction) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION);
 		}
 		else if (obj instanceof IAction) {
 			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_ACTION);
 		}
 		else if (obj instanceof IAttributeMapper) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_ATTRIBUTE_MAPPER);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_ATTRIBUTE_MAPPER);
 		}
 		else if (obj instanceof IDecisionState) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_DECISION_STATE);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_DECISION_STATE);
 		}
 		else if (obj instanceof IIf) {
 			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_IF);
 		}
 		else if (obj instanceof IAttribute) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_PROPERTIES);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_PROPERTIES);
 		}
 		else if (obj instanceof IBean) {
 			return BEANS_LABEL_PROVIDER.getImage(obj);
@@ -115,21 +107,20 @@ public class WebflowModelLabelProvider extends LabelProvider {
 			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 		}
 		else if (obj instanceof IExceptionHandler) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_EXCEPTION_HANDLER);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_EXCEPTION_HANDLER);
 		}
 		else if (obj instanceof IWebflowState) {
 			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 		}
 		else if (obj instanceof IStateTransition) {
-			return WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_TRANSITION);
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_TRANSITION);
 		}
 		return null;
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
 	public String getText(Object element) {
@@ -146,27 +137,32 @@ public class WebflowModelLabelProvider extends LabelProvider {
 	 * 
 	 * @return
 	 */
-	public String getText(Object element, boolean showElementType,
-			boolean showAdditionalInfo, boolean showError) {
+	public String getText(Object element, boolean showElementType, boolean showAdditionalInfo,
+			boolean showError) {
 		StringBuffer buf = new StringBuffer();
 		if (element instanceof IState) {
 			buf.append(((IState) element).getId());
 		}
 		else if (element instanceof Action) {
 			Action action = (Action) element;
-			if (action.getName() != null) {
-				buf.append(action.getName());
-				buf.append(": ");
-			}
-			if (action.getBean() != null) {
-				buf.append(action.getBean());
-			}
-			if (action.getMethod() != null) {
-				buf.append(".");
-				buf.append(action.getMethod());
-				if (action.getMethod().lastIndexOf("(") == -1) {
-					buf.append("()");
+			if (WebflowModelXmlUtils.isVersion1Flow(action)) {
+				if (action.getName() != null) {
+					buf.append(action.getName());
+					buf.append(": ");
 				}
+				if (action.getBean() != null) {
+					buf.append(action.getBean());
+				}
+				if (action.getMethod() != null) {
+					buf.append(".");
+					buf.append(action.getMethod());
+					if (action.getMethod().lastIndexOf("(") == -1) {
+						buf.append("()");
+					}
+				}
+			}
+			else {
+				buf.append("fragments: ").append(action.getName());
 			}
 		}
 		else if (element instanceof BeanAction) {
@@ -265,8 +261,15 @@ public class WebflowModelLabelProvider extends LabelProvider {
 			}
 			if (element instanceof ISubflowState) {
 				ISubflowState state = (ISubflowState) element;
-				if (state.getFlow() != null) {
-					buf.append("\nFlow: " + state.getFlow());
+				if (WebflowModelXmlUtils.isVersion1Flow(state)) {
+					if (state.getFlow() != null) {
+						buf.append("\nFlow: " + state.getFlow());
+					}
+				}
+				else {
+					if (state.getFlow() != null) {
+						buf.append("\nSubflow: " + state.getFlow());
+					}
 				}
 			}
 			if (element instanceof IEndState) {
@@ -338,10 +341,9 @@ public class WebflowModelLabelProvider extends LabelProvider {
 			}
 			buf.append("]");
 		}
-		
+
 		if (showError) {
-			buf.append(WebflowUtils
-					.getErrorTooltip((IWebflowModelElement) element));
+			buf.append(WebflowUtils.getErrorTooltip((IWebflowModelElement) element));
 		}
 
 		return buf.toString();

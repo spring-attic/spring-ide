@@ -28,8 +28,7 @@ import org.w3c.dom.NodeList;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public abstract class AbstractState extends AbstractModelElement implements
-		IState {
+public abstract class AbstractState extends AbstractModelElement implements IState {
 
 	/**
 	 * The entry actions.
@@ -69,6 +68,14 @@ public abstract class AbstractState extends AbstractModelElement implements
 						((EntryActions) this.entryActions).init(child, this);
 					}
 					else if ("exit-actions".equals(child.getLocalName())) {
+						this.exitActions = new ExitActions();
+						((ExitActions) this.exitActions).init(child, this);
+					}
+					else if ("on-entry".equals(child.getLocalName())) {
+						this.entryActions = new EntryActions();
+						((EntryActions) this.entryActions).init(child, this);
+					}
+					else if ("on-exit".equals(child.getLocalName())) {
 						this.exitActions = new ExitActions();
 						((ExitActions) this.exitActions).init(child, this);
 					}
@@ -169,8 +176,8 @@ public abstract class AbstractState extends AbstractModelElement implements
 		if (!this.exceptionHandler.contains(action)) {
 			this.exceptionHandler.add(action);
 			WebflowModelXmlUtils.insertNode(action.getNode(), getNode());
-			super.firePropertyChange(ADD_CHILDREN, new Integer(
-					this.exceptionHandler.indexOf(action)), action);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.exceptionHandler
+					.indexOf(action)), action);
 		}
 	}
 
@@ -184,8 +191,8 @@ public abstract class AbstractState extends AbstractModelElement implements
 		if (!this.exceptionHandler.contains(action)) {
 			this.exceptionHandler.add(i, action);
 			WebflowModelXmlUtils.insertNode(action.getNode(), getNode());
-			super.firePropertyChange(ADD_CHILDREN, new Integer(
-					this.exceptionHandler.indexOf(action)), action);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.exceptionHandler
+					.indexOf(action)), action);
 		}
 	}
 
@@ -198,8 +205,8 @@ public abstract class AbstractState extends AbstractModelElement implements
 		if (this.exceptionHandler.contains(action)) {
 			this.exceptionHandler.remove(action);
 			getNode().removeChild(action.getNode());
-			super.firePropertyChange(ADD_CHILDREN, new Integer(
-					this.exceptionHandler.indexOf(action)), action);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.exceptionHandler
+					.indexOf(action)), action);
 		}
 	}
 
@@ -211,5 +218,19 @@ public abstract class AbstractState extends AbstractModelElement implements
 			getNode().removeChild(action.getNode());
 		}
 		this.exceptionHandler = new ArrayList<IExceptionHandler>();
+	}
+
+	/**
+	 * @return the parent
+	 */
+	public String getParent() {
+		return getAttribute("parent");
+	}
+
+	/**
+	 * @param parent the parent to set
+	 */
+	public void setParent(String parent) {
+		setAttribute("parent", parent);
 	}
 }

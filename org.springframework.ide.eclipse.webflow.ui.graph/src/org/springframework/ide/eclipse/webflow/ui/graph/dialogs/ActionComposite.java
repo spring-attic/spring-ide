@@ -36,135 +36,61 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EvaluateAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Set;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelDecorator;
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelProvider;
 
-/**
- * 
- */
 public class ActionComposite {
 
-	/**
-	 * 
-	 */
 	private class ActionContentProvider implements IStructuredContentProvider {
 
-		/**
-		 * 
-		 */
 		private List<IActionElement> actions;
 
-		/**
-		 * 
-		 * 
-		 * @param actions 
-		 */
 		public ActionContentProvider(List<IActionElement> actions) {
 			this.actions = actions;
 		}
 
-		/**
-		 * 
-		 */
 		public void dispose() {
 		}
 
-		/**
-		 * 
-		 * 
-		 * @param obj 
-		 * 
-		 * @return 
-		 */
 		public Object[] getElements(Object obj) {
 			return actions.toArray();
 		}
 
-		/**
-		 * 
-		 * 
-		 * @param arg1 
-		 * @param arg0 
-		 * @param arg2 
-		 */
 		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private TableViewer configsViewer;
 
-	/**
-	 * 
-	 */
 	private Button editButton;
 
-	/**
-	 * 
-	 */
 	private Button addActionButton;
 
-	/**
-	 * 
-	 */
 	private Button addBeanActionButton;
 
-	/**
-	 * 
-	 */
 	private Button addEvaluationButton;
 
-	/**
-	 * 
-	 */
 	private Button addSetButton;
 
-	/**
-	 * 
-	 */
 	private Button deleteButton;
 
 	// private IDialogValidator validator;
 
-	/**
-	 * 
-	 */
 	private Shell parentShell;
 
-	/**
-	 * 
-	 */
 	private List<IActionElement> actions;
 
-	/**
-	 * 
-	 */
 	private IWebflowModelElement parentElement;
 
-	/**
-	 * 
-	 */
-	@SuppressWarnings("unused")
 	private IActionElement.ACTION_TYPE type;
 
-	/**
-	 * 
-	 * 
-	 * @param item 
-	 * @param parentElement 
-	 * @param parentShell 
-	 * @param validator 
-	 * @param type 
-	 * @param actions 
-	 */
-	public ActionComposite(IDialogValidator validator, TabItem item,
-			Shell parentShell, List<IActionElement> actions,
-			IWebflowModelElement parentElement, IActionElement.ACTION_TYPE type) {
+	public ActionComposite(IDialogValidator validator, TabItem item, Shell parentShell,
+			List<IActionElement> actions, IWebflowModelElement parentElement,
+			IActionElement.ACTION_TYPE type) {
 		this.actions = actions;
 		if (type == IActionElement.ACTION_TYPE.ACTION) {
 			item.setText("Actions");
@@ -182,21 +108,13 @@ public class ActionComposite {
 			item.setText("Render Actions");
 			item.setToolTipText("Define element's render actions");
 		}
-		item.setImage(WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_ACTIONS));
+		item.setImage(WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_ACTIONS));
 		this.parentShell = parentShell;
 		this.parentElement = parentElement;
 		// this.validator = validator;
 		this.type = type;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param parent 
-	 * 
-	 * @return 
-	 */
 	protected Control createDialogArea(Composite parent) {
 		Group groupActionType = new Group(parent, SWT.NULL);
 		GridLayout layoutAttMap = new GridLayout();
@@ -214,8 +132,8 @@ public class ActionComposite {
 		layout2.numColumns = 2;
 		tableAndButtons.setLayout(layout2);
 
-		Table configsTable = new Table(tableAndButtons, SWT.MULTI
-				| SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		Table configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL
+				| SWT.FULL_SELECTION | SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.widthHint = 150;
 		data.heightHint = 200;
@@ -227,10 +145,9 @@ public class ActionComposite {
 			}
 		});
 		configsViewer = new TableViewer(configsTable);
-		configsViewer
-				.setContentProvider(new ActionContentProvider(this.actions));
-		configsViewer.setLabelProvider(new DecoratingLabelProvider(
-				new WebflowModelLabelProvider(), new WebflowModelLabelDecorator()));
+		configsViewer.setContentProvider(new ActionContentProvider(this.actions));
+		configsViewer.setLabelProvider(new DecoratingLabelProvider(new WebflowModelLabelProvider(),
+				new WebflowModelLabelDecorator()));
 		configsViewer.setInput(this);
 
 		Composite buttonArea = new Composite(tableAndButtons, SWT.NONE);
@@ -252,28 +169,22 @@ public class ActionComposite {
 				if (selection.getFirstElement() != null) {
 					if (selection.getFirstElement() instanceof IActionElement) {
 						TitleAreaDialog dialog = null;
-						IActionElement actionElement = (IActionElement) selection
-								.getFirstElement();
+						IActionElement actionElement = (IActionElement) selection.getFirstElement();
 						if (actionElement instanceof Action) {
-							dialog = new ActionPropertiesDialog(parentShell,
-									parentElement, (Action) selection
-											.getFirstElement());
+							dialog = new ActionPropertiesDialog(parentShell, parentElement,
+									(Action) selection.getFirstElement());
 						}
 						else if (actionElement instanceof BeanAction) {
-							dialog = new BeanActionPropertiesDialog(
-									parentShell, parentElement,
+							dialog = new BeanActionPropertiesDialog(parentShell, parentElement,
 									(BeanAction) selection.getFirstElement());
 						}
 						else if (actionElement instanceof EvaluateAction) {
-							dialog = new EvaluateActionPropertiesDialog(
-									parentShell, parentElement,
-									(EvaluateAction) selection
-											.getFirstElement());
+							dialog = new EvaluateActionPropertiesDialog(parentShell, parentElement,
+									(EvaluateAction) selection.getFirstElement());
 						}
 						else if (actionElement instanceof Set) {
-							dialog = new SetActionPropertiesDialog(parentShell,
-									parentElement, (Set) selection
-											.getFirstElement());
+							dialog = new SetActionPropertiesDialog(parentShell, parentElement,
+									(Set) selection.getFirstElement());
 						}
 						if (Dialog.OK == dialog.open()) {
 							configsViewer.refresh();
@@ -295,8 +206,7 @@ public class ActionComposite {
 						.getSelection();
 				if (selection.getFirstElement() != null
 						&& selection.getFirstElement() instanceof IActionElement) {
-					IActionElement actionElement = (IActionElement) selection
-							.getFirstElement();
+					IActionElement actionElement = (IActionElement) selection.getFirstElement();
 					actions.remove(actionElement);
 					configsViewer.refresh(true);
 				}
@@ -307,7 +217,12 @@ public class ActionComposite {
 		sep.setLayoutData(data1);
 
 		addActionButton = new Button(buttonArea, SWT.PUSH);
-		addActionButton.setText("Add Action");
+		if (WebflowModelXmlUtils.isVersion1Flow(parentElement)) {
+			addActionButton.setText("Add Action");
+		}
+		else {
+			addActionButton.setText("Add Render");
+		}
 		data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		data1.widthHint = 120;
 		addActionButton.setLayoutData(data1);
@@ -316,32 +231,37 @@ public class ActionComposite {
 				Action action = new Action();
 				action.createNew(parentElement);
 				action.setType(type);
-				if (DialogUtils.openPropertiesDialog(parentElement, action,
-						true) == Dialog.OK) {
+				if (DialogUtils.openPropertiesDialog(parentElement, action, true) == Dialog.OK) {
 					actions.add(action);
 					configsViewer.refresh();
 				}
 			}
 		});
-		addBeanActionButton = new Button(buttonArea, SWT.PUSH);
-		addBeanActionButton.setText("Add Bean Action");
-		data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data1.widthHint = 120;
-		addBeanActionButton.setLayoutData(data1);
-		addBeanActionButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				BeanAction action = new BeanAction();
-				action.createNew(parentElement);
-				action.setType(type);
-				if (DialogUtils.openPropertiesDialog(parentElement, action,
-						true) == Dialog.OK) {
-					actions.add(action);
-					configsViewer.refresh();
+		if (WebflowModelXmlUtils.isVersion1Flow(parentElement)) {
+			addBeanActionButton = new Button(buttonArea, SWT.PUSH);
+			addBeanActionButton.setText("Add Bean Action");
+			data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			data1.widthHint = 120;
+			addBeanActionButton.setLayoutData(data1);
+			addBeanActionButton.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					BeanAction action = new BeanAction();
+					action.createNew(parentElement);
+					action.setType(type);
+					if (DialogUtils.openPropertiesDialog(parentElement, action, true) == Dialog.OK) {
+						actions.add(action);
+						configsViewer.refresh();
+					}
 				}
-			}
-		});
+			});
+		}
 		addEvaluationButton = new Button(buttonArea, SWT.PUSH);
-		addEvaluationButton.setText("Add Evaluation Action");
+		if (WebflowModelXmlUtils.isVersion1Flow(parentElement)) {
+			addEvaluationButton.setText("Add Evaluation Action");
+		}
+		else {
+			addEvaluationButton.setText("Add Evaluate");
+		}
 		data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		data1.widthHint = 120;
 		addEvaluationButton.setLayoutData(data1);
@@ -350,8 +270,7 @@ public class ActionComposite {
 				EvaluateAction action = new EvaluateAction();
 				action.createNew(parentElement);
 				action.setType(type);
-				if (DialogUtils.openPropertiesDialog(parentElement, action,
-						true) == Dialog.OK) {
+				if (DialogUtils.openPropertiesDialog(parentElement, action, true) == Dialog.OK) {
 					actions.add(action);
 					configsViewer.refresh();
 				}
@@ -367,8 +286,7 @@ public class ActionComposite {
 				Set action = new Set();
 				action.createNew(parentElement);
 				action.setType(type);
-				if (DialogUtils.openPropertiesDialog(parentElement, action,
-						true) == Dialog.OK) {
+				if (DialogUtils.openPropertiesDialog(parentElement, action, true) == Dialog.OK) {
 					actions.add(action);
 					configsViewer.refresh();
 				}
@@ -381,12 +299,8 @@ public class ActionComposite {
 		return groupActionType;
 	}
 
-	/**
-	 * 
-	 */
 	protected void handleTableSelectionChanged() {
-		IStructuredSelection selection = (IStructuredSelection) configsViewer
-				.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) configsViewer.getSelection();
 		if (selection.isEmpty()) {
 			this.editButton.setEnabled(false);
 			this.deleteButton.setEnabled(false);
@@ -397,11 +311,6 @@ public class ActionComposite {
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return 
-	 */
 	public List<IActionElement> getActions() {
 		return this.actions;
 	}

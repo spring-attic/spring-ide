@@ -28,8 +28,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class Action extends AbstractAction implements
-		ICloneableModelElement<Action> {
+public class Action extends AbstractAction implements ICloneableModelElement<Action> {
 
 	/**
 	 * Clone model element.
@@ -51,8 +50,7 @@ public class Action extends AbstractAction implements
 	public void applyCloneValues(Action element) {
 		if (element != null) {
 			if (this.node.getParentNode() != null) {
-				this.parent.getNode()
-						.replaceChild(element.getNode(), this.node);
+				this.parent.getNode().replaceChild(element.getNode(), this.node);
 			}
 			setType(element.getType());
 			init(element.getNode(), parent);
@@ -67,13 +65,17 @@ public class Action extends AbstractAction implements
 	 * @param parent the parent
 	 */
 	public void createNew(IWebflowModelElement parent) {
-		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
-				.createElement("action");
+		IDOMNode node = null;
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("action");
+		}
+		else {
+			node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("render");
+		}
 		init(node, parent);
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 			for (IAttribute state : getAttributes()) {
 				if (monitor.isCanceled()) {
@@ -83,10 +85,39 @@ public class Action extends AbstractAction implements
 			}
 		}
 	}
-	
+
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		children.addAll(getAttributes());
 		return children.toArray(new IModelElement[children.size()]);
+	}
+	
+
+	/**
+	 * Gets the name.
+	 * 
+	 * @return the name
+	 */
+	public String getName() {
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			return getAttribute("name");
+		}
+		else {
+			return getAttribute("fragments");
+		}
+	}
+
+	/**
+	 * Sets the name.
+	 * 
+	 * @param name the name
+	 */
+	public void setName(String name) {
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			setAttribute("name", name);
+		}
+		else {
+			setAttribute("fragments", name);
+		}
 	}
 }

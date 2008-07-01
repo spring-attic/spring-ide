@@ -47,6 +47,12 @@ public class ExitActions extends AbstractModelElement implements IExitActions {
 					action.setType(IActionElement.ACTION_TYPE.EXIT_ACTION);
 					this.exitActions.add(action);
 				}
+				else if ("render".equals(child.getLocalName())) {
+					Action action = new Action();
+					action.init(child, this);
+					action.setType(IActionElement.ACTION_TYPE.EXIT_ACTION);
+					this.exitActions.add(action);
+				}
 				else if ("bean-action".equals(child.getLocalName())) {
 					BeanAction action = new BeanAction();
 					action.init(child, this);
@@ -54,6 +60,12 @@ public class ExitActions extends AbstractModelElement implements IExitActions {
 					this.exitActions.add(action);
 				}
 				else if ("evaluate-action".equals(child.getLocalName())) {
+					EvaluateAction action = new EvaluateAction();
+					action.init(child, this);
+					action.setType(IActionElement.ACTION_TYPE.EXIT_ACTION);
+					this.exitActions.add(action);
+				}
+				else if ("evaluate".equals(child.getLocalName())) {
 					EvaluateAction action = new EvaluateAction();
 					action.init(child, this);
 					action.setType(IActionElement.ACTION_TYPE.EXIT_ACTION);
@@ -73,8 +85,8 @@ public class ExitActions extends AbstractModelElement implements IExitActions {
 		if (!this.exitActions.contains(action)) {
 			this.exitActions.add(action);
 			WebflowModelXmlUtils.insertNode(action.getNode(), node);
-			super.firePropertyChange(ADD_CHILDREN, new Integer(this.exitActions
-					.indexOf(action)), action);
+			super.firePropertyChange(ADD_CHILDREN, new Integer(this.exitActions.indexOf(action)),
+					action);
 			parent.fireStructureChange(MOVE_CHILDREN, this);
 		}
 	}
@@ -83,8 +95,7 @@ public class ExitActions extends AbstractModelElement implements IExitActions {
 		if (!this.exitActions.contains(action)) {
 			if (this.exitActions.size() > i) {
 				IActionElement ref = this.exitActions.get(i);
-				WebflowModelXmlUtils.insertBefore(action.getNode(), ref
-						.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
 			}
 			else {
 				WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -109,16 +120,24 @@ public class ExitActions extends AbstractModelElement implements IExitActions {
 	}
 
 	public void createNew(IWebflowModelElement parent) {
-		if (parent instanceof IWebflowState) {
-			IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
-					.createElement("end-actions");
-			init(node, parent);
+		IDOMNode node = null;
+		if (WebflowModelXmlUtils.isVersion1Flow(this)) {
+			if (parent instanceof IWebflowState) {
+				node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("end-actions");
+			}
+			else {
+				node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("exit-actions");
+			}
 		}
 		else {
-			IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
-					.createElement("exit-actions");
-			init(node, parent);
+			if (parent instanceof IWebflowState) {
+				node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("on-end");
+			}
+			else {
+				node = (IDOMNode) parent.getNode().getOwnerDocument().createElement("on-exit");
+			}
 		}
+		init(node, parent);
 	}
 
 	public void removeAll() {
@@ -128,8 +147,7 @@ public class ExitActions extends AbstractModelElement implements IExitActions {
 		this.exitActions = new ArrayList<IActionElement>();
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 			for (IActionElement state : getExitActions()) {
 				if (monitor.isCanceled()) {
@@ -139,7 +157,7 @@ public class ExitActions extends AbstractModelElement implements IExitActions {
 			}
 		}
 	}
-	
+
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		children.addAll(getExitActions());
