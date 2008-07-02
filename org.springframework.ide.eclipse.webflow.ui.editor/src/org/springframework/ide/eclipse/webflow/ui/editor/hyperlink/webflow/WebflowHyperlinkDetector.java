@@ -41,18 +41,19 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
- * properties in attribute values. Resolves bean references (including
- * references to parent beans or factory beans).
+ * Detects hyperlinks in XML tags. Includes detection of bean classes and bean properties in
+ * attribute values. Resolves bean references (including references to parent beans or factory
+ * beans).
  * @author Christian Dupuis
  */
-public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector
-		implements IHyperlinkDetector {
+public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector implements
+		IHyperlinkDetector {
 
 	private static final Set<String> VALID_ATTRIBUTES;
 
 	static {
 		VALID_ATTRIBUTES = new LinkedHashSet<String>();
+		// web flow 1.x
 		VALID_ATTRIBUTES.add("bean");
 		VALID_ATTRIBUTES.add("method");
 		VALID_ATTRIBUTES.add("to");
@@ -66,6 +67,20 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector
 		VALID_ATTRIBUTES.add("type");
 		VALID_ATTRIBUTES.add("name");
 		VALID_ATTRIBUTES.add("flow");
+
+		// web flow 2.x
+		VALID_ATTRIBUTES.add("type");
+		VALID_ATTRIBUTES.add("class");
+		VALID_ATTRIBUTES.add("result-type");
+		VALID_ATTRIBUTES.add("bean");
+		VALID_ATTRIBUTES.add("subflow-attribute-mapper");
+
+		VALID_ATTRIBUTES.add("to");
+		VALID_ATTRIBUTES.add("start-state");
+		VALID_ATTRIBUTES.add("then");
+		VALID_ATTRIBUTES.add("else");
+
+		VALID_ATTRIBUTES.add("subflow");
 	}
 
 	/**
@@ -77,17 +92,16 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector
 		return VALID_ATTRIBUTES.contains(attr.getLocalName());
 	}
 
-	public IHyperlink createHyperlink(final String name, final String target,
-			Node node, Node parentNode, IDocument document,
-			ITextViewer textViewer, final IRegion hyperlinkRegion,
-			IRegion cursor) {
+	public IHyperlink createHyperlink(final String name, final String target, Node node,
+			Node parentNode, IDocument document, ITextViewer textViewer,
+			final IRegion hyperlinkRegion, IRegion cursor) {
 		if (name == null) {
 			return null;
 		}
-		if ("bean".equals(name) || "name".equals(name)) {
+		if ("bean".equals(name) || "name".equals(name) || "subflow-attribute-mapper".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
-			IWebflowConfig config = Activator.getModel().getProject(
-					file.getProject()).getConfig(file);
+			IWebflowConfig config = Activator.getModel().getProject(file.getProject()).getConfig(
+					file);
 			if (config != null) {
 				Set<IBean> beans = WebflowModelUtils.getBeans(config);
 				for (IBean bean : beans) {
@@ -98,47 +112,40 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector
 			}
 		}
 		else if (("to".equals(name) && "transition".equals(node.getLocalName()))
-				|| "then".equals(name)
-				|| "else".equals(name)
-				|| "idref".equals(name)) {
+				|| "then".equals(name) || "else".equals(name) || "idref".equals(name)
+				|| "start-state".equals(name)) {
 			Node flowNode = WebflowNamespaceUtils.locateFlowRootNode(node);
 			NodeList nodes = flowNode.getChildNodes();
 			if (nodes.getLength() > 0) {
 				for (int i = 0; i < nodes.getLength(); i++) {
-					String id = BeansEditorUtils.getAttribute(nodes.item(i),
-							"id");
+					String id = BeansEditorUtils.getAttribute(nodes.item(i), "id");
 					if (target.equals(id)) {
 						IRegion region = getHyperlinkRegion(nodes.item(i));
-						return new NodeElementHyperlink(hyperlinkRegion,
-								region, textViewer);
+						return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
 					}
 				}
 			}
 		}
-		else if (("to".equals(name) && !"transition"
-				.equals(node.getLocalName()))
-				|| "on-exception".equals(name)
-				|| "type".equals(name)
-				|| "type".equals(name) || "class".equals(name)) {
+		else if (("to".equals(name) && !"transition".equals(node.getLocalName()))
+				|| "on-exception".equals(name) || "type".equals(name) || "type".equals(name)
+				|| "class".equals(name) || "result-type".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
 			IType type = JdtUtils.getJavaType(file.getProject(), target);
 			if (type != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, type);
 			}
 		}
-		else if ("method".equals(name)
-				&& BeansEditorUtils.hasAttribute(node, "bean")) {
+		else if ("method".equals(name) && BeansEditorUtils.hasAttribute(node, "bean")) {
 			String bean = BeansEditorUtils.getAttribute(node, "bean");
 			IFile file = BeansEditorUtils.getFile(document);
 			String className = null;
-			IWebflowConfig config = Activator.getModel().getProject(
-					file.getProject()).getConfig(file);
+			IWebflowConfig config = Activator.getModel().getProject(file.getProject()).getConfig(
+					file);
 			if (config != null) {
 				Set<IBean> beans = WebflowModelUtils.getBeans(config);
 				for (IBean modelBean : beans) {
 					if (modelBean.getElementName().equals(bean)) {
-						className = BeansModelUtils.getBeanClass(modelBean,
-								null);
+						className = BeansModelUtils.getBeanClass(modelBean, null);
 					}
 				}
 				IType type = JdtUtils.getJavaType(file.getProject(), className);
@@ -148,8 +155,7 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector
 						if (methods != null) {
 							for (IMethod method : methods) {
 								if (method.getElementName().equals(target)) {
-									return new JavaElementHyperlink(
-											hyperlinkRegion, method);
+									return new JavaElementHyperlink(hyperlinkRegion, method);
 								}
 							}
 						}
@@ -159,10 +165,10 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector
 				}
 			}
 		}
-		else if ("flow".equals(name)) {
+		else if ("flow".equals(name) || "subflow".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
-			final IWebflowConfig config = Activator.getModel().getProject(
-					file.getProject()).getConfig(target);
+			final IWebflowConfig config = Activator.getModel().getProject(file.getProject())
+					.getConfig(target);
 			if (config != null) {
 				return new IHyperlink() {
 

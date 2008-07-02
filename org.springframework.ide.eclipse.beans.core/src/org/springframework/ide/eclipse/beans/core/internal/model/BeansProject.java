@@ -397,10 +397,10 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		if (beansConfig != null) {
 			beansConfigs.add(beansConfig);
 		}
-		if (includeImported && configs != null) {
+		if (includeImported && getConfigs() != null) {
 			try {
 				r.lock();
-				for (IBeansConfig bc : configs.values()) {
+				for (IBeansConfig bc : getConfigs()) {
 					checkForImportedBeansConfig(file, bc, beansConfigs);
 				}
 			}

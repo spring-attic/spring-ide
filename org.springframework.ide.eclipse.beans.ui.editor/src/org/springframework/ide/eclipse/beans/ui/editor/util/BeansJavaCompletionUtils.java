@@ -46,8 +46,8 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Node;
 
 /**
- * Utility class provides methods to trigger content assist for package and
- * class content assist requests.
+ * Utility class provides methods to trigger content assist for package and class content assist
+ * requests.
  * @author Christian Dupuis
  * @since 1.3.6
  */
@@ -70,8 +70,7 @@ public class BeansJavaCompletionUtils {
 	private static CompletionProposalComparator comparator = new CompletionProposalComparator();
 
 	/**
-	 * Add class and package content assist proposals that match the given
-	 * <code>prefix</code>.
+	 * Add class and package content assist proposals that match the given <code>prefix</code>.
 	 * @param request the {@link ContentAssistRequest} to add the proposals
 	 * @param prefix the prefix
 	 */
@@ -80,8 +79,7 @@ public class BeansJavaCompletionUtils {
 	}
 
 	/**
-	 * Add interface content assist proposals that match the given
-	 * <code>prefix</code>.
+	 * Add interface content assist proposals that match the given <code>prefix</code>.
 	 * @param request the {@link ContentAssistRequest} to add the proposals
 	 * @param prefix the prefix
 	 */
@@ -90,8 +88,7 @@ public class BeansJavaCompletionUtils {
 	}
 
 	/**
-	 * Add package content assist proposals that match the given
-	 * <code>prefix</code>.
+	 * Add package content assist proposals that match the given <code>prefix</code>.
 	 * @param request the {@link ContentAssistRequest} to add the proposals
 	 * @param prefix the prefix
 	 */
@@ -100,8 +97,7 @@ public class BeansJavaCompletionUtils {
 	}
 
 	/**
-	 * Add class and package content assist proposals that match the given
-	 * <code>prefix</code>.
+	 * Add class and package content assist proposals that match the given <code>prefix</code>.
 	 * @param request the {@link ContentAssistRequest} to add the proposals
 	 * @param prefix the prefix
 	 * @param interfaceRequired true if only interfaces are requested
@@ -145,8 +141,8 @@ public class BeansJavaCompletionUtils {
 	}
 
 	/**
-	 * Add class assist proposals that match the given <code>prefix</code> and
-	 * are part of the sub class hierarchy of the given <code>typeName</code>.
+	 * Add class assist proposals that match the given <code>prefix</code> and are part of the sub
+	 * class hierarchy of the given <code>typeName</code>.
 	 * @param request the {@link ContentAssistRequest} to add the proposals
 	 * @param prefix the prefix
 	 * @param typeName the super class of the request proposals
@@ -160,7 +156,8 @@ public class BeansJavaCompletionUtils {
 
 		IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request).getProject(), typeName);
 		try {
-			if (BeansEditorUtils.getFile(request).getProject().hasNature(JavaCore.NATURE_ID)) {
+			if (type != null
+					&& BeansEditorUtils.getFile(request).getProject().hasNature(JavaCore.NATURE_ID)) {
 
 				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(BeansEditorUtils
 						.getFile(request).getProject()), new NullProgressMonitor());

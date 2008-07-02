@@ -65,9 +65,6 @@ import org.springframework.util.ObjectUtils;
  */
 public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	
-	/**
-	 * 
-	 */
 	private static final String CLASS_ATTRIBUTE = "class";
 
 	private static final String GRAPH_CONTENT_EXTENDER_EXTENSION_POINT = 
