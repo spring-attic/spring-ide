@@ -25,7 +25,7 @@
 				uri="platform:/plugin/org.springframework.ide.eclipse.webflow.core/org/springframework/webflow/v1/config/spring-webflow-config-1.0.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd"
-				uri="platform:/plugin/org.springframework.ide.eclipse.webflow.core/org/springframework/webflow/config/spring-webflow-config-2.0.xsd" />
+				uri="platform:/plugin/org.springframework.webflow/org/springframework/webflow/config/spring-webflow-config-2.0.xsd" />
 		</catalogContribution>
 	</extension>
 
