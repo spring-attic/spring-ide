@@ -727,6 +727,12 @@ public class WebflowState extends AbstractTransitionableFrom implements IWebflow
 			if (getOutputMapper() != null) {
 				getInputMapper().accept(visitor, monitor);
 			}
+			if (getEntryActions() != null) {
+				getEntryActions().accept(visitor, monitor);
+			}
+			if (getExitActions() != null) {
+				getExitActions().accept(visitor, monitor);
+			}
 		}
 	}
 

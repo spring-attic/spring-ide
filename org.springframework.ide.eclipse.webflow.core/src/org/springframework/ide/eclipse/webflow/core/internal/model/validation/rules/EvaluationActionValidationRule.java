@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -37,5 +39,16 @@ public class EvaluationActionValidationRule implements
 			context.error(action, "NO_EXPRESSOIN_ATTRIBUTE",
 					"Element 'evaluate-action' requires 'expression' attribute");
 		}
+		
+		if (!context.isVersion1()) {
+			if (StringUtils.hasText(action.getResultType())) {
+				IType type = WebflowValidationRuleUtils.getJavaType(action.getResultType(), context);
+				if (type == null) {
+					context.error(action, "INVALID_TYPE", MessageUtils.format(
+							"Class 'var' \"{0}\" cannot be resolved", action.getResultType()));
+				}
+			}
+		}
+		
 	}
 }

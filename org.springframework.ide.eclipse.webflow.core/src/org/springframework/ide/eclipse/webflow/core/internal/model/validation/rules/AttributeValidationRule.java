@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,25 +27,36 @@ public class AttributeValidationRule implements
 		IValidationRule<Attribute, WebflowValidationContext> {
 
 	public boolean supports(IModelElement element, IValidationContext context) {
-		return element instanceof Attribute
-				&& context instanceof WebflowValidationContext;
+		return element instanceof Attribute && context instanceof WebflowValidationContext;
 	}
 
 	public void validate(Attribute attribute, WebflowValidationContext context,
 			IProgressMonitor monitor) {
-		if (!StringUtils.hasText(attribute.getName())) {
-			context.error(attribute, "NO_NAME_ATTRIBUTE",
-					"Element 'attribute' requires 'name' attribute");
+		if (context.isVersion1()) {
+			if (!StringUtils.hasText(attribute.getName())) {
+				context.error(attribute, "NO_NAME_ATTRIBUTE",
+						"Element 'attribute' requires 'name' attribute");
+			}
+			if (StringUtils.hasText(attribute.getType())
+					&& WebflowValidationRuleUtils.getJavaType(attribute.getType(), context) == null) {
+				context.error(attribute, "NO_TYPE_FOUND", MessageUtils.format(
+						"Attribute 'type' \"{0}\" cannot be resolved", attribute.getType()));
+			}
+			if (!StringUtils.hasText(attribute.getValue())) {
+				context.error(attribute, "NO_VALUE_ATTRIBUTE",
+						"Element 'attribute' requires a 'value'");
+			}
 		}
-		if (StringUtils.hasText(attribute.getType())
-				&& WebflowValidationRuleUtils.getJavaType(attribute.getType(), context) == null) {
-			context.error(attribute, "NO_TYPE_FOUND", MessageUtils.format(
-					"Attribute 'type' \"{0}\" cannot be resolved", attribute
-							.getType()));
-		}
-		if (!StringUtils.hasText(attribute.getValue())) {
-			context.error(attribute, "NO_VALUE_ATTRIBUTE",
-					"Element 'attribute' requires a 'value'");
+		else {
+			if (!StringUtils.hasText(attribute.getName())) {
+				context.error(attribute, "NO_NAME_ATTRIBUTE",
+				"Element 'attribute' requires 'name' attribute");
+			}
+			if (StringUtils.hasText(attribute.getType())
+					&& WebflowValidationRuleUtils.getJavaType(attribute.getType(), context) == null) {
+				context.error(attribute, "NO_TYPE_FOUND", MessageUtils.format(
+						"Attribute 'type' \"{0}\" cannot be resolved", attribute.getType()));
+			}
 		}
 	}
 }
