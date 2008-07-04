@@ -31,23 +31,24 @@ public class TransitionValidationRule implements
 	private static final String EXPRESSION_SUFFIX = "}";
 
 	public boolean supports(IModelElement element, IValidationContext context) {
-		return element instanceof StateTransition
-				&& context instanceof WebflowValidationContext;
+		return element instanceof StateTransition && context instanceof WebflowValidationContext;
 	}
 
-	public void validate(StateTransition state,
-			WebflowValidationContext context, IProgressMonitor monitor) {
+	public void validate(StateTransition state, WebflowValidationContext context,
+			IProgressMonitor monitor) {
 
-		if (!StringUtils.hasText(state.getToStateId())) {
-			context.error(state, "NO_TO_ATTRIBUTE",
-					"Element 'transition' requires 'to' attribute");
+		if (context.isVersion1()) {
+			if (!StringUtils.hasText(state.getToStateId())) {
+				context.error(state, "NO_TO_ATTRIBUTE",
+						"Element 'transition' requires 'to' attribute");
+			}
 		}
-		else if (state.getToState() == null
-				&& (!(state.getToStateId().startsWith(EXPRESSION_PREFIX) && state
-						.getToStateId().endsWith(EXPRESSION_SUFFIX)))) {
-			context.error(state, "NO_VALID_TO_ATTRIBUTE", MessageUtils
-					.format("Element 'transition' references a non-exiting state \"{0}\"", 
-								state.getToStateId()));
+		if (state.getToState() == null
+				&& (!(state.getToStateId().startsWith(EXPRESSION_PREFIX) && state.getToStateId()
+						.endsWith(EXPRESSION_SUFFIX)))) {
+			context.error(state, "NO_VALID_TO_ATTRIBUTE", MessageUtils.format(
+					"Element 'transition' references a non-exiting state \"{0}\"", state
+							.getToStateId()));
 		}
 	}
 }

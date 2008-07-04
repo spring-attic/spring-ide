@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,43 +29,46 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ActionValidationRule implements
-		IValidationRule<Action, WebflowValidationContext> {
+public class ActionValidationRule implements IValidationRule<Action, WebflowValidationContext> {
 
 	public boolean supports(IModelElement element, IValidationContext context) {
-		return element instanceof Action
-				&& context instanceof WebflowValidationContext;
+		return element instanceof Action && context instanceof WebflowValidationContext;
 	}
 
-	public void validate(Action action, WebflowValidationContext context,
-			IProgressMonitor monitor) {
-		if (!StringUtils.hasText(action.getBean())) {
-			context.error(action, "NO_BEAN_ATTRIBUTE",
-					"Element 'action' requires 'bean' attribute");
-		}
-		else if (!WebflowModelUtils.isReferencedBeanFound(context
-				.getWebflowConfig(), action.getBean())) {
-			context.error(action, "INVALID_BEAN", MessageUtils
-					.format("Referenced bean \"{0}\" cannot be found", action
-							.getBean()));
-		}
-		if (StringUtils.hasText(action.getMethod())
-				&& !Introspector.doesImplement(WebflowModelUtils.getActionType(
-						context.getWebflowConfig(), action.getNode()),
-						FactoryBean.class.getName())) {
-			Set<IMethod> methods = WebflowModelUtils.getActionMethods(context
-					.getWebflowConfig(), action.getNode());
-			boolean found = false;
-			for (IMethod method : methods) {
-				if (method.getElementName().equals(action.getMethod())) {
-					found = true;
-					break;
+	public void validate(Action action, WebflowValidationContext context, IProgressMonitor monitor) {
+
+		if (context.isVersion1()) {
+			if (!StringUtils.hasText(action.getBean())) {
+				context.error(action, "NO_BEAN_ATTRIBUTE",
+						"Element 'action' requires 'bean' attribute");
+			}
+			else if (!WebflowModelUtils.isReferencedBeanFound(context.getWebflowConfig(), action
+					.getBean())) {
+				context.error(action, "INVALID_BEAN", MessageUtils.format(
+						"Referenced bean \"{0}\" cannot be found", action.getBean()));
+			}
+			if (StringUtils.hasText(action.getMethod())
+					&& !Introspector.doesImplement(WebflowModelUtils.getActionType(context
+							.getWebflowConfig(), action.getNode()), FactoryBean.class.getName())) {
+				Set<IMethod> methods = WebflowModelUtils.getActionMethods(context
+						.getWebflowConfig(), action.getNode());
+				boolean found = false;
+				for (IMethod method : methods) {
+					if (method.getElementName().equals(action.getMethod())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					context.error(action, "INVALID_ACTION_METHOD", MessageUtils
+						.format("Referenced action method \"{0}\" cannot be found or is not a valid action method",
+								action.getMethod()));
 				}
 			}
-			if (!found) {
-				context.error(action, "INVALID_ACTION_METHOD", MessageUtils
-						.format("Referenced action method \"{0}\" cannot be found or is not a valid action method", action
-							.getMethod()));
+		}
+		else {
+			if (!StringUtils.hasText(action.getAttribute(action.getNode(), "fragments"))) {
+				context.error(action, "NO_FRAGMENTS", "Element 'render' requires 'fragments' attribute");
 			}
 		}
 	}
