@@ -15,12 +15,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -99,8 +101,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	/** Regular expressions to that must be ignored and not reported to the user */
 	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays
 			.asList(new Pattern[] {
-					Pattern.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
-					Pattern.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
+					Pattern
+							.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
+					Pattern
+							.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
 
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
@@ -275,20 +279,29 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 					try {
 
+						final Set<Throwable> throwables = new HashSet<Throwable>();
+
 						Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
 
 							public Integer call() throws Exception {
 
-								// load bean definitions
-								int count = reader.loadBeanDefinitions(resource);
+								try {
+									// load bean definitions
+									int count = reader.loadBeanDefinitions(resource);
 
-								// finally register post processed beans and components
-								eventListener.registerComponents();
+									// finally register post processed beans and components
+									eventListener.registerComponents();
 
-								// post process beans config if required
-								postProcess(problemReporter, beanNameGenerator, resource);
+									// post process beans config if required
+									postProcess(problemReporter, beanNameGenerator, resource);
 
-								return count;
+									return count;
+								}
+								catch (Exception e) {
+									// record the exception to throw that later
+									throwables.add(e);
+									throw e;
+								}
 							}
 
 						};
@@ -298,6 +311,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 									loadBeanDefinitionOperation);
 							BeansCorePlugin.getExecutorService().submit(task);
 							int count = task.get(60, TimeUnit.SECONDS);
+							
 							if (BeansModel.DEBUG) {
 								System.out.println(count + " bean definitions loaded from '"
 										+ resource.getFile().getAbsolutePath() + "'");
@@ -308,7 +322,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 									"Loading of resource '" + resource.getFile().getAbsolutePath()
 											+ "' took more than 60sec", file, -1));
 						}
-
+						catch (ExecutionException e) {
+							// if we recored an exception use this instead of stupid concurrent
+							// exception
+							if (throwables.size() > 0) {
+								throw throwables.iterator().next();
+							}
+							throw e;
+						}
 					}
 					catch (Throwable e) { // handle ALL exceptions
 
