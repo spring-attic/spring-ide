@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,12 +43,13 @@ public class TransitionValidationRule implements
 						"Element 'transition' requires 'to' attribute");
 			}
 		}
-		if (state.getToState() == null
-				&& (!(state.getToStateId().startsWith(EXPRESSION_PREFIX) && state.getToStateId()
-						.endsWith(EXPRESSION_SUFFIX)))) {
+		if (state.getToState() == null && state.getToStateId() != null
+				&& !(state.getToStateId().startsWith(EXPRESSION_PREFIX) && state
+						.getToStateId().endsWith(EXPRESSION_SUFFIX))) {
 			context.error(state, "NO_VALID_TO_ATTRIBUTE", MessageUtils.format(
 					"Element 'transition' references a non-exiting state \"{0}\"", state
 							.getToStateId()));
 		}
 	}
+	
 }
