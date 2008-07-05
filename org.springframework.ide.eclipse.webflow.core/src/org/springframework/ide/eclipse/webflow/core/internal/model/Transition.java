@@ -45,10 +45,6 @@ public abstract class Transition extends AbstractModelElement implements
 		this.webflowState = webflowState;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.ITransition#getToState()
-	 */
 	/**
 	 * Gets the to state.
 	 * @return the to state
@@ -61,10 +57,6 @@ public abstract class Transition extends AbstractModelElement implements
 		return targetState;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ITransition#setToState(org.springframework.ide.eclipse.web.core.model.ITransitionableState)
-	 */
 	/**
 	 * Sets the to state.
 	 * @param state the to state
