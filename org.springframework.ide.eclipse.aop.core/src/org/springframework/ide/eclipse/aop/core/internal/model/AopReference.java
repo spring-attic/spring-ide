@@ -24,8 +24,7 @@ import org.springframework.util.ObjectUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class AopReference implements IAopReference, IAdaptable,
-		IPersistableElement {
+public class AopReference implements IAopReference, IAdaptable, IPersistableElement {
 
 	private String bean;
 
@@ -39,13 +38,13 @@ public class AopReference implements IAopReference, IAdaptable,
 
 	private ADVICE_TYPES type;
 
-	public AopReference(ADVICE_TYPES type, IMember source, IMember target,
-			IAspectDefinition def, IResource file, IBean bean) {
+	public AopReference(ADVICE_TYPES type, IMember source, IMember target, IAspectDefinition def,
+			IResource file, IBean bean) {
 		this(type, source, target, def, file, bean.getElementID());
 	}
 
-	public AopReference(ADVICE_TYPES type, IMember source, IMember target,
-			IAspectDefinition def, IResource file, String beanId) {
+	public AopReference(ADVICE_TYPES type, IMember source, IMember target, IAspectDefinition def,
+			IResource file, String beanId) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
@@ -54,8 +53,8 @@ public class AopReference implements IAopReference, IAdaptable,
 		this.bean = beanId;
 	}
 
-	public AopReference(ADVICE_TYPES type, IMember source, IMember target,
-			IResource file, String beanId) {
+	public AopReference(ADVICE_TYPES type, IMember source, IMember target, IResource file,
+			String beanId) {
 		this(type, source, target, null, file, beanId);
 	}
 
@@ -63,12 +62,14 @@ public class AopReference implements IAopReference, IAdaptable,
 	public boolean equals(Object obj) {
 		if (obj instanceof AopReference) {
 			AopReference other = (AopReference) obj;
-			return getTarget().equals(other.getTarget())
+			return ((getTargetBeanId() == null && other.getTargetBeanId() == null) || getTargetBeanId()
+					.equals(other.getTargetBeanId()))
+					&& getTarget().equals(other.getTarget())
 					&& ((getSource() == null && other.getSource() == null) || (getSource() != null && getSource()
 							.equals(other.getSource())))
 					&& getResource().equals(other.getResource())
-					&& getDefinition().getAspectStartLineNumber() == other
-							.getDefinition().getAspectStartLineNumber();
+					&& getDefinition().getAspectStartLineNumber() == other.getDefinition()
+							.getAspectStartLineNumber();
 		}
 		return false;
 	}
@@ -113,25 +114,24 @@ public class AopReference implements IAopReference, IAdaptable,
 		int hashCode = ObjectUtils.nullSafeHashCode(source);
 		hashCode = 21 + ObjectUtils.nullSafeHashCode(target);
 		hashCode = 24 + ObjectUtils.nullSafeHashCode(file);
-		hashCode = 12 + ObjectUtils.nullSafeHashCode(definition
-				.getAspectStartLineNumber());
+		hashCode = 14 + ObjectUtils.nullSafeHashCode(bean);
+		hashCode = 12 + ObjectUtils.nullSafeHashCode(definition.getAspectStartLineNumber());
 		return hashCode;
 	}
 
 	public void saveState(IMemento memento) {
-		memento.putString(AopReferenceElementFactory.ADVICE_TYPE_ATTRIBUTE,
-				this.type.toString());
+		memento.putString(AopReferenceElementFactory.ADVICE_TYPE_ATTRIBUTE, this.type.toString());
 		if (this.source != null) {
-			memento.putString(AopReferenceElementFactory.SOURCE_ATTRIBUTE,
-					this.source.getHandleIdentifier());
+			memento.putString(AopReferenceElementFactory.SOURCE_ATTRIBUTE, this.source
+					.getHandleIdentifier());
 		}
 		if (this.target != null) {
-			memento.putString(AopReferenceElementFactory.TARGET_ATTRIBUTE,
-					this.target.getHandleIdentifier());
+			memento.putString(AopReferenceElementFactory.TARGET_ATTRIBUTE, this.target
+					.getHandleIdentifier());
 		}
 		if (this.file != null) {
-			memento.putString(AopReferenceElementFactory.FILE_ATTRIBUTE,
-					this.file.getFullPath().toString());
+			memento.putString(AopReferenceElementFactory.FILE_ATTRIBUTE, this.file.getFullPath()
+					.toString());
 		}
 		memento.putString(AopReferenceElementFactory.BEAN_ATTRIBUTE, this.bean);
 	}
