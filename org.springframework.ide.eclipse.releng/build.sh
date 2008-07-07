@@ -28,6 +28,13 @@ AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/34/dev/update
 
 # Run the Eclipse builder on a single builder
 build() {
+
+	rm -rf org.eclipse.releng.basebuilder/eclipse
+	if [ ! -d "org.eclipse.releng.basebuilder/eclipse" ]
+		then
+		unzip -d org.eclipse.releng.basebuilder org.eclipse.releng.basebuilder/basebuilder.zip
+	fi
+
     p=$@
     $JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar -application org.eclipse.ant.core.antRunner -buildfile $WORKSPACE/org.eclipse.releng.basebuilder/plugins/org.eclipse.pde.build_3.4.0.v20080522/scripts/build.xml -Dbuilder=$WORKSPACE/feature.builder -DforceContextQualifier=v${NAME} $p
 

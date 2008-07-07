@@ -12,10 +12,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.search,
  org.eclipse.ui.ide,
  org.eclipse.jdt.core,
- org.springframework.ide.eclipse.core,
- org.springframework.ide.eclipse.beans.core,
- org.springframework.ide.eclipse.beans.ui,
- org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jface.text,
  org.eclipse.ui,
@@ -25,12 +21,18 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.core,
  org.eclipse.jdt.ui,
  org.springframework.ide.eclipse.core,
+ org.springframework.ide.eclipse.beans.core,
+ org.springframework.ide.eclipse.beans.ui,
+ org.eclipse.core.runtime,
+ org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.aop.core,
- org.springframework.ide.eclipse.aop.ui
+ org.springframework.ide.eclipse.aop.ui, 
+ org.springframework.bundle.spring
 Export-Package: org.springframework.ide.eclipse.aop.ui.matcher,
  org.springframework.ide.eclipse.aop.ui.matcher.actions,
  org.springframework.ide.eclipse.aop.ui.matcher.internal
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy

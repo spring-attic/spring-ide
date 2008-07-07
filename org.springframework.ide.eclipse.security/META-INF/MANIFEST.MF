@@ -6,8 +6,6 @@ Bundle-Version: 2.1.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.security.Activator
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.core.runtime,
- org.springframework.ide.eclipse.aop.core,
- org.springframework.ide.eclipse.core,
  org.eclipse.wst.xml.core,
  org.eclipse.core.resources,
  org.eclipse.ui,
@@ -17,6 +15,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.ui.editor,
  org.eclipse.jface.text,
  org.eclipse.wst.xml.ui,
+ org.springframework.bundle.spring,
+ org.springframework.ide.eclipse.core,
+ org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.core,
  org.eclipse.ui.navigator

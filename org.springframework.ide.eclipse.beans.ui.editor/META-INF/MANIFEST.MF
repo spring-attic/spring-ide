@@ -19,6 +19,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml.ui,
  org.eclipse.search,
+ org.springframework.bundle.spring,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
@@ -60,3 +61,4 @@ Export-Package: org.springframework.ide.eclipse.beans.ui.editor,
  org.springframework.ide.eclipse.beans.ui.editor.templates,
  org.springframework.ide.eclipse.beans.ui.editor.util
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy

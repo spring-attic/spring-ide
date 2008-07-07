@@ -9,22 +9,24 @@ Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ltk.core.refactoring,
- org.springframework.ide.eclipse.beans.core,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.sse.ui,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml.ui,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
- org.springframework.ide.eclipse.core,
- org.springframework.ide.eclipse.beans.ui.editor,
  org.eclipse.jdt.ui,
- org.springframework.ide.eclipse.beans.ui,
  org.eclipse.jface.text,
- org.springframework.ide.eclipse.ui,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ltk.ui.refactoring,
  org.eclipse.pde.ui,
- org.eclipse.ui.ide
+ org.eclipse.ui.ide,
+ org.springframework.bundle.spring,
+ org.springframework.ide.eclipse.core,
+ org.springframework.ide.eclipse.ui,
+ org.springframework.ide.eclipse.beans.core,
+ org.springframework.ide.eclipse.beans.ui,
+ org.springframework.ide.eclipse.beans.ui.editor
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy

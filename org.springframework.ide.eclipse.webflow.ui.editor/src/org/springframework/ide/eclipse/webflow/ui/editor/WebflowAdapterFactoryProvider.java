@@ -30,7 +30,6 @@ import org.springframework.util.Assert;
 public class WebflowAdapterFactoryProvider extends AdapterFactoryProviderForXML {
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected void addContentBasedFactories(IStructuredModel structuredModel) {
 		FactoryRegistry factoryRegistry = structuredModel.getFactoryRegistry();
 		Assert.notNull(factoryRegistry, "No factory registered");

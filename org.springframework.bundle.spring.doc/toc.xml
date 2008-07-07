@@ -185,8 +185,8 @@
             <topic label="@Component and further stereotype&#xA;      annotations" href="beans.html#beans-stereotype-annotations"/>
             <topic label="Auto-detecting components" href="beans.html#beans-scanning-autodetection"/>
             <topic label="Using filters to customize scanning" href="beans.html#beans-scanning-filters"/>
-            <topic label="Naming auto-detected components" href="beans.html#beans-scanning-name-generator"/>
-            <topic label="Providing a scope for auto-detected components" href="beans.html#beans-scanning-scope-resolver"/>
+            <topic label="Naming autodetected components" href="beans.html#beans-scanning-name-generator"/>
+            <topic label="Providing a scope for autodetected components" href="beans.html#beans-scanning-scope-resolver"/>
             <topic label="Providing qualifier metadata with annotations" href="beans.html#beans-scanning-qualifiers"/>
          </topic>
          <topic label="Registering a LoadTimeWeaver" href="beans.html#context-load-time-weaver"/>

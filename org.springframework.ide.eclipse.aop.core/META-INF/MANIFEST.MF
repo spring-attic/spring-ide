@@ -5,23 +5,24 @@ Bundle-SymbolicName: org.springframework.ide.eclipse.aop.core;singleton:=true
 Bundle-Version: 2.1.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.aop.core.Activator
 Bundle-Localization: plugin
+Import-Package: org.aspectj.lang.annotation,
+ org.aspectj.lang.reflect
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jdt.core,
  org.eclipse.core.resources,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.xml.core,
- org.springframework.ide.eclipse.beans.ui.editor,
  org.eclipse.ui.ide, 
- org.springframework.ide.eclipse.ui,
  org.eclipse.jdt.ui,
  org.eclipse.jface.text,
+ org.springframework.bundle.spring,
+ org.springframework.ide.eclipse.ui,
+ org.springframework.ide.eclipse.beans.ui.editor,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.core,
- org.aspectj.aspectjweaver,
- org.objectweb.asm;bundle-version="[2.2.3,2.2.3]",
- org.aopalliance
+ org.objectweb.asm;bundle-version="[2.2.3,2.2.3]"
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.builder,

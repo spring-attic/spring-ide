@@ -18,7 +18,6 @@ import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
  * @author Christian Dupuis
  * @since 2.0.2
  */
-@SuppressWarnings("restriction")
 public class BeanMethodContentAssistCalculator extends
 		WebflowActionMethodContentAssistCalculator {
 
