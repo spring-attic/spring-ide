@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -36,17 +35,21 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.IPersistableElement;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.parsing.DefaultsDefinition;
 import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
 import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
+import org.springframework.beans.factory.parsing.SourceExtractor;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
@@ -99,12 +102,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		ILazyInitializedModelElement {
 
 	/** Regular expressions to that must be ignored and not reported to the user */
-	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays
-			.asList(new Pattern[] {
-					Pattern
-							.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
-					Pattern
-							.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
+	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays.asList(new Pattern[] {
+		Pattern	.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
+		Pattern.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
 
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
@@ -260,8 +260,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
 							new BeansDtdResolver(), new PluggableSchemaResolver(
 									PluggableSchemaResolver.class.getClassLoader()));
+					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file
+							.getProject());
 					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(
-							this, resource);
+							this, resource, sourceExtractor);
 					final ProblemReporter problemReporter = new BeansConfigProblemReporter();
 					final BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(this);
 					final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
@@ -269,7 +271,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					reader.setResourceLoader(resourceLoader);
 
 					reader.setEntityResolver(resolver);
-					reader.setSourceExtractor(new DelegatingSourceExtractor(file.getProject()));
+					reader.setSourceExtractor(sourceExtractor);
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
@@ -283,7 +285,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 						Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
 
-							public Integer call() throws Exception {
+							public Integer call() {
 
 								try {
 									// load bean definitions
@@ -300,8 +302,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 								catch (Exception e) {
 									// record the exception to throw that later
 									throwables.add(e);
-									throw e;
 								}
+								return 0;
 							}
 
 						};
@@ -311,10 +313,15 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 									loadBeanDefinitionOperation);
 							BeansCorePlugin.getExecutorService().submit(task);
 							int count = task.get(60, TimeUnit.SECONDS);
-							
+
 							if (BeansModel.DEBUG) {
 								System.out.println(count + " bean definitions loaded from '"
 										+ resource.getFile().getAbsolutePath() + "'");
+							}
+							// if we recored an exception use this instead of stupid concurrent
+							// exception
+							if (throwables.size() > 0) {
+								throw throwables.iterator().next();
 							}
 						}
 						catch (TimeoutException e) {
@@ -322,20 +329,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 									"Loading of resource '" + resource.getFile().getAbsolutePath()
 											+ "' took more than 60sec", file, -1));
 						}
-						catch (ExecutionException e) {
-							// if we recored an exception use this instead of stupid concurrent
-							// exception
-							if (throwables.size() > 0) {
-								throw throwables.iterator().next();
-							}
-							throw e;
-						}
 					}
 					catch (Throwable e) { // handle ALL exceptions
 
 						// Skip SAXParseExceptions because they're already
 						// handled by the SAX ErrorHandler
-						if (!(e.getCause() instanceof SAXParseException)) {
+						if (!(e.getCause() instanceof SAXParseException) 
+								&& !(e instanceof BeanDefinitionParsingException)) {
 							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e
 									.getMessage(), file, -1));
 							BeansCorePlugin.log(e);
@@ -519,7 +519,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		private Map<Resource, DocumentDefaultsDefinition> defaultDefinitionsCache;
 
-		public BeansConfigReaderEventListener(IBeansConfig config, Resource resource) {
+		private SourceExtractor sourceExtractor;
+
+		public BeansConfigReaderEventListener(IBeansConfig config, Resource resource,
+				SourceExtractor sourceExtractor) {
 			this.config = config;
 			this.resource = resource;
 			this.elementProviders = NamespaceUtils.getElementProviders();
@@ -527,9 +530,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			this.importDefinitionsCache = new HashMap<Resource, Set<ImportDefinition>>();
 			this.aliasDefinitionsCache = new HashMap<Resource, Set<AliasDefinition>>();
 			this.defaultDefinitionsCache = new HashMap<Resource, DocumentDefaultsDefinition>();
-
+			this.sourceExtractor = sourceExtractor;
 		}
-
+		
+		/**
+		 * {@inheritDoc}
+		 */
 		public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 			if (defaultsDefinition instanceof DocumentDefaultsDefinition) {
 				Object source = defaultsDefinition.getSource();
@@ -540,7 +546,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				}
 			}
 		}
-
+		
+		/**
+		 * {@inheritDoc}
+		 */
 		public void importProcessed(ImportDefinition importDefinition) {
 			Object source = importDefinition.getSource();
 
@@ -550,12 +559,33 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void aliasRegistered(AliasDefinition aliasDefinition) {
 			Object source = aliasDefinition.getSource();
 
 			if (source instanceof IModelSourceLocation) {
 				Resource resource = ((IModelSourceLocation) source).getResource();
 				addAliasToCache(aliasDefinition, resource);
+			}
+		}
+
+		/**
+		 * Converts the given {@link ComponentDefinition} into a corresponding
+		 * {@link ISourceModelElement} via a namespace-specific {@link IModelElementProvider}. These
+		 * providers are registered via the extension point
+		 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code>.
+		 */
+		public void componentRegistered(ComponentDefinition componentDefinition) {
+			Object source = componentDefinition.getSource();
+			
+			// make sure nested BeanDefinitions have all the source extraction applied
+			addSourceToNestedBeanDefinitions(componentDefinition);
+
+			if (source instanceof IModelSourceLocation) {
+				Resource resource = ((IModelSourceLocation) source).getResource();
+				addComponentToCache(componentDefinition, resource);
 			}
 		}
 
@@ -570,18 +600,22 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			}
 		}
 
-		/**
-		 * Converts the given {@link ComponentDefinition} into a corresponding
-		 * {@link ISourceModelElement} via a namespace-specific {@link IModelElementProvider}. These
-		 * providers are registered via the extension point
-		 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code>.
-		 */
-		public void componentRegistered(ComponentDefinition componentDefinition) {
-			Object source = componentDefinition.getSource();
+		private void addSourceToNestedBeanDefinitions(ComponentDefinition componentDefinition) {
+			if (componentDefinition instanceof CompositeComponentDefinition) {
+				CompositeComponentDefinition compositeComponentDefinition = 
+					(CompositeComponentDefinition) componentDefinition;
+				for (ComponentDefinition nestedComponentDefinition : compositeComponentDefinition
+						.getNestedComponents()) {
+					for (BeanDefinition beanDefinition : nestedComponentDefinition
+							.getBeanDefinitions()) {
+						if (!(beanDefinition.getSource() instanceof IModelSourceLocation)
+								&& beanDefinition instanceof AbstractBeanDefinition) {
+							((AbstractBeanDefinition) beanDefinition).setSource(sourceExtractor
+									.extractSource(beanDefinition.getSource(), resource));
+						}
+					}
+				}
 
-			if (source instanceof IModelSourceLocation) {
-				Resource resource = ((IModelSourceLocation) source).getResource();
-				addComponentToCache(componentDefinition, resource);
 			}
 		}
 
