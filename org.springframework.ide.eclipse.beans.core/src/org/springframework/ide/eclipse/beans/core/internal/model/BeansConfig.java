@@ -221,21 +221,21 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	@Override
 	protected void readConfig() {
 		if (!this.isModelPopulated) {
+
+			// Only install Eclipse-based resource loader if enabled in project properties
+			// IMPORTANT: the following block needs to stay before the w.lock()
+			// as it could otherwise create a runtime deadlock
+			ResourceLoader resourceLoader = null;
+			if (((IBeansProject) getElementParent()).isImportsEnabled()) {
+				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file
+						.getProject());
+			}
+			else {
+				resourceLoader = new PathMatchingResourcePatternResolver(JdtUtils
+						.getClassLoader(getElementResource()));
+			}
+
 			try {
-
-				// Only install Eclipse-based resource loader if enabled in project properties
-				// IMPORTANT: the following block needs to stay before the w.lock()
-				// as it could otherwise create a runtime deadlock
-				ResourceLoader resourceLoader = null;
-				if (((IBeansProject) getElementParent()).isImportsEnabled()) {
-					resourceLoader = new EclipsePathMatchingResourcePatternResolver(file
-							.getProject());
-				}
-				else {
-					resourceLoader = new PathMatchingResourcePatternResolver(JdtUtils
-							.getClassLoader(getElementResource()));
-				}
-
 				w.lock();
 				if (this.isModelPopulated) {
 					return;
