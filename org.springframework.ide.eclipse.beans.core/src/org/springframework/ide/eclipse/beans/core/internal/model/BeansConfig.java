@@ -330,7 +330,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 											+ "' took more than 60sec", file, -1));
 						}
 					}
-					catch (Throwable e) { // handle ALL exceptions
+					catch (Throwable e) {
 
 						// Skip SAXParseExceptions because they're already
 						// handled by the SAX ErrorHandler
