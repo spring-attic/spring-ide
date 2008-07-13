@@ -208,27 +208,13 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 			IBeansConfig bc = (IBeansConfig) getElement(elementId);
 			list.addAll(bc.getBeans());
 			// add component registered beans
-			for (IBeansComponent component : bc.getComponents()) {
-				Set<IBean> nestedBeans = component.getBeans();
-				for (IBean nestedBean : nestedBeans) {
-					if (!nestedBean.isInfrastructure()) {
-						list.add(nestedBean);
-					}
-				}
-			}
+			addBeansFromComponents(list, bc.getComponents());
 		}
 		else if (getElement(elementId) instanceof IBeansConfigSet) {
 			IBeansConfigSet bcs = (IBeansConfigSet) getElement(elementId);
 			list.addAll(bcs.getBeans());
 			// add component registered beans
-			for (IBeansComponent component : bcs.getComponents()) {
-				Set<IBean> nestedBeans = component.getBeans();
-				for (IBean nestedBean : nestedBeans) {
-					if (!nestedBean.isInfrastructure()) {
-						list.add(nestedBean);
-					}
-				}
-			}
+			addBeansFromComponents(list, bcs.getComponents());
 		}
 		else if (getElement(elementId) instanceof IBean) {
 			list.add((IBean) getElement(elementId));
@@ -243,9 +229,21 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		// Marshall all beans into a graph bean node
 		beans = new LinkedHashMap<String, Bean>();
 		for (IBean bean : list) {
-			if (!bean.isInfrastructure()) {
+//			if (!bean.isInfrastructure()) {
 				beans.put(bean.getElementName(), new Bean(bean));
+//			}
+		}
+	}
+
+	private void addBeansFromComponents(Set<IBean> beans, Set<IBeansComponent> components) {
+		for (IBeansComponent component : components) {
+			Set<IBean> nestedBeans = component.getBeans();
+			for (IBean nestedBean : nestedBeans) {
+//				if (!nestedBean.isInfrastructure()) {
+					beans.add(nestedBean);
+//				}
 			}
+			addBeansFromComponents(beans, component.getComponents());
 		}
 	}
 
