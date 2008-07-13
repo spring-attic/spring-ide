@@ -445,7 +445,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		// definitions
 		ReaderEventListener eventListener = new EmptyReaderEventListener() {
 
-			// Keep the contributed model element provider
+			// Keep the contributed model element providers
 			final Map<String, IModelElementProvider> elementProviders = NamespaceUtils
 					.getElementProviders();
 
