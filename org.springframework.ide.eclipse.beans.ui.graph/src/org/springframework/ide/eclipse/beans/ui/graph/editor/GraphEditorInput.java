@@ -51,24 +51,22 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This editor input is used to specify the list of {@link IBean}s which should
- * be displayed in the beans graph editor. Therefore a source model model
- * element ({@link IBean}>, {@link IBeanConfig} or {@link IBeanConfigSet})
- * has to be specified. For a given bean it's parent bean (for child beans
- * only), constructor argument values and property values are checked.
- * {@link IBean} look-up is done from the specified context ({@link IBeanConfig}
- * or {@link IBeanConfigSet}). This list of beans is accessible via
- * {@link #getBeans()}. This context used for bean look-up is accessible via
+ * This editor input is used to specify the list of {@link IBean}s which should be displayed in the
+ * beans graph editor. Therefore a source model model element ({@link IBean}>, {@link IBeanConfig}
+ * or {@link IBeanConfigSet}) has to be specified. For a given bean it's parent bean (for child
+ * beans only), constructor argument values and property values are checked. {@link IBean} look-up
+ * is done from the specified context ({@link IBeanConfig} or {@link IBeanConfigSet}). This list of
+ * beans is accessible via {@link #getBeans()}. This context used for bean look-up is accessible via
  * {@link #getContext()}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public class GraphEditorInput implements IEditorInput, IPersistableElement {
-	
+
 	private static final String CLASS_ATTRIBUTE = "class";
 
-	private static final String GRAPH_CONTENT_EXTENDER_EXTENSION_POINT = 
-		BeansGraphPlugin.PLUGIN_ID + ".graphContentExtender";
+	private static final String GRAPH_CONTENT_EXTENDER_EXTENSION_POINT = BeansGraphPlugin.PLUGIN_ID
+			+ ".graphContentExtender";
 
 	private String elementId;
 
@@ -85,23 +83,21 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	private boolean hasError;
 
 	/**
-	 * Creates a list with all beans which are referenced from the model element
-	 * defined by given ID.
+	 * Creates a list with all beans which are referenced from the model element defined by given
+	 * ID.
 	 * @param elementID the model element's ID
-	 * @throws IllegalArgumentException if unsupported model element is
-	 * specified
+	 * @throws IllegalArgumentException if unsupported model element is specified
 	 */
 	public GraphEditorInput(String elementId) {
 		this(elementId, getContext(elementId));
 	}
 
 	/**
-	 * Creates a list with all beans which are referenced from the model element
-	 * defined by given ID.
+	 * Creates a list with all beans which are referenced from the model element defined by given
+	 * ID.
 	 * @param elementId the model element's ID
 	 * @param contextId the context's ID
-	 * @throws IllegalArgumentException if unsupported model element or context
-	 * is specified
+	 * @throws IllegalArgumentException if unsupported model element or context is specified
 	 */
 	public GraphEditorInput(String elementId, String contextId) {
 		this.elementId = elementId;
@@ -185,7 +181,8 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 							Object provider = config.createExecutableExtension(CLASS_ATTRIBUTE);
 							if (provider instanceof IGraphContentExtender) {
 								((IGraphContentExtender) provider).addAdditionalBeans(getBeans(),
-										getBeansReferences(), (IBeansModelElement) getElement(elementId),
+										getBeansReferences(),
+										(IBeansModelElement) getElement(elementId),
 										(IBeansModelElement) getElement(contextId));
 							}
 						}
@@ -199,8 +196,8 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	}
 
 	/**
-	 * Creates a list with all beans belonging to the specified config / config
-	 * set or being connected with the specified bean.
+	 * Creates a list with all beans belonging to the specified config / config set or being
+	 * connected with the specified bean.
 	 */
 	protected void createBeansMap() {
 		Set<IBean> list = new LinkedHashSet<IBean>();
@@ -229,9 +226,9 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		// Marshall all beans into a graph bean node
 		beans = new LinkedHashMap<String, Bean>();
 		for (IBean bean : list) {
-//			if (!bean.isInfrastructure()) {
-				beans.put(bean.getElementName(), new Bean(bean));
-//			}
+			// if (!bean.isInfrastructure()) {
+			beans.put(bean.getElementName(), new Bean(bean));
+			// }
 		}
 	}
 
@@ -239,9 +236,9 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		for (IBeansComponent component : components) {
 			Set<IBean> nestedBeans = component.getBeans();
 			for (IBean nestedBean : nestedBeans) {
-//				if (!nestedBean.isInfrastructure()) {
-					beans.add(nestedBean);
-//				}
+				// if (!nestedBean.isInfrastructure()) {
+				beans.add(nestedBean);
+				// }
 			}
 			addBeansFromComponents(beans, component.getComponents());
 		}
@@ -263,7 +260,8 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 				Bean targetBean = this.beans.get(beanRef.getTarget().getElementName());
 				if (targetBean != null && targetBean != bean
 						&& beanRef.getSource() instanceof IBean) {
-					beanReferences.add(new Reference(beanRef.getType(), bean, targetBean));
+					beanReferences.add(new Reference(beanRef.getType(), bean, targetBean, bean, beanRef
+							.isInner()));
 				}
 			}
 
@@ -278,8 +276,8 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 					BeansConnection beanRef = (BeansConnection) cargRefs.next();
 					Bean targetBean = this.beans.get(beanRef.getTarget().getElementName());
 					if (targetBean != null && targetBean != bean) {
-						beanReferences
-								.add(new Reference(beanRef.getType(), bean, targetBean, carg));
+						beanReferences.add(new Reference(beanRef.getType(), bean, targetBean, carg,
+								beanRef.isInner()));
 					}
 				}
 			}
@@ -294,7 +292,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 					Bean targetBean = this.beans.get(beanRef.getTarget().getElementName());
 					if (targetBean != null && targetBean != bean) {
 						beanReferences.add(new Reference(beanRef.getType(), bean, targetBean,
-								property));
+								property, beanRef.isInner()));
 					}
 				}
 			}

@@ -87,11 +87,11 @@ import org.w3c.dom.Node;
 public abstract class BeansModelUtils {
 
 	/**
-	 * Returns the <code>IBean</code> for a given bean name from specified context (<code>IBeansConfig</code>
-	 * or <code>IBeansConfigSet</code>). If the corresponding bean is not found then the
-	 * context's list of <code>IBeanAlias</code>es is checked too.
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
-	 * the beans are looked-up
+	 * Returns the <code>IBean</code> for a given bean name from specified context (
+	 * <code>IBeansConfig</code> or <code>IBeansConfigSet</code>). If the corresponding bean is not
+	 * found then the context's list of <code>IBeanAlias</code>es is checked too.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
+	 * beans are looked-up
 	 * @return <code>IBean</code> or <code>null</code> if bean not found
 	 * @throws IllegalArgumentException if unsupported context specified
 	 */
@@ -127,9 +127,9 @@ public abstract class BeansModelUtils {
 	 * Returns the given bean's class name.
 	 * @param bean the bean to lookup the bean class name for
 	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are
-	 * looked-up; if <code>null</code> then the bean's config will be first used; if the bean
-	 * class name cannot be resolved in the bean's configs, the algorithm will look in all bean
-	 * config sets that contain the bean's config
+	 * looked-up; if <code>null</code> then the bean's config will be first used; if the bean class
+	 * name cannot be resolved in the bean's configs, the algorithm will look in all bean config
+	 * sets that contain the bean's config
 	 */
 	public static String getBeanClass(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
@@ -319,10 +319,10 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the corresponding Java type for given bean's class.
 	 * @param bean the bean to lookup the bean class' Java type
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
-	 * the beans are looked-up; if <code>null</code> then the bean's config is used
-	 * @return the Java type of given bean's class or <code>null</code> if no bean class defined
-	 * or type not found
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
+	 * beans are looked-up; if <code>null</code> then the bean's config is used
+	 * @return the Java type of given bean's class or <code>null</code> if no bean class defined or
+	 * type not found
 	 */
 	public static IType getBeanType(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
@@ -431,8 +431,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the given
-	 * <code>file</code> as bean class.
+	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the given <code>file</code>
+	 * as bean class.
 	 * <p>
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * <code>null</code> will never be returned.
@@ -524,14 +524,16 @@ public abstract class BeansModelUtils {
 
 	/**
 	 * Returns the inner {@link IBean}s of a given {@link IModelElement}.
+	 * @since 2.1.0
 	 */
-	public static Set<IBean> getInnerBeans(final IModelElement element) {
+	public static Set<IBean> getInnerBeans(final IModelElement element, final boolean recursive) {
 		final Set<IBean> innerBeans = new HashSet<IBean>();
 		IModelElementVisitor visitor = new IModelElementVisitor() {
 			public boolean visit(IModelElement visitedElement, IProgressMonitor monitor) {
 				if (!element.equals(visitedElement) && visitedElement instanceof IBean
 						&& ((IBean) visitedElement).isInnerBean()) {
 					innerBeans.add((IBean) visitedElement);
+					return recursive;
 				}
 				return true;
 			}
@@ -541,8 +543,15 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the merged bean definition for a given bean from specified context ({@link IBeansConfig}
-	 * or {@link IBeansConfigSet}). Any cyclic-references are ignored.
+	 * Returns the inner {@link IBean}s of a given {@link IModelElement}.
+	 */
+	public static Set<IBean> getInnerBeans(final IModelElement element) {
+		return getInnerBeans(element, true);
+	}
+
+	/**
+	 * Returns the merged bean definition for a given bean from specified context (
+	 * {@link IBeansConfig} or {@link IBeansConfigSet}). Any cyclic-references are ignored.
 	 * @param bean the bean the merged bean definition is requested for
 	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are
 	 * looked-up
@@ -623,8 +632,8 @@ public abstract class BeansModelUtils {
 	 * Returns the most specific {@link IModelElement} that corresponds to the given
 	 * <code>startLine</code> and <code>endLine</code> line numbers.
 	 * <p>
-	 * Client should be aware of possible <code>null</code> returns in case on
-	 * {@link IModelElement} can be found at the given location.
+	 * Client should be aware of possible <code>null</code> returns in case on {@link IModelElement}
+	 * can be found at the given location.
 	 * @since 2.0.1
 	 */
 	public static IModelElement getMostSpecificModelElement(int startLine, int endLine,
@@ -685,10 +694,10 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the corresponding Java set method for given bean property.
 	 * @param property the property to lookup the Java method for
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
-	 * the beans are looked-up; if <code>null</code> then the bean's config is used
-	 * @return the Java method of given bean property or <code>null</code> if no bean class
-	 * defined or set method not found
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
+	 * beans are looked-up; if <code>null</code> then the bean's config is used
+	 * @return the Java method of given bean property or <code>null</code> if no bean class defined
+	 * or set method not found
 	 */
 	public static IMethod getPropertyMethod(IBeanProperty property, IModelElement context) {
 		Assert.notNull(property);
@@ -778,8 +787,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Checks if a the {@link IType}s contained in the given <code>file</code> instance are used
-	 * as Bean classes anywhere in the core model.
+	 * Checks if a the {@link IType}s contained in the given <code>file</code> instance are used as
+	 * Bean classes anywhere in the core model.
 	 * <p>
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
@@ -930,8 +939,8 @@ public abstract class BeansModelUtils {
 	/**
 	 * Adds the all beans which are referenced by the specified bean to the given list as an
 	 * instance of {@link BeansConnection}.
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
-	 * the referenced beans are looked-up
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
+	 * referenced beans are looked-up
 	 * @param referencedBeans used to break from cycles
 	 */
 	private static void addBeanReferencesForBean(IBean element, IModelElement context,
@@ -952,8 +961,8 @@ public abstract class BeansModelUtils {
 	/**
 	 * Adds the all beans which are referenced by the specified {@link IBeansComponent} to the given
 	 * list as an instance of {@link BeansConnection}.
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
-	 * the referenced beans are looked-up
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
+	 * referenced beans are looked-up
 	 * @param referencedBeans used to break from cycles
 	 */
 	private static void addBeanReferencesForBeansComponent(IBeansComponent component,
@@ -970,18 +979,15 @@ public abstract class BeansModelUtils {
 
 	/**
 	 * Given a bean property's or constructor argument's value, adds any beans referenced by this
-	 * value. This value could be:
-	 * <li>An {@link IBeanReference}, which bean will be added.
-	 * <li>An inner {@link IBean}. This is an inner {@link IBean} that may contain
-	 * {@link IBeanReference}s which will be added too.
-	 * <li>An {@link IBeansList}. This is a collection that may contain {@link IBeanReference}s
-	 * which will be added.
-	 * <li>An {@link IBeansSet}. May also contain {@link IBeanReference}s that will be added.
-	 * <li>An {@link IBeansMap}. In this case the value may be a {@link IBeanReference} that will
-	 * be added.
-	 * <li>An ordinary object or null, in which case it's ignored.
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>)
-	 * the referenced beans are looked-up
+	 * value. This value could be: <li>An {@link IBeanReference}, which bean will be added. <li>An
+	 * inner {@link IBean}. This is an inner {@link IBean} that may contain {@link IBeanReference}s
+	 * which will be added too. <li>An {@link IBeansList}. This is a collection that may contain
+	 * {@link IBeanReference}s which will be added. <li>An {@link IBeansSet}. May also contain
+	 * {@link IBeanReference}s that will be added. <li>An {@link IBeansMap}. In this case the value
+	 * may be a {@link IBeanReference} that will be added. <li>An ordinary object or null, in which
+	 * case it's ignored.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
+	 * referenced beans are looked-up
 	 */
 	private static void addBeanReferencesForValue(IModelElement element, Object value,
 			IModelElement context, Set<BeansConnection> references, Set<IBean> referencedBeans,
@@ -1176,6 +1182,16 @@ public abstract class BeansModelUtils {
 				addBeanReferencesForValue(property, property.getValue(), context, references,
 						referencedBeans, recursive);
 			}
+
+			// Add references from inner beans
+			for (IBean nestedBean : getInnerBeans(bean, false)) {
+				Set<BeansConnection> nestedConnections = getBeanReferences(nestedBean, context,
+						false);
+				for (BeansConnection nestedConnection : nestedConnections) {
+					references.add(new BeansConnection(nestedConnection.getType(), bean,
+							nestedConnection.getTarget(), true));
+				}
+			}
 		}
 		else if (element instanceof IBeanConstructorArgument) {
 
@@ -1345,7 +1361,7 @@ public abstract class BeansModelUtils {
 								}
 								for (IBeansConfig config : configs) {
 									Set<IBean> allBeans = getBeans(config);
-									
+
 									for (IBean bean : allBeans) {
 										IType type = resolveBeanType(bean);
 										if (type != null) {
@@ -1421,7 +1437,8 @@ public abstract class BeansModelUtils {
 			try {
 				IBean factoryB = getBeanWithConfigSets(bd.getFactoryBeanName(), beansConfig);
 				if (factoryB != null) {
-					BeanDefinition factoryBd = BeansModelUtils.getMergedBeanDefinition(factoryB, null);
+					BeanDefinition factoryBd = BeansModelUtils.getMergedBeanDefinition(factoryB,
+							null);
 					IType factoryBeanType = extractBeanClass(factoryBd, bean, factoryBd
 							.getBeanClassName(), beansConfig);
 					if (factoryBeanType != null) {
@@ -1437,9 +1454,9 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Extracts the {@link IType} of a {@link BeanDefinition} by only looking at the
-	 * <code>factory-method</code>. The passed in {@link IType} <b>must</b> be the bean class or
-	 * the resolved type of the factory bean in use.
+	 * Extracts the {@link IType} of a {@link BeanDefinition} by only looking at the <code>
+	 * factory-method</code>. The passed in {@link IType} <b>must</b> be the bean class or the
+	 * resolved type of the factory bean in use.
 	 */
 	private static IType extractTypeFromFactoryMethod(BeanDefinition bd, IType type) {
 		String factoryMethod = bd.getFactoryMethodName();

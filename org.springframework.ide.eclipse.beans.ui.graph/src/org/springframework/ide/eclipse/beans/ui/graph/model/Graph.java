@@ -124,7 +124,7 @@ public class Graph implements IAdaptable {
 			}
 			else {
 				Reference reference = new Reference(BeanType.STANDARD, root,
-						bean);
+						bean, false);
 				reference.weight = 0;
 				rootEdges.add(reference);
 				graph.edges.add(reference);

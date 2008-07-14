@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,10 +57,15 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 	@Override
 	protected void refreshVisuals() {
 		Dimension dim = getFigure().getPreferredSize();
-		Rectangle rect = new Rectangle(getBean().x, getBean().y, dim.width,
-				dim.height);
-		((GraphicalEditPart) getParent()).setLayoutConstraint(this,
-				getFigure(), rect);
+		Rectangle rect = null;
+		if (getBean().getInnerBeans().length > 0) {
+			rect = new Rectangle(getBean().x, getBean().y, dim.width + 3, dim.height);
+		}
+		else {
+			rect = new Rectangle(getBean().x, getBean().y, dim.width + 3, dim.height);
+		}
+		((GraphicalEditPart) getParent()).setLayoutConstraint(this, getFigure(), rect);
+		getFigure().setBounds(rect);
 	}
 
 	@Override
@@ -105,8 +110,7 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 	}
 
 	/**
-	 * Opens this bean's config file or corresponding java element on double
-	 * click.
+	 * Opens this bean's config file or corresponding java element on double click.
 	 */
 	@Override
 	public void performRequest(Request req) {
@@ -115,8 +119,7 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 				BeansUIUtils.openInEditor(getBean().getBean());
 			}
 			else {
-				IType type = BeansModelUtils.getBeanType(getBean().getBean(),
-						null);
+				IType type = BeansModelUtils.getBeanType(getBean().getBean(), null);
 				if (type != null) {
 					SpringUIUtils.openInEditor(type);
 				}

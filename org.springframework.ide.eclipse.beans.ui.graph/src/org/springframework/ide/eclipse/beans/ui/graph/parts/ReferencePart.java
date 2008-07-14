@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.beans.ui.graph.model.Reference;
 
 /**
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class ReferencePart extends AbstractConnectionEditPart {
 
@@ -47,7 +48,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 	@Override
 	protected IFigure createFigure() {
 		PolylineConnection conn = createConnection(getReference());
-		Label label = new Label();
+		Label label = new Label(); 
 		BeanType type = getReference().getType();
 		if (type == BeanType.PARENT) {
 			conn.setLineStyle(Graphics.LINE_DOT);
@@ -125,6 +126,9 @@ public class ReferencePart extends AbstractConnectionEditPart {
 		}
 		conn.setRoutingConstraint(bends);
 		conn.setTargetDecoration(new PolylineDecoration());
+		if (getReference().isInner()) {
+			conn.setLineStyle(Graphics.LINE_DOT);
+		}
 		return conn;
 	}
 

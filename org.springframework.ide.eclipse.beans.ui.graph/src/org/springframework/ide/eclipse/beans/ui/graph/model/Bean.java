@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.beans.ui.graph.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
@@ -26,13 +28,16 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
  * This is a representation of a Spring bean.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class Bean extends Node implements IAdaptable {
 
-	public int preferredHeight;
 	private IBean bean;
+
+	private Bean[] innerBeans;
+
+	public int preferredHeight;
 
 	public Bean() {
 		super("empty");
@@ -75,8 +80,7 @@ public class Bean extends Node implements IAdaptable {
 		ArrayList<ConstructorArgument> list = new ArrayList<ConstructorArgument>();
 		Iterator cargs = bean.getConstructorArguments().iterator();
 		while (cargs.hasNext()) {
-			IBeanConstructorArgument carg = (IBeanConstructorArgument) cargs
-					.next();
+			IBeanConstructorArgument carg = (IBeanConstructorArgument) cargs.next();
 			list.add(new ConstructorArgument(this, carg));
 		}
 		return list.toArray(new ConstructorArgument[list.size()]);
@@ -101,6 +105,17 @@ public class Bean extends Node implements IAdaptable {
 		return list.toArray(new Property[list.size()]);
 	}
 
+	public Bean[] getInnerBeans() {
+		if (innerBeans == null) {
+			Set<Bean> innerBeans = new HashSet<Bean>();
+			for (IBean b : BeansModelUtils.getInnerBeans(bean, false)) {
+				innerBeans.add(new Bean(b));
+			}
+			this.innerBeans = innerBeans.toArray(new Bean[innerBeans.size()]);
+		}
+		return this.innerBeans;
+	}
+
 	public boolean isRootBean() {
 		return bean.isRootBean();
 	}
@@ -115,10 +130,10 @@ public class Bean extends Node implements IAdaptable {
 		}
 		return null;
 	}
-
+	
 	@Override
 	public String toString() {
-		return "Bean '" + getName() + "': x=" + x + ", y=" + y + ", width=" +
-			   width + ", height=" + height;
+		return "Bean '" + getName() + "': x=" + x + ", y=" + y + ", width=" + width + ", height="
+				+ height;
 	}
 }

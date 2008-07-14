@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,10 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Holder for a connection betweena {@link IModelElement} and an {@link IBean}
+ * Holder for a connection between a {@link IModelElement} and an {@link IBean}
  * within a certain context ({@link IBeansConfig} or ({@link IBeansConfigSet}).
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansConnection {
 
@@ -32,6 +32,8 @@ public class BeansConnection {
 	private IModelElement source;
 	private IBean target;
 	private IModelElement context;
+	private boolean isInner = false;
+	
 
 	public BeansConnection(BeanType type, IModelElement source,
 			IBean target) {
@@ -40,11 +42,23 @@ public class BeansConnection {
 	}
 
 	public BeansConnection(BeanType type, IModelElement source,
+			IBean target, boolean isInner) {
+		this(BeanType.STANDARD, source, target, target
+				.getElementParent(), isInner);
+	}
+
+	public BeansConnection(BeanType type, IModelElement source,
 			IBean target, IModelElement context) {
+		this(type, source, target, target.getElementParent(), false);
+	}
+
+	public BeansConnection(BeanType type, IModelElement source,
+			IBean target, IModelElement context, boolean isInner) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
 		this.context = context;
+		this.isInner = isInner;
 	}
 
 	public final BeanType getType() {
@@ -62,6 +76,10 @@ public class BeansConnection {
 	public IModelElement getContext() {
 		return context;
 	}
+	
+	public boolean isInner() {
+		return isInner;
+	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -78,6 +96,8 @@ public class BeansConnection {
 			return false;
 		if (!ObjectUtils.nullSafeEquals(this.target, that.target))
 			return false;
+		if (!ObjectUtils.nullSafeEquals(this.isInner, that.isInner))
+			return false;
 		return ObjectUtils.nullSafeEquals(this.context, that.context);
 	}
 
@@ -86,6 +106,7 @@ public class BeansConnection {
 		int hashCode = ObjectUtils.nullSafeHashCode(type);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(source);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(target);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(isInner);
 		return 29 * hashCode + ObjectUtils.nullSafeHashCode(context);
 	}
 
