@@ -59,6 +59,12 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	public static final String DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID = PLUGIN_ID
 			+ ".shouldOpenConfigFile";
 
+	public static final String SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID = PLUGIN_ID
+			+ ".shouldShowInfrastructureBeans";
+
+	public static final String SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID = PLUGIN_ID
+			+ ".shouldShowInnerBeans";
+
 	public static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	/** The shared instance. */
@@ -69,7 +75,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	private ImageDescriptorRegistry imageDescriptorRegistry;
 
 	private ILabelProvider labelProvider;
-	
+
 	/** {@link IResourceChangeListener} that gets notified for project nature added events */
 	private IResourceChangeListener changeListener;
 
@@ -122,6 +128,8 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(changeListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
 		getPreferenceStore().setDefault(DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
+		getPreferenceStore().setDefault(SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID, false);
+		getPreferenceStore().setDefault(SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID, true);
 	}
 
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
@@ -138,8 +146,8 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns then singleton instance of {@link BeansModelLabelProvider}.
 	 * <p>
-	 * <b>For this instance the dispose method must never be called!! This is done by
-	 * {@link Plugin.stop()} instead.</b>
+	 * <b>For this instance the dispose method must never be called!! This is done by {@link
+	 * Plugin.stop()} instead.</b>
 	 */
 	public static ILabelProvider getLabelProvider() {
 		return getDefault().internalGetLabelProvider();

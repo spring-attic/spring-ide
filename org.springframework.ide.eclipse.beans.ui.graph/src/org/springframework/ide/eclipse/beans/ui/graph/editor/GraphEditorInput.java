@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.model.ConstructorArgument;
@@ -226,19 +227,25 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		// Marshall all beans into a graph bean node
 		beans = new LinkedHashMap<String, Bean>();
 		for (IBean bean : list) {
-			// if (!bean.isInfrastructure()) {
-			beans.put(bean.getElementName(), new Bean(bean));
-			// }
+			if (shouldAddBean(bean)) {
+				beans.put(bean.getElementName(), new Bean(bean));
+			}
 		}
+	}
+
+	private boolean shouldAddBean(IBean bean) {
+		return !bean.isInfrastructure()
+				|| (bean.isInfrastructure() && BeansUIPlugin.getDefault().getPluginPreferences()
+						.getBoolean(BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID));
 	}
 
 	private void addBeansFromComponents(Set<IBean> beans, Set<IBeansComponent> components) {
 		for (IBeansComponent component : components) {
 			Set<IBean> nestedBeans = component.getBeans();
 			for (IBean nestedBean : nestedBeans) {
-				// if (!nestedBean.isInfrastructure()) {
-				beans.add(nestedBean);
-				// }
+				if (shouldAddBean(nestedBean)) {
+					beans.add(nestedBean);
+				}
 			}
 			addBeansFromComponents(beans, component.getComponents());
 		}
@@ -260,8 +267,8 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 				Bean targetBean = this.beans.get(beanRef.getTarget().getElementName());
 				if (targetBean != null && targetBean != bean
 						&& beanRef.getSource() instanceof IBean) {
-					beanReferences.add(new Reference(beanRef.getType(), bean, targetBean, bean, beanRef
-							.isInner()));
+					beanReferences.add(new Reference(beanRef.getType(), bean, targetBean, bean,
+							beanRef.isInner()));
 				}
 			}
 

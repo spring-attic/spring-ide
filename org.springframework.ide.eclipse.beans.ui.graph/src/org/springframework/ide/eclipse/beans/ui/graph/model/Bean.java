@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
@@ -108,8 +109,11 @@ public class Bean extends Node implements IAdaptable {
 	public Bean[] getInnerBeans() {
 		if (innerBeans == null) {
 			Set<Bean> innerBeans = new HashSet<Bean>();
-			for (IBean b : BeansModelUtils.getInnerBeans(bean, false)) {
-				innerBeans.add(new Bean(b));
+			if (BeansUIPlugin.getDefault().getPluginPreferences().getBoolean(
+					BeansUIPlugin.SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID)) {
+				for (IBean b : BeansModelUtils.getInnerBeans(bean, false)) {
+					innerBeans.add(new Bean(b));
+				}
 			}
 			this.innerBeans = innerBeans.toArray(new Bean[innerBeans.size()]);
 		}
@@ -130,7 +134,7 @@ public class Bean extends Node implements IAdaptable {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Bean '" + getName() + "': x=" + x + ", y=" + y + ", width=" + width + ", height="
