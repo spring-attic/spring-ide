@@ -15,7 +15,7 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.aspectj.TypePatternClassFilter;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 
 /**
  * @author Christian Dupuis
@@ -33,7 +33,7 @@ public class BeanIntroductionDefinition extends BeanAspectDefinition implements
 	private ClassFilter typePatternClassFilter;
 
 	public BeanIntroductionDefinition() {
-		setType(ADVICE_TYPES.DECLARE_PARENTS);
+		setType(ADVICE_TYPE.DECLARE_PARENTS);
 	}
 
 	@Override
@@ -54,8 +54,8 @@ public class BeanIntroductionDefinition extends BeanAspectDefinition implements
 	}
 
 	@Override
-	public ADVICE_TYPES getType() {
-		return ADVICE_TYPES.DECLARE_PARENTS;
+	public ADVICE_TYPE getType() {
+		return ADVICE_TYPE.DECLARE_PARENTS;
 	}
 
 	public ClassFilter getTypeMatcher() {

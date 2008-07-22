@@ -34,7 +34,7 @@ import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
@@ -157,13 +157,13 @@ public class AspectDefinitionMatcher {
 				Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
 				Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc,
 						null });
-				if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
+				if (info.getType() == ADVICE_TYPE.AFTER_RETURNING) {
 					if (info.getReturning() != null) {
 						ClassUtils.invokeMethod(aspectJAdvice, "setReturningName", info
 								.getReturning());
 					}
 				}
-				else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
+				else if (info.getType() == ADVICE_TYPE.AFTER_THROWING) {
 					if (info.getThrowing() != null) {
 						ClassUtils.invokeMethod(aspectJAdvice, "setThrowingName", info
 								.getThrowing());

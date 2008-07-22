@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
 /**
@@ -148,24 +148,24 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 	}
 
 	private String getText(IAopReference reference) {
-		ADVICE_TYPES type = reference.getAdviceType();
+		ADVICE_TYPE type = reference.getAdviceType();
 		String text = "";
-		if (type == ADVICE_TYPES.AFTER) {
+		if (type == ADVICE_TYPE.AFTER) {
 			text += "after()";
 		}
-		else if (type == ADVICE_TYPES.AFTER_RETURNING) {
+		else if (type == ADVICE_TYPE.AFTER_RETURNING) {
 			text += "after-returning()";
 		}
-		else if (type == ADVICE_TYPES.AFTER_THROWING) {
+		else if (type == ADVICE_TYPE.AFTER_THROWING) {
 			text += "after-throwing()";
 		}
-		else if (type == ADVICE_TYPES.BEFORE) {
+		else if (type == ADVICE_TYPE.BEFORE) {
 			text += "before()";
 		}
-		else if (type == ADVICE_TYPES.AROUND) {
+		else if (type == ADVICE_TYPE.AROUND) {
 			text += "around()";
 		}
-		else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+		else if (type == ADVICE_TYPE.DECLARE_PARENTS) {
 			text += "declare parents:";
 			text += " implements "
 					+ ((IIntroductionDefinition) reference.getDefinition())

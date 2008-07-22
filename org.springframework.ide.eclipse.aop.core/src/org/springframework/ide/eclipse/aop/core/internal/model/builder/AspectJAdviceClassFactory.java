@@ -18,7 +18,7 @@ import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.ide.eclipse.aop.core.model.IAdvisorDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 
 /**
@@ -38,22 +38,22 @@ public class AspectJAdviceClassFactory {
 		}
 
 		Class<?> aspectJAdviceClass = null;
-		if (info.getType() == ADVICE_TYPES.AROUND) {
+		if (info.getType() == ADVICE_TYPE.AROUND) {
 			aspectJAdviceClass = ClassUtils
 					.loadClass(AspectJAroundAdvice.class);
 		}
-		else if (info.getType() == ADVICE_TYPES.AFTER) {
+		else if (info.getType() == ADVICE_TYPE.AFTER) {
 			aspectJAdviceClass = ClassUtils.loadClass(AspectJAfterAdvice.class);
 		}
-		else if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
+		else if (info.getType() == ADVICE_TYPE.AFTER_RETURNING) {
 			aspectJAdviceClass = ClassUtils
 					.loadClass(AspectJAfterReturningAdvice.class);
 		}
-		else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
+		else if (info.getType() == ADVICE_TYPE.AFTER_THROWING) {
 			aspectJAdviceClass = ClassUtils
 					.loadClass(AspectJAfterThrowingAdvice.class);
 		}
-		else if (info.getType() == ADVICE_TYPES.BEFORE) {
+		else if (info.getType() == ADVICE_TYPE.BEFORE) {
 			aspectJAdviceClass = ClassUtils
 					.loadClass(AspectJMethodBeforeAdvice.class);
 		}

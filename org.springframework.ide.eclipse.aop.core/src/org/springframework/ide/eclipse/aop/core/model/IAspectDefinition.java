@@ -35,11 +35,11 @@ public interface IAspectDefinition {
 
 	String getAspectClassName();
 
-	int getAspectStartLineNumber();
-	
 	int getAspectEndLineNumber();
-
+	
 	String getAspectName();
+
+	int getAspectStartLineNumber();
 
 	String getPointcutExpression();
 
@@ -49,7 +49,7 @@ public interface IAspectDefinition {
 
 	String getThrowing();
 	
-	IAopReference.ADVICE_TYPES getType();
+	IAopReference.ADVICE_TYPE getType();
 
 	boolean isProxyTargetClass();
 	

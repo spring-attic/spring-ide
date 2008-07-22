@@ -41,7 +41,7 @@ import org.springframework.ide.eclipse.aop.core.internal.model.builder.AopRefere
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
@@ -159,7 +159,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 			}
 
 			for (IAopReference reference : references) {
-				if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+				if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 					if (reference.getTarget().equals(type)) {
 						node.getDeclaredOnReferences().add(reference);
 					}
@@ -309,7 +309,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 					|| (reference.getDefinition().getAspectStartLineNumber() >= startLine
 							&& reference.getDefinition().getAspectStartLineNumber() <= endLine && resource
 							.equals(reference.getDefinition().getResource()))) {
-				if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+				if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 					if (foundIntroductionSourceReferences.containsKey(reference
 							.getDefinition())) {
 						foundIntroductionSourceReferences.get(
@@ -344,7 +344,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 						|| (targetBean.getElementStartLine() >= startLine
 								&& targetBean.getElementEndLine() <= endLine && resource
 								.equals(targetBean.getElementResource()))) {
-					if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+					if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 						if (foundIntroductionTargetReferences
 								.containsKey(targetBean)) {
 							foundIntroductionTargetReferences.get(targetBean)

@@ -19,7 +19,7 @@ import org.eclipse.ui.IPersistableElement;
 import org.springframework.beans.BeanUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -55,7 +55,7 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 
 	protected String throwing;
 
-	protected IAopReference.ADVICE_TYPES type;
+	protected IAopReference.ADVICE_TYPE type;
 
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(adivceMethodName);
@@ -170,7 +170,7 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		return throwing;
 	}
 
-	public IAopReference.ADVICE_TYPES getType() {
+	public IAopReference.ADVICE_TYPE getType() {
 		return type;
 	}
 
@@ -285,7 +285,7 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		this.throwing = throwing;
 	}
 
-	public void setType(IAopReference.ADVICE_TYPES type) {
+	public void setType(IAopReference.ADVICE_TYPE type) {
 		this.type = type;
 	}
 
@@ -301,28 +301,28 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 			buf.append("]");
 		}
 		buf.append(" advise type [");
-		ADVICE_TYPES type = getType();
-		if (type == ADVICE_TYPES.AFTER) {
+		ADVICE_TYPE type = getType();
+		if (type == ADVICE_TYPE.AFTER) {
 			buf.append("after");
 		}
-		else if (type == ADVICE_TYPES.AFTER_RETURNING) {
+		else if (type == ADVICE_TYPE.AFTER_RETURNING) {
 			buf.append("after-returning");
 		}
-		else if (type == ADVICE_TYPES.AFTER_THROWING) {
+		else if (type == ADVICE_TYPE.AFTER_THROWING) {
 			buf.append("after-throwing");
 		}
-		else if (type == ADVICE_TYPES.BEFORE) {
+		else if (type == ADVICE_TYPE.BEFORE) {
 			buf.append("before");
 		}
-		else if (type == ADVICE_TYPES.AROUND) {
+		else if (type == ADVICE_TYPE.AROUND) {
 			buf.append("after");
 		}
-		else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+		else if (type == ADVICE_TYPE.DECLARE_PARENTS) {
 			buf.append("delcare parents");
 		}
 		buf.append("] advise [");
 		buf.append(getAspectClassName());
-		if (type != ADVICE_TYPES.DECLARE_PARENTS) {
+		if (type != ADVICE_TYPE.DECLARE_PARENTS) {
 			buf.append(".");
 			buf.append(getAdviceMethodName());
 		}

@@ -36,14 +36,14 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 
 	private IMember target;
 
-	private ADVICE_TYPES type;
+	private ADVICE_TYPE type;
 
-	public AopReference(ADVICE_TYPES type, IMember source, IMember target, IAspectDefinition def,
+	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def,
 			IResource file, IBean bean) {
 		this(type, source, target, def, file, bean.getElementID());
 	}
 
-	public AopReference(ADVICE_TYPES type, IMember source, IMember target, IAspectDefinition def,
+	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def,
 			IResource file, String beanId) {
 		this.type = type;
 		this.source = source;
@@ -53,7 +53,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		this.bean = beanId;
 	}
 
-	public AopReference(ADVICE_TYPES type, IMember source, IMember target, IResource file,
+	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IResource file,
 			String beanId) {
 		this(type, source, target, null, file, beanId);
 	}
@@ -81,7 +81,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		return null;
 	}
 
-	public ADVICE_TYPES getAdviceType() {
+	public ADVICE_TYPE getAdviceType() {
 		return this.type;
 	}
 

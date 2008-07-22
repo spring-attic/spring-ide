@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 
 /**
  * @author Christian Dupuis
@@ -129,7 +129,7 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 		Map<IMember, XRef> refsAspectDeclarations = new HashMap<IMember, XRef>();
 		
 		for (IAopReference reference : references) {
-			if (reference.getAdviceType() != ADVICE_TYPES.DECLARE_PARENTS) {
+			if (reference.getAdviceType() != ADVICE_TYPE.DECLARE_PARENTS) {
 				if (checkFilter(checkedRelNames, "advises")
 						&& reference.getSource() != null
 						&& reference.getSource().equals(je)) {

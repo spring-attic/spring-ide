@@ -29,7 +29,7 @@ import org.objectweb.asm.commons.EmptyVisitor;
 import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.util.StringUtils;
 
 /**
@@ -57,19 +57,19 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 	private static final String DECLARE_PARENTS_ANNOTATION_DESC = Type
 			.getDescriptor(DeclareParents.class);
 
-	private static Map<String, ADVICE_TYPES> ANNOTATION_TYPES = null;
+	private static Map<String, ADVICE_TYPE> ANNOTATION_TYPES = null;
 
 	static {
-		ANNOTATION_TYPES = new HashMap<String, ADVICE_TYPES>();
-		ANNOTATION_TYPES.put(BEFORE_ANNOTATION_DESC, ADVICE_TYPES.BEFORE);
-		ANNOTATION_TYPES.put(AFTER_ANNOTATION_DESC, ADVICE_TYPES.AFTER);
+		ANNOTATION_TYPES = new HashMap<String, ADVICE_TYPE>();
+		ANNOTATION_TYPES.put(BEFORE_ANNOTATION_DESC, ADVICE_TYPE.BEFORE);
+		ANNOTATION_TYPES.put(AFTER_ANNOTATION_DESC, ADVICE_TYPE.AFTER);
 		ANNOTATION_TYPES.put(AFTERRETURNING_ANNOTATION_DESC,
-				ADVICE_TYPES.AFTER_RETURNING);
+				ADVICE_TYPE.AFTER_RETURNING);
 		ANNOTATION_TYPES.put(AFTERTHROWING_ANNOTATION_DESC,
-				ADVICE_TYPES.AFTER_THROWING);
-		ANNOTATION_TYPES.put(AROUND_ANNOTATION_DESC, ADVICE_TYPES.AROUND);
+				ADVICE_TYPE.AFTER_THROWING);
+		ANNOTATION_TYPES.put(AROUND_ANNOTATION_DESC, ADVICE_TYPE.AROUND);
 		ANNOTATION_TYPES.put(DECLARE_PARENTS_ANNOTATION_DESC,
-				ADVICE_TYPES.DECLARE_PARENTS);
+				ADVICE_TYPE.DECLARE_PARENTS);
 	}
 
 	private String visitedMethod = null;

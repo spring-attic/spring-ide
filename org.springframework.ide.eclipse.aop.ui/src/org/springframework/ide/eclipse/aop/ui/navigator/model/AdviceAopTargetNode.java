@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -55,39 +55,39 @@ public class AdviceAopTargetNode implements IReferenceNode,
 	}
 
 	public Image getImage() {
-		ADVICE_TYPES type = references.get(0).getAdviceType();
-		if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
-				|| type == ADVICE_TYPES.AFTER_THROWING) {
+		ADVICE_TYPE type = references.get(0).getAdviceType();
+		if (type == ADVICE_TYPE.AFTER || type == ADVICE_TYPE.AFTER_RETURNING
+				|| type == ADVICE_TYPE.AFTER_THROWING) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
 		}
-		else if (type == ADVICE_TYPES.BEFORE) {
+		else if (type == ADVICE_TYPE.BEFORE) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEFORE_ADVICE);
 		}
-		else if (type == ADVICE_TYPES.AROUND) {
+		else if (type == ADVICE_TYPE.AROUND) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AROUND_ADVICE);
 		}
-		else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+		else if (type == ADVICE_TYPE.DECLARE_PARENTS) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
 		}
 		return null;
 	}
 
 	public String getText() {
-		ADVICE_TYPES type = references.get(0).getAdviceType();
+		ADVICE_TYPE type = references.get(0).getAdviceType();
 		String text = "";
-		if (type == ADVICE_TYPES.AFTER) {
+		if (type == ADVICE_TYPE.AFTER) {
 			text += "after()";
 		}
-		else if (type == ADVICE_TYPES.AFTER_RETURNING) {
+		else if (type == ADVICE_TYPE.AFTER_RETURNING) {
 			text += "after-returning()";
 		}
-		else if (type == ADVICE_TYPES.AFTER_THROWING) {
+		else if (type == ADVICE_TYPE.AFTER_THROWING) {
 			text += "after-throwing()";
 		}
-		else if (type == ADVICE_TYPES.BEFORE) {
+		else if (type == ADVICE_TYPE.BEFORE) {
 			text += "before()";
 		}
-		else if (type == ADVICE_TYPES.AROUND) {
+		else if (type == ADVICE_TYPE.AROUND) {
 			text += "around()";
 		}
 		text += " <";

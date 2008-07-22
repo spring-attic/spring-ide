@@ -15,22 +15,23 @@ import org.eclipse.jdt.core.IMember;
 
 public interface IAopReference {
 
-	public enum ADVICE_TYPES {
+	enum ADVICE_TYPE {
 		BEFORE, AROUND, AFTER, AFTER_RETURNING, AFTER_THROWING, DECLARE_PARENTS
-	};
+	}
 
-	ADVICE_TYPES getAdviceType();
+	ADVICE_TYPE getAdviceType();
 
 	IMember getSource();
 
 	IAspectDefinition getDefinition();
-	
-	void setDefinition(IAspectDefinition definition);
 
 	IResource getResource();
 
 	IMember getTarget();
 
 	String getTargetBeanId();
+	
+	// TODO CD move into different interface
+	void setDefinition(IAspectDefinition definition);
 
 }

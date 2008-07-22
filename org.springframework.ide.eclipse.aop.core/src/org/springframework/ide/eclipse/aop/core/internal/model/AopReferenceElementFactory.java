@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
 import org.springframework.ide.eclipse.aop.core.Activator;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 
 /**
  * @author Christian Dupuis
@@ -43,7 +43,7 @@ public class AopReferenceElementFactory implements IElementFactory {
 			+ ".aopReferenceElementFactory";
 
 	public final IAdaptable createElement(IMemento memento) {
-		ADVICE_TYPES type = ADVICE_TYPES.valueOf(memento
+		ADVICE_TYPE type = ADVICE_TYPE.valueOf(memento
 				.getString(ADVICE_TYPE_ATTRIBUTE));
 		String sourceHandle = memento.getString(SOURCE_ATTRIBUTE);
 		IJavaElement source = null;

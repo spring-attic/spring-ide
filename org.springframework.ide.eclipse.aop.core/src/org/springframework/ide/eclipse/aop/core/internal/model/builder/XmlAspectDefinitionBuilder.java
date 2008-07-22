@@ -31,7 +31,7 @@ import org.springframework.ide.eclipse.aop.core.internal.model.JavaAdvisorDefini
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
@@ -174,7 +174,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
 											file, aspectNode, beanRef,
 											className, pointcutExpression);
-									info.setType(ADVICE_TYPES.AROUND);
+									info.setType(ADVICE_TYPE.AROUND);
 									info.setAdviceMethodName("invoke");
 									info.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class
 										.getName() });
@@ -185,7 +185,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
 											file, aspectNode, beanRef,
 											className, pointcutExpression);									
-									info.setType(ADVICE_TYPES.BEFORE);
+									info.setType(ADVICE_TYPE.BEFORE);
 									info.setAdviceMethodName(BEFORE_ELEMENT);
 									info.setAdviceMethodParameterTypes(new String[] {
 										Method.class.getName(),
@@ -198,7 +198,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
 											file, aspectNode, beanRef,
 											className, pointcutExpression);
-									info.setType(ADVICE_TYPES.AFTER_THROWING);
+									info.setType(ADVICE_TYPE.AFTER_THROWING);
 									info.setAdviceMethodName("afterThrowing");
 									info.setAdviceMethodParameterTypes(new String[] {
 										Method.class.getName(),
@@ -212,7 +212,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
 											file, aspectNode, beanRef,
 											className, pointcutExpression);
-									info.setType(ADVICE_TYPES.AFTER_RETURNING);
+									info.setType(ADVICE_TYPE.AFTER_RETURNING);
 									info.setAdviceMethodName("afterReturning");
 									info.setAdviceMethodParameterTypes(new String[] {
 										Object.class.getName(),
@@ -324,20 +324,20 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 				}
 				else if (BEFORE_ELEMENT.equals(aspectNode.getLocalName())) {
 					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
-							IAopReference.ADVICE_TYPES.BEFORE);
+							IAopReference.ADVICE_TYPE.BEFORE);
 				}
 				else if (AROUND_ELEMENT.equals(aspectNode.getLocalName())) {
 					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
-							IAopReference.ADVICE_TYPES.AROUND);
+							IAopReference.ADVICE_TYPE.AROUND);
 				}
 				else if (AFTER_ELEMENT.equals(aspectNode.getLocalName())) {
 					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
-							IAopReference.ADVICE_TYPES.AFTER);
+							IAopReference.ADVICE_TYPE.AFTER);
 				}
 				else if (AFTER_RETURNING_ELEMENT.equals(aspectNode
 						.getLocalName())) {
 					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
-							IAopReference.ADVICE_TYPES.AFTER_RETURNING);
+							IAopReference.ADVICE_TYPE.AFTER_RETURNING);
 					String returning = getAttribute(aspectNode,
 							RETURNING_ATTRIBUTE);
 					info.setReturning(returning);
@@ -345,14 +345,14 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 				else if (AFTER_THROWING_ELEMENT.equals(aspectNode
 						.getLocalName())) {
 					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
-							IAopReference.ADVICE_TYPES.AFTER_THROWING);
+							IAopReference.ADVICE_TYPE.AFTER_THROWING);
 					String throwing = getAttribute(aspectNode,
 							THROWING_ATTRIBUTE);
 					info.setThrowing(throwing);
 				}
 				else if (AROUND_ELEMENT.equals(aspectNode.getLocalName())) {
 					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
-							IAopReference.ADVICE_TYPES.AROUND);
+							IAopReference.ADVICE_TYPE.AROUND);
 				}
 				if (info != null) {
 					if (info.getAspectClassName() == null) {
@@ -394,7 +394,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 
 	private BeanAspectDefinition repareBeanAspectDefinition(Map<String, String> pointcuts,
 			Map<String, String> rootPointcuts, Node aspectNode,
-			IAopReference.ADVICE_TYPES type) {
+			IAopReference.ADVICE_TYPE type) {
 		BeanAspectDefinition info = new BeanAspectDefinition();
 		String pointcut = getAttribute(aspectNode, POINTCUT_ELEMENT);
 		String pointcutRef = getAttribute(aspectNode, POINTCUT_REF_ATTRIBUTE);

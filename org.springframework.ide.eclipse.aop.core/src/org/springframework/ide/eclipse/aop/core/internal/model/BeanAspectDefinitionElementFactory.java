@@ -18,7 +18,7 @@ import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.util.StringUtils;
 
 /**
@@ -95,7 +95,7 @@ public class BeanAspectDefinitionElementFactory implements IElementFactory {
 		String fileName = memento.getString(FILE_ATTRIBUTE);
 		boolean proxyTargetClass = Boolean.valueOf(memento
 				.getString(PROXY_TARGET_CLASS_ATTRIBUTE));
-		IAopReference.ADVICE_TYPES type = ADVICE_TYPES.valueOf(memento
+		IAopReference.ADVICE_TYPE type = ADVICE_TYPE.valueOf(memento
 				.getString(ADVICE_TYPE_ATTRIBUTE));
 
 		definition.setAdviceMethodName(adivceMethodName);

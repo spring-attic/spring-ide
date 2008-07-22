@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
@@ -63,33 +63,33 @@ public class AopReferenceModelMarkerUtils {
 
 	public static final String ADIVCE_TYPE = "adivice_type";
 
-	public static Map<ADVICE_TYPES, String> sourceMarkerMapping;
+	public static Map<ADVICE_TYPE, String> sourceMarkerMapping;
 
-	public static Map<ADVICE_TYPES, String> targetMarkerMapping;
+	public static Map<ADVICE_TYPE, String> targetMarkerMapping;
 
 	static {
-		sourceMarkerMapping = new HashMap<ADVICE_TYPES, String>();
-		sourceMarkerMapping.put(ADVICE_TYPES.BEFORE,
+		sourceMarkerMapping = new HashMap<ADVICE_TYPE, String>();
+		sourceMarkerMapping.put(ADVICE_TYPE.BEFORE,
 				SOURCE_BEFORE_ADVICE_MARKER);
-		sourceMarkerMapping.put(ADVICE_TYPES.AFTER, SOURCE_AFTER_ADVICE_MARKER);
-		sourceMarkerMapping.put(ADVICE_TYPES.AFTER_RETURNING,
+		sourceMarkerMapping.put(ADVICE_TYPE.AFTER, SOURCE_AFTER_ADVICE_MARKER);
+		sourceMarkerMapping.put(ADVICE_TYPE.AFTER_RETURNING,
 				SOURCE_AFTER_ADVICE_MARKER);
-		sourceMarkerMapping.put(ADVICE_TYPES.AFTER_THROWING,
+		sourceMarkerMapping.put(ADVICE_TYPE.AFTER_THROWING,
 				SOURCE_AFTER_ADVICE_MARKER);
-		sourceMarkerMapping.put(ADVICE_TYPES.AROUND,
+		sourceMarkerMapping.put(ADVICE_TYPE.AROUND,
 				SOURCE_AROUND_ADVICE_MARKER);
-		sourceMarkerMapping.put(ADVICE_TYPES.DECLARE_PARENTS,
+		sourceMarkerMapping.put(ADVICE_TYPE.DECLARE_PARENTS,
 				SOURCE_INTRODUCTION_MARKER);
 
-		targetMarkerMapping = new HashMap<ADVICE_TYPES, String>();
-		targetMarkerMapping.put(ADVICE_TYPES.BEFORE, BEFORE_ADVICE_MARKER);
-		targetMarkerMapping.put(ADVICE_TYPES.AFTER, AFTER_ADVICE_MARKER);
-		targetMarkerMapping.put(ADVICE_TYPES.AFTER_RETURNING,
+		targetMarkerMapping = new HashMap<ADVICE_TYPE, String>();
+		targetMarkerMapping.put(ADVICE_TYPE.BEFORE, BEFORE_ADVICE_MARKER);
+		targetMarkerMapping.put(ADVICE_TYPE.AFTER, AFTER_ADVICE_MARKER);
+		targetMarkerMapping.put(ADVICE_TYPE.AFTER_RETURNING,
 				AFTER_ADVICE_MARKER);
-		targetMarkerMapping.put(ADVICE_TYPES.AFTER_THROWING,
+		targetMarkerMapping.put(ADVICE_TYPE.AFTER_THROWING,
 				AFTER_ADVICE_MARKER);
-		targetMarkerMapping.put(ADVICE_TYPES.AROUND, AROUND_ADVICE_MARKER);
-		targetMarkerMapping.put(ADVICE_TYPES.DECLARE_PARENTS,
+		targetMarkerMapping.put(ADVICE_TYPE.AROUND, AROUND_ADVICE_MARKER);
+		targetMarkerMapping.put(ADVICE_TYPE.DECLARE_PARENTS,
 				INTRODUCTION_MARKER);
 	}
 
@@ -103,7 +103,7 @@ public class AopReferenceModelMarkerUtils {
 
 	public static void createTargetMarker(IAopReference reference,
 			String markerId, IResource sourceResource) {
-		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+		if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 			createProblemMarker(reference.getTarget().getResource(),
 					"aspect declarations <"
 							+ reference.getDefinition().getAspectName() + ">",
@@ -149,7 +149,7 @@ public class AopReferenceModelMarkerUtils {
 		// if (reference.getDefinition().getAspectLineNumber() > 0
 		// && !(reference.getDefinition() instanceof JavaAspectDefinition)) {
 		// }
-		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+		if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
 				createProblemMarker(reference.getSource().getResource(),
 						"declared on "

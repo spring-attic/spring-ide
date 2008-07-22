@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
@@ -33,7 +33,7 @@ public class AdvisedAopSourceMethodNode extends
 	@Override
 	public String getText() {
 		if (reference.getSource() != null) {
-			if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+			if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 				return AopReferenceModelUtils.getJavaElementLinkName(reference
 						.getSource())
 						+ " - "

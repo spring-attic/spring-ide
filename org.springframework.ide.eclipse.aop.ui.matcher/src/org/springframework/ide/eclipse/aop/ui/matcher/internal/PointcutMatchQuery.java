@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.aop.core.internal.model.AopReference;
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AspectDefinitionMatcher;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.ui.matcher.PointcutMatcherPlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -108,7 +108,7 @@ public class PointcutMatchQuery implements ISearchQuery {
 			return null;
 		}
 
-		public ADVICE_TYPES getType() {
+		public ADVICE_TYPE getType() {
 			return null;
 		}
 
