@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.aop.core.internal.model.JavaAdvisorDefini
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AbstractAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.util.StringUtils;
@@ -139,7 +139,7 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 		info.setPointcutExpression(pointcutExpression);
 		info.setAspectClassName(METHOD_SECURITY_INTERCEPTOR_CLASS);
 		info.setAspectName(METHOD_SECURITY_INTERCEPTOR_BEAN_ID);
-		info.setType(ADVICE_TYPES.AROUND);
+		info.setType(ADVICE_TYPE.AROUND);
 		info.setAdviceMethodName("invoke");
 		info.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class.getName() });
 		info.setResource(file);
