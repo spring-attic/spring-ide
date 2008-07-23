@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -104,6 +105,10 @@ public class BeansConfigValidator extends AbstractValidator {
 						addBeans(beansConfig);
 					}
 				}
+				
+				// Add resources that are in a config set with the changed resources
+				propagateChangedResourceToConfigSets(resources);
+				
 			}
 			else if (JdtUtils.isClassPathFile(resource) || SpringCoreUtils.isManifest(resource)) {
 				IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
@@ -127,6 +132,27 @@ public class BeansConfigValidator extends AbstractValidator {
 			}
 		}
 		return resources;
+	}
+	
+	/**
+	 * Add resources that share a config set to the list. 
+	 */
+	private void propagateChangedResourceToConfigSets(Set<IResource> resources) {
+		for (IResource resource : new HashSet<IResource>(resources)) {
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource);
+			for (IBeansProject beansProject : BeansCorePlugin.getModel().getProjects()) {
+				for (IBeansConfigSet beansConfigSet : beansProject.getConfigSets()) {
+					if (beansConfigSet.getConfigs().contains(beansConfig)) {
+						for (IBeansConfig bc : beansConfigSet.getConfigs()) {
+							if (!resources.contains(bc.getElementResource())) {
+								resources.add(bc.getElementResource());
+								addBeans(bc);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override
