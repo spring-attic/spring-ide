@@ -453,21 +453,23 @@ public abstract class BeansModelUtils {
 			configSets.add((IBeansConfigSet) element);
 		}
 		else if (element instanceof IBeansConfig) {
-			IBeansProject beansProject = getProject(element);
-			Set<IBeansConfigSet> css = beansProject.getConfigSets();
-			for (IBeansConfigSet cs : css) {
-				if (cs.getConfigs().contains(element)) {
-					configSets.add(cs);
+			for (IBeansProject beansProject : BeansCorePlugin.getModel().getProjects()) {
+				Set<IBeansConfigSet> css = beansProject.getConfigSets();
+				for (IBeansConfigSet cs : css) {
+					if (cs.getConfigs().contains(element)) {
+						configSets.add(cs);
+					}
 				}
 			}
 		}
 		else if (element instanceof ISourceModelElement) {
 			IBeansConfig bc = getConfig(element);
-			IBeansProject beansProject = getProject(bc);
-			Set<IBeansConfigSet> css = beansProject.getConfigSets();
-			for (IBeansConfigSet cs : css) {
-				if (cs.getConfigs().contains(bc)) {
-					configSets.add(cs);
+			for (IBeansProject beansProject : BeansCorePlugin.getModel().getProjects()) {
+				Set<IBeansConfigSet> css = beansProject.getConfigSets();
+				for (IBeansConfigSet cs : css) {
+					if (cs.getConfigs().contains(bc)) {
+						configSets.add(cs);
+					}
 				}
 			}
 		}
