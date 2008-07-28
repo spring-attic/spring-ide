@@ -18,6 +18,9 @@ import java.io.PrintWriter;
 
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.wst.sse.core.internal.encoding.CommonEncodingPreferenceNames;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
@@ -29,8 +32,9 @@ import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 @SuppressWarnings("restriction")
 public class NewWebflowConfigFilePage extends WizardNewFileCreationPage {
 
-	public NewWebflowConfigFilePage(String pageName,
-			IStructuredSelection selection) {
+	private Button swf2Button;
+
+	public NewWebflowConfigFilePage(String pageName, IStructuredSelection selection) {
 		super(pageName, selection);
 		setTitle("New Web Flow Definition file");
 		setDescription("Select the location and give a name for the new Spring Web Flow Definition file");
@@ -49,32 +53,46 @@ public class NewWebflowConfigFilePage extends WizardNewFileCreationPage {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		String charSet = getUserPreferredCharset();
 
-		PrintWriter writer = new PrintWriter(new OutputStreamWriter(
-				outputStream, charSet));
+		PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, charSet));
 		writer.println("<?xml version=\"1.0\" encoding=\"" + charSet + "\"?>"); //$NON-NLS-1$ //$NON-NLS-2$
-		writer
-				.println("<flow xmlns=\"http://www.springframework.org/schema/webflow\"\r\n"
-						+ "	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n"
-						+ "	xsi:schemaLocation=\"http://www.springframework.org/schema/webflow\r\n"
-						+ "        http://www.springframework.org/schema/webflow/spring-webflow-1.0.xsd\">\r\n"
-						+ "\r\n"
-						+ "	<start-state idref=\"start\" />\r\n"
-						+ "	\r\n"
-						+ "	<view-state id=\"start\">\r\n"
-						+ "	</view-state>\r\n" + "\r\n" + "</flow>");
+		StringBuilder builder = new StringBuilder().append(
+				"<flow xmlns=\"http://www.springframework.org/schema/webflow\"\r\n").append(
+				"	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n").append(
+				"	xsi:schemaLocation=\"http://www.springframework.org/schema/webflow\r\n");
+		if (swf2Button.getSelection()) {
+			builder
+					.append("        http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd\">");
+		}
+		else {
+			builder
+					.append("        http://www.springframework.org/schema/webflow/spring-webflow-1.0.xsd\">");
+		}
+		builder.append("\r\n").append("\r\n");
+		if (!swf2Button.getSelection()) {
+			builder.append("	<start-state idref=\"start\" />\r\n").append("\r\n");
+		}
+		builder.append("	<view-state id=\"start\">\r\n").append("	</view-state>\r\n")
+				.append("\r\n").append("</flow>");
+		writer.write(builder.toString());
 		writer.flush();
 		outputStream.close();
 
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(
-				outputStream.toByteArray());
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 		return inputStream;
 	}
 
 	private String getUserPreferredCharset() {
-		Preferences preference = XMLCorePlugin.getDefault()
-				.getPluginPreferences();
-		String charSet = preference
-				.getString(CommonEncodingPreferenceNames.OUTPUT_CODESET);
+		Preferences preference = XMLCorePlugin.getDefault().getPluginPreferences();
+		String charSet = preference.getString(CommonEncodingPreferenceNames.OUTPUT_CODESET);
 		return charSet;
+	}
+
+	@Override
+	protected void createAdvancedControls(Composite parent) {
+		super.createAdvancedControls(parent);
+		swf2Button = new Button(parent, SWT.CHECK);
+		swf2Button
+				.setText("Use Spring Web Flow 2 flow definition syntax (Required if you want to use Spring Web Flow 2)");
+		swf2Button.setSelection(true);
 	}
 }
