@@ -42,14 +42,27 @@ public class TransitionValidationRule implements
 				context.error(state, "NO_TO_ATTRIBUTE",
 						"Element 'transition' requires 'to' attribute");
 			}
+			if (state.getToState() == null
+					&& state.getToStateId() != null
+					&& !(state.getToStateId().startsWith(EXPRESSION_PREFIX) && state.getToStateId()
+							.endsWith(EXPRESSION_SUFFIX))) {
+				context.error(state, "NO_VALID_TO_ATTRIBUTE", MessageUtils.format(
+						"Element 'transition' references a non-exiting state \"{0}\"", state
+								.getToStateId()));
+			}
 		}
-		if (state.getToState() == null && state.getToStateId() != null
-				&& !(state.getToStateId().startsWith(EXPRESSION_PREFIX) && state
-						.getToStateId().endsWith(EXPRESSION_SUFFIX))) {
-			context.error(state, "NO_VALID_TO_ATTRIBUTE", MessageUtils.format(
-					"Element 'transition' references a non-exiting state \"{0}\"", state
-							.getToStateId()));
+		else {
+			if (state.getToState() == null
+					&& state.getToStateId() != null
+					&& !(state.getToStateId().startsWith(EXPRESSION_PREFIX) && state.getToStateId()
+							.endsWith(EXPRESSION_SUFFIX))) {
+				if (context
+						.getStateFromParentFlow(state.getToStateId(), context.getWebflowConfig()) == null) {
+					context.error(state, "NO_VALID_TO_ATTRIBUTE", MessageUtils.format(
+							"Element 'transition' references a non-exiting state \"{0}\"", state
+									.getToStateId()));
+				}
+			}
 		}
 	}
-	
 }

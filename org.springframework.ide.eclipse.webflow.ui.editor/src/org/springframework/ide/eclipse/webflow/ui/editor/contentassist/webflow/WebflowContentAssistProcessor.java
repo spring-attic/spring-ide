@@ -52,6 +52,8 @@ public class WebflowContentAssistProcessor extends NamespaceContentAssistProcess
 
 		registerContentAssistCalculator("subflow-state", "flow",
 				new SubflowReferenceContentAssistCalculator());
+		registerContentAssistCalculator("flow", "parent",
+				new SubflowReferenceContentAssistCalculator());
 
 		registerContentAssistCalculator("action", "method", new BeanMethodContentAssistCalculator());
 

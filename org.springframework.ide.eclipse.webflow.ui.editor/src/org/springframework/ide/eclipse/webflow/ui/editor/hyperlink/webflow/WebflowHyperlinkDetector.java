@@ -81,6 +81,7 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector implemen
 		VALID_ATTRIBUTES.add("else");
 
 		VALID_ATTRIBUTES.add("subflow");
+		VALID_ATTRIBUTES.add("parent");
 	}
 
 	/**
@@ -165,7 +166,7 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector implemen
 				}
 			}
 		}
-		else if ("flow".equals(name) || "subflow".equals(name)) {
+		else if ("flow".equals(name) || "subflow".equals(name) || "parent".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
 			final IWebflowConfig config = Activator.getModel().getProject(file.getProject())
 					.getConfig(target);

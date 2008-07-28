@@ -16,8 +16,14 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMAttr;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
+import org.springframework.ide.eclipse.webflow.core.Activator;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowState;
+import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NamedNodeMap;
 
@@ -67,10 +73,84 @@ public class WebflowValidationContext extends AbstractValidationContext {
 			}
 		}
 		catch (Exception e) {
+		}
+		finally {
 			if (model != null) {
 				model.releaseFromRead();
 			}
+			model = null;
 		}
+	}
+
+	public IState getStateFromParentFlow(String stateId, IWebflowConfig config) {
+		if (!isVersion1()) {
+			IStructuredModel model = null;
+			String parent = null;
+			try {
+				model = StructuredModelManager.getModelManager().getExistingModelForRead(
+						config.getElementResource());
+				if (model == null) {
+					model = StructuredModelManager.getModelManager().getModelForRead(
+							(IFile) config.getElementResource());
+
+				}
+				if (model != null) {
+					IDOMDocument document = ((DOMModelImpl) model).getDocument();
+					NamedNodeMap attributes = document.getDocumentElement().getAttributes();
+					if (attributes.getNamedItem("parent") != null) {
+						IDOMAttr schemaLocationNode = (IDOMAttr) attributes.getNamedItem("parent");
+						parent = schemaLocationNode.getValue();
+					}
+				}
+			}
+			catch (Exception e) {
+			}
+			finally {
+				if (model != null) {
+					model.releaseFromRead();
+				}
+				model = null;
+			}
+
+			if (parent != null) {
+				IState state = null;
+
+				IWebflowProject project = Activator.getModel().getProject(
+						getRootElement().getElementResource().getProject());
+				IWebflowConfig parentConfig = project.getConfig(parent);
+				try {
+					model = StructuredModelManager.getModelManager().getExistingModelForRead(
+							parentConfig.getElementResource());
+					if (model == null) {
+						model = StructuredModelManager.getModelManager().getModelForRead(
+								(IFile) parentConfig.getElementResource());
+					}
+					if (model != null) {
+						IDOMDocument document = ((DOMModelImpl) model).getDocument();
+						IWebflowState parentState = new WebflowState(parentConfig);
+						parentState.init((IDOMNode) document.getDocumentElement(), null);
+
+						state = WebflowModelXmlUtils.getStateById(parentState, stateId);
+					}
+				}
+				catch (Exception e) {
+				}
+				finally {
+					if (model != null) {
+						model.releaseFromRead();
+					}
+					model = null;
+				}
+
+				if (state != null) {
+					return state;
+				}
+				else {
+					return getStateFromParentFlow(stateId, parentConfig);
+				}
+			}
+		}
+		return null;
 	}
 
 }
