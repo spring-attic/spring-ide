@@ -1,155 +1,154 @@
 Manifest-Version: 1.0
-Built-By: nebhale
+Built-By: cdupuis
 Created-By: Apache Maven Bundle Plugin
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
-Import-Package: com.ibm.websphere.security;resolution:=optional,
- javax.crypto;resolution:=optional,
- javax.crypto.spec;resolution:=optional,
- javax.naming;resolution:=optional,
- javax.naming.directory;resolution:=optional,
- javax.naming.ldap;resolution:=optional,
- javax.rmi;resolution:=optional,
- javax.security.auth;resolution:=optional,
- javax.security.auth.callback;resolution:=optional,
- javax.security.auth.login;resolution:=optional,
- javax.security.auth.spi;resolution:=optional,
- javax.servlet;resolution:=optional,
- javax.servlet.http;resolution:=optional,
- javax.sql;resolution:=optional,
- javax.xml.parsers;resolution:=optional,
- net.sf.ehcache;resolution:=optional,
- org.aopalliance.aop;resolution:=optional,
- org.aopalliance.intercept;resolution:=optional,
- org.apache.commons.codec.binary;resolution:=optional,
- org.apache.commons.codec.digest;resolution:=optional,
- org.apache.commons.collections.iterators;resolution:=optional,
- org.apache.commons.lang;resolution:=optional,
- org.apache.commons.logging;resolution:=optional,
- org.apache.directory.server.configuration;resolution:=optional,
- org.apache.directory.server.core;resolution:=optional,
- org.apache.directory.server.core.configuration;resolution:=optional,
+Import-Package: javax.crypto,
+ javax.crypto.spec,
+ javax.naming,
+ javax.naming.directory,
+ javax.naming.ldap,
+ javax.rmi,
+ javax.security.auth,
+ javax.security.auth.callback,
+ javax.security.auth.login,
+ javax.security.auth.spi,
+ javax.servlet;version="[2.4.0,3.0.0)";resolution:=optional,
+ javax.servlet.http;version="[2.4.0,3.0.0)";resolution:=optional,
+ javax.sql,
+ javax.xml.parsers,
+ net.sf.ehcache;version="[1.4.1,2.0.0)";resolution:=optional,
+ org.aopalliance.aop;version="[1.0.0,2.0.0)",
+ org.aopalliance.intercept;version="[1.0.0,2.0.0)",
+ org.apache.commons.codec.binary;version="[1.3.0,2.0.0)",
+ org.apache.commons.codec.digest;version="[1.3.0,2.0.0)",
+ org.apache.commons.collections.iterators,
+ org.apache.commons.logging,
+ org.apache.directory.server.configuration;version="[1.0.2,2.0.0)";resolution:=optional,
+ org.apache.directory.server.core;version="[1.0.2,2.0.0)";resolution:=optional,
+ org.apache.directory.server.core.configuration;version="[1.0.2,2.0.0)";resolution:=optional,
  org.apache.directory.server.jndi;resolution:=optional,
- org.apache.directory.server.protocol.shared.store;resolution:=optional,
- org.aspectj.lang;resolution:=optional,
- org.aspectj.lang.reflect;resolution:=optional,
- org.aspectj.weaver.tools;resolution:=optional,
- org.jaxen;resolution:=optional,
- org.jaxen.dom;resolution:=optional,
- org.springframework.aop;version="[2.0,3]";resolution:=optional,
- org.springframework.aop.config;version="[2.0,3]";resolution:=optional,
- org.springframework.aop.framework;version="[2.0,3]";resolution:=optional,
- org.springframework.aop.support;version="[2.0,3]";resolution:=optional,
- org.springframework.beans;version="[2.0,3]";resolution:=optional,
- org.springframework.beans.factory;version="[2.0,3]";resolution:=optional,
- org.springframework.beans.factory.config;version="[2.0,3]";resolution:=optional,
- org.springframework.beans.factory.parsing;version="[2.0,3]";resolution:=optional,
- org.springframework.beans.factory.support;version="[2.0,3]";resolution:=optional,
- org.springframework.beans.factory.xml;version="[2.0,3]";resolution:=optional,
- org.springframework.beans.propertyeditors;version="[2.0,3]";resolution:=optional,
- org.springframework.context;version="[2.0,3]";resolution:=optional,
- org.springframework.context.i18n;version="[2.0,3]";resolution:=optional,
- org.springframework.context.support;version="[2.0,3]";resolution:=optional,
- org.springframework.core;version="[2.0,3]";resolution:=optional,
- org.springframework.core.io;version="[2.0,3]";resolution:=optional,
- org.springframework.core.io.support;version="[2.0,3]";resolution:=optional,
- org.springframework.dao;version="[2.0,3]";resolution:=optional,
- org.springframework.dao.support;version="[2.0,3]";resolution:=optional,
- org.springframework.jdbc.core;version="[2.0,3]";resolution:=optional,
- org.springframework.jdbc.core.support;version="[2.0,3]";resolution:=optional,
- org.springframework.jdbc.object;version="[2.0,3]";resolution:=optional,
- org.springframework.ldap;version="[2.0,3]";resolution:=optional,
- org.springframework.ldap.core;version="[2.0,3]";resolution:=optional,
- org.springframework.ldap.core.support;version="[2.0,3]";resolution:=optional,
- org.springframework.metadata;version="[2.0,3]";resolution:=optional,
- org.springframework.mock.web;version="[2.0,3]";resolution:=optional,
- org.springframework.remoting.httpinvoker;version="[2.0,3]";resolution:=optional,
- org.springframework.remoting.support;version="[2.0,3]";resolution:=optional,
- org.springframework.security;version="[2.0,3]";resolution:=optional,
- org.springframework.security.acl;version="[2.0,3]";resolution:=optional,
- org.springframework.security.acl.basic;version="[2.0,3]";resolution:=optional,
- org.springframework.security.acl.basic.cache;version="[2.0,3]";resolution:=optional,
- org.springframework.security.acl.basic.jdbc;version="[2.0,3]";resolution:=optional,
- org.springframework.security.adapters;version="[2.0,3]";resolution:=optional,
- org.springframework.security.afterinvocation;version="[2.0,3]";resolution:=optional,
- org.springframework.security.authoritymapping;version="[2.0,3]";resolution:=optional,
- org.springframework.security.concurrent;version="[2.0,3]";resolution:=optional,
- org.springframework.security.config;version="[2.0,3]";resolution:=optional,
- org.springframework.security.context;version="[2.0,3]";resolution:=optional,
- org.springframework.security.context.httpinvoker;version="[2.0,3]";resolution:=optional,
- org.springframework.security.context.rmi;version="[2.0,3]";resolution:=optional,
- org.springframework.security.event.authentication;version="[2.0,3]";resolution:=optional,
- org.springframework.security.event.authorization;version="[2.0,3]";resolution:=optional,
- org.springframework.security.intercept;version="[2.0,3]";resolution:=optional,
- org.springframework.security.intercept.method;version="[2.0,3]";resolution:=optional,
- org.springframework.security.intercept.method.aopalliance;version="[2.0,3]";resolution:=optional,
- org.springframework.security.intercept.method.aspectj;version="[2.0,3]";resolution:=optional,
- org.springframework.security.intercept.web;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ldap;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ldap.populator;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ldap.search;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.anonymous;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.dao;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.dao.cache;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.dao.salt;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.encoding;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.jaas;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.jaas.event;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.ldap;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.ldap.authenticator;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.preauth;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.rcp;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.rememberme;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.x509;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.x509.cache;version="[2.0,3]";resolution:=optional,
- org.springframework.security.providers.x509.populator;version="[2.0,3]";resolution:=optional,
- org.springframework.security.runas;version="[2.0,3]";resolution:=optional,
- org.springframework.security.securechannel;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.basicauth;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.digestauth;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.logout;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.preauth;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.preauth.header;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.preauth.j2ee;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.preauth.websphere;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.preauth.x509;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.rememberme;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.savedrequest;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.session;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.switchuser;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.webapp;version="[2.0,3]";resolution:=optional,
- org.springframework.security.ui.x509;version="[2.0,3]";resolution:=optional,
- org.springframework.security.userdetails;version="[2.0,3]";resolution:=optional,
- org.springframework.security.userdetails.checker;version="[2.0,3]";resolution:=optional,
- org.springframework.security.userdetails.hierarchicalroles;version="[2.0,3]";resolution:=optional,
- org.springframework.security.userdetails.jdbc;version="[2.0,3]";resolution:=optional,
- org.springframework.security.userdetails.ldap;version="[2.0,3]";resolution:=optional,
- org.springframework.security.userdetails.memory;version="[2.0,3]";resolution:=optional,
- org.springframework.security.util;version="[2.0,3]";resolution:=optional,
- org.springframework.security.vote;version="[2.0,3]";resolution:=optional,
- org.springframework.security.wrapper;version="[2.0,3]";resolution:=optional,
- org.springframework.util;version="[2.0,3]";resolution:=optional,
- org.springframework.util.xml;version="[2.0,3]";resolution:=optional,
- org.springframework.web.bind;version="[2.0,3]";resolution:=optional,
- org.springframework.web.context;version="[2.0,3]";resolution:=optional,
- org.springframework.web.context.support;version="[2.0,3]";resolution:=optional,
- org.w3c.dom;resolution:=optional,
- org.xml.sax;resolution:=optional
-Bnd-LastModified: 1207078011357
-Export-Package: org.springframework.security;version="2.0.0.RC1";
+ org.apache.directory.server.protocol.shared.store;version="[1.0.2,2.0.0)";resolution:=optional,
+ org.aspectj.lang;version="[1.5.4,2.0.0)";resolution:=optional,
+ org.aspectj.lang.reflect;version="[1.5.4,2.0.0)";resolution:=optional,
+ org.aspectj.weaver.tools;version="[1.5.4,2.0.0)";resolution:=optional,
+ org.jaxen;version="[1.1.1,2.0.0)";resolution:=optional,
+ org.jaxen.dom;version="[1.1.1,2.0.0)";resolution:=optional,
+ org.springframework.aop;version="[2.0.8,3.0.0)",
+ org.springframework.aop.config;version="[2.0.8,3.0.0)",
+ org.springframework.aop.framework;version="[2.0.8,3.0.0)",
+ org.springframework.aop.support;version="[2.0.8,3.0.0)",
+ org.springframework.beans;version="[2.0.8,3.0.0)",
+ org.springframework.beans.factory;version="[2.0.8,3.0.0)",
+ org.springframework.beans.factory.config;version="[2.0.8,3.0.0)",
+ org.springframework.beans.factory.parsing;version="[2.0.8,3.0.0)",
+ org.springframework.beans.factory.support;version="[2.0.8,3.0.0)",
+ org.springframework.beans.factory.xml;version="[2.0.8,3.0.0)",
+ org.springframework.beans.propertyeditors;version="[2.0.8,3.0.0)",
+ org.springframework.context;version="[2.0.8,3.0.0)",
+ org.springframework.context.i18n;version="[2.0.8,3.0.0)",
+ org.springframework.context.support;version="[2.0.8,3.0.0)",
+ org.springframework.core;version="[2.0.8,3.0.0)",
+ org.springframework.core.io;version="[2.0.8,3.0.0)",
+ org.springframework.core.io.support;version="[2.0.8,3.0.0)",
+ org.springframework.dao;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.dao.support;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.jdbc.core;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.jdbc.core.support;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.jdbc.object;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.ldap;version="[1.2.1.A,2.0.0)";resolution:=optional,
+ org.springframework.ldap.core;version="[1.2.1.A,2.0.0)";resolution:=optional,
+ org.springframework.ldap.core.support;version="[1.2.1.A,2.0.0)";resolution:=optional,
+ org.springframework.metadata;version="[2.0.8,3.0.0)",
+ org.springframework.mock.web;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.remoting.httpinvoker;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.remoting.support;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.security;version="2.0.4";resolution:=optional,
+ org.springframework.security.acl;version="2.0.4";resolution:=optional,
+ org.springframework.security.acl.basic;version="2.0.4";resolution:=optional,
+ org.springframework.security.acl.basic.cache;version="2.0.4";resolution:=optional,
+ org.springframework.security.acl.basic.jdbc;version="2.0.4";resolution:=optional,
+ org.springframework.security.adapters;version="2.0.4";resolution:=optional,
+ org.springframework.security.afterinvocation;version="2.0.4";resolution:=optional,
+ org.springframework.security.authoritymapping;version="2.0.4";resolution:=optional,
+ org.springframework.security.concurrent;version="2.0.4";resolution:=optional,
+ org.springframework.security.config;version="2.0.4";resolution:=optional,
+ org.springframework.security.context;version="2.0.4";resolution:=optional,
+ org.springframework.security.context.httpinvoker;version="2.0.4";resolution:=optional,
+ org.springframework.security.context.rmi;version="2.0.4";resolution:=optional,
+ org.springframework.security.event.authentication;version="2.0.4";resolution:=optional,
+ org.springframework.security.event.authorization;version="2.0.4";resolution:=optional,
+ org.springframework.security.intercept;version="2.0.4";resolution:=optional,
+ org.springframework.security.intercept.method;version="2.0.4";resolution:=optional,
+ org.springframework.security.intercept.method.aopalliance;version="2.0.4";resolution:=optional,
+ org.springframework.security.intercept.method.aspectj;version="2.0.4";resolution:=optional,
+ org.springframework.security.intercept.web;version="2.0.4";resolution:=optional,
+ org.springframework.security.ldap;version="2.0.4";resolution:=optional,
+ org.springframework.security.ldap.populator;version="2.0.4";resolution:=optional,
+ org.springframework.security.ldap.search;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.anonymous;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.dao;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.dao.cache;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.dao.salt;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.encoding;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.jaas;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.jaas.event;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.ldap;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.ldap.authenticator;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.preauth;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.rcp;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.rememberme;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.x509;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.x509.cache;version="2.0.4";resolution:=optional,
+ org.springframework.security.providers.x509.populator;version="2.0.4";resolution:=optional,
+ org.springframework.security.runas;version="2.0.4";resolution:=optional,
+ org.springframework.security.securechannel;version="2.0.4";resolution:=optional,
+ org.springframework.security.token;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.basicauth;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.digestauth;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.logout;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.preauth;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.preauth.header;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.preauth.j2ee;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.preauth.websphere;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.preauth.x509;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.rememberme;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.savedrequest;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.session;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.switchuser;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.webapp;version="2.0.4";resolution:=optional,
+ org.springframework.security.ui.x509;version="2.0.4";resolution:=optional,
+ org.springframework.security.userdetails;version="2.0.4";resolution:=optional,
+ org.springframework.security.userdetails.checker;version="2.0.4";resolution:=optional,
+ org.springframework.security.userdetails.hierarchicalroles;version="2.0.4";resolution:=optional,
+ org.springframework.security.userdetails.jdbc;version="2.0.4";resolution:=optional,
+ org.springframework.security.userdetails.ldap;version="2.0.4";resolution:=optional,
+ org.springframework.security.userdetails.memory;version="2.0.4";resolution:=optional,
+ org.springframework.security.util;version="2.0.4";resolution:=optional,
+ org.springframework.security.vote;version="2.0.4";resolution:=optional,
+ org.springframework.security.wrapper;version="2.0.4";resolution:=optional,
+ org.springframework.util;version="[2.0.8,3.0.0)",
+ org.springframework.util.xml;version="[2.0.8,3.0.0)",
+ org.springframework.web.context;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.springframework.web.context.support;version="[2.0.8,3.0.0)";resolution:=optional,
+ org.w3c.dom,
+ org.xml.sax
+Implementation-Vendor-Id: org.springframework.security
+Bnd-LastModified: 1217278918802
+Export-Package: org.springframework.security;version="2.0.4";
   uses:="org.springframework.core,
    org.springframework.security.providers.anonymous,
    org.springframework.security.providers.rememberme,
    org.springframework.context,
    org.springframework.util,
    org.springframework.context.support",
- org.springframework.security.acl;version="2.0.0.RC1";
+ org.springframework.security.acl;version="2.0.4";
   uses:="org.springframework.security,
    org.apache.commons.logging,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.acl.basic;version="2.0.0.RC1";
+ org.springframework.security.acl.basic;version="2.0.4";
   uses:="org.springframework.security.acl,
    org.apache.commons.logging,
    org.springframework.dao,
@@ -158,14 +157,14 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.acl.basic.cache,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.acl.basic.cache;version="2.0.0.RC1";
+ org.springframework.security.acl.basic.cache;version="2.0.4";
   uses:="net.sf.ehcache,
    org.apache.commons.logging,
    org.springframework.dao,
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.acl.basic",
- org.springframework.security.acl.basic.jdbc;version="2.0.0.RC1";
+ org.springframework.security.acl.basic.jdbc;version="2.0.4";
   uses:="org.springframework.jdbc.core,
    org.apache.commons.logging,
    org.springframework.dao,
@@ -176,7 +175,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.acl.basic.cache,
    org.springframework.util,
    org.springframework.jdbc.object",
- org.springframework.security.adapters;version="2.0.0.RC1";
+ org.springframework.security.adapters;version="2.0.4";
   uses:="javax.servlet.http,
    org.apache.commons.logging,
    org.springframework.context,
@@ -187,18 +186,18 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.context,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.afterinvocation;version="2.0.0.RC1";
+ org.springframework.security.afterinvocation;version="2.0.4";
   uses:="org.springframework.security.acl,
    org.apache.commons.collections.iterators,
    org.apache.commons.logging,
    org.springframework.context,
-   org.springframework.context.support,
    org.springframework.context.i18n,
+   org.springframework.context.support,
    org.springframework.security.acl.basic,
    org.springframework.security,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.authoritymapping;version="2.0.0.RC1";
+ org.springframework.security.authoritymapping;version="2.0.4";
   uses:="org.xml.sax,
    org.w3c.dom,
    org.apache.commons.logging,
@@ -208,12 +207,13 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    javax.xml.parsers,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.concurrent;version="2.0.0.RC1";
+ org.springframework.security.concurrent;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.ui.session,
    org.apache.commons.logging,
    org.springframework.context,
    org.springframework.context.support,
+   org.springframework.security.util,
    org.springframework.security,
    org.springframework.security.ui.logout,
    org.springframework.security.userdetails,
@@ -222,19 +222,19 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.config;version="2.0.0.RC1";
+ org.springframework.security.config;version="2.0.4";
   uses:="org.springframework.ldap.core,
+   org.springframework.security.afterinvocation,
    org.springframework.security.securechannel,
    org.springframework.security.vote,
-   org.springframework.security.userdetails.jdbc,
    org.springframework.security.ui.preauth.x509,
-   org.springframework.security.providers.ldap,
    javax.naming,
    javax.servlet,
    org.springframework.core.io,
    org.springframework.aop.config,
    org.springframework.beans.factory,
    org.springframework.security.wrapper,
+   org.springframework.security.intercept,
    org.apache.directory.server.protocol.shared.store,
    org.springframework.security.intercept.method,
    org.springframework.security.concurrent,
@@ -254,15 +254,12 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.userdetails,
    org.springframework.security.intercept.web,
    org.springframework.security.providers.dao.salt,
-   org.springframework.security.userdetails.memory,
    org.apache.directory.server.core,
    org.springframework.security.ui.basicauth,
+   org.springframework.security.userdetails.memory,
    org.springframework.security.ui.preauth,
-   org.springframework.security.ldap,
    org.springframework.security.ui,
-   org.springframework.security.userdetails.ldap,
    org.springframework.core.io.support,
-   org.springframework.security.ldap.search,
    org.springframework.security.ui.rememberme,
    org.springframework.security.providers.ldap.authenticator,
    org.springframework.security.providers.anonymous,
@@ -275,13 +272,12 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.apache.directory.server.configuration,
    org.springframework.beans.factory.support,
    org.springframework.security.ui.logout,
-   org.springframework.security.ldap.populator,
    org.springframework.beans.factory.config,
    org.springframework.security.providers,
    org.springframework.security.context,
    org.springframework.security.providers.dao.cache,
    org.springframework.util",
- org.springframework.security.context;version="2.0.0.RC1";
+ org.springframework.security.context;version="2.0.4";
   uses:="org.springframework.security,
    javax.servlet.http,
    javax.servlet,
@@ -289,27 +285,27 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.context.httpinvoker;version="2.0.0.RC1";
+ org.springframework.security.context.httpinvoker;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.context,
    org.springframework.remoting.httpinvoker,
    org.apache.commons.logging,
    org.apache.commons.codec.binary",
- org.springframework.security.context.rmi;version="2.0.0.RC1";
+ org.springframework.security.context.rmi;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.remoting.support,
    org.springframework.security.context,
    org.apache.commons.logging,
    org.aopalliance.intercept",
- org.springframework.security.event.authentication;version="2.0.0.RC1";
+ org.springframework.security.event.authentication;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.userdetails,
    org.springframework.core,
    org.apache.commons.logging,
    org.springframework.util,
    org.springframework.context",
- org.springframework.security.event.authorization;version="2.0.0.RC1";uses:="org.springframework.security,org.apache.commons.logging,org.springframework.context",
- org.springframework.security.intercept;version="2.0.0.RC1";
+ org.springframework.security.event.authorization;version="2.0.4";uses:="org.springframework.security,org.apache.commons.logging,org.springframework.context",
+ org.springframework.security.intercept;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.event.authorization,
    org.springframework.security.context,
@@ -319,7 +315,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.context.support,
    org.springframework.beans.factory",
- org.springframework.security.intercept.method;version="2.0.0.RC1";
+ org.springframework.security.intercept.method;version="2.0.4";
   uses:="org.aspectj.weaver.tools,
    org.springframework.metadata,
    org.springframework.security.intercept,
@@ -333,17 +329,19 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.beans,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.intercept.method.aopalliance;version="2.0.0.RC1";
+ org.springframework.security.intercept.method.aopalliance;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.intercept,
    org.springframework.security.intercept.method,
+   org.springframework.beans,
    org.springframework.util,
    org.springframework.aop.support,
+   org.springframework.beans.factory,
    org.aopalliance.aop,
    org.aopalliance.intercept,
    org.springframework.aop",
- org.springframework.security.intercept.method.aspectj;version="2.0.0.RC1";uses:="org.springframework.security.intercept,org.aspectj.lang,org.springframework.security.intercept.method",
- org.springframework.security.intercept.web;version="2.0.0.RC1";
+ org.springframework.security.intercept.method.aspectj;version="2.0.4";uses:="org.springframework.security.intercept,org.aspectj.lang,org.springframework.security.intercept.method",
+ org.springframework.security.intercept.web;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.core,
    org.springframework.security.intercept,
@@ -355,7 +353,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.ldap;version="2.0.0.RC1";
+ org.springframework.security.ldap;version="2.0.4";
   uses:="org.springframework.security.userdetails.ldap,
    javax.naming.directory,
    org.springframework.ldap.core,
@@ -371,7 +369,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.context,
    org.springframework.util,
    org.springframework.ldap",
- org.springframework.security.ldap.populator;version="2.0.0.RC1";
+ org.springframework.security.ldap.populator;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.userdetails,
    javax.naming.directory,
@@ -379,7 +377,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.apache.commons.logging,
    org.springframework.util,
    org.springframework.security.ldap",
- org.springframework.security.ldap.search;version="2.0.0.RC1";
+ org.springframework.security.ldap.search;version="2.0.4";
   uses:="org.springframework.security.userdetails,
    javax.naming.directory,
    org.springframework.ldap.core,
@@ -388,7 +386,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.security.ldap,
    org.springframework.ldap.core.support",
- org.springframework.security.providers;version="2.0.0.RC1";
+ org.springframework.security.providers;version="2.0.4";
   uses:="org.springframework.security.concurrent,
    org.apache.commons.logging,
    org.springframework.context,
@@ -398,7 +396,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.event.authentication,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.providers.anonymous;version="2.0.0.RC1";
+ org.springframework.security.providers.anonymous;version="2.0.4";
   uses:="javax.servlet.http,
    org.apache.commons.logging,
    org.springframework.context,
@@ -411,7 +409,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.providers.dao;version="2.0.0.RC1";
+ org.springframework.security.providers.dao;version="2.0.4";
   uses:="org.springframework.core,
    org.springframework.dao,
    org.springframework.context,
@@ -423,7 +421,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.providers.dao.cache,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.providers.dao.cache;version="2.0.0.RC1";
+ org.springframework.security.providers.dao.cache;version="2.0.4";
   uses:="org.springframework.security.userdetails,
    net.sf.ehcache,
    org.apache.commons.logging,
@@ -431,15 +429,15 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.providers.dao,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.providers.dao.salt;version="2.0.0.RC1";
+ org.springframework.security.providers.dao.salt;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.userdetails,
    org.springframework.beans,
    org.springframework.security.providers.dao,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.providers.encoding;version="2.0.0.RC1";uses:="org.apache.commons.codec.binary,org.springframework.dao",
- org.springframework.security.providers.jaas;version="2.0.0.RC1";
+ org.springframework.security.providers.encoding;version="2.0.4";uses:="org.apache.commons.codec.binary,org.springframework.dao",
+ org.springframework.security.providers.jaas;version="2.0.4";
   uses:="javax.servlet.http,
    javax.security.auth.login,
    org.springframework.security.providers.jaas.event,
@@ -453,11 +451,11 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.providers,
    org.springframework.security.context,
    org.springframework.util,
-   javax.security.auth,
    org.springframework.beans.factory,
+   javax.security.auth,
    javax.security.auth.callback",
- org.springframework.security.providers.jaas.event;version="2.0.0.RC1";uses:="org.springframework.security,org.springframework.context",
- org.springframework.security.providers.ldap;version="2.0.0.RC1";
+ org.springframework.security.providers.jaas.event;version="2.0.4";uses:="org.springframework.security,org.springframework.context",
+ org.springframework.security.providers.ldap;version="2.0.4";
   uses:="org.springframework.security.userdetails.ldap,
    org.springframework.ldap.core,
    org.springframework.core,
@@ -469,7 +467,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.security.ldap,
    org.springframework.ldap",
- org.springframework.security.providers.ldap.authenticator;version="2.0.0.RC1";
+ org.springframework.security.providers.ldap.authenticator;version="2.0.4";
   uses:="javax.naming.directory,
    org.springframework.ldap.core,
    org.springframework.context.support,
@@ -489,7 +487,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security,
    org.springframework.security.providers,
    org.springframework.util",
- org.springframework.security.providers.preauth;version="2.0.0.RC1";
+ org.springframework.security.providers.preauth;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.userdetails,
    org.springframework.security.providers,
@@ -498,13 +496,13 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.apache.commons.logging,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.providers.rcp;version="2.0.0.RC1";
+ org.springframework.security.providers.rcp;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.core,
    org.springframework.security.providers,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.providers.rememberme;version="2.0.0.RC1";
+ org.springframework.security.providers.rememberme;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.providers,
    org.apache.commons.logging,
@@ -512,7 +510,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.context.support,
    org.springframework.beans.factory",
- org.springframework.security.providers.x509;version="2.0.0.RC1";
+ org.springframework.security.providers.x509;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.providers.x509.cache,
    org.springframework.security.userdetails,
@@ -522,7 +520,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.context.support",
- org.springframework.security.providers.x509.cache;version="2.0.0.RC1";
+ org.springframework.security.providers.x509.cache;version="2.0.4";
   uses:="org.springframework.security.userdetails,
    net.sf.ehcache,
    org.springframework.security.providers.x509,
@@ -530,7 +528,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.dao,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.providers.x509.populator;version="2.0.0.RC1";
+ org.springframework.security.providers.x509.populator;version="2.0.4";
   uses:="org.apache.commons.logging,
    org.springframework.context,
    org.springframework.context.support,
@@ -539,14 +537,14 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.providers.x509,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.runas;version="2.0.0.RC1";
+ org.springframework.security.runas;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.providers,
    org.springframework.context,
    org.springframework.util,
    org.springframework.context.support,
    org.springframework.beans.factory",
- org.springframework.security.securechannel;version="2.0.0.RC1";
+ org.springframework.security.securechannel;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.intercept,
    org.apache.commons.logging,
@@ -557,7 +555,13 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.ui;version="2.0.0.RC1";
+ org.springframework.security.token;version="2.0.4";
+  uses:="org.springframework.core.io,
+   org.apache.commons.codec.binary,
+   org.springframework.util,
+   org.springframework.beans.factory,
+   org.springframework.security.util",
+ org.springframework.security.ui;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.ui.rememberme,
    org.springframework.core,
@@ -573,7 +577,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.event.authentication,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.ui.basicauth;version="2.0.0.RC1";
+ org.springframework.security.ui.basicauth;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.ui.rememberme,
    org.springframework.core,
@@ -581,13 +585,13 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.apache.commons.logging,
    org.springframework.security,
    javax.servlet,
-   org.springframework.security.providers,
    org.springframework.security.context,
+   org.springframework.security.providers,
    org.apache.commons.codec.binary,
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.ui.digestauth;version="2.0.0.RC1";
+ org.springframework.security.ui.digestauth;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.core,
    org.apache.commons.logging,
@@ -606,16 +610,16 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.providers.dao,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.ui.logout;version="2.0.0.RC1";
+ org.springframework.security.ui.logout;version="2.0.4";
   uses:="org.springframework.security,
    javax.servlet.http,
    javax.servlet,
    org.springframework.security.context,
    org.apache.commons.logging,
    org.springframework.util,
-   org.springframework.security.ui,
-   org.springframework.security.util",
- org.springframework.security.ui.preauth;version="2.0.0.RC1";
+   org.springframework.security.util,
+   org.springframework.security.ui",
+ org.springframework.security.ui.preauth;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.providers.preauth,
    org.springframework.core,
@@ -629,12 +633,12 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.ui.preauth.header;version="2.0.0.RC1";
+ org.springframework.security.ui.preauth.header;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.ui.preauth,
    org.springframework.util,
    org.springframework.security.ui",
- org.springframework.security.ui.preauth.j2ee;version="2.0.0.RC1";
+ org.springframework.security.ui.preauth.j2ee;version="2.0.4";
   uses:="org.springframework.security,
    javax.servlet.http,
    org.springframework.security.authoritymapping,
@@ -642,16 +646,14 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.apache.commons.logging,
    org.springframework.util,
    org.springframework.security.ui",
- org.springframework.security.ui.preauth.websphere;version="2.0.0.RC1";
+ org.springframework.security.ui.preauth.websphere;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.providers.preauth,
    org.springframework.security.authoritymapping,
    org.apache.commons.logging,
-   org.apache.commons.lang,
    org.aopalliance.intercept,
    org.springframework.security,
    javax.naming,
-   com.ibm.websphere.security,
    org.springframework.security.providers,
    org.springframework.security.context,
    org.springframework.security.ui.preauth,
@@ -660,7 +662,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.beans.factory,
    javax.security.auth,
    org.springframework.security.ui",
- org.springframework.security.ui.preauth.x509;version="2.0.0.RC1";
+ org.springframework.security.ui.preauth.x509;version="2.0.4";
   uses:="javax.servlet.http,
    org.apache.commons.logging,
    org.springframework.context,
@@ -670,10 +672,9 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.ui.preauth,
    org.springframework.util,
    org.springframework.security.ui",
- org.springframework.security.ui.rememberme;version="2.0.0.RC1";
+ org.springframework.security.ui.rememberme;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.userdetails.checker,
-   org.springframework.web.bind,
    org.apache.commons.codec.digest,
    org.springframework.security.providers.rememberme,
    org.springframework.jdbc.core.support,
@@ -697,20 +698,20 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.providers,
    org.springframework.util,
    org.springframework.jdbc.object",
- org.springframework.security.ui.savedrequest;version="2.0.0.RC1";
+ org.springframework.security.ui.savedrequest;version="2.0.4";
   uses:="javax.servlet.http,
    javax.servlet,
    org.apache.commons.logging,
    org.springframework.util,
    org.springframework.security.util",
- org.springframework.security.ui.session;version="2.0.0.RC1";
+ org.springframework.security.ui.session;version="2.0.4";
   uses:="javax.servlet.http,
    javax.servlet,
    org.springframework.web.context,
    org.apache.commons.logging,
    org.springframework.context,
    org.springframework.web.context.support",
- org.springframework.security.ui.switchuser;version="2.0.0.RC1";
+ org.springframework.security.ui.switchuser;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.core,
    org.springframework.security.userdetails.checker,
@@ -721,14 +722,14 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security,
    org.springframework.security.userdetails,
    javax.servlet,
-   org.springframework.security.providers,
    org.springframework.security.context,
-   org.springframework.beans,
+   org.springframework.security.providers,
    org.springframework.security.event.authentication,
+   org.springframework.beans,
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.ui.webapp;version="2.0.0.RC1";
+ org.springframework.security.ui.webapp;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.security.ui.rememberme,
    org.springframework.core,
@@ -741,7 +742,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.ui.x509;version="2.0.0.RC1";
+ org.springframework.security.ui.x509;version="2.0.4";
   uses:="javax.servlet.http,
    org.apache.commons.logging,
    org.springframework.context,
@@ -754,18 +755,18 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.beans.factory,
    org.springframework.security.ui",
- org.springframework.security.userdetails;version="2.0.0.RC1";
+ org.springframework.security.userdetails;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.dao,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.userdetails.checker;version="2.0.0.RC1";uses:="org.springframework.security,org.springframework.security.userdetails,org.springframework.context.support",
- org.springframework.security.userdetails.hierarchicalroles;version="2.0.0.RC1";
+ org.springframework.security.userdetails.checker;version="2.0.4";uses:="org.springframework.security,org.springframework.security.userdetails,org.springframework.context.support",
+ org.springframework.security.userdetails.hierarchicalroles;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.userdetails,
    org.apache.commons.logging,
    org.springframework.dao",
- org.springframework.security.userdetails.jdbc;version="2.0.0.RC1";
+ org.springframework.security.userdetails.jdbc;version="2.0.4";
   uses:="org.apache.commons.logging,
    org.springframework.jdbc.core,
    org.springframework.dao,
@@ -782,7 +783,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.providers.dao,
    org.springframework.jdbc.object,
    org.springframework.util",
- org.springframework.security.userdetails.ldap;version="2.0.0.RC1";
+ org.springframework.security.userdetails.ldap;version="2.0.4";
   uses:="javax.naming.directory,
    org.springframework.ldap.core,
    org.apache.commons.logging,
@@ -796,7 +797,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.security.ldap,
    org.springframework.ldap",
- org.springframework.security.userdetails.memory;version="2.0.0.RC1";
+ org.springframework.security.userdetails.memory;version="2.0.4";
   uses:="org.springframework.security,
    org.springframework.security.userdetails,
    org.springframework.beans.propertyeditors,
@@ -804,7 +805,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.dao,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.util;version="2.0.0.RC1";
+ org.springframework.security.util;version="2.0.4";
   uses:="javax.servlet.http,
    javax.crypto,
    org.springframework.context.support,
@@ -828,7 +829,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.util,
    org.springframework.aop.support,
    org.springframework.web.context.support",
- org.springframework.security.vote;version="2.0.0.RC1";
+ org.springframework.security.vote;version="2.0.4";
   uses:="org.springframework.security.acl,
    org.aspectj.lang,
    org.apache.commons.logging,
@@ -840,7 +841,7 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.aspectj.lang.reflect,
    org.springframework.util,
    org.springframework.beans.factory",
- org.springframework.security.wrapper;version="2.0.0.RC1";
+ org.springframework.security.wrapper;version="2.0.4";
   uses:="javax.servlet.http,
    org.apache.commons.logging,
    org.springframework.security.util,
@@ -851,17 +852,18 @@ Export-Package: org.springframework.security;version="2.0.0.RC1";
    org.springframework.security.context,
    org.springframework.util,
    org.springframework.security.ui"
-Bundle-Version: 2.0.1.v200805150000
-Bundle-Name: Spring Security - Core
+Bundle-Version: 2.0.4.v200807280800
+Ignore-Package: com.ibm.websphere.security
+Bundle-Name: spring-security-core
 Bundle-Description: Spring Security
 Build-Jdk: 1.5.0_13
-Private-Package: !org.springframework.security.*
 Bundle-DocURL: http://www.springsource.com/
+Private-Package: !org.springframework.security.*
 Bundle-ManifestVersion: 2
 Bundle-Vendor: SpringSource
-Bundle-SymbolicName: org.springframework.bundle.security.core
-Implementation-Title: Spring Security - Core
+Bundle-SymbolicName: org.springframework.security.core
+Implementation-Title: Spring Security
 Tool: Bnd-0.0.238
-Implementation-Version: 2.0.0-RC1
+Implementation-Version: 2.0.4-SNAPSHOT
+Implementation-Vendor: SpringSource
 Bundle-ClassPath: spring-security-core.jar
-
