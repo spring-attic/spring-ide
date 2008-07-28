@@ -33,14 +33,14 @@
    </requires>
 
    <plugin
-         id="org.springframework.bundle.security.core"
+         id="org.springframework.security.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.bundle.security.core.tiger"
+         id="org.springframework.security.annotation"
          download-size="0"
          install-size="0"
          version="0.0.0"
