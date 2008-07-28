@@ -87,5 +87,5 @@ plugin@org.springframework.bundle.osgi.io=SVN,trunk,https://src.springframework.
 plugin@org.springframework.osgi.backport.util.concurrent=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/backport-util-concurrent
 plugin@org.springframework.javaconfig=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-javaconfig
 plugin@org.objectweb.asm=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/asm
-plugin@org.springframework.bundle.security.core=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-security-core
-plugin@org.springframework.bundle.security.core.tiger=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-security-core-tiger
+plugin@org.springframework.security.core=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-security-core
+plugin@org.springframework.security.annotation=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-security-core-tiger
