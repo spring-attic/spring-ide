@@ -18,6 +18,8 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.webflow.core.internal.model.SubflowState;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidationContext;
+import org.springframework.ide.eclipse.webflow.core.model.IState;
+import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,8 +37,22 @@ public class SubflowStateValidationRule implements
 			IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(state.getFlow())) {
-			context.error(state, "NO_FLOW_ATTRIBUTE", "Element 'subflow-state' requires unique '"
-					+ (context.isVersion1() ? "flow" : "subflow") + "' attribute");
+			if (context.isVersion1()) {
+				context.error(state, "NO_FLOW_ATTRIBUTE",
+						"Element 'subflow-state' requires unique '"
+								+ (context.isVersion1() ? "flow" : "subflow") + "' attribute");
+			}
+			else {
+				IState parentState = context.getStateFromParentState(state.getAttribute(state
+						.getNode(), "parent"));
+				if (parentState == null
+						|| (parentState instanceof ISubflowState && !StringUtils
+								.hasText(((ISubflowState) parentState).getFlow()))) {
+					context.error(state, "NO_FLOW_ATTRIBUTE",
+							"Element 'subflow-state' requires unique '"
+									+ (context.isVersion1() ? "flow" : "subflow") + "' attribute");
+				}
+			}
 		}
 		else if (!WebflowModelUtils.getWebflowConfigNames(context.getWebflowConfig().getProject())
 				.contains(state.getFlow())

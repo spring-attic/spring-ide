@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.NamedNodeMap;
 
 /**
@@ -81,6 +82,49 @@ public class WebflowValidationContext extends AbstractValidationContext {
 			model = null;
 		}
 	}
+	
+	public IState getStateFromParentState(String stateId) {
+		if (!isVersion1() && stateId != null && stateId.contains("#")) {
+			IStructuredModel model = null;
+			IState state = null;
+			int i = stateId.lastIndexOf('#');
+			String parentFlowId = stateId.substring(0, i);
+			String parentStateId = stateId.substring(i + 1);
+			
+			IWebflowProject project = Activator.getModel().getProject(
+					getRootElement().getElementResource().getProject());
+			IWebflowConfig parentConfig = project.getConfig(parentFlowId);
+			try {
+				model = StructuredModelManager.getModelManager().getExistingModelForRead(
+						parentConfig.getElementResource());
+				if (model == null) {
+					model = StructuredModelManager.getModelManager().getModelForRead(
+							(IFile) parentConfig.getElementResource());
+				}
+				if (model != null) {
+					IDOMDocument document = ((DOMModelImpl) model).getDocument();
+					IWebflowState parentState = new WebflowState(parentConfig);
+					parentState.init((IDOMNode) document.getDocumentElement(), null);
+
+					state = WebflowModelXmlUtils.getStateById(parentState, parentStateId);
+				}
+			}
+			catch (Exception e) {
+			}
+			finally {
+				if (model != null) {
+					model.releaseFromRead();
+				}
+				model = null;
+			}
+
+			if (state != null) {
+				return state;
+			}
+
+		}
+		return null;
+	}
 
 	public IState getStateFromParentFlow(String stateId, IWebflowConfig config) {
 		if (!isVersion1()) {
@@ -113,40 +157,42 @@ public class WebflowValidationContext extends AbstractValidationContext {
 			}
 
 			if (parent != null) {
-				IState state = null;
+				for (Object p : StringUtils.commaDelimitedListToSet(parent)) {
+					IState state = null;
 
-				IWebflowProject project = Activator.getModel().getProject(
-						getRootElement().getElementResource().getProject());
-				IWebflowConfig parentConfig = project.getConfig(parent);
-				try {
-					model = StructuredModelManager.getModelManager().getExistingModelForRead(
-							parentConfig.getElementResource());
-					if (model == null) {
-						model = StructuredModelManager.getModelManager().getModelForRead(
-								(IFile) parentConfig.getElementResource());
-					}
-					if (model != null) {
-						IDOMDocument document = ((DOMModelImpl) model).getDocument();
-						IWebflowState parentState = new WebflowState(parentConfig);
-						parentState.init((IDOMNode) document.getDocumentElement(), null);
+					IWebflowProject project = Activator.getModel().getProject(
+							getRootElement().getElementResource().getProject());
+					IWebflowConfig parentConfig = project.getConfig((String) p);
+					try {
+						model = StructuredModelManager.getModelManager().getExistingModelForRead(
+								parentConfig.getElementResource());
+						if (model == null) {
+							model = StructuredModelManager.getModelManager().getModelForRead(
+									(IFile) parentConfig.getElementResource());
+						}
+						if (model != null) {
+							IDOMDocument document = ((DOMModelImpl) model).getDocument();
+							IWebflowState parentState = new WebflowState(parentConfig);
+							parentState.init((IDOMNode) document.getDocumentElement(), null);
 
-						state = WebflowModelXmlUtils.getStateById(parentState, stateId);
+							state = WebflowModelXmlUtils.getStateById(parentState, stateId);
+						}
 					}
-				}
-				catch (Exception e) {
-				}
-				finally {
-					if (model != null) {
-						model.releaseFromRead();
+					catch (Exception e) {
 					}
-					model = null;
-				}
+					finally {
+						if (model != null) {
+							model.releaseFromRead();
+						}
+						model = null;
+					}
 
-				if (state != null) {
-					return state;
-				}
-				else {
-					return getStateFromParentFlow(stateId, parentConfig);
+					if (state != null) {
+						return state;
+					}
+					else {
+						return getStateFromParentFlow(stateId, parentConfig);
+					}
 				}
 			}
 		}
