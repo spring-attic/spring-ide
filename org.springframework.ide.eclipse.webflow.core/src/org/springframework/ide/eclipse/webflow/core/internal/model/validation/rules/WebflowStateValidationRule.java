@@ -54,9 +54,9 @@ public class WebflowStateValidationRule implements
 									"Start state definition misses 'idref' attribute");
 						}
 						else if (idref != null) {
-							context.error(state, "NO_START_STATE_IDREF_INVALID",
-								MessageUtils.format("Start state definition references non-existing state \"{0}\"",
-									idref));
+							context.error(state, "NO_START_STATE_IDREF_INVALID", MessageUtils
+								.format("Start state definition references non-existing state \"{0}\"",
+										idref));
 						}
 					}
 				}
@@ -67,21 +67,26 @@ public class WebflowStateValidationRule implements
 			}
 		}
 		else {
-			if (state.getStartState() == null) {
-				context.error(state, "NO_START_STATE",
-						"Start state is missing. Add at least one state to the flow");
-			}
-			else {
-				Element node = (Element) state.getNode();
-				if (node.getAttribute("start-state") != null) {
-					String idref = state.getAttribute((IDOMNode) node, "start-state");
-					if (idref != null && WebflowModelXmlUtils.getStateById(state, idref) == null) {
-						context.error(state,
-							"NO_START_STATE",
-							"Start state definition is not pointing to an exiting state. Correct the value of the 'start-state' attribute");
+			
+			// An abstract flow does not need to have states
+			if (!"true".equalsIgnoreCase(state.getAbstract())) {
+				if (state.getStartState() == null) {
+					context.error(state, "NO_START_STATE",
+							"Start state is missing. Add at least one state to the flow");
+				}
+				else {
+					Element node = (Element) state.getNode();
+					if (node.getAttribute("start-state") != null) {
+						String idref = state.getAttribute((IDOMNode) node, "start-state");
+						if (idref != null
+								&& WebflowModelXmlUtils.getStateById(state, idref) == null) {
+							context.error(state, "NO_START_STATE", "Start state definition is not " +
+									"pointing to an exiting state. Correct the value of the 'start-state' attribute");
+						}
 					}
 				}
 			}
 		}
 	}
+	
 }
