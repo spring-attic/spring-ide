@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.autowire.feature"
       label="%featureName"
-      version="2.1.0.qualifier"
+      version="2.1.1.qualifier"
       provider-name="%featureProvider"
       plugin="org.springframework.ide.eclipse">
 
@@ -29,7 +29,7 @@
    -->
    
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.1.0"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.1.1"/>
    </requires>
 
    <plugin

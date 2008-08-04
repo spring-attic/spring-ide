@@ -11,8 +11,8 @@
 ################################################################################
 
 WORKSPACE=`pwd`
-NAME=`date +%Y%m%d%H%M`
-#NAME=200802061800
+#NAME=`date +%Y%m%d%H%M`
+NAME=200808011800
 STAGINGLOCATION=$WORKSPACE/updatesite/
 TEST_STAGINGLOCATION=$WORKSPACE/testupdatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar

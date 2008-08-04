@@ -22,7 +22,7 @@ ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/dow
 
 MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/e3.3/
 AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/33/update
-UPDATESITE=http://springide.org/updatesite
+UPDATESITE=file://$STAGINGLOCATION
 
 # Install given feature into downloaded Eclipse
 install_feature () {
@@ -50,6 +50,16 @@ install_feature org.springframework.ide.eclipse.mylyn.feature $UPDATESITE
 install_feature org.springframework.ide.eclipse.osgi.feature $UPDATESITE
 install_feature org.springframework.ide.eclipse.security.feature $UPDATESITE
 install_feature org.springframework.ide.eclipse.autowire.feature $UPDATESITE
+install_feature org.springframework.ide.eclipse.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.aop.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.ajdt.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.javaconfig.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.webflow.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.mylyn.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.osgi.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.security.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.autowire.feature.source $UPDATESITE
+
 
 cd $STAGINGLOCATION
 ZIP_NAME=`ls *.zip`
