@@ -63,5 +63,14 @@
 			name="Spring Security"
 			uri="http://www.springframework.org/schema/security" />
 	</extension>
+	
+	<!-- contribute the security namespace handler -->
+   <extension
+       point="org.springframework.ide.eclipse.beans.core.namespaces">
+       <namespace
+            namespaceHandler="org.springframework.security.config.SecurityNamespaceHandler"
+            uri="http://www.springframework.org/schema/security">
+       </namespace>
+   </extension>
 
 </plugin>
