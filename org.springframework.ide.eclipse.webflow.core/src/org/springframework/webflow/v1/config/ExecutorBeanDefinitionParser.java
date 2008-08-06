@@ -72,7 +72,7 @@ class ExecutorBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	@SuppressWarnings("deprecation")
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
-				.rootBeanDefinition(FlowExecutorFactoryBean.class);
+				.rootBeanDefinition("org.springframework.webflow.config.FlowExecutorFactoryBean");
 		definitionBuilder.setSource(parserContext.extractSource(element));
 		definitionBuilder.addPropertyReference(DEFINITION_LOCATOR_PROPERTY, 
 				getRegistryRef(element, parserContext));
