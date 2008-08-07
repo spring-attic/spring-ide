@@ -852,7 +852,7 @@ Export-Package: org.springframework.security;version="2.0.4";
    org.springframework.security.context,
    org.springframework.util,
    org.springframework.security.ui"
-Bundle-Version: 2.0.4.v200807280800
+Bundle-Version: 2.0.4.v200808081800
 Ignore-Package: com.ibm.websphere.security
 Bundle-Name: spring-security-core
 Bundle-Description: Spring Security
