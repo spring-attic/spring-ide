@@ -1964,4 +1964,5 @@ Import-Package: bsh;resolution:=optional,
  weblogic.jdbc.extensions;resolution:=optional,
  weblogic.transaction;resolution:=optional
 Originally-Created-By: 1.6.0_05-b13-52 (Apple Inc.)
+DynamicImport-Package: *
 Bundle-ClassPath: spring.jar

@@ -16,4 +16,5 @@ Export-Package: org.aspectj.internal.lang.annotation,
  org.aspectj.runtime.internal,
  org.aspectj.runtime.internal.cflowstack,
  org.aspectj.runtime.reflect
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 
