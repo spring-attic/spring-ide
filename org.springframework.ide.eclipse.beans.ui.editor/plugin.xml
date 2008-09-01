@@ -219,12 +219,12 @@
 			id="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.property">
 		</contextType>
 		<include file="templates/templates.xml"
-			translations="templates/templates.properties" />
+			translations="templates/templates.properties" /> 
 	</extension>
 
 	<extension point="org.eclipse.ui.preferencePages">
 		<page name="%templatesPreferencesPageName"
-			category="org.eclipse.wst.sse.ui.preferences.xml"
+			category="org.springframework.ide.eclipse.beans.ui.preferencePage"
 			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeanTemplatePreferencePage"
 			id="org.springframework.ide.eclipse.beans.ui.editor.templates">
 		</page>
