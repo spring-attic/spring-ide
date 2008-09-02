@@ -21,10 +21,14 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -45,14 +49,12 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringLabelDecorator;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * This decorator adds an overlay image to all Spring beans config files and
- * their corresponding folders and bean classes (Java source and class files).
- * This decoration is refreshed on every modification to the Spring Beans model.
- * Therefore the decorator adds a {@link IModelChangeListener change listener}
- * to the beans model.
+ * This decorator adds an overlay image to all Spring beans config files and their corresponding
+ * folders and bean classes (Java source and class files). This decoration is refreshed on every
+ * modification to the Spring Beans model. Therefore the decorator adds a
+ * {@link IModelChangeListener change listener} to the beans model.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -63,8 +65,27 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 			+ ".model.beansModelLabelDecorator";
 
 	public static void update() {
-		SpringUIUtils.updateDecorator(SpringLabelDecorator.DECORATOR_ID);
-		SpringUIUtils.updateDecorator(DECORATOR_ID);
+		IBaseLabelProvider provider = PlatformUI.getWorkbench().getDecoratorManager()
+				.getBaseLabelProvider(DECORATOR_ID);
+		if (provider instanceof BeansModelLabelDecorator) {
+			((BeansModelLabelDecorator) provider).internalUpdate();
+		}
+	}
+
+	private void internalUpdate() {
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+
+				IBaseLabelProvider provider = PlatformUI.getWorkbench().getDecoratorManager()
+						.getBaseLabelProvider(SpringLabelDecorator.DECORATOR_ID);
+				if (provider != null) {
+					fireLabelProviderChanged(new LabelProviderChangedEvent(provider));
+				}
+
+				fireLabelProviderChanged(new LabelProviderChangedEvent(
+						BeansModelLabelDecorator.this));
+			}
+		});
 	}
 
 	private IModelChangeListener listener;
@@ -72,10 +93,9 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 	public BeansModelLabelDecorator() {
 		listener = new IModelChangeListener() {
 			public void elementChanged(ModelChangeEvent event) {
-				if ((event.getElement() instanceof IBeansProject || event
-						.getElement() instanceof IBeansConfig)
+				if ((event.getElement() instanceof IBeansProject || event.getElement() instanceof IBeansConfig)
 						&& event.getType() != ModelChangeEvent.Type.REMOVED) {
-					update();
+					internalUpdate();
 				}
 			}
 		};
@@ -96,8 +116,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 			if (element instanceof Bean) {
 				decorateBean((Bean) element, decoration);
 			}
-			decorateBeansModelElement(((IBeansModelElement) element),
-					decoration);
+			decorateBeansModelElement(((IBeansModelElement) element), decoration);
 		}
 	}
 
@@ -108,24 +127,19 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 	private void decorateBean(Bean bean, IDecoration decoration) {
 		BeanDefinition bd = bean.getBeanDefinition();
 		if (bean.isChildBean()) {
-			decoration.addOverlay(BeansUIImages.DESC_OVR_CHILD,
-					IDecoration.TOP_RIGHT);
+			decoration.addOverlay(BeansUIImages.DESC_OVR_CHILD, IDecoration.TOP_RIGHT);
 		}
 		if (bean.isFactory()) {
-			decoration.addOverlay(BeansUIImages.DESC_OVR_FACTORY,
-					IDecoration.TOP_LEFT);
+			decoration.addOverlay(BeansUIImages.DESC_OVR_FACTORY, IDecoration.TOP_LEFT);
 		}
 		if (bean.isAbstract()) {
-			decoration.addOverlay(BeansUIImages.DESC_OVR_ABSTRACT,
-					IDecoration.BOTTOM_RIGHT);
+			decoration.addOverlay(BeansUIImages.DESC_OVR_ABSTRACT, IDecoration.BOTTOM_RIGHT);
 		}
 		if (!bd.isSingleton()) {
-			decoration.addOverlay(BeansUIImages.DESC_OVR_PROTOTYPE,
-					IDecoration.BOTTOM_RIGHT);
+			decoration.addOverlay(BeansUIImages.DESC_OVR_PROTOTYPE, IDecoration.BOTTOM_RIGHT);
 		}
 		if (bd instanceof AnnotatedBeanDefinition) {
-			decoration.addOverlay(BeansUIImages.DESC_OVR_ANNOTATION,
-					IDecoration.BOTTOM_LEFT);
+			decoration.addOverlay(BeansUIImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
 		}
 	}
 
@@ -133,8 +147,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 	 * Adds error and warning decorations to {@link IBeansModelElement}.
 	 * @since 2.0.1
 	 */
-	private void decorateBeansModelElement(IBeansModelElement element,
-			IDecoration decoration) {
+	private void decorateBeansModelElement(IBeansModelElement element, IDecoration decoration) {
 		addErrorOverlay(decoration, getSeverity(element));
 	}
 
@@ -161,28 +174,22 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 		}
 	}
 
-	protected void decorateJavaElement(IJavaElement element,
-			IDecoration decoration) {
+	protected void decorateJavaElement(IJavaElement element, IDecoration decoration) {
 		int type = element.getElementType();
-		if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT
-				|| type == IJavaElement.CLASS_FILE
+		if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.CLASS_FILE
 				|| type == IJavaElement.COMPILATION_UNIT) {
 			IBeansModel model = BeansCorePlugin.getModel();
-			IBeansProject project = model.getProject(element.getJavaProject()
-					.getProject());
+			IBeansProject project = model.getProject(element.getJavaProject().getProject());
 			if (project != null) {
 				try {
 					if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 
 						// Decorate JAR file
-						IResource resource = ((IPackageFragmentRoot) element)
-								.getResource();
+						IResource resource = ((IPackageFragmentRoot) element).getResource();
 						if (resource instanceof IFile) {
 							for (IBeansConfig config : project.getConfigs()) {
-								if (config.getElementResource()
-										.equals(resource)) {
-									decoration
-											.addOverlay(BeansUIImages.DESC_OVR_SPRING);
+								if (config.getElementResource().equals(resource)) {
+									decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 									break;
 								}
 							}
@@ -192,21 +199,16 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 
 						// Decorate Java class file
 						IType javaType = ((IClassFile) element).getType();
-						if (BeansModelUtils.isBeanClass(javaType
-								.getFullyQualifiedName())) {
-							decoration
-									.addOverlay(BeansUIImages.DESC_OVR_SPRING);
+						if (BeansModelUtils.isBeanClass(javaType.getFullyQualifiedName())) {
+							decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 						}
 					}
 					else if (type == IJavaElement.COMPILATION_UNIT) {
 
 						// Decorate Java source file
-						for (IType javaType : ((ICompilationUnit) element)
-								.getTypes()) {
-							if (BeansModelUtils.isBeanClass(javaType
-									.getFullyQualifiedName())) {
-								decoration
-										.addOverlay(BeansUIImages.DESC_OVR_SPRING);
+						for (IType javaType : ((ICompilationUnit) element).getTypes()) {
+							if (BeansModelUtils.isBeanClass(javaType.getFullyQualifiedName())) {
+								decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 								break;
 							}
 						}
@@ -231,26 +233,31 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 		}
 		else if (element instanceof ISourceModelElement) {
 			ISourceModelElement source = (ISourceModelElement) element;
-			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(source
-					.getElementResource(), source.getElementStartLine(), source
-					.getElementEndLine());
+			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
+					source.getElementResource(), source.getElementStartLine(), source
+							.getElementEndLine());
 		}
 		else if (element instanceof IResourceModelElement) {
 			if (element instanceof IBeansProject) {
-				for (IBeansConfig config : ((IBeansProject) element)
-						.getConfigs()) {
-					severity = getSeverityForConfig(config);
+				int s = 0;
+				for (IBeansConfig config : ((IBeansProject) element).getConfigs()) {
+					s = getSeverityForConfig(config);
+					if (s > severity) {
+						severity = s;
+					}
 					if (severity == IMarker.SEVERITY_ERROR) {
 						break;
 					}
 				}
 			}
 			else if (element instanceof IBeansConfigSet) {
-				for (IBeansConfig config : ((IBeansConfigSet) element)
-						.getConfigs()) {
-					severity = MarkerUtils
-							.getHighestSeverityFromMarkersInRange(config
-									.getElementResource(), -1, -1);
+				int s = 0;
+				for (IBeansConfig config : ((IBeansConfigSet) element).getConfigs()) {
+					severity = MarkerUtils.getHighestSeverityFromMarkersInRange(config
+							.getElementResource(), -1, -1);
+					if (s > severity) {
+						severity = s;
+					}
 					if (severity == IMarker.SEVERITY_ERROR) {
 						break;
 					}
@@ -261,26 +268,23 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 			}
 			else {
 				severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
-						((IResourceModelElement) element).getElementResource(),
-						-1, -1);
+						((IResourceModelElement) element).getElementResource(), -1, -1);
 			}
 		}
 		else if (element instanceof IResource) {
-			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
-					(IResource) element, -1, -1);
+			severity = MarkerUtils
+					.getHighestSeverityFromMarkersInRange((IResource) element, -1, -1);
 		}
 		else if (element instanceof ZipEntryStorage) {
 			IResource resource = ((ZipEntryStorage) element).getFile();
-			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
-					resource, -1, -1);
+			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, -1, -1);
 		}
 		return severity;
 	}
 
 	private int getSeverityForConfig(IBeansConfig beansConfig) {
-		int severity = MarkerUtils
-				.getHighestSeverityFromMarkersInRange(beansConfig
-						.getElementResource(), -1, -1);
+		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(beansConfig
+				.getElementResource(), -1, -1);
 
 		// Check imported configs
 		for (IBeansImport beanImport : beansConfig.getImports()) {
@@ -299,8 +303,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 
 	private int getSeverityForImport(IBeansImport beanImport) {
 		int severity = 0;
-		for (IBeansConfig importedConfig : beanImport
-				.getImportedBeansConfigs()) {
+		for (IBeansConfig importedConfig : beanImport.getImportedBeansConfigs()) {
 			int importedSeverity = getSeverityForConfig(importedConfig);
 			if (importedSeverity == IMarker.SEVERITY_WARNING) {
 				severity = importedSeverity;

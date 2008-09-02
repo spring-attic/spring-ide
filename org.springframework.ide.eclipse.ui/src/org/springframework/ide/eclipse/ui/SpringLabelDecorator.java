@@ -14,8 +14,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
@@ -35,15 +33,6 @@ public class SpringLabelDecorator extends LabelProvider implements
 		if (element instanceof ISpringProject) {
 			decorateModelElement(((ISpringProject) element), decoration);
 		}
-	}
-
-	public static void update() {
-		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
-			public void run() {
-				IWorkbench workbench = PlatformUI.getWorkbench();
-				workbench.getDecoratorManager().update(DECORATOR_ID);
-			}
-		});
 	}
 
 	/**
