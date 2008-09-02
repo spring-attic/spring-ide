@@ -144,7 +144,12 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 
 		AspectJAutoProxyConfiguration configuration = getAspectJAutoProxyConfiguration(beansConfig,
 				document);
-
+		
+		// not configured for auto proxing
+		if (!configuration.isAutoProxy()) {
+			return;
+		}
+		
 		List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
 
 		for (IBean bean : beansConfig.getBeans()) {
@@ -215,6 +220,11 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 	private void getAspectJConfigurationForDocument(IDOMDocument document,
 			AspectJAutoProxyConfiguration configuration) {
 		NodeList list = getAspectJAutoProxyNodes(document);
+		
+		if (list.getLength() > 0) {
+			configuration.setAutoProxy(true);
+		}
+		
 		for (int i = 0; i < list.getLength(); i++) {
 			Node node = list.item(i);
 			configuration.addIncludePattern(node);
@@ -298,6 +308,8 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		private List<Pattern> includePatterns;
 
 		private boolean proxyTargetClass;
+		
+		private boolean isAutoProxy = false;
 
 		public void setProxyTargetClass(boolean proxyTargetClass) {
 			this.proxyTargetClass = proxyTargetClass;
@@ -305,6 +317,14 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 
 		public boolean isProxyTargetClass() {
 			return proxyTargetClass;
+		}
+		
+		public void setAutoProxy(boolean autoProxy) {
+			this.isAutoProxy = autoProxy;
+		}
+		
+		public boolean isAutoProxy() {
+			return isAutoProxy;
 		}
 
 		public void addIncludePattern(Node autoproxyNode) {
