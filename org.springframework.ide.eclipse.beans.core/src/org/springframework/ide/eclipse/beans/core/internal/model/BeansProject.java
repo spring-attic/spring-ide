@@ -397,7 +397,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		if (beansConfig != null) {
 			beansConfigs.add(beansConfig);
 		}
-		if (includeImported && getConfigs() != null) {
+
+		// make sure that we run into the next block only if <import> support is enabled
+		// not executing the block will safe lots of execution time as configuration files don't
+		// need to get loaded.
+		if ((isImportsEnabled() && includeImported) && getConfigs() != null) {
 			try {
 				r.lock();
 				for (IBeansConfig bc : getConfigs()) {
@@ -416,6 +420,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		if (bc.getElementResource().equals(file)) {
 			beansConfigs.add(bc);
 		}
+
 		for (IBeansImport bi : bc.getImports()) {
 			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
 				if (importedBc.getElementResource().equals(file)) {
@@ -806,7 +811,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * This method should only be called with having a write lock.
 	 */
 	private void populateAutoDetectedConfigsAndConfigSets() {
-		
+
 		autoDetectedConfigs.clear();
 		autoDetectedConfigsByLocator.clear();
 		locatorByAutoDetectedConfig.clear();
