@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -27,78 +26,37 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.PropertyBeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
-import org.springframework.ide.eclipse.core.java.IMethodFilter;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
- * {@link INamespaceContentAssistProcessor} implementation responsible for the
- * standard <code>bean:*</code> namespace.
+ * {@link INamespaceContentAssistProcessor} implementation responsible for the standard
+ * <code>bean:*</code> namespace.
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
 @SuppressWarnings("restriction")
-public class BeansContentAssistProcessor extends
-		NamespaceContentAssistProcessorSupport {
+public class BeansContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
 
-	private void addBeanReferenceProposals(ContentAssistRequest request,
-			String prefix, Node node) {
-		BeansCompletionUtils.addBeanReferenceProposals(request, prefix, node
-				.getOwnerDocument(), true);
+	private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Node node) {
+		BeansCompletionUtils.addBeanReferenceProposals(request, prefix, node.getOwnerDocument(),
+				true);
 	}
 
-	private void addFactoryMethodAttributeValueProposals(
-			ContentAssistRequest request, String prefix,
-			final String factoryClassName, boolean isStatic) {
-		if (BeansEditorUtils.getFile(request) instanceof IFile) {
-			final IFile file = BeansEditorUtils.getFile(request);
-
-			IMethodFilter filter = null;
-			if (isStatic) {
-				filter = new FlagsMethodFilter(FlagsMethodFilter.STATIC
-						| FlagsMethodFilter.NOT_VOID
-						| FlagsMethodFilter.NOT_INTERFACE
-						| FlagsMethodFilter.NOT_CONSTRUCTOR);
-			}
-			else {
-				filter = new FlagsMethodFilter(FlagsMethodFilter.NOT_VOID
-						| FlagsMethodFilter.NOT_INTERFACE
-						| FlagsMethodFilter.NOT_CONSTRUCTOR);
-			}
-
-			IContentAssistCalculator calculator = new MethodContentAssistCalculator(
-					filter) {
-
-				@Override
-				protected IType calculateType(ContentAssistRequest request,
-						String attributeName) {
-					return JdtUtils.getJavaType(file.getProject(),
-							factoryClassName);
-				}
-			};
-
-			calculator.computeProposals(request, prefix, null, null, null);
-		}
-	}
-
-	private void addPropertyNameAttributeNameProposals(
-			ContentAssistRequest request, String prefix, String oldPrefix,
-			Node node, List classNames, boolean attrAtLocationHasValue,
+	private void addPropertyNameAttributeNameProposals(ContentAssistRequest request, String prefix,
+			String oldPrefix, Node node, List classNames, boolean attrAtLocationHasValue,
 			String nameSpacePrefix) {
 
-		PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(
-				request, oldPrefix, attrAtLocationHasValue, nameSpacePrefix);
+		PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(request, oldPrefix,
+				attrAtLocationHasValue, nameSpacePrefix);
 		if (prefix.lastIndexOf(".") >= 0) {
 			int firstIndex = prefix.indexOf(".");
 			String firstPrefix = prefix.substring(0, firstIndex);
@@ -112,27 +70,24 @@ public class BeansContentAssistProcessor extends
 			for (int i = 0; i < classNames.size(); i++) {
 				IType type = (IType) classNames.get(i);
 				try {
-					Collection methods = Introspector.findReadableProperties(
-							type, firstPrefix);
+					Collection methods = Introspector.findReadableProperties(type, firstPrefix);
 					if (methods != null && methods.size() == 1) {
 
 						Iterator iterator = methods.iterator();
 						while (iterator.hasNext()) {
 							IMethod method = (IMethod) iterator.next();
 							IType returnType = JdtUtils
-									.getJavaTypeForMethodReturnType(method,
-											type);
+									.getJavaTypeForMethodReturnType(method, type);
 
 							if (returnType != null) {
 								List<IType> typesTemp = new ArrayList<IType>();
 								typesTemp.add(returnType);
 
-								String newPrefix = oldPrefix + firstPrefix
-										+ ".";
+								String newPrefix = oldPrefix + firstPrefix + ".";
 
-								addPropertyNameAttributeNameProposals(request,
-										lastPrefix, newPrefix, node, typesTemp,
-										attrAtLocationHasValue, nameSpacePrefix);
+								addPropertyNameAttributeNameProposals(request, lastPrefix,
+										newPrefix, node, typesTemp, attrAtLocationHasValue,
+										nameSpacePrefix);
 							}
 							return;
 						}
@@ -147,14 +102,12 @@ public class BeansContentAssistProcessor extends
 			for (int i = 0; i < classNames.size(); i++) {
 				IType type = (IType) classNames.get(i);
 				try {
-					Collection methods = Introspector.findWritableProperties(
-							type, prefix);
+					Collection methods = Introspector.findWritableProperties(type, prefix);
 					if (methods != null && methods.size() > 0) {
 
 						Iterator iterator = methods.iterator();
 						while (iterator.hasNext()) {
-							requestor.acceptSearchMatch((IMethod) iterator
-									.next(), false);
+							requestor.acceptSearchMatch((IMethod) iterator.next(), false);
 						}
 					}
 				}
@@ -169,9 +122,8 @@ public class BeansContentAssistProcessor extends
 	}
 
 	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request,
-			String prefix, String namespace, String namespacePrefix,
-			Node attributeNode) {
+	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix,
+			String namespace, String namespacePrefix, Node attributeNode) {
 		if ("http://www.springframework.org/schema/p".equals(namespace)) {
 			// check whether an attribute really exists for the replacement
 			// offsets AND if it possesses a value
@@ -181,8 +133,7 @@ public class BeansContentAssistProcessor extends
 			for (int i = 0; i < attrs.getLength(); i++) {
 				AttrImpl existingAttr = (AttrImpl) attrs.item(i);
 				ITextRegion name = existingAttr.getNameRegion();
-				if (sdRegion.getStartOffset(name) <= request
-						.getReplacementBeginPosition()
+				if (sdRegion.getStartOffset(name) <= request.getReplacementBeginPosition()
 						&& sdRegion.getStartOffset(name) + name.getLength() >= request
 								.getReplacementBeginPosition()
 								+ request.getReplacementLength()
@@ -196,17 +147,15 @@ public class BeansContentAssistProcessor extends
 				prefix = BeansEditorUtils.attributeNameToPropertyName(prefix);
 			}
 
-			List classNames = BeansEditorUtils.getClassNamesOfBean(
-					BeansEditorUtils.getFile(request), attributeNode);
-			addPropertyNameAttributeNameProposals(request, prefix, "",
-					attributeNode, classNames, attrAtLocationHasValue,
-					namespacePrefix);
+			List classNames = BeansEditorUtils.getClassNamesOfBean(BeansEditorUtils
+					.getFile(request), attributeNode);
+			addPropertyNameAttributeNameProposals(request, prefix, "", attributeNode, classNames,
+					attrAtLocationHasValue, namespacePrefix);
 		}
 	}
 
 	@Override
-	protected void computeTagInsertionProposals(ContentAssistRequest request,
-			IDOMNode node) {
+	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
 		if (node != null && node.getParentNode() != null) {
 			Node parentNode = node.getParentNode();
 			if ("bean".equals(parentNode.getNodeName())) {
@@ -224,8 +173,7 @@ public class BeansContentAssistProcessor extends
 
 	@Override
 	public void init() {
-		ClassContentAssistCalculator clazz = new ClassContentAssistCalculator(
-				false);
+		ClassContentAssistCalculator clazz = new ClassContentAssistCalculator(false);
 		registerContentAssistCalculator("bean", "class", clazz);
 		registerContentAssistCalculator("constructor-arg", "type", clazz);
 		registerContentAssistCalculator("arg-type", "match", clazz);
@@ -242,8 +190,7 @@ public class BeansContentAssistProcessor extends
 		registerContentAssistCalculator("idref", "bean", globalBean);
 		registerContentAssistCalculator("constructor-arg", "ref", globalBean);
 		registerContentAssistCalculator("alias", "name", globalBean);
-		registerContentAssistCalculator("replaced-method", "replacer",
-				globalBean);
+		registerContentAssistCalculator("replaced-method", "replacer", globalBean);
 		registerContentAssistCalculator("entry", "value-ref", globalBean);
 		registerContentAssistCalculator("entry", "key-ref", globalBean);
 		registerContentAssistCalculator("lookup-method", "bean", globalBean);
@@ -257,8 +204,7 @@ public class BeansContentAssistProcessor extends
 		registerContentAssistCalculator("bean", "init-method", initDestroy);
 		registerContentAssistCalculator("bean", "destroy-method", initDestroy);
 
-		registerContentAssistCalculator("bean", "id",
-				new BeanIdContentAssistCalculator());
+		registerContentAssistCalculator("bean", "id", new BeanIdContentAssistCalculator());
 		registerContentAssistCalculator("replaced-method", "name",
 				new ReplaceMethodContentAssistCalculator());
 		registerContentAssistCalculator("lookup-method", "name",
@@ -266,44 +212,21 @@ public class BeansContentAssistProcessor extends
 
 		registerContentAssistCalculator("property", "name",
 				new PropertyNameContentAssistCalculator());
+
+		registerContentAssistCalculator("bean", "factory-method",
+				new FactoryMethodContentAssistCalculator());
 	}
 
 	@Override
-	protected void postComputeAttributeValueProposals(
-			ContentAssistRequest request, IDOMNode node, String matchString,
-			String attributeName, String namespace, String prefix) {
+	protected void postComputeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
+			String matchString, String attributeName, String namespace, String prefix) {
 
 		if ("bean".equals(node.getNodeName())) {
-			if ("factory-method".equals(attributeName)) {
-				NamedNodeMap attributes = node.getAttributes();
-				Node factoryBean = attributes.getNamedItem("factory-bean");
-				String factoryClassName = null;
-				boolean isStatic;
-				if (factoryBean != null) {
-					// instance factory method
-					factoryClassName = BeansEditorUtils.getClassNameForBean(
-							BeansEditorUtils.getFile(request), node
-									.getOwnerDocument(), factoryBean
-									.getNodeValue());
-					isStatic = false;
-				}
-				else {
-					// static factory method
-					factoryClassName = BeansEditorUtils.getAttribute(node,
-							"class");
-					isStatic = true;
-				}
-
-				if (factoryClassName != null) {
-					addFactoryMethodAttributeValueProposals(request,
-							matchString, factoryClassName, isStatic);
-				}
-			}
-			else if ("http://www.springframework.org/schema/p"
-					.equals(namespace)
+			if ("http://www.springframework.org/schema/p".equals(namespace)
 					&& attributeName.endsWith("-ref")) {
 				addBeanReferenceProposals(request, matchString, node);
 			}
 		}
 	}
+	
 }
