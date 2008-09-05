@@ -16,7 +16,7 @@
             name="beans Namespace"
             uri="http://www.springframework.org/schema/beans"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.BeansNamespaceLabelProvider"
-            prefix="bean"
+            prefix="beans"
             icon="icons/full/obj16/bean_obj.gif"
             defaultSchemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd">
            	<schemaLocation url="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd" />
