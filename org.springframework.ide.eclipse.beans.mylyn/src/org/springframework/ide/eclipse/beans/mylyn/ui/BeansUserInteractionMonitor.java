@@ -28,9 +28,9 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.w3c.dom.Text;
 
 /**
- * {@link AbstractUserInteractionMonitor} extension that tracks current
- * selections in the open editor and sends back feedback to Mylyn that a element
- * has been selected and the interest level should be increased.
+ * {@link AbstractUserInteractionMonitor} extension that tracks current selections in the open
+ * editor and sends back feedback to Mylyn that a element has been selected and the interest level
+ * should be increased.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -56,15 +56,17 @@ public class BeansUserInteractionMonitor extends AbstractUserInteractionMonitor 
 						// Try to resolve to a better node instead of working with text
 						if (obj instanceof Text && ((IDOMNode) obj).getOwnerDocument() != null) {
 							IDOMNode sibling = (IDOMNode) ((Text) obj).getNextSibling();
-							int siblingStartLine = ((IDOMDocument) sibling.getOwnerDocument())
-									.getStructuredDocument().getLineOfOffset(
-											sibling.getStartOffset()) + 1;
-							int siblingEndLine = ((IDOMDocument) sibling.getOwnerDocument())
-									.getStructuredDocument()
-									.getLineOfOffset(sibling.getEndOffset()) + 1;
-							if (startLine == siblingStartLine) {
-								startLine = siblingStartLine;
-								endLine = siblingEndLine;
+							if (sibling != null) {
+								int siblingStartLine = ((IDOMDocument) sibling.getOwnerDocument())
+										.getStructuredDocument().getLineOfOffset(
+												sibling.getStartOffset()) + 1;
+								int siblingEndLine = ((IDOMDocument) sibling.getOwnerDocument())
+										.getStructuredDocument().getLineOfOffset(
+												sibling.getEndOffset()) + 1;
+								if (startLine == siblingStartLine) {
+									startLine = siblingStartLine;
+									endLine = siblingEndLine;
+								}
 							}
 						}
 						else if (obj instanceof IDOMNode
