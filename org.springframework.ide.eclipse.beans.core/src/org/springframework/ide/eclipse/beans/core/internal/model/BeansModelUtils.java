@@ -769,8 +769,8 @@ public abstract class BeansModelUtils {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			name.append('<').append(beanName).append(">");
 		}
-		else {
-			String valueName;
+		else if (value != null) {
+			String valueName = null;
 			if (value.getClass().isArray()) {
 				valueName = "[" + StringUtils.arrayToDelimitedString((Object[]) value, ", ") + "]";
 			}
@@ -784,6 +784,9 @@ public abstract class BeansModelUtils {
 			else {
 				name.append(valueName);
 			}
+		}
+		else {
+			name.append("<null>");
 		}
 		return name.toString();
 	}
@@ -1273,8 +1276,7 @@ public abstract class BeansModelUtils {
 
 								for (IType type : types) {
 
-									// Check that the type is coming from the
-									// project classpath
+									// Check that the type is coming from the project classpath
 									IType checkType = JdtUtils.getJavaType(project.getProject(),
 											type.getFullyQualifiedName());
 									if (type == checkType) {
@@ -1287,8 +1289,7 @@ public abstract class BeansModelUtils {
 										IType type = JdtUtils.getJavaType(project.getProject(),
 												className);
 										if (type != null) {
-											// 1. check if the bean class is
-											// clear match
+											// 1. check if the bean class is clear match
 											if (relevantTypes.contains(type)) {
 												files.add(config);
 											}
@@ -1309,8 +1310,7 @@ public abstract class BeansModelUtils {
 													break;
 												}
 											}
-											// 3. break the for loop if file is
-											// already in
+											// 3. break the for loop if file is already in
 											if (files.contains(config)) {
 												break;
 											}
@@ -1392,7 +1392,13 @@ public abstract class BeansModelUtils {
 										else {
 											// we can't determine the beans type so don't be
 											// cleverer as we can and let it be processed again
-											files.add(bean);
+
+											// One last check before adding too much that is not even 
+											// on the resource's classpath
+											if (JdtUtils.getJavaProject(project.getProject())
+													.isOnClasspath(resource)) {
+												files.add(bean);
+											}
 										}
 									}
 								}
