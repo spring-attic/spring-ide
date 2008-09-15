@@ -34,3 +34,7 @@ Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
+Export-Package: org.springframework.ide.eclipse.beans.mylyn,
+ org.springframework.ide.eclipse.beans.mylyn.core,
+ org.springframework.ide.eclipse.beans.mylyn.ui,
+ org.springframework.ide.eclipse.beans.mylyn.ui.editor
