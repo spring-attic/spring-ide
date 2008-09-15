@@ -47,14 +47,13 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		int proposalCount = 0;
 		if (contentAssistRequest.getCompletionProposals() != null) {
 			proposalCount = contentAssistRequest.getCompletionProposals().length;
-
 		}
 
 		IDOMNode node = (IDOMNode) contentAssistRequest.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor processor = NamespaceUtils
+		INamespaceContentAssistProcessor[] processors = NamespaceUtils
 				.getContentAssistProcessor(namespace);
-		if (processor != null) {
+		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addAttributeValueProposals(this, contentAssistRequest);
 		}
 
@@ -108,10 +107,10 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	private void invokeAnnotationBasedContentAssistProcessor(
 			ContentAssistRequest contentAssistRequest, Node child) {
 
-		IAnnotationBasedContentAssistProcessor annotationProcessor = NamespaceUtils
+		IAnnotationBasedContentAssistProcessor[] annotationProcessors = NamespaceUtils
 				.getAnnotationBasedContentAssistProcessor(child
 						.getNamespaceURI());
-		if (annotationProcessor != null) {
+		for (IAnnotationBasedContentAssistProcessor annotationProcessor : annotationProcessors) {
 			annotationProcessor.addAttributeValueProposals(this,
 					contentAssistRequest, child);
 		}
@@ -121,9 +120,9 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addAttributeNameProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor processor = NamespaceUtils
+		INamespaceContentAssistProcessor[] processors = NamespaceUtils
 				.getContentAssistProcessor(namespace);
-		if (processor != null) {
+		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addAttributeNameProposals(this, request);
 		}
 		super.addAttributeNameProposals(request);
@@ -133,9 +132,9 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addTagCloseProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor processor = NamespaceUtils
+		INamespaceContentAssistProcessor[] processors = NamespaceUtils
 				.getContentAssistProcessor(namespace);
-		if (processor != null) {
+		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addTagCloseProposals(this, request);
 		}
 		super.addTagCloseProposals(request);
@@ -146,9 +145,9 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 			int childPosition) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor processor = NamespaceUtils
+		INamespaceContentAssistProcessor[] processors = NamespaceUtils
 				.getContentAssistProcessor(namespace);
-		if (processor != null) {
+		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addTagInsertionProposals(this, request, childPosition);
 		}
 		super.addTagInsertionProposals(request, childPosition);

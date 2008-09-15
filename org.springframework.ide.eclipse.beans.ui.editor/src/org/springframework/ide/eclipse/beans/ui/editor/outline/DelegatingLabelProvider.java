@@ -45,9 +45,9 @@ public class DelegatingLabelProvider extends LabelProvider {
 		Node node = (Node) object;
 		String namespace = node.getNamespaceURI();
 
-		ILabelProvider labelProvider = NamespaceUtils
+		ILabelProvider[] labelProviders = NamespaceUtils
 				.getLabelProvider(namespace);
-		if (labelProvider != null) {
+		for (ILabelProvider labelProvider : labelProviders) {
 			Image image = labelProvider.getImage(object);
 			if (image != null) {
 				return image;
@@ -65,9 +65,9 @@ public class DelegatingLabelProvider extends LabelProvider {
 		Node node = (Node) object;
 		String namespace = node.getNamespaceURI();
 
-		ILabelProvider labelProvider = NamespaceUtils
+		ILabelProvider[] labelProviders = NamespaceUtils
 				.getLabelProvider(namespace);
-		if (labelProvider != null) {
+		for (ILabelProvider labelProvider : labelProviders) {
 			String text = labelProvider.getText(object);
 			if (text != null && !"".equals(text.trim())) {
 				return text;

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,68 +27,58 @@ import org.w3c.dom.Element;
 
 /**
  * Utility class that loads contributions to the
- * <code>org.springframework.ide.eclipse.beans.ui.editor.namespaces</code>
- * extension point.
+ * <code>org.springframework.ide.eclipse.beans.ui.editor.namespaces</code> extension point.
  * @author Christian Dupuis
  */
 public class NamespaceUtils {
 
 	public static final String DEFAULT_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
-	public static final String EXTENSION_POINT = Activator.PLUGIN_ID
-			+ ".namespaces";
+	public static final String EXTENSION_POINT = Activator.PLUGIN_ID + ".namespaces";
 
-	public static IClassNameProvider getClassNameProvider(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "classNameProvider",
-				IClassNameProvider.class);
+	public static IClassNameProvider[] getClassNameProvider(String namespaceUri) {
+		return getExecutableExtension(namespaceUri, "classNameProvider", IClassNameProvider.class);
 	}
 
-	public static INamespaceContentAssistProcessor getContentAssistProcessor(
-			String namespaceUri) {
-		INamespaceContentAssistProcessor processor = getExecutableExtension(
-				namespaceUri, "contentAssistProcessor",
-				INamespaceContentAssistProcessor.class);
-		if (processor != null) {
+	public static INamespaceContentAssistProcessor[] getContentAssistProcessor(String namespaceUri) {
+		INamespaceContentAssistProcessor[] processors = getExecutableExtension(namespaceUri,
+				"contentAssistProcessor", INamespaceContentAssistProcessor.class);
+		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.init();
 		}
-		return processor;
+		return processors;
 	}
 
 	/**
-	 * Returns the registered {@link IAnnotationBasedContentAssistProcessor} for
-	 * the given namespace uri.
+	 * Returns the registered {@link IAnnotationBasedContentAssistProcessor} for the given namespace
+	 * uri.
 	 * @since 2.0.3
 	 */
-	public static IAnnotationBasedContentAssistProcessor getAnnotationBasedContentAssistProcessor(
+	public static IAnnotationBasedContentAssistProcessor[] getAnnotationBasedContentAssistProcessor(
 			String namespaceUri) {
-		IAnnotationBasedContentAssistProcessor processor = getExecutableExtension(
-				namespaceUri, "contentAssistProcessor",
-				IAnnotationBasedContentAssistProcessor.class);
-		if (processor != null) {
+		IAnnotationBasedContentAssistProcessor[] processors = getExecutableExtension(namespaceUri,
+				"contentAssistProcessor", IAnnotationBasedContentAssistProcessor.class);
+		for (IAnnotationBasedContentAssistProcessor processor : processors) {
 			processor.init();
 		}
-		return processor;
+		return processors;
 	}
 
-	public static IReferenceableElementsLocator getElementsLocator(
-			String namespaceUri) {
+	public static IReferenceableElementsLocator[] getElementsLocator(String namespaceUri) {
 		return getExecutableExtension(namespaceUri, "elementLocator",
 				IReferenceableElementsLocator.class);
 	}
 
 	public static List<IReferenceableElementsLocator> getAllElementsLocators() {
 		List<IReferenceableElementsLocator> locators = new ArrayList<IReferenceableElementsLocator>();
-		IExtensionPoint point = Platform.getExtensionRegistry()
-				.getExtensionPoint(EXTENSION_POINT);
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension
-						.getConfigurationElements()) {
+				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					try {
 						if (config.getAttribute("elementLocator") != null) {
-							locators
-									.add(((IReferenceableElementsLocator) config
-											.createExecutableExtension("elementLocator")));
+							locators.add(((IReferenceableElementsLocator) config
+									.createExecutableExtension("elementLocator")));
 						}
 					}
 					catch (Exception e) {
@@ -100,20 +91,18 @@ public class NamespaceUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T getExecutableExtension(String namespaceUri,
-			String attributeName, Class<T> requiredType) {
-		namespaceUri = checkNameSpaceUri(namespaceUri);
-		IExtensionPoint point = Platform.getExtensionRegistry()
-				.getExtensionPoint(EXTENSION_POINT);
+	private static <T> T[] getExecutableExtension(String namespaceUri, String attributeName,
+			Class<T> requiredType) {
+		namespaceUri = checkNamespaceUri(namespaceUri);
+		List extensions = new ArrayList();
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension
-						.getConfigurationElements()) {
+				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					if (namespaceUri.equals(config.getAttribute("uri"))) {
 						try {
 							if (config.getAttribute(attributeName) != null) {
-								return (T) config
-										.createExecutableExtension(attributeName);
+								extensions.add((T) config.createExecutableExtension(attributeName));
 							}
 						}
 						catch (Exception e) {
@@ -124,34 +113,37 @@ public class NamespaceUtils {
 				}
 			}
 		}
-		return null;
+		return (T[]) extensions.toArray((T[]) Array.newInstance(requiredType, extensions.size()));
 	}
 
-	public static IHyperlinkDetector getHyperlinkDetector(String namespaceUri) {
-		IHyperlinkDetector detector = getExecutableExtension(namespaceUri,
-				"hyperLinkDetector", IHyperlinkDetector.class);
-		if (detector instanceof INamespaceHyperlinkDetector) {
-			((INamespaceHyperlinkDetector) detector).init();
+	public static IHyperlinkDetector[] getHyperlinkDetector(String namespaceUri) {
+		IHyperlinkDetector[] detectors = getExecutableExtension(namespaceUri, "hyperLinkDetector",
+				IHyperlinkDetector.class);
+		for (IHyperlinkDetector detector : detectors) {
+			if (detector instanceof INamespaceHyperlinkDetector) {
+				((INamespaceHyperlinkDetector) detector).init();
+			}
 		}
-		return detector;
+		return detectors;
 	}
 
-	public static IAnnotationBasedHyperlinkDetector getAnnotationBasedHyperlinkDetector(
+	public static IAnnotationBasedHyperlinkDetector[] getAnnotationBasedHyperlinkDetector(
 			String namespaceUri) {
-		IAnnotationBasedHyperlinkDetector detector = getExecutableExtension(namespaceUri,
+		IAnnotationBasedHyperlinkDetector[] detectors = getExecutableExtension(namespaceUri,
 				"hyperLinkDetector", IAnnotationBasedHyperlinkDetector.class);
-		if (detector instanceof INamespaceHyperlinkDetector) {
-			((INamespaceHyperlinkDetector) detector).init();
+		for (IAnnotationBasedHyperlinkDetector detector : detectors) {
+			if (detector instanceof INamespaceHyperlinkDetector) {
+				((INamespaceHyperlinkDetector) detector).init();
+			}
 		}
-		return detector;
+		return detectors;
 	}
 
-	public static ILabelProvider getLabelProvider(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "labelProvider",
-				ILabelProvider.class);
+	public static ILabelProvider[] getLabelProvider(String namespaceUri) {
+		return getExecutableExtension(namespaceUri, "labelProvider", ILabelProvider.class);
 	}
 
-	public static String getNameSpaceUri(Element element) {
+	public static String getNamespaceUri(Element element) {
 		String namespaceURI = element.getNamespaceURI();
 		if (namespaceURI == null) {
 			namespaceURI = DEFAULT_NAMESPACE_URI;
@@ -159,7 +151,7 @@ public class NamespaceUtils {
 		return namespaceURI;
 	}
 
-	public static String checkNameSpaceUri(String namespaceUri) {
+	public static String checkNamespaceUri(String namespaceUri) {
 		if (namespaceUri == null) {
 			namespaceUri = DEFAULT_NAMESPACE_URI;
 		}

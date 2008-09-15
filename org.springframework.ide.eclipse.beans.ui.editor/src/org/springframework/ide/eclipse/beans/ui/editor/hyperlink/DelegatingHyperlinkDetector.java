@@ -29,28 +29,25 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * {@link IHyperlinkDetector} implementation that delegates to
- * {@link IHyperlinkDetector}s that are contributed over the namespace
- * extension point.
+ * {@link IHyperlinkDetector} implementation that delegates to {@link IHyperlinkDetector}s that are
+ * contributed over the namespace extension point.
  * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
 public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 
-	public IHyperlink[] detectHyperlinks(ITextViewer textViewer,
-			IRegion region, boolean canShowMultipleHyperlinks) {
+	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region,
+			boolean canShowMultipleHyperlinks) {
 		List<IHyperlink> hyperlinks = new ArrayList<IHyperlink>();
 
 		IDocument document = textViewer.getDocument();
-		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region
-				.getOffset());
+		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region.getOffset());
 
-		detectHyperlinks(textViewer, region, canShowMultipleHyperlinks,
-				hyperlinks, currentNode);
+		detectHyperlinks(textViewer, region, canShowMultipleHyperlinks, hyperlinks, currentNode);
 
 		if (hyperlinks.size() == 0 || canShowMultipleHyperlinks) {
-			detectAnnotationBasedHyperlinks(textViewer, region,
-					canShowMultipleHyperlinks, hyperlinks, currentNode);
+			detectAnnotationBasedHyperlinks(textViewer, region, canShowMultipleHyperlinks,
+					hyperlinks, currentNode);
 		}
 		if (hyperlinks.size() > 0) {
 			return hyperlinks.toArray(new IHyperlink[hyperlinks.size()]);
@@ -60,26 +57,21 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 		}
 	}
 
-	private void detectAnnotationBasedHyperlinks(ITextViewer textViewer,
-			IRegion region, boolean canShowMultipleHyperlinks,
-			List<IHyperlink> hyperlinks, Node currentNode) {
+	private void detectAnnotationBasedHyperlinks(ITextViewer textViewer, IRegion region,
+			boolean canShowMultipleHyperlinks, List<IHyperlink> hyperlinks, Node currentNode) {
 		if (currentNode != null) {
-			Attr currentAttr = BeansEditorUtils.getAttrByOffset(currentNode,
-					region.getOffset());
+			Attr currentAttr = BeansEditorUtils.getAttrByOffset(currentNode, region.getOffset());
 			IDOMAttr attr = (IDOMAttr) currentAttr;
-			if (currentAttr != null
-					&& region.getOffset() >= attr.getValueRegionStartOffset()) {
-				List<Element> appInfo = ToolAnnotationUtils
-						.getApplicationInformationElements(currentNode, attr
-								.getLocalName());
+			if (currentAttr != null && region.getOffset() >= attr.getValueRegionStartOffset()) {
+				List<Element> appInfo = ToolAnnotationUtils.getApplicationInformationElements(
+						currentNode, attr.getLocalName());
 				for (Element elem : appInfo) {
 					NodeList children = elem.getChildNodes();
 					for (int j = 0; j < children.getLength(); j++) {
 						Node child = children.item(j);
 						if (child.getNodeType() == Node.ELEMENT_NODE) {
-							invokeAnnotationBasedHyperlinkDetector(textViewer,
-									region, canShowMultipleHyperlinks,
-									hyperlinks, child);
+							invokeAnnotationBasedHyperlinkDetector(textViewer, region,
+									canShowMultipleHyperlinks, hyperlinks, child);
 						}
 					}
 				}
@@ -88,14 +80,13 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 		}
 	}
 
-	private void invokeAnnotationBasedHyperlinkDetector(ITextViewer textViewer,
-			IRegion region, boolean canShowMultipleHyperlinks,
-			List<IHyperlink> hyperlinks, Node child) {
-		IAnnotationBasedHyperlinkDetector detector = NamespaceUtils
+	private void invokeAnnotationBasedHyperlinkDetector(ITextViewer textViewer, IRegion region,
+			boolean canShowMultipleHyperlinks, List<IHyperlink> hyperlinks, Node child) {
+		IAnnotationBasedHyperlinkDetector[] detectors = NamespaceUtils
 				.getAnnotationBasedHyperlinkDetector(child.getNamespaceURI());
-		if (detector != null) {
-			IHyperlink[] detectedHyperlinks = detector.detectHyperlinks(
-					textViewer, region, canShowMultipleHyperlinks, child);
+		for (IAnnotationBasedHyperlinkDetector detector : detectors) {
+			IHyperlink[] detectedHyperlinks = detector.detectHyperlinks(textViewer, region,
+					canShowMultipleHyperlinks, child);
 			if (detectedHyperlinks != null) {
 				hyperlinks.addAll(Arrays.asList(detectedHyperlinks));
 			}
@@ -103,14 +94,13 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 	}
 
 	private void detectHyperlinks(ITextViewer textViewer, IRegion region,
-			boolean canShowMultipleHyperlinks, List<IHyperlink> hyperlinks,
-			Node currentNode) {
+			boolean canShowMultipleHyperlinks, List<IHyperlink> hyperlinks, Node currentNode) {
 		if (currentNode != null) {
-			IHyperlinkDetector detector = NamespaceUtils
-					.getHyperlinkDetector(currentNode.getNamespaceURI());
-			if (detector != null) {
-				IHyperlink[] detectedHyperlinks = detector.detectHyperlinks(
-						textViewer, region, canShowMultipleHyperlinks);
+			IHyperlinkDetector[] detectors = NamespaceUtils.getHyperlinkDetector(currentNode
+					.getNamespaceURI());
+			for (IHyperlinkDetector detector : detectors) {
+				IHyperlink[] detectedHyperlinks = detector.detectHyperlinks(textViewer, region,
+						canShowMultipleHyperlinks);
 				if (detectedHyperlinks != null) {
 					hyperlinks.addAll(Arrays.asList(detectedHyperlinks));
 				}

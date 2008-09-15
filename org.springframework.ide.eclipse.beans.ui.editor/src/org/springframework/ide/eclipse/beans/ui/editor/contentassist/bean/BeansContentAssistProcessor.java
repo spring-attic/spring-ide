@@ -180,7 +180,8 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 		registerContentAssistCalculator("value", "type", clazz);
 
 		PropertyBeanReferenceContentAssistCalculator propertyBean = new PropertyBeanReferenceContentAssistCalculator();
-		registerContentAssistCalculator("property", "ref", propertyBean);
+		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean",
+				"property", "ref", propertyBean);
 
 		BeanReferenceContentAssistCalculator globalBean = new BeanReferenceContentAssistCalculator();
 		registerContentAssistCalculator("bean", "parent", globalBean);
@@ -210,8 +211,8 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 		registerContentAssistCalculator("lookup-method", "name",
 				new LookupMethodContentAssistCalculator());
 
-		registerContentAssistCalculator("property", "name",
-				new PropertyNameContentAssistCalculator());
+		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean",
+				"property", "name", new PropertyNameContentAssistCalculator());
 
 		registerContentAssistCalculator("bean", "factory-method",
 				new FactoryMethodContentAssistCalculator());
@@ -228,5 +229,5 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 			}
 		}
 	}
-	
+
 }
