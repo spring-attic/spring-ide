@@ -41,7 +41,8 @@ public class BeansUserInteractionMonitor extends AbstractUserInteractionMonitor 
 	protected void handleWorkbenchPartSelection(IWorkbenchPart part, ISelection selection,
 			boolean contributeToContext) {
 
-		if (part instanceof XMLMultiPageEditorPart && selection instanceof ITextSelection) {
+		if ((part instanceof XMLMultiPageEditorPart || part instanceof IBeansXmlEditor)
+				&& selection instanceof ITextSelection) {
 			ITextEditor textEditor = (ITextEditor) part.getAdapter(ITextEditor.class);
 			IEditorInput editorInput = textEditor.getEditorInput();
 			if (editorInput instanceof IFileEditorInput) {

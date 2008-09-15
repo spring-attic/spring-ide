@@ -27,6 +27,7 @@ import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
 import org.eclipse.mylyn.internal.context.ui.ContextUiPlugin;
 import org.eclipse.mylyn.internal.java.ui.JavaUiBridgePlugin;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -54,7 +55,7 @@ public class BeansActiveFoldingListener extends AbstractContextListener {
 	private static BeansContextStructureBridge BRIDGE = (BeansContextStructureBridge) ContextCore
 			.getStructureBridge(BeansContextStructureBridge.CONTENT_TYPE);
 
-	private final XMLMultiPageEditorPart editor;
+	private final IEditorPart editor;
 
 	private boolean enabled = false;
 
@@ -72,7 +73,7 @@ public class BeansActiveFoldingListener extends AbstractContextListener {
 		}
 	};
 
-	public BeansActiveFoldingListener(XMLMultiPageEditorPart editor) {
+	public BeansActiveFoldingListener(IEditorPart editor) {
 		this.editor = editor;
 		ContextCorePlugin.getContextManager().addListener(this);
 		JavaUiBridgePlugin.getDefault().getPluginPreferences().addPropertyChangeListener(

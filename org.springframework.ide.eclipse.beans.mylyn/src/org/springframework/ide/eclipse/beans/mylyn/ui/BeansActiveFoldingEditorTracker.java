@@ -34,22 +34,23 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 @SuppressWarnings("restriction")
 public class BeansActiveFoldingEditorTracker extends AbstractEditorTracker {
 
-	protected Map<XMLMultiPageEditorPart, BeansActiveFoldingListener> editorListenerMap = 
-		new ConcurrentHashMap<XMLMultiPageEditorPart, BeansActiveFoldingListener>();
+	protected Map<IEditorPart, BeansActiveFoldingListener> editorListenerMap = 
+		new ConcurrentHashMap<IEditorPart, BeansActiveFoldingListener>();
 
 	@Override
 	public void editorOpened(IEditorPart part) {
-		if (part instanceof XMLMultiPageEditorPart)
-			registerEditor((XMLMultiPageEditorPart) part);
+		if (part instanceof XMLMultiPageEditorPart || part instanceof IBeansXmlEditor) {
+			registerEditor(part);
+		}
 	}
 
 	@Override
 	public void editorClosed(IEditorPart part) {
-		if (part instanceof XMLMultiPageEditorPart)
-			unregisterEditor((XMLMultiPageEditorPart) part);
+		if (part instanceof XMLMultiPageEditorPart || part instanceof IBeansXmlEditor)
+			unregisterEditor(part);
 	}
 
-	public void registerEditor(XMLMultiPageEditorPart editor) {
+	public void registerEditor(IEditorPart editor) {
 		if (editorShouldBeRegistered(editor)) {
 			if (editorListenerMap.containsKey(editor)) {
 				return;
@@ -65,7 +66,7 @@ public class BeansActiveFoldingEditorTracker extends AbstractEditorTracker {
 	/**
 	 * Make sure that only {@link IBeansConfig} files are registered
 	 */
-	protected boolean editorShouldBeRegistered(XMLMultiPageEditorPart editor) {
+	protected boolean editorShouldBeRegistered(IEditorPart editor) {
 		IEditorInput editorInput = editor.getEditorInput();
 		if (editorInput != null && editorInput instanceof IFileEditorInput) {
 			IResource resource = ((IFileEditorInput) editorInput).getFile();
@@ -74,7 +75,7 @@ public class BeansActiveFoldingEditorTracker extends AbstractEditorTracker {
 		return false;
 	}
 
-	public void unregisterEditor(XMLMultiPageEditorPart editor) {
+	public void unregisterEditor(IEditorPart editor) {
 		BeansActiveFoldingListener listener = editorListenerMap.get(editor);
 		if (listener != null) {
 			listener.dispose();
