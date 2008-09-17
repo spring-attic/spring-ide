@@ -27,7 +27,7 @@ import org.w3c.dom.Node;
  * class.
  * @author Leo Dos Santos
  * @author Christian Dupuis
- * @since 2.1.1
+ * @since 2.2.0
  */
 @SuppressWarnings("restriction")
 public class FactoryMethodContentAssistCalculator implements IContentAssistCalculator {
