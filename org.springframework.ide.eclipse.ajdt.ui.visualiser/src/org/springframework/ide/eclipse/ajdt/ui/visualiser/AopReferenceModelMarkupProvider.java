@@ -56,7 +56,6 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 	 * Get a List of Stripes for the given member, which are its markups.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Stripe> getMemberMarkups(IMember member) {
 
 		List<Stripe> cachedValue = markupCache.get(member);
