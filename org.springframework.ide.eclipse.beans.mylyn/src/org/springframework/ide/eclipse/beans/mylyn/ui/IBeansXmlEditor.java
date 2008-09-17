@@ -16,7 +16,7 @@ import org.eclipse.ui.IEditorPart;
  * Marker interface to make an editor supported by Spring IDE's mylyn UI support for folding and 
  * model propagation.
  * @author Christian Dupuis
- * @since 2.1.1
+ * @since 2.2.0
  */
 public interface IBeansXmlEditor extends IEditorPart {
 
