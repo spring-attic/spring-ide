@@ -24,5 +24,5 @@ Export-Package: org.springframework.js.ajax;version="2.0.4.CI-601";uses:="javax.
  org.springframework.js.resource;version="2.0.4.CI-601";uses:="javax.servlet,javax.servlet.http"
 Implementation-Version: 2.0.4.CI-601
 Bundle-Version: 2.0.4.v200809171600
-Bundle-ClassPath: org.springframwork.js.jar
+Bundle-ClassPath: org.springframework.js.jar
 
