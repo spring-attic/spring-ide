@@ -69,8 +69,7 @@ public class WebflowValidationContext extends AbstractValidationContext {
 				IDOMAttr schemaLocationNode = (IDOMAttr) attributes.getNamedItemNS(
 						"http://www.w3.org/2001/XMLSchema-instance", "schemaLocation");
 				String content = schemaLocationNode.getValue();
-				isVersion1 = !content
-						.contains("http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd");
+				isVersion1 = !content.contains("spring-webflow-2.0.xsd");
 			}
 		}
 		catch (Exception e) {
@@ -82,7 +81,7 @@ public class WebflowValidationContext extends AbstractValidationContext {
 			model = null;
 		}
 	}
-	
+
 	public IState getStateFromParentState(String stateId) {
 		if (!isVersion1() && stateId != null && stateId.contains("#")) {
 			IStructuredModel model = null;
@@ -90,7 +89,7 @@ public class WebflowValidationContext extends AbstractValidationContext {
 			int i = stateId.lastIndexOf('#');
 			String parentFlowId = stateId.substring(0, i);
 			String parentStateId = stateId.substring(i + 1);
-			
+
 			IWebflowProject project = Activator.getModel().getProject(
 					getRootElement().getElementResource().getProject());
 			IWebflowConfig parentConfig = project.getConfig(parentFlowId);

@@ -373,8 +373,7 @@ public class WebflowModelXmlUtils {
 				IDOMAttr schemaLocationNode = (IDOMAttr) attributes.getNamedItemNS(
 						"http://www.w3.org/2001/XMLSchema-instance", "schemaLocation");
 				String content = schemaLocationNode.getValue();
-				return !content
-						.contains("http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd");
+				return !content.contains("spring-webflow-2.0.xsd");
 			}
 		}
 		catch (Exception e) {
