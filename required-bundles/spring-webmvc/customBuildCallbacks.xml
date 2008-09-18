@@ -95,7 +95,7 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
-		<unzip src="spring-web.jar" dest="${target.folder}">
+		<unzip src="spring-webmvc.jar" dest="${target.folder}">
 			<patternset>
 				<exclude name="META-INF/MANIFEST.MF" />
 			</patternset>

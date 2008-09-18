@@ -110,7 +110,7 @@
 	<!-- ===================================================================== -->
 	<target name="post.gather.bin.parts">
 		<replace file="${target.folder}/META-INF/MANIFEST.MF" summary="yes">
-			<replacetoken>org.springframework.webflow.jar</replacetoken>
+			<replacetoken>org.springframework.js.jar</replacetoken>
 			<replacevalue>.</replacevalue>
 		</replace>
 	</target>
