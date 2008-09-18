@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHype
  * This {@link INamespaceHyperlinkDetector} is responsible to for the <code>flow:*</code> namespace.
  * @author Christian Dupuis
  */
-public class WebflowConfigHyperLinkDetector extends NamespaceHyperlinkDetectorSupport implements
+public class FacesConfigHyperLinkDetector extends NamespaceHyperlinkDetectorSupport implements
 		IHyperlinkDetector {
 
 	@Override

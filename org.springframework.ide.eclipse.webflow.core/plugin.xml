@@ -7,6 +7,9 @@
 		<namespace
 			namespaceHandler="org.springframework.ide.eclipse.webflow.core.config.CombiningWebFlowConfigNamespaceHandler"
 			uri="http://www.springframework.org/schema/webflow-config" />
+		<namespace
+			namespaceHandler="org.springframework.faces.config.FacesNamespaceHandler"
+			uri="http://www.springframework.org/schema/faces" />
 	</extension>
 
 	<extension point="org.eclipse.core.expressions.propertyTesters">

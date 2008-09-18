@@ -26,6 +26,14 @@
 			<system
 				systemId="http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd"
 				uri="platform:/plugin/org.springframework.webflow/org/springframework/webflow/config/spring-webflow-config-2.0.xsd" />
+
+			<public
+				publicId="http://www.springframework.org/schema/faces/spring-faces"
+				uri="platform:/plugin/org.springframework.faces/org/springframework/faces/config/spring-faces-2.0.xsd"
+				webURL="http://www.springframework.org/schema/faces/spring-faces-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/faces/spring-faces-2.0.xsd"
+				uri="platform:/plugin/org.springframework.faces/org/springframework/faces/config/spring-faces-2.0.xsd" />
 		</catalogContribution>
 	</extension>
 
@@ -74,6 +82,13 @@
 			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.webflow.WebflowConfigOutlineLabelProvider"
 			name="Spring Web Flow Config"
 			uri="http://www.springframework.org/schema/webflow-config" />
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.faces.FacesConfigContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.faces.FacesConfigHyperLinkDetector"
+			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.webflow.WebflowConfigOutlineLabelProvider"
+			name="Spring Faces"
+			uri="http://www.springframework.org/schema/faces" />
 		<namespace
 			contentAssistProcessor="org.springframework.ide.eclipse.webflow.ui.editor.contentassist.webflow.WebflowContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"

@@ -37,6 +37,9 @@ public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 		if ("http://www.springframework.org/schema/webflow-config".equals(ns)) {
 			return WebflowConfigUIImages.getImage(WebflowConfigUIImages.IMG_OBJS_WEBFLOW);
 		}
+		else if ("http://www.springframework.org/schema/faces".equals(ns)) {
+			return WebflowConfigUIImages.getImage(WebflowConfigUIImages.IMG_OBJS_WEBFLOW);
+		}
 		return null;
 	}
 

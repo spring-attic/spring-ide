@@ -13,6 +13,14 @@
 			defaultSchemaLocation="http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd">
 			<schemaLocation url="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" />
 		</namespace>
+		<namespace
+			name="Spring Faces"
+			labelProvider="org.springframework.ide.eclipse.webflow.ui.namespaces.WebflowConfigNamespaceLabelProvider"
+			uri="http://www.springframework.org/schema/faces" 
+			prefix="faces"
+			icon="icons/full/obj16/spring_webflow_obj.gif"
+			defaultSchemaLocation="http://www.springframework.org/schema/faces/spring-faces-2.0.xsd">
+		</namespace>
 	</extension> 
 
  	<extension
