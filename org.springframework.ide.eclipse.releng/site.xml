@@ -25,13 +25,6 @@
 		<category name="Core" />
 	</feature>
 	
-	<!-- Dependency features -->
-	<feature
-		url="features/org.springframework.ide.eclipse.dependency.feature_@VERSION@.jar"
-		id="org.springframework.ide.eclipse.dependency.feature" version="@VERSION@">
-		<category name="Dependencies" />
-	</feature>
-	
 	<!-- Extensions features -->
 	<feature
 		url="features/org.springframework.ide.eclipse.aop.feature_@VERSION@.jar"

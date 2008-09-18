@@ -13,10 +13,6 @@
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.feature" />
 		</ant>
-		<ant antfile="${genericTargets}" target="${target}">
-			<property name="type" value="feature" />
-			<property name="id" value="org.springframework.ide.eclipse.dependency.feature" />
-		</ant>
  		<ant antfile="${genericTargets}" target="${target}">
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.aop.feature" />
