@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-Name: Spring Web Flow
-Created-By: 1.5.0_13-119 (Apple Inc.)
+Created-By: 1.5.0_13-b05 (Sun Microsystems Inc.)
 Ant-Version: Apache Ant 1.7.0
 Import-Package: edu.emory.mathcs.backport.java.util.concurrent;version="[3.0.0,4.0.0)";resolution:=optional,
  edu.emory.mathcs.backport.java.util.concurrent.locks;version="[3.0.0,4.0.0)";resolution:=optional,
@@ -14,74 +14,77 @@ Import-Package: edu.emory.mathcs.backport.java.util.concurrent;version="[3.0.0,4
  javax.xml.transform.stream,
  junit.framework;version="[3.8.2,4.0.0)";resolution:=optional,
  ognl;version="[2.6.9,3.0.0)";resolution:=optional,
- org.apache.commons.logging;version="[1.0.0,2.0.0)",
+ org.apache.commons.logging;version="[1.0.1,2.0.0)",
  org.hibernate;version="[3.2.6.ga,4.0.0)";resolution:=optional,
  org.hibernate.classic;version="[3.2.6.ga,4.0.0)";resolution:=optional,
- org.springframework.beans;version="[2.5.4,3.0.0)",
- org.springframework.beans.factory;version="[2.5.4,3.0.0)",
- org.springframework.beans.factory.access.el;version="[2.5.4,3.0.0)",
- org.springframework.beans.factory.config;version="[2.5.4,3.0.0)",
- org.springframework.beans.factory.support;version="[2.5.4,3.0.0)",
- org.springframework.beans.factory.xml;version="[2.5.4,3.0.0)",
- org.springframework.binding.collection;version="[2.0.3,2.0.4)",
- org.springframework.binding.convert;version="[2.0.3,2.0.4)",
- org.springframework.binding.convert.converters;version="[2.0.3,2.0.4)",
- org.springframework.binding.convert.service;version="[2.0.3,2.0.4)",
- org.springframework.binding.expression;version="[2.0.3,2.0.4)",
- org.springframework.binding.expression.el;version="[2.0.3,2.0.4)",
- org.springframework.binding.expression.ognl;version="[2.0.3,2.0.4)",
- org.springframework.binding.expression.support;version="[2.0.3,2.0.4)",
- org.springframework.binding.mapping;version="[2.0.3,2.0.4)",
- org.springframework.binding.mapping.impl;version="[2.0.3,2.0.4)",
- org.springframework.binding.message;version="[2.0.3,2.0.4)",
- org.springframework.binding.method;version="[2.0.3,2.0.4)",
- org.springframework.context;version="[2.5.4,3.0.0)",
- org.springframework.context.annotation;version="[2.5.4,3.0.0)",
- org.springframework.context.support;version="[2.5.4,3.0.0)",
- org.springframework.core;version="[2.5.4,3.0.0)",
- org.springframework.core.enums;version="[2.5.4,3.0.0)",
- org.springframework.core.io;version="[2.5.4,3.0.0)",
- org.springframework.core.io.support;version="[2.5.4,3.0.0)",
- org.springframework.core.style;version="[2.5.4,3.0.0)",
- org.springframework.js.ajax;version="[2.0.3,2.0.4)";resolution:=optional,
- org.springframework.js.ajax.tiles2;version="[2.0.3,2.0.4)";resolution:=optional,
- org.springframework.orm.hibernate3;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.orm.jpa;version="[2.5.4,3.0.0)";resolution:=optional,
+ org.springframework.beans;version="[2.5.4.A,3.0.0)",
+ org.springframework.beans.factory;version="[2.5.4.A,3.0.0)",
+ org.springframework.beans.factory.access.el;version="[2.5.4.A,3.0.0)",
+ org.springframework.beans.factory.config;version="[2.5.4.A,3.0.0)",
+ org.springframework.beans.factory.support;version="[2.5.4.A,3.0.0)",
+ org.springframework.beans.factory.xml;version="[2.5.4.A,3.0.0)",
+ org.springframework.binding.collection;version="[2.0.4,2.0.5)",
+ org.springframework.binding.convert;version="[2.0.4,2.0.5)",
+ org.springframework.binding.convert.converters;version="[2.0.4,2.0.5)",
+ org.springframework.binding.convert.service;version="[2.0.4,2.0.5)",
+ org.springframework.binding.expression;version="[2.0.4,2.0.5)",
+ org.springframework.binding.expression.beanwrapper;version="[2.0.4,2.0.5)",
+ org.springframework.binding.expression.el;version="[2.0.4,2.0.5)",
+ org.springframework.binding.expression.ognl;version="[2.0.4,2.0.5)",
+ org.springframework.binding.expression.support;version="[2.0.4,2.0.5)",
+ org.springframework.binding.mapping;version="[2.0.4,2.0.5)",
+ org.springframework.binding.mapping.impl;version="[2.0.4,2.0.5)",
+ org.springframework.binding.message;version="[2.0.4,2.0.5)",
+ org.springframework.binding.method;version="[2.0.4,2.0.5)",
+ org.springframework.context;version="[2.5.4.A,3.0.0)",
+ org.springframework.context.annotation;version="[2.5.4.A,3.0.0)",
+ org.springframework.context.support;version="[2.5.4.A,3.0.0)",
+ org.springframework.core;version="[2.5.4.A,3.0.0)",
+ org.springframework.core.enums;version="[2.5.4.A,3.0.0)",
+ org.springframework.core.io;version="[2.5.4.A,3.0.0)",
+ org.springframework.core.io.support;version="[2.5.4.A,3.0.0)",
+ org.springframework.core.style;version="[2.5.4.A,3.0.0)",
+ org.springframework.js.ajax;version="[2.0.4,2.0.5)",
+ org.springframework.js.ajax.tiles2;version="[2.0.4,2.0.5)",
+ org.springframework.orm.hibernate3;version="[2.5.4.A,3.0.0)";resolution:=optional,
+ org.springframework.orm.jpa;version="[2.5.4.A,3.0.0)";resolution:=optional,
  org.springframework.security;version="[2.0.0,3.0.0)";resolution:=optional,
  org.springframework.security.context;version="[2.0.0,3.0.0)";resolution:=optional,
  org.springframework.security.vote;version="[2.0.0,3.0.0)";resolution:=optional,
- org.springframework.transaction;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.transaction.support;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.util;version="[2.5.4,3.0.0)",
- org.springframework.util.xml;version="[2.5.4,3.0.0)",
- org.springframework.validation;version="[2.5.4,3.0.0)",
- org.springframework.web.bind;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.context;version="[2.5.4,3.0.0)",
- org.springframework.web.context.request;version="[2.5.4,3.0.0)",
- org.springframework.web.context.support;version="[2.5.4,3.0.0)",
- org.springframework.web.multipart;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.portlet;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.portlet.context;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.portlet.handler;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.portlet.multipart;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.servlet;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.servlet.mvc;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.servlet.support;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.servlet.view;version="[2.5.4,3.0.0)";resolution:=optional,
- org.springframework.web.util;version="[2.5.4,3.0.0)",
+ org.springframework.transaction;version="[2.5.4.A,3.0.0)";resolution:=optional,
+ org.springframework.transaction.support;version="[2.5.4.A,3.0.0)";resolution:=optional,
+ org.springframework.util;version="[2.5.4.A,3.0.0)",
+ org.springframework.util.xml;version="[2.5.4.A,3.0.0)",
+ org.springframework.validation;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.bind;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.context;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.context.request;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.context.support;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.multipart;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.portlet;version="[2.5.4.A,3.0.0)";resolution:=optional,
+ org.springframework.web.portlet.context;version="[2.5.4.A,3.0.0)";resolution:=optional,
+ org.springframework.web.portlet.handler;version="[2.5.4.A,3.0.0)";resolution:=optional,
+ org.springframework.web.portlet.multipart;version="[2.5.4.A,3.0.0)";resolution:=optional,
+ org.springframework.web.servlet;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.servlet.handler;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.servlet.mvc;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.servlet.support;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.servlet.view;version="[2.5.4.A,3.0.0)",
+ org.springframework.web.util;version="[2.5.4.A,3.0.0)",
  org.w3c.dom,
  org.xml.sax
-Bundle-ManifestVersion: 2
 Bundle-Vendor: SpringSource
+Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework.webflow
-Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701003730";
+Implementation-Title: org.springframework.webflow
+Export-Package: org.springframework.webflow.action;version="2.0.4";
   uses:="org.springframework.beans,
    org.springframework.binding.convert,
    org.springframework.binding.expression,
    org.springframework.validation,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.execution",
- org.springframework.webflow.config;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.config;version="2.0.4";
   uses:="org.springframework.beans,
    org.springframework.beans.factory.support,
    org.springframework.beans.factory.xml,
@@ -90,28 +93,28 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.core.collection,
    org.springframework.webflow.definition.registry,
    org.springframework.webflow.engine.builder.support,
+   org.springframework.webflow.engine.model.registry,
    org.springframework.webflow.execution.factory,
    org.w3c.dom",
- org.springframework.webflow.context;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.webflow.core.collection",
- org.springframework.webflow.context.portlet;version="2.0.3.BUILD-20080701003730";uses:="javax.portlet,org.springframework.webflow.core.collection",
- org.springframework.webflow.context.servlet;version="2.0.3.BUILD-20080701003730";uses:="javax.servlet,javax.servlet.http,org.springframework.webflow.core.collection",
- org.springframework.webflow.context.web;version="2.0.3.BUILD-20080701003730";uses:="javax.servlet.http,org.springframework.webflow.core.collection",
- org.springframework.webflow.conversation;version="2.0.3.BUILD-20080701003730",
- org.springframework.webflow.conversation.impl;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.webflow.conversation",
- org.springframework.webflow.core;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.webflow.core.collection",
- org.springframework.webflow.core.collection;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.binding.collection,org.springframework.binding.convert,org.springframework.web.multipart",
- org.springframework.webflow.definition;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.context",
- org.springframework.webflow.definition.registry;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.webflow.definition",
- org.springframework.webflow.engine;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.context;version="2.0.4";uses:="org.springframework.webflow.core.collection",
+ org.springframework.webflow.context.portlet;version="2.0.4";uses:="javax.portlet,org.springframework.webflow.core.collection",
+ org.springframework.webflow.context.servlet;version="2.0.4";uses:="javax.servlet,javax.servlet.http,org.springframework.webflow.core.collection",
+ org.springframework.webflow.context.web;version="2.0.4";uses:="javax.servlet.http,org.springframework.webflow.core.collection",
+ org.springframework.webflow.conversation;version="2.0.4",
+ org.springframework.webflow.conversation.impl;version="2.0.4";uses:="org.springframework.webflow.conversation",
+ org.springframework.webflow.core;version="2.0.4";uses:="org.springframework.webflow.core.collection",
+ org.springframework.webflow.core.collection;version="2.0.4";uses:="org.springframework.binding.collection,org.springframework.binding.convert,org.springframework.web.multipart",
+ org.springframework.webflow.definition;version="2.0.4";uses:="org.springframework.context",
+ org.springframework.webflow.definition.registry;version="2.0.4";uses:="org.springframework.webflow.definition",
+ org.springframework.webflow.engine;version="2.0.4";
   uses:="org.springframework.binding.expression,
    org.springframework.binding.mapping,
    org.springframework.context,
    org.springframework.core.style,
-   org.springframework.webflow.context,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.definition,
    org.springframework.webflow.execution",
- org.springframework.webflow.engine.builder;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.engine.builder;version="2.0.4";
   uses:="org.springframework.binding.convert,
    org.springframework.binding.expression,
    org.springframework.binding.mapping,
@@ -121,7 +124,7 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.definition.registry,
    org.springframework.webflow.engine,
    org.springframework.webflow.execution",
- org.springframework.webflow.engine.builder.model;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.engine.builder.model;version="2.0.4";
   uses:="org.springframework.beans.factory.config,
    org.springframework.binding.convert,
    org.springframework.binding.expression,
@@ -134,7 +137,7 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.engine.builder,
    org.springframework.webflow.engine.model,
    org.springframework.webflow.engine.model.registry",
- org.springframework.webflow.engine.builder.support;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.engine.builder.support;version="2.0.4";
   uses:="org.springframework.beans,
    org.springframework.binding.convert,
    org.springframework.binding.expression,
@@ -143,7 +146,7 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.definition.registry,
    org.springframework.webflow.engine,
    org.springframework.webflow.engine.builder",
- org.springframework.webflow.engine.impl;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.engine.impl;version="2.0.4";
   uses:="org.springframework.binding.message,
    org.springframework.webflow.context,
    org.springframework.webflow.core.collection,
@@ -152,9 +155,9 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.engine,
    org.springframework.webflow.execution,
    org.springframework.webflow.execution.factory",
- org.springframework.webflow.engine.model;version="2.0.3.BUILD-20080701003730",
- org.springframework.webflow.engine.model.builder;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.core.io,org.springframework.webflow.engine.model",
- org.springframework.webflow.engine.model.builder.xml;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.engine.model;version="2.0.4",
+ org.springframework.webflow.engine.model.builder;version="2.0.4";uses:="org.springframework.core.io,org.springframework.webflow.engine.model",
+ org.springframework.webflow.engine.model.builder.xml;version="2.0.4";
   uses:="javax.xml.parsers,
    org.springframework.core.io,
    org.springframework.webflow.engine.model,
@@ -162,57 +165,58 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.engine.model.registry,
    org.w3c.dom,
    org.xml.sax",
- org.springframework.webflow.engine.model.registry;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.core.io,org.springframework.webflow.engine.model",
- org.springframework.webflow.engine.support;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.engine.model.registry;version="2.0.4";uses:="org.springframework.core.io,org.springframework.webflow.engine.model",
+ org.springframework.webflow.engine.support;version="2.0.4";
   uses:="org.springframework.beans.factory.config,
    org.springframework.binding.expression,
    org.springframework.binding.mapping,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.engine,
    org.springframework.webflow.execution",
- org.springframework.webflow.execution;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.execution;version="2.0.4";
   uses:="org.springframework.binding.message,
    org.springframework.webflow.context,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.definition,
    org.springframework.webflow.definition.registry",
- org.springframework.webflow.execution.factory;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.webflow.definition,org.springframework.webflow.execution",
- org.springframework.webflow.execution.repository;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.webflow.execution",
- org.springframework.webflow.execution.repository.impl;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.webflow.conversation,org.springframework.webflow.execution,org.springframework.webflow.execution.repository.snapshot",
- org.springframework.webflow.execution.repository.snapshot;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.execution.factory;version="2.0.4";uses:="org.springframework.webflow.definition,org.springframework.webflow.execution",
+ org.springframework.webflow.execution.repository;version="2.0.4";uses:="org.springframework.webflow.execution",
+ org.springframework.webflow.execution.repository.impl;version="2.0.4";uses:="org.springframework.webflow.conversation,org.springframework.webflow.execution,org.springframework.webflow.execution.repository.snapshot",
+ org.springframework.webflow.execution.repository.snapshot;version="2.0.4";
   uses:="org.springframework.webflow.conversation,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.definition.registry,
    org.springframework.webflow.execution,
    org.springframework.webflow.execution.repository",
- org.springframework.webflow.execution.repository.support;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.execution.repository.support;version="2.0.4";
   uses:="org.springframework.webflow.conversation,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.definition,
    org.springframework.webflow.definition.registry,
    org.springframework.webflow.execution,
    org.springframework.webflow.execution.repository",
- org.springframework.webflow.executor;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.executor;version="2.0.4";
   uses:="org.springframework.webflow.context,
    org.springframework.webflow.core,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.definition.registry,
    org.springframework.webflow.execution,
    org.springframework.webflow.execution.repository",
- org.springframework.webflow.expression;version="2.0.3.BUILD-20080701003730";uses:="ognl,org.apache.commons.logging,org.springframework.binding.expression",
- org.springframework.webflow.expression.el;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.expression;version="2.0.4";uses:="ognl,org.springframework.binding.convert,org.springframework.binding.expression",
+ org.springframework.webflow.expression.el;version="2.0.4";
   uses:="javax.el,
    org.springframework.beans.factory,
    org.springframework.context,
    org.springframework.webflow.execution",
- org.springframework.webflow.mvc.builder;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.mvc.builder;version="2.0.4";
   uses:="org.springframework.binding.convert,
    org.springframework.binding.expression,
    org.springframework.context,
    org.springframework.web.servlet,
+   org.springframework.webflow.engine.builder,
    org.springframework.webflow.execution,
    org.springframework.webflow.mvc.view",
- org.springframework.webflow.mvc.portlet;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.mvc.portlet;version="2.0.4";
   uses:="javax.portlet,
    org.springframework.binding.convert,
    org.springframework.binding.expression,
@@ -221,10 +225,11 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.context.portlet,
    org.springframework.webflow.core,
    org.springframework.webflow.core.collection,
+   org.springframework.webflow.engine.builder,
    org.springframework.webflow.execution,
    org.springframework.webflow.executor,
    org.springframework.webflow.mvc.view",
- org.springframework.webflow.mvc.servlet;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.mvc.servlet;version="2.0.4";
   uses:="javax.servlet,
    javax.servlet.http,
    org.springframework.beans,
@@ -236,10 +241,12 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.context.servlet,
    org.springframework.webflow.core,
    org.springframework.webflow.core.collection,
+   org.springframework.webflow.definition.registry,
+   org.springframework.webflow.engine.builder,
    org.springframework.webflow.execution,
    org.springframework.webflow.executor,
    org.springframework.webflow.mvc.view",
- org.springframework.webflow.mvc.view;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.mvc.view;version="2.0.4";
   uses:="javax.servlet.http,
    org.springframework.binding.convert,
    org.springframework.binding.expression,
@@ -247,21 +254,22 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.binding.message,
    org.springframework.validation,
    org.springframework.web.servlet,
+   org.springframework.webflow.engine.builder,
    org.springframework.webflow.execution",
- org.springframework.webflow.persistence;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.persistence;version="2.0.4";
   uses:="javax.persistence,
    org.hibernate,
    org.springframework.transaction,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.execution",
- org.springframework.webflow.scope;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.scope;version="2.0.4";
   uses:="org.springframework.beans,
    org.springframework.beans.factory,
    org.springframework.beans.factory.config,
    org.springframework.webflow.core.collection,
    org.springframework.webflow.execution",
- org.springframework.webflow.security;version="2.0.3.BUILD-20080701003730";uses:="org.springframework.security,org.springframework.webflow.definition,org.springframework.webflow.execution",
- org.springframework.webflow.test;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.security;version="2.0.4";uses:="org.springframework.security,org.springframework.webflow.definition,org.springframework.webflow.execution",
+ org.springframework.webflow.test;version="2.0.4";
   uses:="org.springframework.binding.convert,
    org.springframework.binding.expression,
    org.springframework.binding.message,
@@ -271,10 +279,12 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.core.collection,
    org.springframework.webflow.definition,
    org.springframework.webflow.engine,
+   org.springframework.webflow.engine.builder,
    org.springframework.webflow.engine.builder.support,
    org.springframework.webflow.execution",
- org.springframework.webflow.test.execution;version="2.0.3.BUILD-20080701003730";
+ org.springframework.webflow.test.execution;version="2.0.4";
   uses:="org.springframework.beans.factory.config,
+   org.springframework.core.io,
    org.springframework.webflow.config,
    org.springframework.webflow.context,
    org.springframework.webflow.core.collection,
@@ -285,7 +295,7 @@ Export-Package: org.springframework.webflow.action;version="2.0.3.BUILD-20080701
    org.springframework.webflow.engine.model.registry,
    org.springframework.webflow.execution,
    org.springframework.webflow.test",
- org.springframework.webflow.upgrade;version="2.0.3.BUILD-20080701003730";uses:="javax.xml.transform,org.springframework.core.io"
-Bundle-Version: 2.0.3.v20080701003730
+ org.springframework.webflow.upgrade;version="2.0.4";uses:="javax.xml.transform,org.springframework.core.io"
+Implementation-Version: 2.0.4
+Bundle-Version: 2.0.4.v200809171600
 Bundle-ClassPath: org.springframework.webflow.jar
-
