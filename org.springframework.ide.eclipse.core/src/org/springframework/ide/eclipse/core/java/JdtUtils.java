@@ -59,13 +59,16 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility class that provides several helper methods for working with Eclipse's
- * JDT.
+ * Utility class that provides several helper methods for working with Eclipse's JDT.
  * @author Christian Dupuis
  * @since 2.0
  */
 public class JdtUtils {
+	
+	public static final String JAVA_FILE_EXTENSION = ".java";
 
+	public static final String CLASS_FILE_EXTENSION = ".class";
+	
 	private static final String FILE_SCHEME = "file";
 
 	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
@@ -81,8 +84,7 @@ public class JdtUtils {
 		/**
 		 * Activates the weaving class loader as thread context classloader.
 		 * <p>
-		 * Use {@link #recoverClassLoader()} to recover the original thread
-		 * context classloader
+		 * Use {@link #recoverClassLoader()} to recover the original thread context classloader
 		 */
 		private void activateWeavingClassLoader() {
 			Thread.currentThread().setContextClassLoader(weavingClassLoader);
@@ -195,7 +197,8 @@ public class JdtUtils {
 
 	private static void covertPathToUrl(IProject project, Set<URL> paths, IPath path)
 			throws MalformedURLException {
-		if (path != null && project != null && path.removeFirstSegments(1) != null) {
+		if (path != null && project != null && path.removeFirstSegments(1) != null
+				&& project.findMember(path.removeFirstSegments(1)) != null) {
 
 			URI uri = project.findMember(path.removeFirstSegments(1)).getRawLocationURI();
 
@@ -302,8 +305,7 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Creates a Set of {@link URL}s from the OSGi bundle class path manifest
-	 * entry.
+	 * Creates a Set of {@link URL}s from the OSGi bundle class path manifest entry.
 	 */
 	private static Set<URL> getBundleClassPath(String bundleId) {
 		Set<URL> paths = new HashSet<URL>();
@@ -340,27 +342,26 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Create a {@link ClassLoader} from the class path configuration of the
-	 * given <code>project</code>.
+	 * Create a {@link ClassLoader} from the class path configuration of the given
+	 * <code>project</code>.
 	 * <p>
-	 * Note: Calling this method is the same as calling
-	 * {@link #getClassLoader(IProject, true)}
+	 * Note: Calling this method is the same as calling {@link #getClassLoader(IProject, true)}
 	 * @param project the {@link IProject}
-	 * @return {@link ClassLoader} instance constructed from the
-	 * <code>project</code>'s build path configuration
+	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path
+	 * configuration
 	 */
 	public static ClassLoader getClassLoader(IResource project) {
 		return getClassLoader(project.getProject(), true);
 	}
 
 	/**
-	 * Create a {@link ClassLoader} from the class path configuration of the
-	 * given <code>project</code>.
+	 * Create a {@link ClassLoader} from the class path configuration of the given
+	 * <code>project</code>.
 	 * @param project the {@link IProject}
-	 * @param useParentClassLoader true if the current OSGi class loader should
-	 * be used as parent class loader for the constructed class loader.
-	 * @return {@link ClassLoader} instance constructed from the
-	 * <code>project</code>'s build path configuration
+	 * @param useParentClassLoader true if the current OSGi class loader should be used as parent
+	 * class loader for the constructed class loader.
+	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path
+	 * configuration
 	 */
 	public static ClassLoader getClassLoader(IProject project, boolean useParentClassLoader) {
 		// prepare for tracing
@@ -384,16 +385,13 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Iterates all class path entries of the given <code>project</code> and
-	 * all depending projects.
+	 * Iterates all class path entries of the given <code>project</code> and all depending projects.
 	 * <p>
-	 * Note: if <code>useParentClassLoader</code> is true, the Spring,
-	 * AspectJ, Commons Logging and ASM bundles are automatically added to the
-	 * paths.
+	 * Note: if <code>useParentClassLoader</code> is true, the Spring, AspectJ, Commons Logging and
+	 * ASM bundles are automatically added to the paths.
 	 * @param project the {@link IProject}
 	 * @param useParentClassLoader use the OSGi classloader as parent
-	 * @return a set of {@link URL}s that can be used to construct a
-	 * {@link URLClassLoader}
+	 * @return a set of {@link URL}s that can be used to construct a {@link URLClassLoader}
 	 */
 	private static Set<URL> getClassPathUrls(IProject project, boolean useParentClassLoader) {
 
@@ -414,11 +412,10 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Returns the corresponding Java project or <code>null</code> a for given
-	 * project.
+	 * Returns the corresponding Java project or <code>null</code> a for given project.
 	 * @param project the project the Java project is requested for
-	 * @return the requested Java project or <code>null</code> if the Java
-	 * project is not defined or the project is not accessible
+	 * @return the requested Java project or <code>null</code> if the Java project is not defined or
+	 * the project is not accessible
 	 */
 	public static IJavaProject getJavaProject(IProject project) {
 		if (project.isAccessible()) {
@@ -444,8 +441,8 @@ public class JdtUtils {
 	 * Returns the corresponding Java type for given full-qualified class name.
 	 * @param project the JDT project the class belongs to
 	 * @param className the full qualified class name of the requested Java type
-	 * @return the requested Java type or null if the class is not defined or
-	 * the project is not accessible
+	 * @return the requested Java type or null if the class is not defined or the project is not
+	 * accessible
 	 */
 	public static IType getJavaType(IProject project, String className) {
 		IJavaProject javaProject = JdtUtils.getJavaProject(project);
@@ -646,8 +643,8 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Determines if the <code>resource</code> under question is the
-	 * .classpath file of a {@link IJavaProject}.
+	 * Determines if the <code>resource</code> under question is the .classpath file of a
+	 * {@link IJavaProject}.
 	 */
 	public static boolean isClassPathFile(IResource resource) {
 		String classPathFileName = resource.getProject().getFullPath().append(CLASSPATH_FILENAME)
@@ -693,7 +690,7 @@ public class JdtUtils {
 
 		return className;
 	}
-	
+
 	public static IType getJavaTypeFromSignatureClassName(String className, IType contextType) {
 		if (contextType == null || className == null) {
 			return null;
@@ -781,8 +778,7 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Returns a flat list of all interfaces and super types for the given
-	 * {@link IType}.
+	 * Returns a flat list of all interfaces and super types for the given {@link IType}.
 	 */
 	public static List<String> getFlatListOfClassAndInterfaceNames(IType parameterType, IType type) {
 		List<String> requiredTypes = new ArrayList<String>();

@@ -27,27 +27,37 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansTypeHierachyState;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.TypeStructureState;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
+import org.springframework.ide.eclipse.core.project.IProjectContributorState;
+import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
 
 /**
- * {@link IProjectBuilder} that triggers the creation and maintenance of {@link IBeanMetadata}
- * stored in the {@link IBeanMetadataModel}.
+ * {@link IProjectBuilder} that triggers the creation and lifecycle of {@link IBeanMetadata} stored
+ * in the {@link IBeanMetadataModel}.
  * @author Christian Dupuis
  * @since 2.0.5
  */
-public class BeanMetadataProjectBuilder implements IProjectBuilder {
-
-	private static final String JAVA_FILE_EXTENSION = ".java";
-
+public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectContributorStateAware {
+	
+	/** Internal state */
+	private IProjectContributorState context = null;
+	
+	/** Map of affected beans that need re-processing */
 	private Map<IBeansConfig, Set<IBean>> affectedBeans = new HashMap<IBeansConfig, Set<IBean>>();
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor)
 			throws CoreException {
 		monitor.subTask("Attaching Spring meta data");
@@ -57,7 +67,10 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 		}
 		monitor.done();
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public void cleanup(IResource resource, IProgressMonitor monitor) throws CoreException {
 		if (BeansCoreUtils.isBeansConfig(resource) && resource instanceof IFile) {
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource);
@@ -70,21 +83,31 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public Set<IResource> getAffectedResources(IResource resource, int kind) throws CoreException {
 		Set<IResource> resources = new HashSet<IResource>();
 
 		if (kind != IncrementalProjectBuilder.FULL_BUILD && resource instanceof IFile
-				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
-			for (IBean bean : BeansModelUtils.getBeansByContainingTypes(resource)) {
-				IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
-				resources.add(beansConfig.getElementResource());
-				if (affectedBeans.containsKey(beansConfig)) {
-					affectedBeans.get(beansConfig).add(bean);
-				}
-				else {
-					Set<IBean> beans = new LinkedHashSet<IBean>();
-					beans.add(bean);
-					affectedBeans.put(beansConfig, beans);
+				&& resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
+
+			// Make sure that only a structural change to a java source file triggers a rebuild
+			TypeStructureState structureManager = context.get(TypeStructureState.class);
+			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
+
+			if (structureManager == null || structureManager.hasStructuralChanges(resource)) {
+				for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
+					IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
+					resources.add(beansConfig.getElementResource());
+					if (affectedBeans.containsKey(beansConfig)) {
+						affectedBeans.get(beansConfig).add(bean);
+					}
+					else {
+						Set<IBean> beans = new LinkedHashSet<IBean>();
+						beans.add(bean);
+						affectedBeans.put(beansConfig, beans);
+					}
 				}
 			}
 		}
@@ -106,7 +129,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 		}
 		return resources;
 	}
-
+	
 	private void addBeans(IBeansConfig beansConfig) {
 		if (affectedBeans.containsKey(beansConfig)) {
 			affectedBeans.get(beansConfig).addAll(BeansModelUtils.getBeans(beansConfig));
@@ -115,6 +138,13 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder {
 			Set<IBean> beans = BeansModelUtils.getBeans(beansConfig);
 			affectedBeans.put(beansConfig, beans);
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setProjectContributorState(IProjectContributorState context) {
+		this.context = context;
 	}
 
 }

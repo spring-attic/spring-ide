@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansTypeHierachyState;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -35,6 +36,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.TypeStructureState;
+import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 
 /**
  * Some helper methods.
@@ -113,16 +116,23 @@ public class AopReferenceModelUtils {
 		return affectedFiles;
 	}
 
-	public static Set<IResource> getAffectedFiles(int kind, IResource resource) {
+	public static Set<IResource> getAffectedFiles(int kind, IResource resource,
+			IProjectContributorState context) {
 		Set<IResource> files = new HashSet<IResource>();
 
-		// since we moved to the new AbstractProjectBuilder we don't need the
-		// following check.
 		if (kind != IncrementalProjectBuilder.FULL_BUILD && resource instanceof IFile
 				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
-			for (IBeansConfig config : BeansModelUtils.getConfigsByContainingTypes(resource)) {
-				files.add(config.getElementResource());
+
+			// make sure that the aop model is only reprocessed if a java structural change happens
+			TypeStructureState structureManager = context.get(TypeStructureState.class);
+			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
+
+			if (structureManager == null || structureManager.hasStructuralChanges(resource)) {
+				for (IBeansConfig config : hierachyManager.getConfigsByContainingTypes(resource)) {
+					files.add(config.getElementResource());
+				}
 			}
+
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
 			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils

@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.TypeStructureState;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
@@ -39,6 +40,8 @@ import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManager;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
+import org.springframework.ide.eclipse.core.project.IProjectContributorState;
+import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
 
 /**
  * {@link IValidator} implementation that is responsible for validating the
@@ -47,7 +50,11 @@ import org.springframework.ide.eclipse.core.model.validation.IValidator;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansConfigValidator extends AbstractValidator {
+public class BeansConfigValidator extends AbstractValidator implements
+		IProjectContributorStateAware {
+	
+	/** Internal state object */
+	private IProjectContributorState context = null;
 
 	private Set<IBean> affectedBeans = new LinkedHashSet<IBean>();
 
@@ -122,11 +129,16 @@ public class BeansConfigValidator extends AbstractValidator {
 			}
 			else {
 				if (kind != IncrementalProjectBuilder.FULL_BUILD) {
+					
 					// Now check for bean classes and java structure
-					for (IBean bean : BeansModelUtils.getBeansByContainingTypes(resource)) {
-						IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
-						resources.add(beansConfig.getElementResource());
-						affectedBeans.add(bean);
+					TypeStructureState structureManager = context.get(TypeStructureState.class);
+					BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class); 
+					if (structureManager == null || structureManager.hasStructuralChanges(resource)) {
+						for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
+							IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
+							resources.add(beansConfig.getElementResource());
+							affectedBeans.add(bean);
+						}
 					}
 				}
 			}
@@ -182,6 +194,10 @@ public class BeansConfigValidator extends AbstractValidator {
 		return new BeanElementLifecycleManager();
 	}
 
+	public void setProjectContributorState(IProjectContributorState context) {
+		this.context = context;
+	}
+
 	private static class BeanElementLifecycleManager implements IValidationElementLifecycleManager {
 
 		private IResourceModelElement rootElement = null;
@@ -212,4 +228,5 @@ public class BeansConfigValidator extends AbstractValidator {
 
 		}
 	}
+
 }

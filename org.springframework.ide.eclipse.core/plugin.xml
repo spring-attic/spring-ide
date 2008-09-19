@@ -4,6 +4,7 @@
 
    <extension-point id="builders" name="%buildersName" schema="schema/builders.exsd"/>
    <extension-point id="validators" name="%validatorsName" schema="schema/validators.exsd"/>
+   <extension-point id="listeners" name="%listenersName" schema="schema/listeners.exsd"/>
 
    <extension
          id="springnature"
@@ -81,5 +82,12 @@
 		            enabledByDefault="false"/>
 	    </rules>
 	</extension>
+   
+   <extension
+         point="org.springframework.ide.eclipse.core.listeners">
+      <listener
+            class="org.springframework.ide.eclipse.core.java.TypeStructureStateRegisteringEventListener">
+      </listener>
+   </extension>
 	
 </plugin>

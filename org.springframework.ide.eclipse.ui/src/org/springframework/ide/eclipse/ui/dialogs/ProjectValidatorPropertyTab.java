@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -72,11 +71,11 @@ public class ProjectValidatorPropertyTab {
 
 	private static class ProjectValidatorContentProvider implements ITreeContentProvider {
 
-		private Set<ValidatorDefinition> validatorDefinitions;
+		private List<ValidatorDefinition> validatorDefinitions;
 
 		private Map<ValidatorDefinition, List<ValidationRuleDefinition>> validationRuleDefinitions;
 
-		public ProjectValidatorContentProvider(Set<ValidatorDefinition> validatorDefinitions,
+		public ProjectValidatorContentProvider(List<ValidatorDefinition> validatorDefinitions,
 				Map<ValidatorDefinition, List<ValidationRuleDefinition>> validationRuleDefinitions) {
 			this.validatorDefinitions = validatorDefinitions;
 			this.validationRuleDefinitions = validationRuleDefinitions;
@@ -156,7 +155,7 @@ public class ProjectValidatorPropertyTab {
 
 	private ITreeContentProvider contentProvider;
 
-	private Set<ValidatorDefinition> validatorDefinitions;
+	private List<ValidatorDefinition> validatorDefinitions;
 
 	private Map<ValidatorDefinition, List<ValidationRuleDefinition>> validationRuleDefinitions;
 
@@ -357,7 +356,7 @@ public class ProjectValidatorPropertyTab {
 	}
 
 	private List<Object> getEnabledProjectBuilderDefinitions() {
-		Set<ValidatorDefinition> validatorDefinitions = this.validatorDefinitions;
+		List<ValidatorDefinition> validatorDefinitions = this.validatorDefinitions;
 		List<Object> filteredValidatorDefinitions = new ArrayList<Object>();
 		for (ValidatorDefinition builderDefinition : validatorDefinitions) {
 			if (builderDefinition.isEnabled(project)) {

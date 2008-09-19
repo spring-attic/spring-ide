@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,48 +25,50 @@ import org.springframework.ide.eclipse.core.internal.model.SpringModel;
 import org.springframework.ide.eclipse.core.model.ISpringModel;
 
 /**
- * Central access point for the Spring IDE core plug-in
- * (id <code>"org.springframework.ide.eclipse.core"</code>).
+ * Central access point for the Spring IDE core plug-in (id
+ * <code>"org.springframework.ide.eclipse.core"</code>).
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public class SpringCore extends Plugin {
 
 	/**
-	 * Plugin identifier for Spring Core (value
-	 * <code>org.springframework.ide.eclipse.core</code>).
+	 * Plugin identifier for Spring Core (value <code>org.springframework.ide.eclipse.core</code>).
 	 */
-	public static final String PLUGIN_ID =
-										"org.springframework.ide.eclipse.core";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.core";
+
 	/**
-	 * The identifier for the Spring project builder
-	 * (value <code>"org.springframework.ide.eclipse.core.springbuilder"</code>).
+	 * The identifier for the Spring project builder (value
+	 * <code>"org.springframework.ide.eclipse.core.springbuilder"</code>).
 	 */
 	public static final String BUILDER_ID = PLUGIN_ID + ".springbuilder";
 
 	/**
-	 * The identifier for the Spring nature
-	 * (value <code>"org.springframework.ide.eclipse.core.springnature"</code>).
-	 * The presence of this nature on a project indicates that it is 
-	 * Spring-capable.
-	 *
+	 * The identifier for the Spring nature (value
+	 * <code>"org.springframework.ide.eclipse.core.springnature"</code>). The presence of this
+	 * nature on a project indicates that it is Spring-capable.
+	 * 
 	 * @see org.eclipse.core.resources.IProject#hasNature(java.lang.String)
 	 */
 	public static final String NATURE_ID = PLUGIN_ID + ".springnature";
 
 	/**
-	 * The identifier for the Spring problem marker
-	 * (value <code>"org.springframework.ide.eclipse.core.problemmarker"</code>).
+	 * The identifier for the Spring problem marker (value
+	 * <code>"org.springframework.ide.eclipse.core.problemmarker"</code>).
 	 */
 	public static final String MARKER_ID = PLUGIN_ID + ".problemmarker";
 
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
-	
+
 	/** The identifier for enablement of project versus workspace settings */
 	public static final String PROJECT_PROPERTY_ID = "enable.project.preferences";
 
+	/** Temporally setting to enable or disable the calculation of java structure changes and state */
+	public static final String USE_CHANGE_DETECTION_IN_JAVA_FILES = PLUGIN_ID
+			+ ".useChangeDetectionForJavaFiles";
+
 	/** The shared instance */
-	private static SpringCore plugin; 
+	private static SpringCore plugin;
 
 	/** The singleton Spring model */
 	private static SpringModel model;
@@ -77,15 +79,15 @@ public class SpringCore extends Plugin {
 	/**
 	 * Creates the Spring core plug-in.
 	 * <p>
-	 * The plug-in instance is created automatically by the Eclipse platform.
-	 * Clients must not call.
+	 * The plug-in instance is created automatically by the Eclipse platform. Clients must not call.
 	 */
 	public SpringCore() {
 		plugin = this;
 		model = new SpringModel();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
-		} catch (MissingResourceException e) {
+		}
+		catch (MissingResourceException e) {
 			resourceBundle = null;
 		}
 	}
@@ -94,6 +96,8 @@ public class SpringCore extends Plugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		model.startup();
+
+		plugin.getPluginPreferences().setDefault(USE_CHANGE_DETECTION_IN_JAVA_FILES, false);
 	}
 
 	@Override
@@ -124,20 +128,21 @@ public class SpringCore extends Plugin {
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle,
-	 * or 'key' if not found.
+	 * Returns the string from the plugin's resource bundle, or 'key' if not found.
 	 */
 	public static String getResourceString(String key) {
-	    String bundleString;
+		String bundleString;
 		ResourceBundle bundle = getDefault().getResourceBundle();
 		if (bundle != null) {
 			try {
 				bundleString = bundle.getString(key);
-			} catch (MissingResourceException e) {
-			    log(e);
+			}
+			catch (MissingResourceException e) {
+				log(e);
 				bundleString = "!" + key + "!";
 			}
-		} else {
+		}
+		else {
 			bundleString = "!" + key + "!";
 		}
 		return bundleString;
@@ -168,20 +173,19 @@ public class SpringCore extends Plugin {
 		IStatus status = createErrorStatus(message, exception);
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(createErrorStatus(
-						getResourceString("Plugin.internal_error"), exception));
+		getDefault().getLog().log(
+				createErrorStatus(getResourceString("Plugin.internal_error"), exception));
 	}
 
 	/**
 	 * Returns a new {@link IStatus} with status "ERROR" for this plug-in.
 	 */
-	public static IStatus createErrorStatus(String message,
-											Throwable exception) {
+	public static IStatus createErrorStatus(String message, Throwable exception) {
 		if (message == null) {
-			message = ""; 
-		}		
+			message = "";
+		}
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 

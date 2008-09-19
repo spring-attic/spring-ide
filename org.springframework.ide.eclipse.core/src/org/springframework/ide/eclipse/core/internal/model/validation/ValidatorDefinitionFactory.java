@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.core.internal.model.validation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -40,7 +38,7 @@ public class ValidatorDefinitionFactory {
 	/**
 	 * Returns all contributed {@link ValidatorDefinition}.
 	 */
-	public static Set<ValidatorDefinition> getValidatorDefinitions() {
+	public static List<ValidatorDefinition> getValidatorDefinitions() {
 		List<ValidatorDefinition> validatorDefinitions =
 				new ArrayList<ValidatorDefinition>();
 		for (IExtension extension : Platform.getExtensionRegistry()
@@ -70,7 +68,7 @@ public class ValidatorDefinitionFactory {
 					return Integer.valueOf(v1.getOrder()).compareTo(Integer.valueOf(v2.getOrder()));
 				}
 			}});
-		return new LinkedHashSet<ValidatorDefinition>(validatorDefinitions);
+		return validatorDefinitions;
 	}
 
 	/**

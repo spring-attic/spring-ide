@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TabFolder;
@@ -26,9 +27,8 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
 
 /**
- * Provides an {@link PropertyPage} that allows to manage the enablement of
- * {@link IProjectBuilder}s and {@link IValidator}s for the underlying
- * {@link IProject}.
+ * Provides an {@link PropertyPage} that allows to manage the enablement of {@link IProjectBuilder}s
+ * and {@link IValidator}s for the underlying {@link IProject}.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -42,6 +42,8 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 
 	private ProjectValidatorPropertyTab validatorTab = null;
 
+	private Button useChangeDetectionForJavaFiles;
+
 	public ProjectPropertyPage() {
 		noDefaultAndApplyButton();
 	}
@@ -52,16 +54,23 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		TabItem validatorItem = new TabItem(folder, SWT.NONE);
-		this.validatorTab = new ProjectValidatorPropertyTab(getShell(),
-				((IProject) getElement()));
+		this.validatorTab = new ProjectValidatorPropertyTab(getShell(), ((IProject) getElement()));
 		validatorItem.setControl(validatorTab.createContents(folder));
 		validatorItem.setText(SpringUIMessages.ProjectValidatorPropertyPage_title);
 
 		TabItem builderItem = new TabItem(folder, SWT.NONE);
-		this.builderTab = new ProjectBuilderPropertyTab(
-				((IProject) getElement()));
+		this.builderTab = new ProjectBuilderPropertyTab(((IProject) getElement()));
 		builderItem.setControl(builderTab.createContents(folder));
 		builderItem.setText(SpringUIMessages.ProjectBuilderPropertyPage_title);
+
+		if (!isProjectPreferencePage()) {
+			useChangeDetectionForJavaFiles = new Button(composite, SWT.CHECK);
+			useChangeDetectionForJavaFiles
+					.setText("Use change detection for Java source files (experimentel)");
+			useChangeDetectionForJavaFiles.setSelection(SpringCore.getDefault()
+					.getPluginPreferences().getBoolean(
+							SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES));
+		}
 
 		Dialog.applyDialogFont(folder);
 
@@ -77,21 +86,26 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 	}
 
 	protected boolean hasProjectSpecificOptions(IProject project) {
-		return SpringCorePreferences.getProjectPreferences(project)
-				.getBoolean(SpringCore.PROJECT_PROPERTY_ID, false);
+		return SpringCorePreferences.getProjectPreferences(project).getBoolean(
+				SpringCore.PROJECT_PROPERTY_ID, false);
 	}
 
 	public boolean performOk() {
 
 		if (isProjectPreferencePage()) {
 			if (useProjectSettings()) {
-				SpringCorePreferences.getProjectPreferences(getProject())
-						.putBoolean(SpringCore.PROJECT_PROPERTY_ID, true);
+				SpringCorePreferences.getProjectPreferences(getProject()).putBoolean(
+						SpringCore.PROJECT_PROPERTY_ID, true);
 			}
 			else {
-				SpringCorePreferences.getProjectPreferences(getProject())
-						.putBoolean(SpringCore.PROJECT_PROPERTY_ID, false);
+				SpringCorePreferences.getProjectPreferences(getProject()).putBoolean(
+						SpringCore.PROJECT_PROPERTY_ID, false);
 			}
+		}
+		else {
+			SpringCore.getDefault().getPluginPreferences().setValue(
+					SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES,
+					useChangeDetectionForJavaFiles.getSelection());
 		}
 
 		this.builderTab.performOk();

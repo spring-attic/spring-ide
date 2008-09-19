@@ -25,32 +25,34 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtil
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
+import org.springframework.ide.eclipse.core.project.IProjectContributorState;
+import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
 
 /**
- * {@link IProjectBuilder} that triggers creation of Spring IDE's internal AOP
- * reference model.
+ * {@link IProjectBuilder} that triggers creation of Spring IDE's internal AOP reference model.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class AopReferenceModelProjectBuilder implements IProjectBuilder {
+public class AopReferenceModelProjectBuilder implements IProjectBuilder,
+		IProjectContributorStateAware {
+	
+	private IProjectContributorState context = null;
 
 	/**
-	 * Returns a {@link Set} of {@link IResource} instances that need to be
-	 * rebuild in the context of the current <code>resource</code> and
-	 * <code>kind</code>
+	 * Returns a {@link Set} of {@link IResource} instances that need to be rebuild in the context
+	 * of the current <code>resource</code> and <code>kind</code>
 	 */
 	public Set<IResource> getAffectedResources(IResource resource, int kind) throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
-			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind, resource));
+			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind, resource, context));
 		}
 		return resources;
 	}
 
 	/**
-	 * Starts creation of AOP reference model by passing the Set of
-	 * affectedResources on to a new instance of
-	 * {@link AopReferenceModelBuilderJob}.
+	 * Starts creation of AOP reference model by passing the Set of affectedResources on to a new
+	 * instance of {@link AopReferenceModelBuilderJob}.
 	 */
 	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor)
 			throws CoreException {
@@ -85,4 +87,9 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 			monitor.done();
 		}
 	}
+
+	public void setProjectContributorState(IProjectContributorState context) {
+		this.context = context;
+	}
+	
 }

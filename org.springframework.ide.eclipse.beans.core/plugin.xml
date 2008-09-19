@@ -128,12 +128,12 @@
           	class="org.springframework.ide.eclipse.beans.core.internal.model.metadata.DelegatingAnnotationReadingMetadataProvider">
         </metadataProvider>
     </extension>
-	
-	<!-- support for upcoming quick fix -->
-	<!--<extension point="org.eclipse.ui.ide.markerResolution">
-        <markerResolutionGenerator
-            markerType="org.springframework.ide.eclipse.beans.core.problemmarker"
-            class="org.springframework.ide.eclipse.beans.core.quickfix.QuickFixer"/>
-    </extension>-->
+  
+    <extension
+          point="org.springframework.ide.eclipse.core.listeners">
+       <listener
+             class="org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansTypeHierachyProjectContributionEventListener">
+       </listener>
+    </extension>
 	
 </plugin>

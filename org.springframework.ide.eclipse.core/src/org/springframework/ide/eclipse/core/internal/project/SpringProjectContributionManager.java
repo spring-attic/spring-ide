@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.internal.project;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,95 +34,96 @@ import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorD
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
+import org.springframework.ide.eclipse.core.project.IProjectContributionEventListener;
 import org.springframework.ide.eclipse.core.project.IProjectContributor;
+import org.springframework.ide.eclipse.core.project.IProjectContributorState;
+import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionFactory;
+import org.springframework.ide.eclipse.core.project.ProjectContributionEventListenerFactory;
 
 /**
- * Incremental project builder which implements the Strategy GOF pattern. For
- * every modified {@link IResource} within a Spring project all implementations
- * of the interface {@link IProjectBuilder} provided via the extension point
- * <code>org.springframework.ide.eclipse.core.builders</code> and the
- * interface {@link IValidator} provided via the extension point
- * <code>org.springframework.ide.eclipse.core.validators</code> are called.
- * 
+ * Incremental project builder which implements the Strategy GOF pattern. For every modified
+ * {@link IResource} within a Spring project all implementations of the interface
+ * {@link IProjectBuilder} provided via the extension point
+ * <code>org.springframework.ide.eclipse.core.builders</code> and the interface {@link IValidator}
+ * provided via the extension point <code>org.springframework.ide.eclipse.core.validators</code> are
+ * called.
+ * <p>
+ * This {@link IncrementalProjectBuilder} makes state in form of an instance of
+ * {@link IProjectContributorState} for the {@link IProjectContributor} accessible. This state
+ * should be used to store arbitrary state object in order to save calculation time for subsequent
+ * {@link IValidator} or {@link IProjectBuilder}.
+ * <p>
+ * {@link IProjectBuilder} or {@link IValidator} implementations that want to access the state
+ * should implement the {@link IProjectContributorStateAware} interface to a call back with the
+ * current state.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
+ * @see IProjectContributor
+ * @see IProjectBuilder
+ * @see IValidator
+ * @see IProjectContributorState
  */
 public class SpringProjectContributionManager extends IncrementalProjectBuilder {
 
-	protected final IProject[] build(final int kind, Map args,
-			final IProgressMonitor monitor) throws CoreException {
-		final IProject project = getProject();
-		final IResourceDelta delta = getDelta(project);
+	/**
+	 * {@inheritDoc}
+	 */
+	protected final IProject[] build(final int kind, Map args, final IProgressMonitor monitor)
+			throws CoreException {
+		IProject project = getProject();
+		IResourceDelta delta = getDelta(project);
+
+		List<ProjectBuilderDefinition> builderDefinitions = ProjectBuilderDefinitionFactory
+				.getProjectBuilderDefinitions();
+		List<ValidatorDefinition> validatorDefinitions = ValidatorDefinitionFactory
+				.getValidatorDefinitions();
+		List<IProjectContributionEventListener> listeners = ProjectContributionEventListenerFactory
+				.getProjectContributionEventListeners();
+
+		// Set up the state object
+		IProjectContributorState state = prepareState(project, builderDefinitions,
+				validatorDefinitions);
+
+		// Fire start event on listeners
+		for (IProjectContributionEventListener listener : listeners) {
+			listener.start(kind, delta, builderDefinitions, validatorDefinitions, state, project);
+		}
 
 		// At first run all builders
-		for (final ProjectBuilderDefinition builderDefinition
-				: ProjectBuilderDefinitionFactory
-						.getProjectBuilderDefinitions()) {
+		for (ProjectBuilderDefinition builderDefinition : builderDefinitions) {
 			if (builderDefinition.isEnabled(project)) {
-				Set<IResource> affectedResources = getAffectedResources(
-						builderDefinition.getProjectBuilder(), project, kind,
-						delta);
-				runBuilder(builderDefinition, affectedResources, kind, monitor);
+				Set<IResource> affectedResources = getAffectedResources(builderDefinition
+						.getProjectBuilder(), project, kind, delta);
+				runBuilder(builderDefinition, affectedResources, kind, monitor, listeners);
 			}
 		}
 
 		// Finally run all validators
-		for (final ValidatorDefinition validatorDefinition
-				: ValidatorDefinitionFactory.getValidatorDefinitions()) {
+		for (ValidatorDefinition validatorDefinition : validatorDefinitions) {
 			if (validatorDefinition.isEnabled(project)) {
-				Set<IResource> affectedResources = getAffectedResources(
-						validatorDefinition.getValidator(), project, kind,
-						delta);
-				runValidator(validatorDefinition, affectedResources, monitor);
+				Set<IResource> affectedResources = getAffectedResources(validatorDefinition
+						.getValidator(), project, kind, delta);
+				runValidator(validatorDefinition, affectedResources, monitor, listeners);
 			}
 		}
+
+		// Fire end event on listeners
+		for (IProjectContributionEventListener listener : listeners) {
+			listener.finish(kind, delta, builderDefinitions, validatorDefinitions, state, project);
+		}
+
 		return null;
 	}
 
-	private void runBuilder(final ProjectBuilderDefinition builderDefinition,
-			final Set<IResource> affectedResources, final int kind,
-			final IProgressMonitor monitor) {
-		ISafeRunnable code = new ISafeRunnable() {
-			public void run() throws Exception {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor,
-						1);
-				subMonitor = new SubProgressMonitor(monitor, 1, 0);
-				builderDefinition.getProjectBuilder().build(affectedResources,
-						kind, subMonitor);
-			}
-
-			public void handleException(Throwable e) {
-				// nothing to do - exception is already logged
-			}
-		};
-		SafeRunner.run(code);
-	}
-
-	private void runValidator(final ValidatorDefinition validatorDefinition,
-			final Set<IResource> affectedResources,
-			final IProgressMonitor monitor) {
-		ISafeRunnable code = new ISafeRunnable() {
-			public void run() throws Exception {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor,
-						1);
-				subMonitor = new SubProgressMonitor(monitor, 1, 0);
-				validatorDefinition.getValidator().validate(affectedResources,
-						subMonitor);
-			}
-
-			public void handleException(Throwable e) {
-				// nothing to do - exception is already logged
-			}
-		};
-		SafeRunner.run(code);
-	}
-
-	private Set<IResource> getAffectedResources(IProjectContributor contributor,
-			IProject project, int kind, IResourceDelta delta)
-			throws CoreException {
+	/**
+	 * Collects all affected resources from the given {@link IResourceDelta} and
+	 * {@link IProjectContributor}.
+	 */
+	private Set<IResource> getAffectedResources(IProjectContributor contributor, IProject project,
+			int kind, IResourceDelta delta) throws CoreException {
 		Set<IResource> affectedResources;
 		if (delta == null || kind == IncrementalProjectBuilder.FULL_BUILD) {
 			ResourceTreeVisitor visitor = new ResourceTreeVisitor(contributor);
@@ -128,8 +131,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			affectedResources = visitor.getResources();
 		}
 		else {
-			ResourceDeltaVisitor visitor = new ResourceDeltaVisitor(
-					contributor, kind);
+			ResourceDeltaVisitor visitor = new ResourceDeltaVisitor(contributor, kind);
 			delta.accept(visitor);
 			affectedResources = visitor.getResources();
 		}
@@ -137,43 +139,121 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 	}
 
 	/**
-	 * Create a list of affected resources from a resource tree.
+	 * Instantiate the {@link IProjectContributorState} object. The state object is then passed to
+	 * any {@link IProjectBuilder} and {@link IValidator} that implements the
+	 * {@link IProjectContributorStateAware} interface.
+	 * <p>
+	 * This implementation creates an instance of {@link DefaultProjectContributorState}.
 	 */
-	private class ResourceTreeVisitor implements IResourceVisitor {
+	private IProjectContributorState prepareState(IProject project,
+			List<ProjectBuilderDefinition> builderDefinitions,
+			List<ValidatorDefinition> validatorDefinitions) {
 
-		private IProjectContributor contributor;
-		private Set<IResource> resources;
+		IProjectContributorState context = new DefaultProjectContributorState();
 
-		public ResourceTreeVisitor(IProjectContributor builder) {
-			this.contributor = builder;
-			this.resources = new LinkedHashSet<IResource>();
-		}
-
-		public Set<IResource> getResources() {
-			return resources;
-		}
-
-		public boolean visit(IResource resource) throws CoreException {
-			if (resource instanceof IFile) {
-				resources.addAll(contributor.getAffectedResources(resource, 
-						IncrementalProjectBuilder.FULL_BUILD));
+		for (ProjectBuilderDefinition builderDefinition : builderDefinitions) {
+			if (builderDefinition.isEnabled(project)
+					&& builderDefinition.getProjectBuilder() instanceof IProjectContributorStateAware) {
+				((IProjectContributorStateAware) builderDefinition.getProjectBuilder())
+						.setProjectContributorState(context);
 			}
-			else if (resource instanceof IProject) {
-				resources.addAll(contributor.getAffectedResources(resource, 
-						IncrementalProjectBuilder.FULL_BUILD));
-			}
-			return true;
 		}
+
+		for (ValidatorDefinition validatorDefinition : validatorDefinitions) {
+			if (validatorDefinition.isEnabled(project)
+					&& validatorDefinition.getValidator() instanceof IProjectContributorStateAware) {
+				((IProjectContributorStateAware) validatorDefinition.getValidator())
+						.setProjectContributorState(context);
+			}
+		}
+
+		return context;
+	}
+
+	/**
+	 * Runs all given {@link IProjectBuilder} in the order as they are given in the set.
+	 */
+	private void runBuilder(final ProjectBuilderDefinition builderDefinition,
+			final Set<IResource> affectedResources, final int kind, final IProgressMonitor monitor,
+			final List<IProjectContributionEventListener> listeners) {
+
+		for (IProjectContributionEventListener listener : listeners) {
+			listener.startContributor(builderDefinition.getProjectBuilder(), affectedResources);
+		}
+
+		ISafeRunnable code = new ISafeRunnable() {
+			public void handleException(Throwable e) {
+				// nothing to do - exception is already logged
+			}
+
+			public void run() throws Exception {
+				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
+				subMonitor = new SubProgressMonitor(monitor, 1, 0);
+				builderDefinition.getProjectBuilder().build(affectedResources, kind, subMonitor);
+			}
+		};
+		SafeRunner.run(code);
+	}
+
+	/**
+	 * Runs all given {@link IValidator} in the order as they are given in the set.
+	 */
+	private void runValidator(final ValidatorDefinition validatorDefinition,
+			final Set<IResource> affectedResources, final IProgressMonitor monitor,
+			final List<IProjectContributionEventListener> listeners) {
+
+		for (IProjectContributionEventListener listener : listeners) {
+			listener.startContributor(validatorDefinition.getValidator(), affectedResources);
+		}
+
+		ISafeRunnable code = new ISafeRunnable() {
+			public void handleException(Throwable e) {
+				// nothing to do - exception is already logged
+			}
+
+			public void run() throws Exception {
+				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
+				subMonitor = new SubProgressMonitor(monitor, 1, 0);
+				validatorDefinition.getValidator().validate(affectedResources, subMonitor);
+			}
+		};
+		SafeRunner.run(code);
+	}
+
+	/**
+	 * Default implementation of the {@link IProjectContributorState} interface.
+	 */
+	private class DefaultProjectContributorState implements IProjectContributorState {
+
+		private Map<Class, Object> managedObjects = new HashMap<Class, Object>();
+
+		@SuppressWarnings("unchecked")
+		public <T> T get(Class<T> clazz) {
+			return (T) managedObjects.get(clazz);
+		}
+
+		public boolean hold(Object obj) {
+			if (managedObjects.containsKey(obj.getClass())) {
+				return false;
+			}
+			else {
+				managedObjects.put(obj.getClass(), obj);
+				return true;
+			}
+		}
+
 	}
 
 	/**
 	 * Create a list of affected resources from a resource delta.
 	 */
-	private class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+	public static class ResourceDeltaVisitor implements IResourceDeltaVisitor {
 
 		private IProjectContributor contributor;
-		private Set<IResource> resources;
+
 		private int kind = -1;
+
+		private Set<IResource> resources;
 
 		public ResourceDeltaVisitor(IProjectContributor builder, int kind) {
 			this.contributor = builder;
@@ -194,31 +274,58 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 				// Only check projects with Spring beans nature
 				visitChildren = SpringCoreUtils.isSpringProject(resource);
 				if (visitChildren) {
-					resources.addAll(contributor.getAffectedResources(resource,
-							kind));
+					resources.addAll(contributor.getAffectedResources(resource, kind));
 				}
 			}
 			else if (resource instanceof IFolder) {
-				resources.addAll(contributor.getAffectedResources(resource,
-						kind));
+				resources.addAll(contributor.getAffectedResources(resource, kind));
 				visitChildren = true;
 			}
 			else if (resource instanceof IFile) {
 				switch (aDelta.getKind()) {
 				case IResourceDelta.ADDED:
 				case IResourceDelta.CHANGED:
-					resources.addAll(contributor.getAffectedResources(resource,
-							kind));
+					resources.addAll(contributor.getAffectedResources(resource, kind));
 					visitChildren = true;
 					break;
 
 				case IResourceDelta.REMOVED:
-					resources.addAll(contributor.getAffectedResources(resource,
-							kind));
+					resources.addAll(contributor.getAffectedResources(resource, kind));
 					break;
 				}
 			}
 			return visitChildren;
+		}
+	}
+
+	/**
+	 * Create a list of affected resources from a resource tree.
+	 */
+	public static class ResourceTreeVisitor implements IResourceVisitor {
+
+		private IProjectContributor contributor;
+
+		private Set<IResource> resources;
+
+		public ResourceTreeVisitor(IProjectContributor builder) {
+			this.contributor = builder;
+			this.resources = new LinkedHashSet<IResource>();
+		}
+
+		public Set<IResource> getResources() {
+			return resources;
+		}
+
+		public boolean visit(IResource resource) throws CoreException {
+			if (resource instanceof IFile) {
+				resources.addAll(contributor.getAffectedResources(resource,
+						IncrementalProjectBuilder.FULL_BUILD));
+			}
+			else if (resource instanceof IProject) {
+				resources.addAll(contributor.getAffectedResources(resource,
+						IncrementalProjectBuilder.FULL_BUILD));
+			}
+			return true;
 		}
 	}
 }
