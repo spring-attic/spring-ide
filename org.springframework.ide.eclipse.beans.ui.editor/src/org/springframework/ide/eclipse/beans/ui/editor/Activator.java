@@ -196,7 +196,6 @@ public class Activator extends AbstractUIPlugin {
 				bundleString = bundle.getString(key);
 			}
 			catch (MissingResourceException e) {
-				log(e);
 				bundleString = "!" + key + "!";
 			}
 		}

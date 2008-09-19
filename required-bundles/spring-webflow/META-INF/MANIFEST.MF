@@ -22,6 +22,7 @@ Import-Package: edu.emory.mathcs.backport.java.util.concurrent;version="[3.0.0,4
  org.springframework.beans.factory.access.el;version="[2.5.4.A,3.0.0)",
  org.springframework.beans.factory.config;version="[2.5.4.A,3.0.0)",
  org.springframework.beans.factory.support;version="[2.5.4.A,3.0.0)",
+ org.springframework.beans.factory.parsing;version="[2.5.4.A,3.0.0)",
  org.springframework.beans.factory.xml;version="[2.5.4.A,3.0.0)",
  org.springframework.binding.collection;version="[2.0.4,2.0.5)",
  org.springframework.binding.convert;version="[2.0.4,2.0.5)",
