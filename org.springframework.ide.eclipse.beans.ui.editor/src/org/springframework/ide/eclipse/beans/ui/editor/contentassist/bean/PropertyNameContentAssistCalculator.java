@@ -55,7 +55,7 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 		}
 	}
 
-	private void addPropertyNameAttributeValueProposals(ContentAssistRequest request,
+	protected void addPropertyNameAttributeValueProposals(ContentAssistRequest request,
 			String prefix, String oldPrefix, IType type) {
 
 		// resolve type of indexed and nested property path
@@ -108,7 +108,7 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 		}
 	}
 
-	private void createMethodProposal(ContentAssistRequest request, IMethod method, String prefix) {
+	protected void createMethodProposal(ContentAssistRequest request, IMethod method, String prefix) {
 		try {
 			String[] parameterNames = method.getParameterNames();
 			String[] parameterTypes = JdtUtils.getParameterTypesString(method);
@@ -144,4 +144,5 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 			// do nothing
 		}
 	}
+	
 }
