@@ -37,7 +37,7 @@ public class BeanMetadataPersistence {
 
 	private static final String BEANPROPERTIES_FOLDER_NAME = "/properties/";
 
-	public static void storeMetaData(Map<String, BeanMetadataHolder> metaData) {
+	public static void storeMetadata(Map<String, BeanMetadataHolder> metaData) {
 		File file = BeansCorePlugin.getDefault().getStateLocation().append(
 				METADATA_FOLDER_NAME + STATE_FILE_NAME).toFile();
 		store(metaData, file);
@@ -75,7 +75,7 @@ public class BeanMetadataPersistence {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<String, BeanMetadataHolder> loadMetaData() {
+	public static Map<String, BeanMetadataHolder> loadMetadata() {
 		File f = BeansCorePlugin.getDefault().getStateLocation().append(
 				METADATA_FOLDER_NAME + STATE_FILE_NAME).toFile();
 		Map<String, BeanMetadataHolder> metaData = load(f, Map.class);

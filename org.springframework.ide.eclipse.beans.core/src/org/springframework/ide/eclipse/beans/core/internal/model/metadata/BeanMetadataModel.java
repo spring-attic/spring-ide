@@ -127,7 +127,7 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 	 * Starts and loads the internal model.
 	 */
 	public void start() {
-		this.beanMetadata = BeanMetadataPersistence.loadMetaData();
+		this.beanMetadata = BeanMetadataPersistence.loadMetadata();
 		this.beanPropertyData = BeanMetadataPersistence.loadProperties();
 	}
 	
@@ -135,7 +135,7 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 	 * Stops and saves the internal model. 
 	 */
 	public void stop() {
-		BeanMetadataPersistence.storeMetaData(beanMetadata);
+		BeanMetadataPersistence.storeMetadata(beanMetadata);
 		BeanMetadataPersistence.storeProperties(beanPropertyData);
 	}
 
