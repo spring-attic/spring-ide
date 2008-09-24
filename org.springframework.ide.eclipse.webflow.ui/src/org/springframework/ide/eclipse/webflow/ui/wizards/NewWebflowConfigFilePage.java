@@ -16,6 +16,9 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -24,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.wst.sse.core.internal.encoding.CommonEncodingPreferenceNames;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
  * @author Christian Dupuis
@@ -94,5 +98,21 @@ public class NewWebflowConfigFilePage extends WizardNewFileCreationPage {
 		swf2Button
 				.setText("Use Spring Web Flow 2 flow definition syntax (Required if you want to use Spring Web Flow 2)");
 		swf2Button.setSelection(true);
+	}
+	
+	@Override
+	protected boolean validatePage() {
+		if (super.validatePage()) {
+			IPath path = getContainerFullPath();
+			if (path != null && path.segment(0) != null) {
+				IProject project = 
+					ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
+				if (!SpringCoreUtils.isSpringProject(project)) {
+					setErrorMessage("Selected folder does not belong to a Spring project.");
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 }

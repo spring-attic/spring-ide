@@ -20,6 +20,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
@@ -28,6 +31,7 @@ import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
  * {@link WizardNewFileCreationPage} that enables to select a folder and a name
@@ -156,5 +160,21 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 								o2.getNamespacePrefix());
 					}
 				});
+	}
+	
+	@Override
+	protected boolean validatePage() {
+		if (super.validatePage()) {
+			IPath path = getContainerFullPath();
+			if (path != null && path.segment(0) != null) {
+				IProject project = 
+					ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
+				if (!SpringCoreUtils.isSpringProject(project)) {
+					setErrorMessage("Selected folder does not belong to a Spring project.");
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 }
