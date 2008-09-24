@@ -213,9 +213,12 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 
 		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean",
 				"property", "name", new PropertyNameContentAssistCalculator());
+		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean",
+				"property", "value", new PropertyValueContentAssistCalculator());
 
 		registerContentAssistCalculator("bean", "factory-method",
 				new FactoryMethodContentAssistCalculator());
+
 	}
 
 	@Override
