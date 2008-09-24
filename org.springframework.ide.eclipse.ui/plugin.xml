@@ -115,7 +115,7 @@
             name="%navigatorViewName"
             icon="icons/full/obj16/spring_obj.gif"
             category="org.springframework.ide.eclipse.ui.views"
-            class="org.eclipse.ui.navigator.CommonNavigator">
+            class="org.springframework.ide.eclipse.ui.navigator.actions.SpringNavigator">
       </view>
    </extension>
 
@@ -151,9 +151,11 @@
          point="org.eclipse.ui.navigator.viewer">
       <viewer viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
       	 <!-- Hide the "Link with Editor" action from the toolbar of the viewer -->
+      	 <!--
       	 <options>
 		 	<property name="org.eclipse.ui.navigator.hideLinkWithEditorAction" value="true" />
 		 </options>
+		 -->
       </viewer>
       <viewerContentBinding viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
          <includes>

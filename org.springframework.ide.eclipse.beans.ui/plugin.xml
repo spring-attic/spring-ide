@@ -414,6 +414,7 @@
 				</and>
 				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
+				<instanceof value="org.w3c.dom.Element"/>
 	         </or>
           </selectionEnablement>
           <editorInputEnablement>
