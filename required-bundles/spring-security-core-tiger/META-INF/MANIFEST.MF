@@ -16,7 +16,7 @@ Export-Package: org.springframework.security.annotation;version="2.0.4";
    org.springframework.security.intercept.method,
    javax.annotation.security,
    org.springframework.security.vote"
-Bundle-Version: 2.0.4.v200808081800
+Bundle-Version: 2.0.5.v200809181800
 Bundle-Name: spring-security-core-tiger
 Bundle-Description: Spring Security
 Build-Jdk: 1.5.0_13
