@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.security.ui.namespaces;
 
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -29,8 +27,7 @@ public class SecurityConfigNamespaceLabelProvider extends DefaultNamespaceLabelP
 
 	@Override
 	public Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating) {
-		if (element instanceof IBean
-				&& (context instanceof IBeansConfig || context instanceof IBeansConfigSet)) {
+		if (element instanceof IBean) {
 			return SecurityUIImages.getImage(SecurityUIImages.IMG_OBJS_SECURITY);
 		}
 		return super.getImage(element, context, isDecorating);

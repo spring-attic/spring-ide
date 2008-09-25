@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.osgi.ui.namespaces;
 
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -27,9 +25,7 @@ public class OsgiConfigNamespaceLabelProvider extends DefaultNamespaceLabelProvi
 
 	@Override
 	public Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating) {
-		if (element instanceof IBean
-				&& (context instanceof IBeansConfig
-						|| context instanceof IBeansConfigSet)) {
+		if (element instanceof IBean) {
 			return OsgiUIImages.getImage(OsgiUIImages.IMG_OBJS_OSGI);
 		}
 		return super.getImage(element, context, isDecorating);
