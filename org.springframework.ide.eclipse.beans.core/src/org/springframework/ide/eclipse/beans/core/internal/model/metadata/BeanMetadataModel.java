@@ -13,9 +13,14 @@ package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
@@ -24,8 +29,8 @@ import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataMo
 import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
 
 /**
- * {@link IBeanMetadataModel} implementation that saves and reloads its contents
- * from a backing store.
+ * {@link IBeanMetadataModel} implementation that saves and reloads its contents from a backing
+ * store.
  * @author Christian Dupuis
  * @since 2.0.5
  */
@@ -34,16 +39,16 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/metadata/debug";
 
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
-	
+
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
 	private final Lock r = rwl.readLock();
 
 	private final Lock w = rwl.writeLock();
 
-	private Map<String, BeanMetadataHolder> beanMetadata = null;
-	
-	private Map<String, BeanPropertyDataHolder> beanPropertyData = null;
+	private Map<String, BeanMetadataHolder> beanMetadata = new ConcurrentHashMap<String, BeanMetadataHolder>();
+
+	private Map<String, BeanPropertyDataHolder> beanPropertyData = new ConcurrentHashMap<String, BeanPropertyDataHolder>();
 
 	public Set<IBeanMetadata> getBeanMetadata(IBean bean) {
 		try {
@@ -66,7 +71,7 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 			holder.setElemenetId(bean.getElementID());
 			holder.setBeanMetaData(bMetaData);
 			holder.setMethodMetaData(methodMetaData);
-			// safe time so we can purge very old entries after a while 
+			// safe time so we can purge very old entries after a while
 			holder.setLastModified(System.currentTimeMillis());
 			beanMetadata.put(bean.getElementID(), holder);
 		}
@@ -97,14 +102,14 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 			r.unlock();
 		}
 	}
-	
+
 	public void setBeanProperties(IBean bean, Set<IBeanProperty> beanProperties) {
 		try {
 			w.lock();
 			BeanPropertyDataHolder holder = new BeanPropertyDataHolder();
 			holder.setElemenetId(bean.getElementID());
 			holder.setBeanProperties(beanProperties);
-			// safe time so we can purge very old entries after a while 
+			// safe time so we can purge very old entries after a while
 			holder.setLastModified(System.currentTimeMillis());
 			beanPropertyData.put(bean.getElementID(), holder);
 		}
@@ -112,7 +117,7 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 			w.unlock();
 		}
 	}
-	
+
 	public void clearBeanProperties(IBean bean) {
 		try {
 			w.lock();
@@ -122,17 +127,44 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 			w.unlock();
 		}
 	}
-	
+
 	/**
 	 * Starts and loads the internal model.
 	 */
 	public void start() {
-		this.beanMetadata = BeanMetadataPersistence.loadMetadata();
-		this.beanPropertyData = BeanMetadataPersistence.loadProperties();
+
+		Job metamodelLoadingJob = new Job("Loading Spring meta data") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				Map<String, BeanMetadataHolder> storedBeanMetadata = BeanMetadataPersistence
+						.loadMetadata();
+				Map<String, BeanPropertyDataHolder> storedProperties = BeanMetadataPersistence
+						.loadProperties();
+				try {
+					w.lock();
+					beanMetadata = storedBeanMetadata;
+					beanPropertyData = storedProperties;
+				}
+				catch (Exception e) {
+					beanMetadata = new ConcurrentHashMap<String, BeanMetadataHolder>();
+					beanPropertyData = new ConcurrentHashMap<String, BeanPropertyDataHolder>();
+				}
+				finally {
+					w.unlock();
+				}
+				
+				return Status.OK_STATUS;
+			}
+		};
+		
+		metamodelLoadingJob.setPriority(Job.INTERACTIVE);
+		metamodelLoadingJob.schedule();
 	}
-	
+
 	/**
-	 * Stops and saves the internal model. 
+	 * Stops and saves the internal model.
 	 */
 	public void stop() {
 		BeanMetadataPersistence.storeMetadata(beanMetadata);
