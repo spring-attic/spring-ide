@@ -17,6 +17,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.dialogs.PropertyPage;
@@ -64,12 +65,21 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 		builderItem.setText(SpringUIMessages.ProjectBuilderPropertyPage_title);
 
 		if (!isProjectPreferencePage()) {
+			
+			Label options = new Label(composite, SWT.WRAP);
+			options.setText("Options:");
+			options.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
 			useChangeDetectionForJavaFiles = new Button(composite, SWT.CHECK);
 			useChangeDetectionForJavaFiles
-					.setText("Use change detection for Java source files (experimentel)");
+					.setText(SpringUIMessages.ProjectBuilderPropertyPage_IncrementalCompileMessage);
 			useChangeDetectionForJavaFiles.setSelection(SpringCore.getDefault()
 					.getPluginPreferences().getBoolean(
 							SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES));
+			
+			Label note = new Label(composite, SWT.WRAP);
+			note.setText(SpringUIMessages.ProjectBuilderPropertyPage_IncrementalCompileNote);
+			note.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
 
 		Dialog.applyDialogFont(folder);

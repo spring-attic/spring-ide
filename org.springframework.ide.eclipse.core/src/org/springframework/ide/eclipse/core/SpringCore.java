@@ -96,8 +96,9 @@ public class SpringCore extends Plugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		model.startup();
-
-		plugin.getPluginPreferences().setDefault(USE_CHANGE_DETECTION_IN_JAVA_FILES, false);
+		
+		// install default for incremtal compilation
+		plugin.getPluginPreferences().setDefault(USE_CHANGE_DETECTION_IN_JAVA_FILES, true);
 	}
 
 	@Override

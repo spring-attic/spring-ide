@@ -105,7 +105,7 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	 * Returns then singleton instance of
 	 * <code>SpringUILabelProvider(true)</code>.
 	 * <p>
-	 * <b>For this instance the dispose method must never becalled!! This is
+	 * <b>For this instance the dispose method must never be called!! This is
 	 * done by <code>Plugin.stop()</code> instead.</b>
 	 */
 	public static ILabelProvider getLabelProvider() {
