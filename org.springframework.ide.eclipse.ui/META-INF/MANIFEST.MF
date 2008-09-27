@@ -22,7 +22,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.core,
  org.eclipse.ui.navigator.resources,
  org.eclipse.wst.sse.core,
- org.eclipse.wst.xml.core;bundle-version="1.1.300"
+ org.eclipse.wst.xml.core
 Export-Package: org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.ui.dialogs,
  org.springframework.ide.eclipse.ui.editors,
