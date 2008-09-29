@@ -173,6 +173,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 					setErrorMessage("Selected folder does not belong to a Spring project.");
 					return false;
 				}
+				return true;
 			}
 		}
 		return false;
