@@ -76,7 +76,7 @@
     <dependency>
       <groupId>org.objectweb.asm</groupId>
       <artifactId>com.springsource.org.objectweb.asm</artifactId>
-      <version>2.2.0</version>
+      <version>2.2.1</version>
     </dependency>
     <dependency>
       <groupId>edu.emory.mathcs.backport</groupId>
