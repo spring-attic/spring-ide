@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.model.locate;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.DelegatingNames
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Basic {@link IBeansConfigLocator} that is capable for scanning an {@link IProject} or
@@ -48,12 +49,38 @@ public class ProjectScanningBeansConfigLocator extends
 		AbstractJavaProjectPathMatchingBeansConfigLocator {
 
 	/** Ant-style that matches on every XML file */
-	private List<String> ALLOWED_FILE_PATTERNS = Arrays.asList(new String[] { "**/*.xml" });
+	private String ALLOWED_FILE_PATTERN = "**/*";
 
 	/** Internal cache for {@link NamespaceHandlerResolver}s keyed by their {@link IProject} */
 	private Map<IProject, NamespaceHandlerResolver> namespaceResoverCache = 
 		new HashMap<IProject, NamespaceHandlerResolver>();
-
+	
+	/** Configured file patters derived from the configured file patterns */
+	private List<String> configuredFilePatterns = null;
+	
+	/** Configured file extensions from the dialog */ 
+	private List<String> configuredFileExtensions = null;
+	
+	/**
+	 * Constructor taking a string of CSV file extensions
+	 * @param configuredFileSuffixes
+	 */
+	public ProjectScanningBeansConfigLocator(String configuredFileSuffixes) {
+		configuredFilePatterns = new ArrayList<String>();
+		configuredFileExtensions = new ArrayList<String>();
+		for (String filePattern : StringUtils.commaDelimitedListToStringArray(configuredFileSuffixes)) {
+			filePattern = filePattern.trim();
+			int ix = filePattern.lastIndexOf('.');
+			if (ix != -1) {
+				configuredFileExtensions.add(filePattern.substring(ix + 1));
+			}
+			else {
+				configuredFileExtensions.add(filePattern);
+			}
+			configuredFilePatterns.add(ALLOWED_FILE_PATTERN + filePattern);
+		}
+	}
+	
 	/**
 	 * As this locator is not intended to be used at runtime, we don't need to listen to any
 	 * resource changes.
@@ -133,7 +160,15 @@ public class ProjectScanningBeansConfigLocator extends
 	 */
 	@Override
 	protected List<String> getAllowedFilePatterns() {
-		return ALLOWED_FILE_PATTERNS;
+		return configuredFilePatterns;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected List<String> getAllowedFileExtensions() {
+		return configuredFileExtensions;
 	}
 	
 	/**

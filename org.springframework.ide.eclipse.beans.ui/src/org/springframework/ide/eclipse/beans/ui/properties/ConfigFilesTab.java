@@ -359,7 +359,8 @@ public class ConfigFilesTab {
 	}
 
 	protected void handleScanButtonPressed() {
-		ScannedFilesContentProvider contentProvider = new ScannedFilesContentProvider();
+		ScannedFilesContentProvider contentProvider = new ScannedFilesContentProvider(suffixesText
+				.getText());
 		CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(SpringUIUtils
 				.getStandardDisplay().getActiveShell(), new ScannedFilesLabelProvider(),
 				contentProvider);
@@ -370,7 +371,7 @@ public class ConfigFilesTab {
 		dialog.setInput(project.getProject());
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setInitialSelections(contentProvider.getElements(project.getProject()));
-		
+
 		if (dialog.open() == Window.OK) {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
@@ -458,19 +459,20 @@ public class ConfigFilesTab {
 	}
 
 	private final class ScannedFilesContentProvider implements ITreeContentProvider {
-		
+
 		private Object[] scannedFiles = null;
-		
-		public ScannedFilesContentProvider() {
+
+		public ScannedFilesContentProvider(final String fileSuffixes) {
 			final Set<IFile> files = new LinkedHashSet<IFile>();
 			IRunnableWithProgress runnable = new IRunnableWithProgress() {
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException,
-				InterruptedException {
-					ProjectScanningBeansConfigLocator locator = new ProjectScanningBeansConfigLocator();
+						InterruptedException {
+					ProjectScanningBeansConfigLocator locator = new ProjectScanningBeansConfigLocator(
+							fileSuffixes);
 					files.addAll(locator.locateBeansConfigs(project.getProject(), monitor));
 				}
 			};
-			
+
 			try {
 				IRunnableContext context = new ProgressMonitorDialog(SpringUIUtils
 						.getStandardDisplay().getActiveShell());
@@ -481,9 +483,9 @@ public class ConfigFilesTab {
 			catch (InterruptedException e) {
 			}
 			scannedFiles = files.toArray();
-			
+
 		}
-		
+
 		public void dispose() {
 		}
 
