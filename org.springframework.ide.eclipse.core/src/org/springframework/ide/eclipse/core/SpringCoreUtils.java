@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Some helper methods.
@@ -68,6 +69,9 @@ public final class SpringCoreUtils {
 	 * <code>${beansRef}</code>.
 	 */
 	public static boolean hasPlaceHolder(String text) {
+		if (text == null || !StringUtils.hasText(text)) {
+			return false;
+		}
 		int pos = text.indexOf(PLACEHOLDER_PREFIX);
 		return (pos != -1 && text.indexOf(PLACEHOLDER_SUFFIX, pos) != -1);
 	}
