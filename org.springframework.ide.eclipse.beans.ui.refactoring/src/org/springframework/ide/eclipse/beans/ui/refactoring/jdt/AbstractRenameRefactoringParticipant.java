@@ -33,8 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
- * Abstract super class for implemeting {@link RenameParticipant}
- * 
+ * Abstract super class for implementing {@link RenameParticipant}
  * @author Christian Dupuis
  */
 public abstract class AbstractRenameRefactoringParticipant extends
