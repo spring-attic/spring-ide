@@ -49,7 +49,7 @@ public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 			}
 		}
-		else if (element instanceof IBean && context instanceof IBeansComponent) {
+		else if (element instanceof IBean) {
 			String localName = ModelUtils
 					.getLocalName((ISourceModelElement) element);
 			String contextLocalName = ModelUtils
