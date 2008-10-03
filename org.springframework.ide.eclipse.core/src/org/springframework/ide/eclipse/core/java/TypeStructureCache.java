@@ -126,9 +126,10 @@ class TypeStructureCache {
 		Map<String, TypeStructure> typeStructures = typeStructuresByProject.get(resource
 				.getProject());
 
-		if (resource.getFileExtension().equals("java")) {
+		if (resource != null && resource.getFileExtension() != null
+				&& resource.getFileExtension().equals("java")) {
 			IJavaElement element = JavaCore.create(resource);
-			if (element instanceof ICompilationUnit) {
+			if (element instanceof ICompilationUnit && ((ICompilationUnit) element).isOpen()) {
 				try {
 					IType[] types = ((ICompilationUnit) element).getAllTypes();
 					for (IType type : types) {
