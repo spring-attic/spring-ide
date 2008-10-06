@@ -32,14 +32,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.springframework.ide.eclipse.beans.core.BeansCoreImages;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
-import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
  * {@link Job} implementation that handles loading and attaching {@link IBeanMetadata} for
@@ -160,7 +158,7 @@ public class BeanMetadataBuilderJob extends Job {
 			attachMetadataToBean(beansConfig, progressMonitor, providers, bean);
 		}
 		// Notify that the model has changed.
-		((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansConfig, Type.CHANGED);
+		//((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansConfig, Type.CHANGED);
 	}
 
 	/**

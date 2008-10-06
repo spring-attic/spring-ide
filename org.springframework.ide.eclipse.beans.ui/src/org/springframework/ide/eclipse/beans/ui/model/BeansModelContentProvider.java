@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ITreePathContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -47,8 +48,8 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
- * This class is a content provider which knows about the beans core model's
- * {@link IModelElement elements}.
+ * This class is a content provider which knows about the beans core model's {@link IModelElement
+ * elements}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -59,7 +60,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 
 	private final boolean refresh;
 
-	private StructuredViewer viewer;
+	private TreeViewer viewer;
 
 	public BeansModelContentProvider() {
 		this(true);
@@ -73,8 +74,8 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 	}
 
 	public final void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (viewer instanceof StructuredViewer) {
-			this.viewer = (StructuredViewer) viewer;
+		if (viewer instanceof TreeViewer) {
+			this.viewer = (TreeViewer) viewer;
 		}
 		else {
 			this.viewer = null;
@@ -186,7 +187,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			Set<IBean> beans = ((BeanClassReferences) parentElement).getBeans();
 			return beans.toArray(new IBean[beans.size()]);
 		}
-		else if (parentElement instanceof BeanMetadataReference) {
+		 else if (parentElement instanceof BeanMetadataReference) {
 			return ((BeanMetadataReference) parentElement).getChildren();
 		}
 		return IModelElement.NO_CHILDREN;
@@ -205,7 +206,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			}
 		}
 		children.addAll(project.getConfigSets());
-		
+
 		children.addAll(BeanMetadataUtils.getProjectChildren(project));
 		return children.toArray();
 	}
@@ -276,9 +277,9 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 		else if (element instanceof BeanClassReferences) {
 			return ((BeanClassReferences) element).getBeanClass();
 		}
-		else if (element instanceof BeanMetadataReference) {
+		 else if (element instanceof BeanMetadataReference) {
 			return ((BeanMetadataReference) element).getBeansProject();
-		}
+		 }
 		return null;
 	}
 
@@ -300,7 +301,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 	}
 
 	protected final void refreshViewerForElement(final Object element) {
-		if (viewer instanceof StructuredViewer && element != null) {
+		if (viewer instanceof TreeViewer && element != null) {
 
 			// Abort if this happens after disposes
 			Control ctrl = viewer.getControl();
@@ -310,12 +311,11 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 
 			// Are we in the UI thread?
 			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-				viewer.refresh(element);
+				refreshRetainingExpansion(element);
 			}
 			else {
 				ctrl.getDisplay().asyncExec(new Runnable() {
 					public void run() {
-
 						// Abort if this happens after disposes
 						Control ctrl = viewer.getControl();
 						if (ctrl == null || ctrl.isDisposed()) {
@@ -324,17 +324,24 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 
 						// If the model changed then refresh the whole viewer
 						if (element instanceof IBeansModel) {
-							viewer.refresh();
+							refreshRetainingExpansion(element);
 						}
 						else {
-							viewer.refresh(element);
+							refreshRetainingExpansion(element);
 						}
 					}
+
 				});
 			}
 		}
 	}
 
+	private void refreshRetainingExpansion(final Object element) {
+		Object[] expandedElements = viewer.getExpandedElements();
+		viewer.refresh(element);
+		viewer.setExpandedElements(expandedElements);
+	}
+	
 	public Object[] getChildren(TreePath parentPath) {
 		if (parentPath == null) {
 			return new Object[0];

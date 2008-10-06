@@ -139,6 +139,16 @@ public class BeansConfigValidator extends AbstractValidator implements
 							resources.add(beansConfig.getElementResource());
 							affectedBeans.add(bean);
 						}
+						
+//						// Check for context:component-scan elements
+//						for (IBeansConfig config : BeansCorePlugin.getModel().getProject(resource.getProject()).getConfigs()) {
+//							for (IBeansComponent component : config.getComponents()) {
+//								if (component.getElementName().equals("context:component-scan")) {
+//									resources.add(config.getElementResource());
+//									addBeans(config);
+//								}
+//							}
+//						}
 					}
 				}
 			}
@@ -225,7 +235,6 @@ public class BeansConfigValidator extends AbstractValidator implements
 			if (resource instanceof IFile) {
 				rootElement = BeansCorePlugin.getModel().getConfig((IFile) resource);
 			}
-
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,8 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * Base {@link IValidationContext} implementation that handles creation of
- * {@link ValidationProblem}s instances.
+ * Base {@link IValidationContext} implementation that handles creation of {@link ValidationProblem}
+ * s instances.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
@@ -61,80 +61,89 @@ public abstract class AbstractValidationContext implements IValidationContext {
 	}
 
 	/**
-	 * Create {@link ValidationProblem} of severity info with the given
-	 * information.
+	 * Create {@link ValidationProblem} of severity info with the given information.
 	 * @since 2.0.2
 	 */
-	public void info(IResourceModelElement element, String problemId,
-			String message, ValidationProblemAttribute... attributes) {
-		problems.addAll(createProblems(element, problemId,
-				IValidationProblemMarker.SEVERITY_INFO, message, attributes));
+	public void info(IResourceModelElement element, String problemId, String message,
+			ValidationProblemAttribute... attributes) {
+		problems.addAll(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_INFO,
+				message, attributes));
 	}
 
 	/**
-	 * Create {@link ValidationProblem} of severity warning with the given
-	 * information.
+	 * Create {@link ValidationProblem} of severity warning with the given information.
 	 */
-	public void warning(IResourceModelElement element, String problemId,
-			String message, ValidationProblemAttribute... attributes) {
-		problems
-				.addAll(createProblems(element, problemId,
-						IValidationProblemMarker.SEVERITY_WARNING, message,
-						attributes));
+	public void warning(IResourceModelElement element, String problemId, String message,
+			ValidationProblemAttribute... attributes) {
+		problems.addAll(createProblems(element, problemId,
+				IValidationProblemMarker.SEVERITY_WARNING, message, attributes));
 	}
 
 	/**
-	 * Create {@link ValidationProblem} of severity error with the given
-	 * information.
+	 * Create {@link ValidationProblem} of severity error with the given information.
 	 */
-	public void error(IResourceModelElement element, String problemId,
-			String message, ValidationProblemAttribute... attributes) {
-		problems.addAll(createProblems(element, problemId,
-				IValidationProblemMarker.SEVERITY_ERROR, message, attributes));
+	public void error(IResourceModelElement element, String problemId, String message,
+			ValidationProblemAttribute... attributes) {
+		problems.addAll(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_ERROR,
+				message, attributes));
 	}
 
 	/**
 	 * Create {@link ValidationProblem}s for the given information.
 	 * <p>
-	 * Subclasses may override this method to change the creation of validation
-	 * problems, e.g. to automatically create markers on other resources for
-	 * certain error types.
+	 * Subclasses may override this method to change the creation of validation problems, e.g. to
+	 * automatically create markers on other resources for certain error types.
 	 * @since 2.0.3
 	 */
-	protected Set<ValidationProblem> createProblems(
-			IResourceModelElement element, String problemId, int severity,
-			String message, ValidationProblemAttribute... attributes) {
-		Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>(
-				2);
-		problems.add(createProblem(element, problemId, severity, message,
-				attributes));
+	protected Set<ValidationProblem> createProblems(IResourceModelElement element,
+			String problemId, int severity, String message,
+			ValidationProblemAttribute... attributes) {
+		Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>(2);
+		problems.add(createProblem(element, problemId, severity, message, attributes));
 		return problems;
 	}
 
 	/**
-	 * Create a single root {@link ValidationProblem} from the provided
-	 * information.
+	 * Create a single root {@link ValidationProblem} from the provided information.
 	 */
-	protected final ValidationProblem createProblem(
-			IResourceModelElement element, String problemId, int severity,
-			String message, ValidationProblemAttribute... attributes) {
-		int line = (element instanceof ISourceModelElement ? ((ISourceModelElement) element)
-				.getElementStartLine()
-				: -1);
+	protected final ValidationProblem createProblem(IResourceModelElement element,
+			String problemId, int severity, String message,
+			ValidationProblemAttribute... attributes) {
+
+		// Get the line number from the element
+		int line = getLineNumber(element);
 
 		// Add the element Id to the list of problem attributes
 		String elementId = element.getElementID();
 		List<ValidationProblemAttribute> attributeList = new ArrayList<ValidationProblemAttribute>(
 				Arrays.asList(attributes));
-		attributeList.add(new ValidationProblemAttribute(
-				MarkerUtils.ELEMENT_ID_KEY, elementId));
+		attributeList.add(new ValidationProblemAttribute(MarkerUtils.ELEMENT_ID_KEY, elementId));
 
-		return new ValidationProblem(currentRuleId, problemId, severity,
-				message, element.getElementResource(), line, attributeList
-						.toArray(new ValidationProblemAttribute[attributeList
-								.size()]));
+		return new ValidationProblem(currentRuleId, problemId, severity, message, element
+				.getElementResource(), line, attributeList
+				.toArray(new ValidationProblemAttribute[attributeList.size()]));
 	}
 
+	/**
+	 * Retrieve the line number from the given <code>element</code>. 
+	 */
+	protected int getLineNumber(IResourceModelElement element) {
+		int line = (element instanceof ISourceModelElement ? ((ISourceModelElement) element)
+				.getElementStartLine() : -1);
+		
+		// If the current element does not provide a valid line number iterate up the parent
+		// hierarchy
+		if (line == -1 && element.getElementParent() != null
+				&& element.getElementParent() instanceof IResourceModelElement) {
+			return getLineNumber((IResourceModelElement) element.getElementParent());
+		}
+
+		return line;
+	}
+	
+	/**
+	 * Add the given problems to the internal storage. 
+	 */
 	protected void addProblems(Set<ValidationProblem> problems) {
 		problems.addAll(problems);
 	}

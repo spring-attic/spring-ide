@@ -46,8 +46,8 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * This class is a content provider for the {@link CommonNavigator} which knows
- * about the beans core model's {@link IModelElement} elements.
+ * This class is a content provider for the {@link CommonNavigator} which knows about the beans core
+ * model's {@link IModelElement} elements.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -163,9 +163,9 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 	}
 
 	@Override
-	public void elementChanged(ModelChangeEvent event) {
+	public synchronized void elementChanged(ModelChangeEvent event) {
+		
 		IModelElement element = event.getElement();
-
 		if (element instanceof IBeansProject) {
 			IProject project = ((IBeansProject) element).getProject();
 			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
@@ -181,7 +181,6 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 		}
 		else if (element instanceof IBeansConfig) {
 			IBeansConfig config = (IBeansConfig) element;
-			refreshViewerForElement(config.getElementResource());
 
 			// For a changed Spring beans config in the Eclipse Project Explorer
 			// refresh all corresponding bean classes
@@ -189,7 +188,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 				refreshBeanClasses(config);
 			}
 
-			// In order to refresh the meta data contributeions we need refresh
+			// In order to refresh the meta data contributions we need refresh
 			// the entire project
 			refreshViewerForElement(config.getElementParent());
 		}
@@ -227,8 +226,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 	}
 
 	/**
-	 * Internal {@link Job} that handles loading of {@link IBeansConfig} as
-	 * Eclipse progress
+	 * Internal {@link Job} that handles loading of {@link IBeansConfig} as Eclipse progress
 	 */
 	private static class ModelJob extends Job {
 
@@ -239,7 +237,6 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 		private final Object parent;
 
 		private final BeansNavigatorContentProvider contentProvider;
-
 
 		public ModelJob(Object config, Object parent, BeansNavigatorContentProvider contentProvider) {
 			super("Loading model content");
@@ -304,5 +301,5 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 			return MODEL_CONTENT_FAMILY == family;
 		}
 	}
-
+	
 }

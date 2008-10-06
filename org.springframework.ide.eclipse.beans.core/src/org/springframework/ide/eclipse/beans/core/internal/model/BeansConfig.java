@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,7 +58,7 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
@@ -87,6 +88,7 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+import org.springframework.util.ClassUtils;
 import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
@@ -103,8 +105,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 	/** Regular expressions to that must be ignored and not reported to the user */
 	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays.asList(new Pattern[] {
-		Pattern	.compile("Failed to import bean definitions from relative location \\[\\$\\{(.*)\\}\\]"),
-		Pattern.compile("Failed to import bean definitions from URL location \\[\\$\\{(.*)\\}\\]") });
+		Pattern.compile("Failed to import bean definitions from relative location \\[(.*)\\]"),
+		Pattern.compile("Failed to import bean definitions from URL location \\[(.*)\\]") });
 
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
@@ -146,7 +148,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * file.
 	 */
 	public void reload() {
-		if (file != null && super.resourceChanged()) {
+		if (file != null) {
 			try {
 				w.lock();
 				isModelPopulated = false;
@@ -227,12 +229,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			// as it could otherwise create a runtime deadlock
 			ResourceLoader resourceLoader = null;
 			if (((IBeansProject) getElementParent()).isImportsEnabled()) {
-				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file
-						.getProject());
+				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject());
 			}
 			else {
-				resourceLoader = new PathMatchingResourcePatternResolver(JdtUtils
-						.getClassLoader(getElementResource()));
+				resourceLoader = new NoOpResourcePatternResolver(file.getProject());
 			}
 
 			try {
@@ -334,7 +334,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 						// Skip SAXParseExceptions because they're already
 						// handled by the SAX ErrorHandler
-						if (!(e.getCause() instanceof SAXParseException) 
+						if (!(e.getCause() instanceof SAXParseException)
 								&& !(e instanceof BeanDefinitionParsingException)) {
 							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e
 									.getMessage(), file, -1));
@@ -532,7 +532,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			this.defaultDefinitionsCache = new HashMap<Resource, DocumentDefaultsDefinition>();
 			this.sourceExtractor = sourceExtractor;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -546,7 +546,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				}
 			}
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -579,7 +579,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		 */
 		public void componentRegistered(ComponentDefinition componentDefinition) {
 			Object source = componentDefinition.getSource();
-			
+
 			// make sure nested BeanDefinitions have all the source extraction applied
 			addSourceToNestedBeanDefinitions(componentDefinition);
 
@@ -602,8 +602,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		private void addSourceToNestedBeanDefinitions(ComponentDefinition componentDefinition) {
 			if (componentDefinition instanceof CompositeComponentDefinition) {
-				CompositeComponentDefinition compositeComponentDefinition = 
-					(CompositeComponentDefinition) componentDefinition;
+				CompositeComponentDefinition compositeComponentDefinition = (CompositeComponentDefinition) componentDefinition;
 				for (ComponentDefinition nestedComponentDefinition : compositeComponentDefinition
 						.getNestedComponents()) {
 					for (BeanDefinition beanDefinition : nestedComponentDefinition
@@ -734,6 +733,31 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				}
 			}
 		}
+	}
+
+	private final class NoOpResourcePatternResolver extends
+			EclipsePathMatchingResourcePatternResolver implements ResourcePatternResolver {
+
+		public NoOpResourcePatternResolver(IProject project) {
+			super(project);
+		}
+
+		@Override
+		public Resource getResource(String location) {
+			if (location.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
+				return super.getResource(location);
+			}
+			return null;
+		}
+
+		@Override
+		public Resource[] getResources(String locationPattern) throws IOException {
+			if (locationPattern.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
+				return super.getResources(locationPattern);
+			}
+			return new Resource[0];
+		}
+
 	}
 
 }

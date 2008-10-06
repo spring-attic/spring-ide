@@ -21,7 +21,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.util.ObjectUtils;
 
 /**
  * This class holds the data of a Spring {@link ComponentDefinition} defined via
@@ -79,20 +78,12 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		if (!(other instanceof BeansComponent)) {
 			return false;
 		}
-		BeansComponent that = (BeansComponent) other;
-		if (!ObjectUtils.nullSafeEquals(this.beans, that.beans))
-			return false;
-		if (!ObjectUtils.nullSafeEquals(this.components, that.components))
-			return false;
 		return super.equals(other);
 	}
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(beans);
-		hashCode = getElementType() * hashCode
-				+ ObjectUtils.nullSafeHashCode(components);
-		return getElementType() * hashCode + super.hashCode();
+		return getElementType() * super.hashCode();
 	}
 
 	@Override

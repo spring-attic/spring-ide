@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -22,6 +23,7 @@ import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocato
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * Implementation of {@link IResourceChangeListener} which detects modifications to Spring projects
@@ -71,6 +73,16 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				else if (isAutoDetectedConfig(file)) {
 					events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
 				}
+				else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
+					IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
+					if (project != null) {
+						for (IBeansConfig config : project.getConfigs()) {
+							if (config.getElementResource() instanceof IFile) {
+								events.configChanged((IFile) config.getElementResource(), eventType);
+							}
+						}
+					}
+				}
 				return false;
 			}
 			return super.resourceAdded(resource);
@@ -94,6 +106,16 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					}
 					else if (requiresRefresh(file)) {
 						events.listenedFileChanged(file, eventType);
+					}
+					else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
+						IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
+						if (project != null) {
+							for (IBeansConfig config : project.getConfigs()) {
+								if (config.getElementResource() instanceof IFile) {
+									events.configChanged((IFile) config.getElementResource(), eventType);
+								}
+							}
+						}
 					}
 				}
 				return false;
