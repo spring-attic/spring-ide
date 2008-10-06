@@ -33,8 +33,11 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
@@ -203,13 +206,24 @@ public class AspectDefinitionMatcher {
 
 	private Set<IMethod> internalMatches(final Class<?> targetClass, final IBean targetBean,
 			final IAspectDefinition info, final IProject project) throws Throwable {
-		final Set<IMethod> matchingMethods = new HashSet<IMethod>();
 
 		// check if bean is an infrastructure class
 		if (isInfrastructureClass(targetClass)) {
-			return matchingMethods;
+			return Collections.emptySet();
 		}
-
+		
+		// check if bean is synthetic as this would mean that the BeanPostProcessor would not load
+		BeanDefinition beanDefinition = BeansModelUtils.getMergedBeanDefinition(targetBean, null);
+		if (beanDefinition instanceof RootBeanDefinition && ((RootBeanDefinition) beanDefinition).isSynthetic()) {
+			return Collections.emptySet();
+		}
+		
+		// check if pointcut expression has been set
+		if (info.getPointcutExpression() == null) {
+			return Collections.emptySet();
+		}
+		
+		final Set<IMethod> matchingMethods = new HashSet<IMethod>();
 		final Object aspectJExpressionPointcut = createAspectJPointcutExpression(info);
 
 		if (!((Boolean) ClassUtils.invokeMethod(aspectJExpressionPointcut, "matches", targetClass))) {

@@ -84,6 +84,8 @@ public class AopReferenceModelBuilderJob extends Job {
 	// private Set<IResource> originalResources;
 
 	private IProjectClassLoaderSupport classLoaderSupport;
+	
+	private MarkerModifyingJob markerJob = null;
 
 	/**
 	 * Constructor to create a {@link AopReferenceModelBuilderJob} instance.
@@ -111,10 +113,12 @@ public class AopReferenceModelBuilderJob extends Job {
 		AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 				"AopReferenceModelBuilder.startBuildReferenceModel", affectedResources.size()));
 
-		MarkerModifyingJob markerJob = new MarkerModifyingJob();
+		markerJob = new MarkerModifyingJob();
 		monitor.beginTask(Activator
 				.getFormattedMessage("AopReferenceModelBuilder.startBuildingAopReferenceModel"),
 				affectedResources.size());
+		 
+		Map<IResource, IAopProject> processedProjects = new HashMap<IResource, IAopProject>(); 
 		try {
 			for (IResource currentResource : affectedResources) {
 				if (currentResource instanceof IFile) {
@@ -137,8 +141,7 @@ public class AopReferenceModelBuilderJob extends Job {
 						.getFormattedMessage("AopReferenceModelBuilder.constructedAopReferenceModel"));
 
 					if (aopProject != null) {
-						Set<IAopReference> references = aopProject.getAllReferences();
-						markerJob.addAopReference(currentResource, references);
+						processedProjects.put(currentFile, aopProject);
 					}
 
 					monitor.worked(1);
@@ -148,6 +151,12 @@ public class AopReferenceModelBuilderJob extends Job {
 
 				}
 			}
+			
+			for (Map.Entry<IResource, IAopProject> entry : processedProjects.entrySet()) {
+				Set<IAopReference> references = entry.getValue().getAllReferences();
+				markerJob.addAopReference(entry.getKey(), references);
+			}
+			
 			AopLog.logEnd(AopLog.BUILDER, PROCESSING_TOOK_MSG);
 			// update images and text decorations
 			Activator.getModel().fireModelChanged();
@@ -261,7 +270,7 @@ public class AopReferenceModelBuilderJob extends Job {
 					});
 		}
 		catch (Throwable t) {
-			handleException(t, info, bean, file);
+			markerJob.addThrowableHolder(new ThrowableHolder(t, file, bean, info));
 		}
 	}
 
@@ -401,54 +410,6 @@ public class AopReferenceModelBuilderJob extends Job {
 	}
 
 	/**
-	 * Handles any exception that might come up during parsing and matching of
-	 * pointcuts.
-	 */
-	private void handleException(Throwable t, IAspectDefinition info, IBean bean, IResource file) {
-		if (t instanceof NoClassDefFoundError || t instanceof ClassNotFoundException) {
-			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.classDependencyError", t.getMessage(), info, bean));
-			AopReferenceModelMarkerUtils.createProblemMarker(file, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.buildPathIncomplete", t.getMessage()),
-					IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
-		}
-		else if (t instanceof IllegalArgumentException) {
-			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.pointcutIsMalformedOnBean", info, bean));
-			AopReferenceModelMarkerUtils.createProblemMarker(info.getResource(), Activator
-					.getFormattedMessage("AopReferenceModelBuilder.pointcutIsMalformed", t
-							.getMessage()), IMarker.SEVERITY_ERROR,
-					info.getAspectStartLineNumber(),
-					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, info.getResource());
-		}
-		else if (t instanceof InvocationTargetException || t instanceof RuntimeException) {
-			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.exceptionFromReflectionOnBean", info, bean));
-			if (t.getCause() != null) {
-				handleException(t.getCause(), info, bean, file);
-			}
-			else {
-				Activator.log(t);
-				AopReferenceModelMarkerUtils.createProblemMarker(file, Activator
-						.getFormattedMessage("AopReferenceModelBuilder.exceptionFromReflection", t
-								.getMessage()), IMarker.SEVERITY_WARNING, info
-						.getAspectStartLineNumber(),
-						AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
-			}
-		}
-		else {
-			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.exception", t.getMessage(), info, bean));
-			Activator.log(t);
-			AopReferenceModelMarkerUtils.createProblemMarker(file, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.exception", t.getMessage()),
-					IMarker.SEVERITY_WARNING, info.getAspectStartLineNumber(),
-					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
-		}
-	}
-
-	/**
 	 * Implementation for {@link IWorkspaceRunnable#run(IProgressMonitor)}
 	 * method that triggers the building of the aop reference model.
 	 */
@@ -514,6 +475,8 @@ public class AopReferenceModelBuilderJob extends Job {
 		private Map<IResource, List<IAopReference>> references = new HashMap<IResource, List<IAopReference>>();
 
 		private Set<IResource> resources = new HashSet<IResource>();
+		
+		private Set<ThrowableHolder> throwables = new HashSet<ThrowableHolder>();
 
 		public MarkerModifyingJob() {
 			super("Creating AOP reference model markers");
@@ -535,8 +498,7 @@ public class AopReferenceModelBuilderJob extends Job {
 					AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
 							"AopReferenceModelBuilder.deletedProblemMarkers", currentFile
 									.getFullPath().toString()));
-					// could be that no references have been recorded as the
-					// problem during pc matching
+					// could be that no references have been recorded as the problem during pc matching
 					// occurred
 					if (references.containsKey(currentFile) && references.get(currentFile) != null) {
 						for (IAopReference reference : references.get(currentFile)) {
@@ -550,6 +512,11 @@ public class AopReferenceModelBuilderJob extends Job {
 										.getFullPath().toString()));
 					}
 				}
+				// adding markers for exceptions that occurred during parsing
+				for (ThrowableHolder holder : throwables) {
+					handleException(holder.getThrowable(), holder.getAspectDefinition(), holder
+							.getBean(), holder.getResource());
+				}
 				monitor.done();
 				return Status.OK_STATUS;
 			}
@@ -557,6 +524,10 @@ public class AopReferenceModelBuilderJob extends Job {
 				Activator.log(e);
 				return Status.CANCEL_STATUS;
 			}
+		}
+
+		public void addThrowableHolder(ThrowableHolder throwableHolder) {
+			throwables.add(throwableHolder);
 		}
 
 		public void addResource(IResource resource) {
@@ -567,6 +538,56 @@ public class AopReferenceModelBuilderJob extends Job {
 			// create new list to prevent concurrent modification problems
 			this.references.put(resource, new ArrayList<IAopReference>(references));
 		}
+		
+		/**
+		 * Handles any exception that might come up during parsing and matching of
+		 * pointcuts.
+		 */
+		private void handleException(Throwable t, IAspectDefinition info, IBean bean, IResource file) {
+			if (t instanceof NoClassDefFoundError || t instanceof ClassNotFoundException) {
+				AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.classDependencyError", t.getMessage(), info, bean));
+				AopReferenceModelMarkerUtils.createProblemMarker(file, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.buildPathIncomplete", t.getMessage()),
+						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+			}
+			else if (t instanceof IllegalArgumentException) {
+				AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.pointcutIsMalformedOnBean", info, bean));
+				AopReferenceModelMarkerUtils.createProblemMarker(info.getResource(), Activator
+						.getFormattedMessage("AopReferenceModelBuilder.pointcutIsMalformed", t
+								.getMessage()), IMarker.SEVERITY_ERROR,
+						info.getAspectStartLineNumber(),
+						AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, info.getResource());
+			}
+			else if (t instanceof InvocationTargetException || t instanceof RuntimeException) {
+				AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.exceptionFromReflectionOnBean", info, bean));
+				if (t.getCause() != null) {
+					handleException(t.getCause(), info, bean, file);
+				}
+				else {
+					Activator.log(t);
+					AopReferenceModelMarkerUtils.createProblemMarker(file, Activator
+							.getFormattedMessage("AopReferenceModelBuilder.exceptionFromReflection", t
+									.getMessage()), IMarker.SEVERITY_WARNING, info
+							.getAspectStartLineNumber(),
+							AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+				}
+			}
+			else {
+				AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.exception", t.getMessage(), info, bean));
+				Activator.log(t);
+				AopReferenceModelMarkerUtils.createProblemMarker(file, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.exception", t.getMessage()),
+						IMarker.SEVERITY_WARNING, info.getAspectStartLineNumber(),
+						AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+			}
+		}
+
+
 	}
 
 	/**
@@ -593,6 +614,41 @@ public class AopReferenceModelBuilderJob extends Job {
 		public boolean isConflicting(ISchedulingRule rule) {
 			return rule instanceof BlockingOnSelfSchedulingRule;
 		}
+	}
+	
+	private class ThrowableHolder {
+		private Throwable throwable;
+
+		private IResource resource;
+
+		private IBean bean;
+
+		private IAspectDefinition aspectDefinition;
+
+		public ThrowableHolder(Throwable throwable, IResource resource, IBean bean,
+				IAspectDefinition aspectDefinition) {
+			this.throwable = throwable;
+			this.resource = resource;
+			this.bean = bean;
+			this.aspectDefinition = aspectDefinition;
+		}
+
+		public Throwable getThrowable() {
+			return throwable;
+		}
+
+		public IResource getResource() {
+			return resource;
+		}
+
+		public IBean getBean() {
+			return bean;
+		}
+
+		public IAspectDefinition getAspectDefinition() {
+			return aspectDefinition;
+		}
+
 	}
 
 }
