@@ -36,16 +36,17 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This class gathers common functionality for core model components
- * representing a single instance of xml configuration file.
+ * This class gathers common functionality for core model components representing a single instance
+ * of xml configuration file.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public abstract class AbstractBeansConfig extends AbstractResourceModelElement
-		implements IBeansConfig {
+public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements
+		IBeansConfig {
 
 	/** This bean's config file */
 	protected IFile file;
@@ -70,12 +71,11 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 	/** List of bean names mapped beans (in registration order) */
 	protected volatile Map<String, IBean> beans;
-	
+
 	protected volatile Type type;
 
 	/**
-	 * List of bean class names mapped to list of beans implementing the
-	 * corresponding class
+	 * List of bean class names mapped to list of beans implementing the corresponding class
 	 */
 	protected volatile Map<String, Set<IBean>> beanClassesMap;
 
@@ -180,8 +180,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 		try {
 			r.lock();
 			for (IBeansImport beanImport : imports) {
-				for (IImportedBeansConfig importedConfig : beanImport
-						.getImportedBeansConfigs()) {
+				for (IImportedBeansConfig importedConfig : beanImport.getImportedBeansConfigs()) {
 					if (importedConfig.resourceChanged()) {
 						return true;
 					}
@@ -205,25 +204,23 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 		AbstractBeansConfig that = (AbstractBeansConfig) other;
 		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
 			return false;
-		if (this.defaults != null && that.defaults != null
-				&& this.defaults != that.defaults) {
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(),
-					that.defaults.getLazyInit()))
+		if (this.defaults != null && that.defaults != null && this.defaults != that.defaults) {
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(), that.defaults
+					.getLazyInit()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(),
-					that.defaults.getAutowire()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(), that.defaults
+					.getAutowire()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(),
-					that.defaults.getDependencyCheck()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(), that.defaults
+					.getDependencyCheck()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(),
-					that.defaults.getInitMethod()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(), that.defaults
+					.getInitMethod()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(),
-					that.defaults.getDestroyMethod()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(), that.defaults
+					.getDestroyMethod()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(),
-					that.defaults.getMerge()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(), that.defaults.getMerge()))
 				return false;
 		}
 		return super.equals(other);
@@ -239,8 +236,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 				}
 
 				for (IBeansImport beansImport : imports) {
-					for (IBeansConfig bc : beansImport
-							.getImportedBeansConfigs()) {
+					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
 						alias = bc.getAlias(name);
 						if (alias != null) {
 							return alias;
@@ -261,15 +257,13 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 		try {
 			r.lock();
-			Set<IBeanAlias> allAliases = new LinkedHashSet<IBeanAlias>(aliases
-					.values());
+			Set<IBeanAlias> allAliases = new LinkedHashSet<IBeanAlias>(aliases.values());
 			for (IBeansImport beansImport : imports) {
 				for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
 					allAliases.addAll(bc.getAliases());
 				}
 			}
-			return Collections.unmodifiableSet(new LinkedHashSet<IBeanAlias>(
-					allAliases));
+			return Collections.unmodifiableSet(new LinkedHashSet<IBeanAlias>(allAliases));
 		}
 		finally {
 			r.unlock();
@@ -289,8 +283,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 				}
 
 				for (IBeansImport beansImport : imports) {
-					for (IBeansConfig bc : beansImport
-							.getImportedBeansConfigs()) {
+					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
 						bean = bc.getBean(name);
 						if (bean != null) {
 							return bean;
@@ -306,8 +299,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 	}
 
 	public Set<String> getBeanClasses() {
-		return Collections.unmodifiableSet(new LinkedHashSet<String>(
-				getBeanClassesMap().keySet()));
+		return Collections.unmodifiableSet(new LinkedHashSet<String>(getBeanClassesMap().keySet()));
 	}
 
 	/**
@@ -328,8 +320,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 					addBeanClasses(bean, beanClassesMap);
 				}
 				for (IBeansImport beansImport : imports) {
-					for (IBeansConfig bc : beansImport
-							.getImportedBeansConfigs()) {
+					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
 						for (IBeansComponent component : bc.getComponents()) {
 							addComponentBeanClasses(component, beanClassesMap);
 						}
@@ -361,8 +352,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 				}
 			}
 
-			return Collections.unmodifiableSet(new LinkedHashSet<IBean>(
-					allBeans));
+			return Collections.unmodifiableSet(new LinkedHashSet<IBean>(allBeans));
 		}
 		finally {
 			r.unlock();
@@ -371,8 +361,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 	public Set<IBean> getBeans(String className) {
 		if (isBeanClass(className)) {
-			return Collections.unmodifiableSet(getBeanClassesMap().get(
-					className));
+			return Collections.unmodifiableSet(getBeanClassesMap().get(className));
 		}
 		return new HashSet<IBean>();
 	}
@@ -383,17 +372,14 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 		try {
 			r.lock();
-			Set<IBeansComponent> allComponents = new LinkedHashSet<IBeansComponent>(
-					components);
+			Set<IBeansComponent> allComponents = new LinkedHashSet<IBeansComponent>(components);
 			for (IBeansImport beansImport : imports) {
 				for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
 					allComponents.addAll(bc.getComponents());
 				}
 			}
 
-			return Collections
-					.unmodifiableSet(new LinkedHashSet<IBeansComponent>(
-							allComponents));
+			return Collections.unmodifiableSet(new LinkedHashSet<IBeansComponent>(allComponents));
 		}
 		finally {
 			r.unlock();
@@ -406,8 +392,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 		try {
 			r.lock();
-			return (defaults != null ? defaults.getAutowire()
-					: DEFAULT_AUTO_WIRE);
+			return (defaults != null ? defaults.getAutowire() : DEFAULT_AUTO_WIRE);
 		}
 		finally {
 			r.unlock();
@@ -420,8 +405,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 		try {
 			r.lock();
-			return (defaults != null ? defaults.getDependencyCheck()
-					: DEFAULT_DEPENDENCY_CHECK);
+			return (defaults != null ? defaults.getDependencyCheck() : DEFAULT_DEPENDENCY_CHECK);
 		}
 		finally {
 			r.unlock();
@@ -435,8 +419,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 		try {
 			r.lock();
 			return (defaults != null && defaults.getDestroyMethod() != null ? defaults
-					.getDestroyMethod()
-					: DEFAULT_DESTROY_METHOD);
+					.getDestroyMethod() : DEFAULT_DESTROY_METHOD);
 		}
 		finally {
 			r.unlock();
@@ -449,8 +432,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 		try {
 			r.lock();
-			return (defaults != null && defaults.getInitMethod() != null ? defaults
-					.getInitMethod()
+			return (defaults != null && defaults.getInitMethod() != null ? defaults.getInitMethod()
 					: DEFAULT_INIT_METHOD);
 		}
 		finally {
@@ -464,8 +446,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 
 		try {
 			r.lock();
-			return (defaults != null ? defaults.getLazyInit()
-					: DEFAULT_LAZY_INIT);
+			return (defaults != null ? defaults.getLazyInit() : DEFAULT_LAZY_INIT);
 		}
 		finally {
 			r.unlock();
@@ -481,8 +462,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 			// This default value was introduced with Spring 2.0 -> so we have
 			// to check for an empty string here as well
 			return (defaults != null && defaults.getMerge() != null
-					&& defaults.getMerge().length() > 0 ? defaults.getMerge()
-					: DEFAULT_MERGE);
+					&& defaults.getMerge().length() > 0 ? defaults.getMerge() : DEFAULT_MERGE);
 		}
 		finally {
 			r.unlock();
@@ -545,8 +525,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 				}
 
 				for (IBeansImport beansImport : imports) {
-					for (IBeansConfig bc : beansImport
-							.getImportedBeansConfigs()) {
+					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
 						bean = bc.getBean(name);
 						if (bean != null) {
 							return true;
@@ -571,10 +550,8 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
 			hashCode = getElementType() * hashCode
 					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
-			hashCode = getElementType()
-					* hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults
-							.getDependencyCheck());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getDependencyCheck());
 			hashCode = getElementType() * hashCode
 					+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
 			hashCode = getElementType() * hashCode
@@ -599,17 +576,31 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement
 	protected abstract void readConfig();
 
 	public boolean resourceChanged() {
-		return modificationTimestamp < file.getModificationStamp()
-				|| changedImportedBeansConfig();
+		return modificationTimestamp < file.getModificationStamp() || changedImportedBeansConfig();
 	}
 
 	@Override
 	public String toString() {
 		return getElementName() + ": " + getBeans();
 	}
-	
+
 	public Type getType() {
 		return type;
+	}
+
+	public boolean configAffectedByJavaChange(IResource resource) {
+		for (IBeansComponent component : getComponents()) {
+			if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
+				XmlSourceLocation location = (XmlSourceLocation) component
+						.getElementSourceLocation();
+				if ("component-scan".equals(location.getLocalName())
+						&& "http://www.springframework.org/schema/context".equals(location
+								.getNamespaceURI())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

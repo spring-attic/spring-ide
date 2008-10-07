@@ -58,6 +58,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			super(eventType);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		protected boolean resourceAdded(IResource resource) {
 			if (resource instanceof IFile) {
@@ -74,20 +77,16 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
 				}
 				else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
-					IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
-					if (project != null) {
-						for (IBeansConfig config : project.getConfigs()) {
-							if (config.getElementResource() instanceof IFile) {
-								events.configChanged((IFile) config.getElementResource(), eventType);
-							}
-						}
-					}
+					configsChangedForProject(resource);
 				}
 				return false;
 			}
 			return super.resourceAdded(resource);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		protected boolean resourceChanged(IResource resource, int flags) {
 			if (resource instanceof IFile) {
@@ -108,14 +107,7 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 						events.listenedFileChanged(file, eventType);
 					}
 					else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
-						IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
-						if (project != null) {
-							for (IBeansConfig config : project.getConfigs()) {
-								if (config.getElementResource() instanceof IFile) {
-									events.configChanged((IFile) config.getElementResource(), eventType);
-								}
-							}
-						}
+						configsChangedForProject(resource);
 					}
 				}
 				return false;
@@ -123,6 +115,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			return super.resourceChanged(resource, flags);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		protected boolean resourceRemoved(IResource resource) {
 			if (resource instanceof IFile) {
@@ -137,6 +132,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			return super.resourceRemoved(resource);
 		}
 
+		/**
+		 * Checks if the given <code>resource</code> represents a .springBeans project description.
+		 */
 		private boolean isProjectDescriptionFile(IResource resource) {
 			return resource != null
 					&& resource.isAccessible()
@@ -146,6 +144,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 							.isManifest(resource));
 		}
 
+		/**
+		 * Checks if the given <code>file</code> is an auto detected {@link IBeansConfig}.
+		 */
 		private boolean isAutoDetectedConfig(IFile file) {
 			for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory
 					.getBeansConfigLocatorDefinitions()) {
@@ -164,6 +165,12 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			return false;
 		}
 
+		/**
+		 * Checks if a given <code>file</code> requires a refresh of the auto detected
+		 * {@link IBeansConfig}s.
+		 * <p>
+		 * This is checked by asking every contributed {@link BeansConfigLocatorDefinition}.
+		 */
 		private boolean requiresRefresh(IFile file) {
 			for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory
 					.getBeansConfigLocatorDefinitions()) {
@@ -180,6 +187,23 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			}
 			return false;
 		}
+
+		/**
+		 * Marks every {@link IBeansConfig} in the project to which the given <code>resource</code>
+		 * belongs as changed.
+		 */
+		private void configsChangedForProject(IResource resource) {
+			IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
+			if (project != null) {
+				for (IBeansConfig config : project.getConfigs()) {
+					// Check if a config is affected by a change to the java model
+					if (config.configAffectedByJavaChange(resource) && config.getElementResource() instanceof IFile) {
+						events.configChanged((IFile) config.getElementResource(), eventType);
+					}
+				}
+			}
+		}
+
 	}
-	
+
 }

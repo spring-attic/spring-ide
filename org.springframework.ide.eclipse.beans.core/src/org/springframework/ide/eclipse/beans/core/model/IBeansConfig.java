@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -67,7 +68,7 @@ public interface IBeansConfig extends IBeansModelElement, IResourceModelElement,
 	boolean hasBean(String name);
 
 	/**
-	 * Returns true if the underlying resource has been changed
+	 * Returns <code>true</code> if the underlying resource has been changed
 	 * @since 2.0.3
 	 */
 	boolean resourceChanged();
@@ -77,4 +78,14 @@ public interface IBeansConfig extends IBeansModelElement, IResourceModelElement,
 	 * @since 2.0.5
 	 */
 	Type getType();
+
+	/**
+	 * Returns <code>true</code> if the beans structure model is affected by the change to java
+	 * model.
+	 * <p>
+	 * NOTE: this method does not check if the beans structure model needs re-validation; only of the
+	 * model elements changed. E.g. because of using the context:compontent-scan functionality. 
+	 * @since 2.2.1
+	 */
+	boolean configAffectedByJavaChange(IResource resource);
 }
