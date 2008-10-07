@@ -1,5 +1,4 @@
-/*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ /*******************************************************************************
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,25 +117,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			w.unlock();
 		}
 
-		// Trigger Job to initialize model
-		// initializeModel();
-
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new BeansResourceChangeListener(new ResourceChangeEventHandler());
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
 	}
-
-	/*
-	 * private void initializeModel() { Job job = new Job("Initializing Spring Model") {
-	 * 
-	 * @Override protected IStatus run(IProgressMonitor monitor) { SubProgressMonitor subMonitor =
-	 * new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN); TrueModelElementVisitor visitor =
-	 * new TrueModelElementVisitor(); accept(visitor, subMonitor); subMonitor.done(); return
-	 * Status.OK_STATUS; } }; job.setSystem(true); job.setPriority(Job.SHORT); // process asap
-	 * job.schedule(); }
-	 */
 
 	protected void addProject(IBeansProject project) {
 		projects.put(project.getProject(), project);
@@ -354,6 +340,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					w.unlock();
 				}
 				notifyListeners(proj, Type.CHANGED);
+
+				// Nature added -> run builder and validations on this event
+				SpringCoreUtils.buildProject(project);
 			}
 		}
 
