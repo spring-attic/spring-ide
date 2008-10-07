@@ -123,6 +123,7 @@ public class BeansNavigatorLinkHelper implements ILinkHelper, ILinkHelperExtensi
 			if (modelElement != null) {
 				return new TreeSelection(BeansUIUtils.createTreePath(modelElement));
 			}
+			return new StructuredSelection(resource);
 		}
 
 		return null;
