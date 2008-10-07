@@ -199,7 +199,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 
 						// Decorate Java class file
 						IType javaType = ((IClassFile) element).getType();
-						if (BeansModelUtils.isBeanClass(javaType.getFullyQualifiedName())) {
+						if (BeansModelUtils.isBeanClass(javaType)) {
 							decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 						}
 					}
@@ -207,7 +207,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 
 						// Decorate Java source file
 						for (IType javaType : ((ICompilationUnit) element).getTypes()) {
-							if (BeansModelUtils.isBeanClass(javaType.getFullyQualifiedName())) {
+							if (BeansModelUtils.isBeanClass(javaType)) {
 								decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 								break;
 							}

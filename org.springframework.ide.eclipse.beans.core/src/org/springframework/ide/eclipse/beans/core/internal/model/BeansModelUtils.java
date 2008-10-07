@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -806,11 +807,32 @@ public abstract class BeansModelUtils {
 	 * Checks if a given <code>className</code> is used as a bean class. The check iterates the
 	 * complete {@link IBeansModel} and not "only" the current {@link IBeansProject}.
 	 * @param className
-	 * @return
 	 */
 	public static boolean isBeanClass(String className) {
 		Set<IBeansConfig> beans = BeansCorePlugin.getModel().getConfigs(className);
 		return beans != null && beans.size() > 0;
+	}
+	
+	/**
+	 * Checks if a given <code>type</code> is used as a bean class. The check iterates the
+	 * complete {@link IBeansModel} and not "only" the current {@link IBeansProject}.
+	 * <p>
+	 * The implementation checks if the given <code>type</code> is on the project's classpath. 
+	 * @param type
+	 * @since 2.2.1
+	 */
+	public static boolean isBeanClass(IType type) {
+		for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
+			IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
+			if (javaProject != null && javaProject.isOnClasspath(type)) {
+				for (IBeansConfig config : project.getConfigs()) {
+					if (config.isBeanClass(type.getFullyQualifiedName())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public static boolean isInnerBean(IBean bean) {
@@ -1393,7 +1415,8 @@ public abstract class BeansModelUtils {
 											// we can't determine the beans type so don't be
 											// cleverer as we can and let it be processed again
 
-											// One last check before adding too much that is not even 
+											// One last check before adding too much that is not
+											// even
 											// on the resource's classpath
 											if (JdtUtils.getJavaProject(project.getProject())
 													.isOnClasspath(resource)) {
@@ -1463,8 +1486,9 @@ public abstract class BeansModelUtils {
 
 	/**
 	 * Extracts the {@link IType} of a {@link BeanDefinition} by only looking at the <code>
-	 * factory-method</code>. The passed in {@link IType} <b>must</b> be the bean class or the
-	 * resolved type of the factory bean in use.
+	 * factory-method</code>
+	 * . The passed in {@link IType} <b>must</b> be the bean class or the resolved type of the
+	 * factory bean in use.
 	 */
 	private static IType extractTypeFromFactoryMethod(BeanDefinition bd, IType type) {
 		String factoryMethod = bd.getFactoryMethodName();
