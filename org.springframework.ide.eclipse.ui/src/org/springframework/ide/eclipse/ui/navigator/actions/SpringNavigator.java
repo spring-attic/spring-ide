@@ -52,6 +52,7 @@ import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ILinkHelper;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.dialogs.WrappingStructuredSelection;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -78,10 +79,10 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 	 * again
 	 */
 	private Object lastElement;
-	
+
 	/** Stored {@link LinkHelperService} to resolve instances of {@link ILinkHelperExtension} */
 	private LinkHelperService linkService;
-	
+
 	/**
 	 * Register the {@link ISelectionListener} with the workbench.
 	 */
@@ -90,7 +91,7 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 		super.createPartControl(aParent);
 		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
 	}
-	
+
 	/**
 	 * Remove the {@link ISelectionListener} from the workbench.
 	 */
@@ -99,9 +100,9 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(this);
 		super.dispose();
 	}
-	
+
 	/**
-	 * {@inheritDoc}	
+	 * {@inheritDoc}
 	 */
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
@@ -164,7 +165,8 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 		if (element == null || (element.equals(lastElement) && ignoreSameSelection)) {
 			return;
 		}
-		if ((element instanceof IType || element instanceof IMethod || element instanceof IField || element instanceof Element)
+		if ((element instanceof IType || element instanceof IMethod || element instanceof IField
+				|| element instanceof Element || element instanceof IResource)
 				&& isLinkingEnabled()) {
 			selectReveal(getCommonViewer(), element);
 		}
@@ -253,9 +255,9 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 
 		return null;
 	}
-	
+
 	/**
-	 * Store the {@link LinkHelperService}. 
+	 * Store the {@link LinkHelperService}.
 	 */
 	private synchronized LinkHelperService getLinkHelperService() {
 		if (linkService == null) {
@@ -264,9 +266,9 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 		}
 		return linkService;
 	}
-	
+
 	/**
-	 * Retrieves the element as represented by the given <code>selection</code>. 
+	 * Retrieves the element as represented by the given <code>selection</code>.
 	 */
 	private Object getSelectedElement(IWorkbenchPart part, ISelection selection) {
 		Object selectedElement = getSelectedJavaElement(part, selection);
@@ -309,6 +311,12 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 			}
 			else if (obj instanceof Text) {
 				Node parent = ((Text) obj).getParentNode();
+				if (parent instanceof Element) {
+					selectedElement = parent;
+				}
+			}
+			else if (obj instanceof Comment) {
+				Node parent = ((Comment) obj).getParentNode();
 				if (parent instanceof Element) {
 					selectedElement = parent;
 				}
