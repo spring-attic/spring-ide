@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.TypeStructureState;
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
@@ -127,7 +128,10 @@ public class AopReferenceModelUtils {
 			TypeStructureState structureManager = context.get(TypeStructureState.class);
 			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
 
-			if (structureManager == null || structureManager.hasStructuralChanges(resource)) {
+			if (structureManager == null
+					|| structureManager.hasStructuralChanges(resource,
+							ITypeStructureCache.FLAG_ANNOTATION
+									| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
 				for (IBeansConfig config : hierachyManager.getConfigsByContainingTypes(resource)) {
 					files.add(config.getElementResource());
 				}

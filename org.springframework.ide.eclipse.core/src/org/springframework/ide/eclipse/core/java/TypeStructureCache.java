@@ -43,8 +43,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
+import org.eclipse.jdt.internal.compiler.env.ClassSignature;
+import org.eclipse.jdt.internal.compiler.env.EnumConstantSignature;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
+import org.eclipse.jdt.internal.compiler.env.IBinaryElementValuePair;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
+import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.springframework.ide.eclipse.core.SpringCore;
 
@@ -58,7 +62,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @since 2.2.0
  */
 @SuppressWarnings("restriction")
-public class TypeStructureCache {
+public class TypeStructureCache implements ITypeStructureCache {
 
 	private static final char[][] EMPTY_CHAR_ARRAY = new char[0][];
 
@@ -163,7 +167,7 @@ public class TypeStructureCache {
 	/**
 	 * Check if a given {@link IResource} representing a class file has structural changes.
 	 */
-	public boolean hasStructuralChanges(IResource resource) {
+	public boolean hasStructuralChanges(IResource resource, int flags) {
 		try {
 			r.lock();
 			if (!hasRecordedTypeStructures(resource.getProject())) {
@@ -187,7 +191,8 @@ public class TypeStructureCache {
 							}
 							ClassFileReader reader = getClassFileReaderForClassName(type
 									.getFullyQualifiedName(), resource.getProject());
-							if (reader != null && hasStructuralChanges(reader, typeStructure)) {
+							if (reader != null
+									&& hasStructuralChanges(reader, typeStructure, flags)) {
 								return true;
 							}
 						}
@@ -207,9 +212,9 @@ public class TypeStructureCache {
 			r.unlock();
 		}
 	}
-	
+
 	/**
-	 * Removes cached type structures by the given className. 
+	 * Removes cached type structures by the given className.
 	 */
 	protected void removeRecordedTyeStructures(IProject project, String className) {
 		try {
@@ -294,7 +299,8 @@ public class TypeStructureCache {
 		return null;
 	}
 
-	private static boolean hasStructuralChanges(ClassFileReader reader, TypeStructure existingType) {
+	private boolean hasStructuralChanges(ClassFileReader reader, TypeStructure existingType,
+			int flags) {
 		if (existingType == null) {
 			return true;
 		}
@@ -315,10 +321,12 @@ public class TypeStructureCache {
 		}
 
 		// class level annotations
-		IBinaryAnnotation[] existingAnnotations = existingType.getAnnotations();
-		IBinaryAnnotation[] newAnnotations = reader.getAnnotations();
-		if (!annotationsEqual(existingAnnotations, newAnnotations)) {
-			return true;
+		if ((flags & FLAG_ANNOTATION) != 0) {
+			IBinaryAnnotation[] existingAnnotations = existingType.getAnnotations();
+			IBinaryAnnotation[] newAnnotations = reader.getAnnotations();
+			if (!annotationsEqual(existingAnnotations, newAnnotations, flags)) {
+				return true;
+			}
 		}
 
 		// interfaces
@@ -365,9 +373,11 @@ public class TypeStructureCache {
 						if (!modifiersEqual(method.getModifiers(), existingMs[j].getModifiers())) {
 							return true;
 						}
-						if (!annotationsEqual(method.getAnnotations(), existingMs[j]
-								.getAnnotations())) {
-							return true;
+						if ((flags & FLAG_ANNOTATION) != 0) {
+							if (!annotationsEqual(method.getAnnotations(), existingMs[j]
+									.getAnnotations(), flags)) {
+								return true;
+							}
 						}
 						continue new_method_loop;
 					}
@@ -380,20 +390,106 @@ public class TypeStructureCache {
 	}
 
 	private static boolean annotationsEqual(IBinaryAnnotation[] existingAnnotations,
-			IBinaryAnnotation[] newAnnotations) {
+			IBinaryAnnotation[] newAnnotations, int flags) {
 		if (existingAnnotations == null) {
 			existingAnnotations = TypeStructure.NoAnnotation;
 		}
 		if (newAnnotations == null) {
 			newAnnotations = TypeStructure.NoAnnotation;
 		}
-		if (existingAnnotations.length != newAnnotations.length)
+		if (existingAnnotations.length != newAnnotations.length) {
 			return false;
+		}
 
 		new_annotation_loop: for (int i = 0; i < newAnnotations.length; i++) {
 			for (int j = 0; j < existingAnnotations.length; j++) {
 				if (CharOperation.equals(newAnnotations[j].getTypeName(), existingAnnotations[i]
 						.getTypeName())) {
+					// compare annotation parameters
+					if ((flags & FLAG_ANNOTATION_VALUE) != 0) {
+						IBinaryElementValuePair[] newParameters = newAnnotations[j]
+								.getElementValuePairs();
+						IBinaryElementValuePair[] existingParameters = existingAnnotations[j]
+								.getElementValuePairs();
+						if (newParameters == null) {
+							newParameters = TypeStructure.NoElement;
+						}
+						if (existingParameters == null) {
+							existingParameters = TypeStructure.NoElement;
+						}
+						if (existingParameters.length != newParameters.length) {
+							return false;
+						}
+						for (int k = 0; k < newParameters.length; k++) {
+							for (int l = 0; l < existingParameters.length; l++) {
+								char[] newName = newParameters[l].getName();
+								char[] existingName = existingParameters[l].getName();
+								Object newValue = newParameters[l].getValue();
+								Object existingValue = existingParameters[l].getValue();
+
+								if (!CharOperation.equals(newName, existingName)) {
+									return false;
+								}
+
+								if (newValue instanceof ClassSignature) {
+									if (existingValue instanceof ClassSignature) {
+										if (!CharOperation.equals(((ClassSignature) newValue)
+												.getTypeName(), ((ClassSignature) existingValue)
+												.getTypeName())) {
+											return false;
+										}
+									}
+									else {
+										return false;
+									}
+								}
+								else if (newValue instanceof Constant) {
+									if (existingValue instanceof Constant) {
+										if (!((Constant) newValue)
+												.hasSameValue((Constant) existingValue)) {
+											return false;
+										}
+									}
+									else {
+										return false;
+									}
+								}
+								else if (newValue instanceof EnumConstantSignature) {
+									if (existingValue instanceof EnumConstantSignature) {
+										if (!(CharOperation.equals(
+												((EnumConstantSignature) newValue).getTypeName(),
+												((EnumConstantSignature) existingValue)
+														.getTypeName()) && CharOperation.equals(
+												((EnumConstantSignature) newValue)
+														.getEnumConstantName(),
+												((EnumConstantSignature) existingValue)
+														.getEnumConstantName()))) {
+											return false;
+										}
+									}
+									else {
+										return false;
+									}
+								}
+								else if (newValue instanceof IBinaryAnnotation) {
+									if (existingValue instanceof EnumConstantSignature) {
+										if (!annotationsEqual(
+												new IBinaryAnnotation[] { (IBinaryAnnotation) newValue },
+												new IBinaryAnnotation[] { (IBinaryAnnotation) existingValue },
+												flags)) {
+											return false;
+										}
+									}
+									else {
+										return false;
+									}
+								}
+								else {
+									return false;
+								}
+							}
+						}
+					}
 					continue new_annotation_loop;
 				}
 			}

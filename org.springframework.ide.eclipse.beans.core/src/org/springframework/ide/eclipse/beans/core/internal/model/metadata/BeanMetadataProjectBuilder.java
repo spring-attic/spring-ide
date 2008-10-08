@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
+import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.TypeStructureState;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
@@ -46,13 +47,13 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorStateAwar
  * @since 2.0.5
  */
 public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectContributorStateAware {
-	
+
 	/** Internal state */
 	private IProjectContributorState context = null;
-	
+
 	/** Map of affected beans that need re-processing */
 	private Map<IBeansConfig, Set<IBean>> affectedBeans = new HashMap<IBeansConfig, Set<IBean>>();
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -65,7 +66,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 		}
 		monitor.done();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -77,7 +78,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 				BeansCorePlugin.getMetadataModel().clearBeanProperties(bean);
 			}
 			// Notify that the model has changed.
-			//((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansConfig, Type.CHANGED);
+			// ((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansConfig, Type.CHANGED);
 		}
 	}
 
@@ -94,7 +95,10 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 			TypeStructureState structureManager = context.get(TypeStructureState.class);
 			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
 
-			if (structureManager == null || structureManager.hasStructuralChanges(resource)) {
+			if (structureManager == null
+					|| structureManager.hasStructuralChanges(resource,
+							ITypeStructureCache.FLAG_ANNOTATION
+									| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
 				for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
 					IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 					resources.add(beansConfig.getElementResource());
@@ -127,7 +131,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 		}
 		return resources;
 	}
-	
+
 	private void addBeans(IBeansConfig beansConfig) {
 		if (affectedBeans.containsKey(beansConfig)) {
 			affectedBeans.get(beansConfig).addAll(BeansModelUtils.getBeans(beansConfig));
@@ -137,7 +141,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 			affectedBeans.put(beansConfig, beans);
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

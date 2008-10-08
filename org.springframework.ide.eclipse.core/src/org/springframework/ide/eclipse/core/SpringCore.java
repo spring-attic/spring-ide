@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.core.internal.model.SpringModel;
+import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.TypeStructureCache;
 import org.springframework.ide.eclipse.core.model.ISpringModel;
 
@@ -126,7 +127,7 @@ public class SpringCore extends Plugin {
 		return model;
 	}
 	
-	public static final TypeStructureCache getTypeStructureCache() {
+	public static final ITypeStructureCache getTypeStructureCache() {
 		return typeStructureCache;
 	}
 

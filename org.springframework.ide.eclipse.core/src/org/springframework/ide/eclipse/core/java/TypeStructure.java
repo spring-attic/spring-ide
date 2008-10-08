@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.java;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
+import org.eclipse.jdt.internal.compiler.env.IBinaryElementValuePair;
 import org.eclipse.jdt.internal.compiler.env.IBinaryField;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.env.IBinaryNestedType;
@@ -38,6 +39,8 @@ class TypeStructure implements IBinaryType {
 	static IBinaryMethod[] NoMethod = new IBinaryMethod[0];
 	
 	static IBinaryAnnotation[] NoAnnotation = new IBinaryAnnotation[0];
+
+	static IBinaryElementValuePair[] NoElement = new IBinaryElementValuePair[0];
 
 	// this is the core state for comparison
 	char[] className;

@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.TypeStructureState;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -52,7 +53,7 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorStateAwar
  */
 public class BeansConfigValidator extends AbstractValidator implements
 		IProjectContributorStateAware {
-	
+
 	/** Internal state object */
 	private IProjectContributorState context = null;
 
@@ -129,11 +130,15 @@ public class BeansConfigValidator extends AbstractValidator implements
 			}
 			else {
 				if (kind != IncrementalProjectBuilder.FULL_BUILD) {
-					
+
 					// Now check for bean classes and java structure
 					TypeStructureState structureManager = context.get(TypeStructureState.class);
-					BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class); 
-					if (structureManager == null || structureManager.hasStructuralChanges(resource)) {
+					BeansTypeHierachyState hierachyManager = context
+							.get(BeansTypeHierachyState.class);
+
+					if (structureManager == null
+							|| structureManager.hasStructuralChanges(resource,
+									ITypeStructureCache.FLAG_ANNOTATION)) {
 						for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
 							IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 							resources.add(beansConfig.getElementResource());
