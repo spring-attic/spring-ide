@@ -15,8 +15,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IPathVariableManager;
@@ -25,10 +29,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -50,111 +58,183 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @since 2.2.0
  */
 @SuppressWarnings("restriction")
-class TypeStructureCache {
+public class TypeStructureCache {
 
 	private static final char[][] EMPTY_CHAR_ARRAY = new char[0][];
 
 	private static final String FILE_SCHEME = "file";
 
+	private IElementChangedListener changedListener = null;
+
 	/** {@link TypeStructure} instances keyed by full-qualified class names */
-	private static Map<IProject, Map<String, TypeStructure>> typeStructuresByProject = new ConcurrentHashMap<IProject, Map<String, TypeStructure>>();
+	private Map<IProject, Map<String, TypeStructure>> typeStructuresByProject = new ConcurrentHashMap<IProject, Map<String, TypeStructure>>();
+
+	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
+	protected final Lock r = rwl.readLock();
+
+	protected final Lock w = rwl.writeLock();
+
+	public void startup() {
+		changedListener = new TypeRemovingJavaElementChangeListener();
+		JavaCore.addElementChangedListener(changedListener);
+	}
+
+	public void shutdown() {
+		JavaCore.removeElementChangedListener(changedListener);
+		changedListener = null;
+		typeStructuresByProject = null;
+	}
 
 	/**
 	 * Removes {@link TypeStructure}s for a given project.
 	 */
-	public static void clearStateForProject(IProject project) {
-		typeStructuresByProject.remove(project);
+	public void clearStateForProject(IProject project) {
+		try {
+			w.lock();
+			typeStructuresByProject.remove(project);
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	/**
 	 * Checks if {@link TypeStructure} instances exist for a given project.
 	 */
-	public static boolean hasRecoredTypeStructures(IProject project) {
-		return typeStructuresByProject.containsKey(project);
+	public boolean hasRecordedTypeStructures(IProject project) {
+		try {
+			r.lock();
+			return typeStructuresByProject.containsKey(project);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	/**
 	 * Record {@link TypeStructure} instances of the given <code>resources</code>.
 	 */
-	public static void recordTypeStructures(IProject project, IResource... resources) {
-		Map<String, TypeStructure> typeStructures = null;
-		if (!typeStructuresByProject.containsKey(project)) {
-			typeStructures = new ConcurrentHashMap<String, TypeStructure>();
-			typeStructuresByProject.put(project, typeStructures);
-		}
-		else {
-			typeStructures = typeStructuresByProject.get(project);
-		}
+	public void recordTypeStructures(IProject project, IResource... resources) {
+		try {
+			w.lock();
+			Map<String, TypeStructure> typeStructures = null;
+			if (!typeStructuresByProject.containsKey(project)) {
+				typeStructures = new ConcurrentHashMap<String, TypeStructure>();
+				typeStructuresByProject.put(project, typeStructures);
+			}
+			else {
+				typeStructures = typeStructuresByProject.get(project);
+			}
 
-		for (IResource resource : resources) {
-			if (resource.getFileExtension().equals("class") && resource instanceof IFile) {
-				InputStream input = null;
-				try {
-					input = ((IFile) resource).getContents();
-					ClassFileReader reader = ClassFileReader.read(input, resource.getName());
-					TypeStructure typeStructure = new TypeStructure(reader);
-					typeStructures.put(new String(reader.getName()).replace('/', '.'),
-							typeStructure);
-				}
-				catch (CoreException e) {
-				}
-				catch (ClassFormatException e) {
-				}
-				catch (IOException e) {
-				}
-				finally {
-					if (input != null) {
-						try {
-							input.close();
-						}
-						catch (IOException e) {
+			for (IResource resource : resources) {
+				if (resource.getFileExtension().equals("class") && resource instanceof IFile) {
+					InputStream input = null;
+					try {
+						input = ((IFile) resource).getContents();
+						ClassFileReader reader = ClassFileReader.read(input, resource.getName());
+						TypeStructure typeStructure = new TypeStructure(reader);
+						typeStructures.put(new String(reader.getName()).replace('/', '.'),
+								typeStructure);
+					}
+					catch (CoreException e) {
+					}
+					catch (ClassFormatException e) {
+					}
+					catch (IOException e) {
+					}
+					finally {
+						if (input != null) {
+							try {
+								input.close();
+							}
+							catch (IOException e) {
+							}
 						}
 					}
 				}
 			}
+		}
+		finally {
+			w.unlock();
 		}
 	}
 
 	/**
 	 * Check if a given {@link IResource} representing a class file has structural changes.
 	 */
-	public static boolean hasStructuralChanges(IResource resource) {
-		if (!hasRecoredTypeStructures(resource.getProject())) {
-			return true;
-		}
+	public boolean hasStructuralChanges(IResource resource) {
+		try {
+			r.lock();
+			if (!hasRecordedTypeStructures(resource.getProject())) {
+				return true;
+			}
 
-		Map<String, TypeStructure> typeStructures = typeStructuresByProject.get(resource
-				.getProject());
+			Map<String, TypeStructure> typeStructures = typeStructuresByProject.get(resource
+					.getProject());
 
-		if (resource != null && resource.getFileExtension() != null
-				&& resource.getFileExtension().equals("java")) {
-			IJavaElement element = JavaCore.create(resource);
-			if (element instanceof ICompilationUnit && ((ICompilationUnit) element).isOpen()) {
-				try {
-					IType[] types = ((ICompilationUnit) element).getAllTypes();
-					for (IType type : types) {
-						String fqn = type.getFullyQualifiedName();
-						TypeStructure typeStructure = typeStructures.get(fqn);
-						if (typeStructure == null) {
-							return true;
+			if (resource != null && resource.getFileExtension() != null
+					&& resource.getFileExtension().equals("java")) {
+				IJavaElement element = JavaCore.create(resource);
+				if (element instanceof ICompilationUnit && ((ICompilationUnit) element).isOpen()) {
+					try {
+						IType[] types = ((ICompilationUnit) element).getAllTypes();
+						for (IType type : types) {
+							String fqn = type.getFullyQualifiedName();
+							TypeStructure typeStructure = typeStructures.get(fqn);
+							if (typeStructure == null) {
+								return true;
+							}
+							ClassFileReader reader = getClassFileReaderForClassName(type
+									.getFullyQualifiedName(), resource.getProject());
+							if (reader != null && hasStructuralChanges(reader, typeStructure)) {
+								return true;
+							}
 						}
-						ClassFileReader reader = getClassFileReaderForClassName(type
-								.getFullyQualifiedName(), resource.getProject());
-						if (reader != null && hasStructuralChanges(reader, typeStructure)) {
-							return true;
-						}
+						return false;
 					}
-					return false;
-				}
-				catch (JavaModelException e) {
-					SpringCore.log(e);
-				}
-				catch (MalformedURLException e) {
-					SpringCore.log(e);
+					catch (JavaModelException e) {
+						SpringCore.log(e);
+					}
+					catch (MalformedURLException e) {
+						SpringCore.log(e);
+					}
 				}
 			}
+			return true;
 		}
-		return true;
+		finally {
+			r.unlock();
+		}
+	}
+	
+	/**
+	 * Removes cached type structures by the given className. 
+	 */
+	protected void removeRecordedTyeStructures(IProject project, String className) {
+		try {
+			w.lock();
+			if (!hasRecordedTypeStructures(project)) {
+				return;
+			}
+
+			String innerClassName = className + "$";
+			List<String> typeStructuresToRemove = new ArrayList<String>();
+
+			Map<String, TypeStructure> typeStructures = typeStructuresByProject.get(project);
+			for (String recordedClassName : typeStructures.keySet()) {
+				if (className.equals(recordedClassName)
+						|| recordedClassName.startsWith(innerClassName)) {
+					typeStructuresToRemove.add(recordedClassName);
+				}
+			}
+			for (String recordedClassName : typeStructuresToRemove) {
+				typeStructures.remove(recordedClassName);
+			}
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	private static ClassFileReader getClassFileReaderForClassName(String className, IProject project)
@@ -326,6 +406,57 @@ class TypeStructureCache {
 		resolvedTypeModifiers = resolvedTypeModifiers & ExtraCompilerModifiers.AccJustFlag;
 		eclipseModifiers = eclipseModifiers & ExtraCompilerModifiers.AccJustFlag;
 		return (eclipseModifiers == resolvedTypeModifiers);
+	}
+
+	private class TypeRemovingJavaElementChangeListener implements IElementChangedListener {
+
+		public void elementChanged(ElementChangedEvent event) {
+			if (event.getType() == ElementChangedEvent.POST_CHANGE) {
+				Object obj = event.getSource();
+				if (obj instanceof IJavaElementDelta) {
+					IJavaElementDelta delta = (IJavaElementDelta) obj;
+					iterateChildren(new IJavaElementDelta[] { delta }, new IJavaProject[1]);
+				}
+			}
+		}
+
+		private void iterateChildren(IJavaElementDelta[] deltas, IJavaProject[] javaProject) {
+			for (IJavaElementDelta delta : deltas) {
+				if (delta.getElement() instanceof IJavaProject) {
+					javaProject[0] = (IJavaProject) delta.getElement();
+				}
+				// process removed element
+				IJavaElementDelta[] removedDeltas = delta.getRemovedChildren();
+				for (IJavaElementDelta removedDelta : removedDeltas) {
+					IJavaElement je = removedDelta.getElement();
+					if (je instanceof ICompilationUnit) {
+						StringBuilder sb = new StringBuilder();
+						guessClassName(je, sb);
+						if (javaProject[0] != null) {
+							removeRecordedTyeStructures(javaProject[0].getProject(), sb.toString());
+						}
+					}
+				}
+				iterateChildren(delta.getAffectedChildren(), javaProject);
+			}
+		}
+
+		private void guessClassName(IJavaElement cu, StringBuilder sb) {
+			if (cu instanceof IPackageFragment) {
+				sb.insert(0, cu.getElementName() + ".");
+			}
+			else if (cu != null) {
+				if (cu instanceof ICompilationUnit) {
+					String name = cu.getElementName()
+							.substring(0, cu.getElementName().length() - 5);
+					sb.insert(0, name);
+				}
+				else {
+					sb.insert(0, cu.getElementName());
+				}
+				guessClassName(cu.getParent(), sb);
+			}
+		}
 	}
 
 }

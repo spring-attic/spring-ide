@@ -29,7 +29,8 @@ public class TypeStructureState {
 	}
 
 	public boolean hasStructuralChanges(IResource resource) {
-		return !useChangeDetectionInJavaFiles || TypeStructureCache.hasStructuralChanges(resource);
+		return !useChangeDetectionInJavaFiles
+				|| SpringCore.getTypeStructureCache().hasStructuralChanges(resource);
 	}
 
 }

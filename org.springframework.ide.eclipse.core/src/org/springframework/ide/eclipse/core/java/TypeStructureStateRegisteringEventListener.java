@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.internal.project.SpringProjectContributionManager.ResourceDeltaVisitor;
 import org.springframework.ide.eclipse.core.internal.project.SpringProjectContributionManager.ResourceTreeVisitor;
@@ -74,7 +75,7 @@ public class TypeStructureStateRegisteringEventListener extends
 		}
 		else {
 			// 2. incremental build and no state
-			if (!TypeStructureCache.hasRecoredTypeStructures(project)) {
+			if (!SpringCore.getTypeStructureCache().hasRecordedTypeStructures(project)) {
 				recoredFullTypeStructures(project);
 			}
 			// 3. incremental build and state
@@ -82,8 +83,8 @@ public class TypeStructureStateRegisteringEventListener extends
 				JavaResourceRecordingProjectContributor contributor = new JavaResourceRecordingProjectContributor();
 				ResourceDeltaVisitor visitor = new ResourceDeltaVisitor(contributor, kind);
 				delta.accept(visitor);
-				TypeStructureCache.recordTypeStructures(project, visitor.getResources().toArray(
-						new IResource[visitor.getResources().size()]));
+				SpringCore.getTypeStructureCache().recordTypeStructures(
+					project, visitor.getResources().toArray(new IResource[visitor.getResources().size()]));
 			}
 		}
 	}
@@ -94,7 +95,7 @@ public class TypeStructureStateRegisteringEventListener extends
 	 */
 	private void recoredFullTypeStructures(IProject project) throws CoreException {
 		// remove pre-existing state as we are doing a clean build
-		TypeStructureCache.clearStateForProject(project);
+		SpringCore.getTypeStructureCache().clearStateForProject(project);
 
 		// collect all java class files
 		JavaResourceRecordingProjectContributor contributor = new JavaResourceRecordingProjectContributor();
@@ -102,8 +103,8 @@ public class TypeStructureStateRegisteringEventListener extends
 		project.accept(visitor);
 
 		// recored type strcutures for all collected class files
-		TypeStructureCache.recordTypeStructures(project, visitor.getResources().toArray(
-				new IResource[visitor.getResources().size()]));
+		SpringCore.getTypeStructureCache().recordTypeStructures(project,
+				visitor.getResources().toArray(new IResource[visitor.getResources().size()]));
 	}
 
 	/**

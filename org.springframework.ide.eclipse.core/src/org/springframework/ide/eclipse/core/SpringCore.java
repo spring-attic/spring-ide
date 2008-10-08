@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.core.internal.model.SpringModel;
+import org.springframework.ide.eclipse.core.java.TypeStructureCache;
 import org.springframework.ide.eclipse.core.model.ISpringModel;
 
 /**
@@ -75,6 +76,8 @@ public class SpringCore extends Plugin {
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
+	
+	private static TypeStructureCache typeStructureCache;
 
 	/**
 	 * Creates the Spring core plug-in.
@@ -84,6 +87,7 @@ public class SpringCore extends Plugin {
 	public SpringCore() {
 		plugin = this;
 		model = new SpringModel();
+		typeStructureCache = new TypeStructureCache();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
 		}
@@ -96,7 +100,7 @@ public class SpringCore extends Plugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		model.startup();
-		
+		typeStructureCache.startup();
 		// install default for incremtal compilation
 		plugin.getPluginPreferences().setDefault(USE_CHANGE_DETECTION_IN_JAVA_FILES, true);
 	}
@@ -104,6 +108,7 @@ public class SpringCore extends Plugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		model.shutdown();
+		typeStructureCache.shutdown();
 		super.stop(context);
 	}
 
@@ -119,6 +124,10 @@ public class SpringCore extends Plugin {
 	 */
 	public static final ISpringModel getModel() {
 		return model;
+	}
+	
+	public static final TypeStructureCache getTypeStructureCache() {
+		return typeStructureCache;
 	}
 
 	/**
