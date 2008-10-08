@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.navigator.CommonNavigator;
@@ -191,22 +192,37 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 
 	private ToggleShowBeanRefsForFileAction toggleShowBeanRefsForFileAction;
 
+	private IPropertyListener propertyListener;
+
 	@Override
 	public void createPartControl(Composite aParent) {
 		super.createPartControl(aParent);
 		getSite().getWorkbenchWindow().getSelectionService()
 				.addPostSelectionListener(this);
 		BeansCorePlugin.getModel().addChangeListener(this);
+		
+		propertyListener = new IPropertyListener() {
+
+			public void propertyChanged(Object source, int propId) {
+				if (propId == IS_LINKING_ENABLED_PROPERTY) {
+					updateTreeViewer(lastWorkbenchPart, lastSelection, false);
+				}
+			}
+			
+		};
+		addPropertyListener(propertyListener);
 
 		makeActions();
 	}
 
 	@Override
 	public void dispose() {
+		removePropertyListener(propertyListener);
 		super.dispose();
 		BeansCorePlugin.getModel().removeChangeListener(this);
 		getSite().getWorkbenchWindow().getSelectionService()
 				.removeSelectionListener(this);
+		
 	}
 
 	public boolean isShowBeansRefsForFileEnabled() {
@@ -296,4 +312,5 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 			updateTreeViewer(lastWorkbenchPart, lastSelection, false);
 		}
 	}
+	
 }
