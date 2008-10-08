@@ -47,6 +47,12 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements
 		IBeansConfig {
+	
+	/** The context namespace URI */
+	private static final String CONTEXT_NAMESPACE_URI = "http://www.springframework.org/schema/context";
+
+	/** The component scan element */
+	private static final String COMPONENT_SCAN_ELEMENT_NAME = "component-scan";
 
 	/** This bean's config file */
 	protected IFile file;
@@ -593,8 +599,8 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 			if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
 				XmlSourceLocation location = (XmlSourceLocation) component
 						.getElementSourceLocation();
-				if ("component-scan".equals(location.getLocalName())
-						&& "http://www.springframework.org/schema/context".equals(location
+				if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
+						&& CONTEXT_NAMESPACE_URI.equals(location
 								.getNamespaceURI())) {
 					return true;
 				}
