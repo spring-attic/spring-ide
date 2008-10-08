@@ -44,6 +44,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.navigator.NavigatorContentService;
@@ -78,10 +79,12 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 	 * Last selected element; stored in order to prevent updating on selecting the same element
 	 * again
 	 */
-	private Object lastElement;
+	private ISelection lastElement;
 
 	/** Stored {@link LinkHelperService} to resolve instances of {@link ILinkHelperExtension} */
 	private LinkHelperService linkService;
+
+	private IPropertyListener propertyListener;
 
 	/**
 	 * Register the {@link ISelectionListener} with the workbench.
@@ -90,6 +93,17 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 	public void createPartControl(Composite aParent) {
 		super.createPartControl(aParent);
 		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
+		propertyListener = new IPropertyListener() {
+
+			public void propertyChanged(Object source, int propId) {
+				if (propId == IS_LINKING_ENABLED_PROPERTY) {
+					updateTreeViewer(SpringNavigator.this, lastElement, false);
+				}
+			}
+			
+		};
+		addPropertyListener(propertyListener);
+
 	}
 
 	/**
@@ -98,6 +112,7 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 	@Override
 	public void dispose() {
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(this);
+		removePropertyListener(propertyListener);
 		super.dispose();
 	}
 
@@ -170,7 +185,7 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 				&& isLinkingEnabled()) {
 			selectReveal(getCommonViewer(), element);
 		}
-		lastElement = element;
+		lastElement = selection;
 	}
 
 	/**
