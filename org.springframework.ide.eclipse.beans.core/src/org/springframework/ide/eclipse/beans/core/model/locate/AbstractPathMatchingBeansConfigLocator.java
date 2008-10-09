@@ -84,6 +84,9 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 								if (res instanceof IFolder) {
 									locateConfigsInFolder(files, project, (IFolder) res, rootDir);
 								}
+								else if (res instanceof IFile) {
+									locateConfigInFile(files, project, rootDir, (IFile) res);
+								}
 							}
 						}
 					}
@@ -182,19 +185,27 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 		if (folder != null && folder.exists()) {
 			for (IResource resource : folder.members()) {
 				if (resource instanceof IFile) {
-					String filePath = removeRootDir(resource.getFullPath(), rootDir);
-					for (String pattern : getAllowedFilePatterns()) {
-						if (getAllowedFileExtensions().contains(resource.getFileExtension())
-								&& matches(filePath, pattern)) {
-							files.add((IFile) resource);
-						}
-						doLocateConfig(files, project, (IFile) resource);
-					}
+					locateConfigInFile(files, project, rootDir, (IFile) resource);
 				}
 				else if (resource instanceof IFolder) {
 					locateConfigsInFolder(files, project, (IFolder) resource, rootDir);
 				}
+			} 
+		}
+	}
+
+	/**
+	 * Locates configs in the given <code>resource</code>.
+	 */
+	protected void locateConfigInFile(Set<IFile> files, IProject project, IPath rootDir,
+			IFile resource) {
+		String filePath = removeRootDir(resource.getFullPath(), rootDir);
+		for (String pattern : getAllowedFilePatterns()) {
+			if (getAllowedFileExtensions().contains(resource.getFileExtension())
+					&& matches(filePath, pattern)) {
+				files.add(resource);
 			}
+			doLocateConfig(files, project, resource);
 		}
 	}
 

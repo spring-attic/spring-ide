@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.model.locate;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
@@ -54,13 +57,16 @@ public class ProjectScanningBeansConfigLocator extends
 	/** Internal cache for {@link NamespaceHandlerResolver}s keyed by their {@link IProject} */
 	private Map<IProject, NamespaceHandlerResolver> namespaceResoverCache = 
 		new HashMap<IProject, NamespaceHandlerResolver>();
-	
+
 	/** Configured file patters derived from the configured file patterns */
 	private List<String> configuredFilePatterns = null;
-	
-	/** Configured file extensions from the dialog */ 
+
+	/** Configured file extensions from the dialog */
 	private List<String> configuredFileExtensions = null;
-	
+
+	/** The project this locator operates on */
+	private IProject project = null;
+
 	/**
 	 * Constructor taking a string of CSV file extensions
 	 * @param configuredFileSuffixes
@@ -68,7 +74,8 @@ public class ProjectScanningBeansConfigLocator extends
 	public ProjectScanningBeansConfigLocator(String configuredFileSuffixes) {
 		configuredFilePatterns = new ArrayList<String>();
 		configuredFileExtensions = new ArrayList<String>();
-		for (String filePattern : StringUtils.commaDelimitedListToStringArray(configuredFileSuffixes)) {
+		for (String filePattern : StringUtils
+				.commaDelimitedListToStringArray(configuredFileSuffixes)) {
 			filePattern = filePattern.trim();
 			int ix = filePattern.lastIndexOf('.');
 			if (ix != -1) {
@@ -80,7 +87,7 @@ public class ProjectScanningBeansConfigLocator extends
 			configuredFilePatterns.add(ALLOWED_FILE_PATTERN + filePattern);
 		}
 	}
-	
+ 
 	/**
 	 * As this locator is not intended to be used at runtime, we don't need to listen to any
 	 * resource changes.
@@ -99,8 +106,8 @@ public class ProjectScanningBeansConfigLocator extends
 	}
 
 	/**
-	 * Returns a {@link NamespaceHandlerResolver} for the given {@link IProject}. First looks in
-	 * the {@link #namespaceResoverCache cache} before creating a new instance.
+	 * Returns a {@link NamespaceHandlerResolver} for the given {@link IProject}. First looks in the
+	 * {@link #namespaceResoverCache cache} before creating a new instance.
 	 */
 	private NamespaceHandlerResolver getNamespaceHandlerResolver(IProject project) {
 		if (!namespaceResoverCache.containsKey(project)) {
@@ -109,14 +116,48 @@ public class ProjectScanningBeansConfigLocator extends
 		}
 		return namespaceResoverCache.get(project);
 	}
-	
+
 	/**
 	 * Filters out every {@link IFile} which is has unknown root elements in its XML content.
 	 */
 	@Override
 	protected Set<IFile> filterMatchingFiles(Set<IFile> files) {
+		// if project is a java project remove bin dirs from the list
+		Set<String> outputDirectories = new HashSet<String>();
+		IJavaProject javaProject = JdtUtils.getJavaProject(project);
+		if (javaProject != null) {
+			try {
+				// add default output directory
+				outputDirectories.add(javaProject.getOutputLocation().toString());
+
+				// add source folder specific output directories
+				for (IClasspathEntry entry : javaProject.getResolvedClasspath(true)) {
+					if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
+							&& entry.getOutputLocation() != null) {
+						outputDirectories.add(entry.getOutputLocation().toString());
+					}
+				}
+			}
+			catch (JavaModelException e) {
+				BeansCorePlugin.log(e);
+			}
+		}
+
 		Set<IFile> detectedFiles = new LinkedHashSet<IFile>();
 		for (IFile file : files) {
+			boolean skip = false;
+			// first check if the file sits in an output directory
+			String path = file.getFullPath().toString();
+			for (String outputDirectory : outputDirectories) {
+				if (path.startsWith(outputDirectory)) {
+					skip = true;
+				}
+			}
+			if (skip) {
+				continue;
+			}
+
+			// check if the file is known Spring xml file
 			IStructuredModel model = null;
 			try {
 				try {
@@ -154,7 +195,7 @@ public class ProjectScanningBeansConfigLocator extends
 		}
 		return detectedFiles;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -162,7 +203,7 @@ public class ProjectScanningBeansConfigLocator extends
 	protected List<String> getAllowedFilePatterns() {
 		return configuredFilePatterns;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -170,18 +211,17 @@ public class ProjectScanningBeansConfigLocator extends
 	protected List<String> getAllowedFileExtensions() {
 		return configuredFileExtensions;
 	}
-	
+
 	/**
 	 * Returns the root directories to scan.
 	 */
 	@Override
 	protected Set<IPath> getRootDirectories(IProject project) {
-		if (!JdtUtils.isJavaProject(project)) {
-			Set<IPath> rootDirectories = new LinkedHashSet<IPath>();
-			rootDirectories.add(project.getFullPath());
-			return rootDirectories;
-		}
-		return super.getRootDirectories(project);
+		this.project = project;
+
+		Set<IPath> rootDirectories = new LinkedHashSet<IPath>();
+		rootDirectories.add(project.getFullPath());
+		return rootDirectories;
 	}
-	
+
 }
