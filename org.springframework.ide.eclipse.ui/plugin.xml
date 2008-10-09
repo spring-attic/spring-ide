@@ -115,7 +115,7 @@
             name="%navigatorViewName"
             icon="icons/full/obj16/spring_obj.gif"
             category="org.springframework.ide.eclipse.ui.views"
-            class="org.springframework.ide.eclipse.ui.navigator.actions.SpringNavigator">
+            class="org.springframework.ide.eclipse.ui.navigator.SpringNavigator">
       </view>
    </extension>
 

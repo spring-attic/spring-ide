@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.ui.navigator.actions;
+package org.springframework.ide.eclipse.ui.navigator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +53,7 @@ import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ILinkHelper;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.dialogs.WrappingStructuredSelection;
+import org.springframework.ide.eclipse.ui.navigator.actions.ILinkHelperExtension;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
