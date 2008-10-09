@@ -161,12 +161,20 @@
 		<mkdir dir="${updateSiteStagingLocation}" />
 		<mkdir dir="${updateSiteStagingLocation}/features" />
 		<mkdir dir="${updateSiteStagingLocation}/plugins" />
+	
 		<!-- Build the jar files -->
 		<antcall target="allElements">
 			<param name="genericTargets" value="${builder}/customTargets.xml" />
 			<param name="target" value="updateSiteExport" />
 		</antcall>
 
+		<!-- Copy Orbit plug-ins -->
+		<copy todir="${updateSiteStagingLocation}/plugins">
+			<fileset dir="${buildDirectory}/plugins">
+    			<include name="*.jar"/>
+			</fileset>
+		</copy>
+		
 		<!--Copy site.xml template  -->
 		<copy file="${builder}/../site.xml" tofile="${updateSiteStagingLocation}/site.xml" overwrite="false" />
 		<replace file="${updateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
