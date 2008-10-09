@@ -46,11 +46,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Utility class that tries to locate matches of Spring AOP configurations given
- * by {@link IAspectDefinition}.
+ * Utility class that tries to locate matches of Spring AOP configurations given by
+ * {@link IAspectDefinition}.
  * <p>
- * Uses Spring AOP's {@link AspectJExpressionPointcut} infrastructure to
- * determine matches.
+ * Uses Spring AOP's {@link AspectJExpressionPointcut} infrastructure to determine matches.
  * <p>
  * With Spring 2.5 this class supports the bean pointcut primitive as well.
  * @author Christian Dupuis
@@ -62,20 +61,18 @@ public class AspectDefinitionMatcher {
 	private Map<IAspectDefinition, Object> pointcutExpressionCache = new HashMap<IAspectDefinition, Object>();
 
 	/**
-	 * Returns all matches on {@link Method} in form of the corresponding
-	 * {@link IMethod}.
+	 * Returns all matches on {@link Method} in form of the corresponding {@link IMethod}.
 	 * @param targetClass the target class to check for a match
 	 * @param targetBean the target bean to check for a match
 	 * @param info the {@link IAspectDefinition}
 	 * @param project the current {@link IProject}
-	 * @return the set of {@link IMethod} that match the given
-	 * {@link IAspectDefinition}
+	 * @return the set of {@link IMethod} that match the given {@link IAspectDefinition}
 	 * @throws Throwable any exception occurred during reflective invocation
 	 */
 	public Set<IMethod> matches(final Class<?> targetClass, final IBean targetBean,
 			final IAspectDefinition info, final IProject project) throws Throwable {
 		Set<IMethod> matches = new LinkedHashSet<IMethod>();
-		
+
 		// check aspect definition
 		if (SpringCoreUtils.hasPlaceHolder(info.getPointcutExpression())) {
 			return Collections.emptySet();
@@ -104,20 +101,19 @@ public class AspectDefinitionMatcher {
 	}
 
 	/**
-	 * Checks if the given matching candidate method is a legal match for Spring
-	 * AOP.
+	 * Checks if the given matching candidate method is a legal match for Spring AOP.
 	 * <p>
-	 * Legal matches need to be public and either defined on the class and/or
-	 * interface depending on the <code>allMethods</code>.
+	 * Legal matches need to be public and either defined on the class and/or interface depending on
+	 * the <code>isProxyTargetClass</code>.
 	 */
-	private boolean checkMethod(Class targetClass, Method targetMethod, boolean allMethods) {
+	private boolean checkMethod(Class targetClass, Method targetMethod, boolean isProxyTargetClass) {
 		Assert.notNull(targetClass);
 		Assert.notNull(targetMethod);
 
 		if (!Modifier.isPublic(targetMethod.getModifiers())) {
 			return false;
 		}
-		else if (allMethods) {
+		else if (isProxyTargetClass) {
 			return true;
 		}
 		else {
@@ -140,10 +136,28 @@ public class AspectDefinitionMatcher {
 			return false;
 		}
 	}
+	
+	/**
+	 * Checks if the given <code>targetClass</code> can be proxied in Spring AOP.
+	 */
+	private boolean checkClass(Class targetClass, boolean isProxyTargetClass) throws ClassNotFoundException {
+		
+		// check if bean is an infrastructure class
+		if (isInfrastructureClass(targetClass)) {
+			return false;
+		}
+
+		// Check if proxy-target-class=true is being used and CGLIB can't subclass the class
+		if (Modifier.isFinal(targetClass.getModifiers()) && isProxyTargetClass) {
+			return false;
+		}
+		
+		// all fine; proceed with the given class
+		return true;
+	}
 
 	/**
-	 * Creates {@link AspectJExpressionPointcut} instances based on
-	 * {@link IAspectDefinition}.
+	 * Creates {@link AspectJExpressionPointcut} instances based on {@link IAspectDefinition}.
 	 */
 	private Object createAspectJPointcutExpression(IAspectDefinition info) throws Throwable {
 		try {
@@ -206,23 +220,24 @@ public class AspectDefinitionMatcher {
 
 	private Set<IMethod> internalMatches(final Class<?> targetClass, final IBean targetBean,
 			final IAspectDefinition info, final IProject project) throws Throwable {
-
-		// check if bean is an infrastructure class
-		if (isInfrastructureClass(targetClass)) {
+		
+		// check if bean class can be processed
+		if (!checkClass(targetClass, info.isProxyTargetClass())) {
 			return Collections.emptySet();
 		}
-		
+
 		// check if bean is synthetic as this would mean that the BeanPostProcessor would not load
 		BeanDefinition beanDefinition = BeansModelUtils.getMergedBeanDefinition(targetBean, null);
-		if (beanDefinition instanceof RootBeanDefinition && ((RootBeanDefinition) beanDefinition).isSynthetic()) {
+		if (beanDefinition instanceof RootBeanDefinition
+				&& ((RootBeanDefinition) beanDefinition).isSynthetic()) {
 			return Collections.emptySet();
 		}
-		
+
 		// check if pointcut expression has been set
 		if (info.getPointcutExpression() == null) {
 			return Collections.emptySet();
 		}
-		
+
 		final Set<IMethod> matchingMethods = new HashSet<IMethod>();
 		final Object aspectJExpressionPointcut = createAspectJPointcutExpression(info);
 
