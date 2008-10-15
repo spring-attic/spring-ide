@@ -35,7 +35,7 @@ public class BeansProjectDescriptionWriter implements IBeansProjectDescriptionCo
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
 			+ "/project/description/debug";
 
-	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
+	public static final boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	public static void write(BeansProject project) {
 		IFile file = project.getProject().getFile(new Path(IBeansProject.DESCRIPTION_FILE));
@@ -84,9 +84,9 @@ public class BeansProjectDescriptionWriter implements IBeansProjectDescriptionCo
 	protected static void write(IBeansConfigSet configSet, XMLWriter writer) {
 		writer.startTag(CONFIG_SET, null);
 		writer.printCDataTag(NAME, configSet.getElementName());
-		writer.printSimpleTag(OVERRIDING, new Boolean(configSet.isAllowBeanDefinitionOverriding())
+		writer.printSimpleTag(OVERRIDING, Boolean.valueOf(configSet.isAllowBeanDefinitionOverriding())
 				.toString());
-		writer.printSimpleTag(INCOMPLETE, new Boolean(configSet.isIncomplete()).toString());
+		writer.printSimpleTag(INCOMPLETE, Boolean.valueOf(configSet.isIncomplete()).toString());
 		write(CONFIGS, CONFIG, configSet.getConfigNames(), writer);
 		writer.endTag(CONFIG_SET);
 	}

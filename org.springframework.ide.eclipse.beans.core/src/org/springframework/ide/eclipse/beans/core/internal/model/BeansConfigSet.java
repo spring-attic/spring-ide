@@ -351,7 +351,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 	}
 
 	/**
-	 * Returns lazily initialized list with all componets defined in this config set.
+	 * Returns lazily initialized list with all components defined in this config set.
 	 */
 	private Set<IBeansComponent> getComponentsList() {
 		if (!this.isComponentsPopulated) {

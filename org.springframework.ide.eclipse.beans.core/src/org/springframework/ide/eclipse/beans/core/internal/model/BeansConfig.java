@@ -735,7 +735,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 	}
 
-	private final class NoOpResourcePatternResolver extends
+	private static class NoOpResourcePatternResolver extends
 			EclipsePathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
 		public NoOpResourcePatternResolver(IProject project) {

@@ -197,7 +197,7 @@ public class BeanMetadataBuilderJob extends Job {
 
 			for (IBeanMetadata metaData : beanMetaDataSet) {
 				if (metaData instanceof IMethodMetadata) {
-					methodMetaData.add((IMethodMetadata) beanMetaData);
+					methodMetaData.add((IMethodMetadata) metaData);
 				}
 				else {
 					beanMetaData.add(metaData);

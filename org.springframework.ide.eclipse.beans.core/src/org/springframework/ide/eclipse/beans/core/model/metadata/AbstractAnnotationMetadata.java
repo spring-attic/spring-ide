@@ -121,7 +121,7 @@ public abstract class AbstractAnnotationMetadata implements IClassMetadata, IAda
 					buf.append(pair.getName());
 					buf.append(" = ");
 				}
-				buf.append(pair.getValue().toString());
+				buf.append(pair.getValue());
 				buf.append(", ");
 			}
 

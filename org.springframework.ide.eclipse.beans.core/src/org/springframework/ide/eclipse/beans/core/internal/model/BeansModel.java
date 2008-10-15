@@ -55,7 +55,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/debug";
 
-	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
+	public static final boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 

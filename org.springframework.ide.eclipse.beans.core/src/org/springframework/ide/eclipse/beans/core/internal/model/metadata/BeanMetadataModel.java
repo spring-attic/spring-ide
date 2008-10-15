@@ -38,7 +38,7 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/metadata/debug";
 
-	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
+	public static final boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 

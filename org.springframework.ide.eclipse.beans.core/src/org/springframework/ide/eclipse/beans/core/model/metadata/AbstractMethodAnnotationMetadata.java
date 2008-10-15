@@ -71,7 +71,7 @@ public abstract class AbstractMethodAnnotationMetadata implements IMethodMetadat
 					buf.append(pair.getName());
 					buf.append(" = ");
 				}
-				buf.append(pair.getValue().toString());
+				buf.append(pair.getValue());
 				buf.append(", ");
 			}
 
