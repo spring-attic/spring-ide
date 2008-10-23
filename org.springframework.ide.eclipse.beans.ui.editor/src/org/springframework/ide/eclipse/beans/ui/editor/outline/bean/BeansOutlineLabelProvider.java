@@ -28,7 +28,7 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 	public Image getImage(Object object) {
 		// Create Spring beans label image
 		Node node = (Node) object;
-		String nodeName = node.getNodeName();
+		String nodeName = node.getLocalName();
 		NamedNodeMap attributes = node.getAttributes();
 
 		// Root elements (alias, import and bean)

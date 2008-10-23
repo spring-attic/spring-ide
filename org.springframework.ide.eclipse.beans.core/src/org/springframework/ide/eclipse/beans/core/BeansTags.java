@@ -71,7 +71,7 @@ public final class BeansTags {
 				return getTag(node.getParentNode());
 			} else if (node.getNodeType() == Node.ELEMENT_NODE
 					|| node.getNodeType() == Node.COMMENT_NODE) {
-				return getTag(node.getNodeName());
+				return getTag(node.getLocalName());
 			}
 		}
 		return Tag.UNKNOWN;

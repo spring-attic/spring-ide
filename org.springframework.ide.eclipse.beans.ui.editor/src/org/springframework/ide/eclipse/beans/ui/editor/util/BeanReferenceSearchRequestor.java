@@ -121,7 +121,7 @@ public class BeanReferenceSearchRequestor {
 		NamedNodeMap attributes = beanNode.getAttributes();
 		if (beanId.toLowerCase().startsWith(prefix.toLowerCase())) {
 			if (beanNode.getParentNode() != null
-					&& "beans".equals(beanNode.getParentNode().getNodeName())) {
+					&& "beans".equals(beanNode.getParentNode().getLocalName())) {
 				String beanName = beanId;
 				String replaceText = beanName;
 				String fileName = file.getProjectRelativePath().toString();
