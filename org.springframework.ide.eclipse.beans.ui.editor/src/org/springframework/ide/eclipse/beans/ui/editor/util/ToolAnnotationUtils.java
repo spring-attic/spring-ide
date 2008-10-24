@@ -47,7 +47,7 @@ public abstract class ToolAnnotationUtils {
 	public static final String ANNOTATION_ELEMENT = "annotation";
 
 	/**
-	 * Return the {@link CMElementDeclaration} definied for the given node.
+	 * Return the {@link CMElementDeclaration} defined for the given node.
 	 */
 	protected static CMElementDeclaration getCMElementDeclaration(Node node) {
 		CMElementDeclaration result = null;

@@ -38,6 +38,7 @@ public abstract class MethodContentAssistCalculator implements
 
 	private final IMethodFilter filter;
 
+	// TODO CD dispose the provider
 	private final JavaElementImageProvider imageProvider;
 
 	/**
