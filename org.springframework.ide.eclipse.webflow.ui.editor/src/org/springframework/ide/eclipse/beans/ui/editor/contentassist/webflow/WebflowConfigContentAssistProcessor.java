@@ -45,15 +45,16 @@ public class WebflowConfigContentAssistProcessor extends NamespaceContentAssistP
 		registerContentAssistCalculator("flow-builder", "class",
 				new ClassHierachyContentAssistCalculator(FlowBuilder.class.getName()));
 		registerContentAssistCalculator("flow-builder-services", "view-factory-creator", beanRef);
+		registerContentAssistCalculator("flow-builder-services", "expression-parser", beanRef);
 		registerContentAssistCalculator("flow-builder-services", "conversion-service", beanRef);
-		registerContentAssistCalculator("flow-builder", "conversion-service",
-				new ClassHierachyContentAssistCalculator(
-						"org.springframework.binding.convert.ConversionService"));
-		registerContentAssistCalculator("flow-builder", "expression-parser",
-				new ClassHierachyContentAssistCalculator(
-						"org.springframework.binding.expression.ExpressionParser"));
-		registerContentAssistCalculator("flow-builder", "formatter-registry",
-				new ClassContentAssistCalculator(false));
+//		registerContentAssistCalculator("flow-builder", "conversion-service",
+//				new ClassHierachyContentAssistCalculator(
+//						"org.springframework.binding.convert.ConversionService"));
+//		registerContentAssistCalculator("flow-builder", "expression-parser",
+//				new ClassHierachyContentAssistCalculator(
+//						"org.springframework.binding.expression.ExpressionParser"));
+//		registerContentAssistCalculator("flow-builder", "formatter-registry",
+//				new ClassContentAssistCalculator(false));
 
 	}
 

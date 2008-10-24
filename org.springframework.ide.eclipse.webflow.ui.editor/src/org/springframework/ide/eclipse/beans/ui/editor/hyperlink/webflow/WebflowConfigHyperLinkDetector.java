@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHype
  * This {@link INamespaceHyperlinkDetector} is responsible to for the <code>flow:*</code> namespace.
  * @author Christian Dupuis
  */
-public class FacesConfigHyperLinkDetector extends NamespaceHyperlinkDetectorSupport implements
+public class WebflowConfigHyperLinkDetector extends NamespaceHyperlinkDetectorSupport implements
 		IHyperlinkDetector {
 
 	@Override
@@ -42,9 +42,10 @@ public class FacesConfigHyperLinkDetector extends NamespaceHyperlinkDetectorSupp
 		registerHyperlinkCalculator("flow-builder", "class", classRef);
 		registerHyperlinkCalculator("flow-builder-services", "view-factory-creator", beanRef);
 		registerHyperlinkCalculator("flow-builder-services", "conversion-service", beanRef);
-		registerHyperlinkCalculator("flow-builder", "conversion-service", classRef);
-		registerHyperlinkCalculator("flow-builder", "expression-parser", classRef);
-		registerHyperlinkCalculator("flow-builder", "formatter-registry", classRef);
+		registerHyperlinkCalculator("flow-builder-services", "expression-parser", beanRef);
+//		registerHyperlinkCalculator("flow-builder", "conversion-service", classRef);
+//		registerHyperlinkCalculator("flow-builder", "expression-parser", classRef);
+//		registerHyperlinkCalculator("flow-builder", "formatter-registry", classRef);
 	}
 	
 }
