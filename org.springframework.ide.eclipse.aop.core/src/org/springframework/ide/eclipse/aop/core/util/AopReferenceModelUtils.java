@@ -16,6 +16,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -117,7 +118,7 @@ public class AopReferenceModelUtils {
 		return affectedFiles;
 	}
 
-	public static Set<IResource> getAffectedFiles(int kind, IResource resource,
+	public static Set<IResource> getAffectedFiles(int kind, int deltaKind, IResource resource,
 			IProjectContributorState context) {
 		Set<IResource> files = new HashSet<IResource>();
 
@@ -132,8 +133,20 @@ public class AopReferenceModelUtils {
 					|| structureManager.hasStructuralChanges(resource,
 							ITypeStructureCache.FLAG_ANNOTATION
 									| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
-				for (IBeansConfig config : hierachyManager.getConfigsByContainingTypes(resource)) {
-					files.add(config.getElementResource());
+				if (deltaKind == IResourceDelta.REMOVED) {
+					IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
+							resource.getProject());
+					if (beansProject != null) {
+						for (IBeansConfig beansConfig : beansProject.getConfigs()) {
+							files.add((IFile) beansConfig.getElementResource());
+						}
+					}
+				}
+				else {
+					for (IBeansConfig config : hierachyManager
+							.getConfigsByContainingTypes(resource)) {
+						files.add(config.getElementResource());
+					}
 				}
 			}
 

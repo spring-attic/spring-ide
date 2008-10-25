@@ -84,7 +84,7 @@ public class WebflowValidator extends AbstractValidator {
 		return resources;
 	}
 
-	public Set<IResource> getAffectedResources(IResource resource, int kind)
+	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
 			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (WebflowModelUtils.isWebflowConfig(resource)) {

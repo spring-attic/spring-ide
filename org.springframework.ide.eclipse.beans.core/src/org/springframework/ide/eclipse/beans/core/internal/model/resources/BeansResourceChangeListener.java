@@ -127,6 +127,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				else if (requiresRefresh((IFile) resource)) {
 					events.listenedFileChanged((IFile) resource, eventType);
 				}
+				else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
+					configsChangedForProject(resource);
+				}
 				return false;
 			}
 			return super.resourceRemoved(resource);

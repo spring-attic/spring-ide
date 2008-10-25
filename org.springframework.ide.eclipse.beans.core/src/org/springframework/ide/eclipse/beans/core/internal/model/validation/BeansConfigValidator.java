@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -90,7 +91,8 @@ public class BeansConfigValidator extends AbstractValidator implements
 		MarkerUtils.deleteAllMarkers(resource, getMarkerId());
 	}
 
-	public Set<IResource> getAffectedResources(IResource resource, int kind) throws CoreException {
+	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
+			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
 
@@ -119,26 +121,24 @@ public class BeansConfigValidator extends AbstractValidator implements
 
 			}
 			else if (JdtUtils.isClassPathFile(resource) || SpringCoreUtils.isManifest(resource)) {
-				IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
-						resource.getProject());
-				if (beansProject != null) {
-					for (IBeansConfig beansConfig : beansProject.getConfigs()) {
-						resources.add(beansConfig.getElementResource());
-						addBeans(beansConfig);
-					}
-				}
+				propagateChangedResourceToProject(resource, resources);
 			}
-			else {
-				if (kind != IncrementalProjectBuilder.FULL_BUILD) {
+			else if (kind != IncrementalProjectBuilder.FULL_BUILD) {
 
-					// Now check for bean classes and java structure
-					TypeStructureState structureManager = context.get(TypeStructureState.class);
-					BeansTypeHierachyState hierachyManager = context
-							.get(BeansTypeHierachyState.class);
+				// Now check for bean classes and java structure
+				TypeStructureState structureManager = context.get(TypeStructureState.class);
+				BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
 
-					if (structureManager == null
-							|| structureManager.hasStructuralChanges(resource,
-									ITypeStructureCache.FLAG_ANNOTATION)) {
+				if (structureManager == null
+						|| structureManager.hasStructuralChanges(resource,
+								ITypeStructureCache.FLAG_ANNOTATION)) {
+
+					// capture removal of java source files
+					if (deltaKind == IResourceDelta.REMOVED
+							&& resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
+						propagateChangedResourceToProject(resource, resources);
+					}
+					else {
 						for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
 							IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 							resources.add(beansConfig.getElementResource());
@@ -149,6 +149,20 @@ public class BeansConfigValidator extends AbstractValidator implements
 			}
 		}
 		return resources;
+	}
+
+	/**
+	 * @param resource
+	 * @param resources
+	 */
+	private void propagateChangedResourceToProject(IResource resource, Set<IResource> resources) {
+		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(resource.getProject());
+		if (beansProject != null) {
+			for (IBeansConfig beansConfig : beansProject.getConfigs()) {
+				resources.add(beansConfig.getElementResource());
+				addBeans(beansConfig);
+			}
+		}
 	}
 
 	/**

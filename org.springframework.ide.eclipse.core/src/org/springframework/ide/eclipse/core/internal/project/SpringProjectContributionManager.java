@@ -274,23 +274,27 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 				// Only check projects with Spring beans nature
 				visitChildren = SpringCoreUtils.isSpringProject(resource);
 				if (visitChildren) {
-					resources.addAll(contributor.getAffectedResources(resource, kind));
+					resources.addAll(contributor.getAffectedResources(resource, kind, aDelta
+							.getKind()));
 				}
 			}
 			else if (resource instanceof IFolder) {
-				resources.addAll(contributor.getAffectedResources(resource, kind));
+				resources
+						.addAll(contributor.getAffectedResources(resource, kind, aDelta.getKind()));
 				visitChildren = true;
 			}
 			else if (resource instanceof IFile) {
 				switch (aDelta.getKind()) {
 				case IResourceDelta.ADDED:
 				case IResourceDelta.CHANGED:
-					resources.addAll(contributor.getAffectedResources(resource, kind));
+					resources.addAll(contributor.getAffectedResources(resource, kind, aDelta
+							.getKind()));
 					visitChildren = true;
 					break;
 
 				case IResourceDelta.REMOVED:
-					resources.addAll(contributor.getAffectedResources(resource, kind));
+					resources.addAll(contributor.getAffectedResources(resource, kind, aDelta
+							.getKind()));
 					break;
 				}
 			}
@@ -319,11 +323,11 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 		public boolean visit(IResource resource) throws CoreException {
 			if (resource instanceof IFile) {
 				resources.addAll(contributor.getAffectedResources(resource,
-						IncrementalProjectBuilder.FULL_BUILD));
+						IncrementalProjectBuilder.FULL_BUILD, IResourceDelta.CHANGED));
 			}
 			else if (resource instanceof IProject) {
 				resources.addAll(contributor.getAffectedResources(resource,
-						IncrementalProjectBuilder.FULL_BUILD));
+						IncrementalProjectBuilder.FULL_BUILD, IResourceDelta.CHANGED));
 			}
 			return true;
 		}

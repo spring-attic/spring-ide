@@ -85,7 +85,8 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 	/**
 	 * {@inheritDoc}
 	 */
-	public Set<IResource> getAffectedResources(IResource resource, int kind) throws CoreException {
+	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
+			throws CoreException {
 		Set<IResource> resources = new HashSet<IResource>();
 
 		if (kind != IncrementalProjectBuilder.FULL_BUILD && resource instanceof IFile

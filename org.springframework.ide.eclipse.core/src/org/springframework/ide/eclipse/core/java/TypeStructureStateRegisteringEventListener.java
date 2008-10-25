@@ -116,7 +116,7 @@ public class TypeStructureStateRegisteringEventListener extends
 			// nothing to do
 		}
 
-		public Set<IResource> getAffectedResources(IResource resource, int kind)
+		public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
 				throws CoreException {
 			if (resource.getName().endsWith(ClassUtils.CLASS_FILE_SUFFIX)
 					&& JavaCore.create(resource) != null) {

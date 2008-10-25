@@ -812,12 +812,12 @@ public abstract class BeansModelUtils {
 		Set<IBeansConfig> beans = BeansCorePlugin.getModel().getConfigs(className);
 		return beans != null && beans.size() > 0;
 	}
-	
+
 	/**
-	 * Checks if a given <code>type</code> is used as a bean class. The check iterates the
-	 * complete {@link IBeansModel} and not "only" the current {@link IBeansProject}.
+	 * Checks if a given <code>type</code> is used as a bean class. The check iterates the complete
+	 * {@link IBeansModel} and not "only" the current {@link IBeansProject}.
 	 * <p>
-	 * The implementation checks if the given <code>type</code> is on the project's classpath. 
+	 * The implementation checks if the given <code>type</code> is on the project's classpath.
 	 * @param type
 	 * @since 2.2.1
 	 */
@@ -1299,9 +1299,8 @@ public abstract class BeansModelUtils {
 								for (IType type : types) {
 
 									// Check that the type is coming from the project classpath
-									IType checkType = JdtUtils.getJavaType(project.getProject(),
-											type.getFullyQualifiedName());
-									if (type == checkType) {
+									if (JdtUtils.getJavaProject(resource.getProject())
+											.isOnClasspath(type)) {
 										relevantTypes.add(type);
 									}
 								}
@@ -1361,6 +1360,7 @@ public abstract class BeansModelUtils {
 	 */
 	public static Set<IBean> getBeansByContainingTypes(IResource resource) {
 		Set<IBean> files = new LinkedHashSet<IBean>();
+
 		if (resource != null && resource.isAccessible()
 				&& resource.isSynchronized(IResource.DEPTH_ZERO)
 				&& resource.getName().endsWith(".java")) {
@@ -1377,9 +1377,8 @@ public abstract class BeansModelUtils {
 
 								for (IType type : types) {
 									// Check that the type is coming from the project classpath
-									IType checkType = JdtUtils.getJavaType(project.getProject(),
-											type.getFullyQualifiedName());
-									if (type == checkType) {
+									if (JdtUtils.getJavaProject(resource.getProject())
+											.isOnClasspath(type)) {
 										relevantTypes.add(type);
 									}
 								}
@@ -1434,7 +1433,6 @@ public abstract class BeansModelUtils {
 				}
 			}
 		}
-
 		return files;
 	}
 

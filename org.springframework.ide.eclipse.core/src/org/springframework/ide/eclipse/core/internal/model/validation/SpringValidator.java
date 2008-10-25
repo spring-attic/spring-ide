@@ -87,7 +87,7 @@ public class SpringValidator extends AbstractValidator implements IValidator {
 	 * For every {@link IResource} that is passed in the corresponding
 	 * {@link IProject} will be returned.
 	 */
-	public Set<IResource> getAffectedResources(IResource resource, int kind)
+	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
 			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		resources.add(resource.getProject());

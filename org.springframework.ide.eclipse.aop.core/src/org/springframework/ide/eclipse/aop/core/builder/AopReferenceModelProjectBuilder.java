@@ -35,17 +35,18 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorStateAwar
  */
 public class AopReferenceModelProjectBuilder implements IProjectBuilder,
 		IProjectContributorStateAware {
-	
+
 	private IProjectContributorState context = null;
 
 	/**
 	 * Returns a {@link Set} of {@link IResource} instances that need to be rebuild in the context
 	 * of the current <code>resource</code> and <code>kind</code>
 	 */
-	public Set<IResource> getAffectedResources(IResource resource, int kind) throws CoreException {
+	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
+			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
-			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind, resource, context));
+			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind, deltaKind, resource, context));
 		}
 		return resources;
 	}
@@ -91,5 +92,5 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder,
 	public void setProjectContributorState(IProjectContributorState context) {
 		this.context = context;
 	}
-	
+
 }
