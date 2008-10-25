@@ -1415,8 +1415,7 @@ public abstract class BeansModelUtils {
 											// cleverer as we can and let it be processed again
 
 											// One last check before adding too much that is not
-											// even
-											// on the resource's classpath
+											// even on the resource's classpath
 											if (JdtUtils.getJavaProject(project.getProject())
 													.isOnClasspath(resource)) {
 												files.add(bean);
