@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -32,6 +33,7 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -43,13 +45,11 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("restriction")
 public class BeansRefactoringChangeUtils {
 
-	public static Change createMethodRenameChange(IFile file,
-			IJavaElement[] affectedElements, String[] newNames,
-			IProgressMonitor pm) throws CoreException {
+	public static Change createMethodRenameChange(IFile file, IJavaElement[] affectedElements,
+			String[] newNames, IProgressMonitor pm) throws CoreException {
 		IStructuredModel model = null;
 		try {
-			model = StructuredModelManager.getModelManager().getModelForRead(
-					file);
+			model = StructuredModelManager.getModelManager().getModelForRead(file);
 
 			if (model == null) {
 				return null;
@@ -59,8 +59,8 @@ public class BeansRefactoringChangeUtils {
 			NodeList nodes = document.getElementsByTagName("bean");
 			for (int j = 0; j < affectedElements.length; j++) {
 				for (int i = 0; i < nodes.getLength(); i++) {
-					TextEdit edit = createMethodTextEdit(nodes.item(i),
-							affectedElements[j], newNames[j], file);
+					TextEdit edit = createMethodTextEdit(nodes.item(i), affectedElements[j],
+							newNames[j], file);
 					if (edit != null) {
 						multiEdit.addChild(edit);
 					}
@@ -70,8 +70,7 @@ public class BeansRefactoringChangeUtils {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
 				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup(
-							"Rename Bean property name", e));
+					change.addTextEditGroup(new TextEditGroup("Rename Bean property name", e));
 				}
 				return change;
 			}
@@ -87,34 +86,27 @@ public class BeansRefactoringChangeUtils {
 	}
 
 	@SuppressWarnings( { "unchecked" })
-	private static TextEdit createMethodTextEdit(Node node,
-			IJavaElement element, String newName, IFile file) {
+	private static TextEdit createMethodTextEdit(Node node, IJavaElement element, String newName,
+			IFile file) {
 		if (node == null) {
 			return null;
 		}
 
-		if (element instanceof IMethod
-				&& element.getElementName().startsWith("set")) {
-			String methodName = StringUtils.uncapitalize(element
-					.getElementName().substring(3));
+		if (element instanceof IMethod && element.getElementName().startsWith("set")) {
+			String methodName = StringUtils.uncapitalize(element.getElementName().substring(3));
 			NodeList nodes = node.getChildNodes();
 			for (int i = 0; i < nodes.getLength(); i++) {
 				Node child = nodes.item(i);
 				if ("property".equals(child.getLocalName())
 						&& BeansEditorUtils.hasAttribute(child, "name")) {
-					String propertyName = BeansEditorUtils.getAttribute(child,
-							"name");
+					String propertyName = BeansEditorUtils.getAttribute(child, "name");
 					if (methodName.equals(propertyName)) {
-						List<IType> types = BeansEditorUtils
-								.getClassNamesOfBean(file, node);
-						if (types.contains(((IMethod) element)
-								.getDeclaringType())) {
-							AttrImpl attr = (AttrImpl) child.getAttributes()
-									.getNamedItem("name");
+						List<IType> types = BeansEditorUtils.getClassNamesOfBean(file, node);
+						if (types.contains(((IMethod) element).getDeclaringType())) {
+							AttrImpl attr = (AttrImpl) child.getAttributes().getNamedItem("name");
 							int offset = attr.getValueRegionStartOffset() + 1;
 							if (offset >= 0) {
-								return new ReplaceEdit(offset, propertyName
-										.length(), newName);
+								return new ReplaceEdit(offset, propertyName.length(), newName);
 							}
 						}
 					}
@@ -124,13 +116,11 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	public static Change createRenameBeanIdChange(IFile file, String beanId,
-			String newBeanId, boolean updateReferences, IProgressMonitor monitor)
-			throws CoreException {
+	public static Change createRenameBeanIdChange(IFile file, String beanId, String newBeanId,
+			boolean updateReferences, IProgressMonitor monitor) throws CoreException {
 		IStructuredModel model = null;
 		try {
-			model = StructuredModelManager.getModelManager().getModelForRead(
-					file);
+			model = StructuredModelManager.getModelManager().getModelForRead(file);
 
 			if (model == null) {
 				return null;
@@ -139,8 +129,7 @@ public class BeansRefactoringChangeUtils {
 			MultiTextEdit multiEdit = new MultiTextEdit();
 			NodeList nodes = document.getElementsByTagName("bean");
 			for (int i = 0; i < nodes.getLength(); i++) {
-				TextEdit edit = createRenameBeanIdTextEdit(nodes.item(i),
-						beanId, newBeanId);
+				TextEdit edit = createRenameBeanIdTextEdit(nodes.item(i), beanId, newBeanId);
 				if (edit != null) {
 					multiEdit.addChild(edit);
 				}
@@ -153,16 +142,14 @@ public class BeansRefactoringChangeUtils {
 
 			TextFileChange refChanges = null;
 			if (updateReferences) {
-				refChanges = createRenameBeanRefsChange(file, beanId,
-						newBeanId, monitor);
+				refChanges = createRenameBeanRefsChange(file, beanId, newBeanId, monitor);
 			}
 
 			if (multiEdit.hasChildren()) {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
 				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup("Rename Bean id",
-							e));
+					change.addTextEditGroup(new TextEditGroup("Rename Bean id", e));
 				}
 				if (refChanges != null) {
 					MultiTextEdit edit = (MultiTextEdit) refChanges.getEdit();
@@ -170,8 +157,7 @@ public class BeansRefactoringChangeUtils {
 						for (TextEdit e : edit.getChildren()) {
 							edit.removeChild(e);
 							multiEdit.addChild(e);
-							change.addTextEditGroup(new TextEditGroup(
-									"Rename Bean reference", e));
+							change.addTextEditGroup(new TextEditGroup("Rename Bean reference", e));
 						}
 					}
 				}
@@ -188,8 +174,7 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	private static TextEdit createRenameBeanIdTextEdit(Node node,
-			String beanId, String newBeanId) {
+	private static TextEdit createRenameBeanIdTextEdit(Node node, String beanId, String newBeanId) {
 		if (node == null) {
 			return null;
 		}
@@ -205,13 +190,11 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	public static TextFileChange createRenameBeanRefsChange(IFile file,
-			String beanId, String newBeanId, IProgressMonitor monitor)
-			throws CoreException {
+	public static TextFileChange createRenameBeanRefsChange(IFile file, String beanId,
+			String newBeanId, IProgressMonitor monitor) throws CoreException {
 		IStructuredModel model = null;
 		try {
-			model = StructuredModelManager.getModelManager().getModelForRead(
-					file);
+			model = StructuredModelManager.getModelManager().getModelForRead(file);
 
 			if (model == null) {
 				return null;
@@ -220,15 +203,13 @@ public class BeansRefactoringChangeUtils {
 			MultiTextEdit multiEdit = new MultiTextEdit();
 			NodeList nodes = document.getDocumentElement().getChildNodes();
 			for (int i = 0; i < nodes.getLength(); i++) {
-				createRenameBeanRefsTextEdit(nodes.item(i), beanId, newBeanId,
-						multiEdit);
+				createRenameBeanRefsTextEdit(nodes.item(i), beanId, newBeanId, multiEdit);
 			}
 			if (multiEdit.hasChildren()) {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
 				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup(
-							"Rename Bean reference", e));
+					change.addTextEditGroup(new TextEditGroup("Rename Bean reference", e));
 				}
 				return change;
 			}
@@ -243,60 +224,48 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	private static void createRenameBeanRefsTextEdit(Node node, String beanId,
-			String newBeanId, MultiTextEdit multiEdit) {
+	private static void createRenameBeanRefsTextEdit(Node node, String beanId, String newBeanId,
+			MultiTextEdit multiEdit) {
 		if (node == null) {
 			return;
 		}
-		createRenameBeanRefTextEditForAttribute("depends-on", node, beanId,
-				newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("bean", node, beanId,
-				newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("local", node, beanId,
-				newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("parent", node, beanId,
-				newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("ref", node, beanId, newBeanId,
-				multiEdit);
-		createRenameBeanRefTextEditForAttribute("key-ref", node, beanId,
-				newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("value-ref", node, beanId,
-				newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("depends-on", node, beanId, newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("bean", node, beanId, newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("local", node, beanId, newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("parent", node, beanId, newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("ref", node, beanId, newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("key-ref", node, beanId, newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("value-ref", node, beanId, newBeanId, multiEdit);
 
 		NodeList nodes = node.getChildNodes();
 		if (nodes != null && nodes.getLength() > 0) {
 			for (int i = 0; i < nodes.getLength(); i++) {
-				createRenameBeanRefsTextEdit(nodes.item(i), beanId, newBeanId,
-						multiEdit);
+				createRenameBeanRefsTextEdit(nodes.item(i), beanId, newBeanId, multiEdit);
 			}
 		}
 
 	}
 
-	private static void createRenameBeanRefTextEditForAttribute(
-			String attributeName, Node node, String beanId, String newBeanId,
-			MultiTextEdit multiEdit) {
+	private static void createRenameBeanRefTextEditForAttribute(String attributeName, Node node,
+			String beanId, String newBeanId, MultiTextEdit multiEdit) {
 		if (BeansEditorUtils.hasAttribute(node, attributeName)) {
 			String beanRef = BeansEditorUtils.getAttribute(node, attributeName);
 			if (beanRef != null && beanRef.equals(beanId)) {
-				AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem(
-						attributeName);
+				AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem(attributeName);
 				int offset = attr.getValueRegionStartOffset() + 1;
 				if (offset >= 0) {
-					multiEdit.addChild(new ReplaceEdit(offset,
-							beanRef.length(), newBeanId));
+					multiEdit.addChild(new ReplaceEdit(offset, beanRef.length(), newBeanId));
 				}
 			}
 		}
 	}
 
-	public static Change createRenameChange(IFile file,
-			IJavaElement[] affectedElements, String[] newNames,
-			IProgressMonitor monitor) throws CoreException {
+	public static Change createRenameChange(IFile file, IJavaElement[] affectedElements,
+			String[] newNames, IProgressMonitor monitor) throws CoreException {
+		IJavaProject jp = JdtUtils.getJavaProject(file.getProject());
 		IStructuredModel model = null;
 		try {
-			model = StructuredModelManager.getModelManager().getModelForRead(
-					file);
+			model = StructuredModelManager.getModelManager().getModelForRead(file);
 
 			if (model == null) {
 				return null;
@@ -305,11 +274,17 @@ public class BeansRefactoringChangeUtils {
 			MultiTextEdit multiEdit = new MultiTextEdit();
 			NodeList nodes = document.getElementsByTagName("bean");
 			for (int j = 0; j < affectedElements.length; j++) {
-				for (int i = 0; i < nodes.getLength(); i++) {
-					TextEdit edit = createTextEdit(nodes.item(i),
-							affectedElements[j], newNames[j]);
-					if (edit != null) {
-						multiEdit.addChild(edit);
+
+				IJavaElement je = affectedElements[j];
+
+				// check that the element we are about to change is on the file's classpath
+				if (jp == null || (jp != null && jp.isOnClasspath(je))) {
+					for (int i = 0; i < nodes.getLength(); i++) {
+						TextEdit edit = createTextEdit(nodes.item(i), je,
+								newNames[j]);
+						if (edit != null) {
+							multiEdit.addChild(edit);
+						}
 					}
 				}
 			}
@@ -317,8 +292,7 @@ public class BeansRefactoringChangeUtils {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
 				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup(
-							"Rename Bean class", e));
+					change.addTextEditGroup(new TextEditGroup("Rename Bean class", e));
 				}
 				return change;
 			}
@@ -333,20 +307,17 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	private static TextEdit createTextEdit(Node node, IJavaElement element,
-			String newName) {
+	private static TextEdit createTextEdit(Node node, IJavaElement element, String newName) {
 		if (node == null) {
 			return null;
 		}
 
-		String oldName = (element instanceof IType) ? ((IType) element)
-				.getFullyQualifiedName('$') : element.getElementName();
+		String oldName = (element instanceof IType) ? ((IType) element).getFullyQualifiedName('$')
+				: element.getElementName();
 		String value = BeansEditorUtils.getAttribute(node, "class");
 		if (oldName.equals(value)
-				|| isGoodMatch(value, oldName,
-						element instanceof IPackageFragment)) {
-			AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem(
-					"class");
+				|| isGoodMatch(value, oldName, element instanceof IPackageFragment)) {
+			AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem("class");
 			int offset = attr.getValueRegionStartOffset() + 1;
 			if (offset >= 0) {
 				return new ReplaceEdit(offset, oldName.length(), newName);
@@ -355,13 +326,12 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	private static boolean isGoodMatch(String value, String oldName,
-			boolean isPackage) {
+	private static boolean isGoodMatch(String value, String oldName, boolean isPackage) {
 		if (value == null || value.length() <= oldName.length()) {
 			return false;
 		}
-		boolean goodLengthMatch = isPackage ? value.lastIndexOf('.') <= oldName
-				.length() : value.charAt(oldName.length()) == '$';
+		boolean goodLengthMatch = isPackage ? value.lastIndexOf('.') <= oldName.length() : value
+				.charAt(oldName.length()) == '$';
 		return value.startsWith(oldName) && goodLengthMatch;
 	}
 }
