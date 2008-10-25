@@ -77,6 +77,7 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
 				}
 				else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
+//						|| resource.getName().endsWith(JdtUtils.CLASS_FILE_EXTENSION)) {
 					configsChangedForProject(resource);
 				}
 				return false;
@@ -107,6 +108,7 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 						events.listenedFileChanged(file, eventType);
 					}
 					else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
+//							|| resource.getName().endsWith(JdtUtils.CLASS_FILE_EXTENSION)) {
 						configsChangedForProject(resource);
 					}
 				}
@@ -128,6 +130,7 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					events.listenedFileChanged((IFile) resource, eventType);
 				}
 				else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
+//						|| resource.getName().endsWith(JdtUtils.CLASS_FILE_EXTENSION)) {
 					configsChangedForProject(resource);
 				}
 				return false;
@@ -200,7 +203,8 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			if (project != null) {
 				for (IBeansConfig config : project.getConfigs()) {
 					// Check if a config is affected by a change to the java model
-					if (config.configAffectedByJavaChange(resource) && config.getElementResource() instanceof IFile) {
+					if (config.configAffectedByJavaChange(resource)
+							&& config.getElementResource() instanceof IFile) {
 						events.configChanged((IFile) config.getElementResource(), eventType);
 					}
 				}

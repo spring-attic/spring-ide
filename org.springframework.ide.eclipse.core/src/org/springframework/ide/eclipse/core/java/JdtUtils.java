@@ -64,11 +64,11 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class JdtUtils {
-	
+
 	public static final String JAVA_FILE_EXTENSION = ".java";
 
 	public static final String CLASS_FILE_EXTENSION = ".class";
-	
+
 	private static final String FILE_SCHEME = "file";
 
 	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
@@ -818,6 +818,53 @@ public class JdtUtils {
 			ASTNode node = parser.createAST(new NullProgressMonitor());
 			node.accept(visitor);
 		}
+	}
+
+	public static IResource getSourceResource(IResource classFile) {
+		try {
+			if (isJavaProject(classFile) && classFile.getName().endsWith(CLASS_FILE_EXTENSION)) {
+				IPath classFilePath = classFile.getFullPath();
+				String classFileName = null;
+
+				IJavaProject project = getJavaProject(classFile);
+				IPath defaultOutput = project.getOutputLocation();
+
+				if (defaultOutput.isPrefixOf(classFilePath)) {
+					classFileName = classFilePath.removeFirstSegments(defaultOutput.segmentCount())
+							.toString();
+				}
+				else {
+					for (IClasspathEntry entry : project.getResolvedClasspath(true)) {
+						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							IPath output = entry.getOutputLocation();
+							if (output != null) {
+								if (classFilePath.isPrefixOf(output)) {
+									classFileName = classFilePath.removeFirstSegments(
+											output.segmentCount()).toString();
+								}
+							}
+						}
+					}
+				}
+
+				if (classFileName != null) {
+					// Replace file extension
+					String sourceFileName = classFileName.replace(".class", ".java");
+					for (IClasspathEntry entry : project.getResolvedClasspath(true)) {
+						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							IPath path = entry.getPath().append(sourceFileName).removeFirstSegments(1);
+							IResource resource = project.getProject().findMember(path);
+							if (resource != null) {
+								return resource;
+							}
+						}
+					}
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
 	}
 
 }
