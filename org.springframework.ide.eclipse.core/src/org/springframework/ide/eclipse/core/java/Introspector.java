@@ -356,6 +356,9 @@ public final class Introspector {
 	 */
 	public static IType getSuperType(IType type) throws JavaModelException {
 		String name = type.getSuperclassName();
+		if (name == null && !type.getFullyQualifiedName().equals(Object.class.getName())) {
+			name = Object.class.getName();
+		}
 		if (name != null) {
 			if (type.isBinary()) {
 				return type.getJavaProject().findType(name);
@@ -463,10 +466,10 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given name is a valid JavaBeans property name. This
-	 * normally means that a property name starts with a lower case character, but in the (unusual)
-	 * special case when there is more than one character and both the first and second characters
-	 * are upper case, then an upper case character is valid too.
+	 * Returns <code>true</code> if the given name is a valid JavaBeans property name. This normally
+	 * means that a property name starts with a lower case character, but in the (unusual) special
+	 * case when there is more than one character and both the first and second characters are upper
+	 * case, then an upper case character is valid too.
 	 * <p>
 	 * Thus "fooBah" corresponds to "FooBah" and "x" to "X", but "URL" stays the same as "URL".
 	 * <p>

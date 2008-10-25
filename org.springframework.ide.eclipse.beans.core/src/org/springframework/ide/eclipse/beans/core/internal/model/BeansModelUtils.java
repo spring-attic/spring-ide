@@ -1325,8 +1325,11 @@ public abstract class BeansModelUtils {
 													}
 												}
 												// 2b. extends the class
-												else if (Introspector.doesExtend(type, typeToCheck
-														.getFullyQualifiedName())) {
+												else if (!type.getFullyQualifiedName().equals(
+																typeToCheck.getFullyQualifiedName())
+														&& Introspector
+																.doesExtend(type, typeToCheck
+																		.getFullyQualifiedName())) {
 													files.add(config);
 													break;
 												}
@@ -1403,7 +1406,9 @@ public abstract class BeansModelUtils {
 													}
 												}
 												// 2b. extends the class
-												else if (Introspector.doesExtend(type, typeToCheck
+												else if (!type.getFullyQualifiedName().equals(
+																typeToCheck.getFullyQualifiedName())
+														&& Introspector.doesExtend(type, typeToCheck
 														.getFullyQualifiedName())) {
 													files.add(bean);
 													break;
