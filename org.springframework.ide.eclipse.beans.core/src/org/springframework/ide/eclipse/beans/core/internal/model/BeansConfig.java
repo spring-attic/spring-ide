@@ -104,9 +104,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		ILazyInitializedModelElement {
 
 	/** Regular expressions to that must be ignored and not reported to the user */
-	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays.asList(new Pattern[] {
-		Pattern.compile("Failed to import bean definitions from relative location \\[(.*)\\]"),
-		Pattern.compile("Failed to import bean definitions from URL location \\[(.*)\\]") });
+	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays
+			.asList(new Pattern[] {
+				Pattern.compile("Failed to import bean definitions from relative location \\[(.*)\\]"),
+				Pattern.compile("Failed to import bean definitions from URL location \\[(.*)\\]") });
 
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
@@ -223,6 +224,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	@Override
 	protected void readConfig() {
 		if (!this.isModelPopulated) {
+
+			long start = System.currentTimeMillis();
 
 			// Only install Eclipse-based resource loader if enabled in project properties
 			// IMPORTANT: the following block needs to stay before the w.lock()
@@ -346,6 +349,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			finally {
 				this.isModelPopulated = true;
 				w.unlock();
+				if (BeansModel.DEBUG) {
+					System.out.println("Parsing of file '"
+							+ this.file.getProjectRelativePath().toString() + "' took "
+							+ (System.currentTimeMillis() - start) + "ms");
+				}
 			}
 		}
 	}
@@ -503,7 +511,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * Implementation of {@link ReaderEventListener} which populates the current instance of
 	 * {@link IBeansConfig} with data from the XML bean definition reader events.
 	 */
-	protected final class BeansConfigReaderEventListener implements ReaderEventListener {
+	final class BeansConfigReaderEventListener implements ReaderEventListener {
 
 		private IBeansConfig config;
 
@@ -735,7 +743,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 	}
 
-	private static class NoOpResourcePatternResolver extends
+	static class NoOpResourcePatternResolver extends
 			EclipsePathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
 		public NoOpResourcePatternResolver(IProject project) {
@@ -744,6 +752,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		@Override
 		public Resource getResource(String location) {
+			// Pass package scanning through to the default pattern resolver. This is required
+			// for component-scanning.
 			if (location.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
 				return super.getResource(location);
 			}
@@ -752,6 +762,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		@Override
 		public Resource[] getResources(String locationPattern) throws IOException {
+			// Pass package scanning through to the default pattern resolver. This is required
+			// for component-scanning.
 			if (locationPattern.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
 				return super.getResources(locationPattern);
 			}
