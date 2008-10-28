@@ -35,5 +35,41 @@
 			</action>
 		</viewerContribution>
 	</extension>
+	
+	<extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="iprojectcontributions">
+         <menu
+               label="%popupMenus.label"
+               id="org.springframework.ide.eclipse.ui.tools">
+            <separator
+               name="group0">
+            </separator>
+         </menu>     
+         <visibility>
+         	<and>
+	         	<objectState name="nature" value="org.eclipse.jdt.core.javanature"/>
+	         	<!--
+	         	Probably want to show this no matter what
+	         	<not>
+		         	<objectState name="nature" value="org.eclipse.ajdt.ui.ajnature"/>
+		        </not>
+		        -->
+		        <objectState name="open" value="true"/>
+		    </and>
+         </visibility>
+         <action
+               class="org.springframework.ide.eclipse.ajdt.ui.actions.SpringAspectsAction"
+               label="Enable Spring Aspects Tooling"
+               enablesFor="+"
+               menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
+               id="org.springframework.ide.eclipse.ajdt.ui.xref.actions.addAspectsJar">
+         </action>
+       </objectContribution>
+     </extension>
+	
 
 </plugin>
