@@ -62,6 +62,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -104,6 +105,9 @@ public class ConfigFilesTab {
 
 	private static final String ENABLE_IMPORT_LABEL = PREFIX + "enableImports.label";
 
+	private static final String IGNORE_MISSING_NAMESPACEHANDLER_LABEL = PREFIX
+			+ "ignoreMissingNamespaceHandler.label";
+
 	private static final String NOTE_LABEL = PREFIX + "note.label";
 
 	private PropertiesModel model;
@@ -142,6 +146,8 @@ public class ConfigFilesTab {
 	};
 
 	private boolean hasUserMadeChanges;
+
+	private Button ignoreMissingNamespaceHandlerText;
 
 	public ConfigFilesTab(PropertiesModel model, PropertiesProject project,
 			IModelElement selectedModelElement) {
@@ -223,6 +229,19 @@ public class ConfigFilesTab {
 			}
 		});
 
+		// Create ignore missing namespace handler checkbox
+		ignoreMissingNamespaceHandlerText = SpringUIUtils.createCheckBox(composite, BeansUIPlugin
+				.getResourceString(IGNORE_MISSING_NAMESPACEHANDLER_LABEL));
+		ignoreMissingNamespaceHandlerText.setSelection(SpringCorePreferences.getProjectPreferences(
+				project.getProject(), BeansCorePlugin.PLUGIN_ID).getBoolean(
+				BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY, false));
+		ignoreMissingNamespaceHandlerText.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				hasUserMadeChanges = true;
+			}
+		});
+
 		// Create suffix text field
 		suffixesText = SpringUIUtils.createTextField(composite, BeansUIPlugin
 				.getResourceString(SUFFIXES_LABEL));
@@ -259,6 +278,10 @@ public class ConfigFilesTab {
 
 		handleTableSelectionChanged();
 		return composite;
+	}
+	
+	public boolean shouldIgnoreMissingNamespaceHandler() {
+		return this.ignoreMissingNamespaceHandlerText.getSelection();
 	}
 
 	private void handleImportEnabledChanged() {

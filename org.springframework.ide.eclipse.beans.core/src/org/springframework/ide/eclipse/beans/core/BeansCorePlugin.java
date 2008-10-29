@@ -46,12 +46,16 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
+	/** preference key to suppress missing namespace handler warnings */
+	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = 
+		"ignoreMissingNamespaceHandler";
+
 	/** The shared instance */
 	private static BeansCorePlugin plugin;
 
 	/** The singleton beans model */
 	private static BeansModel model;
-	
+
 	private static BeanMetadataModel metaDataModel;
 
 	/** Internal executor service */
@@ -59,13 +63,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
-	
 
 	/**
 	 * Creates the Spring Beans Core plug-in.
 	 * <p>
-	 * The plug-in instance is created automatically by the Eclipse platform.
-	 * Clients must not call.
+	 * The plug-in instance is created automatically by the Eclipse platform. Clients must not call.
 	 */
 	public BeansCorePlugin() {
 		plugin = this;
@@ -107,11 +109,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static final IBeansModel getModel() {
 		return model;
 	}
-	
+
 	public static final IBeanMetadataModel getMetadataModel() {
 		return metaDataModel;
 	}
-	
+
 	public static final ExecutorService getExecutorService() {
 		return executorService;
 	}
@@ -124,8 +126,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle, or 'key' if not
-	 * found.
+	 * Returns the string from the plugin's resource bundle, or 'key' if not found.
 	 */
 	public static String getResourceString(String key) {
 		String bundleString;
@@ -173,8 +174,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	public static void log(Throwable exception) {
 		getDefault().getLog().log(
-				createErrorStatus(getResourceString("Plugin.internal_error"),
-						exception));
+				createErrorStatus(getResourceString("Plugin.internal_error"), exception));
 	}
 
 	/**

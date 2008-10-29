@@ -36,7 +36,9 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,8 +47,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * {@link NamespaceHandler} that creates {@link BeanDefinition}s based on
- * Spring's tool namespace.
+ * {@link NamespaceHandler} that creates {@link BeanDefinition}s based on Spring's tool namespace.
  * <p>
  * The following annotation is currently supported:
  * 
@@ -69,8 +70,8 @@ import org.w3c.dom.NodeList;
  * &lt;foobar id=&quot;foobeanchen&quot; /&gt;
  * </pre>
  * 
- * would create a BeanDefinition with bean class <code>com.foo.Bar</code> and
- * id <code>foobeanchen</code>.
+ * would create a BeanDefinition with bean class <code>com.foo.Bar</code> and id
+ * <code>foobeanchen</code>.
  * 
  * @author Christian Dupuis
  * @since 2.0.3
@@ -88,12 +89,10 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 
 	private static final String ANNOTATION_ELEMENT = "annotation";
 
-	private static final String TOOL_NAMESPACE_URI = 
-		"http://www.springframework.org/schema/tool";
+	private static final String TOOL_NAMESPACE_URI = "http://www.springframework.org/schema/tool";
 
 	private final IBeansConfig beansConfig;
 
-	
 	/**
 	 * Constructor taking a {@link IBeansConfig}.
 	 */
@@ -101,8 +100,8 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 		this.beansConfig = file;
 	}
 
-	public BeanDefinitionHolder decorate(Node source,
-			BeanDefinitionHolder definition, ParserContext parserContext) {
+	public BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition,
+			ParserContext parserContext) {
 		// Don't do anything; there are no decoration annotations defined.
 		return definition;
 	}
@@ -114,67 +113,66 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 	/**
 	 * Entry point for the parsing a given element.
 	 * <p>
-	 * This implementation simply delegates to
-	 * {@link #parseElement(Node, ParserContext)} and registers the returned
-	 * {@link ComponentDefinition} with the given {@link ParserContext}.
+	 * This implementation simply delegates to {@link #parseElement(Node, ParserContext)} and
+	 * registers the returned {@link ComponentDefinition} with the given {@link ParserContext}.
 	 * <p>
 	 * Note: this implementation always returns <code>null</code>.
 	 */
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 
 		// Get a component definition for the given element.
-		ComponentDefinition componentDefinition = parseElement(element,
-				parserContext);
+		ComponentDefinition componentDefinition = parseElement(element, parserContext);
 
 		if (componentDefinition != null) {
 			if (componentDefinition instanceof BeanComponentDefinition) {
-				parserContext.registerBeanComponent(
-					(BeanComponentDefinition) componentDefinition);
+				parserContext.registerBeanComponent((BeanComponentDefinition) componentDefinition);
 			}
 			else {
 				parserContext.registerComponent(componentDefinition);
 			}
 		}
 		else {
-			// emit a warning that the NamespaceHandler cannot be found
-			parserContext.getReaderContext().warning(
-					"Unable to locate Spring NamespaceHandler for element '" + 
-					element.getNodeName() + "' of schema namespace '" + 
-					element.getNamespaceURI() + "'", parserContext.extractSource(element));
+
+			// emit a warning that the NamespaceHandler cannot be found, only if the property is not
+			// set by the user
+			if (!SpringCorePreferences.getProjectPreferences(
+					beansConfig.getElementResource().getProject(), BeansCorePlugin.PLUGIN_ID)
+					.getBoolean(BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY, false)) {
+				parserContext.getReaderContext().warning(
+						"Unable to locate Spring NamespaceHandler for element '"
+								+ element.getNodeName() + "' of schema namespace '"
+								+ element.getNamespaceURI() + "'",
+						parserContext.extractSource(element));
+			}
 		}
 
 		return null;
 	}
 
 	/**
-	 * Parses the given element and looks for a tool:annotation -> tool:export
-	 * definition on the corresponding XSD definition.
+	 * Parses the given element and looks for a tool:annotation -> tool:export definition on the
+	 * corresponding XSD definition.
 	 * <p>
-	 * First tries to get a {@link ComponentDefinition} from the element itself.
-	 * After that the child nodes of the given elements are checked for tool
-	 * meta data annotations.
+	 * First tries to get a {@link ComponentDefinition} from the element itself. After that the
+	 * child nodes of the given elements are checked for tool meta data annotations.
 	 * <p>
-	 * If there are annotations on child elements a
-	 * {@link CompositeComponentDefinition} will be created carrying the nested
-	 * {@link ComponentDefinition}s.
+	 * If there are annotations on child elements a {@link CompositeComponentDefinition} will be
+	 * created carrying the nested {@link ComponentDefinition}s.
 	 * @param element the element to parse
 	 * @param parserContext the current parser context
 	 * @return a {@link ComponentDefinition} created from the given element
 	 */
-	private ComponentDefinition parseElement(Node element,
-			ParserContext parserContext) {
+	private ComponentDefinition parseElement(Node element, ParserContext parserContext) {
 
 		// Get - if any - the component for the given element.
-		ComponentDefinition rootComponent = parseSingleElement(element,
-				parserContext);
+		ComponentDefinition rootComponent = parseSingleElement(element, parserContext);
 
 		List<ComponentDefinition> nestedComponents = new ArrayList<ComponentDefinition>();
 		NodeList nestedElements = element.getChildNodes();
 		for (int i = 0; i < nestedElements.getLength(); i++) {
 			Node nestedElement = nestedElements.item(i);
 			if (nestedElement.getNodeType() == Node.ELEMENT_NODE) {
-				ComponentDefinition nestedComponent = parseElement(
-						nestedElement, parserContext);
+				ComponentDefinition nestedComponent = parseElement(nestedElement, parserContext);
 				if (nestedComponent != null) {
 					nestedComponents.add(nestedComponent);
 				}
@@ -185,8 +183,7 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 			CompositeComponentDefinition compositeComponentDefinition = new CompositeComponentDefinition(
 					element.getNodeName(), parserContext.extractSource(element));
 			for (ComponentDefinition componentDefinition : nestedComponents) {
-				compositeComponentDefinition
-						.addNestedComponent(componentDefinition);
+				compositeComponentDefinition.addNestedComponent(componentDefinition);
 			}
 
 			// TODO CD implement custom CompositeComponentDefinition to carry
@@ -198,18 +195,16 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 	}
 
 	/**
-	 * Parses a single element and looks for tool:annotations on the
-	 * corresponding XSD definition.
+	 * Parses a single element and looks for tool:annotations on the corresponding XSD definition.
 	 * <p>
-	 * The tool:annotation can either be on the type definition itself or on a
-	 * referenced type definition. If a annotation is found the type itself it
-	 * will overrule any other on the referenced type.
+	 * The tool:annotation can either be on the type definition itself or on a referenced type
+	 * definition. If a annotation is found the type itself it will overrule any other on the
+	 * referenced type.
 	 * @param element the element to parse
 	 * @param parserContext the current parser context
 	 * @return a {@link ComponentDefinition} created from the given element
 	 */
-	private ComponentDefinition parseSingleElement(Node element,
-			ParserContext parserContext) {
+	private ComponentDefinition parseSingleElement(Node element, ParserContext parserContext) {
 
 		IStructuredModel model = null;
 		try {
@@ -223,8 +218,7 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 				// Get a list of nodes for given localName and namespace from
 				// the loaded StructuredModel
 				Document document = ((DOMModelImpl) model).getDocument();
-				NodeList nodes = document.getElementsByTagNameNS(namespaceUri,
-						localName);
+				NodeList nodes = document.getElementsByTagNameNS(namespaceUri, localName);
 
 				if (nodes.getLength() > 0) {
 
@@ -234,8 +228,7 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 
 					// Look for meta data. The query returns null in case no XSD
 					// can be found.
-					ModelQuery modelQuery = ModelQueryUtil
-							.getModelQuery(document);
+					ModelQuery modelQuery = ModelQueryUtil.getModelQuery(document);
 					if (modelQuery != null) {
 
 						// Get the element declaration from the model query.
@@ -252,25 +245,19 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 							// 1. Get component definition for directly attached
 							// annotations.
 							if (elementDeclaration.getAnnotation() != null) {
-								componentDefinition = processAnnotations(
-										element, elementDeclaration
-												.getAnnotation()
-												.getApplicationInformation(),
-										parserContext);
+								componentDefinition = processAnnotations(element,
+										elementDeclaration.getAnnotation()
+												.getApplicationInformation(), parserContext);
 							}
 
 							// 2. If no directly attached annotation could be
 							// found, try the referenced type definition if any.
 							if (componentDefinition == null
 									&& elementDeclaration.getTypeDefinition() != null
-									&& elementDeclaration.getTypeDefinition()
-											.getAnnotation() != null) {
-								componentDefinition = processAnnotations(
-										element, elementDeclaration
-												.getTypeDefinition()
-												.getAnnotation()
-												.getApplicationInformation(),
-										parserContext);
+									&& elementDeclaration.getTypeDefinition().getAnnotation() != null) {
+								componentDefinition = processAnnotations(element,
+										elementDeclaration.getTypeDefinition().getAnnotation()
+												.getApplicationInformation(), parserContext);
 
 							}
 
@@ -298,13 +285,12 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 	/**
 	 * Parses a list of xsd:appinfo elements and looks for tool:annotations
 	 * @param element the root element
-	 * @param appInfos the appinfo elements found on the XSD definition for the
-	 * element's type
+	 * @param appInfos the appinfo elements found on the XSD definition for the element's type
 	 * @param parserContext the current parser context
 	 * @return a {@link ComponentDefinition} created from the given element
 	 */
-	private ComponentDefinition processAnnotations(Node element,
-			List<Element> appInfos, ParserContext parserContext) {
+	private ComponentDefinition processAnnotations(Node element, List<Element> appInfos,
+			ParserContext parserContext) {
 
 		// Iterate the xsd:appinfo elements.
 		for (Element elem : appInfos) {
@@ -313,23 +299,17 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 			for (int j = 0; j < annotations.getLength(); j++) {
 				Node toolAnnotationElement = annotations.item(j);
 				if (toolAnnotationElement.getNodeType() == Node.ELEMENT_NODE
-						&& ANNOTATION_ELEMENT.equals(toolAnnotationElement
-								.getLocalName())
-						&& TOOL_NAMESPACE_URI.equals(toolAnnotationElement
-								.getNamespaceURI())) {
-					NodeList specialToolAnnotationElements = toolAnnotationElement
-							.getChildNodes();
+						&& ANNOTATION_ELEMENT.equals(toolAnnotationElement.getLocalName())
+						&& TOOL_NAMESPACE_URI.equals(toolAnnotationElement.getNamespaceURI())) {
+					NodeList specialToolAnnotationElements = toolAnnotationElement.getChildNodes();
 					// Iterate children for tool:exports elements.
-					for (int k = 0; k < specialToolAnnotationElements
-							.getLength(); k++) {
-						Node specialToolAnnotation = specialToolAnnotationElements
-								.item(k);
+					for (int k = 0; k < specialToolAnnotationElements.getLength(); k++) {
+						Node specialToolAnnotation = specialToolAnnotationElements.item(k);
 						if (specialToolAnnotation.getNodeType() == Node.ELEMENT_NODE
-								&& EXPORTS_ELEMENT.equals(specialToolAnnotation
-										.getLocalName())) {
+								&& EXPORTS_ELEMENT.equals(specialToolAnnotation.getLocalName())) {
 
-							return createBeanComponentDefinition(element,
-									parserContext, specialToolAnnotation);
+							return createBeanComponentDefinition(element, parserContext,
+									specialToolAnnotation);
 						}
 					}
 				}
@@ -339,8 +319,7 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 	}
 
 	/**
-	 * Creates a {@link ComponentDefinition} based on the attribute values of
-	 * the tool annotation.
+	 * Creates a {@link ComponentDefinition} based on the attribute values of the tool annotation.
 	 * @param element the element to create {@link ComponentDefinition} for
 	 * @param parserContext the current parser context
 	 * @param specialToolAnnotation the tool:exports annotation
@@ -350,11 +329,9 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 			ParserContext parserContext, Node specialToolAnnotation) {
 		NamedNodeMap attributes = specialToolAnnotation.getAttributes();
 		String id = (attributes.getNamedItem(IDENTIFIER_ATTRIBUTE) != null ? attributes
-				.getNamedItem(IDENTIFIER_ATTRIBUTE).getTextContent()
-				: DEFAULT_ID_XPATH);
-		String type = (attributes.getNamedItem(TYPE_ATTRIBUTE) != null ? attributes
-				.getNamedItem(TYPE_ATTRIBUTE).getTextContent()
-				: null);
+				.getNamedItem(IDENTIFIER_ATTRIBUTE).getTextContent() : DEFAULT_ID_XPATH);
+		String type = (attributes.getNamedItem(TYPE_ATTRIBUTE) != null ? attributes.getNamedItem(
+				TYPE_ATTRIBUTE).getTextContent() : null);
 
 		// Create the final BeanDefinition.
 		GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
@@ -365,21 +342,18 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 		// so that it will not be validated and can be filtered.
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
-		return new BeanComponentDefinition(beanDefinition, getIdentifier(
-				element, id, beanDefinition));
+		return new BeanComponentDefinition(beanDefinition, getIdentifier(element, id,
+				beanDefinition));
 	}
 
 	/**
 	 * Gets the identifier for a {@link ComponentDefinition}.
 	 * <p>
-	 * First the given XPath expression will be evaluated against the given
-	 * element. If this evaluation does not return any useful value, the
-	 * implementation will fall back to generate an identifier based on
-	 * {@link UniqueBeanNameGenerator#generateBeanName}.
-	 * @param element the element to evaluate the given identifier expression
-	 * against
-	 * @param identifierExpression XPath expression to identify the identifier
-	 * value
+	 * First the given XPath expression will be evaluated against the given element. If this
+	 * evaluation does not return any useful value, the implementation will fall back to generate an
+	 * identifier based on {@link UniqueBeanNameGenerator#generateBeanName}.
+	 * @param element the element to evaluate the given identifier expression against
+	 * @param identifierExpression XPath expression to identify the identifier value
 	 * @param beanDefinition a created BeanDefinition required for the
 	 * {@link UniqueBeanNameGenerator}
 	 * @return a string identifier for the given element
@@ -397,22 +371,18 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 		}
 
 		if (!StringUtils.hasText(identifier)) {
-			identifier = UniqueBeanNameGenerator.generateBeanName(
-					beanDefinition, beansConfig);
+			identifier = UniqueBeanNameGenerator.generateBeanName(beanDefinition, beansConfig);
 		}
 		return identifier;
 	}
 
 	/**
-	 * Returns the {@link IStructuredModel} for the {@link IBeansConfig}-backing
-	 * IFile.
+	 * Returns the {@link IStructuredModel} for the {@link IBeansConfig}-backing IFile.
 	 */
-	private IStructuredModel getStructuredModel() throws IOException,
-			CoreException {
+	private IStructuredModel getStructuredModel() throws IOException, CoreException {
 		IStructuredModel model;
-		model = StructuredModelManager.getModelManager()
-				.getExistingModelForRead(
-						(IFile) beansConfig.getElementResource());
+		model = StructuredModelManager.getModelManager().getExistingModelForRead(
+				(IFile) beansConfig.getElementResource());
 		if (model == null) {
 			model = StructuredModelManager.getModelManager().getModelForRead(
 					(IFile) beansConfig.getElementResource());

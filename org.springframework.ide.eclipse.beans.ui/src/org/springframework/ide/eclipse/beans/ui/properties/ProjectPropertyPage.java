@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
@@ -73,7 +74,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	private Map<String, Object> pageData;
 
 	private ConfigLocatorTab configLocatorTab;
-	
+
 	private boolean shouldTriggerScan = false;
 
 	public ProjectPropertyPage() {
@@ -125,12 +126,12 @@ public class ProjectPropertyPage extends PropertyPage {
 
 		// Pre-select specified tab item
 		folder.setSelection(selectedTab);
-		
+
 		// Open the scan dialog if required if coming from a nature added event
 		if (shouldTriggerScan) {
 			configFilesTab.handleScanButtonPressed();
 		}
-		
+
 		return folder;
 	}
 
@@ -165,9 +166,13 @@ public class ProjectPropertyPage extends PropertyPage {
 
 		// Now save modified project description
 		if (userMadeChanges) {
+			SpringCorePreferences.getProjectPreferences(project.getProject(),
+					BeansCorePlugin.PLUGIN_ID).putBoolean(
+					BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
+					configFilesTab.shouldIgnoreMissingNamespaceHandler());
 			newProject.saveDescription();
 		}
-		
+
 		if (configLocatorTab != null) {
 			configLocatorTab.performOk();
 		}
@@ -202,8 +207,7 @@ public class ProjectPropertyPage extends PropertyPage {
 					&& this.pageData.get(SELECTED_RESOURCE) instanceof IModelElement) {
 				this.selectedModelElement = (IModelElement) this.pageData.get(SELECTED_RESOURCE);
 			}
-			if (this.pageData.containsKey(SCAN)
-					&& this.pageData.get(SCAN) instanceof Boolean) {
+			if (this.pageData.containsKey(SCAN) && this.pageData.get(SCAN) instanceof Boolean) {
 				this.shouldTriggerScan = (Boolean) this.pageData.get(SCAN);
 			}
 		}
