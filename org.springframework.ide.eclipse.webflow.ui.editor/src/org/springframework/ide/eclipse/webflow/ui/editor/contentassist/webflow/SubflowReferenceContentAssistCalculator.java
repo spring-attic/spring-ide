@@ -12,10 +12,9 @@ package org.springframework.ide.eclipse.webflow.ui.editor.contentassist.webflow;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.ui.editor.WebflowNamespaceUtils;
@@ -26,41 +25,34 @@ import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.Webflow
  * @author Christian Dupuis
  * @since 2.0.2
  */
-@SuppressWarnings("restriction")
-public class SubflowReferenceContentAssistCalculator implements
-		IContentAssistCalculator {
+public class SubflowReferenceContentAssistCalculator implements IContentAssistCalculator {
 
 	private static final int RELEVANCE = 10;
 
-	public void computeProposals(ContentAssistRequest request,
-			String matchString, String attributeName, String namespace,
-			String namepacePrefix) {
+	public void computeProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
 
-		IFile file = BeansEditorUtils.getFile(request);
+		IFile file = context.getFile();
 		for (String flowId : WebflowNamespaceUtils.getWebflowConfigNames()) {
-			if (flowId.toLowerCase().startsWith(matchString.toLowerCase())) {
-				acceptSearchMatch(request, flowId, file, matchString);
+			if (flowId.toLowerCase().startsWith(context.getMatchString().toLowerCase())) {
+				acceptSearchMatch(recorder, flowId, file, context.getMatchString());
 			}
 		}
 	}
 
-	private void acceptSearchMatch(ContentAssistRequest request, String flowId,
+	private void acceptSearchMatch(IContentAssistProposalRecorder recorder, String flowId,
 			IFile file, String prefix) {
-		IWebflowConfig config = Activator.getModel().getProject(
-				file.getProject()).getConfig(flowId);
+		IWebflowConfig config = Activator.getModel().getProject(file.getProject())
+				.getConfig(flowId);
 		String fileName = "";
 		if (config != null) {
 			fileName = config.getResource().getProjectRelativePath().toString();
 		}
 		String displayText = flowId + " - " + fileName;
 
-		Image image = WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
-		BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-				flowId, request.getReplacementBeginPosition(), request
-						.getReplacementLength(), flowId.length(), image,
-				displayText, null, RELEVANCE, config);
+		Image image = WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 
-		request.addProposal(proposal);
+		recorder.recordProposal(image, RELEVANCE, displayText, flowId, config);
 	}
+
 }

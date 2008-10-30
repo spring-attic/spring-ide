@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
@@ -35,13 +33,13 @@ public class FieldContentAssistCalculator extends ClassContentAssistCalculator {
 		super(false);
 	}
 	
-	public void computeProposals(ContentAssistRequest request,
-			String matchString, String attributeName, String namespace,
-			String namepacePrefix) {
+	public void computeProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		String matchString = context.getMatchString();
 		int ix = matchString.lastIndexOf('.');
 		if (ix > 0) {
 			String typeName = matchString.substring(0, ix);
-			IFile file = BeansEditorUtils.getFile(request);
+			IFile file = context.getFile();
 			IType type = JdtUtils.getJavaType(file.getProject(), typeName);
 			if (type != null) {
 				try {
@@ -49,7 +47,7 @@ public class FieldContentAssistCalculator extends ClassContentAssistCalculator {
 					for (IField field : fields) {
 						if (Flags.isStatic(field.getFlags())
 								&& Flags.isPublic(field.getFlags())) {
-							acceptSearchMatch(request, field, typeName);
+							acceptSearchMatch(recorder, field, typeName);
 						}
 					}
 				}
@@ -58,24 +56,19 @@ public class FieldContentAssistCalculator extends ClassContentAssistCalculator {
 				return;
 			}
 		}
-		super.computeProposals(request, matchString, attributeName, namespace,
-				namepacePrefix);
+		super.computeProposals(context, recorder);
 
 	}
 
-	private void acceptSearchMatch(ContentAssistRequest request, IField field,
+	private void acceptSearchMatch(IContentAssistProposalRecorder recorder, IField field,
 			String typeName) {
 		try {
 			String replaceText = typeName + "." + field.getElementName();
 			String displayText = field.getElementName();
 			Image image = imageProvider.getImageLabel(field, field.getFlags()
 					| JavaElementImageProvider.SMALL_ICONS);
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-					replaceText, request.getReplacementBeginPosition(), request
-							.getReplacementLength(), replaceText.length(),
-					image, displayText, null, 10, field);
+			recorder.recordProposal(image, 10, displayText, replaceText, field);
 
-			request.addProposal(proposal);
 		}
 		catch (JavaModelException e) {
 		}

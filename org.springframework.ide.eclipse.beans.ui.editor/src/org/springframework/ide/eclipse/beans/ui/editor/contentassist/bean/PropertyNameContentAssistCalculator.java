@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -38,24 +38,23 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 
 	private JavaElementImageProvider imageProvider = new JavaElementImageProvider();
 
-	public void computeProposals(ContentAssistRequest request, String matchString,
-			String attributeName, String namespace, String namepacePrefix) {
+	public void computeProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
 
-		if (request.getParent() != null && request.getParent().getParentNode() != null
-				&& "bean".equals(request.getParent().getParentNode().getLocalName())) {
+		if (context.getParentNode() != null && context.getParentNode().getParentNode() != null
+				&& "bean".equals(context.getParentNode().getParentNode().getLocalName())) {
 
-			String className = BeansEditorUtils.getClassNameForBean(BeansEditorUtils
-					.getFile(request), request.getParent().getParentNode().getOwnerDocument(),
-					request.getParent().getParentNode());
-			IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request).getProject(),
-					className);
+			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+					.getParentNode().getParentNode().getOwnerDocument(), context.getParentNode()
+					.getParentNode());
+			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 			if (type != null) {
-				addPropertyNameAttributeValueProposals(request, matchString, "", type);
+				addPropertyNameAttributeValueProposals(recorder, context.getMatchString(), "", type);
 			}
 		}
 	}
 
-	protected void addPropertyNameAttributeValueProposals(ContentAssistRequest request,
+	protected void addPropertyNameAttributeValueProposals(IContentAssistProposalRecorder recorder,
 			String prefix, String oldPrefix, IType type) {
 
 		// resolve type of indexed and nested property path
@@ -81,7 +80,7 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 						if (returnType != null) {
 							String newPrefix = oldPrefix + firstPrefix + ".";
 
-							addPropertyNameAttributeValueProposals(request, lastPrefix, newPrefix,
+							addPropertyNameAttributeValueProposals(recorder, lastPrefix, newPrefix,
 									returnType);
 						}
 						return;
@@ -98,7 +97,7 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 				if (methods != null && methods.size() > 0) {
 					Iterator<?> iterator = methods.iterator();
 					while (iterator.hasNext()) {
-						createMethodProposal(request, (IMethod) iterator.next(), oldPrefix);
+						createMethodProposal(recorder, (IMethod) iterator.next(), oldPrefix);
 					}
 				}
 			}
@@ -108,7 +107,8 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 		}
 	}
 
-	protected void createMethodProposal(ContentAssistRequest request, IMethod method, String prefix) {
+	protected void createMethodProposal(IContentAssistProposalRecorder recorder, IMethod method,
+			String prefix) {
 		try {
 			String[] parameterNames = method.getParameterNames();
 			String[] parameterTypes = JdtUtils.getParameterTypesString(method);
@@ -134,15 +134,12 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 
 			Image image = imageProvider.getImageLabel(method, method.getFlags()
 					| JavaElementImageProvider.SMALL_ICONS);
-
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(replaceText,
-					request.getReplacementBeginPosition(), request.getReplacementLength(),
-					replaceText.length(), image, displayText, null, PROPERTY_RELEVANCE, method);
-			request.addProposal(proposal);
+			
+			recorder.recordProposal(image, PROPERTY_RELEVANCE, displayText, replaceText, method);
 		}
 		catch (JavaModelException e) {
 			// do nothing
 		}
 	}
-	
+
 }

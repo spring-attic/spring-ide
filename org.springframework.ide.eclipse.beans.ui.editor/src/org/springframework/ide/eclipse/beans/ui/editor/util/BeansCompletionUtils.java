@@ -17,8 +17,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -27,34 +28,35 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class BeansCompletionUtils {
-	
-	public static void addBeanReferenceProposals(ContentAssistRequest request,
-			String prefix, Document document, boolean showExternal) {
-		addBeanReferenceProposals(request, prefix, document, showExternal, new ArrayList<String>());
+
+	public static void addBeanReferenceProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder, boolean showExternal) {
+		addBeanReferenceProposals(context, recorder, showExternal, new ArrayList<String>());
 	}
-	
-	public static void addBeanReferenceProposals(ContentAssistRequest request,
-			String prefix, Document document, boolean showExternal, List<String> requiredTypes) {
+
+	public static void addBeanReferenceProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder, boolean showExternal,
+			List<String> requiredTypes) {
+		String prefix = context.getMatchString();
+		IFile file = context.getFile();
+		Document document = context.getNode().getOwnerDocument();
+		
 		if (prefix == null) {
 			prefix = "";
 		}
-		IFile file = BeansEditorUtils.getFile(request);
 		if (document != null) {
-			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
-					request, requiredTypes);
-			Map<String, Node> beanNodes = BeansEditorUtils
-					.getReferenceableNodes(document);
+			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(recorder,
+					requiredTypes);
+			Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(document);
 			for (Map.Entry<String, Node> node : beanNodes.entrySet()) {
 				Node beanNode = node.getValue();
-				requestor.acceptSearchMatch(node.getKey(), beanNode, file,
-						prefix);
+				requestor.acceptSearchMatch(node.getKey(), beanNode, file, prefix);
 			}
 			if (showExternal) {
 				Set<IBean> beansList = BeansEditorUtils.getBeansFromConfigSets(file);
 				Iterator<IBean> iterator = beansList.iterator();
-				while(iterator.hasNext()) {
+				while (iterator.hasNext()) {
 					IBean bean = iterator.next();
 					requestor.acceptSearchMatch(bean, file, prefix);
 				}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,10 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DefaultContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DefaultContentAssistProposalRecorder;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.PropertyBeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
@@ -45,11 +49,6 @@ import org.w3c.dom.Node;
  */
 @SuppressWarnings("restriction")
 public class BeansContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
-
-	private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Node node) {
-		BeansCompletionUtils.addBeanReferenceProposals(request, prefix, node.getOwnerDocument(),
-				true);
-	}
 
 	private void addPropertyNameAttributeNameProposals(ContentAssistRequest request, String prefix,
 			String oldPrefix, Node node, List classNames, boolean attrAtLocationHasValue,
@@ -228,9 +227,20 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 		if ("bean".equals(node.getNodeName())) {
 			if ("http://www.springframework.org/schema/p".equals(namespace)
 					&& attributeName.endsWith("-ref")) {
-				addBeanReferenceProposals(request, matchString, node);
+
+				IContentAssistContext context = new DefaultContentAssistContext(request,
+						attributeName, matchString);
+				IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(
+						request);
+				addBeanReferenceProposals(context, recorder);
 			}
 		}
+	}
+
+	private void addBeanReferenceProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		BeansCompletionUtils.addBeanReferenceProposals(context, recorder, true);
+
 	}
 
 }

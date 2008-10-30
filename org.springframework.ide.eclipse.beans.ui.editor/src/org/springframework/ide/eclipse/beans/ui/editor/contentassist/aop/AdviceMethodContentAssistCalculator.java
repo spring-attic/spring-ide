@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist.aop;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
@@ -25,32 +25,31 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * @author Christian Dupuis
  * @since 2.0.2
  */
-@SuppressWarnings("restriction")
-public class AdiviceMethodContentAssistCalculator extends
+public class AdviceMethodContentAssistCalculator extends
 		MethodContentAssistCalculator {
 
-	public AdiviceMethodContentAssistCalculator() {
+	public AdviceMethodContentAssistCalculator() {
 		super(new FlagsMethodFilter(FlagsMethodFilter.PUBLIC
 				| FlagsMethodFilter.NOT_CONSTRUCTOR
 				| FlagsMethodFilter.NOT_INTERFACE));
 	}
 
 	@Override
-	protected IType calculateType(ContentAssistRequest request,
-			String attributeName) {
-		if (request.getParent() != null
-				&& request.getParent().getParentNode() != null
-				&& "aspect".equals(request.getParent().getParentNode()
+	protected IType calculateType(IContentAssistContext context) {
+		if (context.getParentNode() != null
+				&& context.getParentNode().getParentNode() != null
+				&& "aspect".equals(context.getParentNode().getParentNode()
 						.getLocalName())) {
-			String ref = BeansEditorUtils.getAttribute(request.getParent()
+			String ref = BeansEditorUtils.getAttribute(context.getParentNode()
 					.getParentNode(), "ref");
 			if (ref != null) {
-				IFile file = BeansEditorUtils.getFile(request);
+				IFile file = context.getFile();
 				String className = BeansEditorUtils.getClassNameForBean(file,
-						request.getNode().getOwnerDocument(), ref);
+						context.getNode().getOwnerDocument(), ref);
 				return JdtUtils.getJavaType(file.getProject(), className);
 			}
 		}
 		return null;
 	}
+	
 }

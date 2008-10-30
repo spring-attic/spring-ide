@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,8 +82,13 @@ public abstract class NamespaceContentAssistProcessorSupport extends AbstractCon
 
 		IContentAssistCalculator calculator = locateContentAssistCalculator(parentNamespaceUri,
 				parentNodeName, node.getLocalName(), attributeName);
+
+		IContentAssistContext context = new DefaultContentAssistContext(request, attributeName,
+				matchString);
+		IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(request);
+
 		if (calculator != null) {
-			calculator.computeProposals(request, matchString, attributeName, namespace, prefix);
+			calculator.computeProposals(context, recorder);
 		}
 		postComputeAttributeValueProposals(request, node, matchString, attributeName, namespace,
 				prefix);
@@ -129,7 +134,7 @@ public abstract class NamespaceContentAssistProcessorSupport extends AbstractCon
 
 	/**
 	 * Creates a name from the <code>nodeName</code> and <code>attributeName</code>.
-	 * @param parentNamespaceUri the namespace uri of the parent node 
+	 * @param parentNamespaceUri the namespace uri of the parent node
 	 * @param parentNodeName the local name of the parent node
 	 * @param nodeName the local (non-namespace qualified) name of the element
 	 * @param attributeName the local (non-namespace qualified) name of the attribute

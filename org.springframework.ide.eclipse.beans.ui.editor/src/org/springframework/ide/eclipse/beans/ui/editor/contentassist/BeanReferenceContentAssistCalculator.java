@@ -10,19 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
 
 /**
- * {@link IContentAssistCalculator} that can be used to located references to
- * {@link IBean}.
+ * {@link IContentAssistCalculator} that can be used to located references to {@link IBean}.
  * @author Christian Dupuis
  * @since 2.0.2
  */
-@SuppressWarnings("restriction")
-public class BeanReferenceContentAssistCalculator implements
-		IContentAssistCalculator {
+public class BeanReferenceContentAssistCalculator implements IContentAssistCalculator {
 
 	protected boolean showExternal;
 
@@ -32,11 +28,11 @@ public class BeanReferenceContentAssistCalculator implements
 	public BeanReferenceContentAssistCalculator() {
 		this(true);
 	}
- 
+
 	/**
 	 * Constructor
-	 * @param showExternal true if those beans should be displayed that are not
-	 * located in the current file
+	 * @param showExternal true if those beans should be displayed that are not located in the
+	 * current file
 	 */
 	public BeanReferenceContentAssistCalculator(boolean showExternal) {
 		this.showExternal = showExternal;
@@ -46,10 +42,8 @@ public class BeanReferenceContentAssistCalculator implements
 	 * Compute the proposals. This implementation simply delegates to
 	 * {@link BeansCompletionUtils#addBeanReferenceProposals()}.
 	 */
-	public void computeProposals(ContentAssistRequest request,
-			String matchString, String attributeName, String namespace,
-			String namepacePrefix) {
-		BeansCompletionUtils.addBeanReferenceProposals(request, matchString,
-				request.getNode().getOwnerDocument(), showExternal);
+	public void computeProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		BeansCompletionUtils.addBeanReferenceProposals(context, recorder, showExternal);
 	}
 }

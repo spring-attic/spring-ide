@@ -16,41 +16,38 @@ import java.util.List;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
- * {@link IContentAssistCalculator} that extends
- * {@link BeanReferenceContentAssistCalculator} in order to give bean reference
- * proposals that have a matching types a higher proposal priority.
+ * {@link IContentAssistCalculator} that extends {@link BeanReferenceContentAssistCalculator} in
+ * order to give bean reference proposals that have a matching types a higher proposal priority.
  * @author Christian Dupuis
  * @since 2.0.4
  */
-@SuppressWarnings("restriction")
 public class PropertyBeanReferenceContentAssistCalculator extends
 		BeanReferenceContentAssistCalculator {
 
 	@Override
-	public void computeProposals(ContentAssistRequest request, String matchString,
-			String attributeName, String namespace, String namepacePrefix) {
-		BeansCompletionUtils.addBeanReferenceProposals(request, matchString, request.getNode()
-				.getOwnerDocument(), showExternal, calculateType(request, attributeName));
+	public void computeProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		BeansCompletionUtils.addBeanReferenceProposals(context, recorder, showExternal,
+				calculateType(context, recorder));
 	}
 
-	protected List<String> calculateType(ContentAssistRequest request, String attributeName) {
-		if (request.getParent() != null && request.getParent().getParentNode() != null
-				&& "bean".equals(request.getParent().getParentNode().getLocalName())) {
+	protected List<String> calculateType(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		if (context.getParentNode() != null && context.getParentNode().getParentNode() != null
+				&& "bean".equals(context.getParentNode().getParentNode().getLocalName())) {
 
-			String className = BeansEditorUtils.getClassNameForBean(BeansEditorUtils
-					.getFile(request), request.getParent().getParentNode().getOwnerDocument(),
-					request.getParent().getParentNode());
-			IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request).getProject(),
-					className);
+			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+					.getParentNode().getParentNode().getOwnerDocument(), context.getParentNode()
+					.getParentNode());
+			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 
-			String propertyName = BeansEditorUtils.getAttribute(request.getParent(), "name");
+			String propertyName = BeansEditorUtils.getAttribute(context.getParentNode(), "name");
 			if (propertyName != null) {
 				try {
 					IMethod method = Introspector.getWritableProperty(type, propertyName);
@@ -60,8 +57,8 @@ public class PropertyBeanReferenceContentAssistCalculator extends
 						String parameterTypeName = JdtUtils.resolveClassName(method
 								.getParameterTypes()[0], type);
 						if (parameterTypeName != null) {
-							IType parameterType = JdtUtils.getJavaType(BeansEditorUtils.getFile(
-									request).getProject(), parameterTypeName);
+							IType parameterType = JdtUtils.getJavaType(context.getFile()
+									.getProject(), parameterTypeName);
 							return JdtUtils
 									.getFlatListOfClassAndInterfaceNames(parameterType, type);
 						}

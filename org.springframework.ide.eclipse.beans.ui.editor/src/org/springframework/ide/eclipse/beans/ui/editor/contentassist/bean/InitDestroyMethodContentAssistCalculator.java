@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NodeClassMethodContentAssistCalculator;
 import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
 import org.springframework.ide.eclipse.core.java.IMethodFilter;
@@ -23,7 +23,6 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @since 2.0.2
  */
-@SuppressWarnings("restriction")
 public class InitDestroyMethodContentAssistCalculator extends
 		NodeClassMethodContentAssistCalculator {
 
@@ -36,8 +35,8 @@ public class InitDestroyMethodContentAssistCalculator extends
 	}
 
 	@Override
-	protected Node getClassNode(ContentAssistRequest request, String attributeName) {
-		return request.getNode();
+	protected Node getClassNode(IContentAssistContext context) {
+		return context.getNode();
 	}
 
 }

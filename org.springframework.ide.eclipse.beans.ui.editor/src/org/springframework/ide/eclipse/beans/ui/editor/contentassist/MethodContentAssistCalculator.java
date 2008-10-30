@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,17 +22,14 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
- * {@link IContentAssistCalculator} that can be used to calculate proposals for
- * {@link IMethod}.
+ * {@link IContentAssistCalculator} that can be used to calculate proposals for {@link IMethod}.
  * <p>
- * This implementation uses a customizable {@link IMethodFilter} to filter for
- * appropriate methods.
+ * This implementation uses a customizable {@link IMethodFilter} to filter for appropriate methods.
  * @author Christian Dupuis
  * @since 2.0.2
  */
 @SuppressWarnings("restriction")
-public abstract class MethodContentAssistCalculator implements
-		IContentAssistCalculator {
+public abstract class MethodContentAssistCalculator implements IContentAssistCalculator {
 
 	public static final int METHOD_RELEVANCE = 10;
 
@@ -51,40 +48,35 @@ public abstract class MethodContentAssistCalculator implements
 	}
 
 	/**
-	 * Calculate the {@link IType} that should be searched for matching methods.
-	 * This method is intended to be implemented by subclasses as there is no
-	 * common approach to locate the {@link IType}.
-	 * @param request the content assist request to access meta data
-	 * @param attributeName the name of the current attribute
+	 * Calculate the {@link IType} that should be searched for matching methods. This method is
+	 * intended to be implemented by subclasses as there is no common approach to locate the
+	 * {@link IType}.
+	 * @param context the current context of the content assist request
 	 * @return the {@link IType} that should be used for searching
 	 */
-	protected abstract IType calculateType(ContentAssistRequest request,
-			String attributeName);
+	protected abstract IType calculateType(IContentAssistContext context);
 
 	/**
-	 * Calculate proposals. This implementation calls {@link #calculateType} to
-	 * get the root for the search and passes the returned {@link IType} and the
-	 * instance's {@link IMethodFilter} to
+	 * Calculate proposals. This implementation calls {@link #calculateType} to get the root for the
+	 * search and passes the returned {@link IType} and the instance's {@link IMethodFilter} to
 	 * {@link Introspector#findAllMethods(IType, String, IMethodFilter)}.
 	 * <p>
-	 * If a match is found the {@link #createMethodProposal} is called to report
-	 * the match as a proposal in the content assist request.
+	 * If a match is found the {@link #createMethodProposal} is called to report the match as a
+	 * proposal in the content assist request.
 	 */
-	public void computeProposals(ContentAssistRequest request,
-			String matchString, String attributeName, String namespace,
-			String namepacePrefix) {
-		for (IMethod method : Introspector.findAllMethods(calculateType(
-				request, attributeName), matchString, filter)) {
-			createMethodProposal(request, method);
+	public void computeProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		for (IMethod method : Introspector.findAllMethods(calculateType(context), context
+				.getMatchString(), filter)) {
+			createMethodProposal(recorder, method);
 		}
 	}
 
 	/**
-	 * Create a {@link BeansJavaCompletionProposal} for the given
-	 * {@link IMethod} and report it on the {@link ContentAssistRequest}.
+	 * Create a {@link BeansJavaCompletionProposal} for the given {@link IMethod} and report it on
+	 * the {@link ContentAssistRequest}.
 	 */
-	protected void createMethodProposal(ContentAssistRequest request,
-			IMethod method) {
+	protected void createMethodProposal(IContentAssistProposalRecorder recorder, IMethod method) {
 		try {
 			String[] parameterNames = method.getParameterNames();
 			String[] parameterTypes = JdtUtils.getParameterTypesString(method);
@@ -130,12 +122,8 @@ public abstract class MethodContentAssistCalculator implements
 			String displayText = buf.toString();
 			Image image = imageProvider.getImageLabel(method, method.getFlags()
 					| JavaElementImageProvider.SMALL_ICONS);
-
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-					replaceText, request.getReplacementBeginPosition(), request
-							.getReplacementLength(), replaceText.length(),
-					image, displayText, null, METHOD_RELEVANCE, method);
-			request.addProposal(proposal);
+			
+			recorder.recordProposal(image, METHOD_RELEVANCE, displayText, replaceText, method);
 		}
 		catch (JavaModelException e) {
 			// do nothing

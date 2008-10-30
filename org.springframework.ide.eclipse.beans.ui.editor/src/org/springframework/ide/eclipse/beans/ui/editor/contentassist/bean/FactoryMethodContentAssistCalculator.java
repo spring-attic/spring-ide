@@ -12,8 +12,9 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
@@ -29,21 +30,20 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @since 2.2.0
  */
-@SuppressWarnings("restriction")
 public class FactoryMethodContentAssistCalculator implements IContentAssistCalculator {
 
-	public void computeProposals(ContentAssistRequest request, String matchString,
-			String attributeName, String namespace, String namepacePrefix) {
-		Node node = request.getNode();
+	public void computeProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		Node node = context.getNode();
 		NamedNodeMap attributes = node.getAttributes();
 		Node factoryBean = attributes.getNamedItem("factory-bean");
-		
+
 		String factoryClassName = null;
 		boolean isStatic;
 		if (factoryBean != null) {
 			// instance factory method
-			factoryClassName = BeansEditorUtils.getClassNameForBean(BeansEditorUtils
-					.getFile(request), node.getOwnerDocument(), factoryBean.getNodeValue());
+			factoryClassName = BeansEditorUtils.getClassNameForBean(context.getFile(), node
+					.getOwnerDocument(), factoryBean.getNodeValue());
 			isStatic = false;
 		}
 		else {
@@ -51,39 +51,35 @@ public class FactoryMethodContentAssistCalculator implements IContentAssistCalcu
 			factoryClassName = BeansEditorUtils.getAttribute(node, "class");
 			isStatic = true;
 		}
-		
+
 		if (factoryClassName != null) {
-			addFactoryMethodAttributeValueProposals(request, matchString, factoryClassName,
-					isStatic);
+			addFactoryMethodAttributeValueProposals(recorder, context, factoryClassName, isStatic);
 		}
 	}
 
-	private void addFactoryMethodAttributeValueProposals(ContentAssistRequest request,
-			String prefix, final String factoryClassName, boolean isStatic) {
-		if (BeansEditorUtils.getFile(request) instanceof IFile) {
-			final IFile file = BeansEditorUtils.getFile(request);
+	private void addFactoryMethodAttributeValueProposals(IContentAssistProposalRecorder recorder,
+			IContentAssistContext context, final String factoryClassName, boolean isStatic) {
+		final IFile file = context.getFile();
 
-			IMethodFilter filter = null;
-			if (isStatic) {
-				filter = new FlagsMethodFilter(FlagsMethodFilter.STATIC
-						| FlagsMethodFilter.NOT_VOID | FlagsMethodFilter.NOT_INTERFACE
-						| FlagsMethodFilter.NOT_CONSTRUCTOR);
-			}
-			else {
-				filter = new FlagsMethodFilter(FlagsMethodFilter.NOT_VOID
-						| FlagsMethodFilter.NOT_INTERFACE | FlagsMethodFilter.NOT_CONSTRUCTOR);
-			}
-
-			IContentAssistCalculator calculator = new MethodContentAssistCalculator(filter) {
-
-				@Override
-				protected IType calculateType(ContentAssistRequest request, String attributeName) {
-					return JdtUtils.getJavaType(file.getProject(), factoryClassName);
-				}
-			};
-
-			calculator.computeProposals(request, prefix, null, null, null);
+		IMethodFilter filter = null;
+		if (isStatic) {
+			filter = new FlagsMethodFilter(FlagsMethodFilter.STATIC | FlagsMethodFilter.NOT_VOID
+					| FlagsMethodFilter.NOT_INTERFACE | FlagsMethodFilter.NOT_CONSTRUCTOR);
 		}
+		else {
+			filter = new FlagsMethodFilter(FlagsMethodFilter.NOT_VOID
+					| FlagsMethodFilter.NOT_INTERFACE | FlagsMethodFilter.NOT_CONSTRUCTOR);
+		}
+
+		IContentAssistCalculator calculator = new MethodContentAssistCalculator(filter) {
+
+			@Override
+			protected IType calculateType(IContentAssistContext context) {
+				return JdtUtils.getJavaType(file.getProject(), factoryClassName);
+			}
+		};
+
+		calculator.computeProposals(context, recorder);
 	}
 
 }

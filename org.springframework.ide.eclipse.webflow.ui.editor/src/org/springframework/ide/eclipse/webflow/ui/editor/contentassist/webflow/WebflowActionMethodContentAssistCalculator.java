@@ -13,9 +13,9 @@ package org.springframework.ide.eclipse.webflow.ui.editor.contentassist.webflow;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.IMethodFilter;
@@ -25,12 +25,10 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelU
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 
 /**
- * {@link MethodContentAssistCalculator} extension that is used to propose
- * action methods.
+ * {@link MethodContentAssistCalculator} extension that is used to propose action methods.
  * @author Christian Dupuis
  * @since 2.0.2
  */
-@SuppressWarnings("restriction")
 public abstract class WebflowActionMethodContentAssistCalculator extends
 		MethodContentAssistCalculator {
 
@@ -39,25 +37,21 @@ public abstract class WebflowActionMethodContentAssistCalculator extends
 	}
 
 	@Override
-	protected final IType calculateType(ContentAssistRequest request,
-			String attributeName) {
-		if (BeansEditorUtils.hasAttribute(request.getNode(), "bean")) {
+	protected final IType calculateType(IContentAssistContext context) {
+		if (BeansEditorUtils.hasAttribute(context.getNode(), "bean")) {
 			String className = null;
-			IWebflowConfig config = Activator.getModel().getProject(
-					BeansEditorUtils.getFile(request).getProject()).getConfig(
-					BeansEditorUtils.getFile(request));
+			IWebflowConfig config = Activator.getModel().getProject(context.getFile().getProject())
+					.getConfig(context.getFile());
 
 			if (config != null) {
 				Set<IBean> beans = WebflowModelUtils.getBeans(config);
 				for (IBean bean : beans) {
 					if (bean.getElementName().equals(
-							BeansEditorUtils.getAttribute(request.getNode(),
-									"bean"))) {
+							BeansEditorUtils.getAttribute(context.getNode(), "bean"))) {
 						className = BeansModelUtils.getBeanClass(bean, null);
 					}
 				}
-				return JdtUtils.getJavaType(BeansEditorUtils.getFile(request)
-						.getProject(), className);
+				return JdtUtils.getJavaType(context.getFile().getProject(), className);
 			}
 		}
 		return null;

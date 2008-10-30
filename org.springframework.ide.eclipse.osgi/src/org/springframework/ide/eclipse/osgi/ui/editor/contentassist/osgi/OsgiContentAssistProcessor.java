@@ -12,9 +12,9 @@ package org.springframework.ide.eclipse.osgi.ui.editor.contentassist.osgi;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
@@ -23,12 +23,11 @@ import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
- * {@link INamespaceContentAssistProcessor} implementation responsible for the
- * <code>osgi:*</code> namespace.
+ * {@link INamespaceContentAssistProcessor} implementation responsible for the <code>osgi:*</code>
+ * namespace.
  * @author Christian Dupuis
  * @since 2.0.1
  */
-@SuppressWarnings("restriction")
 public class OsgiContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
 
 	@Override
@@ -52,14 +51,13 @@ public class OsgiContentAssistProcessor extends NamespaceContentAssistProcessorS
 						| FlagsMethodFilter.NOT_CONSTRUCTOR)) {
 
 			@Override
-			protected IType calculateType(ContentAssistRequest request, String attributeName) {
-				if (request.getNode() != null
-						&& "registration-listener".equals(request.getNode().getLocalName())) {
-					String ref = BeansEditorUtils.getAttribute(request.getNode(),
-							"ref");
+			protected IType calculateType(IContentAssistContext context) {
+				if (context.getNode() != null
+						&& "registration-listener".equals(context.getNode().getLocalName())) {
+					String ref = BeansEditorUtils.getAttribute(context.getNode(), "ref");
 					if (ref != null) {
-						IFile file = BeansEditorUtils.getFile(request);
-						String className = BeansEditorUtils.getClassNameForBean(file, request
+						IFile file = context.getFile();
+						String className = BeansEditorUtils.getClassNameForBean(file, context
 								.getNode().getOwnerDocument(), ref);
 						return JdtUtils.getJavaType(file.getProject(), className);
 					}

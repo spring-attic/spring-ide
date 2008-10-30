@@ -13,11 +13,11 @@ package org.springframework.ide.eclipse.webflow.ui.editor.contentassist.webflow;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeanReferenceSearchRequestor;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -27,23 +27,20 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
  * @author Christian Dupuis
  * @since 2.0.2
  */
-@SuppressWarnings("restriction")
-public class WebflowBeanReferenceContentAssistCalculator implements
-		IContentAssistCalculator {
+public class WebflowBeanReferenceContentAssistCalculator implements IContentAssistCalculator {
 
-	public void computeProposals(ContentAssistRequest request,
-			String matchString, String attributeName, String namespace,
-			String namepacePrefix) {
+	public void computeProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		String matchString = context.getMatchString();
+		
 		if (matchString == null) {
 			matchString = "";
 		}
 
-		IFile file = BeansEditorUtils.getFile(request);
-		BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
-				request);
+		IFile file = context.getFile();
+		BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(recorder);
 
-		IWebflowConfig config = Activator.getModel().getProject(
-				file.getProject()).getConfig(file);
+		IWebflowConfig config = Activator.getModel().getProject(file.getProject()).getConfig(file);
 		if (config != null) {
 			Set<IBean> beans = WebflowModelUtils.getBeans(config);
 			for (IBean bean : beans) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,8 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Node;
@@ -71,45 +72,41 @@ public class BeansJavaCompletionUtils {
 
 	/**
 	 * Add class and package content assist proposals that match the given <code>prefix</code>.
-	 * @param request the {@link ContentAssistRequest} to add the proposals
-	 * @param prefix the prefix
 	 */
-	public static void addClassValueProposals(ContentAssistRequest request, String prefix) {
-		addClassValueProposals(request, prefix, FLAG_PACKAGE | FLAG_CLASS);
+	public static void addClassValueProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		addClassValueProposals(context, recorder, FLAG_PACKAGE | FLAG_CLASS);
 	}
 
 	/**
 	 * Add interface content assist proposals that match the given <code>prefix</code>.
-	 * @param request the {@link ContentAssistRequest} to add the proposals
-	 * @param prefix the prefix
 	 */
-	public static void addInterfaceValueProposals(ContentAssistRequest request, String prefix) {
-		addClassValueProposals(request, prefix, FLAG_PACKAGE | FLAG_INTERFACE);
+	public static void addInterfaceValueProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		addClassValueProposals(context, recorder, FLAG_PACKAGE | FLAG_INTERFACE);
 	}
 
 	/**
 	 * Add package content assist proposals that match the given <code>prefix</code>.
-	 * @param request the {@link ContentAssistRequest} to add the proposals
-	 * @param prefix the prefix
 	 */
-	public static void addPackageValueProposals(ContentAssistRequest request, String prefix) {
-		addClassValueProposals(request, prefix, FLAG_PACKAGE);
+	public static void addPackageValueProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder) {
+		addClassValueProposals(context, recorder, FLAG_PACKAGE);
 	}
 
 	/**
 	 * Add class and package content assist proposals that match the given <code>prefix</code>.
-	 * @param request the {@link ContentAssistRequest} to add the proposals
-	 * @param prefix the prefix
-	 * @param interfaceRequired true if only interfaces are requested
 	 */
-	public static void addClassValueProposals(ContentAssistRequest request, String prefix, int flags) {
+	public static void addClassValueProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder, int flags) {
+		String prefix = context.getMatchString();
 
 		if (prefix == null || prefix.length() == 0) {
 			return;
 		}
 
 		try {
-			ICompilationUnit unit = createSourceCompilationUnit(request, prefix);
+			ICompilationUnit unit = createSourceCompilationUnit(context.getFile(), prefix);
 			// Special handling of inner classes
 			boolean innerClass = prefix.indexOf('$') > prefix.lastIndexOf('.');
 			prefix = prefix.replace('$', '.');
@@ -132,7 +129,7 @@ public class BeansJavaCompletionUtils {
 
 			ICompletionProposal[] proposals = order(props);
 			for (ICompletionProposal comProposal : proposals) {
-				processJavaCompletionProposal(request, comProposal, packageName, innerClass);
+				processJavaCompletionProposal(recorder, comProposal, packageName, innerClass);
 			}
 		}
 		catch (Exception e) {
@@ -147,20 +144,19 @@ public class BeansJavaCompletionUtils {
 	 * @param prefix the prefix
 	 * @param typeName the super class of the request proposals
 	 */
-	public static void addTypeHierachyAttributeValueProposals(ContentAssistRequest request,
-			final String prefix, String typeName) {
-
+	public static void addTypeHierachyAttributeValueProposals(IContentAssistContext context,
+			IContentAssistProposalRecorder recorder, String typeName) {
+		final String prefix = context.getMatchString();
 		if (prefix == null || prefix.length() == 0) {
 			return;
 		}
 
-		IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request).getProject(), typeName);
+		IType type = JdtUtils.getJavaType(context.getFile().getProject(), typeName);
 		try {
-			if (type != null
-					&& BeansEditorUtils.getFile(request).getProject().hasNature(JavaCore.NATURE_ID)) {
+			if (type != null && context.getFile().getProject().hasNature(JavaCore.NATURE_ID)) {
 
-				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(BeansEditorUtils
-						.getFile(request).getProject()), new NullProgressMonitor());
+				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(context.getFile()
+						.getProject()), new NullProgressMonitor());
 				IType[] types = hierachy.getAllSubtypes(type);
 				Map<String, IType> sortMap = new HashMap<String, IType>();
 				for (IType foundType : types) {
@@ -169,16 +165,11 @@ public class BeansJavaCompletionUtils {
 							&& !sortMap.containsKey(foundType.getFullyQualifiedName())
 							&& !Flags.isAbstract(foundType.getFlags())
 							&& Flags.isPublic(foundType.getFlags())) {
-						BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-								foundType.getFullyQualifiedName(), request
-										.getReplacementBeginPosition(), request
-										.getReplacementLength(), foundType.getFullyQualifiedName()
-										.length(), JavaPluginImages
-										.get(JavaPluginImages.IMG_OBJS_CLASS), foundType
-										.getElementName()
-										+ " - " + foundType.getPackageFragment().getElementName(),
-								null, 10, foundType);
-						request.addProposal(proposal);
+						recorder.recordProposal(JavaPluginImages
+								.get(JavaPluginImages.IMG_OBJS_CLASS), 10, foundType
+								.getElementName()
+								+ " - " + foundType.getPackageFragment().getElementName(),
+								foundType.getFullyQualifiedName(), foundType);
 						sortMap.put(foundType.getFullyQualifiedName(), foundType);
 					}
 				}
@@ -191,9 +182,8 @@ public class BeansJavaCompletionUtils {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static ICompilationUnit createSourceCompilationUnit(ContentAssistRequest request,
-			String prefix) throws JavaModelException {
-		IFile file = BeansEditorUtils.getFile(request);
+	private static ICompilationUnit createSourceCompilationUnit(IFile file, String prefix)
+			throws JavaModelException {
 		IJavaProject project = JavaCore.create(file.getProject());
 		IPackageFragment root = getPackageFragment(project, prefix);
 		ICompilationUnit unit = root.getCompilationUnit("_xxx.java").getWorkingCopy(
@@ -271,16 +261,12 @@ public class BeansJavaCompletionUtils {
 		return proposals;
 	}
 
-	private static void processJavaCompletionProposal(ContentAssistRequest request,
+	private static void processJavaCompletionProposal(IContentAssistProposalRecorder recorder,
 			ICompletionProposal comProposal, String packageName, boolean innerClass) {
 		if (comProposal instanceof JavaCompletionProposal) {
 			JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop
-					.getReplacementString(), request.getReplacementBeginPosition(), request
-					.getReplacementLength(), prop.getReplacementString().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop.getRelevance(), prop.getJavaElement());
-
-			request.addProposal(proposal);
+			recorder.recordProposal(prop.getImage(), prop.getRelevance(), prop.getDisplayString(),
+					prop.getReplacementString(), prop.getJavaElement());
 		}
 		else if (comProposal instanceof LazyJavaTypeCompletionProposal) {
 			LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) comProposal;
@@ -302,12 +288,14 @@ public class BeansJavaCompletionUtils {
 				replacementString = getClassName(((IType) prop.getJavaElement()));
 			}
 
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-					replacementString, request.getReplacementBeginPosition(), request
-							.getReplacementLength(), replacementString.length(), prop.getImage(),
-					prop.getDisplayString(), null, prop.getRelevance(), prop.getJavaElement());
+			recorder.recordProposal(prop.getImage(), prop.getRelevance(), prop.getDisplayString(),
+					replacementString, prop.getJavaElement());
+			// TODO CD remoe when refactored
+			// BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
+			// replacementString, request.getReplacementBeginPosition(), request
+			// .getReplacementLength(), replacementString.length(), prop.getImage(),
+			// prop.getDisplayString(), null, prop.getRelevance(), prop.getJavaElement());
 
-			request.addProposal(proposal);
 		}
 	}
 

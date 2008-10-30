@@ -15,7 +15,11 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassHierachyContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DefaultContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DefaultContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IAnnotationBasedContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.ToolAnnotationUtils;
@@ -23,11 +27,10 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.ToolAnnotationUtils.
 import org.w3c.dom.Node;
 
 /**
- * {@link IAnnotationBasedContentAssistProcessor} that calculates content assist
- * proposals based on Spring core's tool namespace annotations.
+ * {@link IAnnotationBasedContentAssistProcessor} that calculates content assist proposals based on
+ * Spring core's tool namespace annotations.
  * <p>
- * Adding the following annotation will trigger a bean reference content assist
- * search:
+ * Adding the following annotation will trigger a bean reference content assist search:
  * 
  * <pre>
  * &lt;tool:annotation kind=“ref”&gt;
@@ -36,9 +39,9 @@ import org.w3c.dom.Node;
  * </pre>
  * 
  * <p>
- * The following will launch the class, package and interface content assist.
- * Depending on the assignable-to value that proposals might be further narrowed
- * to those implementing the interface specified:
+ * The following will launch the class, package and interface content assist. Depending on the
+ * assignable-to value that proposals might be further narrowed to those implementing the interface
+ * specified:
  * 
  * <pre>
  * &lt;tool:annotation&gt;
@@ -60,35 +63,34 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 	private static final IContentAssistCalculator CLASS_CALCULATOR = new ClassContentAssistCalculator();
 
 	public void addAttributeValueProposals(
-			IContentAssistProcessor delegatingContentAssistProcessor,
-			ContentAssistRequest request, Node annotation) {
-		if (ToolAnnotationUtils.ANNOTATION_ELEMENT.equals(annotation
-				.getLocalName())
-				&& ToolAnnotationUtils.TOOL_NAMESPACE_URI.equals(annotation
-						.getNamespaceURI())) {
+			IContentAssistProcessor delegatingContentAssistProcessor, ContentAssistRequest request,
+			Node annotation) {
+		if (ToolAnnotationUtils.ANNOTATION_ELEMENT.equals(annotation.getLocalName())
+				&& ToolAnnotationUtils.TOOL_NAMESPACE_URI.equals(annotation.getNamespaceURI())) {
 
 			ToolAnnotationData annotationData = ToolAnnotationUtils
 					.getToolAnnotationData(annotation);
 
 			String matchString = BeansEditorUtils.prepareMatchString(request);
 
+			IContentAssistContext context = new DefaultContentAssistContext(request, null,
+					matchString);
+			IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(
+					request);
+
 			if ("ref".equals(annotationData.getKind())) {
 				// bean reference content assist
 				// TODO CD: add support for typed reference content assist
-				BEAN_REFERENCE_CALCULATOR.computeProposals(request,
-						matchString, null, null, null);
+				BEAN_REFERENCE_CALCULATOR.computeProposals(context, recorder);
 			}
-			else if (Class.class.getName().equals(
-					annotationData.getExpectedType())) {
+			else if (Class.class.getName().equals(annotationData.getExpectedType())) {
 				// class content assist
 				if (annotationData.getAssignableTo() == null) {
-					CLASS_CALCULATOR.computeProposals(request, matchString,
-							null, null, null);
+					CLASS_CALCULATOR.computeProposals(context, recorder);
 				}
 				else {
-					new ClassHierachyContentAssistCalculator(annotationData
-							.getAssignableTo()).computeProposals(request,
-							matchString, null, null, null);
+					new ClassHierachyContentAssistCalculator(annotationData.getAssignableTo())
+							.computeProposals(context, recorder);
 				}
 			}
 		}
