@@ -42,7 +42,7 @@ public class PointcutReferenceContentAssistCalculator implements IContentAssistC
 			prefix = "";
 		}
 		IFile file = context.getFile();
-		if (context.getNode().getOwnerDocument() != null) {
+		if (context.getDocument() != null) {
 			searchPointcutElements(recorder, prefix, context.getParentNode(), file);
 			searchPointcutElements(recorder, prefix, context.getParentNode().getParentNode(), file);
 		}

@@ -51,8 +51,8 @@ public class ListenerMethodContentAssistCalculator extends MethodContentAssistCa
 			String ref = BeansEditorUtils.getAttribute(context.getNode(), "ref");
 			if (ref != null) {
 				IFile file = context.getFile();
-				String className = BeansEditorUtils.getClassNameForBean(file, context.getNode()
-						.getOwnerDocument(), ref);
+				String className = BeansEditorUtils.getClassNameForBean(file,
+						context.getDocument(), ref);
 				return JdtUtils.getJavaType(file.getProject(), className);
 			}
 		}

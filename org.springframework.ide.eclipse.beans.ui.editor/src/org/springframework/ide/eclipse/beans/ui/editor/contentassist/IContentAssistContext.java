@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
 import org.eclipse.core.resources.IFile;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
@@ -38,7 +39,7 @@ public interface IContentAssistContext {
 	/**
 	 * Returns the underlying resource. That resource <b>must</b> exist and point to a valid xml
 	 * file.
-	 * @return the underlying resource.
+	 * @return the underlying resource
 	 */
 	IFile getFile();
 
@@ -53,5 +54,11 @@ public interface IContentAssistContext {
 	 * @return the parent node of the node the user requested content assist for
 	 */
 	Node getParentNode();
+	
+	/**
+	 * Returns the {@link Document} of the current content assist request
+	 * @return the owning document
+	 */
+	Document getDocument();
 
 }

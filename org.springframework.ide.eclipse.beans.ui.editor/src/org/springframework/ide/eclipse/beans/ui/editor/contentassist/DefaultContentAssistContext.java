@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
@@ -77,5 +78,11 @@ public class DefaultContentAssistContext implements IContentAssistContext {
 	public Node getParentNode() {
 		return request.getNode().getParentNode();
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Document getDocument() {
+		return request.getNode().getOwnerDocument();
+	}
 }

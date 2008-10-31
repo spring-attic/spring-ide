@@ -33,8 +33,8 @@ public abstract class NodeClassMethodContentAssistCalculator extends MethodConte
 	protected final IType calculateType(IContentAssistContext context) {
 		Node node = getClassNode(context);
 		if (node != null) {
-			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), node
-					.getOwnerDocument(), node);
+			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+					.getDocument(), node);
 			return JdtUtils.getJavaType(context.getFile().getProject(), className);
 		}
 		return null;

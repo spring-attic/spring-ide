@@ -35,12 +35,11 @@ public class AdviceMethodContentAssistCalculator extends MethodContentAssistCalc
 	protected IType calculateType(IContentAssistContext context) {
 		if (context.getParentNode() != null
 				&& "aspect".equals(context.getParentNode().getLocalName())) {
-			String ref = BeansEditorUtils.getAttribute(context.getParentNode(),
-					"ref");
+			String ref = BeansEditorUtils.getAttribute(context.getParentNode(), "ref");
 			if (ref != null) {
 				IFile file = context.getFile();
-				String className = BeansEditorUtils.getClassNameForBean(file, context.getNode()
-						.getOwnerDocument(), ref);
+				String className = BeansEditorUtils.getClassNameForBean(file,
+						context.getDocument(), ref);
 				return JdtUtils.getJavaType(file.getProject(), className);
 			}
 		}

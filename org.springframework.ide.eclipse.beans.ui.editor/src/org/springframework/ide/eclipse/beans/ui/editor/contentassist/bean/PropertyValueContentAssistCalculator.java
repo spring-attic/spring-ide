@@ -51,7 +51,7 @@ public class PropertyValueContentAssistCalculator extends ClassContentAssistCalc
 			String propertyName = BeansEditorUtils.getAttribute(context.getNode(), "name");
 			if (StringUtils.hasText(propertyName)) {
 				String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
-						.getParentNode().getOwnerDocument(), context.getParentNode());
+						.getDocument(), context.getParentNode());
 				IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 				if (type != null) {
 					try {

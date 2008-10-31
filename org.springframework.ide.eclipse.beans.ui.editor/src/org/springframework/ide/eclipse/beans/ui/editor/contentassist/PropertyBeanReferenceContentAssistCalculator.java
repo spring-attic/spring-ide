@@ -39,10 +39,11 @@ public class PropertyBeanReferenceContentAssistCalculator extends
 
 	protected List<String> calculateType(IContentAssistContext context,
 			IContentAssistProposalRecorder recorder) {
-		if (context.getParentNode() != null && "bean".equals(context.getParentNode().getLocalName())) {
+		if (context.getParentNode() != null
+				&& "bean".equals(context.getParentNode().getLocalName())) {
 
 			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
-					.getParentNode().getOwnerDocument(), context.getParentNode());
+					.getDocument(), context.getParentNode());
 			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 
 			String propertyName = BeansEditorUtils.getAttribute(context.getParentNode(), "name");

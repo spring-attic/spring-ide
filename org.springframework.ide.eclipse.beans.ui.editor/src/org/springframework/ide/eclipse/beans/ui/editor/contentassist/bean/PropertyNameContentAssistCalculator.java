@@ -41,10 +41,11 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 	public void computeProposals(IContentAssistContext context,
 			IContentAssistProposalRecorder recorder) {
 
-		if (context.getParentNode() != null && "bean".equals(context.getParentNode().getLocalName())) {
+		if (context.getParentNode() != null
+				&& "bean".equals(context.getParentNode().getLocalName())) {
 
 			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
-					.getParentNode().getOwnerDocument(), context.getParentNode());
+					.getDocument(), context.getParentNode());
 			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 			if (type != null) {
 				addPropertyNameAttributeValueProposals(recorder, context.getMatchString(), "", type);
@@ -132,7 +133,7 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 
 			Image image = imageProvider.getImageLabel(method, method.getFlags()
 					| JavaElementImageProvider.SMALL_ICONS);
-			
+
 			recorder.recordProposal(image, PROPERTY_RELEVANCE, displayText, replaceText, method);
 		}
 		catch (JavaModelException e) {

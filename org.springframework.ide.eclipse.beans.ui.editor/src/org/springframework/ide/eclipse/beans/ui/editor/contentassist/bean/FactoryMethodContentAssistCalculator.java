@@ -42,8 +42,8 @@ public class FactoryMethodContentAssistCalculator implements IContentAssistCalcu
 		boolean isStatic;
 		if (factoryBean != null) {
 			// instance factory method
-			factoryClassName = BeansEditorUtils.getClassNameForBean(context.getFile(), node
-					.getOwnerDocument(), factoryBean.getNodeValue());
+			factoryClassName = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+					.getDocument(), factoryBean.getNodeValue());
 			isStatic = false;
 		}
 		else {
