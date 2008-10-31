@@ -16,35 +16,24 @@ import org.eclipse.jdt.core.IMethod;
 
 /**
  * {@link IMethodFilter} that wraps other {@link IMethodFilter}s instances and
- * applies an <code>or</code> pattern.
+ * applies an <code>and</code> pattern.
  * <p>
- * E.g. this class is useful to combine two {@link FlagsMethodFilter} in order
- * to filter methods that are either public or protected:
- * 
- * <pre>
- * 		OrMethodFilter filter = new OrMethodFilter();
- * 		filter.addMethodFilter(new FlagsMethodFilter(FlagsMethodFilter.PUBLIC, 
- * 			0));
- * 		filter.addMethodFilter(new FlagsMethodFilter(FlagsMethodFilter.PROTECTED,
- * 			0));
- * </pre>
- * 
  * @author Christian Dupuis
- * @since 2.0.2
+ * @since 2.2.1
  */
-public class OrMethodFilter extends AbstractCompositeMethodFilter implements IMethodFilter {
+public class AndMethodFilter extends AbstractCompositeMethodFilter implements IMethodFilter {
 
 	/**
 	 * Default constructor
 	 */
-	public OrMethodFilter() {
+	public AndMethodFilter() {
 	}
 
 	/**
 	 * Constructor that initializes the internal list of {@link IMethodFilter}
 	 * with the given.
 	 */
-	public OrMethodFilter(Set<IMethodFilter> filters) {
+	public AndMethodFilter(Set<IMethodFilter> filters) {
 		super(filters);
 	}
 
@@ -52,17 +41,17 @@ public class OrMethodFilter extends AbstractCompositeMethodFilter implements IMe
 	 * Sequentially calls {@link #matches(IMethod, String)} on the wrapped
 	 * {@link IMethodFilter}.
 	 * <p>
-	 * After the first true returned from calling one of the wrapped
+	 * After the first false returned from calling one of the wrapped
 	 * {@link IMethodFilter}'s {@link #matches(IMethod, String)} method this
-	 * implementation returns <code>true</code>.
+	 * implementation returns <code>false</code>.
 	 */
 	public boolean matches(IMethod method, String prefix) {
 		for (IMethodFilter filter : getMethodFilters()) {
-			if (filter.matches(method, prefix)) {
-				return true;
+			if (!filter.matches(method, prefix)) {
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	
 }

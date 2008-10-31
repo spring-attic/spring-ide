@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.core.java;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -112,15 +113,29 @@ public final class Introspector {
 	 * @since 2.0.2
 	 */
 	public static Set<IMethod> findAllMethods(IType type, String prefix, IMethodFilter filter) {
-		Set<IMethod> methods = new HashSet<IMethod>();
+		Set<IMethod> methods = new LinkedHashSet<IMethod>();
 		try {
-			while (type != null) {
+			if (type.isInterface()) {
+				Set<IType> types = new HashSet<IType>();
+				types.add(type);
 				for (IMethod method : type.getMethods()) {
 					if (!method.isConstructor() && filter.matches(method, prefix)) {
 						methods.add(method);
 					}
 				}
-				type = getSuperType(type);
+				for (IType interfaceType : getAllImplementedInterfaces(type)) {
+					methods.addAll(findAllMethods(interfaceType, prefix, filter));
+				}
+			}
+			else {
+				while (type != null) {
+					for (IMethod method : type.getMethods()) {
+						if (!method.isConstructor() && filter.matches(method, prefix)) {
+							methods.add(method);
+						}
+					}
+					type = getSuperType(type);
+				}
 			}
 		}
 		catch (JavaModelException e) {
@@ -221,8 +236,48 @@ public final class Introspector {
 	 */
 	public static IMethod findMethod(IType type, String methodName, int argCount, Public publics,
 			Static statics) throws JavaModelException {
-		while (type != null) {
-			for (IMethod method : type.getMethods()) {
+		
+		if (type.isInterface()) {
+			IMethod method = findMethodOnType(type, methodName, argCount, publics, statics);
+			if (method != null) {
+				return method;
+			}
+			for (IType interfaceType : getAllImplementedInterfaces(type)) {
+				return findMethod(interfaceType, methodName, argCount, publics, statics);
+			}
+		}
+		else {
+			while (type != null) {
+				IMethod method = findMethodOnType(type, methodName, argCount, publics, statics);
+				if (method != null) {
+					return method;
+				}
+				type = getSuperType(type);
+			}
+		}
+		return null;
+	}
+
+	private static IMethod findMethodOnType(IType type, String methodName, int argCount,
+			Public publics, Static statics) throws JavaModelException {
+		for (IMethod method : type.getMethods()) {
+			int flags = method.getFlags();
+			if ((publics == Public.DONT_CARE
+					|| (publics == Public.YES && (Flags.isPublic(flags) || Flags
+							.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
+					.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
+					&& (statics == Static.DONT_CARE
+							|| (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
+							.isStatic(flags)))
+					&& (argCount == -1 || method.getNumberOfParameters() == argCount)
+					&& methodName.equals(method.getElementName())) {
+				return method;
+			}
+		}
+
+		// Add intertype declared methods
+		if (JdtUtils.isAjdtProject(type.getResource())) {
+			for (IMethod method : AjdtUtils.getDeclaredMethods(type)) {
 				int flags = method.getFlags();
 				if ((publics == Public.DONT_CARE
 						|| (publics == Public.YES && (Flags.isPublic(flags) || Flags
@@ -231,37 +286,19 @@ public final class Introspector {
 						&& (statics == Static.DONT_CARE
 								|| (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
 								.isStatic(flags)))
-						&& (argCount == -1 || method.getNumberOfParameters() == argCount)
-						&& methodName.equals(method.getElementName())) {
-					return method;
-				}
-			}
-
-			// Add intertype declared methods
-			if (JdtUtils.isAjdtProject(type.getResource())) {
-				for (IMethod method : AjdtUtils.getDeclaredMethods(type)) {
-					int flags = method.getFlags();
-					if ((publics == Public.DONT_CARE
-							|| (publics == Public.YES && (Flags.isPublic(flags) || Flags
-									.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
-							.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
-							&& (statics == Static.DONT_CARE
-									|| (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
-									.isStatic(flags)))
-							&& (argCount == -1 || method.getNumberOfParameters() == argCount)) {
-						String elementName = method.getElementName();
-						int index = elementName.lastIndexOf('.');
-						if (index > 0) {
-							elementName = elementName.substring(index + 1);
-						}
-						if (elementName.equals(methodName)) {
-							return method;
-						}
+						&& (argCount == -1 || method.getNumberOfParameters() == argCount)) {
+					String elementName = method.getElementName();
+					int index = elementName.lastIndexOf('.');
+					if (index > 0) {
+						elementName = elementName.substring(index + 1);
+					}
+					if (elementName.equals(methodName)) {
+						return method;
 					}
 				}
 			}
-			type = getSuperType(type);
 		}
+		
 		return null;
 	}
 

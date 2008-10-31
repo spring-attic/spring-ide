@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
@@ -155,22 +156,25 @@ public class BeansJavaCompletionUtils {
 		try {
 			if (type != null && context.getFile().getProject().hasNature(JavaCore.NATURE_ID)) {
 
-				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(context.getFile()
-						.getProject()), new NullProgressMonitor());
-				IType[] types = hierachy.getAllSubtypes(type);
-				Map<String, IType> sortMap = new HashMap<String, IType>();
-				for (IType foundType : types) {
-					if ((foundType.getFullyQualifiedName().startsWith(prefix) || foundType
-							.getElementName().startsWith(prefix))
-							&& !sortMap.containsKey(foundType.getFullyQualifiedName())
-							&& !Flags.isAbstract(foundType.getFlags())
-							&& Flags.isPublic(foundType.getFlags())) {
-						recorder.recordProposal(JavaPluginImages
-								.get(JavaPluginImages.IMG_OBJS_CLASS), 10, foundType
-								.getElementName()
-								+ " - " + foundType.getPackageFragment().getElementName(),
-								foundType.getFullyQualifiedName(), foundType);
-						sortMap.put(foundType.getFullyQualifiedName(), foundType);
+				// Make sure that JDT's type filter preferences are applied
+				if (!TypeFilter.isFiltered(type)) {
+					ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(context
+							.getFile().getProject()), new NullProgressMonitor());
+					IType[] types = hierachy.getAllSubtypes(type);
+					Map<String, IType> sortMap = new HashMap<String, IType>();
+					for (IType foundType : types) {
+						if ((foundType.getFullyQualifiedName().startsWith(prefix) || foundType
+								.getElementName().startsWith(prefix))
+								&& !sortMap.containsKey(foundType.getFullyQualifiedName())
+								&& !Flags.isAbstract(foundType.getFlags())
+								&& Flags.isPublic(foundType.getFlags())) {
+							recorder.recordProposal(JavaPluginImages
+									.get(JavaPluginImages.IMG_OBJS_CLASS), 10, foundType
+									.getElementName()
+									+ " - " + foundType.getPackageFragment().getElementName(),
+									foundType.getFullyQualifiedName(), foundType);
+							sortMap.put(foundType.getFullyQualifiedName(), foundType);
+						}
 					}
 				}
 			}
@@ -281,7 +285,12 @@ public class BeansJavaCompletionUtils {
 						.getJavaElement()).getDeclaringType() != null && innerClass))) {
 					return;
 				}
+				// Make sure that JDT's type filter preferences are applied
+				if (TypeFilter.isFiltered((IType) prop.getJavaElement())) {
+					return;
+				}
 			}
+			
 
 			String replacementString = prop.getQualifiedTypeName();
 			if (innerClass) {
@@ -290,12 +299,6 @@ public class BeansJavaCompletionUtils {
 
 			recorder.recordProposal(prop.getImage(), prop.getRelevance(), prop.getDisplayString(),
 					replacementString, prop.getJavaElement());
-			// TODO CD remoe when refactored
-			// BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-			// replacementString, request.getReplacementBeginPosition(), request
-			// .getReplacementLength(), replacementString.length(), prop.getImage(),
-			// prop.getDisplayString(), null, prop.getRelevance(), prop.getJavaElement());
-
 		}
 	}
 

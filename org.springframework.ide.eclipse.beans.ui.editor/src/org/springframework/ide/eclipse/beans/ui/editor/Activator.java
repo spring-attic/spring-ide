@@ -20,6 +20,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
@@ -63,6 +64,8 @@ public class Activator extends AbstractUIPlugin {
 	private TemplateStore templateStore;
 
 	private BundleContext context;
+	
+	private JavaElementImageProvider javaElementLabelProvider;
 
 	/**
 	 * Creates the Spring Beans Editor plug-in.
@@ -89,6 +92,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		this.context = context;
+		this.javaElementLabelProvider = new JavaElementImageProvider();
 	}
 
 	/**
@@ -100,6 +104,7 @@ public class Activator extends AbstractUIPlugin {
 		plugin = null;
 		resourceBundle = null;
 		this.context = null;
+		this.javaElementLabelProvider.dispose();
 	}
 
 	/**
@@ -156,6 +161,10 @@ public class Activator extends AbstractUIPlugin {
 			}
 		}
 		return templateStore;
+	}
+	
+	public JavaElementImageProvider getJavaElementLabelProvider() {
+		return javaElementLabelProvider;
 	}
 
 	/**

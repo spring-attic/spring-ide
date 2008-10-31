@@ -10,13 +10,19 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
+import org.springframework.ide.eclipse.core.java.AndMethodFilter;
 import org.springframework.ide.eclipse.core.java.IMethodFilter;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -35,16 +41,15 @@ public abstract class MethodContentAssistCalculator implements IContentAssistCal
 
 	private final IMethodFilter filter;
 
-	// TODO CD dispose the provider
-	private final JavaElementImageProvider imageProvider;
-
 	/**
 	 * Constructor
 	 * @param filter filter to be used for filtering {@link IMethod}s
 	 */
 	public MethodContentAssistCalculator(IMethodFilter filter) {
-		this.filter = filter;
-		this.imageProvider = new JavaElementImageProvider();
+		AndMethodFilter andFilter = new AndMethodFilter();
+		andFilter.addMethodFilter(new TypeFilterMethodFilterAdapter());
+		andFilter.addMethodFilter(filter);
+		this.filter = andFilter;
 	}
 
 	/**
@@ -66,9 +71,13 @@ public abstract class MethodContentAssistCalculator implements IContentAssistCal
 	 */
 	public void computeProposals(IContentAssistContext context,
 			IContentAssistProposalRecorder recorder) {
+		Set<String> proposedMethods = new HashSet<String>();
 		for (IMethod method : Introspector.findAllMethods(calculateType(context), context
 				.getMatchString(), filter)) {
-			createMethodProposal(recorder, method);
+			if (!proposedMethods.contains(method.getElementName())) {
+				proposedMethods.add(method.getElementName());
+				createMethodProposal(recorder, method);
+			}
 		}
 	}
 
@@ -120,13 +129,28 @@ public abstract class MethodContentAssistCalculator implements IContentAssistCal
 			buf.append(method.getParent().getElementName());
 
 			String displayText = buf.toString();
-			Image image = imageProvider.getImageLabel(method, method.getFlags()
-					| JavaElementImageProvider.SMALL_ICONS);
-			
+			Image image = Activator.getDefault().getJavaElementLabelProvider().getImageLabel(
+					method, method.getFlags() | JavaElementImageProvider.SMALL_ICONS);
+
 			recorder.recordProposal(image, METHOD_RELEVANCE, displayText, replaceText, method);
 		}
 		catch (JavaModelException e) {
 			// do nothing
 		}
 	}
+
+	/**
+	 * Internal {@link IMethodFilter} that delegates to JDT's type filter infrastructure. 
+	 */
+	class TypeFilterMethodFilterAdapter implements IMethodFilter {
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean matches(IMethod method, String prefix) {
+			return !TypeFilter.isFiltered(method.getDeclaringType());
+		}
+
+	}
+
 }
