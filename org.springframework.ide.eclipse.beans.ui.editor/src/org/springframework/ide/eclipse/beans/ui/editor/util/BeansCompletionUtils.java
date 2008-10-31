@@ -40,7 +40,7 @@ public class BeansCompletionUtils {
 			List<String> requiredTypes) {
 		String prefix = context.getMatchString();
 		IFile file = context.getFile();
-		Document document = context.getNode().getOwnerDocument();
+		Document document = context.getDocument();
 		
 		if (prefix == null) {
 			prefix = "";
