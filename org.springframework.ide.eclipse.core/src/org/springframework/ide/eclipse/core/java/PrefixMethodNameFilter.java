@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,8 @@ public class PrefixMethodNameFilter implements IMethodFilter {
 	 * @return true if the method's name starts with the prefix
 	 */
 	protected final boolean matchesMethodPrefix(IMethod method, String prefix) {
-		return method.getElementName().startsWith(prefix);
+		// make sure that static initializers don't come up
+		return !"<clinit>".equals(method.getElementName())
+				&& method.getElementName().startsWith(prefix);
 	}
 }
