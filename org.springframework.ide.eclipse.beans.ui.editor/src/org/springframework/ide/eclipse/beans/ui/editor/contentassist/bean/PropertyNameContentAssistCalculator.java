@@ -41,12 +41,10 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 	public void computeProposals(IContentAssistContext context,
 			IContentAssistProposalRecorder recorder) {
 
-		if (context.getParentNode() != null && context.getParentNode().getParentNode() != null
-				&& "bean".equals(context.getParentNode().getParentNode().getLocalName())) {
+		if (context.getParentNode() != null && "bean".equals(context.getParentNode().getLocalName())) {
 
 			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
-					.getParentNode().getParentNode().getOwnerDocument(), context.getParentNode()
-					.getParentNode());
+					.getParentNode().getOwnerDocument(), context.getParentNode());
 			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 			if (type != null) {
 				addPropertyNameAttributeValueProposals(recorder, context.getMatchString(), "", type);

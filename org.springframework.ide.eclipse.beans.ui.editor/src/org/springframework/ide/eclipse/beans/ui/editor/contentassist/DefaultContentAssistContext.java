@@ -75,7 +75,7 @@ public class DefaultContentAssistContext implements IContentAssistContext {
 	 * {@inheritDoc}
 	 */
 	public Node getParentNode() {
-		return request.getParent();
+		return request.getNode().getParentNode();
 	}
 
 }

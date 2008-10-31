@@ -46,13 +46,12 @@ public class PropertyValueContentAssistCalculator extends ClassContentAssistCalc
 			return;
 		}
 
-		if (context.getParentNode() != null && context.getParentNode().getParentNode() != null
-				&& "bean".equals(context.getParentNode().getParentNode().getLocalName())) {
+		if (context.getParentNode() != null
+				&& "bean".equals(context.getParentNode().getLocalName())) {
 			String propertyName = BeansEditorUtils.getAttribute(context.getNode(), "name");
 			if (StringUtils.hasText(propertyName)) {
 				String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
-						.getParentNode().getParentNode().getOwnerDocument(), context.getParentNode()
-						.getParentNode());
+						.getParentNode().getOwnerDocument(), context.getParentNode());
 				IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 				if (type != null) {
 					try {

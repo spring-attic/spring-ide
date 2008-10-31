@@ -19,37 +19,32 @@ import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
- * Extension of the {@link MethodContentAssistCalculator} that looks for public,
- * non-constructor and non-interface methods on the aspect backing bean (ref
- * attribute on the aspect element).
+ * Extension of the {@link MethodContentAssistCalculator} that looks for public, non-constructor and
+ * non-interface methods on the aspect backing bean (ref attribute on the aspect element).
  * @author Christian Dupuis
  * @since 2.0.2
  */
-public class AdviceMethodContentAssistCalculator extends
-		MethodContentAssistCalculator {
+public class AdviceMethodContentAssistCalculator extends MethodContentAssistCalculator {
 
 	public AdviceMethodContentAssistCalculator() {
-		super(new FlagsMethodFilter(FlagsMethodFilter.PUBLIC
-				| FlagsMethodFilter.NOT_CONSTRUCTOR
+		super(new FlagsMethodFilter(FlagsMethodFilter.PUBLIC | FlagsMethodFilter.NOT_CONSTRUCTOR
 				| FlagsMethodFilter.NOT_INTERFACE));
 	}
 
 	@Override
 	protected IType calculateType(IContentAssistContext context) {
 		if (context.getParentNode() != null
-				&& context.getParentNode().getParentNode() != null
-				&& "aspect".equals(context.getParentNode().getParentNode()
-						.getLocalName())) {
-			String ref = BeansEditorUtils.getAttribute(context.getParentNode()
-					.getParentNode(), "ref");
+				&& "aspect".equals(context.getParentNode().getLocalName())) {
+			String ref = BeansEditorUtils.getAttribute(context.getParentNode(),
+					"ref");
 			if (ref != null) {
 				IFile file = context.getFile();
-				String className = BeansEditorUtils.getClassNameForBean(file,
-						context.getNode().getOwnerDocument(), ref);
+				String className = BeansEditorUtils.getClassNameForBean(file, context.getNode()
+						.getOwnerDocument(), ref);
 				return JdtUtils.getJavaType(file.getProject(), className);
 			}
 		}
 		return null;
 	}
-	
+
 }
