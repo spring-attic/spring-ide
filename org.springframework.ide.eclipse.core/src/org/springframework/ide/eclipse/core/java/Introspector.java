@@ -127,15 +127,13 @@ public final class Introspector {
 					methods.addAll(findAllMethods(interfaceType, prefix, filter));
 				}
 			}
-			else {
-				while (type != null) {
-					for (IMethod method : type.getMethods()) {
-						if (!method.isConstructor() && filter.matches(method, prefix)) {
-							methods.add(method);
-						}
+			while (type != null) {
+				for (IMethod method : type.getMethods()) {
+					if (!method.isConstructor() && filter.matches(method, prefix)) {
+						methods.add(method);
 					}
-					type = getSuperType(type);
 				}
+				type = getSuperType(type);
 			}
 		}
 		catch (JavaModelException e) {
@@ -236,7 +234,7 @@ public final class Introspector {
 	 */
 	public static IMethod findMethod(IType type, String methodName, int argCount, Public publics,
 			Static statics) throws JavaModelException {
-		
+
 		if (type.isInterface()) {
 			IMethod method = findMethodOnType(type, methodName, argCount, publics, statics);
 			if (method != null) {
@@ -246,14 +244,12 @@ public final class Introspector {
 				return findMethod(interfaceType, methodName, argCount, publics, statics);
 			}
 		}
-		else {
-			while (type != null) {
-				IMethod method = findMethodOnType(type, methodName, argCount, publics, statics);
-				if (method != null) {
-					return method;
-				}
-				type = getSuperType(type);
+		while (type != null) {
+			IMethod method = findMethodOnType(type, methodName, argCount, publics, statics);
+			if (method != null) {
+				return method;
 			}
+			type = getSuperType(type);
 		}
 		return null;
 	}
@@ -263,9 +259,9 @@ public final class Introspector {
 		for (IMethod method : type.getMethods()) {
 			int flags = method.getFlags();
 			if ((publics == Public.DONT_CARE
-					|| (publics == Public.YES && (Flags.isPublic(flags) || Flags
-							.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
-					.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
+					|| (publics == Public.YES && (Flags.isPublic(flags) || Flags.isInterface(type
+							.getFlags()))) || (publics == Public.NO && (!Flags.isPublic(flags) && !Flags
+					.isInterface(type.getFlags()))))
 					&& (statics == Static.DONT_CARE
 							|| (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
 							.isStatic(flags)))
@@ -298,7 +294,7 @@ public final class Introspector {
 				}
 			}
 		}
-		
+
 		return null;
 	}
 
