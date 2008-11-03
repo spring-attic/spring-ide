@@ -207,6 +207,14 @@ public class JdtUtils {
 				if (FILE_SCHEME.equalsIgnoreCase(scheme)) {
 					addUri(paths, uri);
 				}
+				else if ("sourcecontrol".equals(scheme)) {
+					// special case of Rational Team Concert
+					IPath sourceControlPath = project.findMember(path.removeFirstSegments(1)).getLocation();
+					File sourceControlFile = sourceControlPath.toFile(); 
+					if (sourceControlFile.exists()) {
+						addUri(paths, sourceControlFile.toURI());
+					}
+				}
 				else {
 					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace()
 							.getPathVariableManager();
