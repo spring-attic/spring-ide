@@ -52,10 +52,10 @@ public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 		Node attr;
 		String nodeName = node.getNodeName();
 		String shortNodeName = node.getLocalName();
-
-		String text = null;
+		String text = shortNodeName;
+		
 		if ("properties".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
@@ -68,7 +68,7 @@ public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("property-path".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
@@ -81,7 +81,7 @@ public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("constant".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
@@ -94,7 +94,7 @@ public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("set".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
@@ -107,7 +107,7 @@ public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("list".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
@@ -120,7 +120,7 @@ public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("map".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {

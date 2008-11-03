@@ -36,7 +36,8 @@ public class ContextOutlineLabelProvider extends JFaceNodeLabelProvider {
 				|| "exclude-filter".equals(nodeName)
 				|| "mbean-export".equals(nodeName)
 				|| "mbean-server".equals(nodeName)
-				|| "property-placeholder".equals(nodeName)) {
+				|| "property-placeholder".equals(nodeName)
+				|| "property-override".equals(nodeName)) {
 			return ContextUIImages.getImage(ContextUIImages.IMG_OBJS_CONTEXT);
 		}
 		return null;
@@ -47,12 +48,11 @@ public class ContextOutlineLabelProvider extends JFaceNodeLabelProvider {
 		Node node = (Node) o;
 		NamedNodeMap attrs = node.getAttributes();
 		Node attr;
-		String nodeName = node.getNodeName();
 		String shortNodeName = node.getLocalName();
-		String text = "";
+		String text = shortNodeName;
 
 		if ("load-time-weaver".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("weaver-class");
 				if (attr != null) {
@@ -61,7 +61,7 @@ public class ContextOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("component-scan".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("base-package");
 				if (attr != null) {

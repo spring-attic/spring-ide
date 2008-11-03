@@ -221,7 +221,7 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if (tag == Tag.VALUE) {
-			text = node.getNodeName();
+			text = node.getLocalName();
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("type");
 				if (attr != null) {
@@ -230,7 +230,7 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if (tag == Tag.ENTRY) {
-			text = node.getNodeName();
+			text = node.getLocalName();
 			attr = attrs.getNamedItem("key");
 			if (attr != null) {
 				text += " \"" + attr.getNodeValue() + "\"";
@@ -249,7 +249,7 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if (tag == Tag.PROP) {
-			text = node.getNodeName();
+			text = node.getLocalName();
 			attr = node.getFirstChild();
 			if (attr != null && attr.getNodeType() == Node.TEXT_NODE) {
 				text += " \"" + attr.getNodeValue() + "\"";
@@ -261,6 +261,10 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 			text += ((CommentImpl) o).getNodeValue().trim();
 			text += '>';
 		}
+		else if (tag != Tag.UNKNOWN) {
+			text = node.getLocalName();
+		}
+		
 		return text;
 	}
 }

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.security.ui.editor.outline.security;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.springframework.ide.eclipse.security.SecurityUIImages;
+import org.w3c.dom.Node;
 
 /**
  * Basic {@link JFaceNodeLabelProvider} label provider for the security namespace.
@@ -25,6 +26,15 @@ public class SecurityOutlineLabelProvider extends JFaceNodeLabelProvider {
 	@Override
 	public Image getImage(Object object) {
 		return SecurityUIImages.getImage(SecurityUIImages.IMG_OBJS_SECURITY);
+	}
+
+	@Override
+	public String getText(Object element) {
+		if (element instanceof Node) {
+			Node node = (Node) element;
+			return node.getLocalName();
+		}
+		return super.getText(element);
 	}
 	
 }

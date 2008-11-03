@@ -26,7 +26,8 @@ public class JeeOutlineLabelProvider extends JFaceNodeLabelProvider {
 		String nodeName = node.getLocalName();
 		if ("jndi-lookup".equals(nodeName) || "local-slsb".equals(nodeName)
 				|| "remote-slsb".equals(nodeName)
-				|| "entity-manager-factory".equals(nodeName)) {
+				|| "entity-manager-factory".equals(nodeName)
+				|| "environment".equals(nodeName)) {
 			return JeeUIImages.getImage(JeeUIImages.IMG_OBJS_JEE);
 		}
 		return null;
@@ -35,14 +36,12 @@ public class JeeOutlineLabelProvider extends JFaceNodeLabelProvider {
 	@Override
 	public String getText(Object o) {
 		Node node = (Node) o;
-		String nodeName = node.getNodeName();
 		String shortNodeName = node.getLocalName();
-
-		String text = null;
+		
+		String text = shortNodeName;
 		if ("jndi-lookup".equals(shortNodeName)
 				|| "local-slsb".equals(shortNodeName)
 				|| "remote-slsb".equals(shortNodeName)) {
-			text = nodeName;
 			String id = BeansEditorUtils.getAttribute(node, "id");
 			if (StringUtils.hasText(id)) {
 				text += " " + id;
@@ -54,7 +53,6 @@ public class JeeOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("entity-manager-factory".equals(shortNodeName)) {
-			text = nodeName;
 			String id = BeansEditorUtils.getAttribute(node, "id");
 			if (StringUtils.hasText(id)) {
 				text += " " + id;

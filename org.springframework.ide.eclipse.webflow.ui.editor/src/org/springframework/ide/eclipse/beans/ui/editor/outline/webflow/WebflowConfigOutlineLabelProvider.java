@@ -55,12 +55,10 @@ public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 
 		// Create Spring beans label text
 		Node node = (Node) o;
-		String nodeName = node.getNodeName();
 		String shortNodeName = node.getLocalName();
-
-		String text = null;
+		String text = shortNodeName;
+		
 		if ("executor".equals(shortNodeName)) {
-			text = nodeName;
 			String id = BeansEditorUtils.getAttribute(node, "id");
 			if (StringUtils.hasText(id)) {
 				text += " " + id;
@@ -71,43 +69,38 @@ public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("registry".equals(shortNodeName)) {
-			text = nodeName;
 			String id = BeansEditorUtils.getAttribute(node, "id");
 			if (StringUtils.hasText(id)) {
 				text += " " + id;
 			}
 		}
 		else if ("location".equals(shortNodeName)) {
-			text = nodeName;
 			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "path")) {
 				text += " [" + BeansEditorUtils.getAttribute(node, "path") + "]";
 			}
 		}
 		else if ("listener".equals(shortNodeName)) {
-			text = nodeName;
 			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "ref")) {
 				text += " <" + BeansEditorUtils.getAttribute(node, "ref") + ">";
 			}
 		}
 		else if ("attribute".equals(shortNodeName)) {
-			text = nodeName;
 			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "name")) {
 				text += " " + BeansEditorUtils.getAttribute(node, "name") + "="
 						+ BeansEditorUtils.getAttribute(node, "value");
 			}
 		}
 		else if ("repository".equals(shortNodeName)) {
-			text = nodeName;
 			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "type")) {
 				text += " " + BeansEditorUtils.getAttribute(node, "type");
 			}
 		}
 		else if ("alwaysRedirectOnPause".equals(shortNodeName)) {
-			text = nodeName;
 			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "value")) {
 				text += " " + BeansEditorUtils.getAttribute(node, "value");
 			}
 		}
+		
 		return text;
 	}
 }

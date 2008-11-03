@@ -24,7 +24,9 @@ public class TxOutlineLabelProvider extends JFaceNodeLabelProvider {
 	public Image getImage(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getLocalName();
-		if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)) {
+		if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)
+				|| "attributes".equals(nodeName) || "method".equals(nodeName)
+				|| "jta-transaction-manager".equals(nodeName)) {
 			return TxUIImages.getImage(TxUIImages.IMG_OBJS_TX);
 		}
 		return null;
@@ -33,13 +35,11 @@ public class TxOutlineLabelProvider extends JFaceNodeLabelProvider {
 	@Override
 	public String getText(Object o) {
 		Node node = (Node) o;
-		String nodeName = node.getNodeName();
 		String shortNodeName = node.getLocalName();
 
-		String text = null;
+		String text = shortNodeName;
 		if ("advice".equals(shortNodeName)
 				|| "annotation-driven".equals(shortNodeName)) {
-			text = nodeName;
 			String id = BeansEditorUtils.getAttribute(node, "id");
 			if (StringUtils.hasText(id)) {
 				text += " " + id;

@@ -61,6 +61,9 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		if ("declare-parents".equals(nodeName)) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
 		}
+		if ("scoped-proxy".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
+		}
 
 		return null;
 	}
@@ -71,13 +74,11 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		Node node = (Node) o;
 		NamedNodeMap attrs = node.getAttributes();
 		Node attr;
-
-		String nodeName = node.getNodeName();
 		String shortNodeName = node.getLocalName();
-		String text = null;
+		String text = shortNodeName;
 
 		if ("config".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("proxy-target-class");
 				if (attr != null) {
@@ -86,7 +87,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("aspect".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
@@ -99,7 +100,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("advisor".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
@@ -120,7 +121,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 				|| "after-returning".equals(shortNodeName)
 				|| "after-throwing".equals(shortNodeName)
 				|| "around".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("method");
 				if (attr != null) {
@@ -133,7 +134,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("pointcut".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
@@ -142,19 +143,13 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 		else if ("include".equals(shortNodeName)) {
-			text = nodeName + " ";
+			text += " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("name");
 				if (attr != null) {
 					text += "[" + attr.getNodeValue() + "]";
 				}
 			}
-		}
-		else if ("aspectj-autoproxy".equals(shortNodeName)) {
-			text = nodeName;
-		}
-		else if ("declare-parents".equals(shortNodeName)) {
-			text = nodeName;
 		}
 
 		return text;
