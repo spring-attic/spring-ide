@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,7 +65,6 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 				else {
 					String methodName = bd.getFactoryMethodName();
 					if (methodName != null && !SpringCoreUtils.hasPlaceHolder(methodName)) {
-
 						// Use constructor argument values of root bean as
 						// arguments for static factory method
 						int argCount = (!bd.isAbstract()
@@ -78,12 +77,14 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 				}
 			}
 		}
-		else if (mergedClassName == null) {
-			if (bd.getParentName() == null) {
-				context.error(bean, "BEAN_WITHOUT_CLASS_OR_PARENT",
-						"Factory method needs class from root " + "or parent bean");
-			}
+
+		// Check if factory class can be found, but only if bean definition is not abstract
+		if (!bd.isAbstract() && bd.getFactoryMethodName() != null && mergedClassName == null
+				&& bd.getParentName() == null && bd.getFactoryBeanName() == null) {
+			context.error(bean, "BEAN_WITHOUT_CLASS_OR_PARENT",
+					"Factory method needs class from root " + "or parent bean");
 		}
+
 	}
 
 	protected void validateFactoryBean(IBean bean, String beanName, String methodName,
