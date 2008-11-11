@@ -10,17 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink.jms;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeanHyperlinkCalculator;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.MethodHyperlinkCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NamespaceHyperlinkDetectorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.w3c.dom.Node;
 
 /**
  * {@link INamespaceHyperlinkDetector} responsible for handling hyperlink
@@ -44,27 +37,6 @@ public class JmsHyperlinkDetector extends NamespaceHyperlinkDetectorSupport
 		registerHyperlinkCalculator("jca-listener-container", "activation-spec-factory", beanRef);
 		registerHyperlinkCalculator("jca-listener-container", "message-converter", beanRef);
 		
-		registerHyperlinkCalculator("listener", "method",
-				new MethodHyperlinkCalculator() {
-
-					@Override
-					protected IType calculateType(String name, String target,
-							Node node, Node parentNode, IDocument document) {
-						if (BeansEditorUtils.hasAttribute(node, "ref")) {
-							String ref = BeansEditorUtils.getAttribute(
-									node, "ref");
-
-							if (ref != null) {
-								IFile file = BeansEditorUtils.getFile(document);
-								String className = BeansEditorUtils
-										.getClassNameForBean(file, node
-												.getOwnerDocument(), ref);
-								return JdtUtils.getJavaType(file
-										.getProject(), className);
-							}
-						}
-						return null;
-					}
-				});
+		registerHyperlinkCalculator("listener", "method", new ListenerMethodHyperlinkCalculator());
 	}
 }

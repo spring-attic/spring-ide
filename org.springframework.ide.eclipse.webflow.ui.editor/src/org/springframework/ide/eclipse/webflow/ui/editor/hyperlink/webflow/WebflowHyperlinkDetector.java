@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.HyperlinkUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
@@ -45,6 +46,7 @@ import org.w3c.dom.NodeList;
  * attribute values. Resolves bean references (including references to parent beans or factory
  * beans).
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  */
 public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
@@ -121,7 +123,7 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector implemen
 				for (int i = 0; i < nodes.getLength(); i++) {
 					String id = BeansEditorUtils.getAttribute(nodes.item(i), "id");
 					if (target.equals(id)) {
-						IRegion region = getHyperlinkRegion(nodes.item(i));
+						IRegion region = HyperlinkUtils.getHyperlinkRegion(nodes.item(i));
 						return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
 					}
 				}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 	 * Calculates hyperlink for the given request by delegating the request to a located
 	 * {@link IHyperlinkCalculator} returned by {@link #locateHyperlinkCalculator(String, String)}.
 	 */
-	public final IHyperlink createHyperlink(String name, String target, Node node, Node parentNode,
+	public IHyperlink createHyperlink(String name, String target, Node node, Node parentNode,
 			IDocument document, ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
 
 		String parentNodeName = null;
@@ -112,7 +112,7 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 	/**
 	 * Checks if a {@link IHyperlinkCalculator} for the given attribute has been registered.
 	 */
-	public final boolean isLinkableAttr(Attr attr) {
+	public boolean isLinkableAttr(Attr attr) {
 
 		Node parentNode = attr.getOwnerElement().getParentNode();
 		String parentNodeName = null;

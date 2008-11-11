@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,15 +13,11 @@ package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMAttr;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
@@ -31,6 +27,7 @@ import org.w3c.dom.Node;
  * references to parent beans or factory beans).
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Leo Dos Santos
  */
 @SuppressWarnings("restriction")
 public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector,
@@ -59,7 +56,7 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector,
 						&& region.getOffset() >= attr
 								.getValueRegionStartOffset()) {
 					if (isLinkableAttr(currentAttr)) {
-						IRegion hyperlinkRegion = getHyperlinkRegion(currentAttr);
+						IRegion hyperlinkRegion = HyperlinkUtils.getHyperlinkRegion(currentAttr);
 						IHyperlink hyperLink = createHyperlink(currentAttr
 								.getName(), currentAttr.getNodeValue(),
 								currentNode, currentNode.getParentNode(),
@@ -72,7 +69,7 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector,
 				break;
 
 			case Node.TEXT_NODE:
-				IRegion hyperlinkRegion = getHyperlinkRegion(currentNode);
+				IRegion hyperlinkRegion = HyperlinkUtils.getHyperlinkRegion(currentNode);
 				Node parentNode = currentNode.getParentNode();
 				if (parentNode != null) {
 					IHyperlink hyperLink = createHyperlink(parentNode
@@ -89,44 +86,4 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector,
 		return null;
 	}
 
-	/**
-	 * Returns the text region of given node.
-	 */
-	protected final IRegion getHyperlinkRegion(Node node) {
-		if (node != null) {
-			switch (node.getNodeType()) {
-			case Node.DOCUMENT_TYPE_NODE:
-			case Node.TEXT_NODE:
-				IDOMNode docNode = (IDOMNode) node;
-				return new Region(docNode.getStartOffset(), docNode
-						.getEndOffset()
-						- docNode.getStartOffset());
-
-			case Node.ELEMENT_NODE:
-				IDOMElement element = (IDOMElement) node;
-				int endOffset;
-				if (element.hasEndTag() && element.isClosed()) {
-					endOffset = element.getStartEndOffset();
-				}
-				else {
-					endOffset = element.getEndOffset();
-				}
-				return new Region(element.getStartOffset(), endOffset
-						- element.getStartOffset());
-
-			case Node.ATTRIBUTE_NODE:
-				IDOMAttr att = (IDOMAttr) node;
-				// do not include quotes in attribute value region
-				int regOffset = att.getValueRegionStartOffset();
-				int regLength = att.getValueRegionText().length();
-				String attValue = att.getValueRegionText();
-				if (StringUtils.isQuoted(attValue)) {
-					regOffset += 1;
-					regLength = regLength - 2;
-				}
-				return new Region(regOffset, regLength);
-			}
-		}
-		return null;
-	}
 }

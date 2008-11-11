@@ -177,6 +177,8 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 		registerContentAssistCalculator("constructor-arg", "type", clazz);
 		registerContentAssistCalculator("arg-type", "match", clazz);
 		registerContentAssistCalculator("value", "type", clazz);
+		registerContentAssistCalculator("value-type", clazz);
+		registerContentAssistCalculator("key-type", clazz);
 
 		PropertyBeanReferenceContentAssistCalculator propertyBean = new PropertyBeanReferenceContentAssistCalculator();
 		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean",
