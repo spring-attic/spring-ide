@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -34,8 +32,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.IPersistableElement;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -58,6 +58,7 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
@@ -103,19 +104,23 @@ import org.xml.sax.SAXParseException;
 public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		ILazyInitializedModelElement {
 
-	/** Regular expressions to that must be ignored and not reported to the user */
-	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays
-			.asList(new Pattern[] {
-				Pattern.compile("Failed to import bean definitions from relative location \\[(.*)\\]"),
-				Pattern.compile("Failed to import bean definitions from URL location \\[(.*)\\]") });
-
+	/** The default element provider used for non-namespaced elements */
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
+	/** The resource that is currently being processed or null if non is processed s */
+	private transient IResource currentResource = null;
+
+	/**
+	 * Creates a new {@link BeansConfig}.
+	 */
 	public BeansConfig(IBeansProject project, String name, Type type) {
 		super(project, name, type);
 		init(name);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public IModelElement[] getElementChildren() {
 		// Lazily initialization of this config
@@ -139,6 +144,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean isInitialized() {
 		return isModelPopulated;
 	}
@@ -221,6 +229,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void readConfig() {
 		if (!this.isModelPopulated) {
@@ -235,7 +246,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject());
 			}
 			else {
-				resourceLoader = new NoOpResourcePatternResolver(file.getProject());
+				resourceLoader = new ClassResourceFilteringPatternResolver(file.getProject());
 			}
 
 			try {
@@ -269,7 +280,34 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 							this, resource, sourceExtractor);
 					final ProblemReporter problemReporter = new BeansConfigProblemReporter();
 					final BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(this);
-					final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
+
+					final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry) {
+						@Override
+						public int loadBeanDefinitions(EncodedResource encodedResource)
+								throws BeanDefinitionStoreException {
+
+							// Capture the current resource being processed to handle parsing
+							// exceptions correctly and create the validation error on the correct
+							// resource
+							if (encodedResource != null
+									&& encodedResource.getResource() instanceof IAdaptable) {
+								currentResource = (IResource) ((IAdaptable) encodedResource
+										.getResource()).getAdapter(IResource.class);
+
+							}
+
+							try {
+								// Delegate actual processing to XmlBeanDefinitionReader
+								return super.loadBeanDefinitions(encodedResource);
+							}
+							finally {
+								// Reset currently processed resource before leaving
+								currentResource = null;
+							}
+
+						}
+					};
+
 					reader.setDocumentLoader(new XercesDocumentLoader());
 					reader.setResourceLoader(resourceLoader);
 
@@ -291,19 +329,19 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 							public Integer call() {
 
 								try {
-									// load bean definitions
+									// Load bean definitions
 									int count = reader.loadBeanDefinitions(resource);
 
-									// finally register post processed beans and components
+									// Finally register post processed beans and components
 									eventListener.registerComponents();
 
-									// post process beans config if required
+									// Post process beans config if required
 									postProcess(problemReporter, beanNameGenerator, resource);
 
 									return count;
 								}
 								catch (Exception e) {
-									// record the exception to throw that later
+									// Record the exception to throw that later
 									throwables.add(e);
 								}
 								return 0;
@@ -358,82 +396,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 	}
 
-	protected final class BeansConfigErrorHandler implements ErrorHandler {
-
-		public void warning(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, e.getMessage(), file, e
-					.getLineNumber()));
-		}
-
-		public void error(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(), file, e
-					.getLineNumber()));
-		}
-
-		public void fatalError(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(), file, e
-					.getLineNumber()));
-		}
-	}
-
-	protected final class BeansConfigProblemReporter implements ProblemReporter {
-
-		public void fatal(Problem problem) {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, getMessage(problem), file,
-					getLine(problem)));
-			throw new BeanDefinitionParsingException(problem);
-		}
-
-		public void error(Problem problem) {
-			if (!isMessageIgnorable(problem.getMessage())) {
-				problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, getMessage(problem),
-						file, getLine(problem)));
-			}
-		}
-
-		public void warning(Problem problem) {
-			if (!isMessageIgnorable(problem.getMessage())) {
-				problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, getMessage(problem),
-						file, getLine(problem)));
-			}
-		}
-
-		private boolean isMessageIgnorable(String message) {
-			for (Pattern pattern : IGNORABLE_ERROR_MESSAGE_PATTERNS) {
-				if (pattern.matcher(message).matches()) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		private String getMessage(Problem problem) {
-			StringBuffer message = new StringBuffer(problem.getMessage());
-			Throwable rootCause = problem.getRootCause();
-			if (rootCause != null) {
-
-				// Retrieve nested exception
-				while (rootCause.getCause() != null) {
-					rootCause = rootCause.getCause();
-				}
-				message.append(": ");
-				message.append(rootCause.getMessage());
-			}
-			return message.toString();
-		}
-
-		private int getLine(Problem problem) {
-			Object source = problem.getLocation().getSource();
-			if (source instanceof XmlSourceLocation) {
-				return ((XmlSourceLocation) source).getStartLine();
-			}
-			else if (source instanceof Node) {
-				return LineNumberPreservingDOMParser.getStartLineNumber((Node) source);
-			}
-			return -1;
-		}
-	}
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object getAdapter(Class adapter) {
@@ -446,6 +411,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		return super.getAdapter(adapter);
 	}
 
+	/**
+	 * Entry into processing the contributed {@link IBeansConfigPostProcessor}.
+	 */
 	protected void postProcess(ProblemReporter problemReporter,
 			BeanNameGenerator beanNameGenerator, Resource resource) {
 
@@ -508,10 +476,20 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	}
 
 	/**
+	 * Returns the current {@link IResource} that is being processed.
+	 */
+	private IResource getCurrentResource() {
+		if (currentResource != null) {
+			return currentResource;
+		}
+		return file;
+	}
+
+	/**
 	 * Implementation of {@link ReaderEventListener} which populates the current instance of
 	 * {@link IBeansConfig} with data from the XML bean definition reader events.
 	 */
-	final class BeansConfigReaderEventListener implements ReaderEventListener {
+	class BeansConfigReaderEventListener implements ReaderEventListener {
 
 		private IBeansConfig config;
 
@@ -655,7 +633,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 		public void registerComponents() {
 
-			// Start with the root resource.
+			// Start with the root resource
 			defaults = defaultDefinitionsCache.get(resource);
 			Set<ComponentDefinition> componentDefinitions = componentDefinitionsCache.get(resource);
 			if (componentDefinitions != null) {
@@ -728,7 +706,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 						}
 					}
 
-					// process nested imports
+					// Process nested imports
 					Set<ImportDefinition> importDefinitions = importDefinitionsCache
 							.get(importedResource);
 					if (importDefinitions != null) {
@@ -743,13 +721,23 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		}
 	}
 
-	static class NoOpResourcePatternResolver extends
-			EclipsePathMatchingResourcePatternResolver implements ResourcePatternResolver {
-
-		public NoOpResourcePatternResolver(IProject project) {
+	/**
+	 * {@link ResourcePatternResolver} that checks if <code>.class</code> resource are being
+	 * requested.
+	 */
+	class ClassResourceFilteringPatternResolver extends EclipsePathMatchingResourcePatternResolver implements
+			ResourcePatternResolver {
+		
+		/**
+		 * Creates a new {@link ClassResourceFilteringPatternResolver} 
+		 */
+		public ClassResourceFilteringPatternResolver(IProject project) {
 			super(project);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public Resource getResource(String location) {
 			// Pass package scanning through to the default pattern resolver. This is required
@@ -760,6 +748,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			return null;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public Resource[] getResources(String locationPattern) throws IOException {
 			// Pass package scanning through to the default pattern resolver. This is required
@@ -770,6 +761,102 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			return new Resource[0];
 		}
 
+	}
+
+	/**
+	 * SAX {@link ErrorHandler} implementation that creates {@link ValidationProblem}s for all
+	 * reported problems
+	 */
+	class BeansConfigErrorHandler implements ErrorHandler {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void warning(SAXParseException e) throws SAXException {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, e.getMessage(),
+					getCurrentResource(), e.getLineNumber()));
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void error(SAXParseException e) throws SAXException {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(),
+					getCurrentResource(), e.getLineNumber()));
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void fatalError(SAXParseException e) throws SAXException {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(),
+					getCurrentResource(), e.getLineNumber()));
+		}
+	}
+
+	/**
+	 * Implementation of the Spring tooling API {@link ProblemReporter} interface. This
+	 * implementation creates {@link ValidationProblem}s for all reported problems.
+	 */
+	class BeansConfigProblemReporter implements ProblemReporter {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void fatal(Problem problem) {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, getMessage(problem),
+					getCurrentResource(), getLine(problem)));
+			throw new BeanDefinitionParsingException(problem);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void error(Problem problem) {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, getMessage(problem),
+					getCurrentResource(), getLine(problem)));
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void warning(Problem problem) {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, getMessage(problem),
+					getCurrentResource(), getLine(problem)));
+		}
+
+		/**
+		 * Returns the concatenated message form the {@link Problem} and the
+		 * {@link Problem#getRootCause()}.
+		 */
+		private String getMessage(Problem problem) {
+			StringBuffer message = new StringBuffer(problem.getMessage());
+			Throwable rootCause = problem.getRootCause();
+			if (rootCause != null) {
+
+				// Retrieve nested exception
+				while (rootCause.getCause() != null) {
+					rootCause = rootCause.getCause();
+				}
+				message.append(": ");
+				message.append(rootCause.getMessage());
+			}
+			return message.toString();
+		}
+
+		/**
+		 * Returns the line of the problem by introspecting the {@link XmlSourceLocation}.
+		 */
+		private int getLine(Problem problem) {
+			Object source = problem.getLocation().getSource();
+			if (source instanceof XmlSourceLocation) {
+				return ((XmlSourceLocation) source).getStartLine();
+			}
+			else if (source instanceof Node) {
+				return LineNumberPreservingDOMParser.getStartLineNumber((Node) source);
+			}
+			return -1;
+		}
 	}
 
 }
