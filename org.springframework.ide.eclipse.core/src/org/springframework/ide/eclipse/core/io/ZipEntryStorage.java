@@ -36,8 +36,8 @@ import org.springframework.util.ObjectUtils;
 public class ZipEntryStorage implements IStorage, IAdaptable {
 
 	/**
-	 * This string (with the value of "!") is used to delimit the ZIP file name
-	 * from the corresponding ZIP entry
+	 * This string (with the value of "!") is used to delimit the ZIP file name from the
+	 * corresponding ZIP entry
 	 */
 	public static final String DELIMITER = "!";
 
@@ -52,26 +52,22 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	private IResourceModelElement parentModelElement;
 
 	/**
-	 * Creates a <code>ZipEntryStorage</code> from a full-qualified name of a
-	 * ZIP file entry (project-relative path to the ZIP file plus full path of
-	 * the ZIP file entry delimited by <code>DELIMITER</code>) and the
-	 * project which contains the ZIP file.
+	 * Creates a <code>ZipEntryStorage</code> from a full-qualified name of a ZIP file entry
+	 * (project-relative path to the ZIP file plus full path of the ZIP file entry delimited by
+	 * <code>DELIMITER</code>) and the project which contains the ZIP file.
 	 * @param project the project which contains the ZIP file
-	 * @param fullName the full-qualified name of the ZIP file entry
-	 * (project-relative path to the ZIP file plus full path of the ZIP file
-	 * entry delimited by <code>DELIMITER</code>)
+	 * @param fullName the full-qualified name of the ZIP file entry (project-relative path to the
+	 * ZIP file plus full path of the ZIP file entry delimited by <code>DELIMITER</code>)
 	 */
 	public ZipEntryStorage(IProject project, String fullName) {
 		int pos = fullName.indexOf(ZipEntryStorage.DELIMITER);
 		if (pos == -1 || pos == (fullName.length() - DELIMITER.length())) {
-			throw new IllegalArgumentException("Illegal JAR entry name '"
-					+ fullName + "'");
+			throw new IllegalArgumentException("Illegal JAR entry name '" + fullName + "'");
 		}
 		else {
 			IResource member = project.findMember(fullName.substring(0, pos));
 			if (member == null || !(member instanceof IFile)) {
-				throw new IllegalArgumentException(
-						"Missing or wrong zip file: " + file);
+				throw new IllegalArgumentException("Missing or wrong zip file: " + file);
 			}
 			this.fullName = fullName;
 			this.file = (IFile) member;
@@ -81,15 +77,14 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	}
 
 	/**
-	 * Creates a <code>ZipEntryStorage</code> from a full path of a ZIP file
-	 * entry and the corresponding ZIP file.
+	 * Creates a <code>ZipEntryStorage</code> from a full path of a ZIP file entry and the
+	 * corresponding ZIP file.
 	 * @param file the ZIP file
 	 * @param entryName the full path of the ZIP file entry
 	 */
 	public ZipEntryStorage(IFile file, String entryName) {
 		if (file == null || !file.exists()) {
-			throw new IllegalArgumentException("Missing or wrong zip file: "
-					+ file);
+			throw new IllegalArgumentException("Missing or wrong zip file: " + file);
 		}
 		this.fullName = file.getProjectRelativePath() + DELIMITER + entryName;
 		this.file = file;
@@ -98,20 +93,17 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	}
 
 	/**
-	 * Creates a <code>ZipEntryStorage</code> from a given archived model
-	 * element.
+	 * Creates a <code>ZipEntryStorage</code> from a given archived model element.
 	 * @param element the archived model element
 	 */
 	public ZipEntryStorage(IResourceModelElement element) {
 		if (element == null || !element.isElementArchived()
 				|| !(element.getElementResource() instanceof IFile)) {
-			throw new IllegalArgumentException(
-					"Missing or wrong model element: " + element);
+			throw new IllegalArgumentException("Missing or wrong model element: " + element);
 		}
 		this.fullName = element.getElementName();
 		this.file = (IFile) element.getElementResource();
-		this.entryName = fullName.substring(fullName.indexOf(DELIMITER)
-				+ DELIMITER.length());
+		this.entryName = fullName.substring(fullName.indexOf(DELIMITER) + DELIMITER.length());
 		this.entryPath = new Path(entryName);
 		this.parentModelElement = element;
 	}
@@ -127,20 +119,18 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 		try {
 			ZipFile file = new ZipFile(this.file.getLocation().toFile());
 			String cleanedEntryName = entryName;
-			if (cleanedEntryName.length() > 1
-					|| cleanedEntryName.charAt(0) == '/') {
+			if (cleanedEntryName.length() > 1 && cleanedEntryName.charAt(0) == '/') {
 				cleanedEntryName = cleanedEntryName.substring(1);
 			}
 			ZipEntry entry = file.getEntry(cleanedEntryName);
 			if (entry == null) {
-				throw new CoreException(SpringCore.createErrorStatus(
-						"Invalid path '" + cleanedEntryName + "'", null));
+				throw new CoreException(SpringCore.createErrorStatus("Invalid path '"
+						+ cleanedEntryName + "'", null));
 			}
 			return file.getInputStream(entry);
 		}
 		catch (IOException e) {
-			throw new CoreException(SpringCore.createErrorStatus(
-					e.getMessage(), e));
+			throw new CoreException(SpringCore.createErrorStatus(e.getMessage(), e));
 		}
 	}
 
@@ -156,9 +146,8 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	}
 
 	/**
-	 * Returns the full-qualified name of the ZIP file entry (project-relative
-	 * path to the ZIP file plus full path of the ZIP file entry delimited by
-	 * <code>DELIMITER</code>).
+	 * Returns the full-qualified name of the ZIP file entry (project-relative path to the ZIP file
+	 * plus full path of the ZIP file entry delimited by <code>DELIMITER</code>).
 	 */
 	public String getFullName() {
 		return fullName;
@@ -173,9 +162,8 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	}
 
 	/**
-	 * Returns the full-qualified name of the ZIP file entry (workspace-relative
-	 * path to the ZIP file plus full path of the ZIP file entry delimited by
-	 * <code>DELIMITER</code>).
+	 * Returns the full-qualified name of the ZIP file entry (workspace-relative path to the ZIP
+	 * file plus full path of the ZIP file entry delimited by <code>DELIMITER</code>).
 	 */
 	public String getAbsoluteName() {
 		return file.getProject().getFullPath().append(fullName).toString();

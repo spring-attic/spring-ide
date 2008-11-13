@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.ui.properties;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -426,7 +427,9 @@ public class ConfigFilesTab {
 			FilteredElementTreeSelectionDialog selDialog = new FilteredElementTreeSelectionDialog(
 					SpringUIUtils.getStandardDisplay().getActiveShell(), new LabelProvider(),
 					new NonJavaResourceContentProvider());
-			selDialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
+			Set<String> fileExtensions = new HashSet<String>(project.getConfigSuffixes());
+			fileExtensions.add("jar");
+			selDialog.addFilter(new ConfigFileFilter(fileExtensions));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());
@@ -436,7 +439,9 @@ public class ConfigFilesTab {
 			ElementTreeSelectionDialog selDialog = new ElementTreeSelectionDialog(SpringUIUtils
 					.getStandardDisplay().getActiveShell(), new LabelProvider(),
 					new NonJavaResourceContentProvider());
-			selDialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
+			Set<String> fileExtensions = new HashSet<String>(project.getConfigSuffixes());
+			fileExtensions.add("jar");
+			selDialog.addFilter(new ConfigFileFilter(fileExtensions));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());
@@ -600,6 +605,9 @@ public class ConfigFilesTab {
 				if (bc != null && bc.getType() == IBeansConfig.Type.AUTO_DETECTED) {
 					label += " [auto detected]";
 				}
+			}
+			else if (element instanceof ZipEntryStorage) {
+				return ((ZipEntryStorage) element).getEntryName();
 			}
 			return label;
 		}
