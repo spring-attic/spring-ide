@@ -10,15 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.properties;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -87,21 +80,22 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			if (element instanceof IFolder) {
 				return getResources((IFolder) element);
 			}
-			if (element instanceof IFile && ((IFile) element).getFileExtension().equals("jar")) {
-				Set<Object> nonJavaResources = new HashSet<Object>();
-				IFile member = (IFile) element;
-				try {
-					JarFile jarFile = new JarFile(new File(member.getLocationURI()));
-					Enumeration<JarEntry> entries = jarFile.entries();
-					while (entries.hasMoreElements()) {
-						JarEntry entry = entries.nextElement();
-						nonJavaResources.add(new ZipEntryStorage((IFile) member, entry.getName()));
-					}
-				}
-				catch (IOException e) {
-				}
-				return (Object[]) nonJavaResources.toArray(new Object[nonJavaResources.size()]);
-			}
+//			TODO CD commented for now IDE-947
+//			if (element instanceof IFile && ((IFile) element).getFileExtension().equals("jar")) {
+//				Set<Object> nonJavaResources = new HashSet<Object>();
+//				IFile member = (IFile) element;
+//				try {
+//					JarFile jarFile = new JarFile(new File(member.getLocationURI()));
+//					Enumeration<JarEntry> entries = jarFile.entries();
+//					while (entries.hasMoreElements()) {
+//						JarEntry entry = entries.nextElement();
+//						nonJavaResources.add(new ZipEntryStorage((IFile) member, entry.getName()));
+//					}
+//				}
+//				catch (IOException e) {
+//				}
+//				return (Object[]) nonJavaResources.toArray(new Object[nonJavaResources.size()]);
+//			}
 		}
 		catch (JavaModelException e) {
 			return NO_CHILDREN;
