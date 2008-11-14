@@ -253,4 +253,8 @@ public abstract class AbstractModelElement extends WebflowModelElement
 	public boolean isElementArchived() {
 		return false;
 	}
+	
+	public boolean isExternal() {
+		return false;
+	}
 }
