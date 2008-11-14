@@ -23,6 +23,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
+import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
@@ -42,14 +43,23 @@ public abstract class AbstractAspectDefinitionBuilder implements IAspectDefiniti
 
 		IStructuredModel model = null;
 		try {
-			try {
-				model = StructuredModelManager.getModelManager().getExistingModelForRead(file);
+			if (file instanceof ExternalFile) {
+				if (model == null) {
+					model = StructuredModelManager.getModelManager().getModelForRead(
+							file.getName(), file.getContents(), null);
+				}
 			}
-			catch (RuntimeException e) {
-				// sometimes WTP throws a NPE in concurrency situations
-			}
-			if (model == null) {
-				model = StructuredModelManager.getModelManager().getModelForRead(file);
+			else {
+				try {
+					model = StructuredModelManager.getModelManager().getExistingModelForRead(file);
+				}
+				catch (RuntimeException e) {
+					// sometimes WTP throws a NPE in concurrency situations
+				}
+				if (model == null) {
+					model = StructuredModelManager.getModelManager().getModelForRead(file);
+				}
+
 			}
 			if (model != null) {
 				IDOMDocument document = ((DOMModelImpl) model).getDocument();

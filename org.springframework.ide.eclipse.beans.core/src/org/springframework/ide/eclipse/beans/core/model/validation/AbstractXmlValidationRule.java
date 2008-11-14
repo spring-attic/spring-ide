@@ -97,6 +97,12 @@ public abstract class AbstractXmlValidationRule implements
 	 * @see #validate(Node, IBeansValidationContext)
 	 */
 	private void validateBeansConfig(final IBeansConfig element, final IBeansValidationContext context) {
+		
+		// Do not validate external configuration files
+		if (element.isExternal()) {
+			return;
+		}
+		
 		IStructuredModel model = null;
 		try {
 			model = StructuredModelManager.getModelManager().getExistingModelForRead(

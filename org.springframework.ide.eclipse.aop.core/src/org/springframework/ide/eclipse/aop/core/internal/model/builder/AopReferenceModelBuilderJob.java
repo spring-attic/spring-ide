@@ -354,7 +354,7 @@ public class AopReferenceModelBuilderJob extends Job {
 			IBeansConfig config = project.getConfig(currentFile, true);
 			IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
 
-			if (javaProject != null) {
+			if (javaProject != null && config != null) {
 				aopProject = ((AopReferenceModel) Activator.getModel())
 						.getProjectWithInitialization(javaProject);
 

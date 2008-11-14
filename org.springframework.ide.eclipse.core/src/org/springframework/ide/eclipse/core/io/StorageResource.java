@@ -68,6 +68,11 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 		return storage.getAdapter(adapter);
 	}
 	
+	@Override
+	public String getFilename() throws IllegalStateException {
+		return storage.getFile().getProjectRelativePath() + ZipEntryStorage.DELIMITER + storage.getEntryName();
+	}
+	
 	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(storage.getEntryName(),
 				relativePath);

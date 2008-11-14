@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -75,6 +79,7 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.EclipsePathMatchingResourcePatternResolver;
+import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -115,7 +120,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 */
 	public BeansConfig(IBeansProject project, String name, Type type) {
 		super(project, name, type);
-		init(name);
+		init(name, project);
 	}
 
 	/**
@@ -190,8 +195,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * from the project. If the name specifies an entry in an archive then the {@link #isArchived}
 	 * flag is set. If the corresponding file is not available or accessible then an entry is added
 	 * to the config's list of errors.
+	 * @param project
 	 */
-	protected void init(String name) {
+	protected void init(String name, IBeansProject project) {
 		IContainer container;
 		String fileName;
 		String fullPath;
@@ -216,13 +222,31 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					.getElementResource();
 			fullPath = container.getFullPath().append(fileName).toString();
 		}
-
+		
+		// Try to find the configuration file in the workspace
 		file = (IFile) container.findMember(fileName);
+		
+		// If the file couldn't be found in the workspace that could either mean we are dealing with
+		// an external resource or the file as been deleted/moved
 		if (file == null) {
-			modificationTimestamp = IResource.NULL_STAMP;
-			String msg = "Beans config file '" + fullPath + "' not accessible";
-			problems = new LinkedHashSet<ValidationProblem>();
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
+			
+			// Resolve eventual contained classpath variables
+			IPath resolvedPath = JavaCore.getResolvedVariablePath(new Path(fileName));
+			if (resolvedPath != null) {
+				fileName = resolvedPath.toString();
+			}
+			
+			// Create an external file instance
+			file = new ExternalFile(new File(fileName), name.substring(pos + 1), project
+					.getProject());
+			
+			// Does the external resource exist?
+			if (!file.exists()) {
+				modificationTimestamp = IResource.NULL_STAMP;
+				String msg = "Beans config file '" + fullPath + "' not accessible";
+				problems = new LinkedHashSet<ValidationProblem>();
+				problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
+			}
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
@@ -259,12 +283,18 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				components = new LinkedHashSet<IBeansComponent>();
 				beans = new LinkedHashMap<String, IBean>();
 				problems = new LinkedHashSet<ValidationProblem>();
+
 				if (file != null) {
 					modificationTimestamp = file.getModificationStamp();
 					final Resource resource;
 					if (isArchived) {
-						resource = new StorageResource(new ZipEntryStorage(file.getProject(),
-								getElementName()));
+						if (file instanceof Resource) {
+							resource = (Resource) file;
+						}
+						else {
+							resource = new StorageResource(new ZipEntryStorage(file.getProject(),
+									getElementName()));
+						}
 					}
 					else {
 						resource = new FileResource(file);
@@ -341,7 +371,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 									return count;
 								}
 								catch (Exception e) {
-									// Record the exception to throw that later
+									// Record the exception to throw it later
 									throwables.add(e);
 								}
 								return 0;
@@ -725,11 +755,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * {@link ResourcePatternResolver} that checks if <code>.class</code> resource are being
 	 * requested.
 	 */
-	class ClassResourceFilteringPatternResolver extends EclipsePathMatchingResourcePatternResolver implements
-			ResourcePatternResolver {
-		
+	class ClassResourceFilteringPatternResolver extends EclipsePathMatchingResourcePatternResolver
+			implements ResourcePatternResolver {
+
 		/**
-		 * Creates a new {@link ClassResourceFilteringPatternResolver} 
+		 * Creates a new {@link ClassResourceFilteringPatternResolver}
 		 */
 		public ClassResourceFilteringPatternResolver(IProject project) {
 			super(project);

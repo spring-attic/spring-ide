@@ -74,4 +74,8 @@ public class SpringProject extends AbstractResourceModelElement implements
 	public String toString() {
 		return "Project=" + getElementName();
 	}
+
+	public boolean isExternal() {
+		return false;
+	}
 }

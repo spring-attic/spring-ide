@@ -128,8 +128,11 @@ public class AopReferenceModelPeristence {
 				factoryId = aopReferenceM.getString(FACTORY_ID);
 				IAopReference aopReference = (IAopReference) ELEMENT_FACTORIES.get(factoryId)
 						.createElement(aopReferenceM);
-				aopReference.setDefinition(aspectDefinition);
-				aopProject.addAopReference(aopReference);
+				// The aopReference can be null if the resource has been deleted or is an external
+				if (aopReference != null) {
+					aopReference.setDefinition(aspectDefinition);
+					aopProject.addAopReference(aopReference);
+				}
 			}
 		}
 	}

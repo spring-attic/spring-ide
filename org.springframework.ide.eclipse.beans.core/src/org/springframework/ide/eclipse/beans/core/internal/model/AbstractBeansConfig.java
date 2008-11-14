@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
@@ -48,63 +49,64 @@ import org.springframework.util.ObjectUtils;
 public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements
 		IBeansConfig {
 	
-	/** The context namespace URI */
-	private static final String CONTEXT_NAMESPACE_URI = "http://www.springframework.org/schema/context";
-
 	/** The component scan element */
 	private static final String COMPONENT_SCAN_ELEMENT_NAME = "component-scan";
 
-	/** This bean's config file */
-	protected IFile file;
-
-	/** This bean config file's timestamp of last modification */
-	protected long modificationTimestamp;
-
-	/** Indicator for a beans configuration embedded in a ZIP file */
-	protected boolean isArchived;
-
-	/** Defaults values for this beans config file */
-	protected volatile DocumentDefaultsDefinition defaults;
-
-	/** List of imports (in registration order) */
-	protected volatile Set<IBeansImport> imports;
+	/** The context namespace URI */
+	private static final String CONTEXT_NAMESPACE_URI = "http://www.springframework.org/schema/context";
 
 	/** List of aliases (in registration order) */
 	protected volatile Map<String, IBeanAlias> aliases;
-
-	/** List of components (in registration order) */
-	protected volatile Set<IBeansComponent> components;
-
-	/** List of bean names mapped beans (in registration order) */
-	protected volatile Map<String, IBean> beans;
-
-	protected volatile Type type;
 
 	/**
 	 * List of bean class names mapped to list of beans implementing the corresponding class
 	 */
 	protected volatile Map<String, Set<IBean>> beanClassesMap;
 
+	/** List of bean names mapped beans (in registration order) */
+	protected volatile Map<String, IBean> beans;
+
+	/** List of components (in registration order) */
+	protected volatile Set<IBeansComponent> components;
+
+	/** Defaults values for this beans config file */
+	protected volatile DocumentDefaultsDefinition defaults;
+
+	/** This bean's config file */
+	protected IFile file;
+
+	/** List of imports (in registration order) */
+	protected volatile Set<IBeansImport> imports;
+
+	/** Indicator for a beans configuration embedded in a ZIP file */
+	protected boolean isArchived;
+
 	protected volatile boolean isBeanClassesMapPopulated = false;
 
+	protected volatile boolean isModelPopulated = false;
+
+	/** This bean config file's timestamp of last modification */
+	protected long modificationTimestamp;
+
+	/** Set of parsing errors */
+	protected Set<ValidationProblem> problems;
+	
 	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
 	protected final Lock r = rwl.readLock();
 
+	protected volatile Type type;
+
 	protected final Lock w = rwl.writeLock();
-
-	protected volatile boolean isModelPopulated = false;
-
-	/**
-	 * List of parsing errors.
-	 */
-	protected Set<ValidationProblem> problems;
 
 	public AbstractBeansConfig(IBeansModelElement project, String name, Type type) {
 		super(project, name);
 		this.type = type;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		// First visit this config
@@ -142,6 +144,465 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 				}
 			}
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean configAffectedByJavaChange(IResource resource) {
+		for (IBeansComponent component : getComponents()) {
+			if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
+				XmlSourceLocation location = (XmlSourceLocation) component
+						.getElementSourceLocation();
+				if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
+						&& CONTEXT_NAMESPACE_URI.equals(location
+								.getNamespaceURI())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AbstractBeansConfig)) {
+			return false;
+		}
+		AbstractBeansConfig that = (AbstractBeansConfig) other;
+		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
+			return false;
+		if (this.defaults != null && that.defaults != null && this.defaults != that.defaults) {
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(), that.defaults
+					.getLazyInit()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(), that.defaults
+					.getAutowire()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(), that.defaults
+					.getDependencyCheck()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(), that.defaults
+					.getInitMethod()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(), that.defaults
+					.getDestroyMethod()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(), that.defaults.getMerge()))
+				return false;
+		}
+		return super.equals(other);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IBeanAlias getAlias(String name) {
+		if (name != null) {
+			try {
+				r.lock();
+				IBeanAlias alias = aliases.get(name);
+				if (alias != null) {
+					return alias;
+				}
+
+				for (IBeansImport beansImport : imports) {
+					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
+						alias = bc.getAlias(name);
+						if (alias != null) {
+							return alias;
+						}
+					}
+				}
+			}
+			finally {
+				r.unlock();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<IBeanAlias> getAliases() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			Set<IBeanAlias> allAliases = new LinkedHashSet<IBeanAlias>(aliases.values());
+			for (IBeansImport beansImport : imports) {
+				for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
+					allAliases.addAll(bc.getAliases());
+				}
+			}
+			return Collections.unmodifiableSet(new LinkedHashSet<IBeanAlias>(allAliases));
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IBean getBean(String name) {
+		if (name != null) {
+			// Lazily initialization of this config
+			readConfig();
+
+			try {
+				r.lock();
+				IBean bean = beans.get(name);
+				if (bean != null) {
+					return bean;
+				}
+
+				for (IBeansImport beansImport : imports) {
+					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
+						bean = bc.getBean(name);
+						if (bean != null) {
+							return bean;
+						}
+					}
+				}
+			}
+			finally {
+				r.unlock();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<String> getBeanClasses() {
+		return Collections.unmodifiableSet(new LinkedHashSet<String>(getBeanClassesMap().keySet()));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<IBean> getBeans() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			Set<IBean> allBeans = new LinkedHashSet<IBean>(beans.values());
+			for (IBeansImport beansImport : imports) {
+				for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
+					allBeans.addAll(bc.getBeans());
+				}
+			}
+
+			return Collections.unmodifiableSet(new LinkedHashSet<IBean>(allBeans));
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<IBean> getBeans(String className) {
+		if (isBeanClass(className)) {
+			return Collections.unmodifiableSet(getBeanClassesMap().get(className));
+		}
+		return new HashSet<IBean>();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<IBeansComponent> getComponents() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			Set<IBeansComponent> allComponents = new LinkedHashSet<IBeansComponent>(components);
+			for (IBeansImport beansImport : imports) {
+				for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
+					allComponents.addAll(bc.getComponents());
+				}
+			}
+
+			return Collections.unmodifiableSet(new LinkedHashSet<IBeansComponent>(allComponents));
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDefaultAutowire() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			return (defaults != null ? defaults.getAutowire() : DEFAULT_AUTO_WIRE);
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDefaultDependencyCheck() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			return (defaults != null ? defaults.getDependencyCheck() : DEFAULT_DEPENDENCY_CHECK);
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDefaultDestroyMethod() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			return (defaults != null && defaults.getDestroyMethod() != null ? defaults
+					.getDestroyMethod() : DEFAULT_DESTROY_METHOD);
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDefaultInitMethod() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			return (defaults != null && defaults.getInitMethod() != null ? defaults.getInitMethod()
+					: DEFAULT_INIT_METHOD);
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDefaultLazyInit() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			return (defaults != null ? defaults.getLazyInit() : DEFAULT_LAZY_INIT);
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDefaultMerge() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			// This default value was introduced with Spring 2.0 -> so we have
+			// to check for an empty string here as well
+			return (defaults != null && defaults.getMerge() != null
+					&& defaults.getMerge().length() > 0 ? defaults.getMerge() : DEFAULT_MERGE);
+		}
+		finally {
+			r.unlock();
+		}
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final IResource getElementResource() {
+		return file;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final int getElementStartLine() {
+		// Lazily initialization of this config
+		readConfig();
+
+		IModelSourceLocation location = ModelUtils.getSourceLocation(defaults);
+		return (location != null ? location.getStartLine() : -1);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final int getElementType() {
+		return IBeansModelElementTypes.CONFIG_TYPE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<IBeansImport> getImports() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			return Collections.unmodifiableSet(imports);
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * Returns the set of {@link ValidationProblem}s that have been recored during initialization.
+	 */
+	public final Set<ValidationProblem> getProblems() {
+		// Lazily initialization of this config
+		readConfig();
+
+		try {
+			r.lock();
+			return problems;
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Type getType() {
+		return type;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean hasBean(String name) {
+		if (name != null) {
+			// Lazily initialization of this config
+			readConfig();
+
+			try {
+				r.lock();
+				IBean bean = beans.get(name);
+				if (bean != null) {
+					return true;
+				}
+
+				for (IBeansImport beansImport : imports) {
+					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
+						bean = bc.getBean(name);
+						if (bean != null) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+			finally {
+				r.unlock();
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(isArchived);
+		if (defaults != null) {
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getDependencyCheck());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getMerge());
+		}
+		return getElementType() * hashCode + super.hashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isBeanClass(String className) {
+		if (className != null) {
+			return getBeanClassesMap().containsKey(className);
+		}
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final boolean isElementArchived() {
+		return isArchived;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isExternal() {
+		return file instanceof ExternalFile;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean resourceChanged() {
+		return modificationTimestamp < file.getModificationStamp() || changedImportedBeansConfig();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return getElementName() + ": " + getBeans();
 	}
 
 	private void addBeanClass(IBean bean, Map<String, Set<IBean>> beanClasses) {
@@ -199,115 +660,6 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 		return false;
 	}
 
-	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof AbstractBeansConfig)) {
-			return false;
-		}
-		AbstractBeansConfig that = (AbstractBeansConfig) other;
-		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
-			return false;
-		if (this.defaults != null && that.defaults != null && this.defaults != that.defaults) {
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(), that.defaults
-					.getLazyInit()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(), that.defaults
-					.getAutowire()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(), that.defaults
-					.getDependencyCheck()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(), that.defaults
-					.getInitMethod()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(), that.defaults
-					.getDestroyMethod()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(), that.defaults.getMerge()))
-				return false;
-		}
-		return super.equals(other);
-	}
-
-	public IBeanAlias getAlias(String name) {
-		if (name != null) {
-			try {
-				r.lock();
-				IBeanAlias alias = aliases.get(name);
-				if (alias != null) {
-					return alias;
-				}
-
-				for (IBeansImport beansImport : imports) {
-					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
-						alias = bc.getAlias(name);
-						if (alias != null) {
-							return alias;
-						}
-					}
-				}
-			}
-			finally {
-				r.unlock();
-			}
-		}
-		return null;
-	}
-
-	public Set<IBeanAlias> getAliases() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			Set<IBeanAlias> allAliases = new LinkedHashSet<IBeanAlias>(aliases.values());
-			for (IBeansImport beansImport : imports) {
-				for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
-					allAliases.addAll(bc.getAliases());
-				}
-			}
-			return Collections.unmodifiableSet(new LinkedHashSet<IBeanAlias>(allAliases));
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public IBean getBean(String name) {
-		if (name != null) {
-			// Lazily initialization of this config
-			readConfig();
-
-			try {
-				r.lock();
-				IBean bean = beans.get(name);
-				if (bean != null) {
-					return bean;
-				}
-
-				for (IBeansImport beansImport : imports) {
-					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
-						bean = bc.getBean(name);
-						if (bean != null) {
-							return bean;
-						}
-					}
-				}
-			}
-			finally {
-				r.unlock();
-			}
-		}
-		return null;
-	}
-
-	public Set<String> getBeanClasses() {
-		return Collections.unmodifiableSet(new LinkedHashSet<String>(getBeanClassesMap().keySet()));
-	}
-
 	/**
 	 * Returns lazily initialized map with all bean classes used in this config.
 	 */
@@ -344,269 +696,9 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 		}
 		return beanClassesMap;
 	}
-
-	public Set<IBean> getBeans() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			Set<IBean> allBeans = new LinkedHashSet<IBean>(beans.values());
-			for (IBeansImport beansImport : imports) {
-				for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
-					allBeans.addAll(bc.getBeans());
-				}
-			}
-
-			return Collections.unmodifiableSet(new LinkedHashSet<IBean>(allBeans));
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public Set<IBean> getBeans(String className) {
-		if (isBeanClass(className)) {
-			return Collections.unmodifiableSet(getBeanClassesMap().get(className));
-		}
-		return new HashSet<IBean>();
-	}
-
-	public Set<IBeansComponent> getComponents() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			Set<IBeansComponent> allComponents = new LinkedHashSet<IBeansComponent>(components);
-			for (IBeansImport beansImport : imports) {
-				for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
-					allComponents.addAll(bc.getComponents());
-				}
-			}
-
-			return Collections.unmodifiableSet(new LinkedHashSet<IBeansComponent>(allComponents));
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public String getDefaultAutowire() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			return (defaults != null ? defaults.getAutowire() : DEFAULT_AUTO_WIRE);
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public String getDefaultDependencyCheck() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			return (defaults != null ? defaults.getDependencyCheck() : DEFAULT_DEPENDENCY_CHECK);
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public String getDefaultDestroyMethod() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			return (defaults != null && defaults.getDestroyMethod() != null ? defaults
-					.getDestroyMethod() : DEFAULT_DESTROY_METHOD);
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public String getDefaultInitMethod() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			return (defaults != null && defaults.getInitMethod() != null ? defaults.getInitMethod()
-					: DEFAULT_INIT_METHOD);
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public String getDefaultLazyInit() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			return (defaults != null ? defaults.getLazyInit() : DEFAULT_LAZY_INIT);
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public String getDefaultMerge() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			// This default value was introduced with Spring 2.0 -> so we have
-			// to check for an empty string here as well
-			return (defaults != null && defaults.getMerge() != null
-					&& defaults.getMerge().length() > 0 ? defaults.getMerge() : DEFAULT_MERGE);
-		}
-		finally {
-			r.unlock();
-		}
-
-	}
-
-	public final IResource getElementResource() {
-		return file;
-	}
-
-	public final int getElementStartLine() {
-		// Lazily initialization of this config
-		readConfig();
-
-		IModelSourceLocation location = ModelUtils.getSourceLocation(defaults);
-		return (location != null ? location.getStartLine() : -1);
-	}
-
-	public final int getElementType() {
-		return IBeansModelElementTypes.CONFIG_TYPE;
-	}
-
-	public Set<IBeansImport> getImports() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			return Collections.unmodifiableSet(imports);
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public final Set<ValidationProblem> getProblems() {
-		// Lazily initialization of this config
-		readConfig();
-
-		try {
-			r.lock();
-			return problems;
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	public boolean hasBean(String name) {
-		if (name != null) {
-			// Lazily initialization of this config
-			readConfig();
-
-			try {
-				r.lock();
-				IBean bean = beans.get(name);
-				if (bean != null) {
-					return true;
-				}
-
-				for (IBeansImport beansImport : imports) {
-					for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
-						bean = bc.getBean(name);
-						if (bean != null) {
-							return true;
-						}
-					}
-				}
-
-				return false;
-			}
-			finally {
-				r.unlock();
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(isArchived);
-		if (defaults != null) {
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getDependencyCheck());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getMerge());
-		}
-		return getElementType() * hashCode + super.hashCode();
-	}
-
-	public boolean isBeanClass(String className) {
-		if (className != null) {
-			return getBeanClassesMap().containsKey(className);
-		}
-		return false;
-	}
-
-	public final boolean isElementArchived() {
-		return isArchived;
-	}
-
+	
+	/**
+	 * Read the resource backing this beans configuration and initialize all internal state.
+	 */
 	protected abstract void readConfig();
-
-	public boolean resourceChanged() {
-		return modificationTimestamp < file.getModificationStamp() || changedImportedBeansConfig();
-	}
-
-	@Override
-	public String toString() {
-		return getElementName() + ": " + getBeans();
-	}
-
-	public Type getType() {
-		return type;
-	}
-
-	public boolean configAffectedByJavaChange(IResource resource) {
-		for (IBeansComponent component : getComponents()) {
-			if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
-				XmlSourceLocation location = (XmlSourceLocation) component
-						.getElementSourceLocation();
-				if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
-						&& CONTEXT_NAMESPACE_URI.equals(location
-								.getNamespaceURI())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 }

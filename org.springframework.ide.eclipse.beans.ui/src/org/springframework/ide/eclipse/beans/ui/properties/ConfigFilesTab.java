@@ -11,16 +11,21 @@
 package org.springframework.ide.eclipse.beans.ui.properties;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.JarEntryFile;
+import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -81,7 +86,7 @@ import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "restriction" })
 public class ConfigFilesTab {
 
 	private static final String PREFIX = "ConfigurationPropertyPage." + "tabConfigFiles.";
@@ -280,7 +285,7 @@ public class ConfigFilesTab {
 		handleTableSelectionChanged();
 		return composite;
 	}
-	
+
 	public boolean shouldIgnoreMissingNamespaceHandler() {
 		return this.ignoreMissingNamespaceHandlerText.getSelection();
 	}
@@ -427,9 +432,7 @@ public class ConfigFilesTab {
 			FilteredElementTreeSelectionDialog selDialog = new FilteredElementTreeSelectionDialog(
 					SpringUIUtils.getStandardDisplay().getActiveShell(), new LabelProvider(),
 					new NonJavaResourceContentProvider());
-			Set<String> fileExtensions = new HashSet<String>(project.getConfigSuffixes());
-			fileExtensions.add("jar");
-			selDialog.addFilter(new ConfigFileFilter(fileExtensions));
+			selDialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());
@@ -439,9 +442,7 @@ public class ConfigFilesTab {
 			ElementTreeSelectionDialog selDialog = new ElementTreeSelectionDialog(SpringUIUtils
 					.getStandardDisplay().getActiveShell(), new LabelProvider(),
 					new NonJavaResourceContentProvider());
-			Set<String> fileExtensions = new HashSet<String>(project.getConfigSuffixes());
-			fileExtensions.add("jar");
-			selDialog.addFilter(new ConfigFileFilter(fileExtensions));
+			selDialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());
@@ -453,16 +454,38 @@ public class ConfigFilesTab {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
-					String config;
+					String config = null;
 					if (element instanceof ZipEntryStorage) {
 						ZipEntryStorage storage = (ZipEntryStorage) element;
 						config = storage.getFullName();
 					}
-					else {
+					else if (element instanceof IFile) {
 						IFile file = (IFile) element;
 						config = file.getProjectRelativePath().toString();
 					}
-					project.addConfig(config, IBeansConfig.Type.MANUAL);
+					else if (element instanceof JarEntryFile) {
+						IPath fullPath = ((JarPackageFragmentRoot) ((JarEntryFile) element)
+								.getPackageFragmentRoot()).internalPath();
+						String entryName = ((JarEntryFile) element).getFullPath().toString();
+						for (String name : JavaCore.getClasspathVariableNames()) {
+							IPath variablePath = JavaCore.getClasspathVariable(name);
+							if (variablePath.isPrefixOf(fullPath)) {
+								if (MessageDialog.openQuestion(SpringUIUtils.getStandardDisplay()
+										.getActiveShell(), "Use classpath variable",
+										"Do you want to use the classpath variable '" + name
+												+ "' to refer to the config file\n'" + entryName
+												+ "'?")) {
+									fullPath = new Path(name).append(fullPath
+											.removeFirstSegments(variablePath.segmentCount()));
+								}
+								break;
+							}
+						}
+						config = fullPath.toString() + ZipEntryStorage.DELIMITER + entryName;
+					}
+					if (config != null) {
+						project.addConfig(config, IBeansConfig.Type.MANUAL);
+					}
 				}
 				configsViewer.refresh(false);
 				hasUserMadeChanges = true;

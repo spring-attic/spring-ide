@@ -144,12 +144,12 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 
 		AspectJAutoProxyConfiguration configuration = getAspectJAutoProxyConfiguration(beansConfig,
 				document);
-		
+
 		// not configured for auto proxing
 		if (!configuration.isAutoProxy()) {
 			return;
 		}
-		
+
 		List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
 
 		for (IBean bean : beansConfig.getBeans()) {
@@ -181,16 +181,25 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 				if (!config.equals(beansConfig)) {
 					IStructuredModel model = null;
 					try {
-						try {
-							model = StructuredModelManager.getModelManager()
-									.getExistingModelForRead(config.getElementResource());
+						if (config.isExternal()) {
+							if (model == null) {
+								model = StructuredModelManager.getModelManager().getModelForRead(
+										config.getElementResource().getName(),
+										((IFile) config.getElementResource()).getContents(), null);
+							}
 						}
-						catch (RuntimeException e) {
-							// sometimes WTP throws a NPE in concurrency situations
-						}
-						if (model == null) {
-							model = StructuredModelManager.getModelManager().getModelForRead(
-									(IFile) config.getElementResource());
+						else {
+							try {
+								model = StructuredModelManager.getModelManager()
+										.getExistingModelForRead(config.getElementResource());
+							}
+							catch (RuntimeException e) {
+								// sometimes WTP throws a NPE in concurrency situations
+							}
+							if (model == null) {
+								model = StructuredModelManager.getModelManager().getModelForRead(
+										(IFile) config.getElementResource());
+							}
 						}
 						if (model != null) {
 							document = ((DOMModelImpl) model).getDocument();
@@ -220,11 +229,11 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 	private void getAspectJConfigurationForDocument(IDOMDocument document,
 			AspectJAutoProxyConfiguration configuration) {
 		NodeList list = getAspectJAutoProxyNodes(document);
-		
+
 		if (list.getLength() > 0) {
 			configuration.setAutoProxy(true);
 		}
-		
+
 		for (int i = 0; i < list.getLength(); i++) {
 			Node node = list.item(i);
 			configuration.addIncludePattern(node);
@@ -308,7 +317,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		private List<Pattern> includePatterns;
 
 		private boolean proxyTargetClass;
-		
+
 		private boolean isAutoProxy = false;
 
 		public void setProxyTargetClass(boolean proxyTargetClass) {
@@ -318,11 +327,11 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		public boolean isProxyTargetClass() {
 			return proxyTargetClass;
 		}
-		
+
 		public void setAutoProxy(boolean autoProxy) {
 			this.isAutoProxy = autoProxy;
 		}
-		
+
 		public boolean isAutoProxy() {
 			return isAutoProxy;
 		}

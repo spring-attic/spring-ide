@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
@@ -41,6 +42,9 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * @author Christian Dupuis
  */
 public class NonJavaResourceContentProvider implements ITreeContentProvider {
+
+	private static final Path JVM_CLASSPATH_CONTAINER = new Path(
+			"org.eclipse.jdt.launching.JRE_CONTAINER");
 
 	public static final Object[] NO_CHILDREN = new Object[0];
 
@@ -80,22 +84,6 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			if (element instanceof IFolder) {
 				return getResources((IFolder) element);
 			}
-//			TODO CD commented for now IDE-947
-//			if (element instanceof IFile && ((IFile) element).getFileExtension().equals("jar")) {
-//				Set<Object> nonJavaResources = new HashSet<Object>();
-//				IFile member = (IFile) element;
-//				try {
-//					JarFile jarFile = new JarFile(new File(member.getLocationURI()));
-//					Enumeration<JarEntry> entries = jarFile.entries();
-//					while (entries.hasMoreElements()) {
-//						JarEntry entry = entries.nextElement();
-//						nonJavaResources.add(new ZipEntryStorage((IFile) member, entry.getName()));
-//					}
-//				}
-//				catch (IOException e) {
-//				}
-//				return (Object[]) nonJavaResources.toArray(new Object[nonJavaResources.size()]);
-//			}
 		}
 		catch (JavaModelException e) {
 			return NO_CHILDREN;
@@ -170,12 +158,9 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			return NO_CHILDREN;
 		}
 
-		// Filter out JARs not contained in the project itself and replace
-		// package fragment roots that correspond to projects with the package
-		// fragments directly
 		List<IJavaElement> list = new ArrayList<IJavaElement>();
 		for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
-			if (isInternalLibrary(project, root)) {
+			if (!JVM_CLASSPATH_CONTAINER.equals(root.getRawClasspathEntry().getPath())) {
 				if (isProjectPackageFragmentRoot(root)) {
 					for (IJavaElement element : root.getChildren()) {
 						list.add(element);

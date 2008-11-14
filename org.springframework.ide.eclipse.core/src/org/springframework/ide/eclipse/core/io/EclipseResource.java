@@ -101,7 +101,7 @@ public class EclipseResource extends AbstractResource implements IAdaptable {
 		if (resource == null) {
 			throw new IllegalStateException("File not found");
 		}
-		return resource.getName();
+		return resource.getProjectRelativePath().toString();
 	}
 
 	public String getDescription() {

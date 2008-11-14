@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocato
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
@@ -436,7 +437,15 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	}
 
 	public IBeansConfig getConfig(IFile file) {
-		return getConfig(getConfigName(file));
+		IBeansConfig config = getConfig(getConfigName(file));
+		if (config == null) {
+			for (IBeansConfig beansConfig : configs.values()) {
+				if (beansConfig.getElementResource().equals(file)) {
+					return beansConfig;
+				}
+			}
+		}
+		return config;
 	}
 
 	public IBeansConfig getConfig(String configName) {
@@ -745,7 +754,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 */
 	private String getConfigName(IFile file) {
 		String configName;
-		if (file.getProject().equals(project.getProject())) {
+		if (file.getProject().equals(project.getProject()) && !(file instanceof ExternalFile)) {
 			configName = file.getProjectRelativePath().toString();
 		}
 		else {
@@ -949,6 +958,10 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		finally {
 			w.unlock();
 		}
+	}
+
+	public boolean isExternal() {
+		return false;
 	}
 
 }

@@ -121,7 +121,10 @@ class EclipseClassPathResource extends AbstractResource implements IAdaptable {
 	}
 
 	public String getFilename() {
-		return StringUtils.getFilename(this.path);
+		if (this.resource != null) {
+			return this.resource.getFilename();
+		}
+		return path;
 	}
 
 	public InputStream getInputStream() throws IOException {

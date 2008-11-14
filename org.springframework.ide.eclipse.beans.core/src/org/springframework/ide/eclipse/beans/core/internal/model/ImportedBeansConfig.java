@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -41,7 +42,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 public class ImportedBeansConfig extends AbstractBeansConfig implements IImportedBeansConfig {
 
 	public ImportedBeansConfig(IBeansImport beansImport, Resource resource, Type type) {
-		super(beansImport, resource.getDescription(), type);
+		super(beansImport, resource.getFilename(), type);
 		init(resource);
 	}
 
@@ -106,15 +107,16 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 
 	private void init(Resource resource) {
 		if (resource instanceof IAdaptable) {
-			if (((IAdaptable) resource).getAdapter(IFile.class) != null) {
-				file = (IFile) ((IAdaptable) resource).getAdapter(IFile.class);
-			}
-			else if (((IAdaptable) resource).getAdapter(ZipEntryStorage.class) != null) {
+			if (((IAdaptable) resource).getAdapter(ZipEntryStorage.class) != null) {
 				ZipEntryStorage storage = (ZipEntryStorage) ((IAdaptable) resource)
 						.getAdapter(ZipEntryStorage.class);
 				file = storage.getFile();
 				setElementName(storage.getFullName());
 				isArchived = true;
+			}
+			else if (((IAdaptable) resource).getAdapter(IFile.class) != null) {
+				file = (IFile) ((IAdaptable) resource).getAdapter(IFile.class);
+				isArchived = file instanceof ExternalFile;
 			}
 		}
 

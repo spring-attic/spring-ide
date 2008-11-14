@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -62,6 +63,10 @@ public abstract class AbstractSourceModelElement extends
 			return element.isElementArchived();
 		}
 		return false;
+	}
+	
+	public boolean isExternal() {
+		return getElementResource() instanceof ExternalFile;
 	}
 
 	protected final void setElementSourceLocation(

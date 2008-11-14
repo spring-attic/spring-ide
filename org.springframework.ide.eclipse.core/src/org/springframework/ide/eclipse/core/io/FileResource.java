@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
 import org.springframework.core.io.AbstractResource;
@@ -70,6 +71,14 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		if (file == null) {
 			throw new FileNotFoundException("File not found");
 		}
+		else if (file instanceof ExternalFile) {
+			try {
+				return file.getContents();
+			}
+			catch (CoreException e) {
+				throw new IOException(e.getMessage());
+			}
+		}
 		return new FileInputStream(getFile());
 	}
 
@@ -109,7 +118,10 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		if (file == null) {
 			throw new IllegalStateException("File not found");
 		}
-		return file.getName();
+		if (file instanceof ExternalFile) {
+			return ((ExternalFile) file).getFilename();
+		}
+		return file.getProjectRelativePath().toString();
 	}
 
 	public String getDescription() {
