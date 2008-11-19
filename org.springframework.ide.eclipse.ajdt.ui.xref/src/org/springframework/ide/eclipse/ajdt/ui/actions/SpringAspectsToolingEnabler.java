@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ajdt.ui.actions;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.ajdt.core.AspectJCorePreferences;
 import org.eclipse.ajdt.internal.ui.editor.AspectJEditor;
 import org.eclipse.ajdt.internal.ui.lazystart.Utils;
@@ -17,6 +19,7 @@ import org.eclipse.ajdt.internal.utils.AJDTUtils;
 import org.eclipse.core.internal.content.ContentTypeManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -38,9 +41,17 @@ import org.springframework.ide.eclipse.core.SpringCore;
 @SuppressWarnings("restriction")
 public class SpringAspectsToolingEnabler {
 
+	// the stand alone spring aspects jar name
 	final private static String SPRING_ASPECTS_JAR_NAME = "spring-aspects.jar";
 
+	// part of the name for the spring aspects jar included in BRITS.
+	// the full name includes a version number at the end
+	final private static Pattern SPRING_ASPECTS_PATTERN = Pattern
+			.compile(".*org\\.springframework\\.aspects-.*\\.jar");
+
 	final private IProject project;
+
+	final private IJavaProject jProject;
 
 	final private Shell shell;
 
@@ -49,6 +60,7 @@ public class SpringAspectsToolingEnabler {
 	public SpringAspectsToolingEnabler(IProject project, Shell shell,
 			boolean askToChangeDefaultEditor) {
 		this.project = project;
+		this.jProject = JavaCore.create(project);
 		this.askToChangeDefaultEditor = askToChangeDefaultEditor;
 		this.shell = shell;
 	}
@@ -56,13 +68,14 @@ public class SpringAspectsToolingEnabler {
 	boolean run() {
 		boolean isAJEditorDefault = false;
 		try {
-			if (hasSpringAspectsJar()) {
+			if (hasSpringAspectsJar(jProject.getRawClasspath())) {
 				if (!hasAJNature()) {
 					AJDTUtils.addAspectJNature(project, false);
 				}
 
-				if (!isJarOnAspectPath()) {
-					IClasspathEntry springAspectsEntry = getSpringAspectsJar();
+				if (!isJarOnAspectPath(jProject.getRawClasspath())) {
+					IClasspathEntry springAspectsEntry = findSpringAspectsJar(jProject
+							.getRawClasspath());
 					AspectJCorePreferences.addToAspectPath(project, springAspectsEntry);
 				}
 
@@ -95,17 +108,14 @@ public class SpringAspectsToolingEnabler {
 			}
 		}
 		catch (CoreException e) {
-			SpringCore.log("Error adding Spring tools to project " + project, e);
+			SpringCore.log("Error adding Spring tools to project "
+					+ project, e);
 		}
 		return isAJEditorDefault;
 	}
 
 	private void makeAJEditorDefault() {
 		EditorRegistry registry = (EditorRegistry) PlatformUI.getWorkbench().getEditorRegistry();
-
-		// will not work because this will not persist across sessions
-		// registry.setDefaultEditor("*.java", AspectJEditor.ASPECTJ_EDITOR_ID);
-		// registry.saveAssociations();
 
 		IFileEditorMapping[] mappings = registry.getFileEditorMappings();
 		for (IFileEditorMapping mapping : mappings) {
@@ -120,12 +130,47 @@ public class SpringAspectsToolingEnabler {
 		registry.saveAssociations();
 	}
 
-	private boolean hasSpringAspectsJar() throws JavaModelException {
-		IJavaProject jProject = JavaCore.create(project);
-		IClasspathEntry[] entries = jProject.getRawClasspath();
+	private IClasspathEntry findSpringAspectsJar(IClasspathEntry[] entries)
+			throws JavaModelException {
 		for (IClasspathEntry entry : entries) {
-			if (entry.getPath().toOSString().endsWith(SPRING_ASPECTS_JAR_NAME)) {
+			if (isSpringAspectsEntry(entry)) {
+				return entry;
+			}
+			else if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				IClasspathEntry containedEntry = findSpringAspectsJar(extractEntriesFomContainer(entry));
+				if (containedEntry != null) {
+					return containedEntry;
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean hasSpringAspectsJar(IClasspathEntry[] entries) throws JavaModelException {
+		for (IClasspathEntry entry : entries) {
+			if (isSpringAspectsEntry(entry)) {
 				return true;
+			}
+			else if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				if (hasSpringAspectsJar(extractEntriesFomContainer(entry))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isJarOnAspectPath(IClasspathEntry[] entries) throws JavaModelException {
+		for (IClasspathEntry entry : entries) {
+			if (isSpringAspectsEntry(entry)) {
+				if (AspectJCorePreferences.isOnAspectpath(entry)) {
+					return true;
+				}
+			}
+			else if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				if (isJarOnAspectPath(extractEntriesFomContainer(entry))) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -135,28 +180,23 @@ public class SpringAspectsToolingEnabler {
 		return Utils.isAJProject(project);
 	}
 
-	private boolean isJarOnAspectPath() throws JavaModelException {
-		IJavaProject jProject = JavaCore.create(project);
-		IClasspathEntry[] entries = jProject.getRawClasspath();
-		for (IClasspathEntry entry : entries) {
-			if (entry.getPath().toOSString().endsWith(SPRING_ASPECTS_JAR_NAME)) {
-				if (AspectJCorePreferences.isOnAspectpath(entry)) {
-					return true;
-				}
-			}
-		}
-		return false;
+	private boolean isSpringAspectsEntry(IClasspathEntry entry) {
+		String path = entry.getPath().toOSString();
+		return path.endsWith(SPRING_ASPECTS_JAR_NAME)
+				|| SPRING_ASPECTS_PATTERN.matcher(path).matches();
 	}
 
-	private IClasspathEntry getSpringAspectsJar() throws JavaModelException {
-		IJavaProject jProject = JavaCore.create(project);
-		IClasspathEntry[] entries = jProject.getRawClasspath();
-		for (IClasspathEntry entry : entries) {
-			if (entry.getPath().toOSString().endsWith(SPRING_ASPECTS_JAR_NAME)) {
-				return entry;
-			}
+	private IClasspathEntry[] extractEntriesFomContainer(IClasspathEntry containerEntry) {
+		try {
+			IClasspathContainer container = JavaCore.getClasspathContainer(
+					containerEntry.getPath(), jProject);
+			return container.getClasspathEntries();
 		}
-		return null;
+		catch (JavaModelException e) {
+			SpringCore.log("Error accessing classpath container "
+					+ containerEntry.getPath() + " from project " + project, e);
+			return new IClasspathEntry[0];
+		}
 	}
 
 	private boolean isAJEditorDefault() {
