@@ -465,7 +465,7 @@ public class ConfigFilesTab {
 					}
 					else if (element instanceof JarEntryFile) {
 						IPath fullPath = ((JarPackageFragmentRoot) ((JarEntryFile) element)
-								.getPackageFragmentRoot()).internalPath();
+								.getPackageFragmentRoot()).getPath();
 						String entryName = ((JarEntryFile) element).getFullPath().toString();
 						for (String name : JavaCore.getClasspathVariableNames()) {
 							IPath variablePath = JavaCore.getClasspathVariable(name);

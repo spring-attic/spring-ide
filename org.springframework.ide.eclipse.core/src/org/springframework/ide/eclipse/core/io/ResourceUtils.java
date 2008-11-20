@@ -389,7 +389,7 @@ abstract class ResourceUtils {
 		IPath classpathEntry = ((JarPackageFragmentRoot) child).getRawClasspathEntry().getPath();
 
 		if (!JVM_CLASSPATH_CONTAINER.equals(classpathEntry)) {
-			IPath jarPath = ((JarPackageFragmentRoot) child).internalPath();
+			IPath jarPath = ((JarPackageFragmentRoot) child).getPath();
 			try {
 				File file = jarPath.toFile();
 				JarFile jarFile = new JarFile(file);
