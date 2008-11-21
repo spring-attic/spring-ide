@@ -880,9 +880,14 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 					// Create a config set for auto detected configs if desired by the extension
 					if (configSetName[0] != null && configSetName[0].length() > 0) {
-						autoDetectedConfigSets.put(configSetName[0], new BeansConfigSet(
-								this, configSetName[0], configNamesByLocator,
-								IBeansConfigSet.Type.AUTO_DETECTED));
+
+						IBeansConfigSet configSet = new BeansConfigSet(this, configSetName[0],
+								configNamesByLocator, IBeansConfigSet.Type.AUTO_DETECTED);
+
+						// configure the created IBeansConfig
+						locator.getBeansConfigLocator().configureBeansConfigSet(configSet);
+						
+						autoDetectedConfigSets.put(configSetName[0], configSet);
 						autoDetectedConfigSetsByLocator.put(locator.getNamespaceUri() + "."
 								+ locator.getId(), configSetName[0]);
 					}

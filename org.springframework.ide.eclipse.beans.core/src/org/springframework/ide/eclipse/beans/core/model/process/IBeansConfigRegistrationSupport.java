@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,16 +19,14 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
 /**
- * Utitity that provides methods to register elements with the
- * {@link BeansConfig}.
- * 
+ * Utility that provides methods to register elements with the {@link BeansConfig}.
  * @author Christian Dupuis
  * @since 2.0
  */
 public interface IBeansConfigRegistrationSupport {
 
 	/**
-	 * Retuns a set if {@link IBean} that should be post processed.
+	 * Returns a set if {@link IBean} that should be post processed.
 	 * @return
 	 */
 	Collection<IBean> getBeans();

@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.springframework.ide.eclipse.beans.core">
+<schema targetNamespace="org.springframework.ide.eclipse.beans.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
+      <appinfo>
          <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="postprocessors" name="Post Processors"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 This extension point is used to add post processors that re-implement functionality normally implemented by &lt;code&gt;org.springframework.beans.factory.config.BeanPostProcessor&lt;/code&gt; or &lt;code&gt;org.springframework.beans.factory.config.BeanFactoryPostProcessor&lt;/code&gt;.
@@ -12,6 +12,11 @@ This extension point is used to add post processors that re-implement functional
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appinfo>
+            <meta.element />
+         </appinfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="postprocessor" minOccurs="0" maxOccurs="unbounded"/>
@@ -35,7 +40,7 @@ This extension point is used to add post processors that re-implement functional
 
    <element name="postprocessor">
       <complexType>
-         <attribute name="type" type="string" use="required">
+         <attribute name="type" type="string">
             <annotation>
                <documentation>
                   the full qualified class name of the corresponding postprocessor, e.g. &lt;code&gt;org.springframework.beans.factory.config.BeanPostProcessor&lt;/code&gt;
@@ -47,27 +52,27 @@ This extension point is used to add post processors that re-implement functional
                <documentation>
                   an implementation of the interface &lt;code&gt;org.springframework.ide.eclipse.beans.core.model.postprocess.IBeansConfigPostProcessor&lt;/code&gt;
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.core.model.postprocess.IBeansConfigPostProcessor"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="since"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          2.0
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt;
 &lt;extension point=&quot;org.springframework.ide.eclipse.beans.core.postprocessors&quot;&gt;
@@ -80,9 +85,9 @@ This extension point is used to add post processors that re-implement functional
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="apiInfo"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 Each post processor must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.postprocess.IBeansConfigPostProcessor&lt;/samp&gt;.
@@ -90,9 +95,9 @@ Each post processor must supply a public, no-argument constructor and implement 
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="implementation"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 This plugin itself comes with a set of predefined namespace contributions.
@@ -100,9 +105,9 @@ This plugin itself comes with a set of predefined namespace contributions.
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="copyright"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt;
 Copyright (c) 2005, 2007 Spring IDE Developers

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 
 /**
  * Base {@link IBeansConfigLocator} implementation that only implements
@@ -54,6 +55,13 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	 */
 	public String getBeansConfigSetName(Set<IFile> files) {
 		return null;
+	}
+	
+	/**
+	 * No configuration required as this locator does not create a {@link IBeansConfigSet}.
+	 */
+	public void configureBeansConfigSet(IBeansConfigSet configSet) {
+		// no op here
 	}
 
 }

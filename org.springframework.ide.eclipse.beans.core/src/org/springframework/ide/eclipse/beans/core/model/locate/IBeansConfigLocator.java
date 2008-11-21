@@ -62,10 +62,10 @@ public interface IBeansConfigLocator {
 	boolean supports(IProject project);
 
 	/**
-	 * Checks if the given <code>file</code> requires the project to rescan for autodetected
+	 * Checks if the given <code>file</code> requires the project to rescan for auto-detected
 	 * config files.
 	 * @param file the file to check
-	 * @return <code>true</code> if the project needs to rescan for auto dectected configs
+	 * @return <code>true</code> if the project needs to rescan for auto detected configs
 	 */
 	boolean requiresRefresh(IFile file);
 
@@ -76,5 +76,11 @@ public interface IBeansConfigLocator {
 	 * @return a config set name
 	 */
 	String getBeansConfigSetName(Set<IFile> files);
+	
+	/**
+	 * Configures the given {@link IBeansConfigSet}.
+	 * @since 2.2.1
+	 */
+	void configureBeansConfigSet(IBeansConfigSet configSet);
 
 }

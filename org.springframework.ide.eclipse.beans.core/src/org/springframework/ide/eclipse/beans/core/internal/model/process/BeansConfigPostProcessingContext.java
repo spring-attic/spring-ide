@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,19 +12,17 @@ package org.springframework.ide.eclipse.beans.core.internal.model.process;
 
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessingContext;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegistrationSupport;
 
 /**
- * Default implementation of {@link IBeansConfigPostProcessingContext} that just
- * delegates to given {@link BeanNameGenerator}, {@link ProblemReporter} and
- * {@link IBeansConfigRegistrationSupport}.
- * 
+ * Default implementation of {@link IBeansConfigPostProcessingContext} that just delegates to given
+ * {@link BeanNameGenerator}, {@link ProblemReporter} and {@link IBeansConfigRegistrationSupport}.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansConfigPostProcessingContext implements
-		IBeansConfigPostProcessingContext {
+public class BeansConfigPostProcessingContext implements IBeansConfigPostProcessingContext {
 
 	private final BeanNameGenerator beanNameGenerator;
 
@@ -32,10 +30,12 @@ public class BeansConfigPostProcessingContext implements
 
 	private final IBeansConfigRegistrationSupport beansConfigRegistrationSupport;
 
-	public BeansConfigPostProcessingContext(
-			final BeanNameGenerator beanNameGenerator,
-			final ProblemReporter problemReporter,
-			final IBeansConfigRegistrationSupport beansConfigRegistrationSupport) {
+	private final IBeansConfig beansConfig;
+
+	public BeansConfigPostProcessingContext(IBeansConfig beansConfig,
+			BeanNameGenerator beanNameGenerator, ProblemReporter problemReporter,
+			IBeansConfigRegistrationSupport beansConfigRegistrationSupport) {
+		this.beansConfig = beansConfig;
 		this.beanNameGenerator = beanNameGenerator;
 		this.problemReporter = problemReporter;
 		this.beansConfigRegistrationSupport = beansConfigRegistrationSupport;
@@ -51,5 +51,9 @@ public class BeansConfigPostProcessingContext implements
 
 	public ProblemReporter getProblemReporter() {
 		return this.problemReporter;
+	}
+
+	public IBeansConfig getBeansConfig() {
+		return beansConfig;
 	}
 }

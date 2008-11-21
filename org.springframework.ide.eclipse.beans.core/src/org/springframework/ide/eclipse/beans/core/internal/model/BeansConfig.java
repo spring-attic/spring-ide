@@ -44,6 +44,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.parsing.AliasDefinition;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
@@ -87,6 +88,7 @@ import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser
 import org.springframework.ide.eclipse.core.io.xml.XercesDocumentLoader;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
@@ -222,24 +224,24 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 					.getElementResource();
 			fullPath = container.getFullPath().append(fileName).toString();
 		}
-		
+
 		// Try to find the configuration file in the workspace
 		file = (IFile) container.findMember(fileName);
-		
+
 		// If the file couldn't be found in the workspace that could either mean we are dealing with
 		// an external resource or the file as been deleted/moved
 		if (file == null) {
-			
+
 			// Resolve eventual contained classpath variables
 			IPath resolvedPath = JavaCore.getResolvedVariablePath(new Path(fileName));
 			if (resolvedPath != null) {
 				fileName = resolvedPath.toString();
 			}
-			
+
 			// Create an external file instance
 			file = new ExternalFile(new File(fileName), name.substring(pos + 1), project
 					.getProject());
-			
+
 			// Does the external resource exist?
 			if (!file.exists()) {
 				modificationTimestamp = IResource.NULL_STAMP;
@@ -445,7 +447,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * Entry into processing the contributed {@link IBeansConfigPostProcessor}.
 	 */
 	protected void postProcess(ProblemReporter problemReporter,
-			BeanNameGenerator beanNameGenerator, Resource resource) {
+			BeanNameGenerator beanNameGenerator, final Resource resource) {
 
 		// Create special ReaderEventListener that essentially just passes through component
 		// definitions
@@ -457,6 +459,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 
 			@Override
 			public void componentRegistered(ComponentDefinition componentDefinition) {
+				// make sure that all components that come through are safe for the model
+				if (componentDefinition.getSource() == null) {
+					if (componentDefinition instanceof BeanComponentDefinition) {
+						((AbstractBeanDefinition) ((BeanComponentDefinition) componentDefinition)
+								.getBeanDefinition()).setSource(new DefaultModelSourceLocation(1,
+								1, resource));
+					}
+				}
 				registerComponentDefinition(componentDefinition, elementProviders);
 			}
 		};
@@ -464,8 +474,16 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 		// TODO CD do we need to check the components map as well?
 		List<IBean> beansClone = new ArrayList<IBean>();
 		beansClone.addAll(beans.values());
+
+		// Run all general contributed post processors
+		for (IBeansConfigPostProcessor postProcessor : BeansConfigPostProcessorFactory
+				.createPostProcessor(null)) {
+			postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(
+					this, beans.values(), eventListener, problemReporter, beanNameGenerator));
+		}
+		
+		// Run all post processors specific to a bean class
 		for (IBean bean : beansClone) {
-			// for now only handle postprocessor that have a direct bean class
 			String beanClassName = bean.getClassName();
 			if (beanClassName != null) {
 				IType type = JdtUtils.getJavaType(getElementResource().getProject(), beanClassName);
@@ -473,16 +491,16 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 						&& (Introspector.doesImplement(type, BeanFactoryPostProcessor.class
 								.getName()) || Introspector.doesImplement(type,
 								BeanPostProcessor.class.getName()))) {
-					IBeansConfigPostProcessor postProcessor = BeansConfigPostProcessorFactory
-							.createPostProcessor(beanClassName);
-					if (postProcessor != null) {
+					for (IBeansConfigPostProcessor postProcessor : BeansConfigPostProcessorFactory
+							.createPostProcessor(beanClassName)) {
 						postProcessor.postProcess(BeansConfigPostProcessorFactory
-								.createPostProcessingContext(beans.values(), eventListener,
+								.createPostProcessingContext(this, beans.values(), eventListener,
 										problemReporter, beanNameGenerator));
 					}
 				}
 			}
 		}
+
 	}
 
 	/**
