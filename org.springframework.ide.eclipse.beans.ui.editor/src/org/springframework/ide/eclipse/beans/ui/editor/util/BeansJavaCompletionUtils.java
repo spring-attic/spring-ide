@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -188,12 +189,14 @@ public class BeansJavaCompletionUtils {
 	@SuppressWarnings("deprecation")
 	private static ICompilationUnit createSourceCompilationUnit(IFile file, String prefix)
 			throws JavaModelException {
+		IProgressMonitor progressMonitor = BeansEditorUtils.getProgressMonitor();
 		IJavaProject project = JavaCore.create(file.getProject());
 		IPackageFragment root = getPackageFragment(project, prefix);
 		ICompilationUnit unit = root.getCompilationUnit("_xxx.java").getWorkingCopy(
 				CompilationUnitHelper.getInstance().getWorkingCopyOwner(),
 				CompilationUnitHelper.getInstance().getProblemRequestor(),
-				BeansEditorUtils.getProgressMonitor());
+				progressMonitor);
+		progressMonitor.done();
 		return unit;
 	}
 
