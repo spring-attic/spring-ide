@@ -44,4 +44,5 @@ Bundle-Vendor: Spring Framework
 Implementation-Title: Spring OSGi Framework
 Bundle-SymbolicName: org.springframework.osgi.backport.util.concurrent
 Implementation-Version: 2.0.5
+Bundle-ClassPath: backport-util-concurrent.jar
 
