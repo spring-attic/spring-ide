@@ -115,7 +115,7 @@ public final class Introspector {
 	public static Set<IMethod> findAllMethods(IType type, String prefix, IMethodFilter filter) {
 		Set<IMethod> methods = new LinkedHashSet<IMethod>();
 		try {
-			if (type.isInterface()) {
+			if (type != null && type.isInterface()) {
 				Set<IType> types = new HashSet<IType>();
 				types.add(type);
 				for (IMethod method : type.getMethods()) {
