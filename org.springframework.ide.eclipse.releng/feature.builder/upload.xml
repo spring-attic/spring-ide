@@ -1,29 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Generic targets" default="s3.publish">
-	
-	<property file="s3.properties" />
-	
+
+	<path id="s3.path">
+		<fileset dir="${basebuilder.dir}/lib" includes="*.jar" />
+	</path>
+
+	<property file="${user.home}/.s3.properties" />
+	<property name="bucket.basename" value="springframework.org" />
+	<property name="release.type" value="release" />
+	<property name="project.key" value="IDE_test" />
+	<property name="project.name" value="Spring IDE" />
+<!--
+	<property name="bundle.version" value="2.2.1" />
+	<property name="updatesite.package.file.name" value="" />
+	<property name="updatesite.package.output.file" value="" />
+	<property name="archive.package.file.name" value="" />
+	<property name="archive.package.output.file" value="" />
+-->
 	<target name="s3.publish">
 
 		<echo>Publishing to Amazon S3</echo>
 
-		<taskdef name="s3" classname="org.springframework.build.aws.ant.SimpleStorageService" />
+		<taskdef name="s3" classname="org.springframework.build.aws.ant.SimpleStorageService" classpathref="s3.path" />
 
 		<s3 accessKey="${accessKey}" secretKey="${secretKey}">
-	
-			<delete bucketName="dist.springframework.org">
-				<fileset dir="release/IDE">
-					<include name="**"/>
+
+			<!--
+			<delete bucketName="dist.${bucket.basename}">
+				<fileset dir="${release.type}/${project.key}">
+					<include name="plugins/**" />
+					<include name="features/**" />
+					<include name="artifacts.jar" />
+					<include name="content.jar" />
+					<include name="site.xml" />
 				</fileset>
 			</delete>
-			
-			<upload bucketName="dist.springframework.org" toDir="release/IDE" publicRead="true">
+			<upload bucketName="dist.${bucket.basename}" toDir="${release.type}/${project.key}" publicRead="true">
 
-				<fileset dir="/home/springide/htdocs/updatesite">
+				<fileset dir="../updatesite">
 					<include name="**/*" />
 					<include name="**" />
+					<exclude name="*.zip" />
 				</fileset>
 
+			</upload>
+-->
+			<upload bucketName="dist.${bucket.basename}" file="${updatesite.package.output.file}" toFile="${release.type}/${project.key}/${updatesite.package.file.name}" publicRead="true">
+				<metadata name="project.name" value="${project.name}" />
+				<metadata name="release.type" value="${release.type}" />
+				<metadata name="bundle.version" value="${bundle.version}" />
+				<metadata name="package.file.name" value="${updatesite.package.file.name}" />
+			</upload>
+
+			<upload bucketName="dist.${bucket.basename}" file="${archive.package.output.file}" toFile="${release.type}/${project.key}/${archive.package.file.name}" publicRead="true">
+				<metadata name="project.name" value="${project.name}" />
+				<metadata name="release.type" value="${release.type}" />
+				<metadata name="bundle.version" value="${bundle.version}" />
+				<metadata name="package.file.name" value="${archive.package.file.name}" />
 			</upload>
 
 		</s3>
