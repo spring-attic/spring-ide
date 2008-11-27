@@ -8,15 +8,17 @@
 	<property file="${user.home}/.s3.properties" />
 	<property name="bucket.basename" value="springframework.org" />
 	<property name="release.type" value="release" />
-	<property name="project.key" value="IDE_test" />
+	<property name="project.key" value="IDE" />
 	<property name="project.name" value="Spring IDE" />
-<!--
+
+	<!--
 	<property name="bundle.version" value="2.2.1" />
 	<property name="updatesite.package.file.name" value="" />
 	<property name="updatesite.package.output.file" value="" />
 	<property name="archive.package.file.name" value="" />
 	<property name="archive.package.output.file" value="" />
--->
+	-->
+	
 	<target name="s3.publish">
 
 		<echo>Publishing to Amazon S3</echo>
@@ -25,7 +27,6 @@
 
 		<s3 accessKey="${accessKey}" secretKey="${secretKey}">
 
-			<!--
 			<delete bucketName="dist.${bucket.basename}">
 				<fileset dir="${release.type}/${project.key}">
 					<include name="plugins/**" />
@@ -35,6 +36,7 @@
 					<include name="site.xml" />
 				</fileset>
 			</delete>
+
 			<upload bucketName="dist.${bucket.basename}" toDir="${release.type}/${project.key}" publicRead="true">
 
 				<fileset dir="../updatesite">
@@ -44,7 +46,7 @@
 				</fileset>
 
 			</upload>
--->
+
 			<upload bucketName="dist.${bucket.basename}" file="${updatesite.package.output.file}" toFile="${release.type}/${project.key}/${updatesite.package.file.name}" publicRead="true">
 				<metadata name="project.name" value="${project.name}" />
 				<metadata name="release.type" value="${release.type}" />
