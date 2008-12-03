@@ -22,13 +22,13 @@ import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanV
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Validates a given {@link IBean}'s bean class. Skips child beans and bean
- * class names with placeholders.
+ * Validates a given {@link IBean}'s bean class. Skips child beans and bean class names with
+ * placeholders.
  * <p>
- * Note: this implementation also skips class names from the Spring DM
- * framework.
+ * Note: this implementation also skips class names from the Spring DM framework.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
@@ -36,13 +36,16 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 public class BeanClassRule extends AbstractBeanValidationRule {
 
 	/**
-	 * Internal list of full-qualified class names that should be ignored by
-	 * this validation rule.
+	 * Internal list of full-qualified class names that should be ignored by this validation rule.
 	 */
-	private static final List<String> CLASSES_TO_IGNORE = Arrays.asList(new String[] {
-			"org.springframework.osgi.service.importer.support.OsgiServiceProxyFactoryBean",
-			"org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean",
-			"org.springframework.osgi.config.OsgiServiceRegistrationListenerAdapter"});
+	private List<String> ignorableClasses = null;
+
+	public void setIgnorableClasses(String classNames) {
+		if (StringUtils.hasText(classNames)) {
+			this.ignorableClasses = Arrays.asList(StringUtils.delimitedListToStringArray(
+					classNames, ",", "\r\n\f "));
+		}
+	}
 
 	@Override
 	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
@@ -51,7 +54,7 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 		// Validate bean class and constructor arguments - skip child beans and
 		// class names with placeholders
 		if (className != null && !SpringCoreUtils.hasPlaceHolder(className)
-				&& !CLASSES_TO_IGNORE.contains(className)) {
+				&& !ignorableClasses.contains(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(),
 					className);
 			if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
