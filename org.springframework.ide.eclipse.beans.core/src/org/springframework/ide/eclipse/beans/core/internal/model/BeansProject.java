@@ -439,11 +439,21 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	public IBeansConfig getConfig(IFile file) {
 		IBeansConfig config = getConfig(getConfigName(file));
 		if (config == null) {
-			for (IBeansConfig beansConfig : configs.values()) {
-				if (beansConfig.getElementResource().equals(file)) {
-					return beansConfig;
+			if (!this.modelPopulated) {
+				populateModel();
+			}
+			try {
+				r.lock();
+				for (IBeansConfig beansConfig : configs.values()) {
+					if (beansConfig.getElementResource().equals(file)) {
+						return beansConfig;
+					}
 				}
 			}
+			finally {
+				r.unlock();
+			}
+
 		}
 		return config;
 	}
@@ -886,7 +896,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 						// configure the created IBeansConfig
 						locator.getBeansConfigLocator().configureBeansConfigSet(configSet);
-						
+
 						autoDetectedConfigSets.put(configSetName[0], configSet);
 						autoDetectedConfigSetsByLocator.put(locator.getNamespaceUri() + "."
 								+ locator.getId(), configSetName[0]);
