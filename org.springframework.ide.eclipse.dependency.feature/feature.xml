@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.dependency.feature"
       label="%featureName"
-      version="2.2.1.qualifier"
+      version="2.2.2.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 

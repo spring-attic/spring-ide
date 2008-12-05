@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.osgi.feature"
       label="%featureName"
-      version="2.2.1.qualifier"
+      version="2.2.2.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
@@ -29,7 +29,7 @@
    -->
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.2.1"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.2.2"/>
    </requires>
 
    <plugin
