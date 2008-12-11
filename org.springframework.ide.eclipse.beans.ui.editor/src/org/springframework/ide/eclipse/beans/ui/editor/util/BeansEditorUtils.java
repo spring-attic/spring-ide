@@ -40,6 +40,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.internal.Workbench;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
@@ -793,7 +794,14 @@ public class BeansEditorUtils {
 	 * @return the progress monitor
 	 */
 	public static final IProgressMonitor getProgressMonitor() {
-		IEditorPart editor = Activator.getActiveWorkbenchPage().getActiveEditor();
+		IWorkbenchWindow activeWorkbenchWindow = Activator.getActiveWorkbenchWindow();
+		
+		// this check is to allow for non UI thread call to this method
+		if (activeWorkbenchWindow == null) {
+			return new NullProgressMonitor();
+		}
+		
+		IEditorPart editor = activeWorkbenchWindow.getActivePage().getActiveEditor();
 		if (editor != null
 				&& editor.getEditorSite() != null
 				&& editor.getEditorSite().getActionBars() != null
