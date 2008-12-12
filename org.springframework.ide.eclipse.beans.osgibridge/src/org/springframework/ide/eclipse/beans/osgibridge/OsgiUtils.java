@@ -72,6 +72,7 @@ public class OsgiUtils {
 
 		// start the OSGi extender bundle
 		if (activateExtender) {
+			startBundle(getBundle("org.eclipse.equinox.event"));
 			startBundle(getBundle(Activator.OSGI_EXTENDER_SYMBOLIC_NAME));
 		}
 

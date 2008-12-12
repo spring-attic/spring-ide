@@ -20,12 +20,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 public class PackageContentAssistCalculator implements IContentAssistCalculator {
 
 	/**
-	 * Default constructor
-	 */
-	public PackageContentAssistCalculator() {
-	}
-
-	/**
 	 * Compute proposals. This implementation simply delegates to
 	 * {@link BeansJavaCompletionUtils#addClassValueProposals()}
 	 */

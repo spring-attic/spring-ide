@@ -15,14 +15,15 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.jdt.core,
  org.eclipse.jdt.ui,
- org.springframework.bundle.spring,
- org.springframework.ide.eclipse.core,
- org.springframework.ide.eclipse.ui,
- org.springframework.ide.eclipse.beans.core,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.sse.core,
  org.eclipse.core.expressions,
- org.eclipse.wst.common.project.facet.core
+ org.eclipse.wst.common.project.facet.core,
+ org.springframework.ide.eclipse.core,
+ org.springframework.ide.eclipse.ui,
+ org.springframework.ide.eclipse.beans.core,
+ org.springframework.beans,
+ org.springframework.core
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Export-Package: org.springframework.ide.eclipse.beans.ui,

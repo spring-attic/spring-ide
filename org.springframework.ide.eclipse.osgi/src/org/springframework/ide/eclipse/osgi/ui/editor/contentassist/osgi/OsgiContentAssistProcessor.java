@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ public class OsgiContentAssistProcessor extends NamespaceContentAssistProcessorS
 		registerContentAssistCalculator("ref", beanRef);
 		registerContentAssistCalculator("property-placeholder", "defaults-ref", beanRef);
 
-		ClassContentAssistCalculator classRef = new ClassContentAssistCalculator(true);
+		ClassContentAssistCalculator classRef = new ClassContentAssistCalculator();
 		registerContentAssistCalculator("interface", classRef);
 
 		MethodContentAssistCalculator methodRef = new RegistrationMethodContentAssistCalculator();

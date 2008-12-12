@@ -13,11 +13,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.navigator,
  org.eclipse.jdt.core,
  org.eclipse.gef,
- org.springframework.bundle.spring,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
- org.springframework.ide.eclipse.beans.ui
+ org.springframework.ide.eclipse.beans.ui,
+ org.springframework.beans,
+ org.springframework.core
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Export-Package: org.springframework.ide.eclipse.beans.ui.graph,

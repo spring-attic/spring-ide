@@ -16,7 +16,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAss
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.PackageContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
-import org.springframework.instrument.classloading.LoadTimeWeaver;
 
 /**
  * {@link INamespaceContentAssistProcessor} responsible for handling content
@@ -34,8 +33,7 @@ public class ContextContentAssistProcessor extends
 		registerContentAssistCalculator("component-scan", "scope-resolver", beanRef);
 
 		registerContentAssistCalculator("load-time-weaver", "weaver-class",
-				new ClassHierachyContentAssistCalculator(LoadTimeWeaver.class
-						.getName()));
+				new ClassHierachyContentAssistCalculator("org.springframework.instrument.classloading.LoadTimeWeaver"));
 
 		registerContentAssistCalculator("component-scan", "base-package",
 				new PackageContentAssistCalculator());

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +26,9 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
@@ -47,8 +52,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	/** preference key to suppress missing namespace handler warnings */
-	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = 
-		"ignoreMissingNamespaceHandler";
+	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
 
 	/** The shared instance */
 	private static BeansCorePlugin plugin;
@@ -56,7 +60,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/** The singleton beans model */
 	private static BeansModel model;
 
-	private static BeanMetadataModel metaDataModel;
+	private static BeanMetadataModel metadataModel;
 
 	/** Internal executor service */
 	private static ExecutorService executorService;
@@ -72,7 +76,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public BeansCorePlugin() {
 		plugin = this;
 		model = new BeansModel();
-		metaDataModel = new BeanMetadataModel();
+		metadataModel = new BeanMetadataModel();
 		executorService = Executors.newCachedThreadPool();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
@@ -86,13 +90,67 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		model.startup();
-		metaDataModel.start();
+		metadataModel.start();
+		
+		context.registerService(EventHandler.class.getName(),  
+                new NamespaceEventHandler(),  
+                getHandlerServiceProperties("org/springframework/osgi/extender/namespace/*"));  
+
+//		// Testing
+//		ICatalog systemCatalog = null;
+//		ICatalog defaultCatalog = XMLCorePlugin.getDefault().getDefaultXMLCatalog();
+//		INextCatalog[] nextCatalogs = defaultCatalog.getNextCatalogs();
+//		for (int i = 0; i < nextCatalogs.length; i++) {
+//			INextCatalog catalog = nextCatalogs[i];
+//			ICatalog referencedCatalog = catalog.getReferencedCatalog();
+//			if (referencedCatalog != null) {
+//				if (XMLCorePlugin.SYSTEM_CATALOG_ID.equals(referencedCatalog.getId())) {
+//					systemCatalog = referencedCatalog;
+//				}
+//			}
+//		}
+//
+//		// <system
+//		// systemId="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
+//		// uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/aop/config/spring-aop-2.0.xsd"
+//		// />
+//
+//		String key = "http://www.springframework.org/schema/batch/spring-batch-2.0.xsd";
+//		int type = ICatalogEntry.ENTRY_TYPE_SYSTEM;
+//
+//		ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
+//		if (catalogElement instanceof ICatalogEntry) {
+//			ICatalogEntry entry = (ICatalogEntry) catalogElement;
+//			entry.setKey(key);
+//			String resolvedPath = "file:///Users/cdupuis/Development/Java/lib/spring-projects-svn/spring-batch/trunk/spring-batch-core/src/main/resources/org/springframework/batch/core/configuration/xml/spring-batch-2.0.xsd";
+//			entry.setURI(resolvedPath);
+//			
+//			
+//			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//			factory.setValidating(false);
+//			factory.setNamespaceAware(false);
+//			DocumentBuilder docBuilder = factory.newDocumentBuilder();
+//			Document doc = docBuilder.parse(new File(new URI(resolvedPath)));
+//			
+//			String namespace = doc.getDocumentElement().getAttribute("targetNamespace");
+//			System.out.println(namespace);
+//		}
+
+//		systemCatalog.addCatalogElement(catalogElement);
+		
+
+	}
+
+	protected Dictionary getHandlerServiceProperties(String... topics) {
+		Dictionary result = new Hashtable();
+		result.put(EventConstants.EVENT_TOPIC, topics);
+		return result;
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		model.shutdown();
-		metaDataModel.stop();
+		metadataModel.stop();
 		super.stop(context);
 	}
 
@@ -111,7 +169,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	}
 
 	public static final IBeanMetadataModel getMetadataModel() {
-		return metaDataModel;
+		return metadataModel;
 	}
 
 	public static final ExecutorService getExecutorService() {
@@ -194,5 +252,13 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static String getPluginVersion() {
 		Bundle bundle = getDefault().getBundle();
 		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+	}
+
+	class NamespaceEventHandler implements EventHandler {
+
+		public void handleEvent(Event event) {
+			System.out.println(event + " " + event.getProperty(Constants.BUNDLE_SYMBOLICNAME));
+		}
+
 	}
 }

@@ -19,14 +19,15 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml.ui,
  org.eclipse.search,
- org.springframework.bundle.spring,
+ org.eclipse.wst.xsd.core,
+ org.eclipse.xsd,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.ui.search,
- org.eclipse.wst.xsd.core,
- org.eclipse.xsd
+ org.springframework.beans,
+ org.springframework.core
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Export-Package: org.springframework.ide.eclipse.beans.ui.editor,

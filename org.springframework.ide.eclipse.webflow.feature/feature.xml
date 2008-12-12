@@ -68,12 +68,14 @@
          version="0.0.0"
          unpack="false"/>
 
+<!--
    <plugin
          id="org.springframework.webflow.doc"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+-->
 
    <plugin
          id="org.springframework.binding"
@@ -95,9 +97,43 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
    <plugin
-         id="org.springframework.bundle.spring.webmvc"
+         id="com.springsource.javax.el"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
+         id="org.springframework.web"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
+         id="org.springframework.web.servlet"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
+         id="com.springsource.javax.servlet"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
+         id="com.springsource.javax.servlet.jsp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
+         id="com.springsource.javax.servlet.jsp.jstl"
          download-size="0"
          install-size="0"
          version="0.0.0"

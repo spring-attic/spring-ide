@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IClassNameProvider;
-import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.w3c.dom.Element;
 
 public class TxClassNameProvider implements IClassNameProvider {
@@ -23,8 +22,7 @@ public class TxClassNameProvider implements IClassNameProvider {
 
 	static {
 		elementToClassNameMapping = new HashMap<String, String>();
-		elementToClassNameMapping.put("advice", TransactionInterceptor.class
-				.getName());
+		elementToClassNameMapping.put("advice", "org.springframework.transaction.interceptor.TransactionInterceptor");
 	}
 
 	public String getClassNameForElement(Element elem) {

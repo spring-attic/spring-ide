@@ -12,7 +12,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.xml.core,
  org.eclipse.ui.ide,
- org.springframework.bundle.spring,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.aop.core,
@@ -25,7 +24,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.jface.text,
  org.eclipse.core.expressions,
- org.eclipse.ui.console
+ org.eclipse.ui.console,
+ org.springframework.core
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.aop.ui,
  org.springframework.ide.eclipse.aop.ui.decorator,

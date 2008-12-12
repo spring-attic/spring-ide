@@ -27,7 +27,7 @@
    </requires>
 
    <plugin
-         id="org.apache.commons.logging"
+         id="com.springsource.org.apache.commons.logging"
          download-size="0"
          install-size="0"
          version="0.0.0"

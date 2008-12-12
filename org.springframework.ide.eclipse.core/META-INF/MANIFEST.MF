@@ -28,11 +28,13 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.jdt.launching,
- org.springframework.bundle.spring;bundle-version="2.5.6",
  org.apache.xerces;bundle-version="2.8.0";visibility:=reexport,
- org.objectweb.asm;bundle-version="[2.2.3,2.2.3]",
  org.eclipse.core.variables,
- org.eclipse.wst.common.project.facet.core
+ org.eclipse.wst.common.project.facet.core,
+ com.springsource.org.objectweb.asm;bundle-version="[2.2.3,2.2.3]",
+ com.springsource.org.objectweb.asm.commons;bundle-version="[2.2.3,2.2.3]",
+ org.springframework.beans,
+ org.springframework.core
 Eclipse-LazyStart: true
 DynamicImport-Package: *
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

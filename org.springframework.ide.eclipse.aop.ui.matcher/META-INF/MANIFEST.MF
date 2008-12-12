@@ -28,8 +28,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.aop.core,
- org.springframework.ide.eclipse.aop.ui, 
- org.springframework.bundle.spring
+ org.springframework.ide.eclipse.aop.ui,
+ org.springframework.core 
 Export-Package: org.springframework.ide.eclipse.aop.ui.matcher,
  org.springframework.ide.eclipse.aop.ui.matcher.actions,
  org.springframework.ide.eclipse.aop.ui.matcher.internal

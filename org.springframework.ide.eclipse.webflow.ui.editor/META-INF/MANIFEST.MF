@@ -16,13 +16,13 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.sse.ui,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml.ui,
- org.springframework.bundle.spring,
+ org.eclipse.ui.ide,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui.editor,
  org.springframework.ide.eclipse.webflow.core,
- org.eclipse.ui.ide,
- org.springframework.ide.eclipse.ui
+ org.springframework.ide.eclipse.ui,
+ org.springframework.core
 Eclipse-LazyStart: true
 Export-Package: 
  org.springframework.ide.eclipse.beans.ui.editor.contentassist.webflow,

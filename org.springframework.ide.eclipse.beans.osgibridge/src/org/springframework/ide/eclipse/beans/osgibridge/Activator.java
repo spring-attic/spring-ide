@@ -14,7 +14,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
-import org.springframework.web.context.ContextLoaderListener;
 import org.xml.sax.EntityResolver;
 
 /**
@@ -30,7 +29,7 @@ public class Activator extends AbstractUIPlugin {
 		"org.springframework.ide.eclipse.beans.osgibridge";
 
 	public static final String OSGI_EXTENDER_SYMBOLIC_NAME = 
-		"org.springframework.bundle.osgi.extender";
+		"org.springframework.osgi.extender";
 
 	private static Activator plugin;
 

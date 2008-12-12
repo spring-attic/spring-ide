@@ -3,7 +3,7 @@ Built-By: cdupuis
 Created-By: Apache Maven Bundle Plugin
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Import-Package: javax.annotation.security;version="[1.0.0,2.0.0)";resolution:=optional,
- org.springframework.core.annotation;version="[2.0.8,3.0.0)",
+ org.springframework.core.annotation;version="[2.0.8,3.0.1)",
  org.springframework.security;version="[2.0.4,2.0.4]",
  org.springframework.security.annotation;version="[2.0.4,2.0.4]",
  org.springframework.security.intercept.method;version="[2.0.4,2.0.4]",

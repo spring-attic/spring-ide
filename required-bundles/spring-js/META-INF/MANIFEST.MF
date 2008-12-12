@@ -10,11 +10,11 @@ Import-Package: javax.servlet;version="[2.4.0,3.0.0)",
  org.apache.tiles.context;version="[2.0.5.osgi,3.0.0)";resolution:=optional,
  org.apache.tiles.definition;version="[2.0.5.osgi,3.0.0)";resolution:=optional,
  org.apache.tiles.impl;version="[2.0.5.osgi,3.0.0)";resolution:=optional,
- org.springframework.util;version="[2.5.4.A,3.0.0)",
- org.springframework.web.servlet;version="[2.5.4.A,3.0.0)",
- org.springframework.web.servlet.support;version="[2.5.4.A,3.0.0)",
- org.springframework.web.servlet.view;version="[2.5.4.A,3.0.0)",
- org.springframework.web.servlet.view.tiles2;version="[2.5.4.A,3.0.0)"
+ org.springframework.util;version="[2.5.4.A,3.0.1)",
+ org.springframework.web.servlet;version="[2.5.4.A,3.0.1)",
+ org.springframework.web.servlet.support;version="[2.5.4.A,3.0.1)",
+ org.springframework.web.servlet.view;version="[2.5.4.A,3.0.1)",
+ org.springframework.web.servlet.view.tiles2;version="[2.5.4.A,3.0.1)"
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework.js
