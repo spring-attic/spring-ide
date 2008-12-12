@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -26,9 +24,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
@@ -92,9 +87,9 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		model.startup();
 		metadataModel.start();
 		
-		context.registerService(EventHandler.class.getName(),  
-                new NamespaceEventHandler(),  
-                getHandlerServiceProperties("org/springframework/osgi/extender/namespace/*"));  
+//		context.registerService(EventHandler.class.getName(),  
+//                new NamespaceEventHandler(),  
+//                getHandlerServiceProperties("org/springframework/osgi/extender/namespace/*"));  
 
 //		// Testing
 //		ICatalog systemCatalog = null;
@@ -141,11 +136,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	}
 
-	protected Dictionary getHandlerServiceProperties(String... topics) {
-		Dictionary result = new Hashtable();
-		result.put(EventConstants.EVENT_TOPIC, topics);
-		return result;
-	}
+//	protected Dictionary getHandlerServiceProperties(String... topics) {
+//		Dictionary result = new Hashtable();
+//		result.put(EventConstants.EVENT_TOPIC, topics);
+//		return result;
+//	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
@@ -254,11 +249,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 
-	class NamespaceEventHandler implements EventHandler {
-
-		public void handleEvent(Event event) {
-			System.out.println(event + " " + event.getProperty(Constants.BUNDLE_SYMBOLICNAME));
-		}
-
-	}
+//	class NamespaceEventHandler implements EventHandler {
+//
+//		public void handleEvent(Event event) {
+//			System.out.println(event + " " + event.getProperty(Constants.BUNDLE_SYMBOLICNAME));
+//		}
+//
+//	}
 }
