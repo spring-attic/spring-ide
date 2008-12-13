@@ -71,7 +71,7 @@ plugin@org.springframework.ide.eclipse.webflow.ui.graph=SVN,trunk,https://src.sp
 plugin@org.springframework.webflow.doc=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.webflow.doc
 plugin@org.springframework.bundle.osgi.doc=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.bundle.osgi.doc
 
-plugin@org.springframework.javaconfig=SVN,trunk,https://src.springframework.org/svn/spring-ide/required-bundles,,spring-javaconfig
+plugin@org.springframework.javaconfig=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-javaconfig
 
 # required osgi bundles
 plugin@com.springsource.edu.emory.mathcs.backport=GET,http://repository.springsource.com/ivy/bundles/external/edu.emory.mathcs.backport/com.springsource.edu.emory.mathcs.backport/3.1.0/com.springsource.edu.emory.mathcs.backport-3.1.0.jar
