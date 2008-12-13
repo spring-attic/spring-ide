@@ -21,4 +21,7 @@ Export-Package: org.springframework.config.java.annotation,
  org.springframework.config.java.support,
  org.springframework.config.java.support.cglib,
  org.springframework.config.java.util
-Require-Bundle: org.springframework.bundle.spring
+Require-Bundle: org.springframework.core,
+ org.springframework.context,
+ org.springframework.core,
+ org.springframework.aop
