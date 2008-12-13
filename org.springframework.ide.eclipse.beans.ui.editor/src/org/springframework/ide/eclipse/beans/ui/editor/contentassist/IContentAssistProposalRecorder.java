@@ -17,7 +17,7 @@ import org.eclipse.swt.graphics.Image;
  * Records calculated content assist proposals in an internal structure.
  * <p>
  * Implementations of this interface abstract from the creation of actual {@link IContentProposal}
- * instances and make sure the {@link IContentAssistCalculator}s do not depend on context specfic
+ * instances and make sure the {@link IContentAssistCalculator}s do not depend on context specific
  * classes.
  * @author Christian Dupuis
  * @since 2.2.1
