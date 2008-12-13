@@ -71,6 +71,8 @@ plugin@org.springframework.ide.eclipse.webflow.ui.graph=SVN,trunk,https://src.sp
 plugin@org.springframework.webflow.doc=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.webflow.doc
 plugin@org.springframework.bundle.osgi.doc=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.bundle.osgi.doc
 
+plugin@org.springframework.javaconfig=SVN,trunk,https://src.springframework.org/svn/spring-ide/required-bundles,,spring-javaconfig
+
 # required osgi bundles
 plugin@com.springsource.edu.emory.mathcs.backport=GET,http://repository.springsource.com/ivy/bundles/external/edu.emory.mathcs.backport/com.springsource.edu.emory.mathcs.backport/3.1.0/com.springsource.edu.emory.mathcs.backport-3.1.0.jar
 plugin@com.springsource.javax.annotation=GET,http://repository.springsource.com/ivy/bundles/external/javax.annotation/com.springsource.javax.annotation/1.0.0/com.springsource.javax.annotation-1.0.0.jar
@@ -88,7 +90,6 @@ plugin@com.springsource.org.aspectj.runtime=GET,http://repository.springsource.c
 plugin@com.springsource.org.aspectj.weaver=GET,http://repository.springsource.com/ivy/bundles/external/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-1.6.2.RELEASE.jar
 plugin@com.springsource.org.objectweb.asm=GET,http://repository.springsource.com/ivy/bundles/external/org.objectweb.asm/com.springsource.org.objectweb.asm/2.2.3/com.springsource.org.objectweb.asm-2.2.3.jar
 plugin@com.springsource.org.objectweb.asm.commons=GET,http://repository.springsource.com/ivy/bundles/external/org.objectweb.asm/com.springsource.org.objectweb.asm.commons/2.2.3/com.springsource.org.objectweb.asm.commons-2.2.3.jar
-plugin@com.springsource.org.objectweb.asm.util=GET,http://repository.springsource.com/ivy/bundles/external/org.objectweb.asm/com.springsource.org.objectweb.asm.util/2.2.0/com.springsource.org.objectweb.asm.util-2.2.0.jar
 plugin@org.springframework.aop=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework/org.springframework.aop/2.5.6.A/org.springframework.aop-2.5.6.A.jar
 plugin@org.springframework.aspects=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework/org.springframework.aspects/2.5.6.A/org.springframework.aspects-2.5.6.A.jar
 plugin@org.springframework.beans=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework/org.springframework.beans/2.5.6.A/org.springframework.beans-2.5.6.A.jar
@@ -110,3 +111,5 @@ plugin@org.springframework.transaction=GET,http://repository.springsource.com/iv
 plugin@org.springframework.web=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework/org.springframework.web/2.5.6.A/org.springframework.web-2.5.6.A.jar
 plugin@org.springframework.web.servlet=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework/org.springframework.web.servlet/2.5.6.A/org.springframework.web.servlet-2.5.6.A.jar
 plugin@org.springframework.webflow=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework.webflow/org.springframework.webflow/2.0.5.RELEASE/org.springframework.webflow-2.0.5.RELEASE.jar
+
+plugin@org.eclipse.equinox.event=GET,http://mirror.csclub.uwaterloo.ca/eclipse/equinox/drops/R-3.4.1-200809111700/org.eclipse.equinox.event_1.1.0.v20080225.jar
