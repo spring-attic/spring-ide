@@ -110,4 +110,3 @@ plugin@org.springframework.transaction=GET,http://repository.springsource.com/iv
 plugin@org.springframework.web=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework/org.springframework.web/2.5.6.A/org.springframework.web-2.5.6.A.jar
 plugin@org.springframework.web.servlet=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework/org.springframework.web.servlet/2.5.6.A/org.springframework.web.servlet-2.5.6.A.jar
 plugin@org.springframework.webflow=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework.webflow/org.springframework.webflow/2.0.5.RELEASE/org.springframework.webflow-2.0.5.RELEASE.jar
-plugin@org.springframework.webflow=GET,http://repository.springsource.com/ivy/bundles/release/org.springframework.webflow/org.springframework.webflow-library/2.0.5.RELEASE/org.springframework.webflow-library-2.0.5.RELEASE.jar
