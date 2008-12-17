@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -82,7 +83,10 @@ public class BeanReferenceSearchRequestor {
 				buf.append(fileName);
 				String displayText = buf.toString();
 
-				Image image = BeansUIPlugin.getLabelProvider().getImage(bean);
+				Image image = null;
+				if (Display.getCurrent() != null) {
+					image = BeansUIPlugin.getLabelProvider().getImage(bean);
+				}
 
 				String className = BeansModelUtils.getBeanClass(bean, null);
 				IType type = JdtUtils.getJavaType(file.getProject(), className);
@@ -137,7 +141,10 @@ public class BeanReferenceSearchRequestor {
 					buf.append(" - ");
 					buf.append(fileName);
 					String displayText = buf.toString();
-					Image image = new DelegatingLabelProvider().getImage(beanNode);
+					Image image = null;
+					if(Display.getCurrent() != null) {
+						image = new DelegatingLabelProvider().getImage(beanNode);
+					}
 
 					String className = BeansEditorUtils.getClassNameForBean(beanNode);
 					IType type = JdtUtils.getJavaType(file.getProject(), className);
