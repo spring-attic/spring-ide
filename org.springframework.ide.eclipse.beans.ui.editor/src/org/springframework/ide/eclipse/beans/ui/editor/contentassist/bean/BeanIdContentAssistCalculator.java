@@ -67,7 +67,14 @@ public class BeanIdContentAssistCalculator implements IContentAssistCalculator {
 	}
 
 	private String buildDefaultBeanName(String className) {
-		String shortClassName = ClassUtils.getShortName(className);
+		String shortClassName = className;
+		int ix = className.lastIndexOf('$');
+		if (ix >= 0) {
+			shortClassName = className.substring(ix + 1);
+		}
+		else {
+			shortClassName = ClassUtils.getShortName(className);
+		}
 		return java.beans.Introspector.decapitalize(shortClassName);
 	}
 
