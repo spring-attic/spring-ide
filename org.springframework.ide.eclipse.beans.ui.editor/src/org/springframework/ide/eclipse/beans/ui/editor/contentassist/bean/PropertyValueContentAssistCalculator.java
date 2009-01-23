@@ -34,10 +34,6 @@ import org.springframework.util.StringUtils;
 public class PropertyValueContentAssistCalculator extends ClassContentAssistCalculator implements
 		IContentAssistCalculator {
 
-	public PropertyValueContentAssistCalculator() {
-		super(false);
-	}
-
 	public void computeProposals(IContentAssistContext context,
 			IContentAssistProposalRecorder recorder) {
 		String matchString = context.getMatchString();
