@@ -48,6 +48,8 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/** preference key to suppress missing namespace handler warnings */
 	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
+	
+	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID + ".timeoutConfigLoading";
 
 	/** The shared instance */
 	private static BeansCorePlugin plugin;
@@ -86,6 +88,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		super.start(context);
 		model.startup();
 		metadataModel.start();
+		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 		
 //		context.registerService(EventHandler.class.getName(),  
 //                new NamespaceEventHandler(),  

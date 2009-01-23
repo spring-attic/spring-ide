@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.preferences;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
+import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.swt.SWT;
@@ -23,6 +24,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
@@ -40,6 +42,8 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	private FieldEditor graphEditorInfrastructureBeans;
 
+	private IntegerFieldEditor configTimeout;
+
 	protected Control createContents(Composite parent) {
 
 		Composite entryTable = new Composite(parent, SWT.NULL);
@@ -53,15 +57,38 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		entryTable.setLayout(layout);
 
 		Label label = new Label(entryTable, SWT.NONE);
-		label.setText("Use this preference page to specify the default Double Click Action\n"
-				+ "on the Spring Explorer and content restrictions for the Beans Graph.");
+		label.setText("Use this preference page to specify the configuration parameters for\nthe Spring support.");
 
+		Composite timeoutComposite = new Composite(entryTable, SWT.NONE);
+		timeoutComposite.setLayout(new GridLayout());
+
+		timeoutComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Group timeoutGroup = new Group(timeoutComposite, SWT.NONE);
+		timeoutGroup.setText("Loading Spring configuration files");
+		layout = new GridLayout();
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		timeoutGroup.setLayout(layout);
+		timeoutGroup.setLayoutData(gd);
+		Composite timoutComposite1 = new Composite(timeoutGroup, SWT.NONE);
+		layout.marginWidth = 3;
+		layout.marginHeight = 3;
+		timoutComposite1.setLayout(layout);
+		timoutComposite1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		configTimeout = new IntegerFieldEditor(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID,
+				"Timeout [sec]", timoutComposite1);
+		configTimeout.setPage(this);
+		configTimeout.setPreferenceStore(BeansCorePlugin.getDefault().getPreferenceStore());
+		configTimeout.load();
+
+		
 		Composite radioComposite = new Composite(entryTable, SWT.NONE);
 		radioComposite.setLayout(new GridLayout());
 
 		// Create a data that takes up the extra space in the dialog.
 		radioComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
+		
 		Composite radioComposite2 = new Composite(radioComposite, SWT.NONE);
 		layout.marginWidth = 3;
 		layout.marginHeight = 3;
@@ -80,11 +107,11 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		graphComposite.setLayout(new GridLayout());
 
 		graphComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Group graphEditorGroup = new Group(graphComposite, SWT.NONE);
 		graphEditorGroup.setText("Beans Graph");
 		layout = new GridLayout();
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
 		graphEditorGroup.setLayout(layout);
 		graphEditorGroup.setLayoutData(gd);
 		Composite graphComposite2 = new Composite(graphEditorGroup, SWT.NONE);
@@ -118,13 +145,15 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		radioEditor.loadDefault();
 		graphEditorInnerBeans.loadDefault();
 		graphEditorInfrastructureBeans.loadDefault();
+		configTimeout.loadDefault();
 	}
 
 	public boolean performOk() {
 		radioEditor.store();
 		graphEditorInnerBeans.store();
 		graphEditorInfrastructureBeans.store();
-
+		configTimeout.store();
+		
 		return super.performOk();
 	}
 

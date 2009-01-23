@@ -385,7 +385,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 							FutureTask<Integer> task = new FutureTask<Integer>(
 									loadBeanDefinitionOperation);
 							BeansCorePlugin.getExecutorService().submit(task);
-							int count = task.get(60, TimeUnit.SECONDS);
+							int count = task.get(BeansCorePlugin.getDefault().getPreferenceStore()
+									.getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID),
+									TimeUnit.SECONDS);
 
 							if (BeansModel.DEBUG) {
 								System.out.println(count + " bean definitions loaded from '"
@@ -400,7 +402,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 						catch (TimeoutException e) {
 							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
 									"Loading of resource '" + resource.getFile().getAbsolutePath()
-											+ "' took more than 60sec", file, -1));
+											+ "' took more than " + BeansCorePlugin.getDefault().getPreferenceStore()
+											.getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID) + "sec", file, -1));
 						}
 					}
 					catch (Throwable e) {
@@ -481,7 +484,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(
 					this, beans.values(), eventListener, problemReporter, beanNameGenerator));
 		}
-		
+
 		// Run all post processors specific to a bean class
 		for (IBean bean : beansClone) {
 			String beanClassName = bean.getClassName();
