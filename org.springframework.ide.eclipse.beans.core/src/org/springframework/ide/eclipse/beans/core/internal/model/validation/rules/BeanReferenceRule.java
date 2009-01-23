@@ -141,7 +141,7 @@ public class BeanReferenceRule implements
 
 				// Skip error "parent name is equal to bean name"
 				if (!e.getBeanName().equals(bean.getElementName())) {
-					context.error(bean, "UNDEFINED_DEPENDS_ON_BEAN", "Depends-on bean '" + beanName
+					context.warning(bean, "UNDEFINED_DEPENDS_ON_BEAN", "Depends-on bean '" + beanName
 							+ "' not found");
 				}
 			}
