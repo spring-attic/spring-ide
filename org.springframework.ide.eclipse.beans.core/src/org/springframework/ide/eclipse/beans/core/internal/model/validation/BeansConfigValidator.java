@@ -195,7 +195,12 @@ public class BeansConfigValidator extends AbstractValidator implements
 	protected boolean supports(IModelElement element) {
 		// Validate only those beans that have been changed
 		if (element instanceof IBean) {
-			return affectedBeans.contains(element);
+			if (affectedBeans.contains(element)) {
+				return true;
+			}
+			else if (((IBean) element).isInnerBean()) {
+				return supports(BeansModelUtils.getParentOfClass(element, IBean.class));
+			}
 		}
 		// Stop at imports because the contents is validated on the root config level
 		else if (element instanceof IBeansModelElement || element instanceof IBeansImport) {
