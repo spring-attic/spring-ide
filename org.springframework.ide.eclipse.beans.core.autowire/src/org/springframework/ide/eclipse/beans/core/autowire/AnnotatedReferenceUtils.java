@@ -32,18 +32,22 @@ public class AnnotatedReferenceUtils {
 		String[] firstLocation = null;
 		String[][] resolvedTypeNames = null;
 		StringBuilder name = new StringBuilder();
-		resolvedTypeNames = type.resolveType(tName);
 
-		if (resolvedTypeNames != null) {
-			firstLocation = resolvedTypeNames[0];
-			for (int i = 0; i < firstLocation.length; i++) {
-				name.append(firstLocation[i]);
-				if (i < firstLocation.length - 1)
-					name.append(".");
+		if (tName != null) {
+			resolvedTypeNames = type.resolveType(tName);
+	
+			if (resolvedTypeNames != null) {
+				firstLocation = resolvedTypeNames[0];
+				for (int i = 0; i < firstLocation.length; i++) {
+					name.append(firstLocation[i]);
+					if (i < firstLocation.length - 1)
+						name.append(".");
+				}
 			}
+	
+			return name.toString();
 		}
-
-		return name.toString();
+		return null;
 	}
 
 	/**
