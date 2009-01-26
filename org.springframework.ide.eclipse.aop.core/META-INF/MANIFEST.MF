@@ -24,9 +24,7 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.core,
  com.springsource.org.aopalliance,
  com.springsource.org.objectweb.asm;bundle-version="[2.2.3,2.2.3]",
- com.springsource.org.objectweb.asm.commons;bundle-version="[2.2.3,2.2.3]",
- com.springsource.org.aspectj.runtime,
- com.springsource.org.aspectj.weaver
+ com.springsource.org.objectweb.asm.commons;bundle-version="[2.2.3,2.2.3]"
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.builder,
@@ -39,3 +37,5 @@ Export-Package: org.springframework.ide.eclipse.aop.core,
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
+Import-Package: org.aspectj.lang.annotation,
+ org.aspectj.lang.reflect
