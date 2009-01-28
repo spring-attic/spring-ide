@@ -122,10 +122,10 @@ fi
 
 if [ "$INSTALL_FEATURES" = "1" ] 
 then
-#	install_feature org.eclipse.mylyn_feature $MYLYN_UPDATE_SITE_URL
-#	install_feature org.eclipse.mylyn.context_feature $MYLYN_UPDATE_SITE_URL
-#	install_feature org.eclipse.mylyn.ide_feature $MYLYN_UPDATE_SITE_URL
-#	install_feature org.eclipse.mylyn.java_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn.context_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn.ide_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn.java_feature $MYLYN_UPDATE_SITE_URL
 
 	install_feature org.eclipse.ajdt $AJDT_UPDATE_SITE_URL
 fi
