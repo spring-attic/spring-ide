@@ -180,7 +180,7 @@ public abstract class AbstractValidator implements IValidator {
 
 				// Check if resource model element is external to the workspace -> if so, do not
 				// validate the resource
-				if (rootElement.isExternal()) {
+				if (rootElement != null && rootElement.isExternal()) {
 					monitor.worked(1);
 					break;
 				}

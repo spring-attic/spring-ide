@@ -381,6 +381,8 @@ public final class SpringCoreUtils {
 				&& resource.getType() == IResource.FILE
 				&& resource.getName().equals(BUNDLE_MANIFEST_FILE)
 				&& resource.getParent() != null
+				&& resource.getParent().getProjectRelativePath() != null
+				&& resource.getParent().getProjectRelativePath().lastSegment() != null
 				&& resource.getParent().getProjectRelativePath().lastSegment().equals(
 						BUNDLE_MANIFEST_FOLDER);
 	}
