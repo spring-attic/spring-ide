@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -36,6 +37,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -64,9 +67,11 @@ public final class SpringCoreUtils {
 	 */
 	public static String BUNDLE_MANIFEST_FILE = "MANIFEST.MF";
 
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
 	/**
-	 * Returns <code>true</code> if given text contains a placeholder, e.g.
-	 * <code>${beansRef}</code>.
+	 * Returns <code>true</code> if given text contains a placeholder, e.g. <code>${beansRef}</code>
+	 * .
 	 */
 	public static boolean hasPlaceHolder(String text) {
 		if (text == null || !StringUtils.hasText(text)) {
@@ -449,6 +454,69 @@ public final class SpringCoreUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the line separator found in the given text. If it is null, or not found return the
+	 * line delimiter for the given project. If the project is null, returns the line separator for
+	 * the workspace. If still null, return the system line separator.
+	 * @since 2.2.2
+	 */
+	public static String getLineSeparator(String text, IProject project) {
+		String lineSeparator = null;
+
+		// line delimiter in given text
+		if (text != null && text.length() != 0) {
+			lineSeparator = findLineSeparator(text.toCharArray());
+			if (lineSeparator != null)
+				return lineSeparator;
+		}
+
+		// line delimiter in project preference
+		IScopeContext[] scopeContext;
+		if (project != null) {
+			scopeContext = new IScopeContext[] { new ProjectScope(project) };
+			lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME,
+					Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+			if (lineSeparator != null)
+				return lineSeparator;
+		}
+
+		// line delimiter in workspace preference
+		scopeContext = new IScopeContext[] { new InstanceScope() };
+		lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME,
+				Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+		if (lineSeparator != null)
+			return lineSeparator;
+
+		// system line delimiter
+		return LINE_SEPARATOR;
+	}
+
+	/**
+	 * Finds the first line separator used by the given text.
+	 * @return </code>"\n"</code> or </code>"\r"</code> or </code>"\r\n"</code>, or
+	 * <code>null</code> if none found
+	 * @since 2.2.2
+	 */
+	public static String findLineSeparator(char[] text) {
+		// find the first line separator
+		int length = text.length;
+		if (length > 0) {
+			char nextChar = text[0];
+			for (int i = 0; i < length; i++) {
+				char currentChar = nextChar;
+				nextChar = i < length - 1 ? text[i + 1] : ' ';
+				switch (currentChar) {
+				case '\n':
+					return "\n"; //$NON-NLS-1$
+				case '\r':
+					return nextChar == '\n' ? "\r\n" : "\r"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+		}
+		// not found
+		return null;
 	}
 
 }
