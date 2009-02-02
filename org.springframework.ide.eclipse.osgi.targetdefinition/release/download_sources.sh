@@ -1,10 +1,10 @@
 #!/bin/sh
 
-SPRING_VERSION=2.5.2
-BUNDLE_SPRING_VERSION=2.5.2
+SPRING_VERSION=2.5.6
+BUNDLE_SPRING_VERSION=2.5.6
 
-OSGI_VERSION=1.0.2
-BUNDLE_OSGI_VERSION=1.0.2
+OSGI_VERSION=1.1.2.B
+BUNDLE_OSGI_VERSION=1.1.2.B
 ROOT=`pwd`
 
 download_source() {	
@@ -22,22 +22,22 @@ download_source() {
 }
 
 download_spring_source() {
-	download_source org/springframework $1 $SPRING_VERSION $2 $BUNDLE_SPRING_VERSION spring.source http://repo1.maven.org/maven2
+	download_source org/springframework $1 $SPRING_VERSION $2 $BUNDLE_SPRING_VERSION spring.source http://repository.springsource.com/maven/bundles/release
 }
 
 download_osgi_source() {
-	download_source org/springframework/osgi $1 $OSGI_VERSION $2 $BUNDLE_OSGI_VERSION springdm.source http://repo1.maven.org/maven2
+	download_source org/springframework/osgi $1 $OSGI_VERSION $2 $BUNDLE_OSGI_VERSION springdm.source http://repository.springsource.com/maven/bundles/release
 }
 
-download_spring_source spring-aop org.springframework.bundle.spring.aop 
-download_spring_source spring-beans org.springframework.bundle.spring.beans
-download_spring_source spring-core org.springframework.bundle.spring.core
-download_spring_source spring-context org.springframework.bundle.spring.context 
-download_spring_source spring-context-support org.springframework.bundle.spring.context.support 
-download_spring_source spring-test org.springframework.bundle.spring.test
+download_spring_source org.springframework.aop org.springframework.aop 
+download_spring_source org.springframework.beans org.springframework.beans
+download_spring_source org.springframework.core org.springframework.core
+download_spring_source org.springframework.context org.springframework.context 
+download_spring_source org.springframework.context.support org.springframework.context.support 
+download_spring_source org.springframework.test org.springframework.test
 
-download_osgi_source spring-osgi-annotation org.springframework.bundle.osgi.extensions.annotations
-download_osgi_source spring-osgi-core org.springframework.bundle.osgi.core
-download_osgi_source spring-osgi-extender org.springframework.bundle.osgi.extender
-download_osgi_source spring-osgi-io org.springframework.bundle.osgi.io
-download_osgi_source spring-osgi-test org.springframework.bundle.osgi.test
+download_osgi_source org.springframework.osgi.extensions.annotation org.springframework.osgi.extensions.annotations
+download_osgi_source org.springframework.osgi.core org.springframework.osgi.core
+download_osgi_source org.springframework.osgi.extender org.springframework.osgi.extender
+download_osgi_source org.springframework.osgi.io org.springframework.osgi.io
+download_osgi_source org.springframework.osgi.test org.springframework.osgi.test
