@@ -68,15 +68,6 @@
          version="0.0.0"
          unpack="false"/>
 
-<!--
-   <plugin
-         id="org.springframework.webflow.doc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
--->
-
    <plugin
          id="org.springframework.binding"
          download-size="0"
@@ -97,6 +88,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+         
    <plugin
          id="com.springsource.javax.el"
          download-size="0"

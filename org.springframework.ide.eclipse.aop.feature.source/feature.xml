@@ -21,11 +21,25 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
-   <plugin
-         id="org.springframework.ide.eclipse.aop.source"
+ <plugin
+         id="org.springframework.ide.eclipse.aop.core.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.aop.ui.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.aop.ui.matcher.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

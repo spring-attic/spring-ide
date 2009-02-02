@@ -21,10 +21,19 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
+
    <plugin
-         id="org.springframework.ide.eclipse.ajdt.source"
+         id="org.springframework.ide.eclipse.ajdt.ui.xref.source"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.ajdt.ui.visualiser.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
