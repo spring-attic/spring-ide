@@ -20,19 +20,68 @@
    <url>
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
-
+	
    <plugin
          id="org.springframework.ide.eclipse.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
    <plugin
-         id="org.springframework.source"
+         id="org.springframework.ide.eclipse.core.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.ui.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.core.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.graph.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.editor.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.search.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.refactoring.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
