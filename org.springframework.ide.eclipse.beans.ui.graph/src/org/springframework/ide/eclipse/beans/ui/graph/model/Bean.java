@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,12 +112,21 @@ public class Bean extends Node implements IAdaptable {
 			if (BeansUIPlugin.getDefault().getPluginPreferences().getBoolean(
 					BeansUIPlugin.SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID)) {
 				for (IBean b : BeansModelUtils.getInnerBeans(bean, false)) {
-					innerBeans.add(new Bean(b));
+					
+					if (shouldAddBean(b)) {				
+						innerBeans.add(new Bean(b));
+					}
 				}
 			}
 			this.innerBeans = innerBeans.toArray(new Bean[innerBeans.size()]);
 		}
 		return this.innerBeans;
+	}
+	
+	private boolean shouldAddBean(IBean bean) {
+		return !bean.isInfrastructure()
+				|| (bean.isInfrastructure() && BeansUIPlugin.getDefault().getPluginPreferences()
+						.getBoolean(BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID));
 	}
 
 	public boolean isRootBean() {
