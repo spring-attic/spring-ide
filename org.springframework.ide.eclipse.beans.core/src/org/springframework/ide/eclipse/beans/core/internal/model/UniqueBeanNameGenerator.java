@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,13 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.springframework.beans.BeanMetadataAttribute;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
@@ -30,6 +33,9 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  */
 public class UniqueBeanNameGenerator implements BeanNameGenerator {
 
+	public static final String GENERATED_BEAN_NAME_PROPERTY = BeansCorePlugin.PLUGIN_ID
+			+ ".GENERATED_BEAN_NAME";
+
 	private IBeansConfig config;
 
 	public UniqueBeanNameGenerator(IBeansConfig config) {
@@ -37,7 +43,17 @@ public class UniqueBeanNameGenerator implements BeanNameGenerator {
 	}
 
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-		return generateBeanName(definition, config);
+		String name = generateBeanName(definition, config);
+
+		// Store a maker that the bean name was auto-generated
+		if (definition instanceof AbstractBeanDefinition) {
+			BeanMetadataAttribute attribute = new BeanMetadataAttribute(
+					GENERATED_BEAN_NAME_PROPERTY, Boolean.TRUE);
+			attribute.setSource(this);
+			((AbstractBeanDefinition) definition).addMetadataAttribute(attribute);
+		}
+
+		return name;
 	}
 
 	public static String generateBeanName(BeanDefinition definition, IBeansConfig config) {
@@ -71,9 +87,10 @@ public class UniqueBeanNameGenerator implements BeanNameGenerator {
 			name.append(BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR);
 			name.append(location.getStartLine());
 		}
+
 		return name.toString();
 	}
-	
+
 	/**
 	 * Returns the name of the originating file that contains the bean definition.
 	 * @since 2.0.5

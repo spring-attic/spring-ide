@@ -225,7 +225,7 @@ public class Graph implements IAdaptable {
 			// error message
 			graph = new DirectedGraph();
 			input.setHasError(true);
-
+e.printStackTrace();
 			MessageDialog.openError(BeansGraphPlugin.getActiveWorkbenchWindow()
 					.getShell(), BeansGraphPlugin
 					.getResourceString(ERROR_TITLE), e.getMessage());

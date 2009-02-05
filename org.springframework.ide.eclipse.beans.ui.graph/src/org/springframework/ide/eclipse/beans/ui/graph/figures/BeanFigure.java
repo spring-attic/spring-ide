@@ -23,10 +23,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.model.ConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Property;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 
 /**
  * A Figure representating a bean
@@ -68,7 +70,7 @@ public class BeanFigure extends Figure {
 			propertiesFigure = createProperties(bean);
 			add(propertiesFigure);
 		}
-		
+
 		// Add the inner child beans
 		if (bean.getInnerBeans().length > 0) {
 			createInnerBeans(bean);
@@ -86,7 +88,22 @@ public class BeanFigure extends Figure {
 
 	protected Label createLabel(Bean bean) {
 		Label label = new Label();
-		label.setText(bean.getName());
+		if (bean.getBean() != null
+				&& bean.getBean().getElementSourceLocation() instanceof XmlSourceLocation) {
+			// Add prefix and node name so that source of the element is more obivous
+			XmlSourceLocation location = (XmlSourceLocation) bean.getBean()
+					.getElementSourceLocation();
+			StringBuilder text = new StringBuilder();
+			if (!location.getNamespaceURI().equals(NamespaceUtils.DEFAULT_NAMESPACE_URI)) {
+				text.append(location.getPrefix()).append(":").append(location.getLocalName())
+						.append(" ");
+			}
+			text.append(bean.getName());
+			label.setText(text.toString());
+		}
+		else {
+			label.setText(bean.getName());
+		}
 		if (bean.isRootBean()) {
 			label.setIcon(BeansUIPlugin.getLabelProvider().getImage(bean.getBean()));
 			if (bean.getClassName() != null) {
@@ -117,16 +134,16 @@ public class BeanFigure extends Figure {
 			String name = carg.getName();
 			Label label = new Label();
 
-//			// Display a truncated element name if necessary
-//			if (name.length() > MAX_NAME_LENGTH) {
-//				label.setText(name.substring(0, MAX_NAME_LENGTH) + "...");
-//				label.setToolTip(new Label(name));
-//			}
-//			else {
-				label.setText(name);
-				Object value = carg.getBeanConstructorArgument().getValue();
-				label.setToolTip(new Label(createToolTipForValue(value)));
-//			}
+			// // Display a truncated element name if necessary
+			// if (name.length() > MAX_NAME_LENGTH) {
+			// label.setText(name.substring(0, MAX_NAME_LENGTH) + "...");
+			// label.setToolTip(new Label(name));
+			// }
+			// else {
+			label.setText(name);
+			Object value = carg.getBeanConstructorArgument().getValue();
+			label.setToolTip(new Label(createToolTipForValue(value)));
+			// }
 			label.setIcon(BeansUIPlugin.getLabelProvider().getImage(
 					carg.getBeanConstructorArgument()));
 			figure.add(label);

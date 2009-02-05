@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,12 @@ public interface IBean extends IBeansModelElement, ISourceModelElement {
 	public boolean isFactory();
 	
 	public boolean isInfrastructure();
+	
+	/**
+	 * Returns <code>true</code> if the bean id or name is generated
+	 * @since 2.2.2 
+	 */
+	public boolean isGeneratedElementName();
 
 	/**
 	 * Returns array of aliases defined for this bean or <code>null</code> if

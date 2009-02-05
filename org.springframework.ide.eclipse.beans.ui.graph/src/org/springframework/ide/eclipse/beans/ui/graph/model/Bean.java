@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * This is a representation of a Spring bean.
@@ -54,6 +55,9 @@ public class Bean extends Node implements IAdaptable {
 	}
 
 	public String getName() {
+		if (bean != null && bean.isGeneratedElementName() && bean.getClassName() != null) {
+			return ClassUtils.getShortName(bean.getClassName());
+		}
 		return (bean != null ? bean.getElementName() : "empty");
 	}
 

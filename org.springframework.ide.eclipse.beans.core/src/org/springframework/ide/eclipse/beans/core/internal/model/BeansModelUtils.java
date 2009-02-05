@@ -106,6 +106,14 @@ public abstract class BeansModelUtils {
 					bean = config.getBean(alias.getBeanName());
 				}
 			}
+			if (bean == null) {
+				for (IBeansComponent component : config.getComponents()) {
+					bean = getBean(name, component);
+					if (bean != null) {
+						return bean;
+					}
+				}
+			}
 			return bean;
 		}
 		else if (context instanceof IBeansConfigSet) {
@@ -117,11 +125,38 @@ public abstract class BeansModelUtils {
 					bean = configSet.getBean(alias.getBeanName());
 				}
 			}
+			if (bean == null) {
+				for (IBeansComponent component : configSet.getComponents()) {
+					bean = getBean(name, component);
+					if (bean != null) {
+						return bean;
+					}
+				}
+			}
 			return bean;
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported context " + context);
 		}
+	}
+
+	/**
+	 * Return's the {@link IBean} for the given name by recursively looking into the
+	 * {@link IBeansComponent}.
+	 */
+	private static IBean getBean(String name, IBeansComponent component) {
+		for (IBean componentBean : component.getBeans()) {
+			if (componentBean.getElementName().equals(name)) {
+				return componentBean;
+			}
+		}
+		for (IBeansComponent nestedComponent : component.getComponents()) {
+			IBean bean = getBean(name, nestedComponent);
+			if (bean != null) {
+				return bean;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -1326,7 +1361,7 @@ public abstract class BeansModelUtils {
 												}
 												// 2b. extends the class
 												else if (!type.getFullyQualifiedName().equals(
-																typeToCheck.getFullyQualifiedName())
+														typeToCheck.getFullyQualifiedName())
 														&& Introspector
 																.doesExtend(type, typeToCheck
 																		.getFullyQualifiedName())) {
@@ -1407,9 +1442,10 @@ public abstract class BeansModelUtils {
 												}
 												// 2b. extends the class
 												else if (!type.getFullyQualifiedName().equals(
-																typeToCheck.getFullyQualifiedName())
-														&& Introspector.doesExtend(type, typeToCheck
-														.getFullyQualifiedName())) {
+														typeToCheck.getFullyQualifiedName())
+														&& Introspector
+																.doesExtend(type, typeToCheck
+																		.getFullyQualifiedName())) {
 													files.add(bean);
 													break;
 												}

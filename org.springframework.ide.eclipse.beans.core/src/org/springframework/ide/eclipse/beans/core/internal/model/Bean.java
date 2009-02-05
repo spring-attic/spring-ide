@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.springframework.beans.BeanMetadataAttribute;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -232,6 +233,17 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return false;
 	}
 
+	public boolean isGeneratedElementName() {
+		if (definition instanceof AbstractBeanDefinition) {
+			BeanMetadataAttribute attribute = ((AbstractBeanDefinition) definition)
+					.getMetadataAttribute(UniqueBeanNameGenerator.GENERATED_BEAN_NAME_PROPERTY);
+			if (attribute != null && attribute.getValue() instanceof Boolean) {
+				return ((Boolean) attribute.getValue()).booleanValue();
+			}
+		}
+		return false;
+	}
+
 	public boolean isFactory() {
 		if (definition instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition bd = (AbstractBeanDefinition) definition;
@@ -268,7 +280,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	@Override
 	public int hashCode() {
-		// need to cache hashCode as the value could change over time due to the mutable nature of 
+		// need to cache hashCode as the value could change over time due to the mutable nature of
 		// hashCode of source location
 		if (hashCode == null) {
 			hashCode = ObjectUtils.nullSafeHashCode(definition);
@@ -340,4 +352,5 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			}
 		}
 	}
+
 }

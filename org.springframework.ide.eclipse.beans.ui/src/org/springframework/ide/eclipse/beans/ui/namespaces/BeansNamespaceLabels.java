@@ -14,6 +14,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -54,12 +55,17 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 
 	public static void appendBeanLabel(IBean bean, StringBuffer buf) {
 		if (!bean.isInnerBean()) {
-			buf.append(bean.getElementName()).append(' ');
-			if (bean.getAliases() != null && bean.getAliases().length > 0) {
-				buf.append('\'');
-				buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
-						LIST_DELIMITER_STRING));
-				buf.append("' ");
+			if (bean.isGeneratedElementName() && bean.getClassName() != null) {
+				buf.append(ClassUtils.getShortName(bean.getClassName())).append(' ');
+			}
+			else {
+				buf.append(bean.getElementName()).append(' ');
+				if (bean.getAliases() != null && bean.getAliases().length > 0) {
+					buf.append('\'');
+					buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
+							LIST_DELIMITER_STRING));
+					buf.append("' ");
+				}
 			}
 		}
 		if (bean.getClassName() != null) {
