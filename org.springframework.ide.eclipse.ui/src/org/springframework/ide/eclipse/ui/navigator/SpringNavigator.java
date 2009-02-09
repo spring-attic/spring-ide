@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.navigator;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,10 +51,10 @@ import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.navigator.NavigatorContentService;
-import org.eclipse.ui.internal.navigator.extensions.LinkHelperService;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ILinkHelper;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 import org.springframework.ide.eclipse.ui.dialogs.WrappingStructuredSelection;
 import org.springframework.ide.eclipse.ui.navigator.actions.ILinkHelperExtension;
 import org.w3c.dom.Comment;
@@ -82,10 +85,11 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 	 */
 	private ISelection lastElement;
 
-	/** Stored {@link LinkHelperService} to resolve instances of {@link ILinkHelperExtension} */
-	private LinkHelperService linkService;
+	private Object linkService;
 
 	private IPropertyListener propertyListener;
+
+	private Method linkServiceMethod;
 
 	/**
 	 * Register the {@link ISelectionListener} with the workbench.
@@ -101,7 +105,7 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 					updateTreeViewer(SpringNavigator.this, lastElement, false);
 				}
 			}
-			
+
 		};
 		addPropertyListener(propertyListener);
 
@@ -272,15 +276,47 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 		return null;
 	}
 
-	/**
-	 * Store the {@link LinkHelperService}.
-	 */
-	private synchronized LinkHelperService getLinkHelperService() {
+	private synchronized Object getInternalLinkHelperService() {
 		if (linkService == null) {
-			linkService = new LinkHelperService((NavigatorContentService) getCommonViewer()
-					.getNavigatorContentService());
+			try {
+				try {
+					// e3.5: get helper from common navigator
+					Method method = CommonNavigator.class.getDeclaredMethod("getLinkHelperService"); //$NON-NLS-1$
+					method.setAccessible(true);
+					linkService = method.invoke(this);
+				}
+				catch (NoSuchMethodException e) {
+					// e3.3, e3.4: instantiate helper
+					Class<?> clazz = Class
+							.forName("org.eclipse.ui.internal.navigator.extensions.LinkHelperService"); //$NON-NLS-1$
+					Constructor<?> constructor = clazz
+							.getConstructor(NavigatorContentService.class);
+					linkService = constructor
+							.newInstance((NavigatorContentService) getCommonViewer()
+									.getNavigatorContentService());
+				}
+				linkServiceMethod = linkService.getClass().getDeclaredMethod("getLinkHelpersFor", Object.class); //$NON-NLS-1$
+			}
+			catch (Throwable e) {
+				SpringUIPlugin.log(e);
+			}
 		}
 		return linkService;
+	}
+	
+	private ILinkHelper[] getInternalLinkHelpersFor(Object object) {
+		if (getInternalLinkHelperService() != null && linkServiceMethod != null) {
+			try {
+				return (ILinkHelper[]) linkServiceMethod.invoke(getInternalLinkHelperService(), object);
+			}
+			catch (IllegalArgumentException e) {
+			}
+			catch (IllegalAccessException e) {
+			}
+			catch (InvocationTargetException e) {
+			}
+		}
+		return new ILinkHelper[0];
 	}
 
 	/**
@@ -342,7 +378,7 @@ public final class SpringNavigator extends CommonNavigator implements ISelection
 	}
 
 	private void selectReveal(TreeViewer viewer, Object element) {
-		ILinkHelper[] helpers = getLinkHelperService().getLinkHelpersFor(element);
+		ILinkHelper[] helpers = getInternalLinkHelpersFor(element);
 		for (ILinkHelper helper : helpers) {
 			if (helper instanceof ILinkHelperExtension) {
 				ISelection selection = ((ILinkHelperExtension) helper).findSelection(element);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -139,7 +139,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements 
 					.getProject().getProject(), "java.lang.Throwable");
 			IJavaSearchScope searchScope = SearchEngine.createJavaSearchScope(throwable
 					.newTypeHierarchy(new NullProgressMonitor()).getAllSubtypes(throwable));
-			TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(), false,
+			FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(getShell(), false,
 					new ProgressMonitorDialog(getShell()), searchScope, IJavaSearchConstants.CLASS);
 			dialog.setBlockOnOpen(true);
 			dialog.setTitle("Type Selection");
