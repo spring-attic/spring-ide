@@ -64,8 +64,10 @@ public class AbstractJavaElementReferenceNode {
 	}
 
 	public IResource getResource() {
-		return this.element.getResource();
-
+		if (this.element != null) {
+			return this.element.getResource();
+		}
+		return null;
 	}
 
 	public IMember getElement() {
