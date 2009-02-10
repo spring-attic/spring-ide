@@ -39,6 +39,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -381,7 +384,8 @@ public final class SpringCoreUtils {
 	 * @since 2.0.5
 	 */
 	public static boolean isManifest(IResource resource) {
-		return resource != null
+		// check if it is a MANIFEST.MF file in META-INF
+		if (resource != null
 				&& resource.isAccessible()
 				&& resource.getType() == IResource.FILE
 				&& resource.getName().equals(BUNDLE_MANIFEST_FILE)
@@ -389,7 +393,37 @@ public final class SpringCoreUtils {
 				&& resource.getParent().getProjectRelativePath() != null
 				&& resource.getParent().getProjectRelativePath().lastSegment() != null
 				&& resource.getParent().getProjectRelativePath().lastSegment().equals(
-						BUNDLE_MANIFEST_FOLDER);
+						BUNDLE_MANIFEST_FOLDER)) {
+
+			// check if the manifest is not in an output folder
+			IPath filePath = resource.getFullPath();
+			IJavaProject javaProject = JdtUtils.getJavaProject(resource);
+			if (javaProject != null) {
+				try {
+					IPath defaultOutputLocation = javaProject.getOutputLocation();
+					if (defaultOutputLocation != null && defaultOutputLocation.isPrefixOf(filePath)) {
+						return false;
+					}
+					for (IClasspathEntry entry : javaProject.getResolvedClasspath(true)) {
+						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							IPath outputLocation = entry.getOutputLocation();
+							if (outputLocation != null && outputLocation.isPrefixOf(filePath)) {
+								return false;
+							}
+						}
+					}
+				}
+				catch (JavaModelException e) {
+					// don't care here
+				}
+				return true;
+			}
+			else {
+				// if the project is not a java project -> it is the manifest
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static IPath getProjectLocation(IProject project) {
