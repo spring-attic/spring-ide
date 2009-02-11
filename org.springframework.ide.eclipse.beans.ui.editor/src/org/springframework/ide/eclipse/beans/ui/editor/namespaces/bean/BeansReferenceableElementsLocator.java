@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IReferenceableElementsLocator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.StringUtils;
@@ -25,7 +26,7 @@ public class BeansReferenceableElementsLocator implements
 
 	public static final String BEAN_NAME_DELIMITERS = ",; ";
 
-	public Map<String, Node> getReferenceableElements(Document document) {
+	public Map<String, Node> getReferenceableElements(Document document, IFile file) {
 		Map<String, Node> nodes = new HashMap<String, Node>();
 		NodeList childNodes = document.getDocumentElement().getChildNodes();
 

@@ -47,14 +47,14 @@ public class BeanHyperlinkCalculator implements IHyperlinkCalculator {
 	public IHyperlink createHyperlink(String name, String target, Node node,
 			Node parentNode, IDocument document, ITextViewer textViewer,
 			IRegion hyperlinkRegion, IRegion cursor) {
+		IFile file = BeansEditorUtils.getFile(document);
 		Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
-				.getOwnerDocument(), target);
+				.getOwnerDocument(), target, file);
 		if (bean != null) {
 			IRegion region = getHyperlinkRegion(bean);
 			return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
 		}
 		else {
-			IFile file = BeansEditorUtils.getFile(document);
 			// assume this is an external reference
 			Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file)
 					.iterator();

@@ -48,7 +48,7 @@ public class BeansCompletionUtils {
 		if (document != null) {
 			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(recorder,
 					requiredTypes);
-			Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(document);
+			Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(document, context.getFile());
 			for (Map.Entry<String, Node> node : beanNodes.entrySet()) {
 				Node beanNode = node.getValue();
 				requestor.acceptSearchMatch(node.getKey(), beanNode, file, prefix);

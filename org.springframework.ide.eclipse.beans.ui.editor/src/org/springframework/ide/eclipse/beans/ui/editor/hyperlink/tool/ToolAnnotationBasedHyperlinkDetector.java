@@ -44,18 +44,18 @@ public class ToolAnnotationBasedHyperlinkDetector extends
 	public IHyperlink createHyperlink(String name, String target, Node node,
 			Node parentNode, IDocument document, ITextViewer textViewer,
 			IRegion hyperlinkRegion, IRegion cursor, Node annotation) {
+		IFile file = BeansEditorUtils.getFile(document);
 		ToolAnnotationData annotationData = ToolAnnotationUtils
 				.getToolAnnotationData(annotation);
 		if ("ref".equals(annotationData.getKind())) {
 			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
-					.getOwnerDocument(), target);
+					.getOwnerDocument(), target, file);
 			if (bean != null) {
 				IRegion region = getHyperlinkRegion(bean);
 				return new NodeElementHyperlink(hyperlinkRegion, region,
 						textViewer);
 			}
 			else {
-				IFile file = BeansEditorUtils.getFile(document);
 				// assume this is an external reference
 				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(
 						file).iterator();
@@ -69,7 +69,6 @@ public class ToolAnnotationBasedHyperlinkDetector extends
 			}
 		}
 		else if (Class.class.getName().equals(annotationData.getExpectedType())) {
-			IFile file = BeansEditorUtils.getFile(document);
 			IType type = JdtUtils.getJavaType(file.getProject(), target);
 			if (type != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, type);

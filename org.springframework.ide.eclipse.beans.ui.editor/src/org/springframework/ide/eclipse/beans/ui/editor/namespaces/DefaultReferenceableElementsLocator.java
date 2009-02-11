@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -27,7 +28,7 @@ import org.w3c.dom.NodeList;
 public class DefaultReferenceableElementsLocator implements
 		IReferenceableElementsLocator {
 
-	public Map<String, Node> getReferenceableElements(Document document) {
+	public Map<String, Node> getReferenceableElements(Document document, IFile file) {
 		Map<String, Node> nodes = new HashMap<String, Node>();
 		NodeList childNodes = document.getDocumentElement().getChildNodes();
 

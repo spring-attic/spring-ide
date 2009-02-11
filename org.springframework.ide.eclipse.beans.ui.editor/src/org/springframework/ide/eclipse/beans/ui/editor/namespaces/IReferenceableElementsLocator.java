@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -23,6 +24,6 @@ import org.w3c.dom.Node;
  */
 public interface IReferenceableElementsLocator {
 
-	Map<String, Node> getReferenceableElements(Document document);
+	Map<String, Node> getReferenceableElements(Document document, IFile file);
 
 }

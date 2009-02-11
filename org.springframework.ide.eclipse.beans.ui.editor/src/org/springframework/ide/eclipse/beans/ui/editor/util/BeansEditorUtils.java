@@ -746,8 +746,8 @@ public class BeansEditorUtils {
 		return resource;
 	}
 
-	public static final Node getFirstReferenceableNodeById(Document document, String id) {
-		Map<String, Node> nodes = getReferenceableNodes(document);
+	public static final Node getFirstReferenceableNodeById(Document document, String id, IFile file) {
+		Map<String, Node> nodes = getReferenceableNodes(document, file);
 		for (Map.Entry<String, Node> node : nodes.entrySet()) {
 			if (node.getKey().equals(id)) {
 				return node.getValue();
@@ -836,11 +836,11 @@ public class BeansEditorUtils {
 		return project;
 	}
 
-	public static final Map<String, Node> getReferenceableNodes(Document document) {
+	public static final Map<String, Node> getReferenceableNodes(Document document, IFile file) {
 		Map<String, Node> nodes = new HashMap<String, Node>();
 		for (IReferenceableElementsLocator locator : NamespaceUtils.getAllElementsLocators()) {
 
-			Map<String, Node> tempNodes = locator.getReferenceableElements(document);
+			Map<String, Node> tempNodes = locator.getReferenceableElements(document, file);
 			if (tempNodes != null) {
 				nodes.putAll(tempNodes);
 			}
