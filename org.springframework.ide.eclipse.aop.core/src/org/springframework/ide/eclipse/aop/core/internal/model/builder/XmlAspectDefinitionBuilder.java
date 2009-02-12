@@ -280,7 +280,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder 
 					((BeanIntroductionDefinition) info).setTypePattern(typesMatching);
 					if (StringUtils.hasText(delegateRef)) {
 						Node delegateBean = BeansEditorUtils.getFirstReferenceableNodeById(
-								aspectNode.getOwnerDocument(), delegateRef);
+								aspectNode.getOwnerDocument(), delegateRef, file);
 						if (delegateBean != null) {
 							defaultImpl = BeansEditorUtils.getClassNameForBean(delegateBean);
 						}
