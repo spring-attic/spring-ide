@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,13 +20,17 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
+import org.springframework.ide.eclipse.core.java.annotation.JdtBasedAnnotationMetadata;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 
@@ -38,20 +42,18 @@ import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
  */
 public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMetadataProviderAdapter
 		implements IBeanMetadataProvider {
-
+ 
 	/**
 	 * Internal cache of {@link ClassReaderFactory} keyed by the corresponding {@link IProject}.
 	 */
-	private final Map<IProject, ClassReaderFactory> classReaderFactoryCache = 
-		new ConcurrentHashMap<IProject, ClassReaderFactory>();
+	private final Map<IProject, ClassReaderFactory> classReaderFactoryCache = new ConcurrentHashMap<IProject, ClassReaderFactory>();
 
 	/**
-	 * Internal cache of {@link IAnnotationMetadata} keyed by the corresponding {@link IType}. It
-	 * is important to key with {@link IType} and not just with FQCN as a class can exist multiple
+	 * Internal cache of {@link IAnnotationMetadata} keyed by the corresponding {@link IType}. It is
+	 * important to key with {@link IType} and not just with FQCN as a class can exist multiple
 	 * times with the same name in different projects.
 	 */
-	private final Map<IType, IAnnotationMetadata> metadataCache = 
-		new ConcurrentHashMap<IType, IAnnotationMetadata>();
+	private final Map<IType, IAnnotationMetadata> metadataCache = new ConcurrentHashMap<IType, IAnnotationMetadata>();
 
 	@Override
 	public final Set<IBeanMetadata> provideBeanMetadata(IBean bean, IBeansConfig beansConfig,
@@ -60,8 +62,8 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 
 		Set<IBeanMetadata> beanMetadata = new HashSet<IBeanMetadata>();
 
-		IType type = JdtUtils.getJavaType(bean.getElementResource().getProject(), bean
-				.getClassName());
+		IType type = JdtUtils.getJavaType(bean.getElementResource().getProject(), BeansModelUtils
+				.getBeanClass(bean, null));
 
 		// Get annotation meta data
 		IAnnotationMetadata visitor = getAnnotationMetadata(bean, getClassReaderFactory(beansConfig
@@ -97,22 +99,30 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 			return metadataCache.get(orginalType);
 		}
 
-		// Create new annotation meta data
-		AnnotationMetadataReadingVisitor visitor = createAnnotationMetadataReadingVisitor();
+		IAnnotationMetadata visitor = null;
 
-		String className = type.getFullyQualifiedName();
-		try {
-			while (className != null && !Object.class.getName().equals(className) && type != null
-					&& !type.isBinary()) {
-				ClassReader classReader = classReaderFactory.getClassReader(className);
-				visitor.setType(type);
-				classReader.accept(visitor, false);
-				className = visitor.getSuperClassName();
-				type = JdtUtils.getJavaType(bean.getElementResource().getProject(), className);
-			}
+		// JDT in Eclipse 3.4 supports annotation in the core model
+		if (SpringCoreUtils.isEclipseSameOrNewer(3, 4)) {
+			visitor = new JdtBasedAnnotationMetadata(orginalType);
 		}
-		catch (IOException e) {
-			BeansCorePlugin.log("Error during AST class visiting", e);
+		else {
+			// Create new annotation meta data
+			visitor = createAnnotationMetadataReadingVisitor();
+
+			String className = type.getFullyQualifiedName();
+			try {
+				while (className != null && !Object.class.getName().equals(className)
+						&& type != null && !type.isBinary()) {
+					ClassReader classReader = classReaderFactory.getClassReader(className);
+					((AnnotationMetadataReadingVisitor) visitor).setType(type);
+					classReader.accept((ClassVisitor) visitor, false);
+					className = ((AnnotationMetadataReadingVisitor) visitor).getSuperClassName();
+					type = JdtUtils.getJavaType(bean.getElementResource().getProject(), className);
+				}
+			}
+			catch (IOException e) {
+				BeansCorePlugin.log("Error during AST class visiting", e);
+			}
 		}
 
 		// cache here in case exception was thrown we don't want to retry over and over again
@@ -156,4 +166,5 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 	 */
 	protected abstract void processFoundAnnotations(IBean bean, Set<IBeanMetadata> beanMetaDataSet,
 			IType type, IAnnotationMetadata metadata, IProgressMonitor progressMonitor);
+
 }

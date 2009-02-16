@@ -31,9 +31,8 @@ import org.springframework.ide.eclipse.core.type.asm.ClassMetadataReadingVisitor
 import org.springframework.util.ClassUtils;
 
 /**
- * ASM based {@link ClassVisitor} that reads and stores all
- * {@link java.lang.annotation.Annotation}s from classes and methods.
- * Furthermore this implementation saves all annotation members as well.
+ * ASM based {@link ClassVisitor} that reads and stores all {@link java.lang.annotation.Annotation}s
+ * from classes and methods. Furthermore this implementation saves all annotation members as well.
  * @author Christian Dupuis
  * @since 2.0.5
  */
@@ -44,8 +43,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	private Set<Annotation> classAnnotations = new HashSet<Annotation>();
 
-	private Map<IMethod, Set<Annotation>> methodAnnotations = 
-		new LinkedHashMap<IMethod, Set<Annotation>>();
+	private Map<IMethod, Set<Annotation>> methodAnnotations = new LinkedHashMap<IMethod, Set<Annotation>>();
 
 	private IType type;
 
@@ -188,6 +186,21 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 					values.add(arg1.toString());
 				}
 
+				/**
+				 * @Controller("/index.htm") 
+				 * -> value = /index.htm
+				 * 
+				 * @Controller({"/index1.htm" , "/index2.htm"}) 
+				 * -> value = /index1.htm, /index2.htm
+				 * 
+				 * @Controller({ RequestMapping.GET, RequestMapping.POST})
+				 * @Controller({ org.swf.RequestMapping.GET, org.swf.RequestMapping.POST}) 
+				 * -> value = RequestMapping.GET, RequestMapping.POST
+				 * 
+				 * @Controller(RequestMapping.GET)
+				 * @Controller(org.swf.RequestMapping.GET) 
+				 * -> value = RequestMapping.GET
+				 */
 				@Override
 				public void visitEnd() {
 					StringBuilder buf = new StringBuilder();

@@ -606,4 +606,14 @@ public class ExternalFile extends AbstractResource implements IFile {
 
 	}
 
+	public boolean isHidden(int options) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean isTeamPrivateMember(int options) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

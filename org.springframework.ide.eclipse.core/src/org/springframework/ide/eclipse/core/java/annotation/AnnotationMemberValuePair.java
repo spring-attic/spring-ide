@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.core.java.annotation;
 
 import java.io.Serializable;
 
-
 /**
  * Default implementation of {@link IAnnotationMemberValuePair}
  * @author Christian Dupuis

@@ -431,60 +431,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 									return false;
 								}
 
-								if (newValue instanceof ClassSignature) {
-									if (existingValue instanceof ClassSignature) {
-										if (!CharOperation.equals(((ClassSignature) newValue)
-												.getTypeName(), ((ClassSignature) existingValue)
-												.getTypeName())) {
-											return false;
-										}
-									}
-									else {
-										return false;
-									}
-								}
-								else if (newValue instanceof Constant) {
-									if (existingValue instanceof Constant) {
-										if (!((Constant) newValue)
-												.hasSameValue((Constant) existingValue)) {
-											return false;
-										}
-									}
-									else {
-										return false;
-									}
-								}
-								else if (newValue instanceof EnumConstantSignature) {
-									if (existingValue instanceof EnumConstantSignature) {
-										if (!(CharOperation.equals(
-												((EnumConstantSignature) newValue).getTypeName(),
-												((EnumConstantSignature) existingValue)
-														.getTypeName()) && CharOperation.equals(
-												((EnumConstantSignature) newValue)
-														.getEnumConstantName(),
-												((EnumConstantSignature) existingValue)
-														.getEnumConstantName()))) {
-											return false;
-										}
-									}
-									else {
-										return false;
-									}
-								}
-								else if (newValue instanceof IBinaryAnnotation) {
-									if (existingValue instanceof EnumConstantSignature) {
-										if (!annotationsEqual(
-												new IBinaryAnnotation[] { (IBinaryAnnotation) newValue },
-												new IBinaryAnnotation[] { (IBinaryAnnotation) existingValue },
-												flags)) {
-											return false;
-										}
-									}
-									else {
-										return false;
-									}
-								}
-								else {
+								if (!parameterValuesEquals(flags, newValue, existingValue)) {
 									return false;
 								}
 							}
@@ -494,6 +441,67 @@ public class TypeStructureCache implements ITypeStructureCache {
 				}
 			}
 			return false;
+		}
+		return true;
+	}
+
+	private static boolean parameterValuesEquals(int flags, Object newValue, Object existingValue) {
+		if (newValue.getClass().isArray() && existingValue.getClass().isArray()) {
+			Object[] newValueArray = (Object[]) newValue;
+			Object[] existingValueArray = (Object[]) existingValue;
+			if (newValueArray.length != existingValueArray.length) {
+				return false;
+			}
+			for (int i = 0; i < newValueArray.length; i++) {
+				if (!parameterValuesEquals(flags, newValueArray[i], existingValueArray[i])) {
+					return false;
+				}
+			}
+		}
+		else if (newValue instanceof ClassSignature) {
+			if (existingValue instanceof ClassSignature) {
+				if (!CharOperation.equals(((ClassSignature) newValue).getTypeName(),
+						((ClassSignature) existingValue).getTypeName())) {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		else if (newValue instanceof Constant) {
+			if (existingValue instanceof Constant) {
+				if (!((Constant) newValue).hasSameValue((Constant) existingValue)) {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		else if (newValue instanceof EnumConstantSignature) {
+			if (existingValue instanceof EnumConstantSignature) {
+				if (!(CharOperation.equals(((EnumConstantSignature) newValue).getTypeName(),
+						((EnumConstantSignature) existingValue).getTypeName()) && CharOperation
+						.equals(((EnumConstantSignature) newValue).getEnumConstantName(),
+								((EnumConstantSignature) existingValue).getEnumConstantName()))) {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		else if (newValue instanceof IBinaryAnnotation) {
+			if (existingValue instanceof EnumConstantSignature) {
+				if (!annotationsEqual(new IBinaryAnnotation[] { (IBinaryAnnotation) newValue },
+						new IBinaryAnnotation[] { (IBinaryAnnotation) existingValue }, flags)) {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
 		}
 		return true;
 	}

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -140,6 +142,15 @@ public final class Introspector {
 			// don't do anything here
 		}
 		return methods;
+	}
+
+	public static Set<IAnnotation> getAllAnnotations(IType type) throws JavaModelException {
+		Set<IAnnotation> annotations = new LinkedHashSet<IAnnotation>();
+		while (type != null && !type.isInterface()) {
+			annotations.addAll(Arrays.asList(type.getAnnotations()));
+			type = getSuperType(type);
+		}
+		return annotations;
 	}
 
 	/**
