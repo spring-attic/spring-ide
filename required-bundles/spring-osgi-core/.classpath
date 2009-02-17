@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry exported="true" kind="lib" path="spring-osgi-core.jar" sourcepath="/org.springframework.osgi.source/src/org.springframework.bundle.osgi.core_1.1.0.v200807602000/src.zip"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>
