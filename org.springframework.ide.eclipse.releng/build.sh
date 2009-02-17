@@ -126,15 +126,25 @@ then
 	rm -rf ./eclipse/plugins/org.eclipse.mylyn*
 	rm -rf ./eclipse/features/org.eclipse.mylyn*
 	
-	#install_feature org.eclipse.mylyn_feature $MYLYN_UPDATE_SITE_URL
-	#install_feature org.eclipse.mylyn.context_feature $MYLYN_UPDATE_SITE_URL
-	#install_feature org.eclipse.mylyn.team_feature $MYLYN_UPDATE_SITE_URL
-	#install_feature org.eclipse.mylyn.ide_feature $MYLYN_UPDATE_SITE_URL
-	#install_feature org.eclipse.mylyn.java_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn.context_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn.team_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn.ide_feature $MYLYN_UPDATE_SITE_URL
+	install_feature org.eclipse.mylyn.java_feature $MYLYN_UPDATE_SITE_URL
 	
-	$WORKSPACE/eclipse/eclipse -nosplash -consoleLog -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/sts/equinox-aspects \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/sts/equinox-aspects \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
+   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects,http://download.eclipse.org/tools/ajdt/34/update \
+   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects,http://download.eclipse.org/tools/ajdt/34/update \
+   		-installIU org.aspectj.runtime
+
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
+   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects,http://download.eclipse.org/tools/ajdt/34/update \
+   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects,http://download.eclipse.org/tools/ajdt/34/update \
+   		-installIU org.aspectj.weaver
+
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
+   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects,http://download.eclipse.org/tools/ajdt/34/update \
+   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects,http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.eclipse.equinox.weaving.feature.group
 
 	install_feature org.eclipse.ajdt $AJDT_UPDATE_SITE_URL
