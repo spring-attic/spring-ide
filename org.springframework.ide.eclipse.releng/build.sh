@@ -16,13 +16,13 @@ NAME=`date +%Y%m%d%H%M`
 STAGINGLOCATION=$WORKSPACE/updatesite/
 TEST_STAGINGLOCATION=$WORKSPACE/testupdatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
-#ECLIPSE_DISTRO_URL=http://mirror.cc.columbia.edu/pub/software/eclipse/technology/epp/downloads/release/europa/winter/eclipse-jee-europa-winter-macosx-carbon.tar.gz
-ECLIPSE_DISTRO_URL=http://build.eclipse.org/technology/epp/epp_build/34/download/20080623-1700/20080623-1700_eclipse-jee-ganymede-macosx.carbon.ppc.tar.gz
+ECLIPSE_DISTRO_URL=http://www.mirrorservice.org/sites/download.eclipse.org/eclipseMirror/technology/epp/downloads/release/ganymede/SR1/eclipse-jee-ganymede-SR1-macosx-carbon.tar.gz
+#ECLIPSE_DISTRO_URL=http://build.eclipse.org/technology/epp/epp_build/34/download/20080623-1700/20080623-1700_eclipse-jee-ganymede-macosx.carbon.ppc.tar.gz
 ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/downloads/drops/R-3.3.1.1-200710231652/eclipse-Automated-Tests-3.3.1.1.zip
 
 MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/e3.4/
-AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/34/dev/update
+AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/34/update
 
 #-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y
 
@@ -122,10 +122,20 @@ fi
 
 if [ "$INSTALL_FEATURES" = "1" ] 
 then
-	install_feature org.eclipse.mylyn_feature $MYLYN_UPDATE_SITE_URL
-	install_feature org.eclipse.mylyn.context_feature $MYLYN_UPDATE_SITE_URL
-	install_feature org.eclipse.mylyn.ide_feature $MYLYN_UPDATE_SITE_URL
-	install_feature org.eclipse.mylyn.java_feature $MYLYN_UPDATE_SITE_URL
+
+	rm -rf ./eclipse/plugins/org.eclipse.mylyn*
+	rm -rf ./eclipse/features/org.eclipse.mylyn*
+	
+	#install_feature org.eclipse.mylyn_feature $MYLYN_UPDATE_SITE_URL
+	#install_feature org.eclipse.mylyn.context_feature $MYLYN_UPDATE_SITE_URL
+	#install_feature org.eclipse.mylyn.team_feature $MYLYN_UPDATE_SITE_URL
+	#install_feature org.eclipse.mylyn.ide_feature $MYLYN_UPDATE_SITE_URL
+	#install_feature org.eclipse.mylyn.java_feature $MYLYN_UPDATE_SITE_URL
+	
+	$WORKSPACE/eclipse/eclipse -nosplash -consoleLog -application org.eclipse.equinox.p2.director.app.application \
+   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/sts/equinox-aspects \
+   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/sts/equinox-aspects \
+   		-installIU org.eclipse.equinox.weaving.feature.group
 
 	install_feature org.eclipse.ajdt $AJDT_UPDATE_SITE_URL
 fi
