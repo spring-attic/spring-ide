@@ -152,6 +152,7 @@
 		
 		<antcall target="pack200" />
 		<antcall target="p2" />
+		<antcall target="createBuildDist" />
 		<antcall target="s3.publish" />
 	</target>
 
@@ -187,8 +188,6 @@
 		<copy file="${builder}/../site.xml" tofile="${updateSiteStagingLocation}/site.xml" overwrite="false" />
 		<replace file="${updateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
 
-		<!-- Create zip archive of update site -->
-		<antcall target="createBuildDist" />
 	</target>
 
 	<target name="updateSiteExport">
@@ -227,6 +226,9 @@
 	<target name="s3.publish" if="s3.publish">
 
 		<echo>Publishing to Amazon S3</echo>
+		
+		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
+		<property name="buildDist.file" value="${updateSiteStagingLocation}/${buildDist.name}.zip" />
 
 		<taskdef name="s3" classname="org.springframework.build.aws.ant.SimpleStorageService" />
 
@@ -241,14 +243,20 @@
 					<include name="features/**" />
 				</fileset>
 			</delete>
-
+			
 			<upload bucketName="dist.springframework.org" toDir="snapshot/IDE/${s3.publish}" publicRead="true">
-
 				<fileset dir="${updateSiteStagingLocation}">
 					<include name="**/*" />
 					<include name="**" />
+					<exclude name="*.zip" />
 				</fileset>
-
+			</upload>
+			
+			<upload bucketName="dist.springframework.com" file="${buildDist.file}" toFile="snapshot/IDE/${s3.publish}/${buildDist.name}.zip" publicRead="true">
+				<metadata name="project.name" value="Spring IDE" />
+				<metadata name="release.type" value="snapshot" />
+				<metadata name="bundle.version" value="${sitePackageVersion}.${forceContextQualifier}" />
+				<metadata name="package.file.name" value="${buildDist.name}.zip" />
 			</upload>
 
 		</s3>
