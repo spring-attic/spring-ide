@@ -252,7 +252,7 @@
 				</fileset>
 			</upload>
 			
-			<upload bucketName="dist.springframework.com" file="${buildDist.file}" toFile="snapshot/IDE/${s3.publish}/${buildDist.name}.zip" publicRead="true">
+			<upload bucketName="dist.springframework.org" file="${buildDist.file}" toFile="snapshot/IDE/${s3.publish}/${buildDist.name}.zip" publicRead="true">
 				<metadata name="project.name" value="Spring IDE" />
 				<metadata name="release.type" value="snapshot" />
 				<metadata name="bundle.version" value="${sitePackageVersion}.${forceContextQualifier}" />
