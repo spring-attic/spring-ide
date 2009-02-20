@@ -198,7 +198,7 @@
 	</target>
 
 	<target name="createBuildDist">
-		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
+		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}.${forceContextQualifier}" />
 		<property name="buildDist.file" value="${updateSiteStagingLocation}/${buildDist.name}.zip" />
 		<delete file="${buildDist.file}" />
 		<zip zipfile="${buildDist.file}" filesonly="true">
@@ -227,7 +227,7 @@
 
 		<echo>Publishing to Amazon S3</echo>
 		
-		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
+		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}.${forceContextQualifier}" />
 		<property name="buildDist.file" value="${updateSiteStagingLocation}/${buildDist.name}.zip" />
 
 		<taskdef name="s3" classname="org.springframework.build.aws.ant.SimpleStorageService" />
