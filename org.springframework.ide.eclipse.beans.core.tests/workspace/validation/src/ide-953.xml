@@ -13,7 +13,7 @@
 	    
 	<bean id="childBean1" class="org.springframework.SubClass" 
 		parent="middle">
-		<property name="rabd" value="test" />
+		<property name="rabdd" value="test" />
 	</bean>
 
 	<bean id="childBean2" class="java.lang.String" 
