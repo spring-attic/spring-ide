@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beansProjectDescription>
 	<version>1</version>
-	<pluginVersion><![CDATA[2.0.5.qualifier]]></pluginVersion>
+	<pluginVersion><![CDATA[2.2.2.qualifier]]></pluginVersion>
 	<configSuffixes>
 		<configSuffix><![CDATA[xml]]></configSuffix>
 	</configSuffixes>
 	<enableImports><![CDATA[true]]></enableImports>
 	<configs>
-		<config>src/ide-798.xml</config>
-		<config>src/ide-771.xml</config>
-		<config>src/ide-832.xml</config>
-		<config>src/ide-855.xml</config>
+		<config>src/ide-953.xml</config>
 	</configs>
 	<configSets>
 	</configSets>
