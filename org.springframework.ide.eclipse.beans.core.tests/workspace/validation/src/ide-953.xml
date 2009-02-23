@@ -3,25 +3,24 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="base" class="org.springframework.Base" abstract="true">
-		<property name="foo" value="test" />
-	</bean>
-	
-	<bean id="middle" abstract="true" parent="base" >
-		<property name="dao" value="test" />
-	</bean>
+<!--	<bean id="base" class="org.springframework.Base" abstract="true">-->
+<!--		<property name="foo" value="test" />-->
+<!--	</bean>-->
+<!--	-->
+<!--	<bean id="middle" abstract="true" parent="base" >-->
+<!--		<property name="dao" value="test" />-->
+<!--	</bean>-->
 	    
-	<bean id="childBean1" class="org.springframework.SubClass" 
-		parent="middle">
-		<property name="rabsss" value="test" />
-	</bean> 
+	<bean id="childBean1" class="org.springframework.SubClass">
+		<property name="rab" value="test" />
+	</bean>  
 
-	<bean id="childBean2" class="java.lang.String" 
-		parent="middle">
-	</bean>
-
-	<bean id="childBean3" class="java.lang.String" >
-	</bean>
+<!--	<bean id="childBean2" class="java.lang.String" -->
+<!--		parent="middle">-->
+<!--	</bean>-->
+<!---->
+<!--	<bean id="childBean3" class="java.lang.String" >-->
+<!--	</bean>-->
 
 
 </beans>
