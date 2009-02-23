@@ -12,7 +12,7 @@
 <!--	</bean>-->
 	    
 	<bean id="childBean1" class="org.springframework.SubClass">
-		<property name="rab" value="test" />
+		<property name="rabsss" value="test" />
 	</bean>  
 
 <!--	<bean id="childBean2" class="java.lang.String" -->
