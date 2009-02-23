@@ -18,7 +18,6 @@
 
 	<bean id="childBean2" class="java.lang.String" 
 		parent="middle">
-		<!-- this is should give an error -->
 	</bean>
 
 	<bean id="childBean3" class="java.lang.String" >
