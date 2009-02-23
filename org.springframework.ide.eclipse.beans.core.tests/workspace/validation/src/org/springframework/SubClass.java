@@ -16,11 +16,11 @@ public class SubClass extends Base implements Serializable{
 	
 	private String bar;
 
-	public String getBar() {
+	public String getRab() {
 		return bar;
 	}
 
-	public void setBar(String bar) {
+	public void setRab(String bar) {
 		this.bar = bar;
 	}
 
