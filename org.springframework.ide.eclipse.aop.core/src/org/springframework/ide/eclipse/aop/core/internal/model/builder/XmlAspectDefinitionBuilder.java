@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -167,8 +167,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder 
 											aspectNode, beanRef, className, pointcutExpression);
 									info.setType(ADVICE_TYPE.AROUND);
 									info.setAdviceMethodName("invoke");
-									info
-											.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class
+									info.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class
 													.getName() });
 									addAspectDefinition(info, aspectInfos);
 								}
