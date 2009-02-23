@@ -319,10 +319,10 @@
             priority="highest">	<!-- we need to outrule the other navigators here to get the IFiles labeled -->
 		<triggerPoints>
 			<or>
-				<and>
+				<!--<and>
 					<instanceof value="org.eclipse.core.resources.IFile"/>
 					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
-				</and>
+				</and>-->
 				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
 				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
