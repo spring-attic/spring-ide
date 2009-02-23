@@ -202,7 +202,9 @@ public class ProjectPropertyPage extends PropertyPage {
 		super.applyData(data);
 		if (data instanceof Map) {
 			this.pageData = (Map<String, Object>) data;
-			this.selectedTab = (Integer) this.pageData.get(BLOCK_ID);
+			if (this.pageData.containsKey(BLOCK_ID)) {
+				this.selectedTab = (Integer) this.pageData.get(BLOCK_ID);
+			}
 			if (this.pageData.containsKey(SELECTED_RESOURCE)
 					&& this.pageData.get(SELECTED_RESOURCE) instanceof IModelElement) {
 				this.selectedModelElement = (IModelElement) this.pageData.get(SELECTED_RESOURCE);
