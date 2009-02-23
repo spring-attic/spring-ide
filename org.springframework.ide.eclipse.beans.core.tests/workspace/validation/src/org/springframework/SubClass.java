@@ -20,7 +20,7 @@ public class SubClass extends Base implements Serializable{
 		return bar;
 	}
 
-	public void setRabsss(String bar) {
+	public void setRab(String bar) {
 		this.bar = bar;
 	}
 
