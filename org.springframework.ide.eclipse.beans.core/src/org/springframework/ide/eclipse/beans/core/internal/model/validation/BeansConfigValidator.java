@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -38,6 +39,7 @@ import org.springframework.ide.eclipse.core.java.TypeStructureState;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManager;
@@ -58,7 +60,7 @@ public class BeansConfigValidator extends AbstractValidator implements
 	/** Internal state object */
 	private IProjectContributorState context = null;
 
-	private Set<IBean> affectedBeans = new LinkedHashSet<IBean>();
+	private Set<String> affectedBeans = new LinkedHashSet<String>();
 
 	public Set<IResource> deriveResources(Object object) {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
@@ -142,7 +144,7 @@ public class BeansConfigValidator extends AbstractValidator implements
 						for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
 							IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 							resources.add(beansConfig.getElementResource());
-							affectedBeans.add(bean);
+							affectedBeans.add(bean.getElementID());
 						}
 					}
 				}
@@ -195,7 +197,7 @@ public class BeansConfigValidator extends AbstractValidator implements
 	protected boolean supports(IModelElement element) {
 		// Validate only those beans that have been changed
 		if (element instanceof IBean) {
-			if (affectedBeans.contains(element)) {
+			if (affectedBeans.contains(element.getElementID())) {
 				return true;
 			}
 			else if (((IBean) element).isInnerBean()) {
@@ -210,7 +212,9 @@ public class BeansConfigValidator extends AbstractValidator implements
 	}
 
 	private void addBeans(IBeansConfig beansConfig) {
-		affectedBeans.addAll(BeansModelUtils.getBeans(beansConfig));
+		for (IBean bean : BeansModelUtils.getBeans(beansConfig)) {
+			affectedBeans.add(bean.getElementID());
+		}
 	}
 
 	@Override
@@ -224,19 +228,18 @@ public class BeansConfigValidator extends AbstractValidator implements
 
 	private static class BeanElementLifecycleManager implements IValidationElementLifecycleManager {
 
-		private IResourceModelElement rootElement = null;
+		private IBeansConfig rootElement = null;
 
 		public void destory() {
-			// nothing to do
+			// Notify that the model has changed.
+			 ((BeansModel) BeansCorePlugin.getModel()).notifyListeners(rootElement, Type.CHANGED);
 		}
 
 		public Set<IResourceModelElement> getContextElements() {
 			Set<IResourceModelElement> contextElements = new LinkedHashSet<IResourceModelElement>();
-			if (rootElement instanceof IBeansConfig) {
-				contextElements.addAll(BeansModelUtils.getConfigSets(rootElement));
-				if (contextElements.isEmpty()) {
-					contextElements.add(rootElement);
-				}
+			contextElements.addAll(BeansModelUtils.getConfigSets(rootElement));
+			if (contextElements.isEmpty()) {
+				contextElements.add(rootElement);
 			}
 			return contextElements;
 		}
@@ -248,6 +251,9 @@ public class BeansConfigValidator extends AbstractValidator implements
 		public void init(IResource resource) {
 			if (resource instanceof IFile) {
 				rootElement = BeansCorePlugin.getModel().getConfig((IFile) resource);
+				if (rootElement.resourceChanged()) {
+					((BeansConfig) rootElement).reload();
+				}
 			}
 		}
 	}

@@ -36,7 +36,8 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE
 			| IResourceChangeEvent.PRE_DELETE
 			| IResourceChangeEvent.PRE_BUILD
-			| IResourceChangeEvent.POST_BUILD;
+			| IResourceChangeEvent.POST_BUILD 
+			| IResourceChangeEvent.PRE_REFRESH;
 
 	private static final int VISITOR_FLAGS = IResourceDelta.ADDED
 			| IResourceDelta.CHANGED | IResourceDelta.REMOVED;
@@ -67,6 +68,7 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 
 			case IResourceChangeEvent.PRE_BUILD:
 			case IResourceChangeEvent.POST_BUILD:
+			case IResourceChangeEvent.PRE_REFRESH:
 				IResourceDelta delta = event.getDelta();
 				if (delta != null) {
 					try {
