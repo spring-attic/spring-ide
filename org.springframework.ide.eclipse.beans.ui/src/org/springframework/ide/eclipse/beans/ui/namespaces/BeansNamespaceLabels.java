@@ -56,7 +56,10 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 	public static void appendBeanLabel(IBean bean, StringBuffer buf) {
 		if (!bean.isInnerBean()) {
 			if (bean.isGeneratedElementName() && bean.getClassName() != null) {
-				buf.append(ClassUtils.getShortName(bean.getClassName())).append(' ');
+				buf.append("<anonymous> ").append(ClassUtils.getShortName(bean.getClassName())).append(' ');
+			}
+			else if (bean.isGeneratedElementName() && bean.getClassName() == null) {
+				buf.append("<anonymous> ");
 			}
 			else {
 				buf.append(bean.getElementName()).append(' ');
