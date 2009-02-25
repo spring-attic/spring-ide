@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DefaultContentAssistContext;
@@ -181,7 +182,7 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 		registerContentAssistCalculator("key-type", clazz);
 
 		PropertyBeanReferenceContentAssistCalculator propertyBean = new PropertyBeanReferenceContentAssistCalculator();
-		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean",
+		registerContentAssistCalculator(NamespaceUtils.DEFAULT_NAMESPACE_URI, "bean",
 				"property", "ref", propertyBean);
 
 		BeanReferenceContentAssistCalculator globalBean = new BeanReferenceContentAssistCalculator();

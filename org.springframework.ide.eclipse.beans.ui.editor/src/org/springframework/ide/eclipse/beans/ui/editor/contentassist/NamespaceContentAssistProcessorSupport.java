@@ -16,6 +16,7 @@ import java.util.Map;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
@@ -79,7 +80,12 @@ public abstract class NamespaceContentAssistProcessorSupport extends AbstractCon
 			parentNodeName = parentNode.getLocalName();
 			parentNamespaceUri = parentNode.getNamespaceURI();
 		}
-
+		
+		// make sure the for old-style DTDs we assume the default namespace
+		if (parentNamespaceUri == null) {
+			parentNamespaceUri = NamespaceUtils.DEFAULT_NAMESPACE_URI;
+		}
+		
 		IContentAssistCalculator calculator = locateContentAssistCalculator(parentNamespaceUri,
 				parentNodeName, node.getLocalName(), attributeName);
 
