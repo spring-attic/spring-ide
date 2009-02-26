@@ -50,6 +50,29 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 	}
 
 	/**
+	 * Checks if a given <code>file</code> requires a refresh of the auto detected
+	 * {@link IBeansConfig}s.
+	 * <p>
+	 * This is checked by asking every contributed {@link BeansConfigLocatorDefinition}.
+	 */
+	public static boolean requiresRefresh(IFile file) {
+		for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory
+				.getBeansConfigLocatorDefinitions()) {
+			try {
+				if (locator.isEnabled(file.getProject())
+						&& locator.getBeansConfigLocator().supports(file.getProject())
+						&& locator.getBeansConfigLocator().requiresRefresh(file)) {
+					return true;
+				}
+			}
+			catch (Exception e) {
+				// Make sure that a extension contribution can't crash the resource listener
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Internal resource delta visitor.
 	 */
 	protected class BeansResourceVisitor extends SpringResourceVisitor {
@@ -162,29 +185,6 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 						if (locator.getBeansConfigLocator().isBeansConfig(file)) {
 							return true;
 						}
-					}
-				}
-				catch (Exception e) {
-					// Make sure that a extension contribution can't crash the resource listener
-				}
-			}
-			return false;
-		}
-
-		/**
-		 * Checks if a given <code>file</code> requires a refresh of the auto detected
-		 * {@link IBeansConfig}s.
-		 * <p>
-		 * This is checked by asking every contributed {@link BeansConfigLocatorDefinition}.
-		 */
-		private boolean requiresRefresh(IFile file) {
-			for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory
-					.getBeansConfigLocatorDefinitions()) {
-				try {
-					if (locator.isEnabled(file.getProject())
-							&& locator.getBeansConfigLocator().supports(file.getProject())
-							&& locator.getBeansConfigLocator().requiresRefresh(file)) {
-						return true;
 					}
 				}
 				catch (Exception e) {

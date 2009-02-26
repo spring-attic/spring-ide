@@ -20,6 +20,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
@@ -122,6 +123,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
+		
 	}
 
 	protected void addProject(IBeansProject project) {
@@ -315,7 +317,29 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 		return text.toString();
 	}
+	
+	private void buildProject(IResource resource, boolean build) {
+		BeansProject project = null;
+		try {
+			r.lock();
+			project = (BeansProject) projects.get(resource.getProject());
+		}
+		finally {
+			r.unlock();
+		}
+		// project can be null if the model has not been populated
+		// correctly before updating the project description
+		if (project != null) {
+			project.reset();
+			notifyListeners(project, Type.CHANGED);
+			if (build) {
+				// trigger build of project
+				SpringCoreUtils.buildProject(project.getProject());
+			}
+		}
+	}
 
+	
 	/**
 	 * Internal resource change event handler.
 	 */
@@ -453,27 +477,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 
-		private void buildProject(IFile file, boolean build) {
-			BeansProject project = null;
-			try {
-				r.lock();
-				project = (BeansProject) projects.get(file.getProject());
-			}
-			finally {
-				r.unlock();
-			}
-			// project can be null if the model has not been populated
-			// correctly before updating the project description
-			if (project != null) {
-				project.reset();
-				notifyListeners(project, Type.CHANGED);
-				if (build) {
-					// trigger build of project
-					SpringCoreUtils.buildProject(project.getProject());
-				}
-			}
-		}
-
 		public void configAdded(IFile file, int eventType, IBeansConfig.Type type) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
@@ -492,6 +495,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					// In case this is a auto detected config make sure to refresh the
 					// project too, as the project description file will not change
 					if (type == IBeansConfig.Type.AUTO_DETECTED) {
+						buildProject(file, true);
 						notifyListeners(project, Type.CHANGED);
 					}
 				}

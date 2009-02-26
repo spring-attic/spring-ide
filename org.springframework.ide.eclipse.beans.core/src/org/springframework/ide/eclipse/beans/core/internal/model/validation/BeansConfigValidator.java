@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -125,6 +126,9 @@ public class BeansConfigValidator extends AbstractValidator implements
 			else if (JdtUtils.isClassPathFile(resource) || SpringCoreUtils.isManifest(resource)) {
 				propagateChangedResourceToProject(resource, resources);
 			}
+			else if (BeansResourceChangeListener.requiresRefresh((IFile) resource)) {
+				propagateChangedResourceToProject(resource, resources);
+			}
 			else if (kind != IncrementalProjectBuilder.FULL_BUILD) {
 
 				// Now check for bean classes and java structure
@@ -154,8 +158,8 @@ public class BeansConfigValidator extends AbstractValidator implements
 	}
 
 	/**
-	 * @param resource
-	 * @param resources
+	 * Propagates a change to a particular resource to its project so that all {@link IBeansConfig}s
+	 * will get revalidated.
 	 */
 	private void propagateChangedResourceToProject(IResource resource, Set<IResource> resources) {
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(resource.getProject());
