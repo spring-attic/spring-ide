@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -461,7 +462,8 @@ public final class SpringCoreUtils {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) {
 				try {
-					project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+					project.build(IncrementalProjectBuilder.FULL_BUILD, SpringCore.BUILDER_ID,
+							Collections.emptyMap(), monitor);
 					return Status.OK_STATUS;
 				}
 				catch (CoreException e) {
