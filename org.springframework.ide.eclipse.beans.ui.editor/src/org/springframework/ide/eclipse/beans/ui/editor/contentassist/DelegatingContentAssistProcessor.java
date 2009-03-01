@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,10 +30,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * {@link IContentAssistProcessor} that delegates to
- * {@link INamespaceContentAssistProcessor}s contribute via the
- * <code>org.springframework.ide.eclipse.beans.ui.editor</code> extension
- * point.
+ * {@link IContentAssistProcessor} that delegates to {@link INamespaceContentAssistProcessor}s
+ * contribute via the <code>org.springframework.ide.eclipse.beans.ui.editor</code> extension point.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -41,8 +39,7 @@ import org.w3c.dom.NodeList;
 public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor {
 
 	@Override
-	protected void addAttributeValueProposals(
-			ContentAssistRequest contentAssistRequest) {
+	protected void addAttributeValueProposals(ContentAssistRequest contentAssistRequest) {
 
 		int proposalCount = 0;
 		if (contentAssistRequest.getCompletionProposals() != null) {
@@ -61,18 +58,16 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		// kicked in already.
 		if (contentAssistRequest.getCompletionProposals() == null
 				|| contentAssistRequest.getCompletionProposals().length == proposalCount) {
-			addAnnotationBasedAttributeValueProposals(contentAssistRequest,
-					node);
+			addAnnotationBasedAttributeValueProposals(contentAssistRequest, node);
 		}
 
 		super.addAttributeValueProposals(contentAssistRequest);
 	}
-	
+
 	private void addAnnotationBasedAttributeValueProposals(
 			ContentAssistRequest contentAssistRequest, IDOMNode node) {
 
-		IStructuredDocumentRegion open = node
-				.getFirstStructuredDocumentRegion();
+		IStructuredDocumentRegion open = node.getFirstStructuredDocumentRegion();
 		ITextRegionList openRegions = open.getRegions();
 		int i = openRegions.indexOf(contentAssistRequest.getRegion());
 		if (i < 0) {
@@ -89,15 +84,14 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		// the name region is REQUIRED to do anything useful
 		if (nameRegion != null) {
 			String attributeName = open.getText(nameRegion);
-			List<Element> appInfo = ToolAnnotationUtils
-					.getApplicationInformationElements(node, attributeName);
+			List<Element> appInfo = ToolAnnotationUtils.getApplicationInformationElements(node,
+					attributeName);
 			for (Element elem : appInfo) {
 				NodeList children = elem.getChildNodes();
 				for (int j = 0; j < children.getLength(); j++) {
 					Node child = children.item(j);
 					if (child.getNodeType() == Node.ELEMENT_NODE) {
-						invokeAnnotationBasedContentAssistProcessor(
-								contentAssistRequest, child);
+						invokeAnnotationBasedContentAssistProcessor(contentAssistRequest, child);
 					}
 				}
 			}
@@ -108,11 +102,9 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 			ContentAssistRequest contentAssistRequest, Node child) {
 
 		IAnnotationBasedContentAssistProcessor[] annotationProcessors = NamespaceUtils
-				.getAnnotationBasedContentAssistProcessor(child
-						.getNamespaceURI());
+				.getAnnotationBasedContentAssistProcessor(child.getNamespaceURI());
 		for (IAnnotationBasedContentAssistProcessor annotationProcessor : annotationProcessors) {
-			annotationProcessor.addAttributeValueProposals(this,
-					contentAssistRequest, child);
+			annotationProcessor.addAttributeValueProposals(this, contentAssistRequest, child);
 		}
 	}
 
@@ -141,8 +133,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	}
 
 	@Override
-	protected void addTagInsertionProposals(ContentAssistRequest request,
-			int childPosition) {
+	protected void addTagInsertionProposals(ContentAssistRequest request, int childPosition) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
 		INamespaceContentAssistProcessor[] processors = NamespaceUtils
@@ -157,8 +148,4 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		return fTextViewer;
 	}
 
-	@Override
-	public char[] getCompletionProposalAutoActivationCharacters() {
-		return new char[] { '.', '=', '\"', '<' };
-	}
 }
