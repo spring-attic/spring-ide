@@ -115,6 +115,8 @@ public class ConfigFilesTab {
 			+ "ignoreMissingNamespaceHandler.label";
 
 	private static final String NOTE_LABEL = PREFIX + "note.label";
+	
+	private static final String SCAN_NOTE_LABEL = PREFIX + "scan.note.label";
 
 	private PropertiesModel model;
 
@@ -392,7 +394,17 @@ public class ConfigFilesTab {
 				.getText());
 		CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(SpringUIUtils
 				.getStandardDisplay().getActiveShell(), new ScannedFilesLabelProvider(),
-				contentProvider);
+				contentProvider) {
+
+			@Override
+			protected Control createDialogArea(Composite parent) {
+				Composite composite = (Composite) super.createDialogArea(parent);
+				Label note = new Label(composite, SWT.WRAP);
+				note.setText(BeansUIPlugin.getResourceString(SCAN_NOTE_LABEL));
+				note.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				return composite;
+			}
+		};
 		dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
 		dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
 		dialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
