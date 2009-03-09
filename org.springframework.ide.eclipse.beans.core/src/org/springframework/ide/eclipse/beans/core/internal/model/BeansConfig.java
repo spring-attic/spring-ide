@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -79,6 +81,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.EclipsePathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.io.FileResource;
@@ -223,6 +226,18 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			container = (IProject) ((IResourceModelElement) getElementParent())
 					.getElementResource();
 			fullPath = container.getFullPath().append(fileName).toString();
+		}
+
+		// Make sure that all config resources are in sync with the file system
+		IFile fileHandle = container.getFile(new Path(fileName));
+		if (!fileHandle.isSynchronized(IResource.DEPTH_ONE)) {
+			try {
+				fileHandle.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+			}
+			catch (CoreException e) {
+				SpringCore.log("Cannot sync state of file '" + fileHandle.getFullPath().toString()
+						+ "'", e);
+			}
 		}
 
 		// Try to find the configuration file in the workspace
@@ -400,10 +415,18 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 							}
 						}
 						catch (TimeoutException e) {
-							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
-									"Loading of resource '" + resource.getFile().getAbsolutePath()
-											+ "' took more than " + BeansCorePlugin.getDefault().getPreferenceStore()
-											.getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID) + "sec", file, -1));
+							problems
+									.add(new ValidationProblem(
+											IMarker.SEVERITY_ERROR,
+											"Loading of resource '"
+													+ resource.getFile().getAbsolutePath()
+													+ "' took more than "
+													+ BeansCorePlugin
+															.getDefault()
+															.getPreferenceStore()
+															.getInt(
+																	BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID)
+													+ "sec", file, -1));
 						}
 					}
 					catch (Throwable e) {

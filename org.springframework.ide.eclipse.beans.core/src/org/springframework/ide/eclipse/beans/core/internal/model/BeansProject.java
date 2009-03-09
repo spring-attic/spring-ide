@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -799,7 +799,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			// Remove all invalid configs from this project
 			Set<IBeansConfig> configuredConfigs = new LinkedHashSet<IBeansConfig>(configs.values());
 			for (IBeansConfig config : configuredConfigs) {
-				if (config.getElementResource() == null) {
+				if (config.getElementResource() == null || !config.getElementResource().exists()) {
 					removeConfig(config.getElementName());
 				}
 			}
