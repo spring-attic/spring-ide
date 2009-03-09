@@ -387,7 +387,7 @@ public final class SpringCoreUtils {
 	public static boolean isManifest(IResource resource) {
 		// check if it is a MANIFEST.MF file in META-INF
 		if (resource != null
-				&& resource.isAccessible()
+//				&& resource.isAccessible()
 				&& resource.getType() == IResource.FILE
 				&& resource.getName().equals(BUNDLE_MANIFEST_FILE)
 				&& resource.getParent() != null
