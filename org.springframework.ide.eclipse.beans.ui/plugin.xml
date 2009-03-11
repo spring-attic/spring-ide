@@ -269,6 +269,7 @@
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 				<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference" />
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata"/>
 			</or>
          </possibleChildren>
@@ -288,6 +289,7 @@
 					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 					<instanceof value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode"/>
 					<instanceof value="org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata"/>
+					<instanceof value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference" />
 	            </or>
 	         </enablement>
          </actionProvider>
