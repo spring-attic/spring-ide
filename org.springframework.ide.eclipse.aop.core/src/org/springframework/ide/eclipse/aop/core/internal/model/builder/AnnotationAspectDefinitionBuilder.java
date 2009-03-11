@@ -25,7 +25,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.springframework.ide.eclipse.aop.core.Activator;
-import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
@@ -159,7 +159,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 
 		if (configuration.isProxyTargetClass()) {
 			for (IAspectDefinition def : aspectDefinitions) {
-				((AnnotationAspectDefinition) def).setProxyTargetClass(configuration
+				((BeanAspectDefinition) def).setProxyTargetClass(configuration
 						.isProxyTargetClass());
 			}
 		}
