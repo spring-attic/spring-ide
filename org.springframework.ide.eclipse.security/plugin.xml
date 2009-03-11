@@ -13,28 +13,28 @@
 		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/security"
-				uri="platform:/plugin/org.springframework.security.core/org/springframework/security/config/spring-security-2.0.xsd"
+				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.xsd"
 				webURL="http://www.springframework.org/schema/security/spring-security-2.0.xsd" />
 			<public
 				publicId="http://www.springframework.org/schema/security"
-				uri="platform:/plugin/org.springframework.security.core/org/springframework/security/config/spring-security-2.0.1.xsd"
+				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.1.xsd"
 				webURL="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd" />
 			<public
 				publicId="http://www.springframework.org/schema/security"
-				uri="platform:/plugin/org.springframework.security.core/org/springframework/security/config/spring-security-2.0.2.xsd"
+				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.2.xsd"
 				webURL="http://www.springframework.org/schema/security/spring-security-2.0.2.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/security/spring-security.xsd"
-				uri="platform:/plugin/org.springframework.security.core/org/springframework/security/config/spring-security-2.0.2.xsd" />
+				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.2.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/security/spring-security-2.0.xsd"
-				uri="platform:/plugin/org.springframework.security.core/org/springframework/security/config/spring-security-2.0.xsd" />
+				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd"
-				uri="platform:/plugin/org.springframework.security.core/org/springframework/security/config/spring-security-2.0.1.xsd" />
+				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.1.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/security/spring-security-2.0.2.xsd"
-				uri="platform:/plugin/org.springframework.security.core/org/springframework/security/config/spring-security-2.0.2.xsd" />
+				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.2.xsd" />
 		</catalogContribution>
 	</extension>
 	

@@ -6,25 +6,25 @@
 		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/osgi"
-				uri="platform:/plugin/org.springframework.bundle.osgi.core/org/springframework/osgi/config/spring-osgi-1.0.xsd"
+				uri="platform:/plugin/org.springframework.osgi.core/org/springframework/osgi/config/spring-osgi-1.0.xsd"
 				webURL="http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi.xsd"
-				uri="platform:/plugin/org.springframework.bundle.osgi.core/org/springframework/osgi/config/spring-osgi-1.0.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.core/org/springframework/osgi/config/spring-osgi-1.0.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd"
-				uri="platform:/plugin/org.springframework.bundle.osgi.core/org/springframework/osgi/config/spring-osgi-1.0.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.core/org/springframework/osgi/config/spring-osgi-1.0.xsd" />
 
 			<public
 				publicId="http://www.springframework.org/schema/osgi-compendium"
-				uri="platform:/plugin/org.springframework.bundle.osgi.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0.xsd"
+				uri="platform:/plugin/org.springframework.osgi.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0.xsd"
 				webURL="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.0.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi-compendium.xsd"
-				uri="platform:/plugin/org.springframework.bundle.osgi.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi-compendium-1.0.xsd"
-				uri="platform:/plugin/org.springframework.bundle.osgi.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0.xsd" />
 		</catalogContribution>
 	</extension>
 	
