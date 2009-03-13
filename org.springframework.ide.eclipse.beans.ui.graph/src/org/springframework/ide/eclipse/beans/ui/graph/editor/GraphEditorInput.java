@@ -163,9 +163,9 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 			buffer.append(element.getElementName());
 			toolTip = buffer.toString();
 		}
-		else {
-			throw new IllegalArgumentException("Unsupported model element " + element);
-		}
+//		else {
+//			throw new IllegalArgumentException("Unsupported model element " + element);
+//		}
 		createBeansMap();
 		createReferences();
 		extendGraphContent();
