@@ -16,6 +16,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
@@ -34,8 +35,7 @@ public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 	}
 
 	@Override
-	public void validate(IBean bean, IBeansValidationContext context,
-			IProgressMonitor monitor) {
+	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
 
 		// only validate bean override for non-infrastructure beans
 		if (bean instanceof Bean && !bean.isInfrastructure()) {
@@ -44,33 +44,38 @@ public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 	}
 
 	/**
-	 * Validates if the given {@link BeanDefinition} nested in the passed
-	 * {@link IBean} can be registered in the <code>context</code>.
+	 * Validates if the given {@link BeanDefinition} nested in the passed {@link IBean} can be
+	 * registered in the <code>context</code>.
 	 * <p>
-	 * The implementation relies on the fact that a {@link BeanDefinitionRegistry}
-	 * throws a {@link BeanDefinitionStoreException} if the bean name is already
-	 * chosen.
+	 * The implementation relies on the fact that a {@link BeanDefinitionRegistry} throws a
+	 * {@link BeanDefinitionStoreException} if the bean name is already chosen.
 	 */
-	private void validateBeanNameAndAlias(Bean bean,
-			IBeansValidationContext context) {
+	private void validateBeanNameAndAlias(Bean bean, IBeansValidationContext context) {
 		try {
-			context.getIncompleteRegistry().registerBeanDefinition(
-					bean.getElementName(), bean.getBeanDefinition());
+			context.getIncompleteRegistry().registerBeanDefinition(bean.getElementName(),
+					bean.getBeanDefinition());
 		}
 		catch (BeanDefinitionStoreException e) {
 			if (context.getContextElement() instanceof IBeansConfigSet) {
-				IBeansConfigSet configSet = (IBeansConfigSet) context
-						.getContextElement();
-				context.error(bean, "BEAN_OVERRIDE",
-						"Overrides another bean named '"
-								+ bean.getElementName() + "' in config set '"
-								+ configSet.getElementName() + "'");
+				IBeansConfigSet configSet = (IBeansConfigSet) context.getContextElement();
+				context.error(bean, "BEAN_OVERRIDE", "Overrides another bean named '"
+						+ bean.getElementName() + "' in config set '" + configSet.getElementName()
+						+ "'");
+			}
+			else if (context.getContextElement() instanceof IBeansConfig) {
+				for (IBean existingBean : ((IBeansConfig) context.getContextElement()).getBeans()) {
+					if (existingBean != bean
+							&& existingBean.getElementName().equals(bean.getElementName())) {
+						if (existingBean.getElementResource().equals(bean.getElementResource())) {
+							context.error(bean, "BEAN_OVERRIDE", "Overrides another bean named '"
+									+ bean.getElementName() + "' in the same config file");
+						}
+					}
+				}
 			}
 			else {
-				context.error(bean, "BEAN_OVERRIDE",
-						"Overrides another bean named '"
-								+ bean.getElementName()
-								+ "' in the same config file");
+				context.error(bean, "BEAN_OVERRIDE", "Overrides another bean named '"
+						+ bean.getElementName() + "' in the same config file");
 			}
 		}
 
@@ -78,8 +83,7 @@ public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 		if (bean.getAliases() != null) {
 			for (String alias : bean.getAliases()) {
 				try {
-					context.getIncompleteRegistry().registerAlias(
-							bean.getElementName(), alias);
+					context.getIncompleteRegistry().registerAlias(bean.getElementName(), alias);
 				}
 				catch (BeanDefinitionStoreException e) {
 					context.error(bean, "INVALID_ALIAS", e.getMessage());
