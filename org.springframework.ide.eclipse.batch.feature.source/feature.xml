@@ -15,7 +15,8 @@
       id="org.springframework.ide.eclipse.batch.feature.source"
       label="%featureName"
       version="2.2.2.qualifier"
-      provider-name="%featureProvider">
+      provider-name="%featureProvider"
+      plugin="org.springframework.ide.eclipse">
 
    <description>
       %description
@@ -29,14 +30,6 @@
       %license
    </license>
 
-   <url>
-      <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
-   </url>
-   
-   <requires>
-      <import feature="org.springframework.ide.eclipse.batch.feature" version="2.2.2"/>
-   </requires>
-   
    <plugin
          id="org.springframework.ide.eclipse.batch.source"
          download-size="0"
