@@ -35,6 +35,7 @@ plugin@org.springframework.ide.eclipse.osgi.source=SVN,trunk,https://src.springf
 plugin@org.springframework.ide.eclipse.mylyn.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.mylyn.source
 plugin@org.springframework.ide.eclipse.mylyn=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.mylyn
 plugin@org.springframework.ide.eclipse.osgi=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.osgi
+plugin@org.springframework.ide.eclipse.batch=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.batch
 plugin@org.springframework.ide.eclipse.osgi.targetdefinition=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.osgi.targetdefinition
 plugin@org.springframework.ide.eclipse.security=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.security
 plugin@org.springframework.ide.eclipse.security.source=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.security.source
