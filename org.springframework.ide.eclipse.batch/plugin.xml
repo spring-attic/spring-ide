@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+	<extension point="org.eclipse.wst.xml.core.catalogContributions">
+		<catalogContribution>
+			<public
+				publicId="http://www.springframework.org/schema/batch"
+				uri="platform:/plugin/org.springframework.batch.core/org/springframework/batch/core/configuration/xml/spring-batch-2.0.xsd"
+				webURL="http://www.springframework.org/schema/batch/spring-batch-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/batch/spring-batch-2.0.xsd"
+				uri="platform:/plugin/org.springframework.batch.core/org/springframework/batch/core/configuration/xml/spring-batch-2.0.xsd" />
+		</catalogContribution>
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.namespaces">
+		<namespace
+			name="Spring Batch"
+			labelProvider="org.springframework.ide.eclipse.batch.ui.namespaces.BatchNamespaceLabelProvider"
+			uri="http://www.springframework.org/schema/batch" 
+			prefix="batch" 
+			icon="icons/full/obj16/spring_batch_obj.gif"
+			defaultSchemaLocation="http://www.springframework.org/schema/batch/spring-batch-2.0.xsd">
+		</namespace>
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.batch.ui.editor.contentassist.batch.BatchContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.batch.ui.editor.hyperlink.osgi.BatchHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.batch.ui.editor.outline.osgi.BatchOutlineLabelProvider"
+			name="Spring Batch"
+			uri="http://www.springframework.org/schema/batch" />
+	</extension>
+
+</plugin>

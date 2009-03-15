@@ -187,8 +187,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 
 			public void run() throws Exception {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
-				subMonitor = new SubProgressMonitor(monitor, 1, 0);
+				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1, 0);
 				builderDefinition.getProjectBuilder().build(affectedResources, kind, subMonitor);
 			}
 		};
@@ -212,8 +211,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 
 			public void run() throws Exception {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
-				subMonitor = new SubProgressMonitor(monitor, 1, 0);
+				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1, 0);
 				validatorDefinition.getValidator().validate(affectedResources, subMonitor);
 			}
 		};

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.springframework.ide.eclipse.aop.feature"
+      id="org.springframework.ide.eclipse.batch.feature.source"
       label="%featureName"
       version="2.2.2.qualifier"
-      provider-name="%providerName"
-      plugin="org.springframework.ide.eclipse">
+      provider-name="%featureProvider">
 
    <description>
       %description
@@ -21,27 +20,20 @@
    <url>
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
-
+   
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.2.2"/>
+      <import feature="org.springframework.ide.eclipse.batch.feature" version="2.2.2"/>
    </requires>
-
+   
    <plugin
-         id="org.springframework.ide.eclipse.aop.core"
+         id="org.springframework.ide.eclipse.batch.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.aop.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.aop.ui.matcher"
+         id="org.springframework.batch.core.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
