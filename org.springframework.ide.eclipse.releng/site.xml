@@ -52,6 +52,12 @@
 		id="org.springframework.ide.eclipse.webflow.feature" version="@VERSION@">
 		<category name="Extensions" />
 	</feature>
+
+	<feature
+		url="features/org.springframework.ide.eclipse.batch.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.batch.feature" version="@VERSION@">
+		<category name="Extensions" />
+	</feature>
 	
 	<!-- Extensions (Incubation) features -->	
 	<feature
@@ -89,6 +95,12 @@
 	<feature
 		url="features/org.springframework.ide.eclipse.aop.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.aop.feature.source" version="@VERSION@">
+		<category name="Resources" />
+	</feature>
+
+	<feature
+		url="features/org.springframework.ide.eclipse.batch.feature.source_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.batch.feature.source" version="@VERSION@">
 		<category name="Resources" />
 	</feature>
 	
