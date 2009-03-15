@@ -182,7 +182,7 @@
 		      <include name="*.jar"/>
 			  <exclude name="org.springframework.ide.eclipse*" />
 		    </fileset>
-			<mapper type="regexp" from="^(.*)\-(.*)$$" to="\1_\2"/>
+			<mapper type="regexp" from="([a-z.A-Z]*)\-(.*)$$" to="\1_\2"/>
 		 </move>
 		
 		<!--Copy site.xml template  -->
