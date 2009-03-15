@@ -142,6 +142,7 @@ then
    		-installIU org.eclipse.equinox.weaving.feature.group
 
 	install_feature org.eclipse.ajdt $AJDT_UPDATE_SITE_URL
+	install_feature org.eclipse.contribution.xref $AJDT_UPDATE_SITE_URL
 fi
 
 # Clean previous builds
