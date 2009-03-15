@@ -17,11 +17,7 @@
       %license
    </license>
 
-   <url>
-      <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
-   </url>
-   
-    <plugin
+   <plugin
          id="org.springframework.security.source"
          download-size="0"
          install-size="0"
