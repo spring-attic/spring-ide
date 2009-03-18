@@ -54,7 +54,7 @@ public abstract class AbstractJavaProjectPathMatchingBeansConfigLocator extends
 		IJavaProject javaProject = JdtUtils.getJavaProject(project);
 		if (javaProject != null) {
 			try {
-				for (IClasspathEntry entry : javaProject.getResolvedClasspath(true)) {
+				for (IClasspathEntry entry : javaProject.getRawClasspath()) {
 					if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 						rootDirectories.add(entry.getPath());
 					}

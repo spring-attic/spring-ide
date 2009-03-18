@@ -131,7 +131,7 @@ public class ProjectScanningBeansConfigLocator extends
 				outputDirectories.add(javaProject.getOutputLocation().toString());
 
 				// add source folder specific output directories
-				for (IClasspathEntry entry : javaProject.getResolvedClasspath(true)) {
+				for (IClasspathEntry entry : javaProject.getRawClasspath()) {
 					if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
 							&& entry.getOutputLocation() != null) {
 						outputDirectories.add(entry.getOutputLocation().toString());

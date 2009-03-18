@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,9 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.ISpringResourceChangeEvents;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeEventsAdapter;
 
@@ -33,7 +33,7 @@ public class SpringNatureAddedEventHandler extends SpringResourceChangeEventsAda
 		ISpringResourceChangeEvents {
 
 	public void springNatureAdded(final IProject project, int eventType) {
-		
+
 		// only post build to make resources exist already and we can scan
 		if (eventType == IResourceChangeEvent.POST_BUILD) {
 			// run in the UI thread
@@ -50,7 +50,8 @@ public class SpringNatureAddedEventHandler extends SpringResourceChangeEventsAda
 	}
 
 	public boolean isSpringProject(IProject project, int eventType) {
-		return SpringCoreUtils.isSpringProject(project);
+		return eventType == IResourceChangeEvent.POST_BUILD
+				&& BeansCorePlugin.getModel().getProject(project) != null;
 	}
 
 }

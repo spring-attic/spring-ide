@@ -842,7 +842,7 @@ public class JdtUtils {
 							.toString();
 				}
 				else {
-					for (IClasspathEntry entry : project.getResolvedClasspath(true)) {
+					for (IClasspathEntry entry : project.getRawClasspath()) {
 						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 							IPath output = entry.getOutputLocation();
 							if (output != null) {
@@ -858,7 +858,7 @@ public class JdtUtils {
 				if (classFileName != null) {
 					// Replace file extension
 					String sourceFileName = classFileName.replace(".class", ".java");
-					for (IClasspathEntry entry : project.getResolvedClasspath(true)) {
+					for (IClasspathEntry entry : project.getRawClasspath()) {
 						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 							IPath path = entry.getPath().append(sourceFileName).removeFirstSegments(1);
 							IResource resource = project.getProject().findMember(path);

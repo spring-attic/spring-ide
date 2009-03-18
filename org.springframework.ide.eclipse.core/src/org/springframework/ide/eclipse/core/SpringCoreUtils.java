@@ -405,7 +405,7 @@ public final class SpringCoreUtils {
 					if (defaultOutputLocation != null && defaultOutputLocation.isPrefixOf(filePath)) {
 						return false;
 					}
-					for (IClasspathEntry entry : javaProject.getResolvedClasspath(true)) {
+					for (IClasspathEntry entry : javaProject.getRawClasspath()) {
 						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 							IPath outputLocation = entry.getOutputLocation();
 							if (outputLocation != null && outputLocation.isPrefixOf(filePath)) {

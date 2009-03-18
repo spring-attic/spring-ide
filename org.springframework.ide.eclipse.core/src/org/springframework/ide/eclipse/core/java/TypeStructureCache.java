@@ -258,7 +258,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 			}
 		}
 
-		IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
+		IClasspathEntry[] classpath = jp.getRawClasspath();
 		for (int i = 0; i < classpath.length; i++) {
 			IClasspathEntry path = classpath[i];
 			if (path.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
