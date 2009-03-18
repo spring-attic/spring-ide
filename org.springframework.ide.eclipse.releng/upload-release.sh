@@ -18,7 +18,8 @@ ANTLOCATION=`ls -d $WORKSPACE/org.eclipse.releng.basebuilder/plugins/org.apache.
 
 cd $STAGINGLOCATION
 ZIP_NAME=`ls spring-ide_*.zip`
-VERSION=`expr "$ZIP_NAME" : '.*\([0-9]\.[0-9]*\.[0-9]*_v[A-Z,a-z,0-9,.]*\).zip'`
+VERSION=`expr "$ZIP_NAME" : '.*\([0-9]\.[0-9]*\.[0-9]*\.[A-Z,a-z,0-9,.]*\).zip'`
+echo $VERSION
 
 ant -f $WORKSPACE/feature.builder/upload.xml -Dbasebuilder.dir=$ANTLOCATION \
  -Dbundle.version=${VERSION//_/.} \
