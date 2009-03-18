@@ -100,6 +100,7 @@ public class AopReferenceModelBuilderJob extends Job {
 		setPriority(Job.BUILD);
 		// make sure that only one Job at a time runs but without blocking the UI
 		setRule(new BlockingOnSelfSchedulingRule());
+		setSystem(true);
 		setProperty(IProgressConstants.ICON_PROPERTY, AopCoreImages.DESC_OBJS_ASPECT);
 	}
 
@@ -481,6 +482,7 @@ public class AopReferenceModelBuilderJob extends Job {
 		public MarkerModifyingJob() {
 			super("Creating AOP reference model markers");
 			setPriority(Job.INTERACTIVE);
+			setSystem(true);
 			setProperty(IProgressConstants.ICON_PROPERTY, AopCoreImages.DESC_OBJS_ASPECT);
 			setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		}

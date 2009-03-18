@@ -74,6 +74,7 @@ public class BeanMetadataBuilderJob extends Job {
 		super("Attaching Spring meta data");
 		this.affectedBeans = affectedBeans;
 		setPriority(Job.BUILD);
+		setSystem(true);
 		setProperty(IProgressConstants.ICON_PROPERTY, BeansCoreImages.DESC_OBJS_ANNOTATATION);
 	}
 
