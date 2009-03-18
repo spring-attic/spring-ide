@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
  * {@link org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache}.
  * @author Christian Dupuis
  * @since 2.0.1
+ * @deprecated will be removed in next major release
  */
 class SuperTypeHierarchyCache {
 

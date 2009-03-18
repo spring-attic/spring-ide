@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.StringUtils;
@@ -466,12 +465,20 @@ public final class Introspector {
 	private static boolean hasSuperType(IType type, String className, boolean isInterface) {
 		if (type != null && type.exists() && className != null && className.length() > 0) {
 			try {
-				IType requiredType = type.getJavaProject().findType(className);
-				if (requiredType != null
-						&& ((isInterface && requiredType.isInterface()) || (!isInterface && !requiredType
-								.isInterface()))) {
-					ITypeHierarchy hierachy = SuperTypeHierarchyCache.getTypeHierarchy(type);
-					return hierachy.contains(requiredType);
+				if (!isInterface) {
+					while (type != null) {
+						if (className.equals(type.getFullyQualifiedName())) {
+							return true;
+						}
+						type = getSuperType(type);
+					}
+				}
+				else {
+					for (IType implementedInteface : getAllImplementedInterfaces(type)) {
+						if (implementedInteface.getFullyQualifiedName().equals(className)) {
+							return true;
+						}
+					}
 				}
 			}
 			catch (JavaModelException e) {
@@ -482,19 +489,7 @@ public final class Introspector {
 	}
 
 	public static boolean hasSuperType(IType type, String className) {
-		if (type != null && type.exists() && className != null && className.length() > 0) {
-			try {
-				IType requiredType = type.getJavaProject().findType(className);
-				if (requiredType != null) {
-					ITypeHierarchy hierachy = SuperTypeHierarchyCache.getTypeHierarchy(type);
-					return hierachy.contains(requiredType);
-				}
-			}
-			catch (JavaModelException e) {
-				SpringCore.log(e);
-			}
-		}
-		return false;
+		return hasSuperType(type, className, false);
 	}
 
 	/**
