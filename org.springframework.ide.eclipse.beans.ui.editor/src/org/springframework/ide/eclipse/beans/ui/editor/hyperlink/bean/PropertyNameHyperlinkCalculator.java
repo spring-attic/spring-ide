@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -22,6 +23,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IHyperlinkCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Node;
 
 /**
@@ -47,10 +49,21 @@ public class PropertyNameHyperlinkCalculator implements IHyperlinkCalculator {
 				cursor, target, propertyPaths);
 		if ("bean".equals(parentName)) {
 			IFile file = BeansEditorUtils.getFile(document);
-			List<?> classNames = BeansEditorUtils.getClassNamesOfBean(file, parentNode);
+			
+			List<IType> classes = new ArrayList<IType>();
 
+			String className = BeansEditorUtils.getClassNameForBean(file, node.getOwnerDocument(), parentNode);
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
+			
+			if (type != null) {
+				classes.add(type);
+			}
+			else {
+				return null;
+			}
+			
 			IMethod method = BeansEditorUtils.extractMethodFromPropertyPathElements(propertyPaths,
-					classNames, file, 0);
+					classes, file, 0);
 			if (method != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, method);
 			}
