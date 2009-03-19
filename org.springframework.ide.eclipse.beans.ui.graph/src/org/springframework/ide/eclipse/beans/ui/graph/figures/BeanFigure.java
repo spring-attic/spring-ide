@@ -94,10 +94,14 @@ public class BeanFigure extends Figure {
 			XmlSourceLocation location = (XmlSourceLocation) bean.getBean()
 					.getElementSourceLocation();
 			StringBuilder text = new StringBuilder();
-			if (location != null
-					&& !NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
+			if (location != null) {
+				if (location.getPrefix() != null) {
 				text.append(location.getPrefix()).append(":").append(location.getLocalName())
 						.append(" ");
+				}
+				else if (!NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(location.getNamespaceURI())){
+					text.append(location.getLocalName()).append(" ");
+				}
 			}
 			text.append(bean.getName());
 			label.setText(text.toString());
