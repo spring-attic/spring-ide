@@ -368,6 +368,30 @@ public final class Introspector {
 		return allInterfaces;
 	}
 
+	private static boolean implementsInterface(IType type, String className) {
+		try {
+			while (type != null) {
+				String[] interfaces = type.getSuperInterfaceTypeSignatures();
+				if (interfaces != null) {
+					for (String iface : interfaces) {
+						String fqin = JdtUtils.resolveClassName(iface, type);
+						IType interfaceType = type.getJavaProject().findType(fqin);
+						if (interfaceType != null
+								&& interfaceType.getFullyQualifiedName().equals(className)) {
+							return true;
+						}
+
+					}
+				}
+				type = getSuperType(type);
+			}
+		}
+		catch (JavaModelException e) {
+			// BeansCorePlugin.log(e);
+		}
+		return false;
+	}
+
 	/**
 	 * Returns <strong>all</strong> methods of the given {@link IType} instance.
 	 * @param type the type
@@ -474,10 +498,8 @@ public final class Introspector {
 					}
 				}
 				else {
-					for (IType implementedInteface : getAllImplementedInterfaces(type)) {
-						if (implementedInteface.getFullyQualifiedName().equals(className)) {
-							return true;
-						}
+					if (implementsInterface(type, className)) {
+						return true;
 					}
 				}
 			}
