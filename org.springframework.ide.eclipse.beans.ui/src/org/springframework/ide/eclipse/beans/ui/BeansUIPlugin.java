@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
@@ -29,11 +28,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.model.SpringNatureAddedEventHandler;
-import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 
 /**
@@ -77,7 +73,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	private ILabelProvider labelProvider;
 
 	/** {@link IResourceChangeListener} that gets notified for project nature added events */
-	private IResourceChangeListener changeListener;
+//	private IResourceChangeListener changeListener;
 
 	/**
 	 * Creates the Spring Beans UI plug-in.
@@ -116,17 +112,17 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 			imageDescriptorRegistry.dispose();
 			imageDescriptorRegistry = null;
 		}
-		if (changeListener != null) {
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(changeListener);
-		}
+//		if (changeListener != null) {
+//			ResourcesPlugin.getWorkspace().removeResourceChangeListener(changeListener);
+//		}
 		super.stop(context);
 	}
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		changeListener = new SpringResourceChangeListener(new SpringNatureAddedEventHandler());
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(changeListener,
-				BeansResourceChangeListener.LISTENER_FLAGS);
+//		changeListener = new SpringResourceChangeListener(new SpringNatureAddedEventHandler());
+//		ResourcesPlugin.getWorkspace().addResourceChangeListener(changeListener,
+//				BeansResourceChangeListener.LISTENER_FLAGS);
 		getPreferenceStore().setDefault(DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
 		getPreferenceStore().setDefault(SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID, false);
 		getPreferenceStore().setDefault(SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID, true);
