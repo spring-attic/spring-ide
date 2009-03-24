@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,11 +93,13 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 						events.projectDescriptionChanged(file, eventType);
 					}
 				}
-				else if (BeansCoreUtils.isBeansConfig(file)) {
-					events.configAdded(file, eventType);
-				}
+				// Test for auto detected config before testing for normal config as otherwise
+				// the auto-detected config will morph into a manual configured and added to .springBeans
 				else if (isAutoDetectedConfig(file)) {
 					events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
+				}
+				else if (BeansCoreUtils.isBeansConfig(file)) {
+					events.configAdded(file, eventType);
 				}
 				else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
 //						|| resource.getName().endsWith(JdtUtils.CLASS_FILE_EXTENSION)) {
@@ -121,11 +123,13 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 							events.projectDescriptionChanged(file, eventType);
 						}
 					}
-					else if (BeansCoreUtils.isBeansConfig(file, true)) {
-						events.configChanged(file, eventType);
-					}
+					// Test for auto detected config before testing for normal config as otherwise
+					// the auto-detected config will morph into a manual configured and added to .springBeans
 					else if (isAutoDetectedConfig(file)) {
 						events.configAdded(file, eventType, IBeansConfig.Type.AUTO_DETECTED);
+					}
+					else if (BeansCoreUtils.isBeansConfig(file, true)) {
+						events.configChanged(file, eventType);
 					}
 					else if (requiresRefresh(file)) {
 						events.listenedFileChanged(file, eventType);
