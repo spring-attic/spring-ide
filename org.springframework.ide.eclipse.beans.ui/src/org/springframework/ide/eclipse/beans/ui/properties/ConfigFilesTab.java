@@ -17,10 +17,12 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -86,7 +88,7 @@ import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-@SuppressWarnings({ "deprecation", "restriction" })
+@SuppressWarnings( { "deprecation", "restriction" })
 public class ConfigFilesTab {
 
 	private static final String PREFIX = "ConfigurationPropertyPage." + "tabConfigFiles.";
@@ -115,7 +117,7 @@ public class ConfigFilesTab {
 			+ "ignoreMissingNamespaceHandler.label";
 
 	private static final String NOTE_LABEL = PREFIX + "note.label";
-	
+
 	private static final String SCAN_NOTE_LABEL = PREFIX + "scan.note.label";
 
 	private PropertiesModel model;
@@ -493,7 +495,8 @@ public class ConfigFilesTab {
 								break;
 							}
 						}
-						config = fullPath.toString() + ZipEntryStorage.DELIMITER + entryName;
+						config = IBeansConfig.EXTERNAL_FILE_NAME_PREFIX + fullPath.toString()
+								+ ZipEntryStorage.DELIMITER + entryName;
 					}
 					if (config != null) {
 						project.addConfig(config, IBeansConfig.Type.MANUAL);
@@ -610,10 +613,28 @@ public class ConfigFilesTab {
 		}
 	}
 
-	private static class ConfigFileFilter extends JavaFileSuffixFilter {
+	private class ConfigFileFilter extends JavaFileSuffixFilter {
 
 		public ConfigFileFilter(Set<String> allowedFileExtensions) {
 			super(allowedFileExtensions);
+		}
+
+		@Override
+		public boolean select(Viewer viewer, Object parent, Object element) {
+			if (super.select(viewer, parent, element)) {
+				if (element instanceof JarPackageFragmentRoot) {
+					try {
+						IResource resource = ((JarPackageFragmentRoot) element).getUnderlyingResource();
+						// Exclude jars that come from different workspace projects; only jars 
+						// coming from outside the workspace have no underlying resource
+						return resource == null || resource.getProject().equals(project.getProject());
+					}
+					catch (JavaModelException e) {
+					}
+				}
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -643,6 +664,9 @@ public class ConfigFilesTab {
 			}
 			else if (element instanceof ZipEntryStorage) {
 				return ((ZipEntryStorage) element).getEntryName();
+			}
+			if (label != null && label.startsWith(IBeansConfig.EXTERNAL_FILE_NAME_PREFIX)) {
+				label = label.substring(IBeansConfig.EXTERNAL_FILE_NAME_PREFIX.length());
 			}
 			return label;
 		}

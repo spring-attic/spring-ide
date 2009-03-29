@@ -86,7 +86,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		model.startup();
+		model.start();
 		metadataModel.start();
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 		
@@ -147,7 +147,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		model.shutdown();
+		model.stop();
 		metadataModel.stop();
 		super.stop(context);
 	}

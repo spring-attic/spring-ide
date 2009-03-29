@@ -27,7 +27,7 @@ public interface IBeansConfig extends IBeansModelElement, IResourceModelElement,
 		MANUAL, AUTO_DETECTED
 	}
 
-	char EXTERNAL_FILE_NAME_PREFIX = '/';
+	String EXTERNAL_FILE_NAME_PREFIX = "external:/";
 
 	String DEFAULT_LAZY_INIT = "false";
 

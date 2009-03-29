@@ -32,11 +32,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -81,7 +78,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.EclipsePathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.io.FileResource;
@@ -203,9 +199,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * @param project
 	 */
 	protected void init(String name, IBeansProject project) {
-		IContainer container;
-		String fileName;
-		String fullPath;
+		IContainer container = null;
+		String fileName = null;
+		String fullPath = null;
 
 		// At first check for a config file in a JAR
 		int pos = name.indexOf(ZipEntryStorage.DELIMITER);
@@ -217,35 +213,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			fileName = name;
 		}
 
-		// Now check for an external config file
-		if (name.charAt(0) == '/') {
-			container = ResourcesPlugin.getWorkspace().getRoot();
-			fullPath = fileName;
-		}
-		else {
-			container = (IProject) ((IResourceModelElement) getElementParent())
-					.getElementResource();
-			fullPath = container.getFullPath().append(fileName).toString();
-		}
+		// Now check if is an workspace external resource
+		if (fileName.startsWith(EXTERNAL_FILE_NAME_PREFIX)) {
 
-		// Make sure that all config resources are in sync with the file system
-		IFile fileHandle = container.getFile(new Path(fileName));
-		if (!fileHandle.isSynchronized(IResource.DEPTH_ONE)) {
-			try {
-				fileHandle.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-			}
-			catch (CoreException e) {
-				SpringCore.log("Cannot sync state of file '" + fileHandle.getFullPath().toString()
-						+ "'", e);
-			}
-		}
-
-		// Try to find the configuration file in the workspace
-		file = (IFile) container.findMember(fileName);
-
-		// If the file couldn't be found in the workspace that could either mean we are dealing with
-		// an external resource or the file as been deleted/moved
-		if (file == null) {
+			fileName = fileName.substring(EXTERNAL_FILE_NAME_PREFIX.length());
 
 			// Resolve eventual contained classpath variables
 			IPath resolvedPath = JavaCore.getResolvedVariablePath(new Path(fileName));
@@ -256,14 +227,21 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			// Create an external file instance
 			file = new ExternalFile(new File(fileName), name.substring(pos + 1), project
 					.getProject());
+		}
+		else {
+			container = (IProject) ((IResourceModelElement) getElementParent())
+					.getElementResource();
+			fullPath = container.getFullPath().append(fileName).toString();
 
-			// Does the external resource exist?
-			if (!file.exists()) {
-				modificationTimestamp = IResource.NULL_STAMP;
-				String msg = "Beans config file '" + fullPath + "' not accessible";
-				problems = new LinkedHashSet<ValidationProblem>();
-				problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
-			}
+			// Try to find the configuration file in the workspace
+			file = (IFile) container.findMember(fileName);
+		}
+
+		if (file == null || !file.exists()) {
+			modificationTimestamp = IResource.NULL_STAMP;
+			String msg = "Beans config file '" + fullPath + "' not accessible";
+			problems = new LinkedHashSet<ValidationProblem>();
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();

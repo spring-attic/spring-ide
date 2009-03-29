@@ -32,7 +32,11 @@ public class PropertiesModelLabelProvider extends BeansModelLabelProvider implem
 	@Override
 	protected String getText(Object element, Object parentElement) {
 		if (element instanceof IBeansConfig) {
-			return ((IBeansConfig) element).getElementName();
+			String text = ((IBeansConfig) element).getElementName();
+			if (text.startsWith(IBeansConfig.EXTERNAL_FILE_NAME_PREFIX)) {
+				text = text.substring(IBeansConfig.EXTERNAL_FILE_NAME_PREFIX.length());
+			}
+			return text;
 		}
 		return super.getText(element, parentElement);
 	}

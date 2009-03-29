@@ -26,6 +26,9 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
@@ -98,25 +101,36 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 	}
 
-	public void startup() {
+	public void start() {
 		if (DEBUG) {
 			System.out.println("Beans Model startup");
 		}
 
-		// Load all projects
-		try {
-			w.lock();
-			projects.clear();
-			for (IProject project : SpringCoreUtils.getSpringProjects()) {
-				addProject(new BeansProject(this, project));
-			}
+		Job modelJob = new Job("Initializing Beans Model") {
 
-			// Check for update actions
-			BeansModelUpdater.updateModel(projects.values());
-		}
-		finally {
-			w.unlock();
-		}
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				// Load all projects
+				try {
+					w.lock();
+					projects.clear();
+					for (IProject project : SpringCoreUtils.getSpringProjects()) {
+						addProject(new BeansProject(BeansModel.this, project));
+					}
+
+					// Check for update actions
+					BeansModelUpdater.updateModel(projects.values());
+				}
+				finally {
+					w.unlock();
+				}
+
+				return Status.OK_STATUS;
+			}};
+		modelJob.setSystem(true);
+		modelJob.setPriority(Job.INTERACTIVE);
+		modelJob.schedule();
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new BeansResourceChangeListener(new ResourceChangeEventHandler());
@@ -130,7 +144,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		projects.put(project.getProject(), project);
 	}
 
-	public void shutdown() {
+	public void stop() {
 		if (DEBUG) {
 			System.out.println("Beans Model shutdown");
 		}
