@@ -1,4 +1,4 @@
- /*******************************************************************************
+/*******************************************************************************
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,9 +26,6 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
@@ -105,39 +102,26 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		if (DEBUG) {
 			System.out.println("Beans Model startup");
 		}
+		try {
+			w.lock();
+			projects.clear();
+			for (IProject project : SpringCoreUtils.getSpringProjects()) {
+				addProject(new BeansProject(BeansModel.this, project));
+			}
 
-		Job modelJob = new Job("Initializing Beans Model") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				
-				// Load all projects
-				try {
-					w.lock();
-					projects.clear();
-					for (IProject project : SpringCoreUtils.getSpringProjects()) {
-						addProject(new BeansProject(BeansModel.this, project));
-					}
-
-					// Check for update actions
-					BeansModelUpdater.updateModel(projects.values());
-				}
-				finally {
-					w.unlock();
-				}
-
-				return Status.OK_STATUS;
-			}};
-		modelJob.setSystem(true);
-		modelJob.setPriority(Job.INTERACTIVE);
-		modelJob.schedule();
+			// Check for update actions
+			BeansModelUpdater.updateModel(projects.values());
+		}
+		finally {
+			w.unlock();
+		}
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new BeansResourceChangeListener(new ResourceChangeEventHandler());
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
-		
+
 	}
 
 	protected void addProject(IBeansProject project) {
@@ -331,7 +315,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 		return text.toString();
 	}
-	
+
 	private void buildProject(IResource resource, boolean build) {
 		BeansProject project = null;
 		try {
@@ -353,7 +337,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 	}
 
-	
 	/**
 	 * Internal resource change event handler.
 	 */
@@ -366,8 +349,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void springNatureAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature added to project '"
-							+ project.getName() + "'");
+					System.out.println("Spring beans nature added to project '" + project.getName()
+							+ "'");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
 				try {

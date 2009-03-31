@@ -17,9 +17,11 @@ import java.util.concurrent.Executors;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -48,8 +50,9 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/** preference key to suppress missing namespace handler warnings */
 	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
-	
-	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID + ".timeoutConfigLoading";
+
+	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID
+			+ ".timeoutConfigLoading";
 
 	/** The shared instance */
 	private static BeansCorePlugin plugin;
@@ -86,64 +89,81 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		model.start();
-		metadataModel.start();
+		
+		Job modelJob = new Job("Initializing Beans Model") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				model.start();
+				metadataModel.start();
+
+				return Status.OK_STATUS;
+			}
+		};
+//		modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		modelJob.setSystem(true);
+		modelJob.setPriority(Job.INTERACTIVE);
+		modelJob.schedule();
+
+		
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
-		
-//		context.registerService(EventHandler.class.getName(),  
-//                new NamespaceEventHandler(),  
-//                getHandlerServiceProperties("org/springframework/osgi/extender/namespace/*"));  
 
-//		// Testing
-//		ICatalog systemCatalog = null;
-//		ICatalog defaultCatalog = XMLCorePlugin.getDefault().getDefaultXMLCatalog();
-//		INextCatalog[] nextCatalogs = defaultCatalog.getNextCatalogs();
-//		for (int i = 0; i < nextCatalogs.length; i++) {
-//			INextCatalog catalog = nextCatalogs[i];
-//			ICatalog referencedCatalog = catalog.getReferencedCatalog();
-//			if (referencedCatalog != null) {
-//				if (XMLCorePlugin.SYSTEM_CATALOG_ID.equals(referencedCatalog.getId())) {
-//					systemCatalog = referencedCatalog;
-//				}
-//			}
-//		}
-//
-//		// <system
-//		// systemId="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
-//		// uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/aop/config/spring-aop-2.0.xsd"
-//		// />
-//
-//		String key = "http://www.springframework.org/schema/batch/spring-batch-2.0.xsd";
-//		int type = ICatalogEntry.ENTRY_TYPE_SYSTEM;
-//
-//		ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
-//		if (catalogElement instanceof ICatalogEntry) {
-//			ICatalogEntry entry = (ICatalogEntry) catalogElement;
-//			entry.setKey(key);
-//			String resolvedPath = "file:///Users/cdupuis/Development/Java/lib/spring-projects-svn/spring-batch/trunk/spring-batch-core/src/main/resources/org/springframework/batch/core/configuration/xml/spring-batch-2.0.xsd";
-//			entry.setURI(resolvedPath);
-//			
-//			
-//			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//			factory.setValidating(false);
-//			factory.setNamespaceAware(false);
-//			DocumentBuilder docBuilder = factory.newDocumentBuilder();
-//			Document doc = docBuilder.parse(new File(new URI(resolvedPath)));
-//			
-//			String namespace = doc.getDocumentElement().getAttribute("targetNamespace");
-//			System.out.println(namespace);
-//		}
+		// context.registerService(EventHandler.class.getName(),
+		// new NamespaceEventHandler(),
+		// getHandlerServiceProperties("org/springframework/osgi/extender/namespace/*"));
 
-//		systemCatalog.addCatalogElement(catalogElement);
-		
+		// // Testing
+		// ICatalog systemCatalog = null;
+		// ICatalog defaultCatalog = XMLCorePlugin.getDefault().getDefaultXMLCatalog();
+		// INextCatalog[] nextCatalogs = defaultCatalog.getNextCatalogs();
+		// for (int i = 0; i < nextCatalogs.length; i++) {
+		// INextCatalog catalog = nextCatalogs[i];
+		// ICatalog referencedCatalog = catalog.getReferencedCatalog();
+		// if (referencedCatalog != null) {
+		// if (XMLCorePlugin.SYSTEM_CATALOG_ID.equals(referencedCatalog.getId())) {
+		// systemCatalog = referencedCatalog;
+		// }
+		// }
+		// }
+		//
+		// // <system
+		// // systemId="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
+		// //
+		// uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/aop/config/spring-aop-2.0.xsd"
+		// // />
+		//
+		// String key = "http://www.springframework.org/schema/batch/spring-batch-2.0.xsd";
+		// int type = ICatalogEntry.ENTRY_TYPE_SYSTEM;
+		//
+		// ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
+		// if (catalogElement instanceof ICatalogEntry) {
+		// ICatalogEntry entry = (ICatalogEntry) catalogElement;
+		// entry.setKey(key);
+		// String resolvedPath =
+		// "file:///Users/cdupuis/Development/Java/lib/spring-projects-svn/spring-batch/trunk/spring-batch-core/src/main/resources/org/springframework/batch/core/configuration/xml/spring-batch-2.0.xsd";
+		// entry.setURI(resolvedPath);
+		//			
+		//			
+		// DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		// factory.setValidating(false);
+		// factory.setNamespaceAware(false);
+		// DocumentBuilder docBuilder = factory.newDocumentBuilder();
+		// Document doc = docBuilder.parse(new File(new URI(resolvedPath)));
+		//			
+		// String namespace = doc.getDocumentElement().getAttribute("targetNamespace");
+		// System.out.println(namespace);
+		// }
+
+		// systemCatalog.addCatalogElement(catalogElement);
 
 	}
 
-//	protected Dictionary getHandlerServiceProperties(String... topics) {
-//		Dictionary result = new Hashtable();
-//		result.put(EventConstants.EVENT_TOPIC, topics);
-//		return result;
-//	}
+	// protected Dictionary getHandlerServiceProperties(String... topics) {
+	// Dictionary result = new Hashtable();
+	// result.put(EventConstants.EVENT_TOPIC, topics);
+	// return result;
+	// }
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
@@ -252,11 +272,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 
-//	class NamespaceEventHandler implements EventHandler {
-//
-//		public void handleEvent(Event event) {
-//			System.out.println(event + " " + event.getProperty(Constants.BUNDLE_SYMBOLICNAME));
-//		}
-//
-//	}
+	// class NamespaceEventHandler implements EventHandler {
+	//
+	// public void handleEvent(Event event) {
+	// System.out.println(event + " " + event.getProperty(Constants.BUNDLE_SYMBOLICNAME));
+	// }
+	//
+	// }
 }
