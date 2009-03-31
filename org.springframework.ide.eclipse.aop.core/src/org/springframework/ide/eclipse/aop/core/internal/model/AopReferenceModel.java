@@ -180,7 +180,7 @@ public class AopReferenceModel implements IAopReferenceModel {
 		// BeansCorePlugin.getModel().removeChangeListener(modelChangeListener);
 	}
 
-	public void startup() {
+	public void start() {
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new SpringResourceChangeListener(
 				new AopResourceChangeEvents());

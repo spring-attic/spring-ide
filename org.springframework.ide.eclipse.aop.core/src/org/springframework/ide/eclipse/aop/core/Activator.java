@@ -13,8 +13,10 @@ package org.springframework.ide.eclipse.aop.core;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel;
@@ -56,7 +58,21 @@ public class Activator extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		model.startup();
+		
+		Job modelJob = new Job("Initializing Aop Model") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				model.start();
+				return Status.OK_STATUS;
+			}
+		};
+//		modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		modelJob.setSystem(true);
+		modelJob.setPriority(Job.INTERACTIVE);
+		modelJob.schedule();
+		
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
 		} catch (MissingResourceException e) {

@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public interface IAopReferenceModel {
 	
-	void startup();
+	void start();
 
 	void shutdown();
 
