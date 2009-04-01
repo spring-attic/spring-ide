@@ -32,7 +32,6 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class JavaConfigImageDecorator extends LabelProvider implements
 		ILightweightLabelDecorator {
 
