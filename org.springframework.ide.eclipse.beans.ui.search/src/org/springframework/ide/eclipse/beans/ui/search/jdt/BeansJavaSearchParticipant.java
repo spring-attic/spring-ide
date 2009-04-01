@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -37,20 +38,19 @@ import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResul
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanClassQuery;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanPropertyQuery;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link IQueryParticipant} implementation that hooks into JDT's Java reference
- * search and displays {@link IBean} that have the class or property name under
- * question
+ * {@link IQueryParticipant} implementation that hooks into JDT's Java reference search and displays
+ * {@link IBean} that have the class or property name under question
  * 
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public class BeansJavaSearchParticipant implements IQueryParticipant,
-		IMatchPresentation {
+public class BeansJavaSearchParticipant implements IQueryParticipant, IMatchPresentation {
 
 	private static final int SEARCH_FOR_TYPES = 0;
 
@@ -70,8 +70,8 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 		return this;
 	}
 
-	public void search(final ISearchRequestor requestor,
-			QuerySpecification querySpecification, IProgressMonitor monitor) {
+	public void search(final ISearchRequestor requestor, QuerySpecification querySpecification,
+			IProgressMonitor monitor) {
 
 		if (querySpecification.getLimitTo() != LIMIT_TO_REF
 				&& querySpecification.getLimitTo() != LIMIT_TO_ALL) {
@@ -80,37 +80,36 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 
 		String search = null;
 		List<String> requiredTypeNames = new ArrayList<String>();
+		IJavaProject project = null;
 
 		if (querySpecification instanceof ElementQuerySpecification) {
 			ElementQuerySpecification elementQuerySpecification = (ElementQuerySpecification) querySpecification;
 			if (elementQuerySpecification.getElement() instanceof IType) {
-				search = ((IType) elementQuerySpecification.getElement())
-						.getFullyQualifiedName();
+				search = ((IType) elementQuerySpecification.getElement()).getFullyQualifiedName();
+				project = ((IType) elementQuerySpecification.getElement()).getJavaProject();
 			}
 			else if (elementQuerySpecification.getElement() instanceof IField) {
 				IField field = ((IField) elementQuerySpecification.getElement());
 				search = field.getElementName();
-				getTypeHierachy(monitor, requiredTypeNames, field
-						.getDeclaringType());
+				getTypeHierachy(monitor, requiredTypeNames, field.getDeclaringType());
+				project = field.getJavaProject();
 			}
 			else if (elementQuerySpecification.getElement() instanceof IMethod) {
-				IMethod method = ((IMethod) elementQuerySpecification
-						.getElement());
+				IMethod method = ((IMethod) elementQuerySpecification.getElement());
 				search = method.getElementName();
 				// do property name magic
 				if (search.startsWith("set")) {
 					search = StringUtils.uncapitalize(search.substring(3));
 				}
-				getTypeHierachy(monitor, requiredTypeNames, method
-						.getDeclaringType());
+				getTypeHierachy(monitor, requiredTypeNames, method.getDeclaringType());
+				project = method.getJavaProject();
 			}
 			else {
-				search = elementQuerySpecification.getElement()
-						.getElementName();
+				search = elementQuerySpecification.getElement().getElementName();
 			}
 
-			int type = ((ElementQuerySpecification) querySpecification)
-					.getElement().getElementType();
+			int type = ((ElementQuerySpecification) querySpecification).getElement()
+					.getElementType();
 			if (type == IJavaElement.TYPE) {
 				searchFor = SEARCH_FOR_TYPES;
 			}
@@ -119,10 +118,8 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 			}
 		}
 		else {
-			searchFor = ((PatternQuerySpecification) querySpecification)
-					.getSearchFor();
-			search = ((PatternQuerySpecification) querySpecification)
-					.getPattern();
+			searchFor = ((PatternQuerySpecification) querySpecification).getSearchFor();
+			search = ((PatternQuerySpecification) querySpecification).getPattern();
 		}
 
 		ISearchQuery query = null;
@@ -137,24 +134,25 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 		if (query != null) {
 			query.run(monitor);
 
-			BeansSearchResult searchResult = (BeansSearchResult) query
-					.getSearchResult();
+			BeansSearchResult searchResult = (BeansSearchResult) query.getSearchResult();
 			for (Object obj : searchResult.getElements()) {
 				Match[] matches = searchResult.getMatches(obj);
 				if (matches != null && matches.length > 0) {
 					for (Match match : matches) {
-
-						if (searchFor == SEARCH_FOR_FIELDS) {
-							// check if the match fits to the selected class
-							IBean bean = (IBean) match.getElement();
-							String beanClass = BeansModelUtils.getBeanClass(
-									bean, null);
-							if (requiredTypeNames.contains(beanClass)) {
+						IBean bean = (IBean) match.getElement();
+						IType type = JdtUtils.getJavaType(bean.getElementResource().getProject(),
+								bean.getClassName());
+						if (project == null || project.isOnClasspath(type)) {
+							if (searchFor == SEARCH_FOR_FIELDS) {
+								// check if the match fits to the selected class
+								String beanClass = BeansModelUtils.getBeanClass(bean, null);
+								if (requiredTypeNames.contains(beanClass)) {
+									requestor.reportMatch(match);
+								}
+							}
+							else {
 								requestor.reportMatch(match);
 							}
-						}
-						else {
-							requestor.reportMatch(match);
 						}
 					}
 				}
@@ -162,11 +160,10 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 		}
 	}
 
-	private void getTypeHierachy(IProgressMonitor monitor,
-			List<String> requiredTypeNames, IType baseType) {
+	private void getTypeHierachy(IProgressMonitor monitor, List<String> requiredTypeNames,
+			IType baseType) {
 		try {
-			IType[] types = baseType.newTypeHierarchy(monitor).getAllSubtypes(
-					baseType);
+			IType[] types = baseType.newTypeHierarchy(monitor).getAllSubtypes(baseType);
 			requiredTypeNames.add(baseType.getFullyQualifiedName());
 			for (IType type : types) {
 				requiredTypeNames.add(type.getFullyQualifiedName());
@@ -182,11 +179,10 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 		return new BeansSearchLabelProvider(true);
 	}
 
-	public void showMatch(Match match, int currentOffset, int currentLength,
-			boolean activate) throws PartInitException {
+	public void showMatch(Match match, int currentOffset, int currentLength, boolean activate)
+			throws PartInitException {
 		if (match.getElement() instanceof IResourceModelElement) {
-			BeansUIUtils.openInEditor((IResourceModelElement) match
-					.getElement(), activate);
+			BeansUIUtils.openInEditor((IResourceModelElement) match.getElement(), activate);
 		}
 	}
 }
