@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,13 +9,13 @@
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.ui.graph;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
 
+
 /**
  * Some helper methods for {@link WebflowEditor}
  * @author Christian Dupuis
@@ -51,8 +52,8 @@ public abstract class WebflowUtils {
 
 	public static WebflowEditor getActiveFlowEditor() {
 
-		IEditorPart editorPart = Activator.getDefault().getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		IEditorPart editorPart = Activator.getDefault().getWorkbench().getActiveWorkbenchWindow()
+				.getActivePage().getActiveEditor();
 		if (editorPart instanceof WebflowEditor) {
 			return (WebflowEditor) editorPart;
 		}
@@ -88,18 +89,16 @@ public abstract class WebflowUtils {
 		Set<IBean> beans = getBeansFromEditorInput();
 		String className = null;
 		for (IBean bean : beans) {
-			if (bean.getElementName().equals(
-					BeansEditorUtils.getAttribute(node, "bean"))) {
+			if (bean.getElementName().equals(BeansEditorUtils.getAttribute(node, "bean"))) {
 				className = BeansModelUtils.getBeanClass(bean, null);
 			}
 		}
 
-		IType type = JdtUtils.getJavaType(getActiveFlowEditorInput().getFile()
-				.getProject(), className);
+		IType type = JdtUtils.getJavaType(getActiveFlowEditorInput().getFile().getProject(),
+				className);
 		if (type != null) {
 			if ("bean-action".equals(node.getLocalName())) {
-				return Introspector.findAllMethods(type, WebflowModelUtils
-						.getBeanMethodFilter());
+				return Introspector.findAllMethods(type, WebflowModelUtils.getBeanMethodFilter());
 			}
 			else {
 				return Introspector.findAllMethods(type, WebflowModelUtils
@@ -111,8 +110,7 @@ public abstract class WebflowUtils {
 
 	public static String[] getWebflowConfigNames() {
 		IWebflowProject project = getActiveWebflowConfig().getProject();
-		return WebflowModelUtils.getWebflowConfigNames(project).toArray(
-				new String[0]);
+		return WebflowModelUtils.getWebflowConfigNames(project).toArray(new String[0]);
 	}
 
 	public static boolean isValid(IWebflowModelElement element) {
@@ -121,17 +119,15 @@ public abstract class WebflowUtils {
 	}
 
 	public static Set<ValidationProblem> validate(IWebflowModelElement element) {
-		IWebflowState webflowState = WebflowModelUtils.getWebflowState(element,
-				true);
+		IWebflowState webflowState = WebflowModelUtils.getWebflowState(element, true);
 		if (webflowState != null) {
-			IWebflowConfig config = (IWebflowConfig) webflowState
-					.getElementParent();
+			IWebflowConfig config = (IWebflowConfig) webflowState.getElementParent();
 			NoMarkerCreatingWebflowValidator validator = new NoMarkerCreatingWebflowValidator();
 			Set<IResource> affectedResources = new HashSet<IResource>();
 			affectedResources.add(config.getElementResource());
 			try {
-				validator
-						.validate(affectedResources, new NullProgressMonitor());
+				validator.validate(affectedResources, IncrementalProjectBuilder.INCREMENTAL_BUILD,
+						new NullProgressMonitor());
 				return validator.getValidationProblems();
 			}
 			catch (CoreException e) {
@@ -155,8 +151,7 @@ public abstract class WebflowUtils {
 	}
 
 	public static String[] getStateId(IWebflowModelElement parent) {
-		IWebflowState webflowState = WebflowModelUtils.getWebflowState(parent,
-				false);
+		IWebflowState webflowState = WebflowModelUtils.getWebflowState(parent, false);
 		List<String> stateIds = new ArrayList<String>();
 		if (webflowState != null) {
 			for (IState state : webflowState.getStates()) {
@@ -166,17 +161,15 @@ public abstract class WebflowUtils {
 		return stateIds.toArray(new String[stateIds.size()]);
 	}
 
-	private static class NoMarkerCreatingWebflowValidator extends
-			WebflowValidator {
+	private static class NoMarkerCreatingWebflowValidator extends WebflowValidator {
 
 		private Set<ValidationProblem> validationProblems = new HashSet<ValidationProblem>();
-		
+
 		public NoMarkerCreatingWebflowValidator() {
 			setMarkerId(VALIDATOR_ID);
 		}
 
-		protected void createProblemMarker(IResource resource,
-				ValidationProblem problem) {
+		protected void createProblemMarker(IResource resource, ValidationProblem problem) {
 			if (problem.getSeverity() == IValidationProblemMarker.SEVERITY_ERROR) {
 				validationProblems.add(problem);
 			}
@@ -192,12 +185,12 @@ public abstract class WebflowUtils {
 		public boolean hasErrors() {
 			return this.validationProblems.size() > 0;
 		}
-		
+
 		@Override
 		protected String getValidatorId() {
 			return VALIDATOR_ID;
 		}
-		
+
 	}
 
 }
