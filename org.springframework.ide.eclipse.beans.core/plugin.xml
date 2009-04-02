@@ -81,16 +81,15 @@
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanDefinitionRule"
 		            name="%beansValidator.rule.beanDefinition.name"
 		            description="%beansValidator.rule.beanDefinition.description" />
-		    <rule
+		    <rule id="beanClass"
             		class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRule"
             		description="%beansValidator.rule.beanClass.description"
-            		id="beanClass"
             		name="%beansValidator.rule.beanClass.name">
 	         	<property
 	               	description="Bean classes that should get ignored during validation"
 	               	name="ignorableClasses"
 	               	value="org.springframework.osgi.service.importer.support.OsgiServiceProxyFactoryBean, org.springframework.osgi.service.importer.support.OsgiServiceCollectionProxyFactoryBean, org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean, org.springframework.osgi.config.OsgiServiceRegistrationListenerAdapter">
-	         </property>
+	            </property>
      	    </rule>
 		    <rule id="beanInitDestroyMethod"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRule"

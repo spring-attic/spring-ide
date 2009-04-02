@@ -42,7 +42,7 @@
 		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
 		<namespace
 			contentAssistProcessor="org.springframework.ide.eclipse.batch.ui.editor.contentassist.batch.BatchContentAssistProcessor"
-			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			elementLocator="org.springframework.ide.eclipse.batch.ui.namespaces.BatchReferenceableElementsLocator"
 			hyperLinkDetector="org.springframework.ide.eclipse.batch.ui.editor.hyperlink.osgi.BatchHyperlinkDetector"
 			labelProvider="org.springframework.ide.eclipse.batch.ui.editor.outline.osgi.BatchOutlineLabelProvider"
 			name="Spring Batch"

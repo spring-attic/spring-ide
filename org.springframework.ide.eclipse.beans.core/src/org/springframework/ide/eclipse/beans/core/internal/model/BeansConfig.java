@@ -393,18 +393,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig,
 							}
 						}
 						catch (TimeoutException e) {
-							problems
-									.add(new ValidationProblem(
-											IMarker.SEVERITY_ERROR,
-											"Loading of resource '"
-													+ resource.getFile().getAbsolutePath()
-													+ "' took more than "
-													+ BeansCorePlugin
-															.getDefault()
-															.getPreferenceStore()
-															.getInt(
-																	BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID)
-													+ "sec", file, -1));
+							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
+									"Loading of resource '"	+ resource.getFile().getAbsolutePath() + "' took more than "
+									+ BeansCorePlugin.getDefault().getPreferenceStore().getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID)
+									+ "sec", file, -1));
 						}
 					}
 					catch (Throwable e) {
