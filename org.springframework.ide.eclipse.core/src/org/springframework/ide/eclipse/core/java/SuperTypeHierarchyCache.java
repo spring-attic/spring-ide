@@ -26,9 +26,8 @@ import org.eclipse.jdt.core.JavaModelException;
  * {@link org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache}.
  * @author Christian Dupuis
  * @since 2.0.1
- * @deprecated will be removed in next major release
  */
-class SuperTypeHierarchyCache {
+public class SuperTypeHierarchyCache {
 
 	/**
 	 * Internal cache entry
@@ -160,12 +159,12 @@ class SuperTypeHierarchyCache {
 			IProgressMonitor progressMonitor) throws JavaModelException {
 		ITypeHierarchy hierarchy = findTypeHierarchyInCache(type);
 		if (hierarchy == null) {
-			hierarchy = type.newSupertypeHierarchy(progressMonitor);
+			hierarchy = type.newTypeHierarchy(progressMonitor);
 			addTypeHierarchyToCache(hierarchy);
 		}
 		return hierarchy;
 	}
-
+	
 	/**
 	 * Checks if a {@link ITypeHierarchy} for a given {@link IType} is in the
 	 * internal cache.

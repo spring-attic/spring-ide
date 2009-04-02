@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -71,6 +72,7 @@ import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.SuperTypeHierarchyCache;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -1317,29 +1319,33 @@ public abstract class BeansModelUtils {
 	 */
 	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource) {
 		Set<IBeansConfig> files = new LinkedHashSet<IBeansConfig>();
+
 		if (resource != null && resource.isAccessible()
 				&& resource.isSynchronized(IResource.DEPTH_ZERO)
 				&& resource.getName().endsWith(".java")) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
 			if (projects != null) {
-				for (IBeansProject project : projects) {
-					if (project != null) {
-						Set<IBeansConfig> configs = project.getConfigs();
-						IJavaElement element = JavaCore.create(resource);
-						if (element instanceof ICompilationUnit) {
-							try {
-								IType[] types = ((ICompilationUnit) element).getAllTypes();
-								List<IType> relevantTypes = new ArrayList<IType>();
 
-								for (IType type : types) {
+				IJavaElement element = JavaCore.create(resource);
+				if (element instanceof ICompilationUnit) {
 
-									// Check that the type is coming from the project classpath
-									if (JdtUtils.getJavaProject(resource.getProject())
-											.isOnClasspath(type)) {
-										relevantTypes.add(type);
-									}
-								}
+					try {
+						IType[] types = ((ICompilationUnit) element).getAllTypes();
+						Set<List<IType>> hierachies = new HashSet<List<IType>>();
+						List<IType> relevantTypes = Arrays.asList(types);
+						for (IType type : types) {
+							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type)
+									.getSubtypes(type);
+							if (subTypes != null && subTypes.length > 0) {
+								hierachies.add(Arrays.asList(subTypes));
+							}
+						}
+
+						for (IBeansProject project : projects) {
+							if (project != null) {
+								Set<IBeansConfig> configs = project.getConfigs();
 								for (IBeansConfig config : configs) {
+									
 									Set<String> allBeanClasses = config.getBeanClasses();
 									for (String className : allBeanClasses) {
 										IType type = JdtUtils.getJavaType(project.getProject(),
@@ -1349,24 +1355,12 @@ public abstract class BeansModelUtils {
 											if (relevantTypes.contains(type)) {
 												files.add(config);
 											}
-											// 2. check the class structure
-											// 2a. implements the interface
-											for (IType typeToCheck : relevantTypes) {
-												if (typeToCheck.isInterface()) {
-													if (Introspector.doesImplement(type,
-															typeToCheck.getFullyQualifiedName())) {
+											else {
+												for (List<IType> subTypes : hierachies) {
+													if (subTypes.contains(type)) {
 														files.add(config);
 														break;
 													}
-												}
-												// 2b. extends the class
-												else if (!type.getFullyQualifiedName().equals(
-														typeToCheck.getFullyQualifiedName())
-														&& Introspector
-																.doesExtend(type, typeToCheck
-																		.getFullyQualifiedName())) {
-													files.add(config);
-													break;
 												}
 											}
 											// 3. break the for loop if file is already in
@@ -1377,10 +1371,10 @@ public abstract class BeansModelUtils {
 									}
 								}
 							}
-							catch (JavaModelException e) {
-								BeansCorePlugin.log(e);
-							}
 						}
+					}
+					catch (JavaModelException e) {
+						BeansCorePlugin.log(e);
 					}
 				}
 			}
@@ -1404,50 +1398,40 @@ public abstract class BeansModelUtils {
 				&& resource.getName().endsWith(".java")) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
 			if (projects != null) {
-				for (IBeansProject project : projects) {
-					if (project != null) {
-						Set<IBeansConfig> configs = project.getConfigs();
-						IJavaElement element = JavaCore.create(resource);
-						if (element instanceof ICompilationUnit) {
-							try {
-								IType[] types = ((ICompilationUnit) element).getAllTypes();
-								List<IType> relevantTypes = new ArrayList<IType>();
 
-								for (IType type : types) {
-									// Check that the type is coming from the project classpath
-									if (JdtUtils.getJavaProject(resource.getProject())
-											.isOnClasspath(type)) {
-										relevantTypes.add(type);
-									}
-								}
+				IJavaElement element = JavaCore.create(resource);
+				if (element instanceof ICompilationUnit) {
+
+					try {
+						IType[] types = ((ICompilationUnit) element).getAllTypes();
+						Set<List<IType>> hierachies = new HashSet<List<IType>>();
+						List<IType> relevantTypes = Arrays.asList(types);
+						for (IType type : types) {
+							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type)
+									.getSubtypes(type);
+							if (subTypes != null && subTypes.length > 0) {
+								hierachies.add(Arrays.asList(subTypes));
+							}
+						}
+
+						for (IBeansProject project : projects) {
+							if (project != null) {
+								Set<IBeansConfig> configs = project.getConfigs();
 								for (IBeansConfig config : configs) {
 									Set<IBean> allBeans = getBeans(config);
 
 									for (IBean bean : allBeans) {
 										IType type = resolveBeanType(bean);
 										if (type != null) {
-											// 1. check if the bean class is clear match
 											if (relevantTypes.contains(type)) {
 												files.add(bean);
 											}
-											// 2. check the class structure
-											// 2a. implements the interface
-											for (IType typeToCheck : relevantTypes) {
-												if (typeToCheck.isInterface()) {
-													if (Introspector.doesImplement(type,
-															typeToCheck.getFullyQualifiedName())) {
+											else {
+												for (List<IType> subTypes : hierachies) {
+													if (subTypes.contains(type)) {
 														files.add(bean);
 														break;
 													}
-												}
-												// 2b. extends the class
-												else if (!type.getFullyQualifiedName().equals(
-														typeToCheck.getFullyQualifiedName())
-														&& Introspector
-																.doesExtend(type, typeToCheck
-																		.getFullyQualifiedName())) {
-													files.add(bean);
-													break;
 												}
 											}
 										}
@@ -1465,10 +1449,10 @@ public abstract class BeansModelUtils {
 									}
 								}
 							}
-							catch (JavaModelException e) {
-								BeansCorePlugin.log(e);
-							}
 						}
+					}
+					catch (JavaModelException e) {
+						BeansCorePlugin.log(e);
 					}
 				}
 			}
