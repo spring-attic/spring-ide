@@ -58,12 +58,19 @@ public class Activator extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		
-		Job modelJob = new Job("Initializing Aop Model") {
+		try {
+			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
+		} catch (MissingResourceException e) {
+			resourceBundle = null;
+		}
+		// add default value
+		getPreferenceStore().setDefault(PERSIST_AOP_MODEL_PREFERENCE, true);
 
+		Job modelJob = new Job("Initializing Aop Model") {
+			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-
+				
 				model.start();
 				return Status.OK_STATUS;
 			}
@@ -72,14 +79,6 @@ public class Activator extends AbstractUIPlugin {
 		modelJob.setSystem(true);
 		modelJob.setPriority(Job.INTERACTIVE);
 		modelJob.schedule();
-		
-		try {
-			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
-		} catch (MissingResourceException e) {
-			resourceBundle = null;
-		}
-		// add default value
-		getPreferenceStore().setDefault(PERSIST_AOP_MODEL_PREFERENCE, true);
 	}
 
 	/*

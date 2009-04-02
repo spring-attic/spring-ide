@@ -89,24 +89,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		
-		Job modelJob = new Job("Initializing Beans Model") {
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-
-				model.start();
-				metadataModel.start();
-
-				return Status.OK_STATUS;
-			}
-		};
-//		modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		modelJob.setSystem(true);
-		modelJob.setPriority(Job.INTERACTIVE);
-		modelJob.schedule();
-
-		
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 
 		// context.registerService(EventHandler.class.getName(),
@@ -156,7 +139,22 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		// }
 
 		// systemCatalog.addCatalogElement(catalogElement);
+		
+		Job modelJob = new Job("Initializing Beans Model") {
 
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				model.start();
+				metadataModel.start();
+
+				return Status.OK_STATUS;
+			}
+		};
+//		modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		modelJob.setSystem(true);
+		modelJob.setPriority(Job.INTERACTIVE);
+		modelJob.schedule();
 	}
 
 	// protected Dictionary getHandlerServiceProperties(String... topics) {
