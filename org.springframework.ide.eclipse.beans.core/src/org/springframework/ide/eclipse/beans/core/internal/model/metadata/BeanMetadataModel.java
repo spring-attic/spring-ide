@@ -17,10 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
@@ -133,34 +129,21 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 	 */
 	public void start() {
 
-		Job metamodelLoadingJob = new Job("Loading Spring meta data") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-
-				Map<String, BeanMetadataHolder> storedBeanMetadata = BeanMetadataPersistence
-						.loadMetadata();
-				Map<String, BeanPropertyDataHolder> storedProperties = BeanMetadataPersistence
-						.loadProperties();
-				try {
-					w.lock();
-					beanMetadata = storedBeanMetadata;
-					beanPropertyData = storedProperties;
-				}
-				catch (Exception e) {
-					beanMetadata = new ConcurrentHashMap<String, BeanMetadataHolder>();
-					beanPropertyData = new ConcurrentHashMap<String, BeanPropertyDataHolder>();
-				}
-				finally {
-					w.unlock();
-				}
-				
-				return Status.OK_STATUS;
-			}
-		};
-		
-		metamodelLoadingJob.setPriority(Job.INTERACTIVE);
-		metamodelLoadingJob.schedule();
+		Map<String, BeanMetadataHolder> storedBeanMetadata = BeanMetadataPersistence.loadMetadata();
+		Map<String, BeanPropertyDataHolder> storedProperties = BeanMetadataPersistence
+				.loadProperties();
+		try {
+			w.lock();
+			beanMetadata = storedBeanMetadata;
+			beanPropertyData = storedProperties;
+		}
+		catch (Exception e) {
+			beanMetadata = new ConcurrentHashMap<String, BeanMetadataHolder>();
+			beanPropertyData = new ConcurrentHashMap<String, BeanPropertyDataHolder>();
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	/**
