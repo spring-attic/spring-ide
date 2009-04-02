@@ -106,7 +106,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			if (validatorDefinition.isEnabled(project)) {
 				Set<IResource> affectedResources = getAffectedResources(validatorDefinition
 						.getValidator(), project, kind, delta);
-				runValidator(validatorDefinition, affectedResources, monitor, listeners);
+				runValidator(validatorDefinition, affectedResources, kind, monitor, listeners);
 			}
 		}
 
@@ -198,7 +198,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 	 * Runs all given {@link IValidator} in the order as they are given in the set.
 	 */
 	private void runValidator(final ValidatorDefinition validatorDefinition,
-			final Set<IResource> affectedResources, final IProgressMonitor monitor,
+			final Set<IResource> affectedResources, final int kind, final IProgressMonitor monitor,
 			final List<IProjectContributionEventListener> listeners) {
 
 		for (IProjectContributionEventListener listener : listeners) {
@@ -212,7 +212,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 			public void run() throws Exception {
 				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1, 0);
-				validatorDefinition.getValidator().validate(affectedResources, subMonitor);
+				validatorDefinition.getValidator().validate(affectedResources, kind, subMonitor);
 			}
 		};
 		SafeRunner.run(code);

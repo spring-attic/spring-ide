@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManager;
+import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManagerExtension;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
@@ -230,15 +231,24 @@ public class BeansConfigValidator extends AbstractValidator implements
 		this.context = context;
 	}
 
-	private static class BeanElementLifecycleManager implements IValidationElementLifecycleManager {
+	private static class BeanElementLifecycleManager implements
+			IValidationElementLifecycleManagerExtension {
 
 		private IBeansConfig rootElement = null;
 
+		private int kind = -1;
+
+		/**
+		 * {@inheritDoc}
+		 */
 		public void destory() {
 			// Notify that the model has changed.
-			 ((BeansModel) BeansCorePlugin.getModel()).notifyListeners(rootElement, Type.CHANGED);
+			((BeansModel) BeansCorePlugin.getModel()).notifyListeners(rootElement, Type.CHANGED);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public Set<IResourceModelElement> getContextElements() {
 			Set<IResourceModelElement> contextElements = new LinkedHashSet<IResourceModelElement>();
 			contextElements.addAll(BeansModelUtils.getConfigSets(rootElement));
@@ -248,17 +258,30 @@ public class BeansConfigValidator extends AbstractValidator implements
 			return contextElements;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public IResourceModelElement getRootElement() {
 			return rootElement;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void init(IResource resource) {
 			if (resource instanceof IFile) {
 				rootElement = BeansCorePlugin.getModel().getConfig((IFile) resource);
-				if (rootElement.resourceChanged()) {
+				if (kind == IncrementalProjectBuilder.FULL_BUILD || rootElement.resourceChanged()) {
 					((BeansConfig) rootElement).reload();
 				}
 			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setKind(int kind) {
+			this.kind = kind;
 		}
 	}
 

@@ -126,8 +126,12 @@ public abstract class AbstractValidator implements IValidator {
 		return validatorId;
 	}
 
-	private IValidationElementLifecycleManager initValidationElementCallback(IResource resource) {
+	private IValidationElementLifecycleManager initValidationElementCallback(IResource resource,
+			int kind) {
 		IValidationElementLifecycleManager callback = createValidationElementLifecycleManager();
+		if (callback instanceof IValidationElementLifecycleManagerExtension) {
+			((IValidationElementLifecycleManagerExtension) callback).setKind(kind);
+		}
 		callback.init(resource);
 		return callback;
 	}
@@ -162,7 +166,10 @@ public abstract class AbstractValidator implements IValidator {
 		return problems;
 	}
 
-	public final void validate(Set<IResource> affectedResources, IProgressMonitor monitor)
+	/**
+	 * {@inheritDoc}
+	 */
+	public final void validate(Set<IResource> affectedResources, int kind, IProgressMonitor monitor)
 			throws CoreException {
 		SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, affectedResources.size());
 		try {
@@ -174,7 +181,8 @@ public abstract class AbstractValidator implements IValidator {
 					throw new OperationCanceledException();
 				}
 
-				IValidationElementLifecycleManager callback = initValidationElementCallback(resource);
+				IValidationElementLifecycleManager callback = initValidationElementCallback(
+						resource, kind);
 
 				IResourceModelElement rootElement = callback.getRootElement();
 
