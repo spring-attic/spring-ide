@@ -43,8 +43,8 @@
 		<namespace
 			contentAssistProcessor="org.springframework.ide.eclipse.batch.ui.editor.contentassist.batch.BatchContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.batch.ui.namespaces.BatchReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.batch.ui.editor.hyperlink.osgi.BatchHyperlinkDetector"
-			labelProvider="org.springframework.ide.eclipse.batch.ui.editor.outline.osgi.BatchOutlineLabelProvider"
+			hyperLinkDetector="org.springframework.ide.eclipse.batch.ui.editor.hyperlink.batch.BatchHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.batch.ui.editor.outline.batch.BatchOutlineLabelProvider"
 			name="Spring Batch"
 			uri="http://www.springframework.org/schema/batch" />
 	</extension>
