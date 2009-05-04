@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model.validation.rul
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -64,15 +65,28 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 				// placeholders
 				else {
 					String methodName = bd.getFactoryMethodName();
-					if (methodName != null && !SpringCoreUtils.hasPlaceHolder(methodName)) {
-						// Use constructor argument values of root bean as
-						// arguments for static factory method
-						int argCount = (!bd.isAbstract()
-								&& bd.getAutowireMode() != AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR ? bd
-								.getConstructorArgumentValues().getArgumentCount()
-								: -1);
-						validateFactoryMethod(bean, mergedClassName, methodName, argCount,
-								Static.DONT_CARE, context);
+					try {
+						if (methodName != null && !SpringCoreUtils.hasPlaceHolder(methodName)) {
+							// Use constructor argument values of root bean as
+							// arguments for static factory method
+							int argCount = (!bd.isAbstract()
+									&& bd.getAutowireMode() != AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR ? bd
+									.getConstructorArgumentValues().getArgumentCount()
+									: -1);
+							if (type.isEnum()) {
+								if (!"valueOf".equals(methodName) && (argCount == 0 || argCount > 2)) {
+									validateFactoryMethod(bean, mergedClassName, methodName, argCount,
+											Static.DONT_CARE, context);
+								}
+							}
+							else {
+								validateFactoryMethod(bean, mergedClassName, methodName, argCount,
+										Static.DONT_CARE, context);
+							}
+						}
+					}
+					catch (JavaModelException e) {
+
 					}
 				}
 			}
