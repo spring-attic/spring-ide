@@ -30,27 +30,27 @@ public interface IBean extends IBeansModelElement, ISourceModelElement {
 
 	String getClassName();
 
-	public boolean isRootBean();
+	boolean isRootBean();
 
-	public boolean isChildBean();
-
-	public boolean isInnerBean();
-
-	public boolean isSingleton();
-
-	public boolean isAbstract();
-
-	public boolean isLazyInit();
-
-	public boolean isFactory();
+	boolean isChildBean();
 	
-	public boolean isInfrastructure();
+	boolean isInnerBean();
+
+	boolean isSingleton();
+
+	boolean isAbstract();
+
+	boolean isLazyInit();
+
+	boolean isFactory();
+	
+	boolean isInfrastructure();
 	
 	/**
 	 * Returns <code>true</code> if the bean id or name is generated
 	 * @since 2.2.2 
 	 */
-	public boolean isGeneratedElementName();
+	boolean isGeneratedElementName();
 
 	/**
 	 * Returns array of aliases defined for this bean or <code>null</code> if
@@ -69,4 +69,17 @@ public interface IBean extends IBeansModelElement, ISourceModelElement {
 	IBeanProperty getProperty(String name);
 
 	Set<IBeanProperty> getProperties();
+	
+	/**
+	 * Returns <b>all</b> implemented interfaces of this bean class.
+	 * @since 2.2.3 
+	 */
+//	Set<String> getInterfaceNames();
+	
+	/**
+	 * Returns <b>all</b> super class of this bean class.
+	 * @since 2.2.3
+	 */
+//	Set<String> getSuperClassNames();
+	
 }
