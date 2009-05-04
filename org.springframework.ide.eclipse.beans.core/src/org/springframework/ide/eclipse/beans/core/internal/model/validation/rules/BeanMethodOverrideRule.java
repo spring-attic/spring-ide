@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,38 +35,34 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Christian Dupuis
  * @since 2.0.2
  */
-public class BeanMethodOverrideRule extends
-		AbstractNonInfrastructureBeanValidationRule implements
+public class BeanMethodOverrideRule extends AbstractNonInfrastructureBeanValidationRule implements
 		IValidationRule<IBeanMethodOverride, IBeansValidationContext> {
 
 	/**
-	 * Checks if this validation rule supports given <code>element</code> and
-	 * <code>context</code>.
-	 * @return true if and only element is a {@link IBeanMethodOverride} and the
-	 * parent element a {@link IBean}
+	 * Checks if this validation rule supports given <code>element</code> and <code>context</code>.
+	 * @return true if and only element is a {@link IBeanMethodOverride} and the parent element a
+	 * {@link IBean}
 	 */
 	@Override
-	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, IBeansValidationContext context) {
+	protected boolean supportsModelElementForNonInfrastructureBean(IModelElement element,
+			IBeansValidationContext context) {
 		return element instanceof IBeanMethodOverride
 				&& element.getElementParent() instanceof IBean;
 	}
 
 	/**
-	 * Validates the given {@link IBeanMethodOverride} for matching methods to
-	 * override.
+	 * Validates the given {@link IBeanMethodOverride} for matching methods to override.
 	 */
-	public void validate(IBeanMethodOverride override,
-			IBeansValidationContext context, IProgressMonitor monitor) {
+	public void validate(IBeanMethodOverride override, IBeansValidationContext context,
+			IProgressMonitor monitor) {
 		IBean bean = (IBean) override.getElementParent();
 		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils
 				.getMergedBeanDefinition(bean, context.getContextElement());
 
 		String mergedClassName = mergedBd.getBeanClassName();
-		if (mergedClassName != null
-				&& !SpringCoreUtils.hasPlaceHolder(mergedClassName)) {
-			IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean,
-					mergedClassName, context);
+		if (mergedClassName != null && !SpringCoreUtils.hasPlaceHolder(mergedClassName)) {
+			IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean, mergedClassName,
+					context);
 			if (type != null) {
 				if (override.getType() == IBeanMethodOverride.TYPE.LOOKUP) {
 					validateLookupOverride(override, type, context);
@@ -79,8 +75,7 @@ public class BeanMethodOverrideRule extends
 	}
 
 	/**
-	 * Validates if the given bean type has a method that matches the following
-	 * signature:
+	 * Validates if the given bean type has a method that matches the following signature:
 	 * <p>
 	 * 
 	 * <pre>
@@ -91,8 +86,8 @@ public class BeanMethodOverrideRule extends
 	 * @param type the bean type
 	 * @param context the validation context
 	 */
-	private void validateReplaceOverride(IBeanMethodOverride override,
-			IType type, IBeansValidationContext context) {
+	private void validateReplaceOverride(IBeanMethodOverride override, IType type,
+			IBeansValidationContext context) {
 		if (override instanceof BeanReplaceMethodOverride) {
 			String methodName = override.getMethodName();
 			try {
@@ -104,17 +99,15 @@ public class BeanMethodOverrideRule extends
 				Set<IMethod> methods = Introspector.getAllMethods(type);
 				for (IMethod method : methods) {
 					if (method.getElementName().equals(methodName)
-							&& (Flags.isProtected(method.getFlags()) || Flags
-									.isPublic(method.getFlags()))) {
+							&& (Flags.isProtected(method.getFlags()) || Flags.isPublic(method
+									.getFlags()))) {
 						return;
 					}
 				}
 
 				// if we reach here, no matching method could be found!
-				context.error(override, "UNDEFINED_REPLACE_METHOD",
-						"Replace-method '" + methodName
-								+ "' not found in bean class '"
-								+ type.getFullyQualifiedName() + "'");
+				context.error(override, "UNDEFINED_REPLACE_METHOD", "Replace-method '" + methodName
+						+ "' not found in bean class '" + type.getFullyQualifiedName() + "'");
 			}
 			catch (JavaModelException e) {
 			}
@@ -122,8 +115,7 @@ public class BeanMethodOverrideRule extends
 	}
 
 	/**
-	 * Validates if the given bean type has a method that matches the following
-	 * signature:
+	 * Validates if the given bean type has a method that matches the following signature:
 	 * <p>
 	 * 
 	 * <pre>
@@ -134,24 +126,21 @@ public class BeanMethodOverrideRule extends
 	 * @param type the bean type
 	 * @param context the validation context
 	 */
-	private void validateLookupOverride(IBeanMethodOverride override,
-			IType type, IBeansValidationContext context) {
+	private void validateLookupOverride(IBeanMethodOverride override, IType type,
+			IBeansValidationContext context) {
 		String methodName = override.getMethodName();
 		try {
-			Set<IMethod> methods = Introspector.findAllNoParameterMethods(type,
-					methodName);
+			Set<IMethod> methods = Introspector.findAllNoParameterMethods(type, methodName);
 			for (IMethod method : methods) {
-				if (Flags.isProtected(method.getFlags())
+				if (type.isInterface() || Flags.isProtected(method.getFlags())
 						|| Flags.isPublic(method.getFlags())) {
 					return;
 				}
 			}
 
 			// if we reach here, no matching method could be found!
-			context.error(override, "UNDEFINED_LOOKUP_METHOD",
-					"Lookup-method '" + methodName
-							+ "' not found in bean class '"
-							+ type.getFullyQualifiedName() + "'");
+			context.error(override, "UNDEFINED_LOOKUP_METHOD", "Lookup-method '" + methodName
+					+ "' not found in bean class '" + type.getFullyQualifiedName() + "'");
 		}
 		catch (JavaModelException e) {
 		}
