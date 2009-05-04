@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
@@ -19,6 +24,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodConte
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
 import org.springframework.ide.eclipse.core.java.IMethodFilter;
+import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -72,6 +78,30 @@ public class FactoryMethodContentAssistCalculator implements IContentAssistCalcu
 		}
 
 		IContentAssistCalculator calculator = new MethodContentAssistCalculator(filter) {
+			
+			@Override
+			public void computeProposals(IContentAssistContext context,
+					IContentAssistProposalRecorder recorder) {
+				super.computeProposals(context, recorder);
+				
+				IType type = calculateType(context);
+				try {
+					// Add special valueOf methods for Enum types
+					if (type.isEnum()) {
+						IType enumType = JdtUtils.getJavaType(context.getFile().getProject(), Enum.class.getName());
+						Set<String> proposedMethods = new HashSet<String>();
+						for (IMethod method : Introspector.findAllMethods(enumType, context
+								.getMatchString(), filter)) {
+							if (!proposedMethods.contains(method.getElementName())) {
+								proposedMethods.add(method.getElementName());
+								createMethodProposal(recorder, method);
+							}
+						}
+					}
+				}
+				catch (JavaModelException e) {
+				}
+			}
 
 			@Override
 			protected IType calculateType(IContentAssistContext context) {

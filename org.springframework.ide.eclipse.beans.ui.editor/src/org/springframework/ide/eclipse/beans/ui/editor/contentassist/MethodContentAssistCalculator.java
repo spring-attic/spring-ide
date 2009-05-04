@@ -39,7 +39,7 @@ public abstract class MethodContentAssistCalculator implements IContentAssistCal
 
 	public static final int METHOD_RELEVANCE = 10;
 
-	private final IMethodFilter filter;
+	protected final IMethodFilter filter;
 
 	/**
 	 * Constructor
