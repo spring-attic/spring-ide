@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.progress.IProgressConstants;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.AopCoreImages;
 import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationIntroductionDefinition;
@@ -63,7 +62,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
-import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.StringUtils;
@@ -93,8 +91,7 @@ public class AopReferenceModelBuilderJob extends Job {
 	 */
 	public AopReferenceModelBuilderJob(Set<IResource> affectedResources,
 			Set<IResource> originalResources) {
-		super(Activator
-				.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
+		super(Activator.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
 		this.affectedResources = affectedResources;
 		// this.originalResources = originalResources;
 		setPriority(Job.BUILD);
@@ -202,8 +199,7 @@ public class AopReferenceModelBuilderJob extends Job {
 					info.getAspectClassName());
 
 			// check type not found and exclude factory beans
-			if (jdtTargetType == null
-					|| Introspector.doesImplement(jdtTargetType, FactoryBean.class.getName())) {
+			if (jdtTargetType == null || bean.isFactory()) {
 				AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
 						"AopReferenceModelBuilder.skippingFactoryBeanDefinition", bean));
 				return;
