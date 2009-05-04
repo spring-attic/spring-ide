@@ -57,6 +57,9 @@ public final class SpringCoreUtils {
 
 	public static final String PLACEHOLDER_PREFIX = "${";
 
+	/** New placeholder string for Spring 3 EL support */
+	public static final String EL_PLACEHOLDER_PREFIX = "#{";
+
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
 	/**
@@ -82,7 +85,8 @@ public final class SpringCoreUtils {
 			return false;
 		}
 		int pos = text.indexOf(PLACEHOLDER_PREFIX);
-		return (pos != -1 && text.indexOf(PLACEHOLDER_SUFFIX, pos) != -1);
+		int elPos = text.indexOf(EL_PLACEHOLDER_PREFIX);
+		return ((pos != -1 || elPos != -1) && text.indexOf(PLACEHOLDER_SUFFIX, pos) != -1);
 	}
 
 	/**
