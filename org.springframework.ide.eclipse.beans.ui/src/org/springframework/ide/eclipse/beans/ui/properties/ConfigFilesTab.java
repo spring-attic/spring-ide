@@ -470,7 +470,7 @@ public class ConfigFilesTab {
 				for (Object element : selection) {
 					String config = null;
 					if (element instanceof ZipEntryStorage) {
-						ZipEntryStorage storage = (ZipEntryStorage) element;
+						ZipEntryStorage storage = (ZipEntryStorage) element; 
 						config = storage.getFullName();
 					}
 					else if (element instanceof IFile) {
@@ -483,7 +483,7 @@ public class ConfigFilesTab {
 						String entryName = ((JarEntryFile) element).getFullPath().toString();
 						for (String name : JavaCore.getClasspathVariableNames()) {
 							IPath variablePath = JavaCore.getClasspathVariable(name);
-							if (variablePath.isPrefixOf(fullPath)) {
+							if (variablePath != null && variablePath.isPrefixOf(fullPath)) {
 								if (MessageDialog.openQuestion(SpringUIUtils.getStandardDisplay()
 										.getActiveShell(), "Use classpath variable",
 										"Do you want to use the classpath variable '" + name
