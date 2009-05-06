@@ -132,7 +132,7 @@
 	   <builder
 	         class="org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataProjectBuilder"
 	         description="%beanmetadataBuilder.description"
-	         enabledByDefault="false"
+	         enabledByDefault="true"
     	     id="beanmetadatabuilder"
 	         name="%beanmetadataBuilder.name"
 	         icon="icons/full/obj16/annotation_obj.gif"
