@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.mylyn;singleton:=true
-Bundle-Version: 2.0.6.qualifier
+Bundle-Version: 2.2.4.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.mylyn.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -18,12 +18,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.sse.ui,
  org.eclipse.wst.xml.ui,
- org.eclipse.mylyn.context.core;bundle-version="3.0.0",
- org.eclipse.mylyn.context.ui;bundle-version="3.0.0",
- org.eclipse.mylyn.ide.ui;bundle-version="3.0.0",
- org.eclipse.mylyn.resources.ui;bundle-version="3.0.0",
- org.eclipse.mylyn.java.ui;bundle-version="3.0.0",
- org.eclipse.mylyn.commons.ui;bundle-version="3.0.0"
+ org.eclipse.mylyn.context.core;bundle-version="3.1.0",
+ org.eclipse.mylyn.context.ui;bundle-version="3.1.0",
+ org.eclipse.mylyn.ide.ui;bundle-version="3.1.0",
+ org.eclipse.mylyn.resources.ui;bundle-version="3.1.0",
+ org.eclipse.mylyn.java.ui;bundle-version="3.1.0",
+ org.eclipse.mylyn.commons.ui;bundle-version="3.1.0"
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: org.springframework.ide.eclipse.mylyn,
