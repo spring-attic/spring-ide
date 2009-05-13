@@ -114,12 +114,12 @@ public class BeansJavaCompletionUtils {
 			prefix = prefix.replace('$', '.');
 
 			String sourceStart = CLASS_SOURCE_START + prefix;
-			String packageName = null;
-			int dot = prefix.lastIndexOf('.');
-			if (dot > -1) {
-				packageName = prefix.substring(0, dot);
-				sourceStart = "package " + packageName + ";\n" + sourceStart;
-			}
+//			String packageName = null;
+//			int dot = prefix.lastIndexOf('.');
+//			if (dot > -1) {
+//				packageName = prefix.substring(0, dot);
+//				sourceStart = "package " + packageName + ";\n" + sourceStart;
+//			}
 			String source = sourceStart + CLASS_SOURCE_END;
 			setContents(unit, source);
 
@@ -131,10 +131,11 @@ public class BeansJavaCompletionUtils {
 
 			ICompletionProposal[] proposals = order(props);
 			for (ICompletionProposal comProposal : proposals) {
-				processJavaCompletionProposal(recorder, comProposal, packageName, innerClass);
+				processJavaCompletionProposal(recorder, comProposal, "", innerClass);
 			}
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			// do nothing
 		}
 	}
@@ -202,22 +203,22 @@ public class BeansJavaCompletionUtils {
 
 	private static IPackageFragment getPackageFragment(IJavaProject project, String prefix)
 			throws JavaModelException {
-		int dot = prefix.lastIndexOf('.');
-		if (dot > -1) {
-			String packageName = prefix.substring(0, dot);
-			IPackageFragment[] packages = project.getPackageFragments();
-			for (IPackageFragment p : packages) {
-				if (p.getElementName().equals(packageName))
-					return p;
-			}
-		}
-		else {
+//		int dot = prefix.lastIndexOf('.');
+//		if (dot > -1) {
+//			String packageName = prefix.substring(0, dot);
+//			IPackageFragment[] packages = project.getPackageFragments();
+//			for (IPackageFragment p : packages) {
+//				if (p.getElementName().equals(packageName))
+//					return p;
+//			}
+//		}
+//		else {
 			for (IPackageFragmentRoot p : project.getAllPackageFragmentRoots()) {
 				if (p.getKind() == IPackageFragmentRoot.K_SOURCE) {
 					return p.getPackageFragment("");
 				}
 			}
-		}
+//		}
 		return project.getPackageFragments()[0];
 	}
 
