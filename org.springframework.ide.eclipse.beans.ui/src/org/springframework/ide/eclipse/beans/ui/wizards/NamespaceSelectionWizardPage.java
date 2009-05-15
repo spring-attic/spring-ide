@@ -38,9 +38,8 @@ import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 
 /**
- * {@link WizardPage} that displays a list of {@link INamespaceDefinition}s to
- * the user in order to allow for selecting the desired XSD namespace
- * declarations.
+ * {@link WizardPage} that displays a list of {@link INamespaceDefinition}s to the user in order to
+ * allow for selecting the desired XSD namespace declarations.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -59,8 +58,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		public String getText(Object element) {
 			if (element instanceof INamespaceDefinition) {
 				INamespaceDefinition xsdDef = (INamespaceDefinition) element;
-				return xsdDef.getNamespacePrefix() + " - "
-						+ xsdDef.getNamespaceURI();
+				return xsdDef.getNamespacePrefix() + " - " + xsdDef.getNamespaceURI();
 			}
 			return "";
 		}
@@ -76,8 +74,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 			if (element instanceof String) {
 				String label = (String) element;
 				if (selectedNamespaceDefinition != null
-						&& label.equals(selectedNamespaceDefinition
-								.getDefaultSchemaLocation())) {
+						&& label.equals(selectedNamespaceDefinition.getDefaultSchemaLocation())) {
 					label += " (default)";
 				}
 				return label;
@@ -86,8 +83,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		}
 	}
 
-	private class XsdConfigContentProvider implements
-			IStructuredContentProvider {
+	private class XsdConfigContentProvider implements IStructuredContentProvider {
 
 		public Object[] getElements(Object obj) {
 			return NamespaceUtils.getNamespaceDefinitions().toArray();
@@ -105,13 +101,11 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		public Object[] getElements(Object obj) {
 			if (obj instanceof INamespaceDefinition) {
 				Set<String> elements = new HashSet<String>();
-				String defaultLocation = ((INamespaceDefinition) obj)
-					.getDefaultSchemaLocation();
+				String defaultLocation = ((INamespaceDefinition) obj).getDefaultSchemaLocation();
 				if (defaultLocation != null) {
 					elements.add(defaultLocation);
 				}
-				elements.addAll(((INamespaceDefinition) obj)
-						.getSchemaLocations());
+				elements.addAll(((INamespaceDefinition) obj).getSchemaLocations());
 				return elements.toArray();
 			}
 			else {
@@ -169,28 +163,25 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		xsdViewer.setContentProvider(new XsdConfigContentProvider());
 		xsdViewer.setLabelProvider(new XsdLabelProvider());
 		xsdViewer.setInput(this); // activate content provider
-		INamespaceDefinition defaultDefinition = NamespaceUtils
-				.getDefaultNamespaceDefinition();
-		xsdViewer.setGrayedElements(new Object[] { defaultDefinition });
-		xsdViewer.setCheckedElements(new Object[] { defaultDefinition });
+		INamespaceDefinition defaultDefinition = NamespaceUtils.getDefaultNamespaceDefinition();
+		if (defaultDefinition != null) {
+			xsdViewer.setGrayedElements(new Object[] { defaultDefinition });
+			xsdViewer.setCheckedElements(new Object[] { defaultDefinition });
+		}
 
 		xsdViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (event.getSelection() instanceof IStructuredSelection) {
-					Object obj = ((IStructuredSelection) event.getSelection())
-							.getFirstElement();
+					Object obj = ((IStructuredSelection) event.getSelection()).getFirstElement();
 					selectedNamespaceDefinition = (INamespaceDefinition) obj;
 					versionViewer.setInput(obj);
-					if (selectedVersion
-							.containsKey(selectedNamespaceDefinition)) {
-						versionViewer
-								.setCheckedElements(new Object[] { selectedVersion
-										.get(selectedNamespaceDefinition) });
+					if (selectedVersion.containsKey(selectedNamespaceDefinition)) {
+						versionViewer.setCheckedElements(new Object[] { selectedVersion
+								.get(selectedNamespaceDefinition) });
 					}
 					if (xsdViewer.getChecked(obj)
-							&& selectedNamespaceDefinition.getSchemaLocations()
-									.size() > 0) {
+							&& selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
 						versionViewer.getControl().setEnabled(true);
 					}
 					else {
@@ -204,10 +195,8 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		xsdViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(final CheckStateChangedEvent event) {
 
-				if (event.getChecked()
-						&& selectedNamespaceDefinition != null
-						&& selectedNamespaceDefinition.getSchemaLocations()
-								.size() > 0) {
+				if (event.getChecked() && selectedNamespaceDefinition != null
+						&& selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
 					versionViewer.getControl().setEnabled(true);
 				}
 				else {
@@ -218,8 +207,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		});
 
 		Label versionLabel = new Label(composite, SWT.NONE);
-		versionLabel
-				.setText("Select desired XSD (if none is selected the default will be used):");
+		versionLabel.setText("Select desired XSD (if none is selected the default will be used):");
 
 		versionViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		versionViewer.getTable().setLayoutData(gd);
@@ -229,11 +217,10 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		versionViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(final CheckStateChangedEvent event) {
 				if (event.getChecked()) {
-					versionViewer.setCheckedElements(new Object[] { event
-							.getElement() });
+					versionViewer.setCheckedElements(new Object[] { event.getElement() });
 					if (selectedNamespaceDefinition != null) {
-						selectedVersion.put(selectedNamespaceDefinition,
-								(String) event.getElement());
+						selectedVersion.put(selectedNamespaceDefinition, (String) event
+								.getElement());
 					}
 				}
 				else {
