@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.autowire;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * Utility class for loading and storing annotation reference information.
@@ -20,35 +21,6 @@ import org.eclipse.jdt.core.Signature;
  * @since 2.0.5
  */
 public class AnnotatedReferenceUtils {
-
-	/**
-	 * Resolves a type name to an actual fully qualified type.
-	 * @param tName the name to resolve
-	 * @param type the {@link IType} which will help resolve
-	 * @return the fully qualified name or null if none found.
-	 * @throws JavaModelException
-	 */
-	public static String resolveType(String tName, IType type) throws JavaModelException {
-		String[] firstLocation = null;
-		String[][] resolvedTypeNames = null;
-		StringBuilder name = new StringBuilder();
-
-		if (tName != null) {
-			resolvedTypeNames = type.resolveType(tName);
-	
-			if (resolvedTypeNames != null) {
-				firstLocation = resolvedTypeNames[0];
-				for (int i = 0; i < firstLocation.length; i++) {
-					name.append(firstLocation[i]);
-					if (i < firstLocation.length - 1)
-						name.append(".");
-				}
-			}
-	
-			return name.toString();
-		}
-		return null;
-	}
 
 	/**
 	 * Gets a fully qualified type name from a type signature.
@@ -68,7 +40,7 @@ public class AnnotatedReferenceUtils {
 		if (fullName.indexOf("[") > 0)
 			fullName = fullName.substring(0, fullName.indexOf("["));
 
-		String resolvedType = resolveType(fullName, type);
+		String resolvedType = JdtUtils.resolveClassName(fullName, type);
 		if (resolvedType != null && resolvedType.length() > 0)
 			return resolvedType;
 		return fullName;

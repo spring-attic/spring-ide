@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.core.autowire.AnnotatedBeanReference;
-import org.springframework.ide.eclipse.beans.core.autowire.AnnotatedReferenceUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.AnnotatedProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -62,10 +61,8 @@ import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
  * @since 2.0.5
  */
 /**
- * TODO: 
- *   * Do processing only if annotation based autowiring is enabled in {@link IBeansConfig}
- *     and/or {@link IBeansConfigSet}. 
- *   * Process XML autowiring configurations as well
+ * TODO: * Do processing only if annotation based autowiring is enabled in {@link IBeansConfig}
+ * and/or {@link IBeansConfigSet}. * Process XML autowiring configurations as well
  */
 public class AnnotationReferenceMetadataProvider extends BeanMetadataProviderAdapter implements
 		IBeanMetadataProvider {
@@ -283,8 +280,8 @@ public class AnnotationReferenceMetadataProvider extends BeanMetadataProviderAda
 	/**
 	 * Populates a {@link AnnotatedBeanReference} describing the resource annotation passed. This
 	 * method extracts information from the parent node to be able to better describe the reference
-	 * being generated. Currently, parents of type
-	 * {@link MethodDeclaration) and {@link FieldDeclaration} are supported.
+	 * being generated. Currently, parents of type {@link MethodDeclaration) and
+	 * {@link FieldDeclaration} are supported.
 	 * @param annotation the annotation for which a reference is generated
 	 * @return the new {@link AnnotatedBeanReference} or null if there was an unknown parent node
 	 * type
@@ -319,12 +316,7 @@ public class AnnotationReferenceMetadataProvider extends BeanMetadataProviderAda
 		else {
 			IType targetType = JdtUtils.getJavaType(jProject.getProject(), fullClassName);
 			if (targetType != null) {
-				try {
-					ref.setClassName(AnnotatedReferenceUtils.resolveType(ref.getClassName(),
-							targetType));
-				}
-				catch (JavaModelException e) {
-				}
+				ref.setClassName(JdtUtils.resolveClassName(ref.getClassName(), targetType));
 			}
 		}
 
