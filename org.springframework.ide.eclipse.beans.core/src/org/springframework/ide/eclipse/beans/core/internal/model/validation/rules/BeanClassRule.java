@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -57,8 +58,15 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 				&& !ignorableClasses.contains(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(),
 					className);
-			if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
-				context.error(bean, "CLASS_NOT_FOUND", "Class '" + className + "' not found");
+			try {
+				if (type != null && type.isInterface()) {
+					context.warning(bean, "CLASS_NOT_CLASS", "Class '" + className + "' is an interface");
+				}
+				else if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
+					context.error(bean, "CLASS_NOT_FOUND", "Class '" + className + "' not found");
+				}
+			}
+			catch (JavaModelException e) {
 			}
 		}
 	}
