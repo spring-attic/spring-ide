@@ -553,7 +553,7 @@ public class BeansEditorUtils {
 	public static final String getClassNameForBean(IFile file, Document document, String id) {
 		boolean foundLocal = false;
 
-		NodeList beanNodes = document.getElementsByTagName("bean");
+		NodeList beanNodes = document.getElementsByTagNameNS(NamespaceUtils.DEFAULT_NAMESPACE_URI, "bean");
 		for (int i = 0; i < beanNodes.getLength(); i++) {
 			Node beanNode = beanNodes.item(i);
 			NamedNodeMap attributes = beanNode.getAttributes();
@@ -906,7 +906,7 @@ public class BeansEditorUtils {
 				Set<IMethod> methods = Introspector.getAllMethods(type);
 				for (IMethod m : methods) {
 					if (m.getElementName().equals(factoryMethod)) {
-						return JdtUtils.resolveClassName(m.getReturnType(), type);
+						return JdtUtils.resolveClassNameBySignature(m.getReturnType(), type);
 					}
 				}
 			}

@@ -54,7 +54,7 @@ public class PropertyValueContentAssistCalculator extends ClassContentAssistCalc
 						IMethod method = Introspector.getWritableProperty(type, propertyName);
 						if (method != null) {
 							// Since we got a java bean setter there needs to one parameter
-							String parameterType = JdtUtils.resolveClassName(method
+							String parameterType = JdtUtils.resolveClassNameBySignature(method
 									.getParameterTypes()[0], type);
 
 							// Class and String can be converted in Class instances

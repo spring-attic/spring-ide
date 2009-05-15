@@ -147,14 +147,16 @@ public class BeanReferenceSearchRequestor {
 					}
 
 					String className = BeansEditorUtils.getClassNameForBean(beanNode);
-					IType type = JdtUtils.getJavaType(file.getProject(), className);
-					List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type,
-							type);
 					boolean matchesType = false;
-					for (String cn : hierachyTypes) {
-						if (this.requiredTypes.contains(cn)) {
-							matchesType = true;
-							break;
+					if (requiredTypes.size() > 0) {
+						IType type = JdtUtils.getJavaType(file.getProject(), className);
+						List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(
+								type, type);
+						for (String cn : hierachyTypes) {
+							if (this.requiredTypes.contains(cn)) {
+								matchesType = true;
+								break;
+							}
 						}
 					}
 

@@ -10,14 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -25,14 +22,12 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -44,9 +39,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
-import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.w3c.dom.Node;
 
 /**
  * Utility class provides methods to trigger content assist for package and class content assist
@@ -220,44 +213,6 @@ public class BeansJavaCompletionUtils {
 			}
 //		}
 		return project.getPackageFragments()[0];
-	}
-
-	public static List<String> getPropertyTypes(Node node, IProject project) {
-		List<String> requiredTypes = new ArrayList<String>();
-		String className = BeansEditorUtils.getClassNameForBean(node.getParentNode());
-		String propertyName = BeansEditorUtils.getAttribute(node, "name");
-		if (className != null && propertyName != null && project != null) {
-			IType type = JdtUtils.getJavaType(project, className);
-			if (type != null) {
-				try {
-					IMethod method = Introspector.getWritableProperty(type, propertyName);
-					if (method != null) {
-						String signature = method.getParameterTypes()[0];
-						String packageName = Signature.getSignatureQualifier(signature);
-						String fullName = (packageName.trim().equals("") ? "" : packageName + ".")
-								+ Signature.getSignatureSimpleName(signature);
-						String[][] resolvedTypeNames = type.resolveType(fullName);
-
-						if (resolvedTypeNames != null && resolvedTypeNames.length > 0
-								&& resolvedTypeNames[0].length > 0) {
-							IType propertyType = JdtUtils.getJavaType(project,
-									resolvedTypeNames[0][0] + "." + resolvedTypeNames[0][1]);
-							ITypeHierarchy hierachy = propertyType.newTypeHierarchy(JavaCore
-									.create(project), new NullProgressMonitor());
-
-							requiredTypes.add(propertyType.getFullyQualifiedName());
-							IType[] subTypes = hierachy.getAllSubtypes(propertyType);
-							for (IType subType : subTypes) {
-								requiredTypes.add(subType.getFullyQualifiedName());
-							}
-						}
-					}
-				}
-				catch (JavaModelException e) {
-				}
-			}
-		}
-		return requiredTypes;
 	}
 
 	/**

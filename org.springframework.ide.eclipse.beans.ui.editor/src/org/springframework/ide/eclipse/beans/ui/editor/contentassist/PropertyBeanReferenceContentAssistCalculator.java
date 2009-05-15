@@ -53,7 +53,7 @@ public class PropertyBeanReferenceContentAssistCalculator extends
 					if (method != null) {
 						// It is safe to assume that we have one parameter since
 						// this is a property setter
-						String parameterTypeName = JdtUtils.resolveClassName(method
+						String parameterTypeName = JdtUtils.resolveClassNameBySignature(method
 								.getParameterTypes()[0], type);
 						if (parameterTypeName != null) {
 							IType parameterType = JdtUtils.getJavaType(context.getFile()
