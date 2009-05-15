@@ -72,4 +72,8 @@ public class AnnotationMetadataReadingVisitor extends
 		return false;
 	}
 
+	public boolean isFinal() {
+		return false;
+	}
+
 }
