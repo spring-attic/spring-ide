@@ -88,25 +88,25 @@ public class BeanReferenceSearchRequestor {
 					image = BeansUIPlugin.getLabelProvider().getImage(bean);
 				}
 
-				String className = BeansModelUtils.getBeanClass(bean, null);
-				IType type = JdtUtils.getJavaType(file.getProject(), className);
-				List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type,
-						type);
 				boolean matchesType = false;
-				for (String cn : hierachyTypes) {
-					if (this.requiredTypes.contains(cn)) {
-						matchesType = true;
-						break;
+				if (requiredTypes.size() > 0) {
+					String className = BeansModelUtils.getBeanClass(bean, null);
+					IType type = JdtUtils.getJavaType(file.getProject(), className);
+					List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type,
+							type);
+					for (String cn : hierachyTypes) {
+						if (this.requiredTypes.contains(cn)) {
+							matchesType = true;
+							break;
+						}
 					}
 				}
-
 				if (matchesType) {
 					recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText,
 							replaceText, null);
 				}
 				else {
-					recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText,
-							replaceText, bean);
+					recorder.recordProposal(image, RELEVANCE, displayText, replaceText, bean);
 				}
 
 				beans.add(key);
@@ -142,7 +142,7 @@ public class BeanReferenceSearchRequestor {
 					buf.append(fileName);
 					String displayText = buf.toString();
 					Image image = null;
-					if(Display.getCurrent() != null) {
+					if (Display.getCurrent() != null) {
 						image = new DelegatingLabelProvider().getImage(beanNode);
 					}
 
