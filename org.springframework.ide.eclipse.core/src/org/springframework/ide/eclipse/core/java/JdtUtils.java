@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -209,8 +210,9 @@ public class JdtUtils {
 				}
 				else if ("sourcecontrol".equals(scheme)) {
 					// special case of Rational Team Concert
-					IPath sourceControlPath = project.findMember(path.removeFirstSegments(1)).getLocation();
-					File sourceControlFile = sourceControlPath.toFile(); 
+					IPath sourceControlPath = project.findMember(path.removeFirstSegments(1))
+							.getLocation();
+					File sourceControlFile = sourceControlPath.toFile();
 					if (sourceControlFile.exists()) {
 						addUri(paths, sourceControlFile.toURI());
 					}
@@ -612,8 +614,8 @@ public class JdtUtils {
 	private static String[] getParameterTypesAsStringArray(IMethod method) {
 		String[] parameterTypesAsString = new String[method.getParameterTypes().length];
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			parameterTypesAsString[i] = resolveClassName(method.getParameterTypes()[i], method
-					.getDeclaringType());
+			parameterTypesAsString[i] = resolveClassNameBySignature(method.getParameterTypes()[i],
+					method.getDeclaringType());
 		}
 		return parameterTypesAsString;
 	}
@@ -686,17 +688,86 @@ public class JdtUtils {
 	}
 
 	public static String resolveClassName(String className, IType type) {
+		// replace binary $ inner class name syntax with . for source level
+		className = className.replace('$', '.');
+
+		IProject project = type.getJavaProject().getProject();
+
 		try {
-			className = Signature.toString(className).replace('$', '.');
+			// Special handling for some well-know classes
+			if (className.startsWith("java.lang") && getJavaType(project, className) != null) {
+				return className;
+			}
+
+			// Check if the class is imported
+			if (!type.isBinary()) {
+
+				int ix = className.lastIndexOf('.');
+				String firstClassNameSegment = className;
+				if (ix > 0) {
+					firstClassNameSegment = className.substring(0, ix);
+				}
+
+				for (IImportDeclaration importDeclaration : type.getCompilationUnit().getImports()) {
+					String importName = importDeclaration.getElementName();
+					if (importDeclaration.isOnDemand()) {
+						String newClassName = new StringBuilder(importName.substring(0, importName
+								.length() - 1)).append(className).toString();
+						if (getJavaType(project, newClassName) != null) {
+							return newClassName;
+						}
+					}
+					else if (importName.endsWith(className)
+							&& getJavaType(project, importName) != null) {
+						return importName;
+					}
+					else if (!className.equals(firstClassNameSegment)) {
+						if (importName.endsWith(firstClassNameSegment)) {
+							String newClassName = new StringBuilder(importName.substring(0,
+									importName.lastIndexOf('.') + 1)).append(className).toString();
+							if (getJavaType(project, newClassName) != null) {
+								return newClassName;
+							}
+						}
+					}
+				}
+			}
+
+			// Check if the class is in the same package as the type
+			String packageName = type.getPackageFragment().getElementName();
+			String newClassName = new StringBuilder(packageName).append('.').append(className)
+					.toString();
+			if (getJavaType(project, newClassName) != null) {
+				return newClassName;
+			}
+
+			// Check if the className is sufficient (already fully-qualified)
+			if (getJavaType(project, className) != null) {
+				return className;
+			}
+
+			// Check if the class is coming from the java.lang
+			newClassName = new StringBuilder("java.lang.").append(className).toString();
+			if (getJavaType(project, newClassName) != null) {
+				return newClassName;
+			}
+
+			// Fall back to full blown resolution
 			String[][] fullInter = type.resolveType(className);
 			if (fullInter != null && fullInter.length > 0) {
 				return fullInter[0][0] + "." + fullInter[0][1];
 			}
 		}
 		catch (JavaModelException e) {
+			SpringCore.log(e);
 		}
 
 		return className;
+	}
+
+	public static String resolveClassNameBySignature(String className, IType type) {
+		className = Signature.toString(className).replace('$', '.');
+		return resolveClassName(className, type);
 	}
 
 	public static IType getJavaTypeFromSignatureClassName(String className, IType contextType) {
@@ -705,7 +776,7 @@ public class JdtUtils {
 		}
 		try {
 			return JdtUtils.getJavaType(contextType.getJavaProject().getProject(), JdtUtils
-					.resolveClassName(className, contextType));
+					.resolveClassNameBySignature(className, contextType));
 		}
 		catch (IllegalArgumentException e) {
 			// do Nothing
@@ -800,10 +871,8 @@ public class JdtUtils {
 							if (type.isBinary()) {
 								requiredTypes.add(interfaceName);
 							}
-							String[][] resolvedNames = type.resolveType(interfaceName);
-							if (resolvedNames != null && resolvedNames.length > 0) {
-								String resolvedName = org.springframework.ide.eclipse.core.StringUtils
-										.concatenate(resolvedNames[0][0], resolvedNames[0][1], ".");
+							String resolvedName = resolveClassName(interfaceName, type);
+							if (resolvedName != null) {
 								requiredTypes.add(resolvedName);
 							}
 						}
@@ -860,7 +929,8 @@ public class JdtUtils {
 					String sourceFileName = classFileName.replace(".class", ".java");
 					for (IClasspathEntry entry : project.getRawClasspath()) {
 						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-							IPath path = entry.getPath().append(sourceFileName).removeFirstSegments(1);
+							IPath path = entry.getPath().append(sourceFileName)
+									.removeFirstSegments(1);
 							IResource resource = project.getProject().findMember(path);
 							if (resource != null) {
 								return resource;

@@ -47,7 +47,7 @@ public class AndMethodFilter extends AbstractCompositeMethodFilter implements IM
 	 */
 	public boolean matches(IMethod method, String prefix) {
 		for (IMethodFilter filter : getMethodFilters()) {
-			if (!filter.matches(method, prefix)) {
+			if (filter != null && !filter.matches(method, prefix)) {
 				return false;
 			}
 		}

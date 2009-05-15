@@ -25,13 +25,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.ClassUtils;
 
 /**
  * {@link IAnnotationMetadata} implementation that uses Eclipse JDT core model information for
  * extracting the metadata.
  * @author Christian Dupuis
- * @since 2.2.2 
+ * @since 2.2.2
  */
 public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 
@@ -74,21 +75,17 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 			}
 		}
 		catch (JavaModelException e) {
-			
+
 		}
 	}
 
-	/**
-	 * @param annotation
-	 * @return
-	 */
 	private Annotation processAnnotation(IAnnotation annotation) {
 		Annotation modelAnnotation;
 		if (type.isBinary()) {
 			modelAnnotation = new Annotation(annotation.getElementName());
 		}
 		else {
-			modelAnnotation = new Annotation(resolveClassName(annotation.getElementName(), type));
+			modelAnnotation = new Annotation(JdtUtils.resolveClassName(annotation.getElementName(), type));
 		}
 		try {
 			for (IMemberValuePair member : annotation.getMemberValuePairs()) {
@@ -109,7 +106,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 				}
 
 				modelAnnotation.addMember(new AnnotationMemberValuePair(("value".equals(member
-					.getMemberName()) ? null : member.getMemberName()), builder.toString()));
+						.getMemberName()) ? null : member.getMemberName()), builder.toString()));
 
 			}
 		}
@@ -122,7 +119,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 	private void processStringValue(IMemberValuePair member, StringBuilder builder, String value) {
 		// class value
 		if (member.getValueKind() == IMemberValuePair.K_CLASS) {
-			String className = resolveClassName(value, type);
+			String className = JdtUtils.resolveClassName(value, type);
 			if (className != null) {
 				builder.append(ClassUtils.getShortName(className));
 			}
@@ -137,7 +134,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 			int i = tempValue.lastIndexOf('.');
 			while (i > 0) {
 				tempValue = tempValue.substring(0, i);
-				String className = resolveClassName(tempValue, type);
+				String className = JdtUtils.resolveClassName(tempValue, type);
 				if (className != null) {
 					builder.append(ClassUtils.getShortName(className)).append(
 							member.getValue().toString().substring(i));
@@ -206,17 +203,4 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 		return false;
 	}
 
-	private String resolveClassName(String className, IType type) {
-		try {
-			String[][] fullInter = type.resolveType(className);
-			if (fullInter != null && fullInter.length > 0) {
-				return fullInter[0][0] + "." + fullInter[0][1];
-			}
-			return null;
-		}
-		catch (JavaModelException e) {
-		}
-
-		return className;
-	}
 }

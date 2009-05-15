@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.StringUtils;
 
 /**
  * Helper methods for examining a Java {@link IType}.
@@ -351,7 +350,7 @@ public final class Introspector {
 				String[] interfaces = type.getSuperInterfaceTypeSignatures();
 				if (interfaces != null) {
 					for (String iface : interfaces) {
-						String fqin = JdtUtils.resolveClassName(iface, type);
+						String fqin = JdtUtils.resolveClassNameBySignature(iface, type);
 						IType interfaceType = type.getJavaProject().findType(fqin);
 						if (interfaceType != null) {
 							allInterfaces.add(interfaceType);
@@ -374,7 +373,7 @@ public final class Introspector {
 				String[] interfaces = type.getSuperInterfaceTypeSignatures();
 				if (interfaces != null) {
 					for (String iface : interfaces) {
-						String fqin = JdtUtils.resolveClassName(iface, type);
+						String fqin = JdtUtils.resolveClassNameBySignature(iface, type);
 						IType interfaceType = type.getJavaProject().findType(fqin);
 						if (interfaceType != null
 								&& interfaceType.getFullyQualifiedName().equals(className)) {
@@ -430,10 +429,8 @@ public final class Introspector {
 			if (type.isBinary()) {
 				return type.getJavaProject().findType(name);
 			}
-			String[][] resolvedNames = type.resolveType(name);
-			if (resolvedNames != null && resolvedNames.length > 0) {
-				String resolvedName = StringUtils.concatenate(resolvedNames[0][0],
-						resolvedNames[0][1], ".");
+			String resolvedName = JdtUtils.resolveClassName(name, type);
+			if (resolvedName != null) {
 				return type.getJavaProject().findType(resolvedName);
 			}
 		}
