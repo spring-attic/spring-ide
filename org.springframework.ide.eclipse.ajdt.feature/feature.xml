@@ -31,8 +31,8 @@
    </license>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.2.4" />
-      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.2.4" />
+      <import feature="org.springframework.ide.eclipse.feature" version="2.2.5" />
+      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.2.5" />
       <import feature="org.eclipse.ajdt" />
    </requires>
 
