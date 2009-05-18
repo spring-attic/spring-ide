@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.batch.ui.editor.contentassist.batch;
 
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 
@@ -21,6 +24,24 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceCont
  */
 public class BatchContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
 	
-	// Intentionally empty for now
+	public void init() {
+		IContentAssistCalculator stepRef = new StepReferenceContentAssistCalculator();
+		registerContentAssistCalculator("next", "on", stepRef);
+		registerContentAssistCalculator("stop", "on", stepRef);
+		registerContentAssistCalculator("split", "next", stepRef);
+		registerContentAssistCalculator("step", "next", stepRef);
+		
+		IContentAssistCalculator beanRef = new BeanReferenceContentAssistCalculator();
+		registerContentAssistCalculator("job", "parent", beanRef);
+		registerContentAssistCalculator("step", "parent", beanRef);
+		registerContentAssistCalculator("chunk", "processor", beanRef);
+		registerContentAssistCalculator("chunk", "reader", beanRef);
+		registerContentAssistCalculator("chunk", "writer", beanRef);
+		
+		IContentAssistCalculator classRef = new ClassContentAssistCalculator();
+		registerContentAssistCalculator("listener", "class", classRef);
+		registerContentAssistCalculator("job-listener", "class", classRef);
+		registerContentAssistCalculator("step-listener", "class", classRef);
+	}
 	
 }

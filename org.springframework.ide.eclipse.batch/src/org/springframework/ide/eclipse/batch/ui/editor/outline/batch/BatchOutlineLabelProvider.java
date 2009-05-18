@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.batch.ui.editor.outline.batch;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.springframework.ide.eclipse.batch.BatchUIImages;
+import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
@@ -30,6 +32,17 @@ public class BatchOutlineLabelProvider extends JFaceNodeLabelProvider {
 	@Override
 	public String getText(Object element) {
 		Node node = (Node) element;
-		return node.getLocalName();
+		NamedNodeMap attrs = node.getAttributes();
+		Node id;
+		String name = node.getLocalName();
+		String text = name;
+		
+		if (BeansContentOutlineConfiguration.isShowAttributes()) {
+			id = attrs.getNamedItem("id");
+			if (id != null) {
+				text = text.concat(" " + id.getNodeValue());
+			}
+		}
+		return text;
 	}
 }

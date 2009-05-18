@@ -11,6 +11,9 @@
 package org.springframework.ide.eclipse.batch.ui.editor.hyperlink.batch;
 
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeanHyperlinkCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ClassHyperlinkCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IHyperlinkCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NamespaceHyperlinkDetectorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHyperlinkDetector;
 
@@ -23,6 +26,24 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHype
 public class BatchHyperlinkDetector extends NamespaceHyperlinkDetectorSupport implements
 		IHyperlinkDetector {
 	
-	// Intentionally empty for now
+	public void init() {
+		IHyperlinkCalculator stepLink = new StepReferenceHyperlinkCalculator();
+		registerHyperlinkCalculator("next", "on", stepLink);
+		registerHyperlinkCalculator("stop", "on", stepLink);
+		registerHyperlinkCalculator("split", "next", stepLink);
+		registerHyperlinkCalculator("step", "next", stepLink);
+		
+		IHyperlinkCalculator beanLink = new BeanHyperlinkCalculator();
+		registerHyperlinkCalculator("job", "parent", beanLink);
+		registerHyperlinkCalculator("step", "parent", beanLink);
+		registerHyperlinkCalculator("chunk", "processor", beanLink);
+		registerHyperlinkCalculator("chunk", "reader", beanLink);
+		registerHyperlinkCalculator("chunk", "writer", beanLink);
+		
+		IHyperlinkCalculator classLink = new ClassHyperlinkCalculator();
+		registerHyperlinkCalculator("listener", "class", classLink);
+		registerHyperlinkCalculator("job-listener", "class", classLink);
+		registerHyperlinkCalculator("step-listener", "class", classLink);
+	}
 	
 }
