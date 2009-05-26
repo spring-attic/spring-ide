@@ -64,11 +64,6 @@ public class NamespaceUtils {
 		return processors;
 	}
 
-	public static IReferenceableElementsLocator[] getElementsLocator(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "elementLocator",
-				IReferenceableElementsLocator.class);
-	}
-
 	public static List<IReferenceableElementsLocator> getAllElementsLocators() {
 		List<IReferenceableElementsLocator> locators = new ArrayList<IReferenceableElementsLocator>();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_POINT);
