@@ -92,6 +92,34 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+         
+   <!--<plugin
+         id="org.springframework.osgi.core.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.osgi.io.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>-->
+         
+   <plugin
+         id="com.springsource.edu.emory.mathcs.backport.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/> 
+         
+   <plugin
+         id="com.springsource.org.antlr.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/> 
 
    <plugin
          id="com.springsource.javax.annotation.source"
@@ -190,6 +218,13 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="org.springframework.expression.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
          
    <plugin
          id="org.springframework.jdbc.source"
@@ -207,6 +242,13 @@
          
    <plugin
          id="org.springframework.orm.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
+         id="org.springframework.oxm.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
