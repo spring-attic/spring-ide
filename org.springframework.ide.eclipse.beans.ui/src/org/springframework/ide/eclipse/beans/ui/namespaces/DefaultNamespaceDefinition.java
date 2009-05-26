@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 
 /**
  * Default implementation of {@link INamespaceDefinition}.
@@ -53,7 +54,10 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 	}
 
 	public Image getNamespaceImage() {
-		return image;
+		if (image != null) {
+			return image;
+		}
+		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
 	}
 
 	public Set<String> getSchemaLocations() {

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -24,6 +25,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -43,8 +46,7 @@ public class NamespaceUtils {
 
 	/**
 	 * Returns the namespace URI for the given {@link ISourceModelElement} or
-	 * <code>"http://www.springframework.org/schema/beans"</code> if no
-	 * namespace URI found.
+	 * <code>"http://www.springframework.org/schema/beans"</code> if no namespace URI found.
 	 */
 	public static String getNameSpaceURI(ISourceModelElement element) {
 		String namespaceURI = ModelUtils.getNameSpaceURI(element);
@@ -55,8 +57,8 @@ public class NamespaceUtils {
 	}
 
 	/**
-	 * Returns the {@link INamespaceLabelProvider} for the given
-	 * {@link ISourceModelElement}'s namespace.
+	 * Returns the {@link INamespaceLabelProvider} for the given {@link ISourceModelElement}'s
+	 * namespace.
 	 */
 	public static INamespaceLabelProvider getLabelProvider(ISourceModelElement element) {
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
@@ -86,8 +88,8 @@ public class NamespaceUtils {
 	}
 
 	/**
-	 * Returns the {@link ITreeContentProvider} for the given
-	 * {@link ISourceModelElement}'s namespace.
+	 * Returns the {@link ITreeContentProvider} for the given {@link ISourceModelElement}'s
+	 * namespace.
 	 */
 	public static ITreeContentProvider getContentProvider(ISourceModelElement element) {
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
@@ -119,18 +121,39 @@ public class NamespaceUtils {
 
 	public static List<INamespaceDefinition> getNamespaceDefinitions() {
 		List<INamespaceDefinition> namespaceDefinitions = new ArrayList<INamespaceDefinition>();
+		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin
+				.getNamespaceDefinitionResolver();
+		Set<org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition> detectedNamespaceDefinitions = definitionResolver
+				.getNamespaceDefinitions();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
 				NAMESPACES_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
-					String ns = config.getDeclaringExtension().getNamespaceIdentifier();
-					String prefix = config.getAttribute("prefix");
-					String schemaLocation = config.getAttribute("defaultSchemaLocation");
 					String uri = config.getAttribute("uri");
-					String icon = config.getAttribute("icon");
+					org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition = definitionResolver
+							.resolveNamespaceDefinition(uri);
+					detectedNamespaceDefinitions.remove(namespaceDefinition);
 
-					Image image = getImage(ns, icon);
+					String prefix = config.getAttribute("prefix");
+					if (!StringUtils.hasText(prefix) && namespaceDefinition != null) {
+						prefix = namespaceDefinition.getPrefix();
+					}
+					String schemaLocation = config.getAttribute("defaultSchemaLocation");
+					if (!StringUtils.hasText(schemaLocation) && namespaceDefinition != null) {
+						schemaLocation = namespaceDefinition.getDefaultSchemaLocation();
+					}
+					Image image = null;
+					if (config.getAttribute("icon") != null) {
+						String ns = config.getDeclaringExtension().getNamespaceIdentifier();
+						String icon = config.getAttribute("icon");
+						image = getImage(ns, icon);
+					}
+					else if (namespaceDefinition != null) {
+						String ns = namespaceDefinition.getBundle().getSymbolicName();
+						String icon = namespaceDefinition.getIconPath();
+						image = getImage(ns, icon);
+					}
 					DefaultNamespaceDefinition def = new DefaultNamespaceDefinition(prefix, uri,
 							schemaLocation, image);
 
@@ -140,10 +163,27 @@ public class NamespaceUtils {
 					for (IConfigurationElement schemaLocationConfigElement : schemaLocationConfigElements) {
 						def.addSchemaLocation(schemaLocationConfigElement.getAttribute("url"));
 					}
+					if (def.getSchemaLocations().size() == 0 && namespaceDefinition != null) {
+						def.getSchemaLocations().addAll(namespaceDefinition.getSchemaLocations());
+					}
 
 					namespaceDefinitions.add(def);
 				}
 			}
+		}
+
+		for (org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition : detectedNamespaceDefinitions) {
+			String ns = namespaceDefinition.getBundle().getSymbolicName();
+			String icon = namespaceDefinition.getIconPath();
+			Image image = null;
+			if (icon != null) {
+				image = getImage(ns, icon);
+			}
+			DefaultNamespaceDefinition def = new DefaultNamespaceDefinition(namespaceDefinition
+					.getPrefix(), namespaceDefinition.getNamespaceUri(), namespaceDefinition
+					.getDefaultSchemaLocation(), image);
+			def.getSchemaLocations().addAll(namespaceDefinition.getSchemaLocations());
+			namespaceDefinitions.add(def);
 		}
 
 		Collections.sort(namespaceDefinitions, new Comparator<INamespaceDefinition>() {
@@ -156,6 +196,11 @@ public class NamespaceUtils {
 	}
 
 	public static INamespaceDefinition getDefaultNamespaceDefinition() {
+		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin
+				.getNamespaceDefinitionResolver();
+		org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition = definitionResolver
+				.resolveNamespaceDefinition(DEFAULT_NAMESPACE_URI);
+
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
 				NAMESPACES_EXTENSION_POINT);
 		if (point != null) {
@@ -163,21 +208,44 @@ public class NamespaceUtils {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					if (namespaceURI.equals(config.getAttribute("uri"))) {
-						String ns = config.getDeclaringExtension().getNamespaceIdentifier();
-						String prefix = config.getAttribute("prefix");
-						String schemaLocation = config.getAttribute("defaultSchemaLocation");
-						String uri = config.getAttribute("uri");
-						String icon = config.getAttribute("icon");
 
-						Image image = getImage(ns, icon);
+						String prefix = config.getAttribute("prefix");
+						if (!StringUtils.hasText(prefix) && namespaceDefinition != null) {
+							prefix = namespaceDefinition.getPrefix();
+						}
+						String schemaLocation = config.getAttribute("defaultSchemaLocation");
+						if (!StringUtils.hasText(schemaLocation) && namespaceDefinition != null) {
+							schemaLocation = namespaceDefinition.getDefaultSchemaLocation();
+						}
+						String uri = config.getAttribute("uri");
+						Image image = null;
+						if (config.getAttribute("icon") != null) {
+							String ns = config.getDeclaringExtension().getNamespaceIdentifier();
+							String icon = config.getAttribute("icon");
+							image = getImage(ns, icon);
+						}
+						else if (namespaceDefinition != null) {
+							String ns = namespaceDefinition.getBundle().getSymbolicName();
+							String icon = namespaceDefinition.getIconPath();
+							image = getImage(ns, icon);
+						}
 						return new DefaultNamespaceDefinition(prefix, uri, schemaLocation, image);
 					}
 				}
 			}
 		}
+
+		if (namespaceDefinition != null) {
+			String ns = namespaceDefinition.getBundle().getSymbolicName();
+			String icon = namespaceDefinition.getIconPath();
+			Image image = getImage(ns, icon);
+			return new DefaultNamespaceDefinition(namespaceDefinition.getPrefix(),
+					namespaceDefinition.getNamespaceUri(), namespaceDefinition
+							.getDefaultSchemaLocation(), image);
+		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns an {@link Image} instance which is located at the indicated icon path.
 	 */
@@ -195,5 +263,5 @@ public class NamespaceUtils {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
 		}
 	}
-	
+
 }

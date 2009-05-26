@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.springframework.ide.eclipse.beans.ui">
+<schema targetNamespace="org.springframework.ide.eclipse.beans.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
          <meta.schema plugin="org.springframework.ide.eclipse.beans.ui" id="namespaces" name="Namespaces"/>
@@ -12,6 +12,11 @@ This extension point is used to add content providers and label providers for Sp
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="namespace" minOccurs="0" maxOccurs="unbounded"/>
@@ -84,7 +89,7 @@ This extension point is used to add content providers and label providers for Sp
                </appInfo>
             </annotation>
          </attribute>
-         <attribute name="prefix" type="string" use="required">
+         <attribute name="prefix" type="string">
             <annotation>
                <documentation>
                   the prefix used for this namespace in xml files
