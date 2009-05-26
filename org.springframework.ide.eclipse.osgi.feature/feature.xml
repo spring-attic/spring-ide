@@ -42,61 +42,10 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.beans.osgibridge"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.springframework.ide.eclipse.osgi.targetdefinition"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="true"/>
 
-<!--
-   <plugin
-         id="org.springframework.bundle.osgi.doc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> 
--->
-
-   <plugin
-         id="org.springframework.osgi.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.osgi.io"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.osgi.extender"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-         
-   <plugin
-         id="com.springsource.edu.emory.mathcs.backport"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> 
-
-   <plugin
-         id="org.eclipse.equinox.event"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> 
-         
 </feature>
