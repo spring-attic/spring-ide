@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core;
 
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,12 +27,17 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Constants;
+import org.osgi.framework.SynchronousBundleListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
+import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
 import org.springframework.ide.eclipse.core.MessageUtils;
+import org.springframework.osgi.util.OsgiBundleUtils;
 
 /**
  * Central access point for the Spring Framework Core plug-in (id
@@ -58,15 +65,30 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	private static BeansCorePlugin plugin;
 
 	/** The singleton beans model */
-	private static BeansModel model;
+	private BeansModel model;
 
-	private static BeanMetadataModel metadataModel;
+	private BeanMetadataModel metadataModel;
+
+	/** Spring namespace/resolver manager */
+	private NamespaceManager nsManager;
+
+	private NamespaceBundleLister nsListener;
 
 	/** Internal executor service */
-	private static ExecutorService executorService;
+	private ExecutorService executorService;
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
+
+	/**
+	 * flag indicating whether the context is down or not - useful during shutdown
+	 */
+	private volatile boolean isClosed = false;
+
+	/**
+	 * Monitor used for dealing with the bundle activator and synchronous bundle threads
+	 */
+	private transient final Object monitor = new Object();
 
 	/**
 	 * Creates the Spring Beans Core plug-in.
@@ -139,7 +161,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		// }
 
 		// systemCatalog.addCatalogElement(catalogElement);
-		
+
 		Job modelJob = new Job("Initializing Beans Model") {
 
 			@Override
@@ -151,20 +173,24 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 				return Status.OK_STATUS;
 			}
 		};
-//		modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		// modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		modelJob.setSystem(true);
 		modelJob.setPriority(Job.INTERACTIVE);
 		modelJob.schedule();
-	}
 
-	// protected Dictionary getHandlerServiceProperties(String... topics) {
-	// Dictionary result = new Hashtable();
-	// result.put(EventConstants.EVENT_TOPIC, topics);
-	// return result;
-	// }
+		nsManager = new NamespaceManager(context);
+		initNamespaceHandlers(context);
+	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		synchronized (monitor) {
+			// if already closed, bail out
+			if (isClosed) {
+				return;
+			}
+			isClosed = true;
+		}
 		model.stop();
 		metadataModel.stop();
 		super.stop(context);
@@ -181,15 +207,19 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	 * Returns the singleton {@link IBeansModel}.
 	 */
 	public static final IBeansModel getModel() {
-		return model;
+		return getDefault().model;
+	}
+	
+	public static final INamespaceDefinitionResolver getNamespaceDefinitionResolver() {
+		return getDefault().nsManager.getNamespacePlugins();
 	}
 
 	public static final IBeanMetadataModel getMetadataModel() {
-		return metadataModel;
+		return getDefault().metadataModel;
 	}
 
 	public static final ExecutorService getExecutorService() {
-		return executorService;
+		return getDefault().executorService;
 	}
 
 	/**
@@ -270,11 +300,122 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 
-	// class NamespaceEventHandler implements EventHandler {
-	//
-	// public void handleEvent(Event event) {
-	// System.out.println(event + " " + event.getProperty(Constants.BUNDLE_SYMBOLICNAME));
-	// }
-	//
-	// }
+	protected void maybeAddNamespaceHandlerFor(Bundle bundle, boolean isLazy) {
+		nsManager.maybeAddNamespaceHandlerFor(bundle, isLazy);
+	}
+
+	protected void maybeRemoveNameSpaceHandlerFor(Bundle bundle) {
+		nsManager.maybeRemoveNameSpaceHandlerFor(bundle);
+	}
+
+	protected void initNamespaceHandlers(BundleContext context) {
+		nsManager = new NamespaceManager(context);
+
+		// register listener first to make sure any bundles in INSTALLED state
+		// are not lost
+		nsListener = new NamespaceBundleLister();
+		context.addBundleListener(nsListener);
+
+		Bundle[] previousBundles = context.getBundles();
+
+		for (int i = 0; i < previousBundles.length; i++) {
+			Bundle bundle = previousBundles[i];
+			if (OsgiBundleUtils.isBundleResolved(bundle)) {
+				maybeAddNamespaceHandlerFor(bundle, false);
+			}
+			else if (OsgiBundleUtils.isBundleLazyActivated(bundle)) {
+				maybeAddNamespaceHandlerFor(bundle, true);
+			}
+		}
+
+		// discovery finished, publish the resolvers/parsers in the OSGi space
+		nsManager.afterPropertiesSet();
+	}
+
+	/**
+	 * Common base class for {@link ContextLoaderListener} listeners.
+	 */
+	private abstract class BaseListener implements SynchronousBundleListener {
+
+		/**
+		 * common cache used for tracking down bundles started lazily so they don't get processed
+		 * twice (once when started lazy, once when started fully)
+		 */
+		protected Map<Bundle, Object> lazyBundleCache = new WeakHashMap<Bundle, Object>();
+
+		/** dummy value for the bundle cache */
+		private final Object VALUE = new Object();
+
+		// caches the bundle
+		protected void push(Bundle bundle) {
+			synchronized (lazyBundleCache) {
+				lazyBundleCache.put(bundle, VALUE);
+			}
+		}
+
+		// checks the presence of the bundle as well as removing it
+		protected boolean pop(Bundle bundle) {
+			synchronized (lazyBundleCache) {
+				return (lazyBundleCache.remove(bundle) != null);
+			}
+		}
+
+		/**
+		 * A bundle has been started, stopped, resolved, or unresolved. This method is a synchronous
+		 * callback, do not do any long-running work in this thread.
+		 * 
+		 * @see org.osgi.framework.SynchronousBundleListener#bundleChanged
+		 */
+		public void bundleChanged(BundleEvent event) {
+
+			// check if the listener is still alive
+			if (isClosed) {
+				return;
+			}
+			try {
+				handleEvent(event);
+			}
+			catch (Exception ex) {
+				log(ex);
+			}
+		}
+
+		protected abstract void handleEvent(BundleEvent event);
+	}
+
+	/**
+	 * Bundle listener used for detecting namespace handler/resolvers. Exists as a separate listener
+	 * so that it can be registered early to avoid race conditions with bundles in INSTALLING state
+	 * but still to avoid premature context creation before the Spring {@link ContextLoaderListener}
+	 * is not fully initialized.
+	 */
+	private class NamespaceBundleLister extends BaseListener {
+
+		@Override
+		protected void handleEvent(BundleEvent event) {
+
+			Bundle bundle = event.getBundle();
+
+			switch (event.getType()) {
+			case BundleEvent.LAZY_ACTIVATION: {
+				push(bundle);
+				maybeAddNamespaceHandlerFor(bundle, true);
+				}
+				break;
+			case BundleEvent.RESOLVED: {
+				if (!pop(bundle)) {
+					maybeAddNamespaceHandlerFor(bundle, false);
+				}
+				break;
+			}
+			case BundleEvent.STOPPED: {
+				pop(bundle);
+				maybeRemoveNameSpaceHandlerFor(bundle);
+				break;
+			}
+			default:
+				break;
+			}
+		}
+	}
 }
