@@ -807,7 +807,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			// Add auto detected configs and config sets
 			populateAutoDetectedConfigsAndConfigSets();
 
-			// Remove all invalid config names from from this project's config sets
+			// Remove all invalid config names from this project's config sets
 			IBeansModel model = BeansCorePlugin.getModel();
 			for (IBeansConfigSet configSet : configSets.values()) {
 				for (String configName : configSet.getConfigNames()) {
