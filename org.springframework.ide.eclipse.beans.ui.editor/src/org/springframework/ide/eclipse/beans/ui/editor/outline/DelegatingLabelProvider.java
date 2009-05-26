@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,14 +14,15 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.views.contentoutline.XMLContentOutlineConfiguration;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
 public class DelegatingLabelProvider extends LabelProvider {
 
-	private static XMLContentOutlineConfiguration contentOutlineConfiguration = 
-		new XMLContentOutlineConfiguration();
+	private static XMLContentOutlineConfiguration contentOutlineConfiguration = new XMLContentOutlineConfiguration();
 
 	private ILabelProvider xmlProvider;
 
@@ -45,14 +46,22 @@ public class DelegatingLabelProvider extends LabelProvider {
 		Node node = (Node) object;
 		String namespace = node.getNamespaceURI();
 
-		ILabelProvider[] labelProviders = NamespaceUtils
-				.getLabelProvider(namespace);
+		ILabelProvider[] labelProviders = NamespaceUtils.getLabelProvider(namespace);
 		for (ILabelProvider labelProvider : labelProviders) {
 			Image image = labelProvider.getImage(object);
 			if (image != null) {
 				return image;
 			}
 		}
+
+		INamespaceDefinition namespaceDefinition = BeansCorePlugin.getNamespaceDefinitionResolver()
+				.resolveNamespaceDefinition(namespace);
+		if (namespaceDefinition != null && namespaceDefinition.getIconPath() != null) {
+			return org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils.getImage(
+					namespaceDefinition.getBundle().getSymbolicName(), namespaceDefinition
+							.getIconPath());
+		}
+
 		return xmlProvider.getImage(object);
 	}
 
@@ -65,8 +74,7 @@ public class DelegatingLabelProvider extends LabelProvider {
 		Node node = (Node) object;
 		String namespace = node.getNamespaceURI();
 
-		ILabelProvider[] labelProviders = NamespaceUtils
-				.getLabelProvider(namespace);
+		ILabelProvider[] labelProviders = NamespaceUtils.getLabelProvider(namespace);
 		for (ILabelProvider labelProvider : labelProviders) {
 			String text = labelProvider.getText(object);
 			if (text != null && !"".equals(text.trim())) {

@@ -21,13 +21,25 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 public class ClassHierachyContentAssistCalculator implements IContentAssistCalculator {
 
 	private final String typeName;
+	
+	private final int flags;
 
 	/**
 	 * Constructor
 	 * @param typeName the name of the root type
 	 */
 	public ClassHierachyContentAssistCalculator(String typeName) {
+		this(typeName, BeansJavaCompletionUtils.FLAG_CLASS | BeansJavaCompletionUtils.FLAG_INTERFACE);
+	}
+
+	/**
+	 * Constructor
+	 * @param typeName the name of the root type
+	 * @param flags
+	 */
+	public ClassHierachyContentAssistCalculator(String typeName, int flags) {
 		this.typeName = typeName;
+		this.flags = flags;
 	}
 
 	/**
@@ -37,6 +49,6 @@ public class ClassHierachyContentAssistCalculator implements IContentAssistCalcu
 	public void computeProposals(IContentAssistContext context,
 			IContentAssistProposalRecorder recorder) {
 		BeansJavaCompletionUtils
-				.addTypeHierachyAttributeValueProposals(context, recorder, typeName);
+				.addTypeHierachyAttributeValueProposals(context, recorder, typeName, flags);
 	}
 }

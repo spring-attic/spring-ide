@@ -88,7 +88,8 @@ public class ToolAnnotationBasedHyperlinkDetector extends AbstractAnnotationBase
 		}
 		else if (annotationData.getExpectedMethodRef() != null) {
 			String typeName = evaluateXPathExpression(annotationData.getExpectedMethodRef(), node);
-			String className = BeansEditorUtils.getClassNameForBean(file, node.getOwnerDocument(), typeName);
+			String className = BeansEditorUtils.getClassNameForBean(file, node.getOwnerDocument(),
+					typeName);
 			return createMethodHyperlink(target, hyperlinkRegion, file, className);
 		}
 		return null;
@@ -117,8 +118,10 @@ public class ToolAnnotationBasedHyperlinkDetector extends AbstractAnnotationBase
 			ToolAnnotationData annotationData = ToolAnnotationUtils
 					.getToolAnnotationData(annotation);
 			return annotationData != null
-					&& (REF_ATTRIBUTE.equals(annotationData.getKind()) || Class.class.getName()
-							.equals(annotationData.getExpectedType()));
+					&& (REF_ATTRIBUTE.equals(annotationData.getKind())
+							|| Class.class.getName().equals(annotationData.getExpectedType())
+							|| annotationData.getExpectedMethodRef() != null || annotationData
+							.getExpectedMethodType() != null);
 		}
 		return false;
 	}

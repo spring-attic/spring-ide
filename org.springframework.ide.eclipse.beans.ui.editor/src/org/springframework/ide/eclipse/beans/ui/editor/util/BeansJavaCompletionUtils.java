@@ -107,12 +107,6 @@ public class BeansJavaCompletionUtils {
 			prefix = prefix.replace('$', '.');
 
 			String sourceStart = CLASS_SOURCE_START + prefix;
-//			String packageName = null;
-//			int dot = prefix.lastIndexOf('.');
-//			if (dot > -1) {
-//				packageName = prefix.substring(0, dot);
-//				sourceStart = "package " + packageName + ";\n" + sourceStart;
-//			}
 			String source = sourceStart + CLASS_SOURCE_END;
 			setContents(unit, source);
 
@@ -128,7 +122,6 @@ public class BeansJavaCompletionUtils {
 			}
 		}
 		catch (Exception e) {
-			e.printStackTrace();
 			// do nothing
 		}
 	}
@@ -141,7 +134,7 @@ public class BeansJavaCompletionUtils {
 	 * @param typeName the super class of the request proposals
 	 */
 	public static void addTypeHierachyAttributeValueProposals(IContentAssistContext context,
-			IContentAssistProposalRecorder recorder, String typeName) {
+			IContentAssistProposalRecorder recorder, String typeName, int flags) {
 		final String prefix = context.getMatchString();
 		if (prefix == null || prefix.length() == 0) {
 			return;
@@ -161,14 +154,25 @@ public class BeansJavaCompletionUtils {
 						if ((foundType.getFullyQualifiedName().startsWith(prefix) || foundType
 								.getElementName().startsWith(prefix))
 								&& !sortMap.containsKey(foundType.getFullyQualifiedName())
-								&& !Flags.isAbstract(foundType.getFlags())
-								&& Flags.isPublic(foundType.getFlags())) {
-							recorder.recordProposal(JavaPluginImages
-									.get(JavaPluginImages.IMG_OBJS_CLASS), 10, foundType
-									.getElementName()
-									+ " - " + foundType.getPackageFragment().getElementName(),
-									foundType.getFullyQualifiedName(), foundType);
-							sortMap.put(foundType.getFullyQualifiedName(), foundType);
+								&& !Flags.isAbstract(foundType.getFlags())) {
+
+							boolean accepted = false;
+							if ((flags & BeansJavaCompletionUtils.FLAG_CLASS) != 0
+									&& !Flags.isInterface(foundType.getFlags())) {
+								accepted = true;
+							}
+							else if ((flags & BeansJavaCompletionUtils.FLAG_INTERFACE) != 0
+									&& Flags.isInterface(foundType.getFlags())) {
+								accepted = true;
+							}
+							if (accepted) {
+								recorder.recordProposal(JavaPluginImages
+										.get(JavaPluginImages.IMG_OBJS_CLASS), 10, foundType
+										.getElementName()
+										+ " - " + foundType.getPackageFragment().getElementName(),
+										foundType.getFullyQualifiedName(), foundType);
+								sortMap.put(foundType.getFullyQualifiedName(), foundType);
+							}
 						}
 					}
 				}
@@ -188,30 +192,29 @@ public class BeansJavaCompletionUtils {
 		IPackageFragment root = getPackageFragment(project, prefix);
 		ICompilationUnit unit = root.getCompilationUnit("_xxx.java").getWorkingCopy(
 				CompilationUnitHelper.getInstance().getWorkingCopyOwner(),
-				CompilationUnitHelper.getInstance().getProblemRequestor(),
-				progressMonitor);
+				CompilationUnitHelper.getInstance().getProblemRequestor(), progressMonitor);
 		progressMonitor.done();
 		return unit;
 	}
 
 	private static IPackageFragment getPackageFragment(IJavaProject project, String prefix)
 			throws JavaModelException {
-//		int dot = prefix.lastIndexOf('.');
-//		if (dot > -1) {
-//			String packageName = prefix.substring(0, dot);
-//			IPackageFragment[] packages = project.getPackageFragments();
-//			for (IPackageFragment p : packages) {
-//				if (p.getElementName().equals(packageName))
-//					return p;
-//			}
-//		}
-//		else {
-			for (IPackageFragmentRoot p : project.getAllPackageFragmentRoots()) {
-				if (p.getKind() == IPackageFragmentRoot.K_SOURCE) {
-					return p.getPackageFragment("");
-				}
+		// int dot = prefix.lastIndexOf('.');
+		// if (dot > -1) {
+		// String packageName = prefix.substring(0, dot);
+		// IPackageFragment[] packages = project.getPackageFragments();
+		// for (IPackageFragment p : packages) {
+		// if (p.getElementName().equals(packageName))
+		// return p;
+		// }
+		// }
+		// else {
+		for (IPackageFragmentRoot p : project.getAllPackageFragmentRoots()) {
+			if (p.getKind() == IPackageFragmentRoot.K_SOURCE) {
+				return p.getPackageFragment("");
 			}
-//		}
+		}
+		// }
 		return project.getPackageFragments()[0];
 	}
 
@@ -249,7 +252,6 @@ public class BeansJavaCompletionUtils {
 					return;
 				}
 			}
-			
 
 			String replacementString = prop.getQualifiedTypeName();
 			if (innerClass) {

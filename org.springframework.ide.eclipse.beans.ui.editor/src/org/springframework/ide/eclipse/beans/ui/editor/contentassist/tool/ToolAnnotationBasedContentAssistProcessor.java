@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAss
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IAnnotationBasedContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.ToolAnnotationUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -71,8 +72,6 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 	private static final IContentAssistCalculator BEAN_REFERENCE_CALCULATOR = new BeanReferenceContentAssistCalculator(
 			true);
 
-	private static final IContentAssistCalculator CLASS_CALCULATOR = new ClassContentAssistCalculator();
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -100,11 +99,12 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 			if (Class.class.getName().equals(annotationData.getExpectedType())) {
 				// class content assist
 				if (annotationData.getAssignableTo() == null) {
-					CLASS_CALCULATOR.computeProposals(context, recorder);
+					getClassContentAssistCalculator(annotationData).computeProposals(context,
+							recorder);
 				}
 				else {
-					new ClassHierachyContentAssistCalculator(annotationData.getAssignableTo())
-							.computeProposals(context, recorder);
+					getClassHierachyContentAssistCalculator(annotationData).computeProposals(
+							context, recorder);
 				}
 			}
 			if (annotationData.getExpectedMethodType() != null) {
@@ -116,8 +116,8 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 			else if (annotationData.getExpectedMethodRef() != null) {
 				String typeName = evaluateXPathExpression(annotationData.getExpectedMethodRef(),
 						context.getNode());
-				String className = BeansEditorUtils.getClassNameForBean(context.getFile(),
-						context.getDocument(), typeName);
+				String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+						.getDocument(), typeName);
 				new NonFilteringMethodContentAssistCalculator(className).computeProposals(context,
 						recorder);
 			}
@@ -140,6 +140,30 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 		catch (XPathExpressionException e) {
 			return null;
 		}
+	}
+
+	protected IContentAssistCalculator getClassContentAssistCalculator(
+			ToolAnnotationData annotationData) {
+		if ("class-only".equals(annotationData.getAssignableToRestriction())) {
+			return new ClassContentAssistCalculator(false);
+		}
+		else if ("interface-only".equals(annotationData.getAssignableToRestriction())) {
+			return new ClassContentAssistCalculator(true);
+		}
+		return new ClassContentAssistCalculator();
+	}
+
+	protected IContentAssistCalculator getClassHierachyContentAssistCalculator(
+			ToolAnnotationData annotationData) {
+		if ("class-only".equals(annotationData.getAssignableToRestriction())) {
+			return new ClassHierachyContentAssistCalculator(annotationData.getAssignableTo(),
+					BeansJavaCompletionUtils.FLAG_CLASS);
+		}
+		else if ("interface-only".equals(annotationData.getAssignableToRestriction())) {
+			return new ClassHierachyContentAssistCalculator(annotationData.getAssignableTo(),
+					BeansJavaCompletionUtils.FLAG_INTERFACE);
+		}
+		return new ClassHierachyContentAssistCalculator(annotationData.getAssignableTo());
 	}
 
 	class NonFilteringMethodContentAssistCalculator extends MethodContentAssistCalculator {
