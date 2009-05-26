@@ -30,7 +30,7 @@ import org.xml.sax.EntityResolver;
 public class NamespaceManager {
 
 	/** The set of all namespace plugins known to the extender */
-	private ToolingNamespacePlugins namespacePlugins;
+	private ToolingAwareNamespacePlugins namespacePlugins;
 
 	/**
 	 * ServiceRegistration object returned by OSGi when registering the NamespacePlugins instance as
@@ -58,7 +58,7 @@ public class NamespaceManager {
 	public NamespaceManager(BundleContext context) {
 		this.context = context;
 		// detect package admin
-		this.namespacePlugins = new ToolingNamespacePlugins();
+		this.namespacePlugins = new ToolingAwareNamespacePlugins();
 	}
 
 	/**
@@ -167,7 +167,7 @@ public class NamespaceManager {
 		this.ndResolverRegistration = null;
 	}
 
-	public ToolingNamespacePlugins getNamespacePlugins() {
+	public ToolingAwareNamespacePlugins getNamespacePlugins() {
 		return namespacePlugins;
 	}
 

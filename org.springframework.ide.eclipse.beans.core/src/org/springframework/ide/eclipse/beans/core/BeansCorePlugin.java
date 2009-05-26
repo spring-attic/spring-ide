@@ -109,63 +109,17 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	}
 
 	@Override
-	public void start(BundleContext context) throws Exception {
+	public void start(final BundleContext context) throws Exception {
 		super.start(context);
 
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
-
-		// context.registerService(EventHandler.class.getName(),
-		// new NamespaceEventHandler(),
-		// getHandlerServiceProperties("org/springframework/osgi/extender/namespace/*"));
-
-		// // Testing
-		// ICatalog systemCatalog = null;
-		// ICatalog defaultCatalog = XMLCorePlugin.getDefault().getDefaultXMLCatalog();
-		// INextCatalog[] nextCatalogs = defaultCatalog.getNextCatalogs();
-		// for (int i = 0; i < nextCatalogs.length; i++) {
-		// INextCatalog catalog = nextCatalogs[i];
-		// ICatalog referencedCatalog = catalog.getReferencedCatalog();
-		// if (referencedCatalog != null) {
-		// if (XMLCorePlugin.SYSTEM_CATALOG_ID.equals(referencedCatalog.getId())) {
-		// systemCatalog = referencedCatalog;
-		// }
-		// }
-		// }
-		//
-		// // <system
-		// // systemId="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
-		// //
-		// uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/aop/config/spring-aop-2.0.xsd"
-		// // />
-		//
-		// String key = "http://www.springframework.org/schema/batch/spring-batch-2.0.xsd";
-		// int type = ICatalogEntry.ENTRY_TYPE_SYSTEM;
-		//
-		// ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
-		// if (catalogElement instanceof ICatalogEntry) {
-		// ICatalogEntry entry = (ICatalogEntry) catalogElement;
-		// entry.setKey(key);
-		// String resolvedPath =
-		// "file:///Users/cdupuis/Development/Java/lib/spring-projects-svn/spring-batch/trunk/spring-batch-core/src/main/resources/org/springframework/batch/core/configuration/xml/spring-batch-2.0.xsd";
-		// entry.setURI(resolvedPath);
-		//			
-		//			
-		// DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		// factory.setValidating(false);
-		// factory.setNamespaceAware(false);
-		// DocumentBuilder docBuilder = factory.newDocumentBuilder();
-		// Document doc = docBuilder.parse(new File(new URI(resolvedPath)));
-		//			
-		// String namespace = doc.getDocumentElement().getAttribute("targetNamespace");
-		// System.out.println(namespace);
-		// }
-
-		// systemCatalog.addCatalogElement(catalogElement);
 
 		Job modelJob = new Job("Initializing Beans Model") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+
+				initNamespaceHandlers(context);
 
 				model.start();
 				metadataModel.start();
@@ -179,7 +133,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		modelJob.schedule();
 
 		nsManager = new NamespaceManager(context);
-		initNamespaceHandlers(context);
 	}
 
 	@Override

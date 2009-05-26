@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
  * @since 2.2.5
  */
 @SuppressWarnings("restriction")
-public class ToolingNamespacePlugins extends NamespacePlugins implements
+public class ToolingAwareNamespacePlugins extends NamespacePlugins implements
 		INamespaceDefinitionResolver {
 
 	private static final String META_INF = "META-INF/";
@@ -98,7 +98,6 @@ public class ToolingNamespacePlugins extends NamespacePlugins implements
 	 */
 	@SuppressWarnings("unchecked")
 	private void addNamespaceDefinition(Bundle bundle) {
-		ICatalog systemCatalog = getSystemCatalog();
 
 		Set<ICatalogElement> catalogEntries = new HashSet<ICatalogElement>();
 		this.catalogEntriesByBundle.put(bundle, catalogEntries);
@@ -107,79 +106,91 @@ public class ToolingNamespacePlugins extends NamespacePlugins implements
 
 		Enumeration<URL> schemas = bundle.findEntries(META_INF, SPRING_SCHEMAS, false);
 		while (schemas.hasMoreElements()) {
-			URL schemaFile = schemas.nextElement();
-			Properties props = loadProperties(schemaFile);
+			Properties props = loadProperties(schemas.nextElement());
 
 			for (Object xsd : props.keySet()) {
 
-				String uri = "platform:/plugin/" + bundle.getSymbolicName() + "/"
-						+ props.getProperty(xsd.toString());
 				String key = xsd.toString();
-				int type = ICatalogEntry.ENTRY_TYPE_SYSTEM;
+				String uri = "platform:/plugin/" + bundle.getSymbolicName() + "/" + props.getProperty(key);
+				String namespaceUri = getTargetNamespace(bundle.getEntry(props.getProperty(key)));
+				String icon = null;
+				String prefix = null;
+				String name = null;
+				
+				// Add catalog entry to XML catalog
+				addCatalogEntry(bundle, key, uri, catalogEntries);
 
-				ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
-				if (catalogElement instanceof ICatalogEntry) {
-					ICatalogEntry entry = (ICatalogEntry) catalogElement;
-					String resolvePath = CatalogContributorRegistryReader.resolvePath(
-							CatalogContributorRegistryReader.getPlatformURL(bundle
-									.getSymbolicName()), uri);
-					entry.setKey(key);
-					entry.setURI(resolvePath);
-					systemCatalog.addCatalogElement(catalogElement);
-					catalogEntries.add(catalogElement);
-				}
+				Enumeration<URL> tooling = bundle.findEntries(META_INF, SPRING_TOOLING, false);
+				if (tooling != null) {
+					while (tooling.hasMoreElements()) {
+						Properties toolingProps = loadProperties(tooling.nextElement());
 
-				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-				factory.setValidating(false);
-				factory.setNamespaceAware(false);
-				try {
-					DocumentBuilder docBuilder = factory.newDocumentBuilder();
-					Document doc = docBuilder.parse(bundle.getEntry(
-							props.getProperty(xsd.toString())).openStream());
-					String namespaceUri = doc.getDocumentElement().getAttribute("targetNamespace");
-
-					Enumeration<URL> tooling = bundle.findEntries(META_INF, SPRING_TOOLING, false);
-					if (tooling != null) {
-						while (tooling.hasMoreElements()) {
-							URL tool = tooling.nextElement();
-							Properties toolingProps = loadProperties(tool);
-
-							String icon = toolingProps.getProperty(namespaceUri + "@icon");
-							String prefix = toolingProps.getProperty(namespaceUri + "@prefix");
-							String name = toolingProps.getProperty(namespaceUri + "@name");
-
-							if (name != null && prefix != null) {
-								if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
-									namespaceDefinitionRegistry.get(namespaceUri)
-											.addSchemaLocation(key);
-								}
-								else {
-									NamespaceDefinition namespaceDefinition = new NamespaceDefinition();
-									namespaceDefinition.setName(name);
-									namespaceDefinition.setPrefix(prefix);
-									namespaceDefinition.setIconPath(icon);
-									namespaceDefinition.addSchemaLocation(key);
-									namespaceDefinition.setBundle(bundle);
-									namespaceDefinition.setNamespaceUri(namespaceUri);
-									namespaceDefinitionRegistry.put(namespaceUri,
-											namespaceDefinition);
-									namespaceDefinitions.add(namespaceDefinition);
-								}
-							}
-						}
+						icon = toolingProps.getProperty(namespaceUri + "@icon");
+						prefix = toolingProps.getProperty(namespaceUri + "@prefix");
+						name = toolingProps.getProperty(namespaceUri + "@name");
 					}
 				}
-				catch (SAXException e) {
-					BeansCorePlugin.log(e);
+
+				if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
+					namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
 				}
-				catch (IOException e) {
-					BeansCorePlugin.log(e);
-				}
-				catch (ParserConfigurationException e) {
-					BeansCorePlugin.log(e);
+				else {
+					NamespaceDefinition namespaceDefinition = new NamespaceDefinition();
+					namespaceDefinition.setName(name);
+					namespaceDefinition.setPrefix(prefix);
+					namespaceDefinition.setIconPath(icon);
+					namespaceDefinition.addSchemaLocation(key);
+					namespaceDefinition.setBundle(bundle);
+					namespaceDefinition.setNamespaceUri(namespaceUri);
+					namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
+					namespaceDefinitions.add(namespaceDefinition);
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Create and add a XML catalog entry. 
+	 */
+	private void addCatalogEntry(Bundle bundle, String key, String uri, Set<ICatalogElement> catalogEntries) {
+		ICatalog systemCatalog = getSystemCatalog();
+		
+		ICatalogElement catalogElement = systemCatalog.createCatalogElement(ICatalogEntry.ENTRY_TYPE_SYSTEM);
+		if (catalogElement instanceof ICatalogEntry) {
+			ICatalogEntry entry = (ICatalogEntry) catalogElement;
+			String resolvePath = CatalogContributorRegistryReader.resolvePath(
+					CatalogContributorRegistryReader.getPlatformURL(bundle
+							.getSymbolicName()), uri);
+			entry.setKey(key);
+			entry.setURI(resolvePath);
+			systemCatalog.addCatalogElement(catalogElement);
+			catalogEntries.add(catalogElement);
+		}
+	}
+
+	/**
+	 * Returns the target namespace URI of the XSD identified by the given <code>url</code>. 
+	 */
+	private String getTargetNamespace(URL url) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setValidating(false);
+		factory.setNamespaceAware(false);
+		DocumentBuilder docBuilder;
+		try {
+			docBuilder = factory.newDocumentBuilder();
+			Document doc = docBuilder.parse(url.openStream());
+			return doc.getDocumentElement().getAttribute("targetNamespace");
+		}
+		catch (ParserConfigurationException e) {
+			BeansCorePlugin.log(e);
+		}
+		catch (SAXException e) {
+			BeansCorePlugin.log(e);
+		}
+		catch (IOException e) {
+			BeansCorePlugin.log(e);
+		}
+		return null;
 	}
 
 	/**
@@ -216,9 +227,9 @@ public class ToolingNamespacePlugins extends NamespacePlugins implements
 		}
 		return toolingProps;
 	}
-	
+
 	/**
-	 * Removes any registered {@link INamespaceDefinition}s and XML catalog entries. 
+	 * Removes any registered {@link INamespaceDefinition}s and XML catalog entries.
 	 */
 	private void removeNamespaceDefinition(Bundle bundle) {
 		if (catalogEntriesByBundle.containsKey(bundle)) {
@@ -300,8 +311,15 @@ public class ToolingNamespacePlugins extends NamespacePlugins implements
 		}
 
 		public String getPrefix() {
-			return prefix;
-		}
+			if (prefix != null) {
+				return prefix;
+			}
+			int ix = namespaceUri.lastIndexOf('/');
+			if (ix > 0) {
+				return namespaceUri.substring(ix + 1);
+			}
+			return null;
+		} 
 
 		public Set<String> getSchemaLocations() {
 			return schemaLocations;
