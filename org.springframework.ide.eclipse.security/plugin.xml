@@ -21,35 +21,6 @@
      	</aspectDefinitionBuilder>
  	</extension>
  	
- 	<extension point="org.eclipse.wst.xml.core.catalogContributions">
-		<catalogContribution>
-			<public
-				publicId="http://www.springframework.org/schema/security"
-				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.xsd"
-				webURL="http://www.springframework.org/schema/security/spring-security-2.0.xsd" />
-			<public
-				publicId="http://www.springframework.org/schema/security"
-				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.1.xsd"
-				webURL="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd" />
-			<public
-				publicId="http://www.springframework.org/schema/security"
-				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.2.xsd"
-				webURL="http://www.springframework.org/schema/security/spring-security-2.0.2.xsd" />
-			<system
-				systemId="http://www.springframework.org/schema/security/spring-security.xsd"
-				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.2.xsd" />
-			<system
-				systemId="http://www.springframework.org/schema/security/spring-security-2.0.xsd"
-				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.xsd" />
-			<system
-				systemId="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd"
-				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.1.xsd" />
-			<system
-				systemId="http://www.springframework.org/schema/security/spring-security-2.0.2.xsd"
-				uri="platform:/plugin/org.springframework.security/org/springframework/security/config/spring-security-2.0.2.xsd" />
-		</catalogContribution>
-	</extension>
-	
 	<extension
 		point="org.springframework.ide.eclipse.beans.ui.namespaces">
 		<namespace
@@ -57,12 +28,7 @@
 			labelProvider="org.springframework.ide.eclipse.security.ui.namespaces.SecurityConfigNamespaceLabelProvider"
 			uri="http://www.springframework.org/schema/security" 
 			prefix="sec" 
-			icon="icons/full/obj16/spring_security_obj.gif"
-			defaultSchemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.2.xsd">
-			<schemaLocation url="http://www.springframework.org/schema/security/spring-security-2.0.xsd" />
-			<schemaLocation url="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd" />
-			<schemaLocation url="http://www.springframework.org/schema/security/spring-security-2.0.2.xsd" />
-		</namespace>
+			icon="icons/full/obj16/spring_security_obj.gif" />
 	</extension>
 	
 	<extension
@@ -76,13 +42,4 @@
 			uri="http://www.springframework.org/schema/security" />
 	</extension>
 	
-	<!-- contribute the security namespace handler -->
-   <extension
-       point="org.springframework.ide.eclipse.beans.core.namespaces">
-       <namespace
-            namespaceHandler="org.springframework.security.config.SecurityNamespaceHandler"
-            uri="http://www.springframework.org/schema/security">
-       </namespace>
-   </extension>
-
 </plugin>
