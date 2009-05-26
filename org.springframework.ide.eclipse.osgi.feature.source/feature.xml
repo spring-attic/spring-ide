@@ -37,32 +37,4 @@
          version="0.0.0"
          unpack="false"/>
 
-   <plugin
-         id="org.springframework.osgi.core.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.osgi.io.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.osgi.extender.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-         
-   <plugin
-         id="com.springsource.edu.emory.mathcs.backport.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> 
-
 </feature>
