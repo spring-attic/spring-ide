@@ -249,7 +249,7 @@ public class NamespaceUtils {
 	/**
 	 * Returns an {@link Image} instance which is located at the indicated icon path.
 	 */
-	private static Image getImage(String ns, String icon) {
+	public static Image getImage(String ns, String icon) {
 		if (StringUtils.hasText(icon)) {
 			Image image = BeansUIPlugin.getDefault().getImageRegistry().get(icon);
 			if (image == null) {
