@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.springframework.ide.eclipse.beans.core">
+<schema targetNamespace="org.springframework.ide.eclipse.beans.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
          <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="namespaces" name="Namespaces"/>
@@ -12,6 +12,11 @@ This extension point is used to add namespace handlers and model element provide
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="namespace" minOccurs="0" maxOccurs="unbounded"/>
@@ -61,7 +66,7 @@ This extension point is used to add namespace handlers and model element provide
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="namespaceHandler" type="string" use="required">
+         <attribute name="namespaceHandler" type="string">
             <annotation>
                <documentation>
                   an instance of &lt;samp&gt;org.springframework.beans.factory.xml.NamespaceHandler&lt;/samp&gt;
