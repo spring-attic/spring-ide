@@ -72,49 +72,6 @@ public class JdtUtils {
 
 	private static final String FILE_SCHEME = "file";
 
-	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
-
-		private ClassLoader classLoader;
-
-		private ClassLoader weavingClassLoader;
-
-		public DefaultProjectClassLoaderSupport(IProject javaProject) {
-			setupClassLoaders(javaProject);
-		}
-
-		/**
-		 * Activates the weaving class loader as thread context classloader.
-		 * <p>
-		 * Use {@link #recoverClassLoader()} to recover the original thread context classloader
-		 */
-		private void activateWeavingClassLoader() {
-			Thread.currentThread().setContextClassLoader(weavingClassLoader);
-		}
-
-		public void executeCallback(IProjectClassLoaderAwareCallback callback) throws Throwable {
-			try {
-				activateWeavingClassLoader();
-				callback.doWithActiveProjectClassLoader();
-			}
-			finally {
-				recoverClassLoader();
-			}
-		}
-
-		public ClassLoader getProjectClassLoader() {
-			return this.weavingClassLoader;
-		}
-
-		private void recoverClassLoader() {
-			Thread.currentThread().setContextClassLoader(classLoader);
-		}
-
-		private void setupClassLoaders(IProject project) {
-			classLoader = Thread.currentThread().getContextClassLoader();
-			weavingClassLoader = JdtUtils.getClassLoader(project, false);
-		}
-	}
-
 	private static final String AJDT_CLASS = "org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager";
 
 	private static final String AJDT_NATURE = "org.eclipse.ajdt.ui.ajnature";
@@ -690,6 +647,7 @@ public class JdtUtils {
 	public static String resolveClassName(String className, IType type) {
 		// replace binary $ inner class name syntax with . for source level
 		className = className.replace('$', '.');
+		String dotClassName = new StringBuilder('.').append(className).toString();
 
 		IProject project = type.getJavaProject().getProject();
 
@@ -702,14 +660,17 @@ public class JdtUtils {
 			// Check if the class is imported
 			if (!type.isBinary()) {
 
+				// Strip className to first segment to support ReflectionUtils.MethodCallback
 				int ix = className.lastIndexOf('.');
 				String firstClassNameSegment = className;
 				if (ix > 0) {
 					firstClassNameSegment = className.substring(0, ix);
 				}
 
+				// Iterate the imports
 				for (IImportDeclaration importDeclaration : type.getCompilationUnit().getImports()) {
 					String importName = importDeclaration.getElementName();
+					// Wildcard imports -> check if the package + className is a valid type
 					if (importDeclaration.isOnDemand()) {
 						String newClassName = new StringBuilder(importName.substring(0, importName
 								.length() - 1)).append(className).toString();
@@ -717,10 +678,13 @@ public class JdtUtils {
 							return newClassName;
 						}
 					}
-					else if (importName.endsWith(className)
+					// Concrete import matching .className at the end -> check if type exists
+					else if (importName.endsWith(dotClassName)
 							&& getJavaType(project, importName) != null) {
 						return importName;
 					}
+					// Check if className is multi segmented (ReflectionUtils.MethodCallback) 
+					// -> check if the first segment
 					else if (!className.equals(firstClassNameSegment)) {
 						if (importName.endsWith(firstClassNameSegment)) {
 							String newClassName = new StringBuilder(importName.substring(0,
@@ -732,11 +696,10 @@ public class JdtUtils {
 					}
 				}
 			}
-
+			
 			// Check if the class is in the same package as the type
 			String packageName = type.getPackageFragment().getElementName();
-			String newClassName = new StringBuilder(packageName).append('.').append(className)
-					.toString();
+			String newClassName = new StringBuilder(packageName).append(dotClassName).toString();
 			if (getJavaType(project, newClassName) != null) {
 				return newClassName;
 			}
@@ -747,7 +710,7 @@ public class JdtUtils {
 			}
 
 			// Check if the class is coming from the java.lang
-			newClassName = new StringBuilder("java.lang.").append(className).toString();
+			newClassName = new StringBuilder("java.lang").append(dotClassName).toString();
 			if (getJavaType(project, newClassName) != null) {
 				return newClassName;
 			}
@@ -943,6 +906,49 @@ public class JdtUtils {
 		catch (JavaModelException e) {
 		}
 		return null;
+	}
+
+	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
+
+		private ClassLoader classLoader;
+
+		private ClassLoader weavingClassLoader;
+
+		public DefaultProjectClassLoaderSupport(IProject javaProject) {
+			setupClassLoaders(javaProject);
+		}
+
+		/**
+		 * Activates the weaving class loader as thread context classloader.
+		 * <p>
+		 * Use {@link #recoverClassLoader()} to recover the original thread context classloader
+		 */
+		private void activateWeavingClassLoader() {
+			Thread.currentThread().setContextClassLoader(weavingClassLoader);
+		}
+
+		public void executeCallback(IProjectClassLoaderAwareCallback callback) throws Throwable {
+			try {
+				activateWeavingClassLoader();
+				callback.doWithActiveProjectClassLoader();
+			}
+			finally {
+				recoverClassLoader();
+			}
+		}
+
+		public ClassLoader getProjectClassLoader() {
+			return this.weavingClassLoader;
+		}
+
+		private void recoverClassLoader() {
+			Thread.currentThread().setContextClassLoader(classLoader);
+		}
+
+		private void setupClassLoaders(IProject project) {
+			classLoader = Thread.currentThread().getContextClassLoader();
+			weavingClassLoader = JdtUtils.getClassLoader(project, false);
+		}
 	}
 
 }
