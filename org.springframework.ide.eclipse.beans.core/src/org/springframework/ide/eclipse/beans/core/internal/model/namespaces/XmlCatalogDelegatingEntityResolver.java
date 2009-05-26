@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model;
+package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,16 +24,15 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * Extension to Spring's {@link DelegatingEntityResolver} that tries to resolve
- * entities from the Eclipse XML Catalog as well as from other
- * {@link EntityResolver}s that are available as OSGi services.
+ * Extension to Spring's {@link DelegatingEntityResolver} that tries to resolve entities from the
+ * Eclipse XML Catalog as well as from other {@link EntityResolver}s that are available as OSGi
+ * services.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0.3
  */
 @SuppressWarnings("restriction")
-public class XmlCatalogDelegatingEntityResolver extends
-		DelegatingEntityResolver {
+public class XmlCatalogDelegatingEntityResolver extends DelegatingEntityResolver {
 
 	/** Internal list of already known {@link EntityResolver}s */
 	private final Set<EntityResolver> entityResolvers;
@@ -48,14 +47,13 @@ public class XmlCatalogDelegatingEntityResolver extends
 	 * Resolve an {@link InputSource} for the given publicId and systemId.
 	 * <p>
 	 * This implementation firstly delegates to the implementation in the
-	 * {@link DelegatingEntityResolver}. If that doesn't resolve to an
-	 * {@link InputSource} the Eclipse XML Catalog will be checked. As a last
-	 * fall back the OSGi service registry is being queried for available
-	 * {@link EntityResolver}s.
+	 * {@link DelegatingEntityResolver}. If that doesn't resolve to an {@link InputSource} the
+	 * Eclipse XML Catalog will be checked. As a last fall back the OSGi service registry is being
+	 * queried for available {@link EntityResolver}s.
 	 */
 	@Override
-	public InputSource resolveEntity(String publicId, String systemId)
-			throws SAXException, IOException {
+	public InputSource resolveEntity(String publicId, String systemId) throws SAXException,
+			IOException {
 		InputSource inputSource = super.resolveEntity(publicId, systemId);
 		if (inputSource != null) {
 			return inputSource;
@@ -82,14 +80,13 @@ public class XmlCatalogDelegatingEntityResolver extends
 
 		return inputSource;
 	}
-	
+
 	/**
-	 * Resolves an {@link InputSource} for a given publicId and systemId from 
-	 * the Eclipse XML Catalog.
-	 * @see ICatalog 
+	 * Resolves an {@link InputSource} for a given publicId and systemId from the Eclipse XML
+	 * Catalog.
+	 * @see ICatalog
 	 */
-	private InputSource resolveEntityViaXmlCatalog(String publicId,
-			String systemId) {
+	private InputSource resolveEntityViaXmlCatalog(String publicId, String systemId) {
 		ICatalog catalog = XMLCorePlugin.getDefault().getDefaultXMLCatalog();
 		if (systemId != null) {
 			try {
@@ -111,8 +108,7 @@ public class XmlCatalogDelegatingEntityResolver extends
 		if (publicId != null) {
 			if (!(systemId != null && systemId.endsWith(XSD_SUFFIX))) {
 				try {
-					String resolvedSystemId = catalog.resolvePublic(publicId,
-							systemId);
+					String resolvedSystemId = catalog.resolvePublic(publicId, systemId);
 					if (resolvedSystemId == null) {
 						resolvedSystemId = catalog.resolveURI(publicId);
 					}
