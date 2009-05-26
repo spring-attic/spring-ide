@@ -14,18 +14,6 @@
  -->
 <plugin>
 
-	<extension point="org.eclipse.wst.xml.core.catalogContributions">
-		<catalogContribution>
-			<public
-				publicId="http://www.springframework.org/schema/batch"
-				uri="platform:/plugin/org.springframework.batch.core/org/springframework/batch/core/configuration/xml/spring-batch-2.0.xsd"
-				webURL="http://www.springframework.org/schema/batch/spring-batch-2.0.xsd" />
-			<system
-				systemId="http://www.springframework.org/schema/batch/spring-batch-2.0.xsd"
-				uri="platform:/plugin/org.springframework.batch.core/org/springframework/batch/core/configuration/xml/spring-batch-2.0.xsd" />
-		</catalogContribution>
-	</extension>
-	
 	<extension
 		point="org.springframework.ide.eclipse.beans.ui.namespaces">
 		<namespace
@@ -33,9 +21,7 @@
 			labelProvider="org.springframework.ide.eclipse.batch.ui.namespaces.BatchNamespaceLabelProvider"
 			uri="http://www.springframework.org/schema/batch" 
 			prefix="batch" 
-			icon="icons/full/obj16/spring_batch_obj.gif"
-			defaultSchemaLocation="http://www.springframework.org/schema/batch/spring-batch-2.0.xsd">
-		</namespace>
+			icon="icons/full/obj16/spring_batch_obj.gif" />
 	</extension>
 	
 	<extension
