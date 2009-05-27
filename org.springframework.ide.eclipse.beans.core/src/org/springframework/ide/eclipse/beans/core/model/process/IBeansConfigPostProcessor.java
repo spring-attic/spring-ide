@@ -18,8 +18,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
  * Post processing mechanism that provides similar semantics than Spring's
  * {@link BeanFactoryPostProcessor} and {@link BeanPostProcessor}.
  * <p>
- * A certain {@link IBeansConfigPostProcessor} can be contributed to Spring IDE
- * by using the
+ * A certain {@link IBeansConfigPostProcessor} can be contributed to Spring IDE by using the
  * 
  * <pre>
  * org.springframework.ide.eclipse.beans.core.postprocessors

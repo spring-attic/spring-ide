@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.model.process;
 
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessingContext;
@@ -32,12 +33,16 @@ public class BeansConfigPostProcessingContext implements IBeansConfigPostProcess
 
 	private final IBeansConfig beansConfig;
 
+	private final BeanDefinitionRegistry beanDefinitionRegistry;
+
 	public BeansConfigPostProcessingContext(IBeansConfig beansConfig,
 			BeanNameGenerator beanNameGenerator, ProblemReporter problemReporter,
+			BeanDefinitionRegistry beanDefinitionRegistry,
 			IBeansConfigRegistrationSupport beansConfigRegistrationSupport) {
 		this.beansConfig = beansConfig;
 		this.beanNameGenerator = beanNameGenerator;
 		this.problemReporter = problemReporter;
+		this.beanDefinitionRegistry = beanDefinitionRegistry;
 		this.beansConfigRegistrationSupport = beansConfigRegistrationSupport;
 	}
 
@@ -55,5 +60,9 @@ public class BeansConfigPostProcessingContext implements IBeansConfigPostProcess
 
 	public IBeansConfig getBeansConfig() {
 		return beansConfig;
+	}
+
+	public BeanDefinitionRegistry getBeanDefinitionRegistry() {
+		return beanDefinitionRegistry;
 	}
 }

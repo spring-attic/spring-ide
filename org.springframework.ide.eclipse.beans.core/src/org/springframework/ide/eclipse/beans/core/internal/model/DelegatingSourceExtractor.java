@@ -16,6 +16,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.core.java.classreading.JdtSourceExtractor;
 import org.springframework.ide.eclipse.core.model.java.JavaSourceExtractor;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 
@@ -34,6 +35,7 @@ public class DelegatingSourceExtractor implements SourceExtractor {
 		this.sourceExtractors = new HashSet<SourceExtractor>();
 		this.sourceExtractors.add(new XmlSourceExtractor());
 		this.sourceExtractors.add(new JavaSourceExtractor(project));
+		this.sourceExtractors.add(new JdtSourceExtractor());
 	}
 
 	public Object extractSource(Object sourceCandidate,

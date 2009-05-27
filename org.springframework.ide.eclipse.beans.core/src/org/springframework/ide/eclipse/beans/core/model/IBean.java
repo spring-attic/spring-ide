@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * @author Christian Dupuis
  */
 public interface IBean extends IBeansModelElement, ISourceModelElement {
-
+	
 	/**
 	 * Returns the name of the parent bean (in case of a child bean) or null
 	 * (in case of a root bean).

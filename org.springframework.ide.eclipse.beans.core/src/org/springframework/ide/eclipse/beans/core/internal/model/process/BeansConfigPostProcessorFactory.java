@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -84,11 +85,11 @@ public class BeansConfigPostProcessorFactory {
 	public static IBeansConfigPostProcessingContext createPostProcessingContext(
 			IBeansConfig beansConfig, Collection<IBean> beans,
 			ReaderEventListener readerEventListener, ProblemReporter problemReporter,
-			BeanNameGenerator beanNameGenerator) {
+			BeanNameGenerator beanNameGenerator, BeanDefinitionRegistry beanDefinitionRegistry) {
 		List<IBean> beansClone = new ArrayList<IBean>();
 		beansClone.addAll(beans);
 		return new BeansConfigPostProcessingContext(beansConfig, beanNameGenerator,
-				problemReporter, new BeansConfigRegistrationSupport(Collections
-						.unmodifiableCollection(beansClone), readerEventListener));
+				problemReporter, beanDefinitionRegistry, new BeansConfigRegistrationSupport(
+						Collections.unmodifiableCollection(beansClone), readerEventListener));
 	}
 }

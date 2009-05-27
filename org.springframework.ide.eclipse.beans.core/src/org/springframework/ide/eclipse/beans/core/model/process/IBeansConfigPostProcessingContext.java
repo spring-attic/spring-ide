@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.model.process;
 
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
@@ -30,7 +31,12 @@ public interface IBeansConfigPostProcessingContext {
 	 * Returns the {@link ProblemReporter} that should be used to report errors, warnings and notes.
 	 */
 	ProblemReporter getProblemReporter();
-
+	
+	/**
+	 * Returns the {@link BeanDefinitionRegistry}.
+	 */
+	BeanDefinitionRegistry getBeanDefinitionRegistry();
+	
 	/**
 	 * Returns the {@link IBeansConfigRegistrationSupport}.
 	 */
