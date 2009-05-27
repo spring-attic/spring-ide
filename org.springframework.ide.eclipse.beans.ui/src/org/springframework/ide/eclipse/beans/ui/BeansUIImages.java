@@ -96,6 +96,7 @@ public class BeansUIImages {
     public static final String IMG_OBJS_REQUEST_MAPPING = NAME_PREFIX + "request_mapping_obj.gif";
     public static final String IMG_OBJS_KEY = NAME_PREFIX + "key_obj.gif";
     public static final String IMG_OBJS_CONSTANT = NAME_PREFIX + "constant_obj.gif";
+    public static final String IMG_OBJS_CONTENT_ASSIST = NAME_PREFIX + "content_assist_separator_obj.gif";
     public static final String IMG_OBJS_PROPERTY_PATH = NAME_PREFIX + "property_path_obj.gif";
 	public static final String IMG_OBJS_SPRING = NAME_PREFIX + "spring_obj.gif";
 	public static final String IMG_OBJS_ERROR = NAME_PREFIX + "error_obj.gif";
@@ -136,6 +137,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_VIRTUAL_FOLDER = createManaged(OBJECT, IMG_OBJS_VIRTUAL_FOLDER);
 	public static final ImageDescriptor DESC_OBJS_BEAN_REF = createManaged(OBJECT, IMG_OBJS_BEAN_REF);
 	public static final ImageDescriptor DESC_OBJS_CONSTRUCTOR = createManaged(OBJECT, IMG_OBJS_CONSTRUCTOR);
+	public static final ImageDescriptor DESC_OBJS_CONTENT_ASSIST = createManaged(OBJECT, IMG_OBJS_CONTENT_ASSIST);
 	public static final ImageDescriptor DESC_OBJS_PROPERTY = createManaged(OBJECT, IMG_OBJS_PROPERTY);
 	public static final ImageDescriptor DESC_OBJS_VALUE = createManaged(OBJECT, IMG_OBJS_VALUE);
 	public static final ImageDescriptor DESC_OBJS_COLLECTION = createManaged(OBJECT, IMG_OBJS_COLLECTION);
