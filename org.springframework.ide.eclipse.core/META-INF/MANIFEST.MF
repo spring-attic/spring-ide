@@ -15,6 +15,7 @@ Export-Package: org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.core.io.xml,
  org.springframework.ide.eclipse.core.java,
  org.springframework.ide.eclipse.core.java.annotation,
+ org.springframework.ide.eclipse.core.java.classreading,
  org.springframework.ide.eclipse.core.model,
  org.springframework.ide.eclipse.core.model.java,
  org.springframework.ide.eclipse.core.model.validation,
@@ -28,15 +29,15 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.jdt.launching,
- org.apache.xerces;bundle-version="2.8.0";visibility:=reexport,
+ org.apache.xerces;bundle-version="2.8.0",
  org.eclipse.core.variables,
  org.eclipse.wst.common.project.facet.core,
  com.springsource.org.objectweb.asm;bundle-version="[2.2.3,2.2.3]",
  com.springsource.org.objectweb.asm.commons;bundle-version="[2.2.3,2.2.3]",
  org.springframework.beans,
- org.springframework.core
+ org.springframework.core,
+ org.springframework.context
 Eclipse-LazyStart: true
-DynamicImport-Package: *
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 
