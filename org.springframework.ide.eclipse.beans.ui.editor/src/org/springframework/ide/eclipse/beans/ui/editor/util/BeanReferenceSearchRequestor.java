@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.DelegatingLabelProvider;
@@ -30,12 +31,13 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
- * Utility class for accepting bean matches and creating completion proposals for those bean
- * matches.
+ * Utility class for accepting bean matches and creating completion proposals for those bean matches.
  * @author Christian Dupuis
  * @since 2.0
  */
 public class BeanReferenceSearchRequestor {
+
+	public static final String LABEL_SEPARATOR = " -------------------------------------------- ";
 
 	public static final int TYPE_MATCHING_RELEVANCE = 20;
 
@@ -47,20 +49,20 @@ public class BeanReferenceSearchRequestor {
 
 	protected List<String> requiredTypes = null;
 
+	private boolean insertedMatchingType = false;
+
 	public BeanReferenceSearchRequestor(IContentAssistProposalRecorder recorder) {
 		this(recorder, new ArrayList<String>());
 	}
 
-	public BeanReferenceSearchRequestor(IContentAssistProposalRecorder recorder,
-			List<String> requiredTypes) {
+	public BeanReferenceSearchRequestor(IContentAssistProposalRecorder recorder, List<String> requiredTypes) {
 		this.recorder = recorder;
 		this.beans = new HashSet<String>();
 		this.requiredTypes = requiredTypes;
 	}
 
 	public void acceptSearchMatch(IBean bean, IFile file, String prefix) {
-		if (bean.getElementName() != null
-				&& bean.getElementName().toLowerCase().startsWith(prefix.toLowerCase())) {
+		if (bean.getElementName() != null && bean.getElementName().toLowerCase().startsWith(prefix.toLowerCase())) {
 			String beanName = bean.getElementName();
 			String replaceText = beanName;
 			String fileName = bean.getElementResource().getProjectRelativePath().toString();
@@ -92,8 +94,7 @@ public class BeanReferenceSearchRequestor {
 				if (requiredTypes.size() > 0) {
 					String className = BeansModelUtils.getBeanClass(bean, null);
 					IType type = JdtUtils.getJavaType(file.getProject(), className);
-					List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type,
-							type);
+					List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type, type);
 					for (String cn : hierachyTypes) {
 						if (this.requiredTypes.contains(cn)) {
 							matchesType = true;
@@ -102,8 +103,12 @@ public class BeanReferenceSearchRequestor {
 					}
 				}
 				if (matchesType) {
-					recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText,
-							replaceText, null);
+					recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText, replaceText, null);
+					if (!insertedMatchingType) {
+						recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONTENT_ASSIST),
+								TYPE_MATCHING_RELEVANCE - 1, LABEL_SEPARATOR, "");
+						insertedMatchingType = true;
+					}
 				}
 				else {
 					recorder.recordProposal(image, RELEVANCE, displayText, replaceText, bean);
@@ -117,8 +122,7 @@ public class BeanReferenceSearchRequestor {
 	public void acceptSearchMatch(String beanId, Node beanNode, IFile file, String prefix) {
 		NamedNodeMap attributes = beanNode.getAttributes();
 		if (beanId.toLowerCase().startsWith(prefix.toLowerCase())) {
-			if (beanNode.getParentNode() != null
-					&& "beans".equals(beanNode.getParentNode().getLocalName())) {
+			if (beanNode.getParentNode() != null && "beans".equals(beanNode.getParentNode().getLocalName())) {
 				String beanName = beanId;
 				String replaceText = beanName;
 				String fileName = file.getProjectRelativePath().toString();
@@ -150,8 +154,7 @@ public class BeanReferenceSearchRequestor {
 					boolean matchesType = false;
 					if (requiredTypes.size() > 0) {
 						IType type = JdtUtils.getJavaType(file.getProject(), className);
-						List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(
-								type, type);
+						List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type, type);
 						for (String cn : hierachyTypes) {
 							if (this.requiredTypes.contains(cn)) {
 								matchesType = true;
@@ -161,12 +164,15 @@ public class BeanReferenceSearchRequestor {
 					}
 
 					if (matchesType) {
-						recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText,
-								replaceText, beanNode);
+						recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText, replaceText, beanNode);
+						if (!insertedMatchingType) {
+							recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONTENT_ASSIST),
+									TYPE_MATCHING_RELEVANCE - 1, LABEL_SEPARATOR, "");
+							insertedMatchingType = true;
+						}
 					}
 					else {
-						recorder.recordProposal(image, RELEVANCE, displayText, replaceText,
-								beanNode);
+						recorder.recordProposal(image, RELEVANCE, displayText, replaceText, beanNode);
 					}
 
 					beans.add(key);

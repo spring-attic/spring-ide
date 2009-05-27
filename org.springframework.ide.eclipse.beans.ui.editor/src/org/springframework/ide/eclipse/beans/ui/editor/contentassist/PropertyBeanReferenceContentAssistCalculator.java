@@ -46,7 +46,7 @@ public class PropertyBeanReferenceContentAssistCalculator extends
 					.getDocument(), context.getParentNode());
 			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 
-			String propertyName = BeansEditorUtils.getAttribute(context.getParentNode(), "name");
+			String propertyName = BeansEditorUtils.getAttribute(context.getNode(), "name");
 			if (propertyName != null) {
 				try {
 					IMethod method = Introspector.getWritableProperty(type, propertyName);
