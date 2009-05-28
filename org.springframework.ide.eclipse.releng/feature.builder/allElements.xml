@@ -23,10 +23,6 @@
 		</ant>
  		<ant antfile="${genericTargets}" target="${target}">
 			<property name="type" value="feature" />
-			<property name="id" value="org.springframework.ide.eclipse.javaconfig.feature" />
-		</ant>
- 		<ant antfile="${genericTargets}" target="${target}">
-			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.webflow.feature" />
 		</ant>
  		<ant antfile="${genericTargets}" target="${target}">
@@ -60,10 +56,6 @@
  		<ant antfile="${genericTargets}" target="${target}">
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.ajdt.feature.source" />
-		</ant>
- 		<ant antfile="${genericTargets}" target="${target}">
-			<property name="type" value="feature" />
-			<property name="id" value="org.springframework.ide.eclipse.javaconfig.feature.source" />
 		</ant>
  		<ant antfile="${genericTargets}" target="${target}">
 			<property name="type" value="feature" />

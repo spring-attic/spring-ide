@@ -66,12 +66,6 @@
 		<category name="Extensions (Incubation)" />
 	</feature>
 
-	<feature
-		url="features/org.springframework.ide.eclipse.javaconfig.feature_@VERSION@.jar"
-		id="org.springframework.ide.eclipse.javaconfig.feature" version="@VERSION@">
-		<category name="Extensions (Incubation)" />
-	</feature>
-	
 	<!-- Integration features -->
 	<feature
 		url="features/org.springframework.ide.eclipse.ajdt.feature_@VERSION@.jar"

@@ -31,3 +31,12 @@ for II in $TARGET_DIR/*-sources-*; do
 	#echo bundle@$NAME.source=GET,https://src.springsource.org/svn/dm-server-tools/main-branches/jersey/required-bundles/$NAME.source-$VERSION.jar >> bundles.map
 	
 done
+
+for II in $TARGET_DIR/*; do 
+	echo $II
+	NAME=`expr "$II" : '.*/\(.*\)-.*'`
+	VERSION=`expr "$II" : '.*-\(.*\).jar'`
+
+	echo bundle@$NAME=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/$NAME-$VERSION.jar >> bundles.map
+	
+done
