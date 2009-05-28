@@ -82,7 +82,7 @@ public class JdtMethodMetadata implements MethodMetadata {
 		}
 	}
 
-	protected IMethod getMethod() {
+	public IMethod getMethod() {
 		return method;
 	}
 

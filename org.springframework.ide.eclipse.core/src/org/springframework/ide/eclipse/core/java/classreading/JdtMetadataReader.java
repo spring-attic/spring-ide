@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.classreading;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.ide.eclipse.core.io.FileResource;
 
 /**
  * @author Christian Dupuis
@@ -37,7 +40,12 @@ public class JdtMetadataReader implements MetadataReader {
 	}
 
 	public Resource getResource() {
-		throw new JdtMetadataReaderException("'getResource' is not supported");
+		try {
+			return new FileResource((IFile) type.getUnderlyingResource());
+		}
+		catch (JavaModelException e) {
+			return null;
+		}
 	}
 
 }
