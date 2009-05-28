@@ -14,6 +14,7 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
 /**
  * Post processing context.
@@ -47,5 +48,6 @@ public interface IBeansConfigPostProcessingContext {
 	 * @since 2.2.1
 	 */
 	IBeansConfig getBeansConfig();
-
+	
+	void reportProblem(ValidationProblem problem);
 }

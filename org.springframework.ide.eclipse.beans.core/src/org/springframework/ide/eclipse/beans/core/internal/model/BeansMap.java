@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,9 +33,10 @@ import org.springframework.util.ObjectUtils;
 public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 
 	private LinkedHashMap<Object, Object> map;
+
 	private LinkedList<IBeansMapEntry> entries;
 
-	public BeansMap(IModelElement parent, ManagedMap map) {
+	public BeansMap(IModelElement parent, ManagedMap<?, ?> map) {
 		super(parent, "(map)", map);
 
 		// Create new list with values from given list
@@ -46,10 +47,8 @@ public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 			this.map.put(mEntry.getKey(), mEntry.getValue());
 
 			BeansMapEntry bmEntry = new BeansMapEntry(this, mEntry);
-			bmEntry.setKey(BeansModelUtils.resolveValueIfNecessary(bmEntry,
-					mEntry.getKey()));
-			bmEntry.setValue(BeansModelUtils
-					.resolveValueIfNecessary(bmEntry, mEntry.getValue()));
+			bmEntry.setKey(BeansModelUtils.resolveValueIfNecessary(bmEntry, mEntry.getKey()));
+			bmEntry.setValue(BeansModelUtils.resolveValueIfNecessary(bmEntry, mEntry.getValue()));
 			entries.add(bmEntry);
 		}
 	}
@@ -98,7 +97,8 @@ public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 			return false;
 		}
 		BeansMap that = (BeansMap) other;
-		if (!ObjectUtils.nullSafeEquals(this.map, that.map)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.map, that.map))
+			return false;
 		return super.equals(other);
 	}
 

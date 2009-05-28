@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public class BeansList extends AbstractBeansModelElement implements IBeansList {
 
 	private List<Object> list;
 
-	public BeansList(IModelElement parent, ManagedList list) {
+	public BeansList(IModelElement parent, ManagedList<?> list) {
 		super(parent, "(list)", list);
 
 		// Create new list with values from given list
@@ -86,7 +86,8 @@ public class BeansList extends AbstractBeansModelElement implements IBeansList {
 			return false;
 		}
 		BeansList that = (BeansList) other;
-		if (!ObjectUtils.nullSafeEquals(this.list, that.list)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.list, that.list))
+			return false;
 		return super.equals(other);
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessingContext;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
 /**
  * Internal factory for creating instances of {@link IBeansConfigPostProcessor} and
@@ -42,26 +43,22 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
  */
 public class BeansConfigPostProcessorFactory {
 
-	public static final String POSTPROCESSOR_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID
-			+ ".postprocessors";
+	public static final String POSTPROCESSOR_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID + ".postprocessors";
 
 	/**
-	 * Returns an new instance of {@link IBeansConfigPostProcessor} that is configured to match the
-	 * given <code>type</code>.
-	 * @param type the Spring {@link BeanFactoryPostProcessor} or {@link BeanPostProcessor}
-	 * implementation
+	 * Returns an new instance of {@link IBeansConfigPostProcessor} that is configured to match the given
+	 * <code>type</code>.
+	 * @param type the Spring {@link BeanFactoryPostProcessor} or {@link BeanPostProcessor} implementation
 	 * @return the beansConfigPostProcessor
 	 */
 	public static IBeansConfigPostProcessor[] createPostProcessor(String type) {
 		Set<IBeansConfigPostProcessor> postProcessors = new HashSet<IBeansConfigPostProcessor>();
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
-				POSTPROCESSOR_EXTENSION_POINT);
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(POSTPROCESSOR_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					String extensionType = config.getAttribute("type");
-					if ((type == null && extensionType == null)
-							|| (type != null && type.equals(extensionType))) {
+					if ((type == null && extensionType == null) || (type != null && type.equals(extensionType))) {
 						try {
 							Object object = config.createExecutableExtension("class");
 							if (object instanceof IBeansConfigPostProcessor) {
@@ -82,14 +79,14 @@ public class BeansConfigPostProcessorFactory {
 	/**
 	 * Helper method to create a new {@link IBeansConfigPostProcessingContext}.
 	 */
-	public static IBeansConfigPostProcessingContext createPostProcessingContext(
-			IBeansConfig beansConfig, Collection<IBean> beans,
-			ReaderEventListener readerEventListener, ProblemReporter problemReporter,
-			BeanNameGenerator beanNameGenerator, BeanDefinitionRegistry beanDefinitionRegistry) {
+	public static IBeansConfigPostProcessingContext createPostProcessingContext(IBeansConfig beansConfig,
+			Collection<IBean> beans, ReaderEventListener readerEventListener, ProblemReporter problemReporter,
+			BeanNameGenerator beanNameGenerator, BeanDefinitionRegistry beanDefinitionRegistry,
+			Set<ValidationProblem> problems) {
 		List<IBean> beansClone = new ArrayList<IBean>();
 		beansClone.addAll(beans);
-		return new BeansConfigPostProcessingContext(beansConfig, beanNameGenerator,
-				problemReporter, beanDefinitionRegistry, new BeansConfigRegistrationSupport(
-						Collections.unmodifiableCollection(beansClone), readerEventListener));
+		return new BeansConfigPostProcessingContext(beansConfig, beanNameGenerator, problemReporter,
+				beanDefinitionRegistry, new BeansConfigRegistrationSupport(Collections
+						.unmodifiableCollection(beansClone), readerEventListener), problems);
 	}
 }

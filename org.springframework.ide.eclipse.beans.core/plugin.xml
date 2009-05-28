@@ -150,6 +150,9 @@
     <extension
           point="org.springframework.ide.eclipse.core.listeners">
        <listener
+             class="org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansConfigReloadingProjectContributionEventListener">
+       </listener>
+       <listener
              class="org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansTypeHierachyProjectContributionEventListener">
        </listener>
     </extension>

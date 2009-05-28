@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigEventListener;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
@@ -37,23 +38,15 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This class gathers common functionality for core model components representing a single instance
- * of xml configuration file.
+ * This class gathers common functionality for core model components representing a single instance of xml configuration
+ * file.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements
-		IBeansConfig {
-	
-	/** The component scan element */
-	private static final String COMPONENT_SCAN_ELEMENT_NAME = "component-scan";
-
-	/** The context namespace URI */
-	private static final String CONTEXT_NAMESPACE_URI = "http://www.springframework.org/schema/context";
+public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements IBeansConfig {
 
 	/** List of aliases (in registration order) */
 	protected volatile Map<String, IBeanAlias> aliases;
@@ -90,7 +83,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 
 	/** Set of parsing errors */
 	protected Set<ValidationProblem> problems;
-	
+
 	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
 	protected final Lock r = rwl.readLock();
@@ -98,6 +91,8 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	protected volatile Type type;
 
 	protected final Lock w = rwl.writeLock();
+
+	protected volatile Set<IBeansConfigEventListener> eventListeners = new LinkedHashSet<IBeansConfigEventListener>();
 
 	public AbstractBeansConfig(IBeansModelElement project, String name, Type type) {
 		super(project, name);
@@ -149,24 +144,6 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean configAffectedByJavaChange(IResource resource) {
-		for (IBeansComponent component : getComponents()) {
-			if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
-				XmlSourceLocation location = (XmlSourceLocation) component
-						.getElementSourceLocation();
-				if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
-						&& CONTEXT_NAMESPACE_URI.equals(location
-								.getNamespaceURI())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -179,20 +156,15 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
 			return false;
 		if (this.defaults != null && that.defaults != null && this.defaults != that.defaults) {
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(), that.defaults
-					.getLazyInit()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(), that.defaults.getLazyInit()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(), that.defaults
-					.getAutowire()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(), that.defaults.getAutowire()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(), that.defaults
-					.getDependencyCheck()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(), that.defaults.getDependencyCheck()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(), that.defaults
-					.getInitMethod()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(), that.defaults.getInitMethod()))
 				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(), that.defaults
-					.getDestroyMethod()))
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(), that.defaults.getDestroyMethod()))
 				return false;
 			if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(), that.defaults.getMerge()))
 				return false;
@@ -287,7 +259,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	public Set<String> getBeanClasses() {
 		return Collections.unmodifiableSet(new LinkedHashSet<String>(getBeanClassesMap().keySet()));
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -385,8 +357,8 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 
 		try {
 			r.lock();
-			return (defaults != null && defaults.getDestroyMethod() != null ? defaults
-					.getDestroyMethod() : DEFAULT_DESTROY_METHOD);
+			return (defaults != null && defaults.getDestroyMethod() != null ? defaults.getDestroyMethod()
+					: DEFAULT_DESTROY_METHOD);
 		}
 		finally {
 			r.unlock();
@@ -437,8 +409,8 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 			r.lock();
 			// This default value was introduced with Spring 2.0 -> so we have
 			// to check for an empty string here as well
-			return (defaults != null && defaults.getMerge() != null
-					&& defaults.getMerge().length() > 0 ? defaults.getMerge() : DEFAULT_MERGE);
+			return (defaults != null && defaults.getMerge() != null && defaults.getMerge().length() > 0 ? defaults
+					.getMerge() : DEFAULT_MERGE);
 		}
 		finally {
 			r.unlock();
@@ -550,18 +522,12 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(isArchived);
 		if (defaults != null) {
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getDependencyCheck());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getMerge());
+			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
+			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(defaults.getAutowire());
+			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(defaults.getDependencyCheck());
+			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
+			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
+			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(defaults.getMerge());
 		}
 		return getElementType() * hashCode + super.hashCode();
 	}
@@ -605,6 +571,36 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 		return getElementName() + ": " + getBeans();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public void registerEventListener(IBeansConfigEventListener configEventListener) {
+		if (configEventListener != null) {
+			try {
+				w.lock();
+				eventListeners.add(configEventListener);
+			}
+			finally {
+				w.unlock();
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void unregisterEventListener(IBeansConfigEventListener configEventListener) {
+		if (configEventListener != null) {
+			try {
+				w.lock();
+				eventListeners.remove(configEventListener);
+			}
+			finally {
+				w.unlock();
+			}
+		}
+	}
+
 	private void addBeanClass(IBean bean, Map<String, Set<IBean>> beanClasses) {
 
 		// Get name of bean class - strip name of any inner class
@@ -633,8 +629,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 		}
 	}
 
-	private void addComponentBeanClasses(IBeansComponent component,
-			Map<String, Set<IBean>> beanClasses) {
+	private void addComponentBeanClasses(IBeansComponent component, Map<String, Set<IBean>> beanClasses) {
 		for (IBean bean : component.getBeans()) {
 			addBeanClasses(bean, beanClasses);
 		}
@@ -696,7 +691,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 		}
 		return beanClassesMap;
 	}
-	
+
 	/**
 	 * Read the resource backing this beans configuration and initialize all internal state.
 	 */

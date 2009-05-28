@@ -15,7 +15,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -23,7 +22,6 @@ import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocato
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * Implementation of {@link IResourceChangeListener} which detects modifications to Spring projects
@@ -101,10 +99,6 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				else if (BeansCoreUtils.isBeansConfig(file)) {
 					events.configAdded(file, eventType);
 				}
-				else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
-//						|| resource.getName().endsWith(JdtUtils.CLASS_FILE_EXTENSION)) {
-					configsChangedForProject(resource);
-				}
 				return false;
 			}
 			return super.resourceAdded(resource);
@@ -134,10 +128,6 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 					else if (requiresRefresh(file)) {
 						events.listenedFileChanged(file, eventType);
 					}
-					else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
-//							|| resource.getName().endsWith(JdtUtils.CLASS_FILE_EXTENSION)) {
-						configsChangedForProject(resource);
-					}
 				}
 				return false;
 			}
@@ -155,10 +145,6 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				}
 				else if (requiresRefresh((IFile) resource)) {
 					events.listenedFileChanged((IFile) resource, eventType);
-				}
-				else if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
-//						|| resource.getName().endsWith(JdtUtils.CLASS_FILE_EXTENSION)) {
-					configsChangedForProject(resource);
 				}
 				return false;
 			}
@@ -196,23 +182,6 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				}
 			}
 			return false;
-		}
-
-		/**
-		 * Marks every {@link IBeansConfig} in the project to which the given <code>resource</code>
-		 * belongs as changed.
-		 */
-		private void configsChangedForProject(IResource resource) {
-			IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
-			if (project != null) {
-				for (IBeansConfig config : project.getConfigs()) {
-					// Check if a config is affected by a change to the java model
-					if (config.configAffectedByJavaChange(resource)
-							&& config.getElementResource() instanceof IFile) {
-						events.configChanged((IFile) config.getElementResource(), eventType);
-					}
-				}
-			}
 		}
 
 	}

@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.process;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessingContext;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegistrationSupport;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
 /**
  * Default implementation of {@link IBeansConfigPostProcessingContext} that just delegates to given
@@ -35,15 +38,17 @@ public class BeansConfigPostProcessingContext implements IBeansConfigPostProcess
 
 	private final BeanDefinitionRegistry beanDefinitionRegistry;
 
-	public BeansConfigPostProcessingContext(IBeansConfig beansConfig,
-			BeanNameGenerator beanNameGenerator, ProblemReporter problemReporter,
-			BeanDefinitionRegistry beanDefinitionRegistry,
-			IBeansConfigRegistrationSupport beansConfigRegistrationSupport) {
+	private final Set<ValidationProblem> problems;
+
+	public BeansConfigPostProcessingContext(IBeansConfig beansConfig, BeanNameGenerator beanNameGenerator,
+			ProblemReporter problemReporter, BeanDefinitionRegistry beanDefinitionRegistry,
+			IBeansConfigRegistrationSupport beansConfigRegistrationSupport, Set<ValidationProblem> problems) {
 		this.beansConfig = beansConfig;
 		this.beanNameGenerator = beanNameGenerator;
 		this.problemReporter = problemReporter;
 		this.beanDefinitionRegistry = beanDefinitionRegistry;
 		this.beansConfigRegistrationSupport = beansConfigRegistrationSupport;
+		this.problems = problems;
 	}
 
 	public BeanNameGenerator getBeanNameGenerator() {
@@ -64,5 +69,9 @@ public class BeansConfigPostProcessingContext implements IBeansConfigPostProcess
 
 	public BeanDefinitionRegistry getBeanDefinitionRegistry() {
 		return beanDefinitionRegistry;
+	}
+
+	public void reportProblem(ValidationProblem problem) {
+		problems.add(problem);
 	}
 }

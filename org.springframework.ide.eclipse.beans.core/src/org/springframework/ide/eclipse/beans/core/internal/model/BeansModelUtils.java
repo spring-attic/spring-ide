@@ -90,11 +90,10 @@ import org.w3c.dom.Node;
 public abstract class BeansModelUtils {
 
 	/**
-	 * Returns the <code>IBean</code> for a given bean name from specified context (
-	 * <code>IBeansConfig</code> or <code>IBeansConfigSet</code>). If the corresponding bean is not
-	 * found then the context's list of <code>IBeanAlias</code>es is checked too.
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
-	 * beans are looked-up
+	 * Returns the <code>IBean</code> for a given bean name from specified context ( <code>IBeansConfig</code> or
+	 * <code>IBeansConfigSet</code>). If the corresponding bean is not found then the context's list of
+	 * <code>IBeanAlias</code>es is checked too.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the beans are looked-up
 	 * @return <code>IBean</code> or <code>null</code> if bean not found
 	 * @throws IllegalArgumentException if unsupported context specified
 	 */
@@ -143,8 +142,7 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Return's the {@link IBean} for the given name by recursively looking into the
-	 * {@link IBeansComponent}.
+	 * Return's the {@link IBean} for the given name by recursively looking into the {@link IBeansComponent}.
 	 */
 	private static IBean getBean(String name, IBeansComponent component) {
 		for (IBean componentBean : component.getBeans()) {
@@ -164,10 +162,9 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the given bean's class name.
 	 * @param bean the bean to lookup the bean class name for
-	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are
-	 * looked-up; if <code>null</code> then the bean's config will be first used; if the bean class
-	 * name cannot be resolved in the bean's configs, the algorithm will look in all bean config
-	 * sets that contain the bean's config
+	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are looked-up; if
+	 * <code>null</code> then the bean's config will be first used; if the bean class name cannot be resolved in the
+	 * bean's configs, the algorithm will look in all bean config sets that contain the bean's config
 	 */
 	public static String getBeanClass(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
@@ -198,8 +195,7 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the given bean's class name.
 	 * @param bean the bean to lookup the bean class name for
-	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are
-	 * looked-up
+	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are looked-up
 	 * @throws IllegalArgumentException if context of bean is <code>null</code>
 	 */
 	public static String getBeanClassFromContext(IBean bean, IModelElement context) {
@@ -234,19 +230,17 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns a collection of {@link BeansConnection}s holding all {@link IBean<}s which are
-	 * referenced from given model element. For a bean it's parent bean (for child beans only),
-	 * constructor argument values and property values are checked. {@link IBean} look-up is done
-	 * from the specified {@link IBeanConfig} or {@link IBeanConfigSet}.
-	 * @param element the element ({@link IBean}, {@link IBeanConstructorArgument} or
-	 * {@link IBeanProperty}) to get all referenced beans from
-	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the referenced
-	 * beans are looked-up
+	 * Returns a collection of {@link BeansConnection}s holding all {@link IBean<}s which are referenced from given
+	 * model element. For a bean it's parent bean (for child beans only), constructor argument values and property
+	 * values are checked. {@link IBean} look-up is done from the specified {@link IBeanConfig} or
+	 * {@link IBeanConfigSet}.
+	 * @param element the element ({@link IBean}, {@link IBeanConstructorArgument} or {@link IBeanProperty}) to get all
+	 * referenced beans from
+	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the referenced beans are looked-up
 	 * @param recursive set to <code>true</code> if the dependency graph is traversed recursively
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
-	public static Set<BeansConnection> getBeanReferences(IModelElement element,
-			IModelElement context, boolean recursive) {
+	public static Set<BeansConnection> getBeanReferences(IModelElement element, IModelElement context, boolean recursive) {
 		Set<BeansConnection> references = new LinkedHashSet<BeansConnection>();
 		Set<IBean> referencedBeans = new HashSet<IBean>(); // used to break
 		// from cycles
@@ -265,8 +259,7 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns a list of all beans which belong to the given model element.
 	 * @param element the model element which contains beans
-	 * @param monitor the progress monitor to indicate progress; mark the monitor done after
-	 * completing the work
+	 * @param monitor the progress monitor to indicate progress; mark the monitor done after completing the work
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static Set<IBean> getBeans(IModelElement element, IProgressMonitor monitor) {
@@ -280,11 +273,9 @@ public abstract class BeansModelUtils {
 			monitor.beginTask("Locating bean definitions", projects.size());
 			try {
 				for (IBeansProject project : projects) {
-					monitor.subTask("Locating bean definitions in project '"
-							+ project.getElementName() + "'");
+					monitor.subTask("Locating bean definitions in project '" + project.getElementName() + "'");
 					for (IBeansConfig config : project.getConfigs()) {
-						monitor.subTask("Locating bean defintions from file '"
-								+ config.getElementName() + "'");
+						monitor.subTask("Locating bean defintions from file '" + config.getElementName() + "'");
 						beans.addAll(config.getBeans());
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
@@ -311,8 +302,7 @@ public abstract class BeansModelUtils {
 			monitor.beginTask("Locating bean definitions", configs.size());
 			try {
 				for (IBeansConfig config : configs) {
-					monitor.subTask("Loading bean defintion from file '" + config.getElementName()
-							+ "'");
+					monitor.subTask("Loading bean defintion from file '" + config.getElementName() + "'");
 					beans.addAll(config.getBeans());
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -357,10 +347,9 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the corresponding Java type for given bean's class.
 	 * @param bean the bean to lookup the bean class' Java type
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
-	 * beans are looked-up; if <code>null</code> then the bean's config is used
-	 * @return the Java type of given bean's class or <code>null</code> if no bean class defined or
-	 * type not found
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the beans are looked-up; if
+	 * <code>null</code> then the bean's config is used
+	 * @return the Java type of given bean's class or <code>null</code> if no bean class defined or type not found
 	 */
 	public static IType getBeanType(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
@@ -388,9 +377,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the child of given parent element's subtree the specified element belongs to. If the
-	 * given element does not belong to the subtree of the specified parent element
-	 * <code>null</code> is returned.
+	 * Returns the child of given parent element's subtree the specified element belongs to. If the given element does
+	 * not belong to the subtree of the specified parent element <code>null</code> is returned.
 	 */
 	public static IModelElement getChildForElement(IModelElement parent, IModelElement element) {
 		while (element != null) {
@@ -422,9 +410,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns config for given name from specified context (<code>IBeansProject</code> or
-	 * <code>IBeansConfigSet</code>). Externally referenced configs (config name starts with '/')
-	 * are recognized too.
+	 * Returns config for given name from specified context (<code>IBeansProject</code> or <code>IBeansConfigSet</code>
+	 * ). Externally referenced configs (config name starts with '/') are recognized too.
 	 * @param configName the name of the config to look for
 	 * @param context the context used for config look-up
 	 * @throws IllegalArgumentException if unsupported context specified
@@ -454,14 +441,12 @@ public abstract class BeansModelUtils {
 	 * Returns the beans config for a given ZIP file entry.
 	 */
 	public static IBeansConfig getConfig(ZipEntryStorage storage) {
-		IResourceModelElement parent = (IResourceModelElement) storage
-				.getAdapter(IResourceModelElement.class);
+		IResourceModelElement parent = (IResourceModelElement) storage.getAdapter(IResourceModelElement.class);
 		if (parent instanceof IBeansConfig) {
 			return (IBeansConfig) parent;
 		}
 
-		IBeansProject project = BeansCorePlugin.getModel().getProject(
-				storage.getFile().getProject());
+		IBeansProject project = BeansCorePlugin.getModel().getProject(storage.getFile().getProject());
 		if (project != null) {
 			return project.getConfig(storage.getFullName());
 		}
@@ -469,11 +454,10 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the given <code>file</code>
-	 * as bean class.
+	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the given <code>file</code> as bean class.
 	 * <p>
-	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
-	 * <code>null</code> will never be returned.
+	 * This implementation considers <b>all</b> inner classes as potential bean classes as well. <code>null</code> will
+	 * never be returned.
 	 * @since 2.0.5
 	 */
 	public static Set<IBeansConfig> getConfigsByTypes(IFile file) {
@@ -533,8 +517,7 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the first constructor argument defined for given bean.
 	 * @param bean the bean to lookup the first constructor argument
-	 * @return the first constructor argument or <code>null</code> if no constructor argument is
-	 * defined
+	 * @return the first constructor argument or <code>null</code> if no constructor argument is defined
 	 */
 	public static IBeanConstructorArgument getFirstConstructorArgument(IBean bean) {
 		IBeanConstructorArgument firstCarg = null;
@@ -590,11 +573,10 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the merged bean definition for a given bean from specified context (
-	 * {@link IBeansConfig} or {@link IBeansConfigSet}). Any cyclic-references are ignored.
+	 * Returns the merged bean definition for a given bean from specified context ( {@link IBeansConfig} or
+	 * {@link IBeansConfigSet}). Any cyclic-references are ignored.
 	 * @param bean the bean the merged bean definition is requested for
-	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are
-	 * looked-up
+	 * @param context the context ({@link IBeanConfig} or {@link IBeanConfigSet}) the beans are looked-up
 	 * @return given bean's merged bean definition
 	 * @throws IllegalArgumentException if unsupported context specified
 	 */
@@ -669,15 +651,15 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the most specific {@link IModelElement} that corresponds to the given
-	 * <code>startLine</code> and <code>endLine</code> line numbers.
+	 * Returns the most specific {@link IModelElement} that corresponds to the given <code>startLine</code> and
+	 * <code>endLine</code> line numbers.
 	 * <p>
-	 * Client should be aware of possible <code>null</code> returns in case on {@link IModelElement}
-	 * can be found at the given location.
+	 * Client should be aware of possible <code>null</code> returns in case on {@link IModelElement} can be found at the
+	 * given location.
 	 * @since 2.0.1
 	 */
-	public static IModelElement getMostSpecificModelElement(int startLine, int endLine,
-			IFile resource, IProgressMonitor monitor) {
+	public static IModelElement getMostSpecificModelElement(int startLine, int endLine, IFile resource,
+			IProgressMonitor monitor) {
 		if (BeansCoreUtils.isBeansConfig(resource, true)) {
 
 			if (monitor == null) {
@@ -685,8 +667,7 @@ public abstract class BeansModelUtils {
 			}
 
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(resource, true);
-			ModelElementDetermingModelVisitor v = new ModelElementDetermingModelVisitor(startLine,
-					endLine, resource);
+			ModelElementDetermingModelVisitor v = new ModelElementDetermingModelVisitor(startLine, endLine, resource);
 			beansConfig.accept(v, monitor);
 			return v.getElement();
 		}
@@ -694,8 +675,7 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Iterates up the model tree to find the first parent element that is of the given
-	 * <code>parentType</code>.
+	 * Iterates up the model tree to find the first parent element that is of the given <code>parentType</code>.
 	 * @since 2.0.4
 	 */
 	@SuppressWarnings("unchecked")
@@ -721,8 +701,7 @@ public abstract class BeansModelUtils {
 		if (element instanceof IResourceModelElement) {
 			IResource resource = ((IResourceModelElement) element).getElementResource();
 			if (resource != null) {
-				IBeansProject project = BeansCorePlugin.getModel()
-						.getProject(resource.getProject());
+				IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
 				if (project != null) {
 					return project;
 				}
@@ -734,10 +713,10 @@ public abstract class BeansModelUtils {
 	/**
 	 * Returns the corresponding Java set method for given bean property.
 	 * @param property the property to lookup the Java method for
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
-	 * beans are looked-up; if <code>null</code> then the bean's config is used
-	 * @return the Java method of given bean property or <code>null</code> if no bean class defined
-	 * or set method not found
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the beans are looked-up; if
+	 * <code>null</code> then the bean's config is used
+	 * @return the Java method of given bean property or <code>null</code> if no bean class defined or set method not
+	 * found
 	 */
 	public static IMethod getPropertyMethod(IBeanProperty property, IModelElement context) {
 		Assert.notNull(property);
@@ -830,8 +809,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Checks if a the {@link IType}s contained in the given <code>file</code> instance are used as
-	 * Bean classes anywhere in the core model.
+	 * Checks if a the {@link IType}s contained in the given <code>file</code> instance are used as Bean classes
+	 * anywhere in the core model.
 	 * <p>
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
@@ -841,8 +820,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Checks if a given <code>className</code> is used as a bean class. The check iterates the
-	 * complete {@link IBeansModel} and not "only" the current {@link IBeansProject}.
+	 * Checks if a given <code>className</code> is used as a bean class. The check iterates the complete
+	 * {@link IBeansModel} and not "only" the current {@link IBeansProject}.
 	 * @param className
 	 */
 	public static boolean isBeanClass(String className) {
@@ -851,8 +830,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Checks if a given <code>type</code> is used as a bean class. The check iterates the complete
-	 * {@link IBeansModel} and not "only" the current {@link IBeansProject}.
+	 * Checks if a given <code>type</code> is used as a bean class. The check iterates the complete {@link IBeansModel}
+	 * and not "only" the current {@link IBeansProject}.
 	 * <p>
 	 * The implementation checks if the given <code>type</code> is on the project's classpath.
 	 * @param type
@@ -878,8 +857,8 @@ public abstract class BeansModelUtils {
 
 	/**
 	 * Registers all bean definitions and aliases from given {@link IBeansConfig} in specified
-	 * {@link BeanDefinitionRegistry}. All {@link BeansException}s thrown by the
-	 * {@link BeanDefinitionRegistry} are ignored.
+	 * {@link BeanDefinitionRegistry}. All {@link BeansException}s thrown by the {@link BeanDefinitionRegistry} are
+	 * ignored.
 	 */
 	public static void register(IBeansConfig config, BeanDefinitionRegistry registry) {
 
@@ -940,13 +919,13 @@ public abstract class BeansModelUtils {
 			return new BeanReference(parent, (RuntimeBeanReference) value);
 		}
 		else if (value instanceof ManagedList) {
-			return new BeansList(parent, (ManagedList) value);
+			return new BeansList(parent, (ManagedList<?>) value);
 		}
 		else if (value instanceof ManagedSet) {
-			return new BeansSet(parent, (ManagedSet) value);
+			return new BeansSet(parent, (ManagedSet<?>) value);
 		}
 		else if (value instanceof ManagedMap) {
-			return new BeansMap(parent, (ManagedMap) value);
+			return new BeansMap(parent, (ManagedMap<?, ?>) value);
 		}
 		else if (value instanceof ManagedProperties) {
 			return new BeansProperties(parent, (ManagedProperties) value);
@@ -955,14 +934,12 @@ public abstract class BeansModelUtils {
 			return new BeansTypedString(parent, (TypedStringValue) value);
 		}
 		else if (value != null && value.getClass().isArray()) {
-			return new BeansTypedString(parent, "["
-					+ StringUtils.arrayToDelimitedString((Object[]) value, ", ") + "]");
+			return new BeansTypedString(parent, "[" + StringUtils.arrayToDelimitedString((Object[]) value, ", ") + "]");
 		}
 		return new BeansTypedString(parent, (value != null ? value.toString() : "null"));
 	}
 
-	private static void addBeanDefinition(IBean bean, IModelElement context,
-			List<BeanDefinition> beanDefinitions) {
+	private static void addBeanDefinition(IBean bean, IModelElement context, List<BeanDefinition> beanDefinitions) {
 		String parentName = bean.getParentName();
 		Bean parentBean = (Bean) getBean(parentName, context);
 		if (parentBean != null) {
@@ -979,13 +956,12 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * If given target is not equal to source then a {@link BeansConnection} is created. This bean
-	 * reference is added to the given list of bean references (if not already). If given target is
-	 * not already checked for bean references then <code>true</code> is returned else
-	 * <code>false</code>.
+	 * If given target is not equal to source then a {@link BeansConnection} is created. This bean reference is added to
+	 * the given list of bean references (if not already). If given target is not already checked for bean references
+	 * then <code>true</code> is returned else <code>false</code>.
 	 */
-	private static boolean addBeanReference(BeanType type, IModelElement source, IBean target,
-			IModelElement context, Set<BeansConnection> references, Set<IBean> referencedBeans) {
+	private static boolean addBeanReference(BeanType type, IModelElement source, IBean target, IModelElement context,
+			Set<BeansConnection> references, Set<IBean> referencedBeans) {
 		if (target != null && target != source) {
 			BeansConnection ref = new BeansConnection(type, source, target, context);
 			if (!references.contains(ref)) {
@@ -1001,20 +977,19 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Adds the all beans which are referenced by the specified bean to the given list as an
-	 * instance of {@link BeansConnection}.
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
-	 * referenced beans are looked-up
+	 * Adds the all beans which are referenced by the specified bean to the given list as an instance of
+	 * {@link BeansConnection}.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the referenced beans are
+	 * looked-up
 	 * @param referencedBeans used to break from cycles
 	 */
-	private static void addBeanReferencesForBean(IBean element, IModelElement context,
-			boolean recursive, Set<BeansConnection> references, Set<IBean> referencedBeans) {
+	private static void addBeanReferencesForBean(IBean element, IModelElement context, boolean recursive,
+			Set<BeansConnection> references, Set<IBean> referencedBeans) {
 		if (!referencedBeans.contains(element)) {
 
 			// must add this element first to break from cycles
 			referencedBeans.add(element);
-			for (BeansConnection ref : getBeanReferences(element, context, recursive, references,
-					referencedBeans)) {
+			for (BeansConnection ref : getBeanReferences(element, context, recursive, references, referencedBeans)) {
 				if (!references.contains(ref)) {
 					references.add(ref);
 				}
@@ -1023,66 +998,56 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Adds the all beans which are referenced by the specified {@link IBeansComponent} to the given
-	 * list as an instance of {@link BeansConnection}.
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
-	 * referenced beans are looked-up
+	 * Adds the all beans which are referenced by the specified {@link IBeansComponent} to the given list as an instance
+	 * of {@link BeansConnection}.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the referenced beans are
+	 * looked-up
 	 * @param referencedBeans used to break from cycles
 	 */
-	private static void addBeanReferencesForBeansComponent(IBeansComponent component,
-			IModelElement context, boolean recursive, Set<BeansConnection> references,
-			Set<IBean> referencedBeans) {
+	private static void addBeanReferencesForBeansComponent(IBeansComponent component, IModelElement context,
+			boolean recursive, Set<BeansConnection> references, Set<IBean> referencedBeans) {
 		for (IBean bean : component.getBeans()) {
 			addBeanReferencesForBean(bean, context, recursive, references, referencedBeans);
 		}
 		for (IBeansComponent innerComponent : component.getComponents()) {
-			addBeanReferencesForBeansComponent(innerComponent, context, recursive, references,
-					referencedBeans);
+			addBeanReferencesForBeansComponent(innerComponent, context, recursive, references, referencedBeans);
 		}
 	}
 
 	/**
-	 * Given a bean property's or constructor argument's value, adds any beans referenced by this
-	 * value. This value could be: <li>An {@link IBeanReference}, which bean will be added. <li>An
-	 * inner {@link IBean}. This is an inner {@link IBean} that may contain {@link IBeanReference}s
-	 * which will be added too. <li>An {@link IBeansList}. This is a collection that may contain
-	 * {@link IBeanReference}s which will be added. <li>An {@link IBeansSet}. May also contain
-	 * {@link IBeanReference}s that will be added. <li>An {@link IBeansMap}. In this case the value
-	 * may be a {@link IBeanReference} that will be added. <li>An ordinary object or null, in which
-	 * case it's ignored.
-	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the
-	 * referenced beans are looked-up
+	 * Given a bean property's or constructor argument's value, adds any beans referenced by this value. This value
+	 * could be: <li>An {@link IBeanReference}, which bean will be added. <li>An inner {@link IBean}. This is an inner
+	 * {@link IBean} that may contain {@link IBeanReference}s which will be added too. <li>An {@link IBeansList}. This
+	 * is a collection that may contain {@link IBeanReference}s which will be added. <li>An {@link IBeansSet}. May also
+	 * contain {@link IBeanReference}s that will be added. <li>An {@link IBeansMap}. In this case the value may be a
+	 * {@link IBeanReference} that will be added. <li>An ordinary object or null, in which case it's ignored.
+	 * @param context the context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>) the referenced beans are
+	 * looked-up
 	 */
-	private static void addBeanReferencesForValue(IModelElement element, Object value,
-			IModelElement context, Set<BeansConnection> references, Set<IBean> referencedBeans,
-			boolean recursive) {
+	private static void addBeanReferencesForValue(IModelElement element, Object value, IModelElement context,
+			Set<BeansConnection> references, Set<IBean> referencedBeans, boolean recursive) {
 		if (value instanceof IBeanReference) {
 			String beanName = ((IBeanReference) value).getBeanName();
 			IBean bean = getBean(beanName, context);
-			if (addBeanReference(BeanType.STANDARD, element, bean, context, references,
-					referencedBeans)
-					&& recursive) {
+			if (addBeanReference(BeanType.STANDARD, element, bean, context, references, referencedBeans) && recursive) {
 				addBeanReferencesForBean(bean, context, recursive, references, referencedBeans);
 			}
 		}
 		else if (value instanceof IBeansList) {
 
 			// Add bean property's interceptors
-			if (element instanceof IBeanProperty
-					&& element.getElementName().equals("interceptorNames")) {
+			if (element instanceof IBeanProperty && element.getElementName().equals("interceptorNames")) {
 				IType type = getBeanType((IBean) element.getElementParent(), context);
 				if (type != null) {
-					if (type.getFullyQualifiedName().equals(
-							"org.springframework.aop.framework.ProxyFactoryBean")) {
+					if (type.getFullyQualifiedName().equals("org.springframework.aop.framework.ProxyFactoryBean")) {
 						for (IModelElement child : ((IBeansList) value).getElementChildren()) {
 							if (child instanceof IBeansTypedString) {
-								IBean interceptor = getBean(
-										((IBeansTypedString) child).getString(), context);
-								if (addBeanReference(BeanType.INTERCEPTOR, element, interceptor,
-										context, references, referencedBeans)
+								IBean interceptor = getBean(((IBeansTypedString) child).getString(), context);
+								if (addBeanReference(BeanType.INTERCEPTOR, element, interceptor, context, references,
+										referencedBeans)
 										&& recursive) {
-									addBeanReferencesForBean(interceptor, context, recursive,
-											references, referencedBeans);
+									addBeanReferencesForBean(interceptor, context, recursive, references,
+											referencedBeans);
 								}
 							}
 						}
@@ -1091,24 +1056,22 @@ public abstract class BeansModelUtils {
 			}
 			else {
 				for (IModelElement child : ((IBeansList) value).getElementChildren()) {
-					addBeanReferencesForValue(element, child, context, references, referencedBeans,
-							recursive);
+					addBeanReferencesForValue(element, child, context, references, referencedBeans, recursive);
 				}
 			}
 		}
 		else if (value instanceof IBeansSet) {
 			for (IModelElement child : ((IBeansSet) value).getElementChildren()) {
-				addBeanReferencesForValue(element, child, context, references, referencedBeans,
-						recursive);
+				addBeanReferencesForValue(element, child, context, references, referencedBeans, recursive);
 			}
 		}
 		else if (value instanceof IBeansMap) {
 			for (IModelElement child : ((IBeansMap) value).getElementChildren()) {
 				if (child instanceof IBeansMapEntry) {
-					addBeanReferencesForValue(element, ((IBeansMapEntry) child).getKey(), context,
-							references, referencedBeans, recursive);
-					addBeanReferencesForValue(element, ((IBeansMapEntry) child).getValue(),
-							context, references, referencedBeans, recursive);
+					addBeanReferencesForValue(element, ((IBeansMapEntry) child).getKey(), context, references,
+							referencedBeans, recursive);
+					addBeanReferencesForValue(element, ((IBeansMapEntry) child).getValue(), context, references,
+							referencedBeans, recursive);
 				}
 			}
 		}
@@ -1126,12 +1089,11 @@ public abstract class BeansModelUtils {
 		return null;
 	}
 
-	private static Set<BeansConnection> getBeanReferences(IModelElement element,
-			IModelElement context, boolean recursive, Set<BeansConnection> references,
-			Set<IBean> referencedBeans) {
+	private static Set<BeansConnection> getBeanReferences(IModelElement element, IModelElement context,
+			boolean recursive, Set<BeansConnection> references, Set<IBean> referencedBeans) {
 		if (element instanceof IBeansComponent) {
-			addBeanReferencesForBeansComponent((IBeansComponent) element, context, recursive,
-					references, referencedBeans);
+			addBeanReferencesForBeansComponent((IBeansComponent) element, context, recursive, references,
+					referencedBeans);
 		}
 		else if (element instanceof Bean) {
 
@@ -1141,8 +1103,7 @@ public abstract class BeansModelUtils {
 			// For a child bean add the parent bean
 			if (bean.isChildBean()) {
 				IBean parentBean = getBean(bean.getParentName(), context);
-				if (addBeanReference(BeanType.PARENT, bean, parentBean, context, references,
-						referencedBeans)
+				if (addBeanReference(BeanType.PARENT, bean, parentBean, context, references, referencedBeans)
 						&& recursive) {
 					// Now add all parent beans and all beans which are
 					// referenced by the parent beans
@@ -1158,11 +1119,9 @@ public abstract class BeansModelUtils {
 						}
 						beanNames.add(parentName);
 						parentBean = getBean(parentName, context);
-						if (addBeanReference(BeanType.PARENT, bean, parentBean, context,
-								references, referencedBeans)
+						if (addBeanReference(BeanType.PARENT, bean, parentBean, context, references, referencedBeans)
 								&& recursive) {
-							addBeanReferencesForBean(parentBean, context, recursive, references,
-									referencedBeans);
+							addBeanReferencesForBean(parentBean, context, recursive, references, referencedBeans);
 						}
 					}
 				}
@@ -1180,11 +1139,9 @@ public abstract class BeansModelUtils {
 			// Add bean's factoy bean
 			if (bd.getFactoryBeanName() != null) {
 				IBean factoryBean = getBean(bd.getFactoryBeanName(), context);
-				if (addBeanReference(BeanType.FACTORY, bean, factoryBean, context, references,
-						referencedBeans)
+				if (addBeanReference(BeanType.FACTORY, bean, factoryBean, context, references, referencedBeans)
 						&& recursive) {
-					addBeanReferencesForBean(factoryBean, context, recursive, references,
-							referencedBeans);
+					addBeanReferencesForBean(factoryBean, context, recursive, references, referencedBeans);
 				}
 			}
 
@@ -1192,11 +1149,9 @@ public abstract class BeansModelUtils {
 			if (bd.getDependsOn() != null) {
 				for (String dependsOnBeanId : bd.getDependsOn()) {
 					IBean dependsOnBean = getBean(dependsOnBeanId, context);
-					if (addBeanReference(BeanType.DEPENDS_ON, bean, dependsOnBean, context,
-							references, referencedBeans)
+					if (addBeanReference(BeanType.DEPENDS_ON, bean, dependsOnBean, context, references, referencedBeans)
 							&& recursive) {
-						addBeanReferencesForBean(dependsOnBean, context, recursive, references,
-								referencedBeans);
+						addBeanReferencesForBean(dependsOnBean, context, recursive, references, referencedBeans);
 					}
 				}
 			}
@@ -1207,22 +1162,19 @@ public abstract class BeansModelUtils {
 					if (methodOverride instanceof LookupOverride) {
 						String beanName = ((LookupOverride) methodOverride).getBeanName();
 						IBean overrideBean = getBean(beanName, context);
-						if (addBeanReference(BeanType.METHOD_OVERRIDE, bean, overrideBean, context,
-								references, referencedBeans)
+						if (addBeanReference(BeanType.METHOD_OVERRIDE, bean, overrideBean, context, references,
+								referencedBeans)
 								&& recursive) {
-							addBeanReferencesForBean(overrideBean, context, recursive, references,
-									referencedBeans);
+							addBeanReferencesForBean(overrideBean, context, recursive, references, referencedBeans);
 						}
 					}
 					else if (methodOverride instanceof ReplaceOverride) {
-						String beanName = ((ReplaceOverride) methodOverride)
-								.getMethodReplacerBeanName();
+						String beanName = ((ReplaceOverride) methodOverride).getMethodReplacerBeanName();
 						IBean overrideBean = getBean(beanName, context);
-						if (addBeanReference(BeanType.METHOD_OVERRIDE, bean, overrideBean, context,
-								references, referencedBeans)
+						if (addBeanReference(BeanType.METHOD_OVERRIDE, bean, overrideBean, context, references,
+								referencedBeans)
 								&& recursive) {
-							addBeanReferencesForBean(overrideBean, context, recursive, references,
-									referencedBeans);
+							addBeanReferencesForBean(overrideBean, context, recursive, references, referencedBeans);
 						}
 					}
 				}
@@ -1230,30 +1182,27 @@ public abstract class BeansModelUtils {
 
 			// Add beans referenced from bean's constructor arguments
 			for (IBeanConstructorArgument carg : bean.getConstructorArguments()) {
-				addBeanReferencesForValue(carg, carg.getValue(), context, references,
-						referencedBeans, recursive);
+				addBeanReferencesForValue(carg, carg.getValue(), context, references, referencedBeans, recursive);
 			}
 
 			// Add referenced beans from bean's properties
 			for (IBeanProperty property : bean.getProperties()) {
-				addBeanReferencesForValue(property, property.getValue(), context, references,
-						referencedBeans, recursive);
+				addBeanReferencesForValue(property, property.getValue(), context, references, referencedBeans,
+						recursive);
 			}
 
 			// Add referenced beans from bean annotations contributed into the bean meta data model
-			for (IBeanProperty property : BeansCorePlugin.getMetadataModel()
-					.getBeanProperties(bean)) {
-				addBeanReferencesForValue(property, property.getValue(), context, references,
-						referencedBeans, recursive);
+			for (IBeanProperty property : BeansCorePlugin.getMetadataModel().getBeanProperties(bean)) {
+				addBeanReferencesForValue(property, property.getValue(), context, references, referencedBeans,
+						recursive);
 			}
 
 			// Add references from inner beans
 			for (IBean nestedBean : getInnerBeans(bean, false)) {
-				Set<BeansConnection> nestedConnections = getBeanReferences(nestedBean, context,
-						false);
+				Set<BeansConnection> nestedConnections = getBeanReferences(nestedBean, context, false);
 				for (BeansConnection nestedConnection : nestedConnections) {
-					references.add(new BeansConnection(nestedConnection.getType(), bean,
-							nestedConnection.getTarget(), true));
+					references.add(new BeansConnection(nestedConnection.getType(), bean, nestedConnection.getTarget(),
+							true));
 				}
 			}
 		}
@@ -1261,15 +1210,13 @@ public abstract class BeansModelUtils {
 
 			// Add referenced beans from constructor arguments element
 			IBeanConstructorArgument carg = (IBeanConstructorArgument) element;
-			addBeanReferencesForValue(carg, carg.getValue(), context, references, referencedBeans,
-					recursive);
+			addBeanReferencesForValue(carg, carg.getValue(), context, references, referencedBeans, recursive);
 		}
 		else if (element instanceof IBeanProperty) {
 
 			// Add referenced beans from property element
 			IBeanProperty property = (IBeanProperty) element;
-			addBeanReferencesForValue(property, property.getValue(), context, references,
-					referencedBeans, recursive);
+			addBeanReferencesForValue(property, property.getValue(), context, references, referencedBeans, recursive);
 
 		}
 		else {
@@ -1282,8 +1229,7 @@ public abstract class BeansModelUtils {
 	 * Registers all {@link IBean}s and {@link IBeansComponent}s that are nested within the given
 	 * <code>components</code>.
 	 */
-	private static void registerComponents(Set<IBeansComponent> components,
-			BeanDefinitionRegistry registry) {
+	private static void registerComponents(Set<IBeansComponent> components, BeanDefinitionRegistry registry) {
 		for (IBeansComponent component : components) {
 			for (IBean bean : component.getBeans()) {
 				try {
@@ -1311,8 +1257,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns a list of all configs which contain a bean that uses a bean class that is part of the
-	 * java structure represented by the given <code>resource</code>.
+	 * Returns a list of all configs which contain a bean that uses a bean class that is part of the java structure
+	 * represented by the given <code>resource</code>.
 	 * <p>
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
@@ -1320,8 +1266,7 @@ public abstract class BeansModelUtils {
 	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource) {
 		Set<IBeansConfig> files = new LinkedHashSet<IBeansConfig>();
 
-		if (resource != null && resource.isAccessible()
-				&& resource.isSynchronized(IResource.DEPTH_ZERO)
+		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
 				&& resource.getName().endsWith(".java")) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
 			if (projects != null) {
@@ -1334,8 +1279,7 @@ public abstract class BeansModelUtils {
 						Set<List<IType>> hierachies = new HashSet<List<IType>>();
 						List<IType> relevantTypes = Arrays.asList(types);
 						for (IType type : types) {
-							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type)
-									.getSubtypes(type);
+							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type).getSubtypes(type);
 							if (subTypes != null && subTypes.length > 0) {
 								hierachies.add(Arrays.asList(subTypes));
 							}
@@ -1345,11 +1289,10 @@ public abstract class BeansModelUtils {
 							if (project != null) {
 								Set<IBeansConfig> configs = project.getConfigs();
 								for (IBeansConfig config : configs) {
-									
+
 									Set<String> allBeanClasses = config.getBeanClasses();
 									for (String className : allBeanClasses) {
-										IType type = JdtUtils.getJavaType(project.getProject(),
-												className);
+										IType type = JdtUtils.getJavaType(project.getProject(), className);
 										if (type != null) {
 											// 1. check if the bean class is clear match
 											if (relevantTypes.contains(type)) {
@@ -1384,8 +1327,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns a list of all beans which use a bean class that is part of the java structure
-	 * represented by the given <code>resource</code>.
+	 * Returns a list of all beans which use a bean class that is part of the java structure represented by the given
+	 * <code>resource</code>.
 	 * <p>
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
@@ -1393,8 +1336,7 @@ public abstract class BeansModelUtils {
 	public static Set<IBean> getBeansByContainingTypes(IResource resource) {
 		Set<IBean> files = new LinkedHashSet<IBean>();
 
-		if (resource != null && resource.isAccessible()
-				&& resource.isSynchronized(IResource.DEPTH_ZERO)
+		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
 				&& resource.getName().endsWith(".java")) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
 			if (projects != null) {
@@ -1407,8 +1349,7 @@ public abstract class BeansModelUtils {
 						Set<List<IType>> hierachies = new HashSet<List<IType>>();
 						List<IType> relevantTypes = Arrays.asList(types);
 						for (IType type : types) {
-							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type)
-									.getSubtypes(type);
+							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type).getSubtypes(type);
 							if (subTypes != null && subTypes.length > 0) {
 								hierachies.add(Arrays.asList(subTypes));
 							}
@@ -1441,8 +1382,7 @@ public abstract class BeansModelUtils {
 
 											// One last check before adding too much that is not
 											// even on the resource's classpath
-											if (JdtUtils.getJavaProject(project.getProject())
-													.isOnClasspath(resource)) {
+											if (JdtUtils.getJavaProject(project.getProject()).isOnClasspath(resource)) {
 												files.add(bean);
 											}
 										}
@@ -1464,11 +1404,9 @@ public abstract class BeansModelUtils {
 	 * Resolves the {@link IBean} bean class by looking at parent, factory-bean and factory-method.
 	 */
 	public static IType resolveBeanType(IBean bean) {
-		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils
-				.getMergedBeanDefinition(bean, null);
+		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils.getMergedBeanDefinition(bean, null);
 		String mergedClassName = mergedBd.getBeanClassName();
-		return extractBeanClass(mergedBd, bean, mergedClassName, getParentOfClass(bean,
-				BeansConfig.class));
+		return extractBeanClass(mergedBd, bean, mergedClassName, getParentOfClass(bean, BeansConfig.class));
 	}
 
 	/**
@@ -1479,8 +1417,7 @@ public abstract class BeansModelUtils {
 	private static IType extractBeanClass(BeanDefinition bd, IBean bean, String mergedClassName,
 			IBeansConfig beansConfig) {
 
-		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(),
-				mergedClassName);
+		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), mergedClassName);
 		// 1. factory-method on bean
 		if (bd.getFactoryMethodName() != null && bd.getFactoryBeanName() == null) {
 			type = extractTypeFromFactoryMethod(bd, type);
@@ -1490,10 +1427,8 @@ public abstract class BeansModelUtils {
 			try {
 				IBean factoryB = getBeanWithConfigSets(bd.getFactoryBeanName(), beansConfig);
 				if (factoryB != null) {
-					BeanDefinition factoryBd = BeansModelUtils.getMergedBeanDefinition(factoryB,
-							null);
-					IType factoryBeanType = extractBeanClass(factoryBd, bean, factoryBd
-							.getBeanClassName(), beansConfig);
+					BeanDefinition factoryBd = BeansModelUtils.getMergedBeanDefinition(factoryB, null);
+					IType factoryBeanType = extractBeanClass(factoryBd, bean, factoryBd.getBeanClassName(), beansConfig);
 					if (factoryBeanType != null) {
 						type = extractTypeFromFactoryMethod(bd, factoryBeanType);
 					}
@@ -1508,19 +1443,16 @@ public abstract class BeansModelUtils {
 
 	/**
 	 * Extracts the {@link IType} of a {@link BeanDefinition} by only looking at the <code>
-	 * factory-method</code>
-	 * . The passed in {@link IType} <b>must</b> be the bean class or the resolved type of the
-	 * factory bean in use.
+	 * factory-method</code> . The passed
+	 * in {@link IType} <b>must</b> be the bean class or the resolved type of the factory bean in use.
 	 */
 	private static IType extractTypeFromFactoryMethod(BeanDefinition bd, IType type) {
 		String factoryMethod = bd.getFactoryMethodName();
 		try {
-			int argCount = (!bd.isAbstract() ? bd.getConstructorArgumentValues().getArgumentCount()
-					: -1);
+			int argCount = (!bd.isAbstract() ? bd.getConstructorArgumentValues().getArgumentCount() : -1);
 			Set<IMethod> methods = Introspector.getAllMethods(type);
 			for (IMethod method : methods) {
-				if (factoryMethod.equals(method.getElementName())
-						&& method.getParameterNames().length == argCount) {
+				if (factoryMethod.equals(method.getElementName()) && method.getParameterNames().length == argCount) {
 					type = JdtUtils.getJavaTypeFromSignatureClassName(method.getReturnType(), type);
 					break;
 				}
@@ -1532,8 +1464,8 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * A {@link IModelElementVisitor} that tries to determine the closest {@link IModelElement} by
-	 * looking at <code>startLine</code> and <code>endLine</code> information.
+	 * A {@link IModelElementVisitor} that tries to determine the closest {@link IModelElement} by looking at
+	 * <code>startLine</code> and <code>endLine</code> information.
 	 * @author Christian Dupuis
 	 */
 	private static class ModelElementDetermingModelVisitor implements IModelElementVisitor {
@@ -1546,8 +1478,7 @@ public abstract class BeansModelUtils {
 
 		private IModelElement element;
 
-		public ModelElementDetermingModelVisitor(final int startLine, final int endLine,
-				final IFile file) {
+		public ModelElementDetermingModelVisitor(final int startLine, final int endLine, final IFile file) {
 			if (startLine + 1 == endLine) {
 				this.startLine = startLine + 1;
 			}
@@ -1566,8 +1497,7 @@ public abstract class BeansModelUtils {
 			if (element instanceof ISourceModelElement) {
 				ISourceModelElement sourceElement = (ISourceModelElement) element;
 				if (sourceElement.getElementResource().equals(file)
-						&& (sourceElement.getElementStartLine() <= startLine || sourceElement
-								.getElementStartLine() - 1 <= startLine)
+						&& (sourceElement.getElementStartLine() <= startLine || sourceElement.getElementStartLine() - 1 <= startLine)
 						&& endLine <= sourceElement.getElementEndLine()) {
 					this.element = element;
 

@@ -50,14 +50,12 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
 
 /**
- * {@link IValidator} implementation that is responsible for validating the
- * {@link IBeansModelElement}s.
+ * {@link IValidator} implementation that is responsible for validating the {@link IBeansModelElement}s.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansConfigValidator extends AbstractValidator implements
-		IProjectContributorStateAware {
+public class BeansConfigValidator extends AbstractValidator implements IProjectContributorStateAware {
 
 	/** Internal state object */
 	private IProjectContributorState context = null;
@@ -95,20 +93,17 @@ public class BeansConfigValidator extends AbstractValidator implements
 		MarkerUtils.deleteAllMarkers(resource, getMarkerId());
 	}
 
-	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
-			throws CoreException {
+	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind) throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
 
 			// First check for a beans config file
-			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs((IFile) resource,
-					true);
+			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs((IFile) resource, true);
 			if (configs != null && configs.size() > 0) {
 				for (IBeansConfig beansConfig : configs) {
 					// Resolve imported config files to their root importing one
 					if (beansConfig instanceof IImportedBeansConfig) {
-						IBeansConfig importingConfig = BeansModelUtils.getParentOfClass(
-								beansConfig, BeansConfig.class);
+						IBeansConfig importingConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
 						if (importingConfig != null) {
 							resources.add(importingConfig.getElementResource());
 							addBeans(importingConfig);
@@ -137,8 +132,8 @@ public class BeansConfigValidator extends AbstractValidator implements
 				BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
 
 				if (structureManager == null
-						|| structureManager.hasStructuralChanges(resource,
-								ITypeStructureCache.FLAG_ANNOTATION)) {
+						|| structureManager.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
+								| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
 
 					// capture removal of java source files
 					if (deltaKind == IResourceDelta.REMOVED
@@ -159,8 +154,8 @@ public class BeansConfigValidator extends AbstractValidator implements
 	}
 
 	/**
-	 * Propagates a change to a particular resource to its project so that all {@link IBeansConfig}s
-	 * will get revalidated.
+	 * Propagates a change to a particular resource to its project so that all {@link IBeansConfig}s will get
+	 * revalidated.
 	 */
 	private void propagateChangedResourceToProject(IResource resource, Set<IResource> resources) {
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(resource.getProject());
@@ -190,8 +185,7 @@ public class BeansConfigValidator extends AbstractValidator implements
 	}
 
 	@Override
-	protected IValidationContext createContext(IResourceModelElement rootElement,
-			IResourceModelElement contextElement) {
+	protected IValidationContext createContext(IResourceModelElement rootElement, IResourceModelElement contextElement) {
 		if (rootElement instanceof IBeansConfig) {
 			return new BeansValidationContext((IBeansConfig) rootElement, contextElement);
 		}
@@ -231,11 +225,11 @@ public class BeansConfigValidator extends AbstractValidator implements
 		this.context = context;
 	}
 
-	private static class BeanElementLifecycleManager implements
-			IValidationElementLifecycleManagerExtension {
+	private static class BeanElementLifecycleManager implements IValidationElementLifecycleManagerExtension {
 
 		private IBeansConfig rootElement = null;
 
+		@SuppressWarnings("unused")
 		private int kind = -1;
 
 		/**
@@ -271,7 +265,7 @@ public class BeansConfigValidator extends AbstractValidator implements
 		public void init(IResource resource) {
 			if (resource instanceof IFile) {
 				rootElement = BeansCorePlugin.getModel().getConfig((IFile) resource);
-				if (kind == IncrementalProjectBuilder.FULL_BUILD || rootElement.resourceChanged()) {
+				if (rootElement.resourceChanged()) {
 					((BeansConfig) rootElement).reload();
 				}
 			}

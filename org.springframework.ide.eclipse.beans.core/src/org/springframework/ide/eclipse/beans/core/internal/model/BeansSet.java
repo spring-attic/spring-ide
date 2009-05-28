@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ public class BeansSet extends AbstractBeansModelElement implements IBeansSet {
 
 	private LinkedHashSet<Object> set;
 
-	public BeansSet(IModelElement parent, ManagedSet set) {
+	public BeansSet(IModelElement parent, ManagedSet<?> set) {
 		super(parent, "(set)", set);
 
 		// Create new list with values from given list
@@ -88,7 +88,8 @@ public class BeansSet extends AbstractBeansModelElement implements IBeansSet {
 			return false;
 		}
 		BeansSet that = (BeansSet) other;
-		if (!ObjectUtils.nullSafeEquals(this.set, that.set)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.set, that.set))
+			return false;
 		return super.equals(other);
 	}
 
