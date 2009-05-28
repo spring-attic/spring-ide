@@ -50,6 +50,8 @@ public class BeanReferenceSearchRequestor {
 	protected List<String> requiredTypes = null;
 
 	private boolean insertedMatchingType = false;
+	
+	private boolean matchingTypeFound = false;
 
 	public BeanReferenceSearchRequestor(IContentAssistProposalRecorder recorder) {
 		this(recorder, new ArrayList<String>());
@@ -102,17 +104,21 @@ public class BeanReferenceSearchRequestor {
 						}
 					}
 				}
+				
+				if (!insertedMatchingType && matchingTypeFound && !matchesType) {
+					recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONTENT_ASSIST),
+							TYPE_MATCHING_RELEVANCE - 1, LABEL_SEPARATOR, "");
+					insertedMatchingType = true;
+				}
+
 				if (matchesType) {
 					recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText, replaceText, null);
-					if (!insertedMatchingType) {
-						recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONTENT_ASSIST),
-								TYPE_MATCHING_RELEVANCE - 1, LABEL_SEPARATOR, "");
-						insertedMatchingType = true;
-					}
+					matchingTypeFound = true;
 				}
 				else {
 					recorder.recordProposal(image, RELEVANCE, displayText, replaceText, bean);
 				}
+				
 
 				beans.add(key);
 			}
@@ -163,13 +169,15 @@ public class BeanReferenceSearchRequestor {
 						}
 					}
 
+					if (!insertedMatchingType && matchingTypeFound && !matchesType) {
+						recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONTENT_ASSIST),
+								TYPE_MATCHING_RELEVANCE - 1, LABEL_SEPARATOR, "");
+						insertedMatchingType = true;
+					}
+
 					if (matchesType) {
 						recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText, replaceText, beanNode);
-						if (!insertedMatchingType) {
-							recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONTENT_ASSIST),
-									TYPE_MATCHING_RELEVANCE - 1, LABEL_SEPARATOR, "");
-							insertedMatchingType = true;
-						}
+						matchingTypeFound = true;
 					}
 					else {
 						recorder.recordProposal(image, RELEVANCE, displayText, replaceText, beanNode);
