@@ -1272,7 +1272,7 @@ public abstract class BeansModelUtils {
 			if (projects != null) {
 
 				IJavaElement element = JavaCore.create(resource);
-				if (element instanceof ICompilationUnit) {
+				if (element instanceof ICompilationUnit && element.getJavaProject().isOnClasspath(element)) {
 
 					try {
 						IType[] types = ((ICompilationUnit) element).getAllTypes();
@@ -1342,7 +1342,7 @@ public abstract class BeansModelUtils {
 			if (projects != null) {
 
 				IJavaElement element = JavaCore.create(resource);
-				if (element instanceof ICompilationUnit) {
+				if (element instanceof ICompilationUnit && element.getJavaProject().isOnClasspath(element)) {
 
 					try {
 						IType[] types = ((ICompilationUnit) element).getAllTypes();
