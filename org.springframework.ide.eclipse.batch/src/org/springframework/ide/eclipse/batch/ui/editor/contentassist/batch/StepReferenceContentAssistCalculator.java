@@ -37,8 +37,12 @@ public class StepReferenceContentAssistCalculator implements IContentAssistCalcu
 			prefix = "";
 		}
 		IFile file = context.getFile();
-		if (context.getDocument() != null && context.getDocument().getDocumentElement() != null) {
-			searchStepElements(recorder, prefix, context.getDocument().getDocumentElement(), file);
+		if (context.getDocument() != null) {
+			searchStepElements(recorder, prefix, context.getParentNode(), file);
+			if (context.getNode() != null && ("next".equals(context.getNode().getNodeName()) 
+					|| "stop".equals(context.getNode().getNodeName()))) {
+				searchStepElements(recorder, prefix, context.getParentNode().getParentNode(), file);
+			}
 		}
 	}
 
@@ -47,15 +51,13 @@ public class StepReferenceContentAssistCalculator implements IContentAssistCalcu
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
-			if ("step".equals(child.getLocalName())) {
+			if ("step".equals(child.getLocalName()) || "decision".equals(child.getLocalName()) 
+					|| "split".equals(child.getLocalName())) {
 				NamedNodeMap attributes = child.getAttributes();
 				Node id = attributes.getNamedItem("id");
 				if (id != null && id.getNodeValue() != null && id.getNodeValue().startsWith(prefix)) {
 					acceptStepMatch(recorder, child, file);
 				}
-			}
-			if (child.hasChildNodes()) {
-				searchStepElements(recorder, prefix, child, file);
 			}
 		}
 	}
@@ -63,6 +65,7 @@ public class StepReferenceContentAssistCalculator implements IContentAssistCalcu
 	private void acceptStepMatch(IContentAssistProposalRecorder recorder, Node stepNode, IFile file) {
 		NamedNodeMap attrs = stepNode.getAttributes();
 		Node id = attrs.getNamedItem("id");
+		Node parentNode = stepNode.getParentNode();
 
 		String stepName = id.getNodeValue();
 		String replaceText = stepName;
@@ -70,6 +73,11 @@ public class StepReferenceContentAssistCalculator implements IContentAssistCalcu
 		StringBuilder buf = new StringBuilder();
 		buf.append(stepName);
 
+		if (parentNode != null) {
+			buf.append(" [");
+			buf.append(parentNode.getNodeName());
+			buf.append("]");
+		}
 		if (fileName != null) {
 			buf.append(" - ");
 			buf.append(fileName);

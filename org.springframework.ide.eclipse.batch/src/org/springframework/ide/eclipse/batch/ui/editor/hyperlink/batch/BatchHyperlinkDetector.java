@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHype
  * {@link INamespaceHyperlinkDetector} implementation responsible for the <code>batch:*</code>
  * namespace.
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  * @since 2.2.2
  */
 public class BatchHyperlinkDetector extends NamespaceHyperlinkDetectorSupport implements
@@ -28,8 +29,8 @@ public class BatchHyperlinkDetector extends NamespaceHyperlinkDetectorSupport im
 	
 	public void init() {
 		IHyperlinkCalculator stepLink = new StepReferenceHyperlinkCalculator();
-		registerHyperlinkCalculator("next", "on", stepLink);
-		registerHyperlinkCalculator("stop", "on", stepLink);
+		registerHyperlinkCalculator("next", "to", stepLink);
+		registerHyperlinkCalculator("stop", "restart", stepLink);
 		registerHyperlinkCalculator("split", "next", stepLink);
 		registerHyperlinkCalculator("step", "next", stepLink);
 		

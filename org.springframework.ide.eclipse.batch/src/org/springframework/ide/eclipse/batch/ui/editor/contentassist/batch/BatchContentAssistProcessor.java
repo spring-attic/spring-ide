@@ -20,14 +20,15 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceCont
  * {@link INamespaceContentAssistProcessor} implementation responsible for the <code>batch:*</code>
  * namespace.
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  * @since 2.2.2
  */
 public class BatchContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
 	
 	public void init() {
 		IContentAssistCalculator stepRef = new StepReferenceContentAssistCalculator();
-		registerContentAssistCalculator("next", "on", stepRef);
-		registerContentAssistCalculator("stop", "on", stepRef);
+		registerContentAssistCalculator("next", "to", stepRef);
+		registerContentAssistCalculator("stop", "restart", stepRef);
 		registerContentAssistCalculator("split", "next", stepRef);
 		registerContentAssistCalculator("step", "next", stepRef);
 		
