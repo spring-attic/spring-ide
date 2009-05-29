@@ -97,16 +97,16 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 		for (IBeansConfig config : configs) {
 			((BeansConfig) config).reload();
 		}
-		
-		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(project);
-		if (configs.size() > 0 && beansProject != null) {
-			((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansProject, Type.CHANGED);
-		}
 
+		// Send update event
+		if (configs.size() > 0) {
+			((BeansModel) BeansCorePlugin.getModel()).notifyListeners(BeansCorePlugin.getModel().getProject(project),
+					Type.CHANGED);
+		}
 	}
 
 	/**
-	 * Check if the given <code>resource</code> affects the {@link IBeansConfig}s. 
+	 * Check if the given <code>resource</code> affects the {@link IBeansConfig}s.
 	 * <p>
 	 * If that is the case the {@link IBeansConfig} and all configs from {@link IBeansConfigSet}s are reset.
 	 */
@@ -140,6 +140,9 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 	}
 
 	private void propagateToConfigsFromConfigSet(IBeansConfig config) {
+		// Add config to make sure that in case on config set is configured
+		configs.add(config);
+
 		for (IBeansProject beansProject : BeansCorePlugin.getModel().getProjects()) {
 			for (IBeansConfigSet configSet : beansProject.getConfigSets()) {
 				if (configSet.hasConfig((IFile) config.getElementResource())) {
