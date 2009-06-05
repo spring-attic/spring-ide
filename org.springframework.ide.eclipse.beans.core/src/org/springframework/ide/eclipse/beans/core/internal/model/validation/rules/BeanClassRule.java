@@ -23,11 +23,11 @@ import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanV
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.util.StringUtils;
 
 /**
- * Validates a given {@link IBean}'s bean class. Skips child beans and bean class names with
- * placeholders.
+ * Validates a given {@link IBean}'s bean class. Skips child beans and bean class names with placeholders.
  * <p>
  * Note: this implementation also skips class names from the Spring DM framework.
  * @author Torsten Juergeleit
@@ -43,8 +43,7 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 
 	public void setIgnorableClasses(String classNames) {
 		if (StringUtils.hasText(classNames)) {
-			this.ignorableClasses = Arrays.asList(StringUtils.delimitedListToStringArray(
-					classNames, ",", "\r\n\f "));
+			this.ignorableClasses = Arrays.asList(StringUtils.delimitedListToStringArray(classNames, ",", "\r\n\f "));
 		}
 	}
 
@@ -54,12 +53,11 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 
 		// Validate bean class and constructor arguments - skip child beans and
 		// class names with placeholders
-		if (className != null && !SpringCoreUtils.hasPlaceHolder(className)
-				&& !ignorableClasses.contains(className)) {
-			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(),
-					className);
+		if (className != null && !SpringCoreUtils.hasPlaceHolder(className) && !ignorableClasses.contains(className)) {
+			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), className);
 			try {
-				if (type != null && type.isInterface()) {
+				if (type != null && type.isInterface()
+						&& !(bean.getElementSourceLocation() instanceof JavaModelSourceLocation)) {
 					context.warning(bean, "CLASS_NOT_CLASS", "Class '" + className + "' is an interface");
 				}
 				else if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
@@ -70,5 +68,4 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 			}
 		}
 	}
-
 }
