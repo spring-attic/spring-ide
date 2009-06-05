@@ -26,6 +26,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.wst.sse.core.internal.encoding.CommonEncodingPreferenceNames;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
@@ -46,6 +51,8 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 	private Map<INamespaceDefinition, String> schemaVersions;
 
 	private List<INamespaceDefinition> xmlSchemaDefinitions;
+
+	private Button addNature;
 
 	public NewBeansConfigFilePage(String pageName, IStructuredSelection selection) {
 		super(pageName, selection);
@@ -164,7 +171,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 			if (path != null && path.segment(0) != null) {
 				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
 						path.segment(0));
-				if (!SpringCoreUtils.isSpringProject(project)) {
+				if (!SpringCoreUtils.isSpringProject(project) && !addNature.getSelection()) {
 					setErrorMessage("Selected folder does not belong to a Spring project.");
 					return false;
 				}
@@ -172,5 +179,19 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	protected void createAdvancedControls(Composite parent) {
+		super.createAdvancedControls(parent);
+		addNature = new Button(parent, SWT.CHECK);
+		addNature.setText("Add Spring project nature if required");
+		addNature.setSelection(true);
+		addNature.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				validatePage();
+			}
+		}); 
 	}
 }

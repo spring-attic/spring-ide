@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.wizards;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
@@ -26,11 +30,12 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * {@link INewWizard} implementation that creates a new {@link IBeansConfig}
- * instance.
+ * {@link INewWizard} implementation that creates a new {@link IBeansConfig} instance.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -52,8 +57,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 
 	/**
 	 * Returns the newly created beans config.
-	 * @return the created beans config, or <code>null</code> if config not
-	 * created
+	 * @return the created beans config, or <code>null</code> if config not created
 	 */
 	public IBeansConfig getNewConfig() {
 		return newConfig;
@@ -84,8 +88,8 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 			return false;
 		}
 
-		BasicNewResourceWizard.selectAndReveal(newConfig.getElementResource(),
-				BeansUIPlugin.getActiveWorkbenchWindow());
+		BasicNewResourceWizard
+				.selectAndReveal(newConfig.getElementResource(), BeansUIPlugin.getActiveWorkbenchWindow());
 		SpringUIUtils.openInEditor((IFile) newConfig.getElementResource(), -1);
 		return true;
 	}
@@ -94,10 +98,30 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 		// create the new Spring project operation
 		mainPage.setXmlSchemaDefinitions(xsdPage.getXmlSchemaDefinitions());
 		mainPage.setSchemaVersions(xsdPage.getSchemaVersions());
-		IFile file = mainPage.createNewFile();
+		final IFile file = mainPage.createNewFile();
 
 		BeansProject beansProject = getProject(file);
-		
+
+		if (beansProject == null) {
+			WorkspaceModifyOperation oper = new WorkspaceModifyOperation() {
+				@Override
+				protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
+						InterruptedException {
+					SpringCoreUtils.addProjectNature(file.getProject(), SpringCore.NATURE_ID, monitor);
+				}
+			};
+			try {
+				getContainer().run(true, true, oper);
+			}
+			catch (InvocationTargetException e) {
+				SpringCore.log(e);
+			}
+			catch (InterruptedException e) {
+				SpringCore.log(e);
+			}
+			beansProject = new BeansProject(BeansCorePlugin.getModel(), file.getProject());
+		}
+
 		if (beansProject != null) {
 			beansProject.addConfig(file, IBeansConfig.Type.MANUAL);
 			newConfig = beansProject.getConfig(file);
@@ -105,8 +129,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 			Set<IBeansConfigSet> configSets = linkPage.getBeansConfigSets();
 			for (IBeansConfigSet bcs : configSets) {
 				if (beansProject.equals(bcs.getElementParent())) {
-					((BeansConfigSet) bcs)
-							.addConfig(newConfig.getElementName());
+					((BeansConfigSet) bcs).addConfig(newConfig.getElementName());
 				}
 			}
 
@@ -114,14 +137,12 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 			beansProject.saveDescription();
 
 			// Finally (after saving the modified project description!!!)
-			// refresh
-			// the label decoration of all config files
+			// refresh the label decoration of all config files
 			BeansModelLabelDecorator.update();
 		}
 	}
 
 	private BeansProject getProject(IFile file) {
-		return (BeansProject) BeansCorePlugin.getModel().getProject(
-				file.getProject());
+		return (BeansProject) BeansCorePlugin.getModel().getProject(file.getProject());
 	}
 }
