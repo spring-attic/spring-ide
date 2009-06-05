@@ -647,7 +647,7 @@ public class JdtUtils {
 	public static String resolveClassName(String className, IType type) {
 		// replace binary $ inner class name syntax with . for source level
 		className = className.replace('$', '.');
-		String dotClassName = new StringBuilder('.').append(className).toString();
+		String dotClassName = new StringBuilder().append('.').append(className).toString();
 
 		IProject project = type.getJavaProject().getProject();
 
