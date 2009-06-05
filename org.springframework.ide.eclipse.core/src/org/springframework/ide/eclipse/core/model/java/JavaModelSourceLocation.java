@@ -76,4 +76,7 @@ public class JavaModelSourceLocation implements Serializable, IModelSourceLocati
 		return this.handleIdentifier.hashCode();
 	}
 
+	public String getHandleIdentifier() {
+		return handleIdentifier;
+	}
 }

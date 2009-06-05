@@ -45,14 +45,14 @@ public abstract class JdtAnnotationUtils {
 				annotationName);
 		try {
 			for (IMemberValuePair member : annotation.getMemberValuePairs()) {
-				processAnnotation(member, annotationType, attributesMap);
+				processAnnotation(member, annotationType, attributesMap, type);
 			}
 
 			for (IMethod annotationMethod : Introspector.getAllMethods(annotationType)) {
 				if (annotationMethod.getDefaultValue() != null) {
 					IMemberValuePair member = annotationMethod.getDefaultValue();
 					if (!attributesMap.containsKey(member.getMemberName())) {
-						processAnnotation(member, annotationType, attributesMap);
+						processAnnotation(member, annotationType, attributesMap, type);
 					}
 				}
 			}
@@ -65,7 +65,7 @@ public abstract class JdtAnnotationUtils {
 	}
 
 	public static void processAnnotation(IMemberValuePair member, IType annotationType,
-			Map<String, Object> attributesMap) throws JavaModelException {
+			Map<String, Object> attributesMap, IType type) throws JavaModelException {
 		IMethod test = annotationType.getMethod(member.getMemberName(), null);
 		int kind = Signature.getTypeSignatureKind(test.getReturnType());
 		String returnTypeName = Signature.getElementType(test.getReturnType());
@@ -93,6 +93,10 @@ public abstract class JdtAnnotationUtils {
 			if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 				if (member.getValue().getClass().isArray()) {
 					String[] values = Arrays.asList((Object[])member.getValue()).toArray(new String[0]);
+					for (int i = 0; i < values.length; i++) {
+						String className = values[i];
+						values[i] = JdtUtils.resolveClassName(className, type);
+					}
 					attributesMap.put(member.getMemberName(), values);
 				}
 				else {
