@@ -37,14 +37,13 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * Extension to Spring DM's {@link NamespacePlugins} class that handles registering of XSDs in
- * Eclipse' XML Catalog and builds an internal representation of {@link INamespaceDefinition}s.
+ * Extension to Spring DM's {@link NamespacePlugins} class that handles registering of XSDs in Eclipse' XML Catalog and
+ * builds an internal representation of {@link INamespaceDefinition}s.
  * @author Christian Dupuis
  * @since 2.2.5
  */
 @SuppressWarnings("restriction")
-public class ToolingAwareNamespacePlugins extends NamespacePlugins implements
-		INamespaceDefinitionResolver {
+public class ToolingAwareNamespacePlugins extends NamespacePlugins implements INamespaceDefinitionResolver {
 
 	private static final String META_INF = "META-INF/";
 
@@ -116,7 +115,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements
 				String icon = null;
 				String prefix = null;
 				String name = null;
-				
+
 				// Add catalog entry to XML catalog
 				addCatalogEntry(bundle, key, uri, catalogEntries);
 
@@ -148,19 +147,18 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements
 			}
 		}
 	}
-	
+
 	/**
-	 * Create and add a XML catalog entry. 
+	 * Create and add a XML catalog entry.
 	 */
 	private void addCatalogEntry(Bundle bundle, String key, String uri, Set<ICatalogElement> catalogEntries) {
 		ICatalog systemCatalog = getSystemCatalog();
-		
+
 		ICatalogElement catalogElement = systemCatalog.createCatalogElement(ICatalogEntry.ENTRY_TYPE_SYSTEM);
 		if (catalogElement instanceof ICatalogEntry) {
 			ICatalogEntry entry = (ICatalogEntry) catalogElement;
-			String resolvePath = CatalogContributorRegistryReader.resolvePath(
-					CatalogContributorRegistryReader.getPlatformURL(bundle
-							.getSymbolicName()), uri);
+			String resolvePath = CatalogContributorRegistryReader.resolvePath(CatalogContributorRegistryReader
+					.getPlatformURL(bundle.getSymbolicName()), uri);
 			entry.setKey(key);
 			entry.setURI(resolvePath);
 			systemCatalog.addCatalogElement(catalogElement);
@@ -169,7 +167,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements
 	}
 
 	/**
-	 * Returns the target namespace URI of the XSD identified by the given <code>url</code>. 
+	 * Returns the target namespace URI of the XSD identified by the given <code>url</code>.
 	 */
 	private String getTargetNamespace(URL url) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -214,8 +212,8 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements
 	}
 
 	/**
-	 * Fail safe loading of a {@link Properties} from an {@link URL}. Returns an empty
-	 * {@link Properties} if the an {@link IOException} occurs.
+	 * Fail safe loading of a {@link Properties} from an {@link URL}. Returns an empty {@link Properties} if the an
+	 * {@link IOException} occurs.
 	 */
 	private Properties loadProperties(URL url) {
 		Properties toolingProps = new Properties();
@@ -283,8 +281,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements
 				try {
 					int ix = schemaLocation.lastIndexOf('-');
 					if (ix > 0) {
-						tempVersion = Float.parseFloat(schemaLocation.substring(ix + 1,
-								schemaLocation.length() - 4));
+						tempVersion = Float.parseFloat(schemaLocation.substring(ix + 1, schemaLocation.length() - 4));
 					}
 				}
 				catch (Exception e) {
@@ -319,7 +316,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements
 				return namespaceUri.substring(ix + 1);
 			}
 			return null;
-		} 
+		}
 
 		public Set<String> getSchemaLocations() {
 			return schemaLocations;

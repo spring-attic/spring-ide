@@ -118,7 +118,8 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 
 			// Reset configs that use component-scanning and annotation-config
 			for (IBeansProject beansProject : BeansCorePlugin.getModel().getProjects()) {
-				if (JdtUtils.getJavaProject(beansProject.getProject()).isOnClasspath(resource)) {
+				if (JdtUtils.isJavaProject(beansProject.getProject())
+						&& JdtUtils.getJavaProject(beansProject.getProject()).isOnClasspath(resource)) {
 					for (IBeansConfig config : beansProject.getConfigs()) {
 						for (IBeansComponent component : config.getComponents()) {
 							if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
