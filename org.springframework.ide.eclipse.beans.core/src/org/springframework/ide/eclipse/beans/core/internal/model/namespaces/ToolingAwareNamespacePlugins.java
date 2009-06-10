@@ -117,7 +117,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 				String name = null;
 
 				// Add catalog entry to XML catalog
-				addCatalogEntry(bundle, key, uri, catalogEntries);
+				addCatalogEntry(bundle, key, uri, catalogEntries, ICatalogEntry.ENTRY_TYPE_URI);
 
 				Enumeration<URL> tooling = bundle.findEntries(META_INF, SPRING_TOOLING, false);
 				if (tooling != null) {
@@ -148,11 +148,12 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 				}
 			}
 		}
-		
+
 		// Add catalog entry to namespace uri
 		for (NamespaceDefinition definition : namespaceDefinitions) {
 			addCatalogEntry(definition.getBundle(), definition.getNamespaceUri(), "platform:/plugin/"
-					+ bundle.getSymbolicName() + "/" + definition.getDefaultUri(), catalogEntries);
+					+ bundle.getSymbolicName() + "/" + definition.getDefaultUri(), catalogEntries,
+					ICatalogEntry.ENTRY_TYPE_PUBLIC);
 		}
 
 	}
@@ -160,10 +161,10 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	/**
 	 * Create and add a XML catalog entry.
 	 */
-	private void addCatalogEntry(Bundle bundle, String key, String uri, Set<ICatalogElement> catalogEntries) {
+	private void addCatalogEntry(Bundle bundle, String key, String uri, Set<ICatalogElement> catalogEntries, int type) {
 		ICatalog systemCatalog = getSystemCatalog();
 
-		ICatalogElement catalogElement = systemCatalog.createCatalogElement(ICatalogEntry.ENTRY_TYPE_SYSTEM);
+		ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
 		if (catalogElement instanceof ICatalogEntry) {
 			ICatalogEntry entry = (ICatalogEntry) catalogElement;
 			String resolvePath = CatalogContributorRegistryReader.resolvePath(CatalogContributorRegistryReader
