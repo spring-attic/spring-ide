@@ -6,18 +6,37 @@ Bundle-Version: 2.2.5.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.ajdt.ui.xref.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Require-Bundle: org.eclipse.contribution.xref.ui,
- org.eclipse.core.runtime,
+Eclipse-LazyStart: true
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.ajdt.core,
+ org.eclipse.ajdt.internal.ui.editor,
+ org.eclipse.ajdt.internal.ui.lazystart,
+ org.eclipse.ajdt.internal.utils,
+ org.eclipse.contribution.xref.core,
+ org.eclipse.contribution.xref.internal.ui.providers,
+ org.eclipse.core.commands.common,
+ org.eclipse.core.internal.content,
  org.eclipse.core.resources,
- org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.runtime.content,
+ org.eclipse.core.runtime.jobs,
  org.eclipse.jdt.core,
+ org.eclipse.jface.action,
+ org.eclipse.jface.dialogs,
+ org.eclipse.jface.preference,
+ org.eclipse.jface.resource,
+ org.eclipse.jface.viewers,
+ org.eclipse.swt.widgets,
+ org.eclipse.ui,
+ org.eclipse.ui.internal,
+ org.eclipse.ui.internal.registry,
+ org.eclipse.ui.model,
+ org.eclipse.ui.plugin,
+ org.osgi.framework,
+ org.springframework.ide.eclipse.aop.core,
+ org.springframework.ide.eclipse.aop.core.model,
+ org.springframework.ide.eclipse.aop.core.util,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
- org.springframework.ide.eclipse.aop.core,
- org.eclipse.contribution.xref.core,
- org.eclipse.ajdt.core,
- org.eclipse.ajdt.ui
-Eclipse-LazyStart: true
+ org.springframework.util
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Bundle-ActivationPolicy: lazy
-Import-Package: org.springframework.util
