@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
-import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -43,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.GlobalBuildAction;
+import org.eclipse.ui.dialogs.ListDialog;
 
 /**
  * For compatibility reasons ported to 3.2 from the 3.3 code base.
@@ -112,7 +112,7 @@ public class RefactoringSaveHelper {
 		switch (fSaveMode) {
 		case SAVE_ALL_ALWAYS_ASK:
 		case SAVE_ALL:
-			dirtyEditors = EditorUtility.getDirtyEditors();
+			dirtyEditors = EditorUtility.getDirtyEditors(false);
 			break;
 		case SAVE_NOTHING:
 			return true;
