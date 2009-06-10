@@ -182,4 +182,8 @@ class TypeStructure implements IBinaryType {
 		return null;
 	}
 
+	public char[] getEnclosingMethod() {
+		return null;
+	}
+
 }
