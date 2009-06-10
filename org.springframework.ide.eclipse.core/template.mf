@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.springframework.ide.eclipse.core;singleton:=true
+Bundle-Version: 2.2.5.qualifier
+Bundle-Localization: plugin
+Bundle-Vendor: %providerName
+Bundle-Activator: org.springframework.ide.eclipse.core.SpringCore
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Import-Template: org.eclipse.ajdt.core.javaelements;resolution:=optional,
+ org.eclipse.ajdt.core.model;resolution:=optional,
+ org.objectweb.*;version="[2.2.3,2.2.3]"

@@ -6,6 +6,9 @@ Bundle-Version: 2.2.5.qualifier
 Bundle-Localization: plugin
 Bundle-Vendor: %providerName
 Bundle-Activator: org.springframework.ide.eclipse.core.SpringCore
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.core.internal.model,
  org.springframework.ide.eclipse.core.internal.model.resources,
@@ -23,21 +26,42 @@ Export-Package: org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.core.project,
  org.springframework.ide.eclipse.core.type,
  org.springframework.ide.eclipse.core.type.asm
-Import-Package: org.eclipse.ajdt.core.javaelements;resolution:=optional,
- org.eclipse.ajdt.core.model;resolution:=optional
-Require-Bundle: org.eclipse.core.runtime,
+Import-Package: org.apache.xerces.dom,
+ org.apache.xerces.impl,
+ org.apache.xerces.parsers,
+ org.apache.xerces.xni,
+ org.eclipse.ajdt.core.javaelements;resolution:=optional,
+ org.eclipse.ajdt.core.model;resolution:=optional,
+ org.eclipse.core.internal.resources,
  org.eclipse.core.resources,
- org.eclipse.jdt.core,
- org.eclipse.jdt.launching,
- org.apache.xerces;bundle-version="2.8.0",
+ org.eclipse.core.runtime,
+ org.eclipse.core.runtime.content,
+ org.eclipse.core.runtime.jobs,
+ org.eclipse.core.runtime.preferences,
  org.eclipse.core.variables,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.core.compiler,
+ org.eclipse.jdt.core.dom,
+ org.eclipse.jdt.internal.compiler.classfmt,
+ org.eclipse.jdt.internal.compiler.env,
+ org.eclipse.jdt.internal.compiler.impl,
+ org.eclipse.jdt.internal.compiler.lookup,
+ org.eclipse.jdt.internal.core,
+ org.eclipse.jdt.launching,
  org.eclipse.wst.common.project.facet.core,
- com.springsource.org.objectweb.asm;bundle-version="[2.2.3,2.2.3]",
- com.springsource.org.objectweb.asm.commons;bundle-version="[2.2.3,2.2.3]",
+ org.objectweb.asm;version="[2.2.3,2.2.3]",
+ org.objectweb.asm.commons;version="[2.2.3,2.2.3]",
+ org.osgi.framework,
+ org.osgi.service.prefs,
  org.springframework.beans,
- org.springframework.core,
- org.springframework.context
-Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Bundle-ActivationPolicy: lazy
+ org.springframework.beans.factory,
+ org.springframework.beans.factory.parsing,
+ org.springframework.beans.factory.xml,
+ org.springframework.core.io,
+ org.springframework.core.io.support,
+ org.springframework.core.type,
+ org.springframework.core.type.classreading,
+ org.springframework.util,
+ org.w3c.dom,
+ org.xml.sax
 
