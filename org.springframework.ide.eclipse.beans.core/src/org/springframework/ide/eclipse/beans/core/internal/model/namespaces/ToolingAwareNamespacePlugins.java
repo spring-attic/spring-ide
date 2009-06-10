@@ -132,6 +132,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 
 				if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
 					namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
+					namespaceDefinitionRegistry.get(namespaceUri).addUri(props.getProperty(key));
 				}
 				else {
 					NamespaceDefinition namespaceDefinition = new NamespaceDefinition();
@@ -141,11 +142,19 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 					namespaceDefinition.addSchemaLocation(key);
 					namespaceDefinition.setBundle(bundle);
 					namespaceDefinition.setNamespaceUri(namespaceUri);
+					namespaceDefinition.addUri(props.getProperty(key));
 					namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
 					namespaceDefinitions.add(namespaceDefinition);
 				}
 			}
 		}
+		
+		// Add catalog entry to namespace uri
+		for (NamespaceDefinition definition : namespaceDefinitions) {
+			addCatalogEntry(definition.getBundle(), definition.getNamespaceUri(), "platform:/plugin/"
+					+ bundle.getSymbolicName() + "/" + definition.getDefaultUri(), catalogEntries);
+		}
+
 	}
 
 	/**
@@ -265,8 +274,14 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 
 		private Set<String> schemaLocations = new HashSet<String>();
 
+		private Set<String> uris = new HashSet<String>();
+
 		public void addSchemaLocation(String schemaLocation) {
 			schemaLocations.add(schemaLocation);
+		}
+
+		public void addUri(String uri) {
+			uris.add(uri);
 		}
 
 		public Bundle getBundle() {
@@ -293,6 +308,28 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 				}
 			}
 			return defaultSchemaLocation;
+		}
+
+		public String getDefaultUri() {
+			String defaultUri = null;
+			float version = 0F;
+			for (String uri : uris) {
+				float tempVersion = 0F;
+				try {
+					int ix = uri.lastIndexOf('-');
+					if (ix > 0) {
+						tempVersion = Float.parseFloat(uri.substring(ix + 1, uri.length() - 4));
+					}
+				}
+				catch (Exception e) {
+					// make sure it can't fail on us
+				}
+				if (tempVersion >= version) {
+					version = tempVersion;
+					defaultUri = uri;
+				}
+			}
+			return defaultUri;
 		}
 
 		public String getIconPath() {
