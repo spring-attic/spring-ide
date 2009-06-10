@@ -157,7 +157,7 @@
 	</target>
 
 	<target name="generateUpdateSite">
-
+		
 		<!-- Create the directory structure -->
 		<mkdir dir="${updateSiteStagingLocation}" />
 		<mkdir dir="${updateSiteStagingLocation}/features" />
