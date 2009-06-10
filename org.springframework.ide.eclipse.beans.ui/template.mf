@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui; singleton:=true
+Bundle-Version: 2.2.5.qualifier
+Bundle-Activator: org.springframework.ide.eclipse.beans.ui.BeansUIPlugin
+Bundle-Localization: plugin
+Eclipse-LazyStart: true
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
