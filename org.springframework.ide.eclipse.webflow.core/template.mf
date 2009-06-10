@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.springframework.ide.eclipse.webflow.core;singleton:=true
+Bundle-Version: 2.2.5.qualifier
+Bundle-Activator: org.springframework.ide.eclipse.webflow.core.Activator
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/spring-binding-1.0.3.jar,
+ lib/spring-webflow-1.0.3.jar,
+ .
