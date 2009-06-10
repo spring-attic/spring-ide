@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.springframework.ide.eclipse.webflow.mylyn;singleton:=true
+Bundle-Version: 2.2.5.qualifier
+Bundle-Activator: org.springframework.ide.eclipse.webflow.mylyn.Activator
+Bundle-Localization: plugin
+Eclipse-LazyStart: true
+Bundle-Vendor: %providerName
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
