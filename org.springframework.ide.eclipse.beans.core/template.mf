@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.springframework.ide.eclipse.beans.core;singleton:=true
+Bundle-Vendor: %providerName
+Bundle-Version: 2.2.5.M1
+Bundle-Activator: org.springframework.ide.eclipse.beans.core.BeansCorePlugin
+Bundle-Localization: plugin
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Ignore-Existing-Header: Require-Bundle
