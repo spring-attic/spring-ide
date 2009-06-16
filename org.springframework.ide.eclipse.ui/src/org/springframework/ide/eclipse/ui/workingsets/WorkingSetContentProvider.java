@@ -165,7 +165,6 @@ public class WorkingSetContentProvider implements ICommonContentProvider {
 		 * Create a Helper class for the given working set
 		 * @param set The set to use to build the item to parent map.
 		 */
-		@SuppressWarnings("restriction")
 		public WorkingSetHelper(IWorkingSet set) {
 			workingSet = set;
 

@@ -106,7 +106,6 @@ public class RefactoringSaveHelper {
 	 * @return <code>true</code> if save was successful and refactoring can
 	 * proceed; false if the refactoring must be cancelled
 	 */
-	@SuppressWarnings("deprecation")
 	public boolean saveEditors(Shell shell) {
 		final IEditorPart[] dirtyEditors;
 		switch (fSaveMode) {

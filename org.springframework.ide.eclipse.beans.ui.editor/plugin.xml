@@ -20,7 +20,7 @@
 			priority="normal"
 			default-charset="UTF-8">
 			<describer
-				class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
+				class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
 				<parameter name="element" value="beans" />
 			</describer>
 		</content-type>

@@ -54,7 +54,7 @@
 			base-type="org.eclipse.core.runtime.xml" priority="high"
 			default-charset="UTF-8">
 			<describer
-				class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
+				class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
 				<parameter name="element" value="flow" />
 			</describer>
 		</content-type>

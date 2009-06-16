@@ -6,12 +6,17 @@ Bundle-Version: 2.2.5.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.security.Activator
 Bundle-Vendor: %providerName
 Import-Package: org.aopalliance.intercept,
+ org.eclipse.core.commands.common,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.jface.action,
  org.eclipse.jface.resource,
+ org.eclipse.jface.text,
  org.eclipse.jface.text.hyperlink,
  org.eclipse.swt.graphics,
+ org.eclipse.ui,
+ org.eclipse.ui.navigator,
+ org.eclipse.wst.sse.core.internal.provisional,
  org.eclipse.wst.sse.core.internal.provisional.text,
  org.eclipse.wst.xml.core.internal.provisional.document,
  org.eclipse.wst.xml.ui.internal.contentoutline,
@@ -24,16 +29,12 @@ Import-Package: org.aopalliance.intercept,
  org.springframework.ide.eclipse.beans.core.model,
  org.springframework.ide.eclipse.beans.ui.editor.contentassist,
  org.springframework.ide.eclipse.beans.ui.editor.hyperlink,
+ org.springframework.ide.eclipse.beans.ui.editor.namespaces,
  org.springframework.ide.eclipse.beans.ui.namespaces,
  org.springframework.ide.eclipse.core.java,
  org.springframework.ide.eclipse.core.model,
  org.springframework.util,
- org.w3c.dom,
- org.eclipse.ui.navigator,
- org.eclipse.core.commands.common,
- org.eclipse.jface.text,
- org.eclipse.wst.sse.core.internal.provisional,
- org.eclipse.ui
+ org.w3c.dom
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy

@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * @author Christian Dupuis
  * @since 2.0
  */
+@SuppressWarnings("restriction")
 public class WebflowContextStructureBridge extends AbstractContextStructureBridge {
 
 	public static final String CONTENT_TYPE = "spring/webflow";
