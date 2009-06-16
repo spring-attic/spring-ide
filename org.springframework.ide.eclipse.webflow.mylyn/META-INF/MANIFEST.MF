@@ -7,6 +7,7 @@ Bundle-Activator: org.springframework.ide.eclipse.webflow.mylyn.Activator
 Bundle-Localization: plugin
 Import-Package: org.eclipse.core.resources,
  org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
  org.eclipse.mylyn.context.core,
  org.eclipse.mylyn.internal.resources.ui,
  org.eclipse.ui.plugin,
