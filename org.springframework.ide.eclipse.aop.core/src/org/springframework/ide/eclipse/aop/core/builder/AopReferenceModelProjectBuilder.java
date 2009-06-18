@@ -72,9 +72,8 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder,
 	 */
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
-			monitor.subTask(Activator
-					.getFormattedMessage("AopReferenceModelProjectBuilder.deletedProblemMarkers",
-							resource.getFullPath()));
+			monitor.subTask(Activator.getFormattedMessage("AopReferenceModelProjectBuilder.deletedProblemMarkers",
+					resource.getFullPath()));
 			AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
 
 			// delete existing AOP references in case a build is disabled for
