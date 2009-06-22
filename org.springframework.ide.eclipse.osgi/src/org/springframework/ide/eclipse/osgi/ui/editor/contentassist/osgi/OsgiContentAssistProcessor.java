@@ -38,6 +38,9 @@ public class OsgiContentAssistProcessor extends NamespaceContentAssistProcessorS
 		MethodContentAssistCalculator methodRef = new RegistrationMethodContentAssistCalculator();
 		registerContentAssistCalculator("registration-method", methodRef);
 		registerContentAssistCalculator("unregistration-method", methodRef);
+		
+		ReferenceIdContentAssistCalculator id = new ReferenceIdContentAssistCalculator(); 
+		registerContentAssistCalculator("reference", "id", id);
 
 	}
 }

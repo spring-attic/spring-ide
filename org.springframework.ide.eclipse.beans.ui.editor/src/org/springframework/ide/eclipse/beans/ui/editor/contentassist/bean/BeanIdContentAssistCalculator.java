@@ -10,32 +10,23 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IType;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractIdContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link IContentAssistCalculator} that calculates bean id proposals based on the bean class.
  * @author Christian Dupuis
  * @since 2.0.2
  */
-public class BeanIdContentAssistCalculator implements IContentAssistCalculator {
-
-	private static final String[] FILTERED_NAMES = new String[] { Serializable.class.getName(),
-			InitializingBean.class.getName(), FactoryBean.class.getName(),
-			DisposableBean.class.getName() };
+public class BeanIdContentAssistCalculator extends AbstractIdContentAssistCalculator {
 
 	public void computeProposals(IContentAssistContext context,
 			IContentAssistProposalRecorder recorder) {
@@ -55,36 +46,6 @@ public class BeanIdContentAssistCalculator implements IContentAssistCalculator {
 				createBeanIdProposals(context, recorder, interf.getFullyQualifiedName());
 			}
 		}
-	}
-
-	private void createBeanIdProposals(IContentAssistContext context,
-			IContentAssistProposalRecorder recorder, String className) {
-		String beanId = buildDefaultBeanName(className);
-		if (beanId.startsWith(context.getMatchString()) && shouldNotFilter(className)) {
-			recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN), 10, beanId
-					+ " - " + className, beanId);
-		}
-	}
-
-	private String buildDefaultBeanName(String className) {
-		String shortClassName = className;
-		int ix = className.lastIndexOf('$');
-		if (ix >= 0) {
-			shortClassName = className.substring(ix + 1);
-		}
-		else {
-			shortClassName = ClassUtils.getShortName(className);
-		}
-		return java.beans.Introspector.decapitalize(shortClassName);
-	}
-
-	private boolean shouldNotFilter(String className) {
-		for (String filter : FILTERED_NAMES) {
-			if (className.startsWith(filter)) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 }
