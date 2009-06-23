@@ -11,13 +11,16 @@
 ################################################################################
 
 WORKSPACE=`pwd`
+NAME=`date +%Y%m%d%H%M`
 REMOTE_PATH=$1
 S3_FILE=$2
+QUALIFIER=$3
+shift
 shift
 shift
 ARGS=$@
 
-./build.sh -Ds3.publish=$REMOTE_PATH -Dpack200.enable=true -Dp2.enable=true -propertyfile $S3_FILE $ARGS
+./build.sh -Ds3.publish=$REMOTE_PATH -Dpack200.enable=true -Dp2.enable=true -propertyfile $S3_FILE -DforceContextQualifier=$NAME-$QUALIFIER $ARGS
 
 if [ $? -ne 0 ]
 then
