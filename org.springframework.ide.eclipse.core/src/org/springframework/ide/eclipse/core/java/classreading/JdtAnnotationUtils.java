@@ -41,8 +41,7 @@ public abstract class JdtAnnotationUtils {
 		else {
 			annotationName = JdtUtils.resolveClassName(annotation.getElementName(), type);
 		}
-		IType annotationType = JdtUtils.getJavaType(type.getJavaProject().getProject(),
-				annotationName);
+		IType annotationType = JdtUtils.getJavaType(type.getJavaProject().getProject(), annotationName);
 		try {
 			for (IMemberValuePair member : annotation.getMemberValuePairs()) {
 				processAnnotation(member, annotationType, attributesMap, type);
@@ -69,18 +68,15 @@ public abstract class JdtAnnotationUtils {
 		IMethod test = annotationType.getMethod(member.getMemberName(), null);
 		int kind = Signature.getTypeSignatureKind(test.getReturnType());
 		String returnTypeName = Signature.getElementType(test.getReturnType());
-		String returnType = JdtUtils.resolveClassName(Signature.getSignatureSimpleName(returnTypeName),
-				annotationType);
+		String returnType = JdtUtils.resolveClassName(Signature.getSignatureSimpleName(returnTypeName), annotationType);
 
-		if (member.getValueKind() == IMemberValuePair.K_STRING
-				&& returnType.equals(String.class.getName())) {
+		if (member.getValueKind() == IMemberValuePair.K_STRING && returnType.equals(String.class.getName())) {
 			if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 				if (member.getValue().getClass().isArray()) {
 					attributesMap.put(member.getMemberName(), member.getValue());
 				}
 				else {
-					attributesMap.put(member.getMemberName(), new String[] { member.getValue()
-							.toString() });
+					attributesMap.put(member.getMemberName(), new String[] { member.getValue().toString() });
 				}
 			}
 			else {
@@ -88,20 +84,23 @@ public abstract class JdtAnnotationUtils {
 			}
 		}
 		// support for class
-		else if (member.getValueKind() == IMemberValuePair.K_CLASS
-				&& returnType.equals(Class.class.getName())) {
+		else if (member.getValueKind() == IMemberValuePair.K_CLASS && returnType.equals(Class.class.getName())) {
 			if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 				if (member.getValue().getClass().isArray()) {
-					String[] values = Arrays.asList((Object[])member.getValue()).toArray(new String[0]);
+					String[] values = Arrays.asList((Object[]) member.getValue()).toArray(new String[0]);
 					for (int i = 0; i < values.length; i++) {
 						String className = values[i];
 						values[i] = JdtUtils.resolveClassName(className, type);
 					}
 					attributesMap.put(member.getMemberName(), values);
 				}
+				else if (member.getValue() instanceof String) {
+					String className = (String) member.getValue();
+					attributesMap.put(member.getMemberName(),
+							new String[] { JdtUtils.resolveClassName(className, type) });
+				}
 				else {
-					attributesMap.put(member.getMemberName(), new String[] { member.getValue()
-							.toString() });
+					attributesMap.put(member.getMemberName(), member.getValue().toString());
 				}
 			}
 			else {
@@ -109,8 +108,7 @@ public abstract class JdtAnnotationUtils {
 			}
 		}
 		// support for empty string[]s
-		else if (member.getValueKind() == IMemberValuePair.K_UNKNOWN
-				&& String.class.getName().equals(returnType)
+		else if (member.getValueKind() == IMemberValuePair.K_UNKNOWN && String.class.getName().equals(returnType)
 				&& kind == Signature.ARRAY_TYPE_SIGNATURE) {
 			attributesMap.put(member.getMemberName(), new String[0]);
 		}
