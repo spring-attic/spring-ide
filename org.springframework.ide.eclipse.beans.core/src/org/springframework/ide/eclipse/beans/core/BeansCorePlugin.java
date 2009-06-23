@@ -112,6 +112,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public void start(final BundleContext context) throws Exception {
 		super.start(context);
 
+		nsManager = new NamespaceManager(context);
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 
 		Job modelJob = new Job("Initializing Beans Model") {
@@ -131,8 +132,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		modelJob.setSystem(true);
 		modelJob.setPriority(Job.INTERACTIVE);
 		modelJob.schedule();
-
-		nsManager = new NamespaceManager(context);
 	}
 
 	@Override
