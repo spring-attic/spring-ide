@@ -48,8 +48,8 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.webflow.core,
  org.springframework.ide.eclipse.webflow.core.internal.model,
  org.springframework.ide.eclipse.webflow.core.model,
- org.springframework.util,
- org.springframework.webflow.engine.builder,
+ org.springframework.util;version="[3.0.0,3.1.0)",
+ org.springframework.webflow.engine.builder;version="[2.0.5,2.1.0)",
  org.w3c.dom
 Eclipse-LazyStart: true
 Export-Package: 

@@ -67,7 +67,7 @@ Import-Package: org.eclipse.core.commands,
  org.springframework.ide.eclipse.core.model,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.ui.dialogs,
- org.springframework.util,
+ org.springframework.util;version="[3.0.0, 3.1.0)",
  org.w3c.dom
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.aop.ui,
