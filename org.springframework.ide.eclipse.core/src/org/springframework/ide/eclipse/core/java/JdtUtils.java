@@ -366,10 +366,12 @@ public class JdtUtils {
 		Set<URL> paths = new LinkedHashSet<URL>();
 		if (!useParentClassLoader) {
 			// add required libraries from osgi bundles
-			paths.addAll(getBundleClassPath("org.springframework.bundle.spring"));
-			paths.addAll(getBundleClassPath("org.aspectj.aspectjweaver"));
-			paths.addAll(getBundleClassPath("org.apache.logging"));
-			paths.addAll(getBundleClassPath("org.objectweb.asm"));
+			paths.addAll(getBundleClassPath("org.springframework.core"));
+			paths.addAll(getBundleClassPath("org.springframework.beans"));
+			paths.addAll(getBundleClassPath("org.springframework.aop"));
+			paths.addAll(getBundleClassPath("com.springsource.org.aspectj.weaver"));
+			paths.addAll(getBundleClassPath("com.springsource.org.apache.logging"));
+			paths.addAll(getBundleClassPath("com.springsource.org.objectweb.asm"));
 		}
 
 		Set<IProject> resolvedProjects = new HashSet<IProject>();
