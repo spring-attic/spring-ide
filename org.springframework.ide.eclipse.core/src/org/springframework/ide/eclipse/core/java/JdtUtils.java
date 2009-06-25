@@ -89,7 +89,7 @@ public class JdtUtils {
 	 */
 	private static void addClassPathUrls(IProject project, Set<URL> paths,
 			Set<IProject> resolvedProjects) {
-
+ 
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
 		// add project to local cache to prevent adding its classpaths
