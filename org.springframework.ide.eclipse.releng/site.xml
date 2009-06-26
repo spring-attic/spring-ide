@@ -25,126 +25,126 @@
 	<feature
 		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
-		<category name="Core" />
+		<category name="Core / Spring IDE" />
 	</feature>
 	
 	<!-- Extensions features -->
 	<feature
 		url="features/org.springframework.ide.eclipse.aop.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.aop.feature" version="@VERSION@">
-		<category name="Extensions" />
+		<category name="Extensions / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.osgi.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.osgi.feature" version="@VERSION@">
-		<category name="Extensions" />
+		<category name="Extensions / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.security.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.security.feature" version="@VERSION@">
-		<category name="Extensions" />
+		<category name="Extensions / Spring IDE" />
 	</feature>
 
 	<feature
 		url="features/org.springframework.ide.eclipse.webflow.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.webflow.feature" version="@VERSION@">
-		<category name="Extensions" />
+		<category name="Extensions / Spring IDE" />
 	</feature>
 
 	<feature
 		url="features/org.springframework.ide.eclipse.batch.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.batch.feature" version="@VERSION@">
-		<category name="Extensions" />
+		<category name="Extensions / Spring IDE" />
 	</feature>
 	
 	<!-- Extensions (Incubation) features -->	
 	<feature
 		url="features/org.springframework.ide.eclipse.autowire.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.autowire.feature" version="@VERSION@">
-		<category name="Extensions (Incubation)" />
+		<category name="Extensions (Incubation) / Spring IDE" />
 	</feature>
 
 	<!-- Integration features -->
 	<feature
 		url="features/org.springframework.ide.eclipse.ajdt.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.ajdt.feature" version="@VERSION@">
-		<category name="Integrations" />
+		<category name="Integrations / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.mylyn.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.mylyn.feature" version="@VERSION@">
-		<category name="Integrations" />
+		<category name="Integrations / Spring IDE" />
 	</feature>
 	
 	<!-- Resources features -->
 	<feature
 		url="features/org.springframework.ide.eclipse.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.aop.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.aop.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 
 	<feature
 		url="features/org.springframework.ide.eclipse.batch.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.batch.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.osgi.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.osgi.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.security.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.security.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 
 	<feature
 		url="features/org.springframework.ide.eclipse.webflow.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.webflow.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.autowire.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.autowire.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 
 	<feature
 		url="features/org.springframework.ide.eclipse.javaconfig.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.javaconfig.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.ajdt.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.ajdt.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
 		url="features/org.springframework.ide.eclipse.mylyn.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.mylyn.feature.source" version="@VERSION@">
-		<category name="Resources" />
+		<category name="Resources / Spring IDE" />
 	</feature>
 		
-	<category-def name="Core" label="Core" />
-	<category-def name="Dependencies" label="Dependencies" />
-	<category-def name="Extensions" label="Extensions" />
-	<category-def name="Extensions (Incubation)" label="Extensions (Incubation)" />
-	<category-def name="Integrations" label="Integrations" />
-	<category-def name="Resources" label="Resources" />
+	<category-def name="Core / Spring IDE" label="Core / Spring IDE" />
+	<category-def name="Dependencies / Spring IDE" label="Dependencies / Spring IDE" />
+	<category-def name="Extensions / Spring IDE" label="Extensions / Spring IDE" />
+	<category-def name="Extensions (Incubation) / Spring IDE" label="Extensions (Incubation) / Spring IDE" />
+	<category-def name="Integrations / Spring IDE" label="Integrations / Spring IDE" />
+	<category-def name="Resources / Spring IDE" label="Resources / Spring IDE" />
 	
 </site>
