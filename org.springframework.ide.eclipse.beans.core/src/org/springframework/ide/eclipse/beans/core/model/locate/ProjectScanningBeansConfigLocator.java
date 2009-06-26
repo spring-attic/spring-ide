@@ -39,24 +39,22 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Basic {@link IBeansConfigLocator} that is capable for scanning an {@link IProject} or
- * {@link IJavaProject} for Spring XML configuration files.
+ * Basic {@link IBeansConfigLocator} that is capable for scanning an {@link IProject} or {@link IJavaProject} for Spring
+ * XML configuration files.
  * <p>
- * Only those XML files that have any known namespace uri at the root element level are being
- * considered to be a suitable candidate.
+ * Only those XML files that have any known namespace uri at the root element level are being considered to be a
+ * suitable candidate.
  * @author Christian Dupuis
  * @since 2.0.5
  */
 @SuppressWarnings("restriction")
-public class ProjectScanningBeansConfigLocator extends
-		AbstractJavaProjectPathMatchingBeansConfigLocator {
+public class ProjectScanningBeansConfigLocator extends AbstractJavaProjectPathMatchingBeansConfigLocator {
 
 	/** Ant-style that matches on every XML file */
 	private String ALLOWED_FILE_PATTERN = "**/*";
 
 	/** Internal cache for {@link NamespaceHandlerResolver}s keyed by their {@link IProject} */
-	private Map<IProject, NamespaceHandlerResolver> namespaceResoverCache = 
-		new HashMap<IProject, NamespaceHandlerResolver>();
+	private Map<IProject, NamespaceHandlerResolver> namespaceResoverCache = new HashMap<IProject, NamespaceHandlerResolver>();
 
 	/** Configured file patters derived from the configured file patterns */
 	private List<String> configuredFilePatterns = null;
@@ -74,8 +72,7 @@ public class ProjectScanningBeansConfigLocator extends
 	public ProjectScanningBeansConfigLocator(String configuredFileSuffixes) {
 		configuredFilePatterns = new ArrayList<String>();
 		configuredFileExtensions = new ArrayList<String>();
-		for (String filePattern : StringUtils
-				.commaDelimitedListToStringArray(configuredFileSuffixes)) {
+		for (String filePattern : StringUtils.commaDelimitedListToStringArray(configuredFileSuffixes)) {
 			filePattern = filePattern.trim();
 			int ix = filePattern.lastIndexOf('.');
 			if (ix != -1) {
@@ -87,18 +84,16 @@ public class ProjectScanningBeansConfigLocator extends
 			configuredFilePatterns.add(ALLOWED_FILE_PATTERN + filePattern);
 		}
 	}
- 
+
 	/**
-	 * As this locator is not intended to be used at runtime, we don't need to listen to any
-	 * resource changes.
+	 * As this locator is not intended to be used at runtime, we don't need to listen to any resource changes.
 	 */
 	public boolean requiresRefresh(IFile file) {
 		return false;
 	}
 
 	/**
-	 * Supports both an normal {@link IProject} and a {@link IJavaProject} but it needs to have the
-	 * Spring nature.
+	 * Supports both an normal {@link IProject} and a {@link IJavaProject} but it needs to have the Spring nature.
 	 */
 	@Override
 	public boolean supports(IProject project) {
@@ -111,8 +106,8 @@ public class ProjectScanningBeansConfigLocator extends
 	 */
 	private NamespaceHandlerResolver getNamespaceHandlerResolver(IProject project) {
 		if (!namespaceResoverCache.containsKey(project)) {
-			namespaceResoverCache.put(project, new DelegatingNamespaceHandlerResolver(JdtUtils
-					.getClassLoader(project), null));
+			namespaceResoverCache.put(project, new DelegatingNamespaceHandlerResolver(JdtUtils.getClassLoader(project),
+					null));
 		}
 		return namespaceResoverCache.get(project);
 	}
@@ -132,8 +127,7 @@ public class ProjectScanningBeansConfigLocator extends
 
 				// add source folder specific output directories
 				for (IClasspathEntry entry : javaProject.getRawClasspath()) {
-					if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
-							&& entry.getOutputLocation() != null) {
+					if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getOutputLocation() != null) {
 						outputDirectories.add(entry.getOutputLocation().toString());
 					}
 				}
@@ -173,9 +167,9 @@ public class ProjectScanningBeansConfigLocator extends
 					IDOMDocument document = ((DOMModelImpl) model).getDocument();
 					if (document != null && document.getDocumentElement() != null) {
 						String namespaceUri = document.getDocumentElement().getNamespaceURI();
-						if (NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(namespaceUri)
-								|| getNamespaceHandlerResolver(file.getProject()).resolve(
-										namespaceUri) != null) {
+						if (namespaceUri != null
+								&& (NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(namespaceUri) || getNamespaceHandlerResolver(
+										file.getProject()).resolve(namespaceUri) != null)) {
 							detectedFiles.add(file);
 						}
 					}
