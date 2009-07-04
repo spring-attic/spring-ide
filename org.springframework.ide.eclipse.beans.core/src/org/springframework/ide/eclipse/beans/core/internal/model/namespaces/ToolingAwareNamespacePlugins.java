@@ -23,6 +23,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.eclipse.wst.xml.core.internal.catalog.CatalogContributorRegistryReader;
 import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalog;
@@ -30,9 +31,11 @@ import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalogElement;
 import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalogEntry;
 import org.eclipse.wst.xml.core.internal.catalog.provisional.INextCatalog;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
+import org.springframework.osgi.util.OsgiBundleUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -44,6 +47,8 @@ import org.xml.sax.SAXException;
  */
 @SuppressWarnings("restriction")
 public class ToolingAwareNamespacePlugins extends NamespacePlugins implements INamespaceDefinitionResolver {
+
+	private static final String XML_CORE_BUNDLE_SYMBOLICNAME = "org.eclipse.wst.xml.core";
 
 	private static final String META_INF = "META-INF/";
 
@@ -70,7 +75,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * {@inheritDoc} 
 	 */
 	@Override
 	boolean removePlugin(Bundle bundle) {
@@ -162,6 +167,22 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	 * Create and add a XML catalog entry.
 	 */
 	private void addCatalogEntry(Bundle bundle, String key, String uri, Set<ICatalogElement> catalogEntries, int type) {
+		Bundle xmlBundle = Platform.getBundle(XML_CORE_BUNDLE_SYMBOLICNAME);
+		if (xmlBundle == null) {
+			// The xml bundle is not even installed
+			return;
+		}
+		if (!OsgiBundleUtils.isBundleActive(xmlBundle)) {
+			try {
+				xmlBundle.start();
+			}
+			catch (BundleException e) {
+				// we can't start the xml core bundle and therefore we can't register the
+				// catalog element
+				return;
+			}
+		}
+
 		ICatalog systemCatalog = getSystemCatalog();
 
 		ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
@@ -240,7 +261,9 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	 * Removes any registered {@link INamespaceDefinition}s and XML catalog entries.
 	 */
 	private void removeNamespaceDefinition(Bundle bundle) {
-		if (catalogEntriesByBundle.containsKey(bundle)) {
+		Bundle xmlBundle = Platform.getBundle(XML_CORE_BUNDLE_SYMBOLICNAME);
+
+		if (catalogEntriesByBundle.containsKey(bundle) && OsgiBundleUtils.isBundleActive(xmlBundle)) {
 			ICatalog systemCatalog = getSystemCatalog();
 			for (ICatalogElement element : catalogEntriesByBundle.get(bundle)) {
 				systemCatalog.removeCatalogElement(element);
