@@ -177,14 +177,16 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 				xmlBundle.start();
 			}
 			catch (BundleException e) {
-				// we can't start the xml core bundle and therefore we can't register the
-				// catalog element
+				// we can't start the xml core bundle and therefore we can't register the catalog element
 				return;
 			}
 		}
 
 		ICatalog systemCatalog = getSystemCatalog();
-
+		if (systemCatalog == null) {
+			return;
+		}
+		
 		ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
 		if (catalogElement instanceof ICatalogEntry) {
 			ICatalogEntry entry = (ICatalogEntry) catalogElement;
@@ -226,8 +228,13 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	 * Returns the Eclipse XML catalog.
 	 */
 	private ICatalog getSystemCatalog() {
+		XMLCorePlugin xmlCore = XMLCorePlugin.getDefault();
+		if (xmlCore == null) {
+			return null;
+		}
+		
 		ICatalog systemCatalog = null;
-		ICatalog defaultCatalog = XMLCorePlugin.getDefault().getDefaultXMLCatalog();
+		ICatalog defaultCatalog = xmlCore.getDefaultXMLCatalog();
 
 		INextCatalog[] nextCatalogs = defaultCatalog.getNextCatalogs();
 		for (int i = 0; i < nextCatalogs.length; i++) {
