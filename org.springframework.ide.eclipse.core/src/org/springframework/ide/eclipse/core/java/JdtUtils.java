@@ -370,14 +370,15 @@ public class JdtUtils {
 			paths.addAll(getBundleClassPath("org.springframework.beans"));
 			paths.addAll(getBundleClassPath("org.springframework.aop"));
 			paths.addAll(getBundleClassPath("com.springsource.org.aspectj.weaver"));
-			paths.addAll(getBundleClassPath("com.springsource.org.apache.logging"));
+			paths.addAll(getBundleClassPath("com.springsource.org.apache.commons.logging"));
 			paths.addAll(getBundleClassPath("com.springsource.org.objectweb.asm"));
+			paths.addAll(getBundleClassPath("com.springsource.org.aopalliance"));
 		}
 
 		Set<IProject> resolvedProjects = new HashSet<IProject>();
 		addClassPathUrls(project, paths, resolvedProjects);
 
-		return paths;
+		return paths; 
 	}
 
 	/**

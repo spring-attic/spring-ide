@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,17 +63,18 @@ import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * {@link ICommonContentProvider} that contributes elements from the
- * {@link AopReferenceModel} created by {@link AopReferenceModelBuilderJob}.
+ * {@link ICommonContentProvider} that contributes elements from the {@link AopReferenceModel} created by
+ * {@link AopReferenceModelBuilderJob}.
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class AopReferenceModelNavigatorContentProvider implements
-		ICommonContentProvider, IAopModelChangedListener, IModelChangeListener {
+public class AopReferenceModelNavigatorContentProvider implements ICommonContentProvider, IAopModelChangedListener,
+		IModelChangeListener {
 
 	private StructuredViewer viewer;
 
@@ -105,8 +106,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 			return getChildren(inputElement);
 		}
 		else if (inputElement instanceof JavaElementReferenceNode) {
-			return getChildren(((JavaElementReferenceNode) inputElement)
-					.getJavaElement());
+			return getChildren(((JavaElementReferenceNode) inputElement).getJavaElement());
 		}
 		else if (inputElement instanceof ElementImpl) {
 			return getChildren(inputElement);
@@ -120,8 +120,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 		}
 		else if (parentElement instanceof JavaElementReferenceNode
 				&& ((JavaElementReferenceNode) parentElement).isRoot()) {
-			return getChildren(((JavaElementReferenceNode) parentElement)
-					.getJavaElement());
+			return getChildren(((JavaElementReferenceNode) parentElement).getJavaElement());
 		}
 		else if (parentElement instanceof IType) {
 			IType type = (IType) parentElement;
@@ -129,19 +128,16 @@ public class AopReferenceModelNavigatorContentProvider implements
 			try {
 				Set<IMethod> methods = Introspector.getAllMethods(type);
 				for (IMethod method : methods) {
-					if (Activator.getModel().isAdvice(method)
-							|| Activator.getModel().isAdvised(method)) {
+					if (Activator.getModel().isAdvice(method) || Activator.getModel().isAdvised(method)) {
 						me.addAll(Arrays.asList(getChildren(method)));
 					}
 				}
 			}
 			catch (JavaModelException e) {
 			}
-			ClassMethodReferenceNode node = new ClassMethodReferenceNode(type,
-					me);
+			ClassMethodReferenceNode node = new ClassMethodReferenceNode(type, me);
 
-			List<IAopReference> references = Activator.getModel()
-					.getAllReferences();
+			List<IAopReference> references = Activator.getModel().getAllReferences();
 
 			// fields
 			try {
@@ -149,8 +145,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 					Object[] obj = getChildren(field);
 					if (obj != null && obj.length > 0) {
 						for (Object o : obj) {
-							node.getDeclareParentReferences().add(
-									(IReferenceNode) o);
+							node.getDeclareParentReferences().add((IReferenceNode) o);
 						}
 					}
 				}
@@ -166,16 +161,14 @@ public class AopReferenceModelNavigatorContentProvider implements
 				}
 			}
 			// add bean references
-			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs(
-					type.getFullyQualifiedName());
+			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs(type.getFullyQualifiedName());
 			Set<String> beans = new HashSet<String>();
 			for (IBeansConfig config : configs) {
 				List<IBean> pBeans = new ArrayList<IBean>();
 				pBeans.addAll(config.getBeans());
 				pBeans.addAll(BeansModelUtils.getInnerBeans(config));
 				for (IBean b : pBeans) {
-					if (type.getFullyQualifiedName().equals(
-							BeansModelUtils.getBeanClass(b, config))) {
+					if (type.getFullyQualifiedName().equals(BeansModelUtils.getBeanClass(b, config))) {
 						beans.add(b.getElementID());
 					}
 				}
@@ -185,16 +178,14 @@ public class AopReferenceModelNavigatorContentProvider implements
 		}
 		else if (parentElement instanceof IMethod) {
 			IMethod method = (IMethod) parentElement;
-			List<IAopReference> references = Activator.getModel()
-					.getAllReferences();
+			List<IAopReference> references = Activator.getModel().getAllReferences();
 			List<IAopReference> foundSourceReferences = new ArrayList<IAopReference>();
 			List<IAopReference> foundTargetReferences = new ArrayList<IAopReference>();
 			for (IAopReference reference : references) {
 				if (reference.getTarget().equals(method)) {
 					foundTargetReferences.add(reference);
 				}
-				if (reference.getSource() != null
-						&& reference.getSource().equals(method)) {
+				if (reference.getSource() != null && reference.getSource().equals(method)) {
 					foundSourceReferences.add(reference);
 				}
 			}
@@ -223,22 +214,17 @@ public class AopReferenceModelNavigatorContentProvider implements
 				}
 			}
 			for (Map.Entry<IMember, MethodReference> entry : refs.entrySet()) {
-				nodes
-						.add(new MethodBeanReferenceNode(entry.getKey(), entry
-								.getValue().getAspects(), entry.getValue()
-								.getAdvices()));
+				nodes.add(new MethodBeanReferenceNode(entry.getKey(), entry.getValue().getAspects(), entry.getValue()
+						.getAdvices()));
 			}
 			return nodes.toArray();
 		}
-		else if (parentElement instanceof IField
-				&& parentElement instanceof SourceField) {
+		else if (parentElement instanceof IField && parentElement instanceof SourceField) {
 			IField method = (IField) parentElement;
-			List<IAopReference> references = Activator.getModel()
-					.getAllReferences();
+			List<IAopReference> references = Activator.getModel().getAllReferences();
 			List<IAopReference> foundSourceReferences = new ArrayList<IAopReference>();
 			for (IAopReference reference : references) {
-				if (reference.getSource() != null
-						&& reference.getSource().equals(method)) {
+				if (reference.getSource() != null && reference.getSource().equals(method)) {
 					foundSourceReferences.add(reference);
 				}
 			}
@@ -254,11 +240,8 @@ public class AopReferenceModelNavigatorContentProvider implements
 					refs.put(reference.getSource(), f);
 				}
 			}
-			for (Map.Entry<IMember, List<IAopReference>> entry : refs
-					.entrySet()) {
-				nodes
-						.add(new AdviceDeclareParentAopSourceNode(entry
-								.getValue()));
+			for (Map.Entry<IMember, List<IAopReference>> entry : refs.entrySet()) {
+				nodes.add(new AdviceDeclareParentAopSourceNode(entry.getValue()));
 			}
 			return nodes.toArray();
 		}
@@ -277,15 +260,12 @@ public class AopReferenceModelNavigatorContentProvider implements
 			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 			String id = BeansEditorUtils.getAttribute(element, "id");
 
-			nodes.addAll(getChildrenFromXmlLocation(resource, startLine,
-					endLine, id, beansConfig.getBeans()));
+			nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, beansConfig.getBeans()));
 
 			// add inner beans
 			if (nodes.size() == 0) {
-				nodes
-						.addAll(getChildrenFromXmlLocation(resource, startLine,
-								endLine, id, BeansModelUtils
-										.getInnerBeans(beansConfig)));
+				nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, BeansModelUtils
+						.getInnerBeans(beansConfig)));
 			}
 
 			return nodes.toArray();
@@ -293,11 +273,10 @@ public class AopReferenceModelNavigatorContentProvider implements
 		return IModelElement.NO_CHILDREN;
 	}
 
-	private List<IReferenceNode> getChildrenFromXmlLocation(IResource resource,
-			int startLine, int endLine, String id, Set<IBean> beans) {
+	private List<IReferenceNode> getChildrenFromXmlLocation(IResource resource, int startLine, int endLine, String id,
+			Set<IBean> beans) {
 		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-		List<IAopReference> references = Activator.getModel()
-				.getAllReferencesForResource(resource);
+		List<IAopReference> references = Activator.getModel().getAllReferencesForResource(resource);
 
 		Map<IAspectDefinition, List<IAopReference>> foundSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
 		Map<IAspectDefinition, List<IAopReference>> foundIntroductionSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
@@ -310,57 +289,45 @@ public class AopReferenceModelNavigatorContentProvider implements
 							&& reference.getDefinition().getAspectStartLineNumber() <= endLine && resource
 							.equals(reference.getDefinition().getResource()))) {
 				if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
-					if (foundIntroductionSourceReferences.containsKey(reference
-							.getDefinition())) {
-						foundIntroductionSourceReferences.get(
-								reference.getDefinition()).add(reference);
+					if (foundIntroductionSourceReferences.containsKey(reference.getDefinition())) {
+						foundIntroductionSourceReferences.get(reference.getDefinition()).add(reference);
 					}
 					else {
 						List<IAopReference> tmp = new ArrayList<IAopReference>();
 						tmp.add(reference);
-						foundIntroductionSourceReferences.put(reference
-								.getDefinition(), tmp);
+						foundIntroductionSourceReferences.put(reference.getDefinition(), tmp);
 					}
 
 				}
 				else {
-					if (foundSourceReferences.containsKey(reference
-							.getDefinition())) {
-						foundSourceReferences.get(reference.getDefinition())
-								.add(reference);
+					if (foundSourceReferences.containsKey(reference.getDefinition())) {
+						foundSourceReferences.get(reference.getDefinition()).add(reference);
 					}
 					else {
 						List<IAopReference> tmp = new ArrayList<IAopReference>();
 						tmp.add(reference);
-						foundSourceReferences.put(reference.getDefinition(),
-								tmp);
+						foundSourceReferences.put(reference.getDefinition(), tmp);
 					}
 				}
 			}
-			IBean targetBean = AopReferenceModelUtils
-					.getBeanFromElementId(reference.getTargetBeanId());
+			IBean targetBean = AopReferenceModelUtils.getBeanFromElementId(reference.getTargetBeanId());
 			if (targetBean != null) {
 				if (reference.getDefinition().getAspectName().equals(id)
-						|| (targetBean.getElementStartLine() >= startLine
-								&& targetBean.getElementEndLine() <= endLine && resource
+						|| (targetBean.getElementStartLine() >= startLine && targetBean.getElementEndLine() <= endLine && resource
 								.equals(targetBean.getElementResource()))) {
 					if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
-						if (foundIntroductionTargetReferences
-								.containsKey(targetBean)) {
-							foundIntroductionTargetReferences.get(targetBean)
-									.add(reference);
+						if (foundIntroductionTargetReferences.containsKey(targetBean)) {
+							foundIntroductionTargetReferences.get(targetBean).add(reference);
 						}
 						else {
 							List<IAopReference> tmp = new ArrayList<IAopReference>();
 							tmp.add(reference);
-							foundIntroductionTargetReferences.put(targetBean,
-									tmp);
+							foundIntroductionTargetReferences.put(targetBean, tmp);
 						}
 					}
 					else {
 						if (foundTargetReferences.containsKey(targetBean)) {
-							foundTargetReferences.get(targetBean)
-									.add(reference);
+							foundTargetReferences.get(targetBean).add(reference);
 						}
 						else {
 							List<IAopReference> tmp = new ArrayList<IAopReference>();
@@ -375,61 +342,55 @@ public class AopReferenceModelNavigatorContentProvider implements
 		// add normal beans
 		Map<IBean, BeanReferenceNode> beansRefs = new HashMap<IBean, BeanReferenceNode>();
 		for (IBean bean : beans) {
-			if (bean.getElementStartLine() >= startLine
-					&& bean.getElementEndLine() <= endLine
-					&& BeansCorePlugin.getModel().getElement(
-							bean.getElementID()) != null) {
-				BeanReferenceNode rn = new BeanReferenceNode(bean
-						.getElementID());
-				nodes.add(rn);
-				beansRefs.put(bean, rn);
+			if (bean.getElementStartLine() >= startLine && bean.getElementEndLine() <= endLine
+					&& BeansCorePlugin.getModel().getElement(bean.getElementID()) != null) {
+				// Check model source location so that aop nodes are not added
+				if (bean.getElementSourceLocation() instanceof XmlSourceLocation) {
+					String namespace = ((XmlSourceLocation) bean.getElementSourceLocation()).getNamespaceURI();
+					if (!namespace.equals("http://www.springframework.org/schema/aop")) {
+						BeanReferenceNode rn = new BeanReferenceNode(bean.getElementID());
+						nodes.add(rn);
+						beansRefs.put(bean, rn);
+					}
+				}
+				else {
+					BeanReferenceNode rn = new BeanReferenceNode(bean.getElementID());
+					nodes.add(rn);
+					beansRefs.put(bean, rn);
+				}
 			}
 		}
 		// add found references
 		if (foundTargetReferences.size() > 0) {
-			for (Map.Entry<IBean, List<IAopReference>> entry : foundTargetReferences
-					.entrySet()) {
+			for (Map.Entry<IBean, List<IAopReference>> entry : foundTargetReferences.entrySet()) {
 				if (beansRefs.containsKey(entry.getKey())) {
-					beansRefs.get(entry.getKey()).getAdviseReferences().addAll(
-							entry.getValue());
+					beansRefs.get(entry.getKey()).getAdviseReferences().addAll(entry.getValue());
 				}
 			}
 		}
 		if (foundIntroductionTargetReferences.size() > 0) {
-			for (Map.Entry<IBean, List<IAopReference>> entry : foundIntroductionTargetReferences
-					.entrySet()) {
+			for (Map.Entry<IBean, List<IAopReference>> entry : foundIntroductionTargetReferences.entrySet()) {
 				if (beansRefs.containsKey(entry.getKey())) {
-					beansRefs.get(entry.getKey()).getDeclaredOnReferences()
-							.addAll(entry.getValue());
+					beansRefs.get(entry.getKey()).getDeclaredOnReferences().addAll(entry.getValue());
 				}
 			}
 		}
 		if (foundSourceReferences.size() > 0) {
-			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundSourceReferences
-					.entrySet()) {
-				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs
-						.entrySet()) {
-					if (n.getKey().getElementStartLine() == entry.getKey()
-							.getAspectStartLineNumber()
-							|| entry.getKey().getAspectName().equals(
-									n.getKey().getElementName())) {
-						beansRefs.get(n.getKey()).getAspectReferences().addAll(
-								entry.getValue());
+			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundSourceReferences.entrySet()) {
+				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs.entrySet()) {
+					if (n.getKey().getElementStartLine() == entry.getKey().getAspectStartLineNumber()
+							|| entry.getKey().getAspectName().equals(n.getKey().getElementName())) {
+						beansRefs.get(n.getKey()).getAspectReferences().addAll(entry.getValue());
 					}
 				}
 			}
 		}
 		if (foundIntroductionSourceReferences.size() > 0) {
-			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundIntroductionSourceReferences
-					.entrySet()) {
-				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs
-						.entrySet()) {
-					if (n.getKey().getElementStartLine() == entry.getKey()
-							.getAspectStartLineNumber()
-							|| entry.getKey().getAspectName().equals(
-									n.getKey().getElementName())) {
-						beansRefs.get(n.getKey()).getDeclareParentReferences()
-								.addAll(entry.getValue());
+			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundIntroductionSourceReferences.entrySet()) {
+				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs.entrySet()) {
+					if (n.getKey().getElementStartLine() == entry.getKey().getAspectStartLineNumber()
+							|| entry.getKey().getAspectName().equals(n.getKey().getElementName())) {
+						beansRefs.get(n.getKey()).getDeclareParentReferences().addAll(entry.getValue());
 					}
 				}
 			}
@@ -442,15 +403,13 @@ public class AopReferenceModelNavigatorContentProvider implements
 			return ((IModelElement) element).getElementParent();
 		}
 		else if (element instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					(IFile) element);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
 			if (config != null) {
 				return config.getElementParent();
 			}
 		}
 		else if (element instanceof ZipEntryStorage) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					((ZipEntryStorage) element).getFullName());
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(((ZipEntryStorage) element).getFullName());
 			if (config != null) {
 				return config.getElementParent();
 			}
@@ -467,8 +426,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 			try {
 				IMethod[] methods = type.getMethods();
 				for (IMethod method : methods) {
-					if (Activator.getModel().isAdvised(method)
-							|| Activator.getModel().isAdvice(method)) {
+					if (Activator.getModel().isAdvised(method) || Activator.getModel().isAdvice(method)) {
 						return true;
 					}
 				}
@@ -478,8 +436,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 		}
 		else if (element instanceof IMethod) {
 			IMethod method = (IMethod) element;
-			List<IAopReference> references = Activator.getModel()
-					.getAllReferences();
+			List<IAopReference> references = Activator.getModel().getAllReferences();
 			for (IAopReference reference : references) {
 				if (reference.getTarget().equals(method)) {
 					return true;
@@ -498,9 +455,8 @@ public class AopReferenceModelNavigatorContentProvider implements
 
 			// Are we in the UI thread?
 			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-				AopReferenceModelNavigator.refreshViewer((TreeViewer) viewer,
-						AopReferenceModelNavigator
-								.calculateRootElement(element), element);
+				AopReferenceModelNavigator.refreshViewer((TreeViewer) viewer, AopReferenceModelNavigator
+						.calculateRootElement(element), element);
 			}
 			else {
 				ctrl.getDisplay().asyncExec(new Runnable() {
@@ -511,11 +467,8 @@ public class AopReferenceModelNavigatorContentProvider implements
 						if (ctrl == null || ctrl.isDisposed()) {
 							return;
 						}
-						AopReferenceModelNavigator
-								.refreshViewer((TreeViewer) viewer,
-										AopReferenceModelNavigator
-												.calculateRootElement(element),
-										element);
+						AopReferenceModelNavigator.refreshViewer((TreeViewer) viewer, AopReferenceModelNavigator
+								.calculateRootElement(element), element);
 					}
 				});
 			}
@@ -539,8 +492,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 	}
 
 	public void elementChanged(ModelChangeEvent event) {
-		if (event.getType() == Type.CHANGED
-				&& event.getSource() instanceof IBeansProject) {
+		if (event.getType() == Type.CHANGED && event.getSource() instanceof IBeansProject) {
 			changed();
 		}
 	}

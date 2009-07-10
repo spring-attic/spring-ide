@@ -42,6 +42,7 @@ import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
@@ -49,6 +50,7 @@ import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -84,6 +86,9 @@ public class AopReferenceModelNavigatorUtils {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structSelection = (IStructuredSelection) selection;
 			Object obj = structSelection.getFirstElement();
+			if (obj instanceof Attr) {
+				obj = ((Attr) obj).getOwnerElement();
+			}
 			if (obj instanceof Element) {
 				Element elem = (Element) obj;
 				selectedElement = obj;
@@ -125,7 +130,7 @@ public class AopReferenceModelNavigatorUtils {
 			else if (obj instanceof Text) {
 				Node parent = ((Text) obj).getParentNode();
 				if (parent instanceof Element) {
-					selectedElement = parent;
+					selectedElement = getSelectedXmlElement(new StructuredSelection(parent));
 				}
 			}
 		}

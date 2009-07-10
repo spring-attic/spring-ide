@@ -17,6 +17,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.util.ObjectUtils;
 
@@ -38,13 +39,13 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 
 	private ADVICE_TYPE type;
 
-	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def,
-			IResource file, IBean bean) {
+	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def, IResource file,
+			IBean bean) {
 		this(type, source, target, def, file, bean.getElementID());
 	}
 
-	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def,
-			IResource file, String beanId) {
+	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def, IResource file,
+			String beanId) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
@@ -53,8 +54,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		this.bean = beanId;
 	}
 
-	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IResource file,
-			String beanId) {
+	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IResource file, String beanId) {
 		this(type, source, target, null, file, beanId);
 	}
 
@@ -62,14 +62,19 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 	public boolean equals(Object obj) {
 		if (obj instanceof AopReference) {
 			AopReference other = (AopReference) obj;
-			return ((getTargetBeanId() == null && other.getTargetBeanId() == null) || getTargetBeanId()
-					.equals(other.getTargetBeanId()))
-					&& getTarget().equals(other.getTarget())
+			if (!(getTarget().equals(other.getTarget())
 					&& ((getSource() == null && other.getSource() == null) || (getSource() != null && getSource()
-							.equals(other.getSource())))
-					&& getResource().equals(other.getResource())
-					&& getDefinition().getAspectStartLineNumber() == other.getDefinition()
-							.getAspectStartLineNumber();
+							.equals(other.getSource()))) && getDefinition().getAspectStartLineNumber() == other
+					.getDefinition().getAspectStartLineNumber())) {
+				return false;
+			}
+			if ((getTargetBeanId() == null && other.getTargetBeanId() == null)
+					|| getTargetBeanId().equals(other.getTargetBeanId())) {
+				return true;
+			}
+			IBean bean1 = AopReferenceModelUtils.getBeanFromElementId(getTargetBeanId());
+			IBean bean2 = AopReferenceModelUtils.getBeanFromElementId(other.getTargetBeanId());
+			return ObjectUtils.nullSafeEquals(bean1, bean2);
 		}
 		return false;
 	}
@@ -122,16 +127,13 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 	public void saveState(IMemento memento) {
 		memento.putString(AopReferenceElementFactory.ADVICE_TYPE_ATTRIBUTE, this.type.toString());
 		if (this.source != null) {
-			memento.putString(AopReferenceElementFactory.SOURCE_ATTRIBUTE, this.source
-					.getHandleIdentifier());
+			memento.putString(AopReferenceElementFactory.SOURCE_ATTRIBUTE, this.source.getHandleIdentifier());
 		}
 		if (this.target != null) {
-			memento.putString(AopReferenceElementFactory.TARGET_ATTRIBUTE, this.target
-					.getHandleIdentifier());
+			memento.putString(AopReferenceElementFactory.TARGET_ATTRIBUTE, this.target.getHandleIdentifier());
 		}
 		if (this.file != null) {
-			memento.putString(AopReferenceElementFactory.FILE_ATTRIBUTE, this.file.getFullPath()
-					.toString());
+			memento.putString(AopReferenceElementFactory.FILE_ATTRIBUTE, this.file.getFullPath().toString());
 		}
 		memento.putString(AopReferenceElementFactory.BEAN_ATTRIBUTE, this.bean);
 	}
