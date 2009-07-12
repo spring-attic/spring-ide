@@ -497,4 +497,36 @@
 			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
 	</extension>
 	
+	<extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            id="org.springframework.ide.eclipse.beans.ui.namespaces.projectPropertyPage"
+            name="%namespaceProjectPropertyPage.label"
+            class="org.springframework.ide.eclipse.beans.ui.wizards.NamespaceVersionPreferencePage"
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            category="org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage">
+         <filter
+               name="nature"
+               value="org.springframework.ide.eclipse.core.springnature">
+         </filter>
+         <keywordReference
+               id="org.springframework.ide.eclipse.beans.ui.namespaces.keywords">
+         </keywordReference>
+      </page>
+   </extension>
+   
+     <extension point="org.eclipse.ui.keywords">
+         <keyword id="org.springframework.ide.eclipse.beans.ui.namespaces.keywords"
+            label="%namespacePreferenceKeywords.label"/>
+    </extension>
+   
+    <extension point="org.eclipse.ui.preferencePages">
+	 	<page id="org.springframework.ide.eclipse.beans.ui.namespaces.preferencePage"
+ 			name="%namespaceProjectPropertyPage.label"
+    		class="org.springframework.ide.eclipse.beans.ui.wizards.NamespaceVersionPreferencePage"
+    		category="org.springframework.ide.eclipse.beans.ui.preferencePage">
+   		</page>
+   	</extension>
+	
 </plugin>

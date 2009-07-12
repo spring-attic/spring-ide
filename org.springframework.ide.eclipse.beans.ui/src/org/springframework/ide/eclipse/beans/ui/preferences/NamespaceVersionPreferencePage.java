@@ -8,13 +8,14 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.wizards;
+package org.springframework.ide.eclipse.beans.ui.preferences;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -23,26 +24,33 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.ui.dialogs.ProjectAndPreferencePage;
 
 /**
- * {@link WizardPage} that displays a list of {@link INamespaceDefinition}s to the user in order to allow for selecting
- * the desired XSD namespace declarations.
+ * {@link ProjectAndPreferencePage} that allows to configure default namepace versions.
  * @author Christian Dupuis
- * @since 2.0
+ * @since 2.2.5
  */
-public class NamespaceSelectionWizardPage extends WizardPage {
+@SuppressWarnings("deprecation")
+public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
+
+	public static final String PREF_ID = "org.springframework.ide.eclipse.beans.ui.namespaces.preferencePage"; //$NON-NLS-1$
+
+	public static final String PROP_ID = "org.springframework.ide.eclipse.beans.ui.namespaces.projectPropertyPage"; //$NON-NLS-1$
 
 	public class XsdLabelProvider extends LabelProvider {
 
@@ -64,8 +72,17 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 	}
 
 	public class VersionLabelProvider extends LabelProvider {
+
 		public Image getImage(Object element) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
+		}
+
+		public String getText(Object element) {
+			if (element instanceof String) {
+				String label = (String) element;
+				return label;
+			}
+			return super.getText(element);
 		}
 	}
 
@@ -104,7 +121,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 
 	private static final int LIST_VIEWER_WIDTH = 340;
 
-	private CheckboxTableViewer xsdViewer;
+	private TableViewer xsdViewer;
 
 	private CheckboxTableViewer versionViewer;
 
@@ -112,41 +129,48 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 
 	private INamespaceDefinition selectedNamespaceDefinition;
 
-	protected NamespaceSelectionWizardPage(String pageName) {
-		super(pageName);
-		setTitle(BeansWizardsMessages.NewConfig_title);
-		setDescription(BeansWizardsMessages.NewConfig_xsdDescription);
-	}
+	public Composite createPreferenceContent(Composite parent) {
 
-	public void createControl(Composite parent) {
+		List<INamespaceDefinition> namespaces = NamespaceUtils.getNamespaceDefinitions();
+		if (isProjectPreferencePage()) {
+			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
+					BeansCorePlugin.PLUGIN_ID);
+			for (INamespaceDefinition namespace : namespaces) {
+				String version = prefs.getString(BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID
+						+ namespace.getNamespaceURI(), "");
+				selectedVersion.put(namespace, version);
+			}
+		}
+		else {
+			Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
+			for (INamespaceDefinition namespace : namespaces) {
+				String version = prefs.getString(BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID
+						+ namespace.getNamespaceURI());
+				selectedVersion.put(namespace, version);
+			}
+		}
+
 		initializeDialogUnits(parent);
 		// top level group
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
-		layout.marginTop = 5;
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		composite.setFont(parent.getFont());
-		setControl(composite);
 
 		Label namespaceLabel = new Label(composite, SWT.NONE);
-		namespaceLabel.setText("Select desired XSD namespace declarations:");
+		namespaceLabel.setText("Select XSD namespace to configure default version:");
 
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.widthHint = LIST_VIEWER_WIDTH;
 		gd.heightHint = XSD_LIST_VIEWER_HEIGHT;
 
 		// config set list viewer
-		xsdViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
+		xsdViewer = new TableViewer(composite, SWT.BORDER);
 		xsdViewer.getTable().setLayoutData(gd);
 		xsdViewer.setContentProvider(new XsdConfigContentProvider());
 		xsdViewer.setLabelProvider(new XsdLabelProvider());
 		xsdViewer.setInput(this); // activate content provider
-		INamespaceDefinition defaultDefinition = NamespaceUtils.getDefaultNamespaceDefinition();
-		if (defaultDefinition != null) {
-			xsdViewer.setGrayedElements(new Object[] { defaultDefinition });
-			xsdViewer.setCheckedElements(new Object[] { defaultDefinition });
-		}
 
 		xsdViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
@@ -155,44 +179,30 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 					Object obj = ((IStructuredSelection) event.getSelection()).getFirstElement();
 					selectedNamespaceDefinition = (INamespaceDefinition) obj;
 					versionViewer.setInput(obj);
-					if (selectedVersion.containsKey(selectedNamespaceDefinition)) {
+					if (selectedVersion.get(selectedNamespaceDefinition) != null) {
 						versionViewer.setCheckedElements(new Object[] { selectedVersion
 								.get(selectedNamespaceDefinition) });
 					}
-					if (xsdViewer.getChecked(obj) && selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
+					if (selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
 						versionViewer.getControl().setEnabled(true);
 					}
 					else {
 						versionViewer.getControl().setEnabled(false);
 					}
-
 				}
-			}
-		});
-
-		xsdViewer.addCheckStateListener(new ICheckStateListener() {
-			public void checkStateChanged(final CheckStateChangedEvent event) {
-
-				if (event.getChecked() && selectedNamespaceDefinition != null
-						&& selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
-					versionViewer.getControl().setEnabled(true);
-				}
-				else {
-					versionViewer.getControl().setEnabled(false);
-				}
-
 			}
 		});
 
 		Label versionLabel = new Label(composite, SWT.NONE);
-		versionLabel.setText("Select desired XSD (if none is selected the default will be used):");
+		versionLabel
+				.setText("Select default schema version (if none is selected the versionless schema will be used):");
 
 		versionViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		versionViewer.getTable().setLayoutData(gd);
 		versionViewer.setContentProvider(new VersionContentProvider());
 		versionViewer.setLabelProvider(new VersionLabelProvider());
 		versionViewer.setSorter(new ViewerSorter());
-		
+
 		versionViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(final CheckStateChangedEvent event) {
 				if (event.getChecked()) {
@@ -203,24 +213,62 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 				}
 				else {
 					versionViewer.setCheckedElements(new Object[0]);
-					selectedVersion.remove(selectedNamespaceDefinition);
+					selectedVersion.put(selectedNamespaceDefinition, "");
 				}
 			}
 		});
+
+		return composite;
 	}
 
-	public List<INamespaceDefinition> getXmlSchemaDefinitions() {
-		List<INamespaceDefinition> defs = new ArrayList<INamespaceDefinition>();
-		Object[] checkedElements = xsdViewer.getCheckedElements();
-		if (checkedElements != null) {
-			for (int i = 0; i < checkedElements.length; i++) {
-				defs.add((INamespaceDefinition) checkedElements[i]);
+	@Override
+	protected String getPreferencePageID() {
+		return PREF_ID;
+	}
+
+	@Override
+	protected String getPropertyPageID() {
+		return PROP_ID;
+	}
+
+	@Override
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
+				BeansCorePlugin.NAMESPACE_VERSION_PROJECT_PREFERENCE_ID, false);
+	}
+
+	public boolean performOk() {
+		if (isProjectPreferencePage()) {
+			if (useProjectSettings()) {
+				SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+						BeansCorePlugin.NAMESPACE_VERSION_PROJECT_PREFERENCE_ID, true);
+			}
+			else {
+				SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+						BeansCorePlugin.NAMESPACE_VERSION_PROJECT_PREFERENCE_ID, false);
+			}
+			for (Map.Entry<INamespaceDefinition, String> entry : selectedVersion.entrySet()) {
+				SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putString(
+						BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID + entry.getKey().getNamespaceURI(),
+						entry.getValue());
 			}
 		}
-		return defs;
-	}
-
-	public Map<INamespaceDefinition, String> getSchemaVersions() {
-		return selectedVersion;
+		else {
+			for (Map.Entry<INamespaceDefinition, String> entry : selectedVersion.entrySet()) {
+				BeansCorePlugin.getDefault().getPluginPreferences().setValue(
+						BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID + entry.getKey().getNamespaceURI(),
+						entry.getValue());
+			}
+		}
+		BeansCorePlugin.getDefault().savePluginPreferences();
+		return true;
+	};
+	
+	@Override
+	protected void performDefaults() {
+		super.performDefaults();
+		for (Map.Entry<INamespaceDefinition, String> entry : selectedVersion.entrySet()) {
+			entry.setValue("");
+		}
 	}
 }

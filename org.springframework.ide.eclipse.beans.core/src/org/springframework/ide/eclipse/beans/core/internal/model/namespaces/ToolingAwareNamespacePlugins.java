@@ -12,12 +12,17 @@ package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -288,10 +293,10 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 
 	/**
 	 * Default implementation of {@link INamespaceDefinition}.
-	 * @author Christian Dupuis
-	 * @since 2.2.5
 	 */
 	class NamespaceDefinition implements INamespaceDefinition {
+		
+		private Pattern versionPattern = Pattern.compile(".*-([0-9,.a-zA-z]*)\\.xsd");
 
 		private Bundle bundle;
 
@@ -314,48 +319,45 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		public void addUri(String uri) {
 			uris.add(uri);
 		}
-
+		
+		/**
+		 * {@inheritDoc}
+		 */
 		public Bundle getBundle() {
 			return bundle;
 		}
-
+		
+		/**
+		 * {@inheritDoc}
+		 */
 		public String getDefaultSchemaLocation() {
 			String defaultSchemaLocation = null;
-			float version = 0F;
 			for (String schemaLocation : schemaLocations) {
-				float tempVersion = 0F;
-				try {
-					int ix = schemaLocation.lastIndexOf('-');
-					if (ix > 0) {
-						tempVersion = Float.parseFloat(schemaLocation.substring(ix + 1, schemaLocation.length() - 4));
-					}
-				}
-				catch (Exception e) {
-					// make sure it can't fail on us
-				}
-				if (tempVersion >= version) {
-					version = tempVersion;
+				if (!versionPattern.matcher(schemaLocation).matches()) {
 					defaultSchemaLocation = schemaLocation;
 				}
+			}
+			if (defaultSchemaLocation == null && schemaLocations.size() > 0) {
+				List<String> locations = new ArrayList<String>(schemaLocations);
+				Collections.sort(locations);
+				defaultSchemaLocation = locations.get(0);
 			}
 			return defaultSchemaLocation;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public String getDefaultUri() {
 			String defaultUri = null;
-			float version = 0F;
+			Version version = Version.MINIMUM_VERSION;
 			for (String uri : uris) {
-				float tempVersion = 0F;
-				try {
-					int ix = uri.lastIndexOf('-');
-					if (ix > 0) {
-						tempVersion = Float.parseFloat(uri.substring(ix + 1, uri.length() - 4));
-					}
+				Version tempVersion = Version.MINIMUM_VERSION;
+				Matcher matcher = versionPattern.matcher(uri);
+				if (matcher.matches()) {
+					tempVersion = new Version(matcher.group(1));
 				}
-				catch (Exception e) {
-					// make sure it can't fail on us
-				}
-				if (tempVersion >= version) {
+				if (tempVersion.compareTo(version) >= 0) {
 					version = tempVersion;
 					defaultUri = uri;
 				}
@@ -363,18 +365,30 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 			return defaultUri;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public String getIconPath() {
 			return iconPath;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public String getName() {
 			return name;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public String getNamespaceUri() {
 			return namespaceUri;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public String getPrefix() {
 			if (prefix != null) {
 				return prefix;
@@ -386,10 +400,16 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 			return null;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public Set<String> getSchemaLocations() {
 			return schemaLocations;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void setBundle(Bundle bundle) {
 			this.bundle = bundle;
 		}
@@ -398,17 +418,52 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 			this.iconPath = iconPath;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void setNamespaceUri(String namespaceUri) {
 			this.namespaceUri = namespaceUri;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void setPrefix(String prefix) {
 			this.prefix = prefix;
 		}
+	}
+	
+	static class Version implements Comparable<Version> {
+
+	    private static final String MINIMUM_VERSION_STRING = "0";
+
+	    public static final Version MINIMUM_VERSION = new Version(MINIMUM_VERSION_STRING);
+
+	    private final org.osgi.framework.Version version;
+
+	    public Version(String v) {
+	    	org.osgi.framework.Version tempVersion = null;
+	    	try {
+	    		tempVersion = org.osgi.framework.Version.parseVersion(v);
+	    	}
+	    	catch (Exception e) {
+	    		// make sure that we don't crash on any new version numbers format that we don't support
+	    		BeansCorePlugin.log("Cannot convert schema vesion", e);
+	    		tempVersion = org.osgi.framework.Version.parseVersion(MINIMUM_VERSION_STRING);
+	    	}
+	    	this.version = tempVersion;
+	    }
+
+	    public int compareTo(Version v2) {
+	        return this.version.compareTo(v2.version);
+	    }
 	}
 
 }

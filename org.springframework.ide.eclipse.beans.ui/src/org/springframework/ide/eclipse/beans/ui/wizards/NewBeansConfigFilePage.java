@@ -45,7 +45,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({ "restriction", "deprecation" })
 public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 
 	private Map<INamespaceDefinition, String> schemaVersions;
@@ -78,7 +78,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		writer.println("<beans xmlns=\"" + defaultXsd.getNamespaceURI() + "\"" + lineSeparator
 				+ "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + lineSeparator
 				+ getNamespaceMappings(lineSeparator) + "\txsi:schemaLocation=\""
-				+ getSchemaLocations(lineSeparator) + "\">" + lineSeparator + lineSeparator
+				+ getSchemaLocations(lineSeparator, newFileHandle) + "\">" + lineSeparator + lineSeparator
 				+ lineSeparator + "</beans>");
 		writer.flush();
 		outputStream.close();
@@ -113,7 +113,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		return builder.toString();
 	}
 
-	private String getSchemaLocations(String lineSeparator) {
+	private String getSchemaLocations(String lineSeparator, IFile file) {
 		StringBuilder builder = new StringBuilder();
 
 		INamespaceDefinition defaultXsd = NamespaceUtils.getDefaultNamespaceDefinition();
@@ -124,12 +124,12 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 			builder.append(schemaVersions.get(defaultXsd));
 		}
 		else {
-			builder.append(defaultXsd.getDefaultSchemaLocation());
+			builder.append(defaultXsd.getDefaultSchemaLocation(file));
 		}
 		builder.append(lineSeparator);
 
 		for (INamespaceDefinition def : xmlSchemaDefinitions) {
-			if (def.getDefaultSchemaLocation() != null && !def.equals(defaultXsd)) {
+			if (def.getDefaultSchemaLocation(file) != null && !def.equals(defaultXsd)) {
 				builder.append("\t\t");
 				builder.append(def.getNamespaceURI());
 				builder.append(" ");
@@ -137,7 +137,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 					builder.append(schemaVersions.get(def));
 				}
 				else {
-					builder.append(def.getDefaultSchemaLocation());
+					builder.append(def.getDefaultSchemaLocation(file));
 				}
 				builder.append(lineSeparator);
 			}

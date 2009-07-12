@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.springframework.osgi.util.OsgiBundleUtils;
  * <code>"org.springframework.ide.eclipse.beans.core"</code>).
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansCorePlugin extends AbstractUIPlugin {
 
@@ -58,8 +59,15 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/** preference key to suppress missing namespace handler warnings */
 	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
 
+	/** preference key for defining the parsing timeout */
 	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID
 			+ ".timeoutConfigLoading";
+
+	/** preference key to enable namespace versions per namespace */
+	public static final String NAMESPACE_VERSION_PROJECT_PREFERENCE_ID = "enable.namespace.versions";
+	
+	/** preference key to specify the default namespace version */
+	public static final String NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID = "default.version.";
 
 	/** The shared instance */
 	private static BeansCorePlugin plugin;

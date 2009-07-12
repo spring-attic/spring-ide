@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.namespaces;
 
 import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -25,7 +26,10 @@ public interface INamespaceDefinition {
 
 	String getNamespaceURI();
 
+	@Deprecated
 	String getDefaultSchemaLocation();
+	
+	String getDefaultSchemaLocation(IResource resource);
 	
 	Set<String> getSchemaLocations();
 	
