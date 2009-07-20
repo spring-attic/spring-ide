@@ -16,9 +16,11 @@ NAME=`date +%Y%m%d%H%M`
 STAGINGLOCATION=$WORKSPACE/updatesite/
 TEST_STAGINGLOCATION=$WORKSPACE/testupdatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
-ECLIPSE_DISTRO_URL=http://ftp.wh2.tu-dresden.de/pub/mirrors/eclipse/technology/epp/downloads/release/ganymede/SR2/eclipse-jee-ganymede-SR2-macosx-carbon.tar.gz
-#ECLIPSE_DISTRO_URL=http://build.eclipse.org/technology/epp/epp_build/34/download/20080623-1700/20080623-1700_eclipse-jee-ganymede-macosx.carbon.ppc.tar.gz
-#ECLIPSE_DISTRO_URL=http://www.mirrorservice.org/sites/download.eclipse.org/eclipseMirror/technology/epp/downloads/release/ganymede/SR2/eclipse-jee-ganymede-SR2-linux-gtk.tar.gz
+if [ -z "$ECLIPSE_DISTRO_URL" ]; then
+ 	ECLIPSE_DISTRO_URL=http://ftp.wh2.tu-dresden.de/pub/mirrors/eclipse/technology/epp/downloads/release/ganymede/SR2/eclipse-jee-ganymede-SR2-macosx-carbon.tar.gz
+	#ECLIPSE_DISTRO_URL=http://build.eclipse.org/technology/epp/epp_build/34/download/20080623-1700/20080623-1700_eclipse-jee-ganymede-macosx.carbon.ppc.tar.gz
+	#ECLIPSE_DISTRO_URL=http://www.mirrorservice.org/sites/download.eclipse.org/eclipseMirror/technology/epp/downloads/release/ganymede/SR2/eclipse-jee-ganymede-SR2-linux-gtk.tar.gz
+fi
 ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/downloads/drops/R-3.3.1.1-200710231652/eclipse-Automated-Tests-3.3.1.1.zip
 
