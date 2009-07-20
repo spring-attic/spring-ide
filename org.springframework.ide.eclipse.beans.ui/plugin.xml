@@ -502,7 +502,7 @@
       <page
             id="org.springframework.ide.eclipse.beans.ui.namespaces.projectPropertyPage"
             name="%namespaceProjectPropertyPage.label"
-            class="org.springframework.ide.eclipse.beans.ui.wizards.NamespaceVersionPreferencePage"
+            class="org.springframework.ide.eclipse.beans.ui.preferences.NamespaceVersionPreferencePage"
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
             category="org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage">
@@ -524,7 +524,7 @@
     <extension point="org.eclipse.ui.preferencePages">
 	 	<page id="org.springframework.ide.eclipse.beans.ui.namespaces.preferencePage"
  			name="%namespaceProjectPropertyPage.label"
-    		class="org.springframework.ide.eclipse.beans.ui.wizards.NamespaceVersionPreferencePage"
+    		class="org.springframework.ide.eclipse.beans.ui.preferences.NamespaceVersionPreferencePage"
     		category="org.springframework.ide.eclipse.beans.ui.preferencePage">
    		</page>
    	</extension>
