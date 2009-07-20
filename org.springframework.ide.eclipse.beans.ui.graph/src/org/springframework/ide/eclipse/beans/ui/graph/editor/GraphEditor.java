@@ -233,7 +233,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 * @see #createGraphicalViewer(Composite)
 	 */
 	protected void initializeGraphicalViewer() {
-		if (graph != null) {
+		if (graph != null && getGraphicalViewer().getControl() != null) {
 			graph.layout(getGraphicalViewer().getControl().getFont());
 			getGraphicalViewer().setContents(graph);
 		}
