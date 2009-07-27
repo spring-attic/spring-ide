@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils;
+import org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -35,13 +36,11 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 
 /**
- * {@link ICommonLabelProvider} which knows about the beans core model's
- * {@link IModelElement elements}.
+ * {@link ICommonLabelProvider} which knows about the beans core model's {@link IModelElement elements}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansNavigatorLabelProvider extends BeansModelLabelProvider implements
-		ICommonLabelProvider { 
+public class BeansNavigatorLabelProvider extends BeansModelLabelProvider implements ICommonLabelProvider {
 
 	private String providerID;
 
@@ -64,18 +63,19 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider impleme
 	}
 
 	public String getDescription(Object element) {
-		if (element instanceof IBeanMetadata
-				&& BeanMetadataUtils.getLabelProvider((IBeanMetadata) element) != null) {
-			return BeanMetadataUtils.getLabelProvider((IBeanMetadata) element).getDescription(
-					element);
+		if (element instanceof IBeanMetadata) {
+			IBeanMetadataLabelProvider labelProvider = BeanMetadataUtils.getLabelProvider((IBeanMetadata) element);
+			if (labelProvider != null) {
+				labelProvider.getDescription(element);
+			}
 		}
-		else if (element instanceof IBeansProject) {
+
+		if (element instanceof IBeansProject) {
 			return "Beans" // TODO Externalize string
 					+ " - " + ((IBeansProject) element).getProject().getName();
 		}
 		else if (element instanceof ISourceModelElement) {
-			INamespaceLabelProvider provider = NamespaceUtils
-					.getLabelProvider((ISourceModelElement) element);
+			INamespaceLabelProvider provider = NamespaceUtils.getLabelProvider((ISourceModelElement) element);
 			if (provider != null && provider instanceof IDescriptionProvider) {
 				return ((IDescriptionProvider) provider).getDescription(element);
 			}
@@ -84,14 +84,13 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider impleme
 			}
 		}
 		else if (element instanceof IModelElement) {
-			return BeansModelLabels.getElementLabel((IModelElement) element,
-					BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
+			return BeansModelLabels.getElementLabel((IModelElement) element, BeansUILabels.APPEND_PATH
+					| BeansUILabels.DESCRIPTION);
 		}
 		if (element instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
 			if (config != null) {
-				return BeansModelLabels.getElementLabel(config, BeansUILabels.APPEND_PATH
-						| BeansUILabels.DESCRIPTION);
+				return BeansModelLabels.getElementLabel(config, BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
 			}
 		}
 		else if (element instanceof ZipEntryStorage) {
@@ -107,8 +106,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider impleme
 		}
 		else if (element instanceof BeanMetadataReference
 				&& BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element) != null) {
-			return BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element)
-					.getDescription(element);
+			return BeanMetadataUtils.getLabelProvider((BeanMetadataReference) element).getDescription(element);
 		}
 		return null;
 	}

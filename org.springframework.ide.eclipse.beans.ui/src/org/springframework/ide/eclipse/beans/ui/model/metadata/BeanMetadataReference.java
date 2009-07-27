@@ -72,6 +72,10 @@ public class BeanMetadataReference {
 	public Object[] getChildren() {
 		return beanMetaData.toArray();
 	}
+	
+	public String getKey() {
+		return key;
+	}
 
 	@Override
 	public int hashCode() {
