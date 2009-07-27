@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,9 +18,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Eclipse specific {@link ResourceLoader} implementation that creates
- * {@link EclipseClassPathResource}s or {@link EclipseResource} depending on
- * the given location String.
+ * Eclipse specific {@link ResourceLoader} implementation that creates {@link EclipseClassPathResource}s or
+ * {@link EclipseResource} depending on the given location String.
  * @author Christian Dupuis
  * @since 2.0.3
  * @see EclipsePathMatchingResourcePatternResolver
@@ -28,9 +27,9 @@ import org.springframework.util.ClassUtils;
 class EclipseFileResourceLoader extends DefaultResourceLoader {
 
 	private final IProject project;
-	
+
 	private final ClassLoader classLoader;
-	
+
 	/**
 	 * Constructor taking a {@link IProject}.
 	 */
@@ -39,10 +38,9 @@ class EclipseFileResourceLoader extends DefaultResourceLoader {
 		this.project = project;
 		this.classLoader = classLoader;
 	}
-	
+
 	/**
-	 * Returns the {@link IProject}'s classloader constructed from the Eclipse 
-	 * build path.
+	 * Returns the {@link IProject}'s classloader constructed from the Eclipse build path.
 	 */
 	public ClassLoader getClassLoader() {
 		return this.classLoader;
@@ -55,11 +53,10 @@ class EclipseFileResourceLoader extends DefaultResourceLoader {
 			return super.getResource(location);
 		}
 		else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
-			return new EclipseClassPathResource(location
-					.substring(CLASSPATH_URL_PREFIX.length()), project);
+			return new EclipseClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), project);
 		}
 		else {
-			return new EclipseResource('/' + project.getName() + location);
+			return new EclipseResource(location, project);
 		}
 	}
 

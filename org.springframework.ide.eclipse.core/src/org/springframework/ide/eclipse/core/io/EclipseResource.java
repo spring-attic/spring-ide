@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,18 +15,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} abstraction for Eclipse {@link IResource} implementations.
@@ -36,20 +41,48 @@ import org.springframework.util.ResourceUtils;
 public class EclipseResource extends AbstractResource implements IAdaptable {
 
 	private IResource resource;
-	
+
 	public EclipseResource(IResource resource) {
 		this.resource = resource;
 	}
 
-	public EclipseResource(String path) {
-		if (path.charAt(0) != '/') {
+	public EclipseResource(String path, IProject rootProject) {
+		if (path.charAt(0) != '/' && !path.startsWith(ResourceUtils.URL_PROTOCOL_FILE + ":")) {
 			throw new IllegalArgumentException("Path '" + path
-					+ "' has to be relative to Eclipse workspace");
+					+ "' has to be relative to Eclipse workspace or an absolute URL location");
 		}
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IResource member = root.findMember(path);
+
+		String rootPath = '/' + rootProject.getName() + path;
+		IResource member = root.findMember(rootPath);
 		if (member != null && member instanceof IResource) {
-			resource = (IResource) member;
+			this.resource = (IResource) member;
+		}
+		else {
+			// TODO hook in logic to check other source folders for relative file locations
+			for (IProject project : root.getProjects()) {
+				IPath projectPath = project.getLocation();
+				if (projectPath == null) {
+					projectPath = project.getRawLocation();
+				}
+				try {
+					if (projectPath != null && projectPath.toFile() != null
+							&& path.startsWith(projectPath.toFile().toURL().toString())) {
+						int length = projectPath.toFile().toURL().toString().length();
+						String tempPath = path;
+						if (length < path.length()) {
+							tempPath = StringUtils.replace(tempPath.substring(length), "\\", "/");
+							this.resource = project.findMember(tempPath);
+							if (this.resource != null) {
+								break;
+							}
+						}
+					}
+				}
+				catch (MalformedURLException e) {
+					SpringCore.log(e);
+				}
+			}
 		}
 	}
 
@@ -70,8 +103,7 @@ public class EclipseResource extends AbstractResource implements IAdaptable {
 		if (resource == null || !(resource instanceof IFile)) {
 			throw new FileNotFoundException("File not found");
 		}
-		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":"
-				+ resource.getRawLocation());
+		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":" + resource.getRawLocation());
 	}
 
 	@Override
@@ -87,13 +119,12 @@ public class EclipseResource extends AbstractResource implements IAdaptable {
 		if (resource == null) {
 			throw new IllegalStateException("File not found");
 		}
-		IFile relativeFile = resource.getParent().getFile(
-				new Path(relativePath));
+		IFile relativeFile = resource.getParent().getFile(new Path(relativePath));
 		if (relativeFile != null) {
 			return new EclipseResource(relativeFile);
 		}
-		throw new FileNotFoundException("Cannot create relative resource '"
-				+ relativePath + "' for " + getDescription());
+		throw new FileNotFoundException("Cannot create relative resource '" + relativePath + "' for "
+				+ getDescription());
 	}
 
 	@Override
@@ -124,13 +155,13 @@ public class EclipseResource extends AbstractResource implements IAdaptable {
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(resource);
 	}
-	
+
 	public IResource getRawResource() {
 		return resource;
 	}
 
 	public Object getAdapter(Class adapter) {
-		if (adapter.equals(IResource.class)) {
+		if (adapter.equals(IResource.class) || adapter.equals(IFile.class)) {
 			return resource;
 		}
 		return null;

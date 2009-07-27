@@ -40,7 +40,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 
 	/**
 	 * Create a new FileResource.
-	 * @param file  a file
+	 * @param file a file
 	 */
 	public FileResource(IFile file) {
 		this.file = file;
@@ -52,8 +52,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 	 */
 	public FileResource(String path) {
 		if (path.charAt(0) != '/') {
-			throw new IllegalArgumentException("Path '" + path
-					+ "' has to be relative to Eclipse workspace");
+			throw new IllegalArgumentException("Path '" + path + "' has to be relative to Eclipse workspace");
 		}
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IResource member = root.findMember(path);
@@ -87,8 +86,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		if (file == null) {
 			throw new FileNotFoundException("File not found");
 		}
-		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":"
-				+ file.getRawLocation());
+		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":" + file.getRawLocation());
 	}
 
 	@Override
@@ -104,13 +102,12 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		if (file == null) {
 			throw new IllegalStateException("File not found");
 		}
-		IFile relativeFile = file.getParent().getFile(
-				new Path(relativePath));
+		IFile relativeFile = file.getParent().getFile(new Path(relativePath));
 		if (relativeFile != null) {
 			return new FileResource(relativeFile);
 		}
-		throw new FileNotFoundException("Cannot create relative resource '"
-				+ relativePath + "' for " + getDescription());
+		throw new FileNotFoundException("Cannot create relative resource '" + relativePath + "' for "
+				+ getDescription());
 	}
 
 	@Override
@@ -154,7 +151,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(file);
 	}
-	
+
 	public IFile getRawFile() {
 		return this.file;
 	}

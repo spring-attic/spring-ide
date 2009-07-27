@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,8 +51,8 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link IFile} implementation which makes workspace external resources accessible for the Spring
- * IDE core model using {@link IResource} as core resource abstraction.
+ * {@link IFile} implementation which makes workspace external resources accessible for the Spring IDE core model using
+ * {@link IResource} as core resource abstraction.
  * <p>
  * NOTE: This implementation can't be used by third parties.
  * @author Christian Dupuis
@@ -77,38 +77,32 @@ public class ExternalFile extends AbstractResource implements IFile {
 		this.entryName = entryName;
 	}
 
-	public void appendContents(InputStream source, int updateFlags, IProgressMonitor monitor)
+	public void appendContents(InputStream source, int updateFlags, IProgressMonitor monitor) throws CoreException {
+		// no-op
+	}
+
+	public void appendContents(InputStream source, boolean force, boolean keepHistory, IProgressMonitor monitor)
 			throws CoreException {
 		// no-op
 	}
 
-	public void appendContents(InputStream source, boolean force, boolean keepHistory,
-			IProgressMonitor monitor) throws CoreException {
+	public void create(InputStream source, boolean force, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
-	public void create(InputStream source, boolean force, IProgressMonitor monitor)
-			throws CoreException {
+	public void create(InputStream source, int updateFlags, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
-	public void create(InputStream source, int updateFlags, IProgressMonitor monitor)
-			throws CoreException {
+	public void createLink(IPath localLocation, int updateFlags, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
-	public void createLink(IPath localLocation, int updateFlags, IProgressMonitor monitor)
-			throws CoreException {
+	public void createLink(URI location, int updateFlags, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
-	public void createLink(URI location, int updateFlags, IProgressMonitor monitor)
-			throws CoreException {
-		// no-op
-	}
-
-	public void delete(boolean force, boolean keepHistory, IProgressMonitor monitor)
-			throws CoreException {
+	public void delete(boolean force, boolean keepHistory, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
@@ -137,8 +131,7 @@ public class ExternalFile extends AbstractResource implements IFile {
 			}
 			ZipEntry entry = file.getEntry(cleanedEntryName);
 			if (entry == null) {
-				throw new CoreException(SpringCore.createErrorStatus("Invalid path '"
-						+ cleanedEntryName + "'", null));
+				throw new CoreException(SpringCore.createErrorStatus("Invalid path '" + cleanedEntryName + "'", null));
 			}
 			return file.getInputStream(entry);
 		}
@@ -184,23 +177,21 @@ public class ExternalFile extends AbstractResource implements IFile {
 		// no-op
 	}
 
-	public void setContents(InputStream source, int updateFlags, IProgressMonitor monitor)
+	public void setContents(InputStream source, int updateFlags, IProgressMonitor monitor) throws CoreException {
+		// no-op
+	}
+
+	public void setContents(IFileState source, int updateFlags, IProgressMonitor monitor) throws CoreException {
+		// no-op
+	}
+
+	public void setContents(InputStream source, boolean force, boolean keepHistory, IProgressMonitor monitor)
 			throws CoreException {
 		// no-op
 	}
 
-	public void setContents(IFileState source, int updateFlags, IProgressMonitor monitor)
+	public void setContents(IFileState source, boolean force, boolean keepHistory, IProgressMonitor monitor)
 			throws CoreException {
-		// no-op
-	}
-
-	public void setContents(InputStream source, boolean force, boolean keepHistory,
-			IProgressMonitor monitor) throws CoreException {
-		// no-op
-	}
-
-	public void setContents(IFileState source, boolean force, boolean keepHistory,
-			IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
@@ -212,8 +203,7 @@ public class ExternalFile extends AbstractResource implements IFile {
 		// no-op
 	}
 
-	public void accept(IResourceVisitor visitor, int depth, boolean includePhantoms)
-			throws CoreException {
+	public void accept(IResourceVisitor visitor, int depth, boolean includePhantoms) throws CoreException {
 		// no-op
 	}
 
@@ -225,23 +215,19 @@ public class ExternalFile extends AbstractResource implements IFile {
 		// no-op
 	}
 
-	public void copy(IPath destination, boolean force, IProgressMonitor monitor)
-			throws CoreException {
+	public void copy(IPath destination, boolean force, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
-	public void copy(IPath destination, int updateFlags, IProgressMonitor monitor)
-			throws CoreException {
+	public void copy(IPath destination, int updateFlags, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
-	public void copy(IProjectDescription description, boolean force, IProgressMonitor monitor)
-			throws CoreException {
+	public void copy(IProjectDescription description, boolean force, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
-	public void copy(IProjectDescription description, int updateFlags, IProgressMonitor monitor)
-			throws CoreException {
+	public void copy(IProjectDescription description, int updateFlags, IProgressMonitor monitor) throws CoreException {
 		// no-op
 	}
 
@@ -282,8 +268,7 @@ public class ExternalFile extends AbstractResource implements IFile {
 		return markers.get(id);
 	}
 
-	public IMarker[] findMarkers(String type, boolean includeSubtypes, int depth)
-			throws CoreException {
+	public IMarker[] findMarkers(String type, boolean includeSubtypes, int depth) throws CoreException {
 		Set<IMarker> newMarkers = new HashSet<IMarker>();
 		for (ExternalMarker marker : this.markers.values()) {
 			if (marker.getType().equals(type) || (includeSubtypes && marker.isSubtypeOf(type))) {
@@ -293,8 +278,7 @@ public class ExternalFile extends AbstractResource implements IFile {
 		return (IMarker[]) newMarkers.toArray(new IMarker[newMarkers.size()]);
 	}
 
-	public int findMaxProblemSeverity(String type, boolean includeSubtypes, int depth)
-			throws CoreException {
+	public int findMaxProblemSeverity(String type, boolean includeSubtypes, int depth) throws CoreException {
 		return 0;
 	}
 
@@ -410,20 +394,17 @@ public class ExternalFile extends AbstractResource implements IFile {
 		return false;
 	}
 
-	public void move(IPath destination, boolean force, IProgressMonitor monitor)
-			throws CoreException {
+	public void move(IPath destination, boolean force, IProgressMonitor monitor) throws CoreException {
 	}
 
-	public void move(IPath destination, int updateFlags, IProgressMonitor monitor)
-			throws CoreException {
+	public void move(IPath destination, int updateFlags, IProgressMonitor monitor) throws CoreException {
 	}
 
-	public void move(IProjectDescription description, int updateFlags, IProgressMonitor monitor)
-			throws CoreException {
+	public void move(IProjectDescription description, int updateFlags, IProgressMonitor monitor) throws CoreException {
 	}
 
-	public void move(IProjectDescription description, boolean force, boolean keepHistory,
-			IProgressMonitor monitor) throws CoreException {
+	public void move(IProjectDescription description, boolean force, boolean keepHistory, IProgressMonitor monitor)
+			throws CoreException {
 	}
 
 	public void refreshLocal(int depth, IProgressMonitor monitor) throws CoreException {
@@ -535,18 +516,15 @@ public class ExternalFile extends AbstractResource implements IFile {
 		}
 
 		public int getAttribute(String attributeName, int defaultValue) {
-			return (attributes.containsKey(attributeName) ? (Integer) attributes.get(attributeName)
-					: defaultValue);
+			return (attributes.containsKey(attributeName) ? (Integer) attributes.get(attributeName) : defaultValue);
 		}
 
 		public String getAttribute(String attributeName, String defaultValue) {
-			return (attributes.containsKey(attributeName) ? (String) attributes.get(attributeName)
-					: defaultValue);
+			return (attributes.containsKey(attributeName) ? (String) attributes.get(attributeName) : defaultValue);
 		}
 
 		public boolean getAttribute(String attributeName, boolean defaultValue) {
-			return (attributes.containsKey(attributeName) ? (Boolean) attributes.get(attributeName)
-					: defaultValue);
+			return (attributes.containsKey(attributeName) ? (Boolean) attributes.get(attributeName) : defaultValue);
 		}
 
 		public Map getAttributes() throws CoreException {
