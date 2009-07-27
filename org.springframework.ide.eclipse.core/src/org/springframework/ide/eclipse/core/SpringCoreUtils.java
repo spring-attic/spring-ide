@@ -77,8 +77,7 @@ public final class SpringCoreUtils {
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	/**
-	 * Returns <code>true</code> if given text contains a placeholder, e.g. <code>${beansRef}</code>
-	 * .
+	 * Returns <code>true</code> if given text contains a placeholder, e.g. <code>${beansRef}</code> .
 	 */
 	public static boolean hasPlaceHolder(String text) {
 		if (text == null || !StringUtils.hasText(text)) {
@@ -90,8 +89,7 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns the specified adapter for the given object or <code>null</code> if adapter is not
-	 * supported.
+	 * Returns the specified adapter for the given object or <code>null</code> if adapter is not supported.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getAdapter(Object object, Class<T> adapter) {
@@ -122,8 +120,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Creates specified simple project.
 	 */
-	public static IProject createProject(String projectName, IProjectDescription description,
-			IProgressMonitor monitor) throws CoreException {
+	public static IProject createProject(String projectName, IProjectDescription description, IProgressMonitor monitor)
+			throws CoreException {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject(projectName);
 		if (!project.exists()) {
@@ -162,8 +160,7 @@ public final class SpringCoreUtils {
 	/**
 	 * Adds given nature as first nature to specified project.
 	 */
-	public static void addProjectNature(IProject project, String nature, IProgressMonitor monitor)
-			throws CoreException {
+	public static void addProjectNature(IProject project, String nature, IProgressMonitor monitor) throws CoreException {
 		if (project != null && nature != null) {
 			if (!project.hasNature(nature)) {
 				IProjectDescription desc = project.getDescription();
@@ -212,8 +209,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Adds given builder to specified project.
 	 */
-	public static void addProjectBuilder(IProject project, String builderID,
-			IProgressMonitor monitor) throws CoreException {
+	public static void addProjectBuilder(IProject project, String builderID, IProgressMonitor monitor)
+			throws CoreException {
 		IProjectDescription desc = project.getDescription();
 		ICommand builderCommand = getProjectBuilderCommand(desc, builderID);
 		if (builderCommand == null) {
@@ -231,8 +228,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Removes given builder from specified project.
 	 */
-	public static void removeProjectBuilder(IProject project, String builderID,
-			IProgressMonitor monitor) throws CoreException {
+	public static void removeProjectBuilder(IProject project, String builderID, IProgressMonitor monitor)
+			throws CoreException {
 		if (project != null && builderID != null) {
 			IProjectDescription desc = project.getDescription();
 			ICommand[] commands = desc.getBuildSpec();
@@ -253,8 +250,7 @@ public final class SpringCoreUtils {
 	/**
 	 * Adds (or updates) a builder in given project description.
 	 */
-	public static void addProjectBuilderCommand(IProjectDescription description, ICommand command)
-			throws CoreException {
+	public static void addProjectBuilderCommand(IProjectDescription description, ICommand command) throws CoreException {
 		ICommand[] oldCommands = description.getBuildSpec();
 		ICommand oldBuilderCommand = getProjectBuilderCommand(description, command.getBuilderName());
 		ICommand[] newCommands;
@@ -282,8 +278,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Returns specified builder from given project description.
 	 */
-	public static ICommand getProjectBuilderCommand(IProjectDescription description,
-			String builderID) throws CoreException {
+	public static ICommand getProjectBuilderCommand(IProjectDescription description, String builderID)
+			throws CoreException {
 		ICommand[] commands = description.getBuildSpec();
 		for (int i = commands.length - 1; i >= 0; i--) {
 			if (commands[i].getBuilderName().equals(builderID)) {
@@ -324,8 +320,7 @@ public final class SpringCoreUtils {
 	public static boolean isEclipseSameOrNewer(int majorVersion, int minorVersion) {
 		Bundle bundle = Platform.getBundle(Platform.PI_RUNTIME);
 		if (bundle != null) {
-			String version = (String) bundle.getHeaders().get(
-					org.osgi.framework.Constants.BUNDLE_VERSION);
+			String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
 			StringTokenizer st = new StringTokenizer(version, ".");
 			try {
 				int major = Integer.parseInt(st.nextToken());
@@ -352,8 +347,7 @@ public final class SpringCoreUtils {
 	/**
 	 * Returns true if Eclipse's runtime bundle has the same or a newer than given version.
 	 */
-	public static boolean isVersionSameOrNewer(String version, int majorVersion, int minorVersion,
-			int patchVersion) {
+	public static boolean isVersionSameOrNewer(String version, int majorVersion, int minorVersion, int patchVersion) {
 		StringTokenizer st = new StringTokenizer(version, ".");
 		try {
 			int major = Integer.parseInt(st.nextToken());
@@ -391,14 +385,11 @@ public final class SpringCoreUtils {
 	public static boolean isManifest(IResource resource) {
 		// check if it is a MANIFEST.MF file in META-INF
 		if (resource != null
-//				&& resource.isAccessible()
-				&& resource.getType() == IResource.FILE
-				&& resource.getName().equals(BUNDLE_MANIFEST_FILE)
-				&& resource.getParent() != null
-				&& resource.getParent().getProjectRelativePath() != null
+				// && resource.isAccessible()
+				&& resource.getType() == IResource.FILE && resource.getName().equals(BUNDLE_MANIFEST_FILE)
+				&& resource.getParent() != null && resource.getParent().getProjectRelativePath() != null
 				&& resource.getParent().getProjectRelativePath().lastSegment() != null
-				&& resource.getParent().getProjectRelativePath().lastSegment().equals(
-						BUNDLE_MANIFEST_FOLDER)) {
+				&& resource.getParent().getProjectRelativePath().lastSegment().equals(BUNDLE_MANIFEST_FOLDER)) {
 
 			// check if the manifest is not in an output folder
 			IPath filePath = resource.getFullPath();
@@ -441,8 +432,8 @@ public final class SpringCoreUtils {
 	 */
 	public static void buildProject(IProject project) {
 		if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
-			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace().getRuleFactory()
-					.buildRule(), new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD });
+			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace().getRuleFactory().buildRule(),
+					new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD });
 		}
 	}
 
@@ -466,20 +457,21 @@ public final class SpringCoreUtils {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) {
 				try {
-					project.build(IncrementalProjectBuilder.FULL_BUILD, SpringCore.BUILDER_ID,
-							Collections.emptyMap(), monitor);
+					project.build(IncrementalProjectBuilder.FULL_BUILD, SpringCore.BUILDER_ID, Collections.emptyMap(),
+							monitor);
 					return Status.OK_STATUS;
 				}
 				catch (CoreException e) {
-					return new MultiStatus(SpringCore.PLUGIN_ID, 1,
-							"Error during build of project [" + project.getName() + "]", e);
+					return new MultiStatus(SpringCore.PLUGIN_ID, 1, "Error during build of project ["
+							+ project.getName() + "]", e);
 				}
 			}
 		};
 		if (rule != null) {
 			job.setRule(rule);
 		}
-		job.setUser(true);
+		job.setPriority(Job.INTERACTIVE);
+		job.setSystem(true);
 		job.schedule();
 	}
 
@@ -497,9 +489,9 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns the line separator found in the given text. If it is null, or not found return the
-	 * line delimiter for the given project. If the project is null, returns the line separator for
-	 * the workspace. If still null, return the system line separator.
+	 * Returns the line separator found in the given text. If it is null, or not found return the line delimiter for the
+	 * given project. If the project is null, returns the line separator for the workspace. If still null, return the
+	 * system line separator.
 	 * @since 2.2.2
 	 */
 	public static String getLineSeparator(String text, IProject project) {
@@ -524,8 +516,8 @@ public final class SpringCoreUtils {
 
 		// line delimiter in workspace preference
 		scopeContext = new IScopeContext[] { new InstanceScope() };
-		lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME,
-				Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+		lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR,
+				null, scopeContext);
 		if (lineSeparator != null)
 			return lineSeparator;
 
@@ -535,8 +527,7 @@ public final class SpringCoreUtils {
 
 	/**
 	 * Finds the first line separator used by the given text.
-	 * @return </code>"\n"</code> or </code>"\r"</code> or </code>"\r\n"</code>, or
-	 * <code>null</code> if none found
+	 * @return </code>"\n"</code> or </code>"\r"</code> or </code>"\r\n"</code>, or <code>null</code> if none found
 	 * @since 2.2.2
 	 */
 	public static String findLineSeparator(char[] text) {
