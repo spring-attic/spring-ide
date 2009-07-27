@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,30 +17,30 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
-
 /**
- * Implementation of {@link IResourceChangeListener} which detects modifications
- * to Spring projects (add/remove Spring beans nature, open/close and delete).
+ * Implementation of {@link IResourceChangeListener} which detects modifications to Spring projects (add/remove Spring
+ * beans nature, open/close and delete).
  * <p>
- * An implementation of {@link ISpringResourceChangeEvents} has to be provided.
- * Here are callbacks defined for the different events.
+ * An implementation of {@link ISpringResourceChangeEvents} has to be provided. Here are callbacks defined for the
+ * different events.
  * 
  * @author Torsten Juergeleit
  * @since 2.0
  */
 public class SpringResourceChangeListener implements IResourceChangeListener {
 
-	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE
-			| IResourceChangeEvent.PRE_DELETE
-			| IResourceChangeEvent.PRE_BUILD
-			| IResourceChangeEvent.POST_BUILD 
-			| IResourceChangeEvent.PRE_REFRESH;
+	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE
+			| IResourceChangeEvent.PRE_BUILD | IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_REFRESH;
 
-	private static final int VISITOR_FLAGS = IResourceDelta.ADDED
-			| IResourceDelta.CHANGED | IResourceDelta.REMOVED;
+	private static final int VISITOR_FLAGS = IResourceDelta.ADDED | IResourceDelta.CHANGED | IResourceDelta.REMOVED;
 
 	private ISpringResourceChangeEvents events;
 
@@ -73,9 +73,9 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 				if (delta != null) {
 					try {
 						delta.accept(getVisitor(eventType), VISITOR_FLAGS);
-					} catch (CoreException e) {
-						SpringCore.log("Error while traversing "
-								+ "resource change delta", e);
+					}
+					catch (CoreException e) {
+						SpringCore.log("Error while traversing " + "resource change delta", e);
 					}
 				}
 				break;
@@ -104,9 +104,9 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 				if (delta != null) {
 					try {
 						delta.accept(getVisitor(eventType), VISITOR_FLAGS);
-					} catch (CoreException e) {
-						SpringCore.log("Error while traversing "
-								+ "resource change delta", e);
+					}
+					catch (CoreException e) {
+						SpringCore.log("Error while traversing " + "resource change delta", e);
 					}
 				}
 				break;
@@ -148,10 +148,40 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 			return true;
 		}
 
-		protected boolean resourceAdded(IResource resource) {
+		protected boolean resourceAdded(final IResource resource) {
 			if (resource instanceof IProject) {
 				if (SpringCoreUtils.isSpringProject(resource)) {
-					events.projectAdded((IProject) resource, eventType);
+
+					// Check if project is already in sync with the file system. if not launch background job of later
+					// refresh.
+					if (resource.isSynchronized(IResource.DEPTH_INFINITE)) {
+						events.projectAdded((IProject) resource, eventType);
+					}
+					else {
+
+						Job projectAddJob = new Job("Importing project configuration for '" + resource.getName() + "'") {
+
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								// Check again that project is in sync before initiating the new Spring projects
+								if (!resource.isSynchronized(IResource.DEPTH_INFINITE)) {
+									try {
+										resource.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+									}
+									catch (CoreException e) {
+										SpringCore.log(e);
+									}
+								}
+								events.projectAdded((IProject) resource, eventType);
+								SpringCoreUtils.buildProject((IProject) resource);
+								return Status.OK_STATUS;
+							}
+						};
+						projectAddJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(resource));
+						projectAddJob.setPriority(Job.INTERACTIVE);
+						projectAddJob.setSystem(true);
+						projectAddJob.schedule();
+					}
 				}
 				return false;
 			}
@@ -172,18 +202,18 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 			if (resource instanceof IProject) {
 				if ((flags & IResourceDelta.OPEN) != 0) {
 					if (SpringCoreUtils.isSpringProject(resource)) {
-						events.projectOpened((IProject) resource,
-								eventType);
+						events.projectOpened((IProject) resource, eventType);
 					}
 					return false;
-				} else if ((flags & IResourceDelta.DESCRIPTION) != 0) {
+				}
+				else if ((flags & IResourceDelta.DESCRIPTION) != 0) {
 					IProject project = (IProject) resource;
 					if (SpringCoreUtils.isSpringProject(project)) {
-						if (!events.isSpringProject((IProject) resource,
-								eventType)) {
+						if (!events.isSpringProject((IProject) resource, eventType)) {
 							events.springNatureAdded(project, eventType);
 						}
-					} else if (events.isSpringProject(project, eventType)) {
+					}
+					else if (events.isSpringProject(project, eventType)) {
 						events.springNatureRemoved(project, eventType);
 					}
 					return false;
