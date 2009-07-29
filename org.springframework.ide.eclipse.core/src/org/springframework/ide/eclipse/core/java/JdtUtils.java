@@ -274,7 +274,7 @@ public class JdtUtils {
 	/**
 	 * Creates a Set of {@link URL}s from the OSGi bundle class path manifest entry.
 	 */
-	private static Set<URL> getBundleClassPath(String bundleId) {
+	public static Set<URL> getBundleClassPath(String bundleId) {
 		Set<URL> paths = new HashSet<URL>();
 		try {
 			Bundle bundle = Platform.getBundle(bundleId);
