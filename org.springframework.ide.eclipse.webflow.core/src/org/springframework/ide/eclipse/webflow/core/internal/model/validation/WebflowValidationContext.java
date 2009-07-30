@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,16 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMAttr;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.SuperTypeHierarchyCache;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
@@ -130,8 +134,7 @@ public class WebflowValidationContext extends AbstractValidationContext {
 			IStructuredModel model = null;
 			String parent = null;
 			try {
-				model = StructuredModelManager.getModelManager().getExistingModelForRead(
-						config.getElementResource());
+				model = StructuredModelManager.getModelManager().getExistingModelForRead(config.getElementResource());
 				if (model == null) {
 					model = StructuredModelManager.getModelManager().getModelForRead(
 							(IFile) config.getElementResource());
@@ -196,6 +199,26 @@ public class WebflowValidationContext extends AbstractValidationContext {
 			}
 		}
 		return null;
+	}
+
+	public boolean doesImplement(IType type, String className) {
+		IType interfaceType = JdtUtils.getJavaType(getWebflowConfig().getElementResource().getProject(), className);
+		if (type != null && interfaceType != null) {
+			try {
+				IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getSubtypes(interfaceType);
+				if (subTypes != null) {
+					for (IType subType : subTypes) {
+						if (subType.equals(type)) {
+							return true;
+						}
+					}
+				}
+			}
+			catch (JavaModelException e) {
+				Activator.log(e);
+			}
+		}
+		return false;
 	}
 
 }
