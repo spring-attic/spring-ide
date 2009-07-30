@@ -158,18 +158,18 @@ then
    		-installIU org.aspectj.weaver
 
 	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects \
+   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
+   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.eclipse.equinox.weaving.feature.group
 
 	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects \
+   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
+   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.eclipse.ajdt.feature.group
 
 	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/equinox-aspects \
+   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
+   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.eclipse.contribution.xref.feature.group
 fi
 
