@@ -122,52 +122,52 @@ then
 	rm -rf ./eclipse/plugins/org.eclipse.mylyn*
 	rm -rf ./eclipse/features/org.eclipse.mylyn*
 	
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository $MYLYN_UPDATE_SITE_URL \
    		-artifactRepository $MYLYN_UPDATE_SITE_URL \
    		-installIU org.eclipse.mylyn_feature.feature.group
 	
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository $MYLYN_UPDATE_SITE_URL \
    		-artifactRepository $MYLYN_UPDATE_SITE_URL \
    		-installIU org.eclipse.mylyn.context_feature.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository $MYLYN_UPDATE_SITE_URL \
    		-artifactRepository $MYLYN_UPDATE_SITE_URL \
    		-installIU org.eclipse.mylyn.team_feature.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository $MYLYN_UPDATE_SITE_URL \
    		-artifactRepository $MYLYN_UPDATE_SITE_URL \
    		-installIU org.eclipse.mylyn.ide_feature.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository $MYLYN_UPDATE_SITE_URL \
    		-artifactRepository $MYLYN_UPDATE_SITE_URL \
    		-installIU org.eclipse.mylyn.java_feature.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.aspectj.runtime
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.aspectj.weaver
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.eclipse.equinox.weaving.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.eclipse.ajdt.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
    		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
    		-installIU org.eclipse.contribution.xref.feature.group
