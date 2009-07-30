@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
@@ -298,6 +299,10 @@ public abstract class AbstractXmlValidationRule implements
 				}
 			}
 			return delegateContext.getRootElement();
+		}
+
+		public boolean doesImplement(IType type, String className) {
+			return false;
 		}
 
 	}

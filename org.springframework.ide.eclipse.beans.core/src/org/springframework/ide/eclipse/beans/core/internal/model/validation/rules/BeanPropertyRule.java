@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,27 +41,22 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeanPropertyRule extends
-		AbstractNonInfrastructureBeanValidationRule implements
+public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRule implements
 		IValidationRule<IBeanProperty, IBeansValidationContext> {
 
 	@Override
-	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, IBeansValidationContext context) {
+	protected boolean supportsModelElementForNonInfrastructureBean(IModelElement element,
+			IBeansValidationContext context) {
 		return (element instanceof IBeanProperty
 		// Skip properties with placeholders
-		&& !SpringCoreUtils.hasPlaceHolder(((IBeanProperty) element)
-				.getElementName()));
+		&& !SpringCoreUtils.hasPlaceHolder(((IBeanProperty) element).getElementName()));
 	}
 
-	public void validate(IBeanProperty property,
-			IBeansValidationContext context, IProgressMonitor monitor) {
+	public void validate(IBeanProperty property, IBeansValidationContext context, IProgressMonitor monitor) {
 		IBean bean = (IBean) property.getElementParent();
-		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
-				context.getContextElement());
+		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean, context.getContextElement());
 		String mergedClassName = mergedBd.getBeanClassName();
-		IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean,
-				mergedClassName, context);
+		IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean, mergedClassName, context);
 
 		// Don't validate a bean without a valid and resolvable IType; this will
 		// be validated by the BeanClassRule
@@ -72,37 +67,27 @@ public class BeanPropertyRule extends
 		// as these property values are injected into the created object rather
 		// then on the factory bean itself.
 
-		if (type != null
-				&& !mergedBd.isAbstract()
-				&& !Introspector.doesImplement(type, ScriptFactory.class
-						.getName())) {
+		if (type != null && !mergedBd.isAbstract() && !context.doesImplement(type, ScriptFactory.class.getName())) {
 			validateProperty(property, type, context);
 		}
 	}
 
-	private void validateProperty(IBeanProperty property, IType type,
-			IBeansValidationContext context) {
+	private void validateProperty(IBeanProperty property, IType type, IBeansValidationContext context) {
 		String propertyName = property.getElementName();
 
 		// Check for property accessor in given type
 		try {
 
 			// First check for nested property path
-			int nestedIndex = getNestedPropertySeparatorIndex(propertyName,
-					false);
+			int nestedIndex = getNestedPropertySeparatorIndex(propertyName, false);
 			if (nestedIndex >= 0) {
-				String nestedPropertyName = propertyName.substring(0,
-						nestedIndex);
+				String nestedPropertyName = propertyName.substring(0, nestedIndex);
 				PropertyTokenHolder tokens = getPropertyNameTokens(nestedPropertyName);
-				String getterName = "get"
-						+ StringUtils.capitalize(tokens.actualName);
-				IMethod getter = Introspector.findMethod(type, getterName, 0,
-						Public.YES, Static.NO);
+				String getterName = "get" + StringUtils.capitalize(tokens.actualName);
+				IMethod getter = Introspector.findMethod(type, getterName, 0, Public.YES, Static.NO);
 				if (getter == null) {
-					context.error(property, "NO_GETTER",
-							"No getter found for nested property '"
-									+ nestedPropertyName + "' in class '"
-									+ type.getFullyQualifiedName() + "'");
+					context.error(property, "NO_GETTER", "No getter found for nested property '" + nestedPropertyName
+							+ "' in class '" + type.getFullyQualifiedName() + "'");
 				}
 				else {
 
@@ -116,23 +101,19 @@ public class BeanPropertyRule extends
 			else {
 
 				// Now check for mapped property
-				int mappedIndex = propertyName
-						.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR);
+				int mappedIndex = propertyName.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR);
 				if (mappedIndex != -1) {
 					propertyName = propertyName.substring(0, mappedIndex);
 				}
 
 				// Finally check property
 				if (!Introspector.isValidPropertyName(propertyName)) {
-					context.error(property, "INVALID_PROPERTY_NAME",
-							"Invalid property name '" + propertyName
-									+ "' - not JavaBean compliant");
+					context.error(property, "INVALID_PROPERTY_NAME", "Invalid property name '" + propertyName
+							+ "' - not JavaBean compliant");
 				}
 				else if (!Introspector.hasWritableProperty(type, propertyName)) {
-					context.error(property, "NO_SETTER",
-							"No setter found for property '" + propertyName
-									+ "' in class '"
-									+ type.getFullyQualifiedName() + "'");
+					context.error(property, "NO_SETTER", "No setter found for property '" + propertyName
+							+ "' in class '" + type.getFullyQualifiedName() + "'");
 				}
 
 				// TODO If mapped property then check type of setter's argument
@@ -144,14 +125,13 @@ public class BeanPropertyRule extends
 	}
 
 	/**
-	 * Determine the first (or last) nested property separator in the given
-	 * property path, ignoring dots in keys (like "map[my.key]").
+	 * Determine the first (or last) nested property separator in the given property path, ignoring dots in keys (like
+	 * "map[my.key]").
 	 * @param propertyPath the property path to check
 	 * @param last whether to return the last separator rather than the first
 	 * @return the index of the nested property separator, or -1 if none
 	 */
-	private int getNestedPropertySeparatorIndex(String propertyPath,
-			boolean last) {
+	private int getNestedPropertySeparatorIndex(String propertyPath, boolean last) {
 		boolean inKey = false;
 		int i = (last ? propertyPath.length() - 1 : 0);
 		while ((last && i >= 0) || i < propertyPath.length()) {
@@ -176,8 +156,7 @@ public class BeanPropertyRule extends
 	}
 
 	/**
-	 * Parse the given property name into the corresponding property name
-	 * tokens.
+	 * Parse the given property name into the corresponding property name tokens.
 	 * 
 	 * @param propertyName the property name to parse
 	 * @return representation of the parsed property tokens
@@ -188,19 +167,16 @@ public class BeanPropertyRule extends
 		Set<String> keys = new LinkedHashSet<String>(2);
 		int searchIndex = 0;
 		while (searchIndex != -1) {
-			int keyStart = propertyName.indexOf(
-					PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
+			int keyStart = propertyName.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
 			searchIndex = -1;
 			if (keyStart != -1) {
-				int keyEnd = propertyName
-						.indexOf(PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart
-								+ PropertyAccessor.PROPERTY_KEY_PREFIX.length());
+				int keyEnd = propertyName.indexOf(PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart
+						+ PropertyAccessor.PROPERTY_KEY_PREFIX.length());
 				if (keyEnd != -1) {
 					if (actualName == null) {
 						actualName = propertyName.substring(0, keyStart);
 					}
-					String key = propertyName.substring(keyStart
-							+ PropertyAccessor.PROPERTY_KEY_PREFIX.length(),
+					String key = propertyName.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(),
 							keyEnd);
 					if (key.startsWith("'") && key.endsWith("'")) {
 						key = key.substring(1, key.length() - 1);
@@ -209,8 +185,7 @@ public class BeanPropertyRule extends
 						key = key.substring(1, key.length() - 1);
 					}
 					keys.add(key);
-					searchIndex = keyEnd
-							+ PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
+					searchIndex = keyEnd + PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
 				}
 			}
 		}
@@ -218,10 +193,8 @@ public class BeanPropertyRule extends
 		tokens.canonicalName = tokens.actualName;
 		if (!keys.isEmpty()) {
 			tokens.canonicalName += PropertyAccessor.PROPERTY_KEY_PREFIX
-					+ StringUtils.collectionToDelimitedString(keys,
-							PropertyAccessor.PROPERTY_KEY_SUFFIX
-									+ PropertyAccessor.PROPERTY_KEY_PREFIX)
-					+ PropertyAccessor.PROPERTY_KEY_SUFFIX;
+					+ StringUtils.collectionToDelimitedString(keys, PropertyAccessor.PROPERTY_KEY_SUFFIX
+							+ PropertyAccessor.PROPERTY_KEY_PREFIX) + PropertyAccessor.PROPERTY_KEY_SUFFIX;
 			tokens.keys = keys.toArray(new String[keys.size()]);
 		}
 		return tokens;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,11 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -27,6 +30,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.SuperTypeHierarchyCache;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationProblemMarker;
@@ -38,14 +42,13 @@ import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.Assert;
 
 /**
- * Context that gets passed to an {@link IValidationRule}, encapsulating all relevant information
- * used during validation.
+ * Context that gets passed to an {@link IValidationRule}, encapsulating all relevant information used during
+ * validation.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansValidationContext extends AbstractValidationContext implements
-		IBeansValidationContext {
+public class BeansValidationContext extends AbstractValidationContext implements IBeansValidationContext {
 
 	private static final char KEY_SEPARATOR_CHAR = '/';
 
@@ -69,8 +72,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
 	 * #getIncompleteRegistry()
 	 */
 	public BeanDefinitionRegistry getIncompleteRegistry() {
@@ -80,16 +82,15 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
 	 * #getCompleteRegistry()
 	 */
 	public BeanDefinitionRegistry getCompleteRegistry() {
 		return completeRegistry;
 	}
 
-	private BeanDefinitionRegistry createRegistry(IBeansConfig config,
-			IResourceModelElement contextElement, boolean fillCompletely) {
+	private BeanDefinitionRegistry createRegistry(IBeansConfig config, IResourceModelElement contextElement,
+			boolean fillCompletely) {
 		DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry();
 		if (contextElement instanceof BeansConfigSet) {
 			IBeansConfigSet configSet = (IBeansConfigSet) contextElement;
@@ -99,8 +100,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 			}
 			else {
 				registry.setAllowAliasOverriding(configSet.isAllowAliasOverriding());
-				registry.setAllowBeanDefinitionOverriding(configSet
-						.isAllowBeanDefinitionOverriding());
+				registry.setAllowBeanDefinitionOverriding(configSet.isAllowBeanDefinitionOverriding());
 			}
 			for (IBeansConfig csConfig : configSet.getConfigs()) {
 				if (!fillCompletely && config.equals(csConfig)) {
@@ -122,14 +122,13 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
 	 * #getClassReaderFactory()
 	 */
 	public synchronized ClassReaderFactory getClassReaderFactory() {
 		if (this.classReaderFactory == null) {
-			this.classReaderFactory = new CachingClassReaderFactory(JdtUtils.getClassLoader(
-					getRootElement().getElementResource().getProject(), false));
+			this.classReaderFactory = new CachingClassReaderFactory(JdtUtils.getClassLoader(getRootElement()
+					.getElementResource().getProject(), false));
 		}
 		return this.classReaderFactory;
 	}
@@ -137,20 +136,18 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
 	 * #getRootElementProject()
 	 */
 	public IProject getRootElementProject() {
-		return (getRootElement().getElementResource() != null ? getRootElement()
-				.getElementResource().getProject() : null);
+		return (getRootElement().getElementResource() != null ? getRootElement().getElementResource().getProject()
+				: null);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
 	 * #getRootElementResource()
 	 */
 	public IResource getRootElementResource() {
@@ -160,8 +157,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
 	 * #getRegisteredBeanDefinition(java.lang.String, java.lang.String)
 	 */
 	public Set<BeanDefinition> getRegisteredBeanDefinition(String beanName, String beanClass) {
@@ -181,8 +177,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
 	 * #isBeanRegistered(java.lang.String, java.lang.String)
 	 */
 	public boolean isBeanRegistered(String beanName, String beanClass) {
@@ -191,38 +186,51 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	}
 
 	@Override
-	protected Set<ValidationProblem> createProblems(IResourceModelElement element,
-			String problemId, int severity, String message,
-			ValidationProblemAttribute... attributes) {
+	protected Set<ValidationProblem> createProblems(IResourceModelElement element, String problemId, int severity,
+			String message, ValidationProblemAttribute... attributes) {
 
-		Set<ValidationProblem> problems = super.createProblems(element, problemId, severity,
-				message, attributes);
+		Set<ValidationProblem> problems = super.createProblems(element, problemId, severity, message, attributes);
 		IResource resource = element.getElementResource();
 
 		// Check if error or warning on imported resource exists
 		if (!resource.equals(getRootElementResource())) {
-			IBeansImport beansImport = BeansModelUtils
-					.getParentOfClass(element, IBeansImport.class);
+			IBeansImport beansImport = BeansModelUtils.getParentOfClass(element, IBeansImport.class);
 
 			while (beansImport != null) {
 				if (severity == IValidationProblemMarker.SEVERITY_ERROR) {
-					problems.add(createProblem(beansImport, "",
-							IValidationProblemMarker.SEVERITY_ERROR,
+					problems.add(createProblem(beansImport, "", IValidationProblemMarker.SEVERITY_ERROR,
 							"Validation error occured in imported configuration file '"
-									+ element.getElementResource().getProjectRelativePath()
-											.toString() + "'"));
+									+ element.getElementResource().getProjectRelativePath().toString() + "'"));
 				}
 				else if (severity == IValidationProblemMarker.SEVERITY_WARNING) {
-					problems.add(createProblem(beansImport, "",
-							IValidationProblemMarker.SEVERITY_WARNING,
+					problems.add(createProblem(beansImport, "", IValidationProblemMarker.SEVERITY_WARNING,
 							"Validation warning occured in imported configuration file '"
-									+ element.getElementResource().getProjectRelativePath()
-											.toString() + "'"));
+									+ element.getElementResource().getProjectRelativePath().toString() + "'"));
 				}
 				beansImport = BeansModelUtils.getParentOfClass(beansImport, IBeansImport.class);
 			}
 		}
 
 		return problems;
+	}
+
+	public boolean doesImplement(IType type, String className) {
+		IType interfaceType = JdtUtils.getJavaType(getRootElementProject(), className);
+		if (type != null && interfaceType != null) {
+			try {
+				IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getSubtypes(interfaceType);
+				if (subTypes != null) {
+					for (IType subType : subTypes) {
+						if (subType.equals(type)) {
+							return true;
+						}
+					}
+				}
+			}
+			catch (JavaModelException e) {
+				BeansCorePlugin.log(e);
+			}
+		}
+		return false;
 	}
 }
