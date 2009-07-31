@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
@@ -44,33 +43,29 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * {@link IValidationRule} implementation that allows to validate on the raw XML
- * content in the context of the bean validation request.
+ * {@link IValidationRule} implementation that allows to validate on the raw XML content in the context of the bean
+ * validation request.
  * @author Christian Dupuis
  * @since 2.0.4
  * @see #supports(Node)
  * @see #validate(Node, IBeansValidationContext)
  */
 @SuppressWarnings("restriction")
-public abstract class AbstractXmlValidationRule implements
-		IValidationRule<IBeansModelElement, IBeansValidationContext> {
+public abstract class AbstractXmlValidationRule implements IValidationRule<IBeansModelElement, IBeansValidationContext> {
 
 	/**
-	 * This rule support <strong>only</strong> {@link IBeansConfig} elements as
-	 * this is the model element representing a actual file.
+	 * This rule support <strong>only</strong> {@link IBeansConfig} elements as this is the model element representing a
+	 * actual file.
 	 */
 	public final boolean supports(IModelElement element, IValidationContext context) {
 		return element instanceof IBeansConfig
-				|| (element instanceof IBeansImport && ((IBeansImport) element)
-						.getImportedBeansConfigs().size() > 0);
+				|| (element instanceof IBeansImport && ((IBeansImport) element).getImportedBeansConfigs().size() > 0);
 	}
 
 	/**
-	 * Validates a {@link IBeansConfig} or imported {@link IImportedBeansConfig}
-	 * from a {@link IBeansImport}.
+	 * Validates a {@link IBeansConfig} or imported {@link IImportedBeansConfig} from a {@link IBeansImport}.
 	 * <p>
-	 * Calls for every {@link IBeansConfig} the
-	 * {@link #validateBeansConfig(IBeansConfig, IBeansValidationContext)}
+	 * Calls for every {@link IBeansConfig} the {@link #validateBeansConfig(IBeansConfig, IBeansValidationContext)}
 	 * method.
 	 */
 	public final void validate(IBeansModelElement element, final IBeansValidationContext context,
@@ -79,38 +74,32 @@ public abstract class AbstractXmlValidationRule implements
 			validateBeansConfig((IBeansConfig) element, context);
 		}
 		else if (element instanceof IBeansImport) {
-			for (IImportedBeansConfig beansConfig : ((IBeansImport) element)
-					.getImportedBeansConfigs()) {
+			for (IImportedBeansConfig beansConfig : ((IBeansImport) element).getImportedBeansConfigs()) {
 				validateBeansConfig(beansConfig, context);
 			}
 		}
 	}
 
 	/**
-	 * Validates the {@link IBeansConfig} by creating a {@link DomVisitor} and
-	 * visiting the entire dom model.
+	 * Validates the {@link IBeansConfig} by creating a {@link DomVisitor} and visiting the entire dom model.
 	 * <p>
-	 * Every element will be visited and depending on the return of
-	 * {@link #supports(Node)} the
-	 * {@link #validate(Node, IBeansValidationContext)} will be called for the
-	 * node.
+	 * Every element will be visited and depending on the return of {@link #supports(Node)} the
+	 * {@link #validate(Node, IBeansValidationContext)} will be called for the node.
 	 * @see #supports(Node)
 	 * @see #validate(Node, IBeansValidationContext)
 	 */
 	private void validateBeansConfig(final IBeansConfig element, final IBeansValidationContext context) {
-		
+
 		// Do not validate external configuration files
 		if (element.isExternal()) {
 			return;
 		}
-		
+
 		IStructuredModel model = null;
 		try {
-			model = StructuredModelManager.getModelManager().getExistingModelForRead(
-					element.getElementResource());
+			model = StructuredModelManager.getModelManager().getExistingModelForRead(element.getElementResource());
 			if (model == null) {
-				model = StructuredModelManager.getModelManager().getModelForRead(
-						(IFile) element.getElementResource());
+				model = StructuredModelManager.getModelManager().getModelForRead((IFile) element.getElementResource());
 			}
 			if (model != null) {
 				Document document = ((DOMModelImpl) model).getDocument();
@@ -146,8 +135,7 @@ public abstract class AbstractXmlValidationRule implements
 	}
 
 	/**
-	 * Returns <code>true</code> if given {@link Node n} is supported to be
-	 * validated.
+	 * Returns <code>true</code> if given {@link Node n} is supported to be validated.
 	 * @param n the node to validate
 	 * @return true if validation should be called
 	 */
@@ -193,11 +181,11 @@ public abstract class AbstractXmlValidationRule implements
 	}
 
 	/**
-	 * Internal validation context implementation that coverts {@link Node}
-	 * object back to {@link IResourceModelElement}s.
+	 * Internal validation context implementation that coverts {@link Node} object back to {@link IResourceModelElement}
+	 * s.
 	 */
 	private static class XmlValidationContext implements IXmlValidationContext {
-		
+
 		private final IBeansConfig beansConfig;
 
 		private final IBeansValidationContext delegateContext;
@@ -240,10 +228,8 @@ public abstract class AbstractXmlValidationRule implements
 			delegateContext.error(element, problemId, message, attributes);
 		}
 
-		public void error(Node node, String problemId, String message,
-				ValidationProblemAttribute... attributes) {
-			delegateContext.error(getResourceModelElementFromNode(node), problemId, message,
-					attributes);
+		public void error(Node node, String problemId, String message, ValidationProblemAttribute... attributes) {
+			delegateContext.error(getResourceModelElementFromNode(node), problemId, message, attributes);
 		}
 
 		public IResourceModelElement getContextElement() {
@@ -263,10 +249,8 @@ public abstract class AbstractXmlValidationRule implements
 			delegateContext.info(element, problemId, message, attributes);
 		}
 
-		public void info(Node n, String problemId, String message,
-				ValidationProblemAttribute... attributes) {
-			delegateContext
-					.info(getResourceModelElementFromNode(n), problemId, message, attributes);
+		public void info(Node n, String problemId, String message, ValidationProblemAttribute... attributes) {
+			delegateContext.info(getResourceModelElementFromNode(n), problemId, message, attributes);
 		}
 
 		public void setCurrentRuleId(String ruleId) {
@@ -278,32 +262,23 @@ public abstract class AbstractXmlValidationRule implements
 			delegateContext.warning(element, problemId, message, attributes);
 		}
 
-		public void warning(Node n, String problemId, String message,
-				ValidationProblemAttribute... attributes) {
-			delegateContext.warning(getResourceModelElementFromNode(n), problemId, message,
-					attributes);
+		public void warning(Node n, String problemId, String message, ValidationProblemAttribute... attributes) {
+			delegateContext.warning(getResourceModelElementFromNode(n), problemId, message, attributes);
 		}
 
 		private IResourceModelElement getResourceModelElementFromNode(Node n) {
 			if (n instanceof IDOMNode) {
 				IDOMNode domNode = ((IDOMNode) n);
-				int startLine = domNode.getStructuredDocument().getLineOfOffset(
-						domNode.getStartOffset());
-				int endLine = domNode.getStructuredDocument().getLineOfOffset(
-						domNode.getStartOffset());
-				IModelElement modelElement = BeansModelUtils.getMostSpecificModelElement(startLine,
-						endLine, (IFile) beansConfig.getElementResource(),
-						null);
+				int startLine = domNode.getStructuredDocument().getLineOfOffset(domNode.getStartOffset());
+				int endLine = domNode.getStructuredDocument().getLineOfOffset(domNode.getStartOffset());
+				IModelElement modelElement = BeansModelUtils.getMostSpecificModelElement(startLine, endLine,
+						(IFile) beansConfig.getElementResource(), null);
 				if (modelElement instanceof IResourceModelElement) {
 					return (IResourceModelElement) modelElement;
 				}
 			}
 			return delegateContext.getRootElement();
 		}
-
-		public boolean doesImplement(IType type, String className) {
-			return false;
-		}
-
 	}
+
 }
