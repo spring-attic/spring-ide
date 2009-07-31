@@ -10,24 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -70,136 +64,18 @@ public class JdtUtils {
 
 	public static final String CLASS_FILE_EXTENSION = ".class";
 
-	private static final String FILE_SCHEME = "file";
-
 	private static final String AJDT_CLASS = "org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager";
 
 	private static final String AJDT_NATURE = "org.eclipse.ajdt.ui.ajnature";
 
 	private static final String CLASSPATH_FILENAME = ".classpath";
 
-	private static final String DEBUG_OPTION = SpringCore.PLUGIN_ID + "/java/classloader/debug";
-
-	private static boolean DEBUG_CLASSLOADER = SpringCore.isDebug(DEBUG_OPTION);
-
 	private static final boolean IS_AJDT_PRESENT = isAjdtPresent();
-
-	/**
-	 * Add {@link URL}s to the given set of <code>paths</code>.
-	 */
-	private static void addClassPathUrls(IProject project, Set<URL> paths,
-			Set<IProject> resolvedProjects) {
- 
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-
-		// add project to local cache to prevent adding its classpaths
-		// multiple times
-		if (resolvedProjects.contains(project)) {
-			return;
-		}
-		else {
-			resolvedProjects.add(project);
-		}
-
-		try {
-			if (isJavaProject(project)) {
-				IJavaProject jp = JavaCore.create(project);
-				// configured classpath
-				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
-
-				// add class path entries
-				for (int i = 0; i < classpath.length; i++) {
-					IClasspathEntry path = classpath[i];
-					if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-						IPath entryPath = path.getPath();
-						File file = entryPath.toFile();
-						if (file.exists()) {
-							paths.add(file.toURL());
-						}
-						else {
-							// case for project relative links
-							String projectName = entryPath.segment(0);
-							IProject pathProject = root.getProject(projectName);
-							covertPathToUrl(pathProject, paths, entryPath);
-						}
-					}
-					else if (path.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-						// add source path as well for non java resources
-						IPath sourcePath = path.getPath();
-						covertPathToUrl(project, paths, sourcePath);
-						// add source output locations for different source
-						// folders
-						IPath sourceOutputPath = path.getOutputLocation();
-						covertPathToUrl(project, paths, sourceOutputPath);
-					}
-				}
-				// add all depending java projects
-				for (IJavaProject p : getAllDependingJavaProjects(jp)) {
-					addClassPathUrls(p.getProject(), paths, resolvedProjects);
-				}
-
-				// get default output directory
-				IPath outputPath = jp.getOutputLocation();
-				covertPathToUrl(project, paths, outputPath);
-			}
-			else {
-				for (IProject p : project.getReferencedProjects()) {
-					addClassPathUrls(p, paths, resolvedProjects);
-				}
-			}
-		}
-		catch (Exception e) {
-			// ignore
-		}
-	}
-
-	private static void covertPathToUrl(IProject project, Set<URL> paths, IPath path)
-			throws MalformedURLException {
-		if (path != null && project != null && path.removeFirstSegments(1) != null
-				&& project.findMember(path.removeFirstSegments(1)) != null) {
-
-			URI uri = project.findMember(path.removeFirstSegments(1)).getRawLocationURI();
-
-			if (uri != null) {
-				String scheme = uri.getScheme();
-				if (FILE_SCHEME.equalsIgnoreCase(scheme)) {
-					addUri(paths, uri);
-				}
-				else if ("sourcecontrol".equals(scheme)) {
-					// special case of Rational Team Concert
-					IPath sourceControlPath = project.findMember(path.removeFirstSegments(1))
-							.getLocation();
-					File sourceControlFile = sourceControlPath.toFile();
-					if (sourceControlFile.exists()) {
-						addUri(paths, sourceControlFile.toURI());
-					}
-				}
-				else {
-					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace()
-							.getPathVariableManager();
-					addUri(paths, variableManager.resolveURI(uri));
-				}
-			}
-		}
-	}
-
-	private static void addUri(Set<URL> paths, URI uri) throws MalformedURLException {
-		File file = new File(uri);
-		if (file.exists()) {
-			if (file.isDirectory()) {
-				paths.add(new URL(uri.toString() + File.separator));
-			}
-			else {
-				paths.add(uri.toURL());
-			}
-		}
-	}
 
 	/**
 	 * Creates specified Java project.
 	 */
-	public static IJavaProject createJavaProject(String projectName, IProgressMonitor monitor)
-			throws CoreException {
+	public static IJavaProject createJavaProject(String projectName, IProgressMonitor monitor) throws CoreException {
 		IProject project = SpringCoreUtils.createProject(projectName, null, monitor);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
@@ -279,18 +155,18 @@ public class JdtUtils {
 		try {
 			Bundle bundle = Platform.getBundle(bundleId);
 			if (bundle != null) {
-				String bundleClassPath = (String) bundle.getHeaders().get(
-						org.osgi.framework.Constants.BUNDLE_CLASSPATH);
+				String bundleClassPath = (String) bundle.getHeaders()
+						.get(org.osgi.framework.Constants.BUNDLE_CLASSPATH);
 				if (bundleClassPath != null) {
-					String[] classPathEntries = StringUtils.delimitedListToStringArray(
-							bundleClassPath, ",");
+					String[] classPathEntries = StringUtils.delimitedListToStringArray(bundleClassPath, ",");
 					for (String classPathEntry : classPathEntries) {
 						if (".".equals(classPathEntry.trim())) {
 							paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
 						}
 						else {
-							paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/"
-									+ classPathEntry.trim())));
+							paths
+									.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/"
+											+ classPathEntry.trim())));
 						}
 					}
 				}
@@ -309,83 +185,10 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Create a {@link ClassLoader} from the class path configuration of the given
-	 * <code>project</code>.
-	 * <p>
-	 * Note: Calling this method is the same as calling {@link #getClassLoader(IProject, true)}
-	 * @param project the {@link IProject}
-	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path
-	 * configuration
-	 */
-	public static ClassLoader getClassLoader(IResource project) {
-		return getClassLoader(project.getProject(), true);
-	}
-
-	/**
-	 * Create a {@link ClassLoader} from the class path configuration of the given
-	 * <code>project</code>.
-	 * @param project the {@link IProject}
-	 * @param useParentClassLoader true if the current OSGi class loader should be used as parent
-	 * class loader for the constructed class loader.
-	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path
-	 * configuration
-	 */
-	public static ClassLoader getClassLoader(IProject project, boolean useParentClassLoader) {
-		// prepare for tracing
-		long start = System.currentTimeMillis();
-		try {
-			Set<URL> paths = getClassPathUrls(project, useParentClassLoader);
-			if (useParentClassLoader) {
-				return new URLClassLoader(paths.toArray(new URL[paths.size()]), Thread
-						.currentThread().getContextClassLoader());
-			}
-			else {
-				return new URLClassLoader(paths.toArray(new URL[paths.size()]));
-			}
-		}
-		finally {
-			if (DEBUG_CLASSLOADER) {
-				System.out.println("getClassLoader for '" + project.getProject().getName()
-						+ "' took " + (System.currentTimeMillis() - start) + "ms");
-			}
-		}
-	}
-
-	/**
-	 * Iterates all class path entries of the given <code>project</code> and all depending projects.
-	 * <p>
-	 * Note: if <code>useParentClassLoader</code> is true, the Spring, AspectJ, Commons Logging and
-	 * ASM bundles are automatically added to the paths.
-	 * @param project the {@link IProject}
-	 * @param useParentClassLoader use the OSGi classloader as parent
-	 * @return a set of {@link URL}s that can be used to construct a {@link URLClassLoader}
-	 */
-	private static Set<URL> getClassPathUrls(IProject project, boolean useParentClassLoader) {
-
-		// needs to be linked to preserve ordering
-		Set<URL> paths = new LinkedHashSet<URL>();
-		if (!useParentClassLoader) {
-			// add required libraries from osgi bundles
-			paths.addAll(getBundleClassPath("org.springframework.core"));
-			paths.addAll(getBundleClassPath("org.springframework.beans"));
-			paths.addAll(getBundleClassPath("org.springframework.aop"));
-			paths.addAll(getBundleClassPath("com.springsource.org.aspectj.weaver"));
-			paths.addAll(getBundleClassPath("com.springsource.org.apache.commons.logging"));
-			paths.addAll(getBundleClassPath("com.springsource.org.objectweb.asm"));
-			paths.addAll(getBundleClassPath("com.springsource.org.aopalliance"));
-		}
-
-		Set<IProject> resolvedProjects = new HashSet<IProject>();
-		addClassPathUrls(project, paths, resolvedProjects);
-
-		return paths; 
-	}
-
-	/**
 	 * Returns the corresponding Java project or <code>null</code> a for given project.
 	 * @param project the project the Java project is requested for
-	 * @return the requested Java project or <code>null</code> if the Java project is not defined or
-	 * the project is not accessible
+	 * @return the requested Java project or <code>null</code> if the Java project is not defined or the project is not
+	 * accessible
 	 */
 	public static IJavaProject getJavaProject(IProject project) {
 		if (project.isAccessible()) {
@@ -395,8 +198,7 @@ public class JdtUtils {
 				}
 			}
 			catch (CoreException e) {
-				SpringCore.log(
-						"Error getting Java project for project '" + project.getName() + "'", e);
+				SpringCore.log("Error getting Java project for project '" + project.getName() + "'", e);
 			}
 		}
 		return null;
@@ -411,8 +213,7 @@ public class JdtUtils {
 	 * Returns the corresponding Java type for given full-qualified class name.
 	 * @param project the JDT project the class belongs to
 	 * @param className the full qualified class name of the requested Java type
-	 * @return the requested Java type or null if the class is not defined or the project is not
-	 * accessible
+	 * @return the requested Java type or null if the class is not defined or the project is not accessible
 	 */
 	public static IType getJavaType(IProject project, String className) {
 		IJavaProject javaProject = JdtUtils.getJavaProject(project);
@@ -430,8 +231,7 @@ public class JdtUtils {
 				if (javaProject != null) {
 					type = javaProject.findType(className);
 					if (type != null
-							&& ((type.getDeclaringType() == null && !innerClass) || (type
-									.getDeclaringType() != null && innerClass))) {
+							&& ((type.getDeclaringType() == null && !innerClass) || (type.getDeclaringType() != null && innerClass))) {
 						return type;
 					}
 				}
@@ -468,11 +268,9 @@ public class JdtUtils {
 				IMethod method = (IMethod) element;
 				int lines = 0;
 				String targetsource;
-				if (method.getDeclaringType() != null
-						&& method.getDeclaringType().getCompilationUnit() != null) {
+				if (method.getDeclaringType() != null && method.getDeclaringType().getCompilationUnit() != null) {
 					targetsource = method.getDeclaringType().getCompilationUnit().getSource();
-					String sourceuptomethod = targetsource.substring(0, method.getNameRange()
-							.getOffset());
+					String sourceuptomethod = targetsource.substring(0, method.getNameRange().getOffset());
 
 					char[] chars = new char[sourceuptomethod.length()];
 					sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
@@ -487,15 +285,13 @@ public class JdtUtils {
 			catch (JavaModelException e) {
 			}
 		}
-		else if (element != null && element instanceof IType
-				&& ((IType) element).getCompilationUnit() != null) {
+		else if (element != null && element instanceof IType && ((IType) element).getCompilationUnit() != null) {
 			try {
 				IType type = (IType) element;
 				int lines = 0;
 				String targetsource;
 				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource
-						.substring(0, type.getNameRange().getOffset());
+				String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
 
 				char[] chars = new char[sourceuptomethod.length()];
 				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
@@ -515,8 +311,7 @@ public class JdtUtils {
 				int lines = 0;
 				String targetsource;
 				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource
-						.substring(0, type.getNameRange().getOffset());
+				String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
 
 				char[] chars = new char[sourceuptomethod.length()];
 				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
@@ -555,8 +350,7 @@ public class JdtUtils {
 				}
 			}
 
-			return Introspector.findMethod(type, methodName, parameterTypes.length, Public.YES,
-					Static.DONT_CARE);
+			return Introspector.findMethod(type, methodName, parameterTypes.length, Public.YES, Static.DONT_CARE);
 		}
 		catch (JavaModelException e) {
 		}
@@ -574,8 +368,8 @@ public class JdtUtils {
 	private static String[] getParameterTypesAsStringArray(IMethod method) {
 		String[] parameterTypesAsString = new String[method.getParameterTypes().length];
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			parameterTypesAsString[i] = resolveClassNameBySignature(method.getParameterTypes()[i],
-					method.getDeclaringType());
+			parameterTypesAsString[i] = resolveClassNameBySignature(method.getParameterTypes()[i], method
+					.getDeclaringType());
 		}
 		return parameterTypesAsString;
 	}
@@ -613,12 +407,10 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Determines if the <code>resource</code> under question is the .classpath file of a
-	 * {@link IJavaProject}.
+	 * Determines if the <code>resource</code> under question is the .classpath file of a {@link IJavaProject}.
 	 */
 	public static boolean isClassPathFile(IResource resource) {
-		String classPathFileName = resource.getProject().getFullPath().append(CLASSPATH_FILENAME)
-				.toString();
+		String classPathFileName = resource.getProject().getFullPath().append(CLASSPATH_FILENAME).toString();
 		return resource.getFullPath().toString().equals(classPathFileName);
 	}
 
@@ -678,18 +470,17 @@ public class JdtUtils {
 					String importName = importDeclaration.getElementName();
 					// Wildcard imports -> check if the package + className is a valid type
 					if (importDeclaration.isOnDemand()) {
-						String newClassName = new StringBuilder(importName.substring(0, importName
-								.length() - 1)).append(className).toString();
+						String newClassName = new StringBuilder(importName.substring(0, importName.length() - 1))
+								.append(className).toString();
 						if (getJavaType(project, newClassName) != null) {
 							return newClassName;
 						}
 					}
 					// Concrete import matching .className at the end -> check if type exists
-					else if (importName.endsWith(dotClassName)
-							&& getJavaType(project, importName) != null) {
+					else if (importName.endsWith(dotClassName) && getJavaType(project, importName) != null) {
 						return importName;
 					}
-					// Check if className is multi segmented (ReflectionUtils.MethodCallback) 
+					// Check if className is multi segmented (ReflectionUtils.MethodCallback)
 					// -> check if the first segment
 					else if (!className.equals(firstClassNameSegment)) {
 						if (importName.endsWith(firstClassNameSegment)) {
@@ -702,7 +493,7 @@ public class JdtUtils {
 					}
 				}
 			}
-			
+
 			// Check if the class is in the same package as the type
 			String packageName = type.getPackageFragment().getElementName();
 			String newClassName = new StringBuilder(packageName).append(dotClassName).toString();
@@ -754,17 +545,14 @@ public class JdtUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static final List<IType> getJavaTypesForMethodParameterTypes(IMethod method,
-			IType contextType) {
-		if (method == null || method.getParameterTypes() == null
-				|| method.getParameterTypes().length == 0) {
+	public static final List<IType> getJavaTypesForMethodParameterTypes(IMethod method, IType contextType) {
+		if (method == null || method.getParameterTypes() == null || method.getParameterTypes().length == 0) {
 			return Collections.EMPTY_LIST;
 		}
 		List<IType> parameterTypes = new ArrayList<IType>(method.getParameterTypes().length);
 		String[] parameterTypeNames = method.getParameterTypes();
 		for (String parameterTypeName : parameterTypeNames) {
-			parameterTypes.add(JdtUtils.getJavaTypeFromSignatureClassName(parameterTypeName,
-					contextType));
+			parameterTypes.add(JdtUtils.getJavaTypeFromSignatureClassName(parameterTypeName, contextType));
 		}
 		return parameterTypes;
 	}
@@ -799,8 +587,7 @@ public class JdtUtils {
 	public static String getReturnTypeString(IMethod method, boolean classTypesOnly) {
 		try {
 			String qualifiedReturnType = Signature.getReturnType(method.getSignature());
-			if (!classTypesOnly || qualifiedReturnType.startsWith("L")
-					|| qualifiedReturnType.startsWith("Q")) {
+			if (!classTypesOnly || qualifiedReturnType.startsWith("L") || qualifiedReturnType.startsWith("Q")) {
 				return Signature.getSignatureSimpleName(qualifiedReturnType.replace('/', '.'));
 			}
 		}
@@ -850,8 +637,7 @@ public class JdtUtils {
 				}
 				catch (JavaModelException e) {
 				}
-			} while (parameterType != null
-					&& !parameterType.getFullyQualifiedName().equals(Object.class.getName()));
+			} while (parameterType != null && !parameterType.getFullyQualifiedName().equals(Object.class.getName()));
 		}
 		return requiredTypes;
 	}
@@ -876,8 +662,7 @@ public class JdtUtils {
 				IPath defaultOutput = project.getOutputLocation();
 
 				if (defaultOutput.isPrefixOf(classFilePath)) {
-					classFileName = classFilePath.removeFirstSegments(defaultOutput.segmentCount())
-							.toString();
+					classFileName = classFilePath.removeFirstSegments(defaultOutput.segmentCount()).toString();
 				}
 				else {
 					for (IClasspathEntry entry : project.getRawClasspath()) {
@@ -885,8 +670,7 @@ public class JdtUtils {
 							IPath output = entry.getOutputLocation();
 							if (output != null) {
 								if (classFilePath.isPrefixOf(output)) {
-									classFileName = classFilePath.removeFirstSegments(
-											output.segmentCount()).toString();
+									classFileName = classFilePath.removeFirstSegments(output.segmentCount()).toString();
 								}
 							}
 						}
@@ -898,8 +682,7 @@ public class JdtUtils {
 					String sourceFileName = classFileName.replace(".class", ".java");
 					for (IClasspathEntry entry : project.getRawClasspath()) {
 						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-							IPath path = entry.getPath().append(sourceFileName)
-									.removeFirstSegments(1);
+							IPath path = entry.getPath().append(sourceFileName).removeFirstSegments(1);
 							IResource resource = project.getProject().findMember(path);
 							if (resource != null) {
 								return resource;
@@ -912,6 +695,54 @@ public class JdtUtils {
 		catch (JavaModelException e) {
 		}
 		return null;
+	}
+
+	/**
+	 * Create a {@link ClassLoader} from the class path configuration of the given <code>project</code>.
+	 * <p>
+	 * Note: Calling this method is the same as calling {@link #getClassLoader(IProject, true)}
+	 * @param project the {@link IProject}
+	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path configuration
+	 */
+	public static ClassLoader getClassLoader(IProject project) {
+		return ProjectClassLoaderCache.getClassLoader(project);
+	}
+
+	/**
+	 * Create a {@link ClassLoader} from the class path configuration of the given <code>project</code>.
+	 * @param project the {@link IProject}
+	 * @param useParentClassLoader true if the current OSGi class loader should be used as parent class loader for the
+	 * constructed class loader.
+	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path configuration
+	 */
+	public static ClassLoader getClassLoader(IProject project, boolean useParentClassLoader) {
+		return ProjectClassLoaderCache.getClassLoader(project, useParentClassLoader);
+	}
+
+	/**
+	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
+	 */
+	public static boolean doesImplement(IResource resource, IType type, String className) {
+		if (resource == null || type == null || className == null) {
+			return false;
+		}
+		IType interfaceType = getJavaType(resource.getProject(), className);
+		if (type != null && interfaceType != null) {
+			try {
+				IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getSubtypes(interfaceType);
+				if (subTypes != null) {
+					for (IType subType : subTypes) {
+						if (subType.equals(type)) {
+							return true;
+						}
+					}
+				}
+			}
+			catch (JavaModelException e) {
+				SpringCore.log(e);
+			}
+		}
+		return false;
 	}
 
 	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
@@ -953,7 +784,7 @@ public class JdtUtils {
 
 		private void setupClassLoaders(IProject project) {
 			classLoader = Thread.currentThread().getContextClassLoader();
-			weavingClassLoader = JdtUtils.getClassLoader(project, false);
+			weavingClassLoader = ProjectClassLoaderCache.getClassLoader(project, false);
 		}
 	}
 
