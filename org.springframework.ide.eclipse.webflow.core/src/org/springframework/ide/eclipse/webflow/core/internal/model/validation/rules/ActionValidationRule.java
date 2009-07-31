@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.ide.eclipse.core.MessageUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -45,8 +46,8 @@ public class ActionValidationRule implements IValidationRule<Action, WebflowVali
 						action.getBean()));
 			}
 			if (StringUtils.hasText(action.getMethod())
-					&& !context.doesImplement(WebflowModelUtils.getActionType(context.getWebflowConfig(), action
-							.getNode()), FactoryBean.class.getName())) {
+					&& !JdtUtils.doesImplement(context.getWebflowConfig().getElementResource(), WebflowModelUtils
+							.getActionType(context.getWebflowConfig(), action.getNode()), FactoryBean.class.getName())) {
 				Set<IMethod> methods = WebflowModelUtils.getActionMethods(context.getWebflowConfig(), action.getNode());
 				boolean found = false;
 				for (IMethod method : methods) {

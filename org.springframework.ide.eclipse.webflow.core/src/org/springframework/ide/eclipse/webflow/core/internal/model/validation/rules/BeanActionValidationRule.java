@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.ide.eclipse.core.MessageUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -45,8 +46,8 @@ public class BeanActionValidationRule implements IValidationRule<BeanAction, Web
 		if (!StringUtils.hasText(action.getMethod())) {
 			context.error(action, "NO_METHOD_ATTRIBUTE", "Element 'bean-action' requires method attribute");
 		}
-		else if (!context.doesImplement(WebflowModelUtils.getActionType(context.getWebflowConfig(), action
-				.getNode()), FactoryBean.class.getName())) {
+		else if (!JdtUtils.doesImplement(context.getWebflowConfig().getElementResource(), WebflowModelUtils
+				.getActionType(context.getWebflowConfig(), action.getNode()), FactoryBean.class.getName())) {
 			Set<IMethod> methods = WebflowModelUtils.getActionMethods(context.getWebflowConfig(), action.getNode());
 			boolean found = false;
 			for (IMethod method : methods) {
