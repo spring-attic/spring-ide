@@ -137,7 +137,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 			// Skip factory-method validation for factory beans which are
 			// Spring factory beans as well and for those aspectOf methods
 			if (type != null && !ValidationRuleUtils.ASPECT_OF_METHOD_NAME.equals(methodName)
-					&& !context.doesImplement(type, FactoryBean.class.getName())) {
+					&& !JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())) {
 				validateMethod(bean, type, MethodType.FACTORY, methodName, argCount, statics, context);
 			}
 		}

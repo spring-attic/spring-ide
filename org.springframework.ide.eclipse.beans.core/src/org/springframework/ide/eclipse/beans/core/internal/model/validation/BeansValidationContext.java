@@ -16,11 +16,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -30,7 +27,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.core.java.SuperTypeHierarchyCache;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationProblemMarker;
@@ -214,23 +210,4 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		return problems;
 	}
 
-	public boolean doesImplement(IType type, String className) {
-		IType interfaceType = JdtUtils.getJavaType(getRootElementProject(), className);
-		if (type != null && interfaceType != null) {
-			try {
-				IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getSubtypes(interfaceType);
-				if (subTypes != null) {
-					for (IType subType : subTypes) {
-						if (subType.equals(type)) {
-							return true;
-						}
-					}
-				}
-			}
-			catch (JavaModelException e) {
-				BeansCorePlugin.log(e);
-			}
-		}
-		return false;
-	}
 }

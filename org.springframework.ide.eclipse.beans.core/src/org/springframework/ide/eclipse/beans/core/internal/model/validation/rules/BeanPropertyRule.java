@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonIn
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -67,7 +68,8 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 		// as these property values are injected into the created object rather
 		// then on the factory bean itself.
 
-		if (type != null && !mergedBd.isAbstract() && !context.doesImplement(type, ScriptFactory.class.getName())) {
+		if (type != null && !mergedBd.isAbstract()
+				&& !JdtUtils.doesImplement(context.getRootElementResource(), type, ScriptFactory.class.getName())) {
 			validateProperty(property, type, context);
 		}
 	}

@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IType;
 import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -82,11 +81,4 @@ public interface IBeansValidationContext extends IValidationContext {
 	 */
 	boolean isBeanRegistered(String beanName, String beanClass);
 
-	/**
-	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
-	 * @param type the type to test
-	 * @param className the class or interface name to check if the <code>type</code> does implement/extend
-	 * @return
-	 */
-	boolean doesImplement(IType type, String className);
 }

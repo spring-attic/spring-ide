@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 
 /**
@@ -42,7 +43,7 @@ public class BeanInitDestroyMethodRule extends AbstractBeanMethodValidationRule 
 
 			// For non-factory beans validate bean's init-method and
 			// destroy-method
-			if (!context.doesImplement(type, FactoryBean.class.getName())) {
+			if (!JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())) {
 				if (mergedBd.isEnforceInitMethod()) {
 					validateMethod(bean, type, MethodType.INIT, bd.getInitMethodName(), 0, Static.DONT_CARE, context);
 				}

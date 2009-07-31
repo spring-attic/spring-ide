@@ -35,23 +35,23 @@ import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 
 /**
- * Abstract base {@link IBeanMetadataProvider} that uses a {@link AnnotationMetadataReadingVisitor}
- * to load annotation meta data from the {@link IBean}'s bean class.
+ * Abstract base {@link IBeanMetadataProvider} that uses a {@link AnnotationMetadataReadingVisitor} to load annotation
+ * meta data from the {@link IBean}'s bean class.
  * @author Christian Dupuis
  * @since 2.0.5
  */
-public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMetadataProviderAdapter
-		implements IBeanMetadataProvider {
- 
+public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMetadataProviderAdapter implements
+		IBeanMetadataProvider {
+
 	/**
 	 * Internal cache of {@link ClassReaderFactory} keyed by the corresponding {@link IProject}.
 	 */
 	private final Map<IProject, ClassReaderFactory> classReaderFactoryCache = new ConcurrentHashMap<IProject, ClassReaderFactory>();
 
 	/**
-	 * Internal cache of {@link IAnnotationMetadata} keyed by the corresponding {@link IType}. It is
-	 * important to key with {@link IType} and not just with FQCN as a class can exist multiple
-	 * times with the same name in different projects.
+	 * Internal cache of {@link IAnnotationMetadata} keyed by the corresponding {@link IType}. It is important to key
+	 * with {@link IType} and not just with FQCN as a class can exist multiple times with the same name in different
+	 * projects.
 	 */
 	private final Map<IType, IAnnotationMetadata> metadataCache = new ConcurrentHashMap<IType, IAnnotationMetadata>();
 
@@ -62,12 +62,11 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 
 		Set<IBeanMetadata> beanMetadata = new HashSet<IBeanMetadata>();
 
-		IType type = JdtUtils.getJavaType(bean.getElementResource().getProject(), BeansModelUtils
-				.getBeanClass(bean, null));
+		IType type = JdtUtils.getJavaType(bean.getElementResource().getProject(), BeansModelUtils.getBeanClass(bean,
+				null));
 
 		// Get annotation meta data
-		IAnnotationMetadata visitor = getAnnotationMetadata(bean, getClassReaderFactory(beansConfig
-				.getElementResource().getProject()), type);
+		IAnnotationMetadata visitor = getAnnotationMetadata(bean, beansConfig.getElementResource().getProject(), type);
 
 		if (visitor != null) {
 			// Call the actual processing of the found annotations
@@ -75,18 +74,16 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 		}
 
 		if (BeanMetadataModel.DEBUG) {
-			System.out.println("Processing bean [" + bean + "] took "
-					+ (System.currentTimeMillis() - start) + "ms");
+			System.out.println("Processing bean [" + bean + "] took " + (System.currentTimeMillis() - start) + "ms");
 		}
 		return beanMetadata;
 	}
 
 	/**
-	 * Returns an {@link IAnnotationMetadata} implementation. This method checks the
-	 * {@link #metadataCache} before creating a new instance.
+	 * Returns an {@link IAnnotationMetadata} implementation. This method checks the {@link #metadataCache} before
+	 * creating a new instance.
 	 */
-	protected IAnnotationMetadata getAnnotationMetadata(IBean bean,
-			ClassReaderFactory classReaderFactory, IType type) {
+	protected IAnnotationMetadata getAnnotationMetadata(IBean bean, IProject project, IType type) {
 		IType orginalType = type;
 
 		// No support for binary types (class files)
@@ -106,13 +103,16 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 			visitor = new JdtBasedAnnotationMetadata(orginalType);
 		}
 		else {
+			// Get the class reader as late as possible 
+			ClassReaderFactory classReaderFactory = getClassReaderFactory(project);
+			
 			// Create new annotation meta data
 			visitor = createAnnotationMetadataReadingVisitor();
 
 			String className = type.getFullyQualifiedName();
 			try {
-				while (className != null && !Object.class.getName().equals(className)
-						&& type != null && !type.isBinary()) {
+				while (className != null && !Object.class.getName().equals(className) && type != null
+						&& !type.isBinary()) {
 					ClassReader classReader = classReaderFactory.getClassReader(className);
 					((AnnotationMetadataReadingVisitor) visitor).setType(type);
 					classReader.accept((ClassVisitor) visitor, false);
@@ -141,8 +141,8 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 	 */
 	private ClassReaderFactory getClassReaderFactory(IProject project) {
 		if (!classReaderFactoryCache.containsKey(project)) {
-			classReaderFactoryCache.put(project, new CachingClassReaderFactory(JdtUtils
-					.getClassLoader(project, false)));
+			classReaderFactoryCache
+					.put(project, new CachingClassReaderFactory(JdtUtils.getClassLoader(project, false)));
 		}
 		return classReaderFactoryCache.get(project);
 	}
@@ -164,7 +164,7 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 	 * @param progressMonitor the progress monitor to report status
 	 * @param visitor the annotation visitor
 	 */
-	protected abstract void processFoundAnnotations(IBean bean, Set<IBeanMetadata> beanMetaDataSet,
-			IType type, IAnnotationMetadata metadata, IProgressMonitor progressMonitor);
+	protected abstract void processFoundAnnotations(IBean bean, Set<IBeanMetadata> beanMetaDataSet, IType type,
+			IAnnotationMetadata metadata, IProgressMonitor progressMonitor);
 
 }

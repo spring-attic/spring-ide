@@ -164,7 +164,7 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 							IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(element).getProject(),
 									beanClassName);
 							if (type != null) {
-								if (!context.doesImplement(type, FactoryBean.class.getName())) {
+								if (!JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())) {
 									context.error(element, "INVALID_FACTORY_BEAN", "Referenced factory bean '"
 											+ tempBeanName + "' does not implement the " + "interface 'FactoryBean'");
 								}
