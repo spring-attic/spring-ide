@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.ajdt.ui.visualiser;singleton:=true
-Bundle-Version: 2.2.5.qualifier
+Bundle-Version: 2.2.6.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.ajdt.ui.visualiser.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
