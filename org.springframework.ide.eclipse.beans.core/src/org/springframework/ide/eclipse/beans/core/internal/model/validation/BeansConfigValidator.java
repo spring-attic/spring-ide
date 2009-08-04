@@ -143,8 +143,18 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 					else {
 						for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
 							IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
-							resources.add(beansConfig.getElementResource());
-							affectedBeans.add(bean.getElementID());
+							// Resolve imported config files to their root importing one
+							if (beansConfig instanceof IImportedBeansConfig) {
+								IBeansConfig importingConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
+								if (importingConfig != null) {
+									resources.add(importingConfig.getElementResource());
+									affectedBeans.add(bean.getElementID());
+								}
+							}
+							else {
+								resources.add(beansConfig.getElementResource());
+								affectedBeans.add(bean.getElementID());
+							}
 						}
 					}
 				}
