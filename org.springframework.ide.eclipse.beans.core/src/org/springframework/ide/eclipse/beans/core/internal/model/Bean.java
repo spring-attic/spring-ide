@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.springframework.beans.BeanMetadataAttribute;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -36,7 +37,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.util.ObjectUtils;
@@ -75,8 +76,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	}
 
 	/**
-	 * For inner beans we have to omit the element name because it consists of volatile stuff, like
-	 * object ids.
+	 * For inner beans we have to omit the element name because it consists of volatile stuff, like object ids.
 	 */
 	@Override
 	protected String getUniqueElementName() {
@@ -89,8 +89,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	@Override
 	public IResource getElementResource() {
 		// We need to make sure that the beans resource comes back
-		if (getElementSourceLocation() != null
-				&& getElementSourceLocation().getResource() instanceof IAdaptable) {
+		if (getElementSourceLocation() != null && getElementSourceLocation().getResource() instanceof IAdaptable) {
 			IResource resource = (IResource) ((IAdaptable) getElementSourceLocation().getResource())
 					.getAdapter(IResource.class);
 			if (resource != null) {
@@ -255,8 +254,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			}
 			IType type = BeansModelUtils.getBeanType(this, null);
 			if (type != null) {
-				return Introspector.doesImplement(type,
-						"org.springframework.beans.factory.FactoryBean");
+				return JdtUtils.doesImplement(getElementResource(), type, FactoryBean.class.getName());
 			}
 		}
 		return false;
@@ -315,15 +313,13 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		constructorArguments = new LinkedHashSet<IBeanConstructorArgument>();
 		ConstructorArgumentValues cargValues = definition.getConstructorArgumentValues();
 		for (Object cargValue : cargValues.getGenericArgumentValues()) {
-			IBeanConstructorArgument carg = new BeanConstructorArgument(this,
-					(ValueHolder) cargValue);
+			IBeanConstructorArgument carg = new BeanConstructorArgument(this, (ValueHolder) cargValue);
 			constructorArguments.add(carg);
 		}
 		Map<?, ?> indexedCargValues = cargValues.getIndexedArgumentValues();
 		for (Object key : indexedCargValues.keySet()) {
 			ValueHolder vHolder = (ValueHolder) indexedCargValues.get(key);
-			IBeanConstructorArgument carg = new BeanConstructorArgument(this, ((Integer) key)
-					.intValue(), vHolder);
+			IBeanConstructorArgument carg = new BeanConstructorArgument(this, ((Integer) key).intValue(), vHolder);
 			constructorArguments.add(carg);
 		}
 
@@ -341,12 +337,10 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			if (mos != null) {
 				for (Object mo : mos.getOverrides()) {
 					if (mo instanceof LookupOverride) {
-						methodOverrides
-								.add(new BeanLookupMethodOverride(this, (LookupOverride) mo));
+						methodOverrides.add(new BeanLookupMethodOverride(this, (LookupOverride) mo));
 					}
 					else if (mo instanceof ReplaceOverride) {
-						methodOverrides.add(new BeanReplaceMethodOverride(this,
-								(ReplaceOverride) mo));
+						methodOverrides.add(new BeanReplaceMethodOverride(this, (ReplaceOverride) mo));
 					}
 				}
 			}
