@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -120,7 +120,7 @@ public class AopReferenceModelUtils {
 
 	public static Set<IResource> getAffectedFiles(int kind, int deltaKind, IResource resource,
 			IProjectContributorState context) {
-		Set<IResource> files = new HashSet<IResource>();
+		Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
 
 		if (kind != IncrementalProjectBuilder.FULL_BUILD && resource instanceof IFile
 				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
@@ -130,51 +130,52 @@ public class AopReferenceModelUtils {
 			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
 
 			if (structureManager == null
-					|| structureManager.hasStructuralChanges(resource,
-							ITypeStructureCache.FLAG_ANNOTATION
-									| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
+					|| structureManager.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
+							| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
 				if (deltaKind == IResourceDelta.REMOVED) {
-					IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
-							resource.getProject());
+					IBeansProject beansProject = BeansCorePlugin.getModel().getProject(resource.getProject());
 					if (beansProject != null) {
 						for (IBeansConfig beansConfig : beansProject.getConfigs()) {
-							files.add((IFile) beansConfig.getElementResource());
+							configs.add(beansConfig);
 						}
 					}
 				}
 				else {
-					for (IBeansConfig config : hierachyManager
-							.getConfigsByContainingTypes(resource)) {
-						files.add(config.getElementResource());
+					for (IBeansConfig config : hierachyManager.getConfigsByContainingTypes(resource)) {
+						configs.add(config);
 					}
 				}
 			}
 
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
-			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils
-					.getResourceModelElement(resource);
+			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils.getResourceModelElement(resource);
 			if (beansConfig instanceof IImportedBeansConfig) {
 				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
 			}
-			for (IBeansImport beansImport : beansConfig.getImports()) {
-				for (IImportedBeansConfig importedBeansConfig : beansImport
-						.getImportedBeansConfigs()) {
-					files.add(importedBeansConfig.getElementResource());
-				}
-			}
-			files.add((IFile) beansConfig.getElementResource());
+			configs.add(beansConfig);
 		}
 		// if the .classpath file is updated redo for every beans config
 		else if (JdtUtils.isClassPathFile(resource)) {
-			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
-					resource.getProject());
+			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(resource.getProject());
 			if (beansProject != null) {
 				for (IBeansConfig beansConfig : beansProject.getConfigs()) {
-					files.add((IFile) beansConfig.getElementResource());
+					configs.add(beansConfig);
 				}
 			}
 		}
+
+		// Correctly add the imported files to the set of affected files
+		Set<IResource> files = new HashSet<IResource>();
+		for (IBeansConfig config : configs) {
+			files.add(config.getElementResource());
+			for (IBeansImport beansImport : config.getImports()) {
+				for (IImportedBeansConfig importedBeansConfig : beansImport.getImportedBeansConfigs()) {
+					files.add(importedBeansConfig.getElementResource());
+				}
+			}
+		}
+
 		return files;
 	}
 
