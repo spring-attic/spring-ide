@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,47 +22,56 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
- * properties in attribute values. Resolves bean references (including
- * references to parent beans or factory beans).
+ * Detects hyperlinks in XML tags. Includes detection of bean classes and bean properties in attribute values. Resolves
+ * bean references (including references to parent beans or factory beans).
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @author Leo Dos Santos
  */
 @SuppressWarnings("restriction")
-public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector,
-		INamespaceHyperlinkDetector {
-	
+public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector, INamespaceHyperlinkDetector {
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void init() {
 	}
-	
-	public final IHyperlink[] detectHyperlinks(ITextViewer textViewer,
-			IRegion region, boolean canShowMultipleHyperlinks) {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
 		if (region == null || textViewer == null) {
 			return null;
 		}
 
 		IDocument document = textViewer.getDocument();
-		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region
-				.getOffset());
+		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region.getOffset());
 		if (currentNode != null) {
 			switch (currentNode.getNodeType()) {
 			case Node.ELEMENT_NODE:
 				// at first try to handle selected attribute value
-				Attr currentAttr = BeansEditorUtils.getAttrByOffset(
-						currentNode, region.getOffset());
+				Attr currentAttr = BeansEditorUtils.getAttrByOffset(currentNode, region.getOffset());
 				IDOMAttr attr = (IDOMAttr) currentAttr;
-				if (currentAttr != null
-						&& region.getOffset() >= attr
-								.getValueRegionStartOffset()) {
+				if (currentAttr != null && region.getOffset() >= attr.getValueRegionStartOffset()) {
 					if (isLinkableAttr(currentAttr)) {
 						IRegion hyperlinkRegion = HyperlinkUtils.getHyperlinkRegion(currentAttr);
-						IHyperlink hyperLink = createHyperlink(currentAttr
-								.getName(), currentAttr.getNodeValue(),
-								currentNode, currentNode.getParentNode(),
-								document, textViewer, hyperlinkRegion, region);
-						if (hyperLink != null) {
-							return new IHyperlink[] { hyperLink };
+
+						if (canShowMultipleHyperlinks) {
+							IHyperlink[] hyperlinks = createHyperlinks(currentAttr.getName(), currentAttr
+									.getNodeValue(), currentNode, currentNode.getParentNode(), document, textViewer,
+									hyperlinkRegion, region);
+							if (hyperlinks != null && hyperlinks.length > 0) {
+								return hyperlinks;
+							}
+						}
+						else {
+							IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr.getNodeValue(),
+									currentNode, currentNode.getParentNode(), document, textViewer, hyperlinkRegion,
+									region);
+							if (hyperLink != null) {
+								return new IHyperlink[] { hyperLink };
+							}
 						}
 					}
 				}
@@ -72,17 +81,33 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector,
 				IRegion hyperlinkRegion = HyperlinkUtils.getHyperlinkRegion(currentNode);
 				Node parentNode = currentNode.getParentNode();
 				if (parentNode != null) {
-					IHyperlink hyperLink = createHyperlink(parentNode
-							.getNodeName(), currentNode.getNodeValue(),
-							currentNode, parentNode, document, textViewer,
-							hyperlinkRegion, region);
-					if (hyperLink != null) {
-						return new IHyperlink[] { hyperLink };
+					if (canShowMultipleHyperlinks) {
+						IHyperlink[] hyperlinks = createHyperlinks(parentNode.getNodeName(),
+								currentNode.getNodeValue(), currentNode, parentNode, document, textViewer,
+								hyperlinkRegion, region);
+						if (hyperlinks != null && hyperlinks.length > 0) {
+							return hyperlinks;
+						}
+					}
+					else {
+						IHyperlink hyperLink = createHyperlink(parentNode.getNodeName(), currentNode.getNodeValue(),
+								currentNode, parentNode, document, textViewer, hyperlinkRegion, region);
+						if (hyperLink != null) {
+							return new IHyperlink[] { hyperLink };
+						}
 					}
 				}
 				break;
 			}
 		}
+		return null;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IHyperlink[] createHyperlinks(String name, String target, Node node, Node parentNode, IDocument document,
+			ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
 		return null;
 	}
 

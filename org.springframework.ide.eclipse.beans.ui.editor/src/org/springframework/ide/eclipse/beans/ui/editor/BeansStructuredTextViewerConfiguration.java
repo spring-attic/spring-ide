@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,22 +25,23 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DelegatingC
 import org.springframework.ide.eclipse.beans.ui.editor.hover.BeansTextHoverProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.DelegatingHyperlinkDetector;
 
-public class BeansStructuredTextViewerConfiguration extends
-		StructuredTextViewerConfigurationXML {
+/**
+ * {@link StructuredTextViewerConfigurationXML} specific to the Beans XML editor
+ * @author Christian Dupuis
+ * @since 2.2.7
+ */
+public class BeansStructuredTextViewerConfiguration extends StructuredTextViewerConfigurationXML {
 
 	@Override
-	public IContentAssistProcessor[] getContentAssistProcessors(
-			ISourceViewer sourceViewer, String partitionType) {
+	public IContentAssistProcessor[] getContentAssistProcessors(ISourceViewer sourceViewer, String partitionType) {
 
 		IContentAssistProcessor[] processors;
 
-		if (partitionType == IStructuredPartitions.DEFAULT_PARTITION
-				|| partitionType == IXMLPartitions.XML_DEFAULT) {
+		if (partitionType == IStructuredPartitions.DEFAULT_PARTITION || partitionType == IXMLPartitions.XML_DEFAULT) {
 			processors = new IContentAssistProcessor[] { new DelegatingContentAssistProcessor() };
 		}
 		else {
-			processors = super.getContentAssistProcessors(sourceViewer,
-					partitionType);
+			processors = super.getContentAssistProcessors(sourceViewer, partitionType);
 		}
 		return processors;
 	}
@@ -54,8 +55,7 @@ public class BeansStructuredTextViewerConfiguration extends
 
 		List<IHyperlinkDetector> allDetectors = new ArrayList<IHyperlinkDetector>();
 		allDetectors.add(new DelegatingHyperlinkDetector());
-		IHyperlinkDetector[] superDetectors = super
-				.getHyperlinkDetectors(sourceViewer);
+		IHyperlinkDetector[] superDetectors = super.getHyperlinkDetectors(sourceViewer);
 		for (IHyperlinkDetector detector : superDetectors) {
 			if (!allDetectors.contains(detector)) {
 				allDetectors.add(detector);
@@ -65,10 +65,8 @@ public class BeansStructuredTextViewerConfiguration extends
 	}
 
 	@Override
-	public ITextHover getTextHover(ISourceViewer sourceViewer,
-			String contentType, int stateMask) {
-		if ((contentType == IStructuredPartitions.DEFAULT_PARTITION)
-				|| (contentType == IXMLPartitions.XML_DEFAULT)) {
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		if ((contentType == IStructuredPartitions.DEFAULT_PARTITION) || (contentType == IXMLPartitions.XML_DEFAULT)) {
 			return new BeansTextHoverProcessor();
 		}
 		return super.getTextHover(sourceViewer, contentType, stateMask);

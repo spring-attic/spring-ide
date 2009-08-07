@@ -10,42 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Node;
 
 /**
- * This implementation of <code>IHyperlink</code> represents a link to a node within the same file.
+ * Implementations of this interface are able to calculate multiple hyperlinks {@link IHyperlink} instances for a given
+ * attribute.
  * @author Christian Dupuis
+ * @since 2.2.7
  */
-public class NodeElementHyperlink implements IHyperlink {
+public interface IMultiHyperlinkCalculator extends IHyperlinkCalculator {
 
-	private final IRegion region;
+	/**
+	 * Calculate {@link IHyperlink} instance for the given context.
+	 * <p>
+	 * Note: this method will only be called if {@link #isLinkableAttr(Attr)} returns true.
+	 */
+	IHyperlink[] createHyperlinks(String name, String target, Node node, Node parentNode, IDocument document,
+			ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor);
 
-	private final IRegion targetRegion;
-
-	private final ITextViewer viewer;
-
-	public NodeElementHyperlink(IRegion region, IRegion targetRegion, ITextViewer viewer) {
-		this.region = region;
-		this.targetRegion = targetRegion;
-		this.viewer = viewer;
-	}
-
-	public IRegion getHyperlinkRegion() {
-		return region;
-	}
-
-	public String getTypeLabel() {
-		return null;
-	}
-
-	public String getHyperlinkText() {
-		return "Navigate";
-	}
-
-	public void open() {
-		viewer.setSelectedRange(targetRegion.getOffset(), 0);
-		viewer.revealRange(targetRegion.getOffset(), targetRegion.getLength());
-	}
 }

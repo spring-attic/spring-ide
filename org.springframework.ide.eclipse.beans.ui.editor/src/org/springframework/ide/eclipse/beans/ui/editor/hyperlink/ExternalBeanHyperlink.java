@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
@@ -25,7 +24,7 @@ public class ExternalBeanHyperlink implements IHyperlink {
 	/**
 	 * Creates a new Java element hyperlink.
 	 */
-	public ExternalBeanHyperlink(IBean bean, IRegion region) {
+	public ExternalBeanHyperlink(ISourceModelElement bean, IRegion region) {
 		this.region = region;
 		this.modelElement = bean;
 	}
@@ -39,7 +38,7 @@ public class ExternalBeanHyperlink implements IHyperlink {
 	}
 
 	public String getHyperlinkText() {
-		return null;
+		return "Open '" + modelElement.getElementName() + "'";
 	}
 
 	public void open() {

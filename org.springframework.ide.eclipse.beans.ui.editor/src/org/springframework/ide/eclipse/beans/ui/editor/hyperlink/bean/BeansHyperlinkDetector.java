@@ -78,6 +78,8 @@ public class BeansHyperlinkDetector extends NamespaceHyperlinkDetectorSupport im
 
 		registerHyperlinkCalculator("property", "name", new PropertyNameHyperlinkCalculator());
 		registerHyperlinkCalculator("factory-method", new FactoryMethodHyperlinkCalculator());
+		
+		registerHyperlinkCalculator("import", "resource", new ImportHyperlinkCalculator());
 	}
 
 	public IHyperlink createHyperlink(String name, String target, Node node, Node parentNode,

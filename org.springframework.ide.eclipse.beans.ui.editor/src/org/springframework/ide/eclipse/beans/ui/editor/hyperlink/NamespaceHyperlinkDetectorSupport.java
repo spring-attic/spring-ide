@@ -24,11 +24,11 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
 /**
- * Support class for implementing custom {@link IHyperlinkDetector}s. Calculation of individual
- * hyperlinks is done via {@link IHyperlinkCalculator} strategy interfaces respectively.
+ * Support class for implementing custom {@link IHyperlinkDetector}s. Calculation of individual hyperlinks is done via
+ * {@link IHyperlinkCalculator} strategy interfaces respectively.
  * <p>
- * Provides the {@link #registerHyperlinkCalculator} methods for registering a
- * {@link IHyperlinkCalculator} to handle a specific element.
+ * Provides the {@link #registerHyperlinkCalculator} methods for registering a {@link IHyperlinkCalculator} to handle a
+ * specific element.
  * @author Christian Dupuis
  * @since 2.0.2
  */
@@ -41,11 +41,11 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 	private Map<String, IHyperlinkCalculator> calculators = new HashMap<String, IHyperlinkCalculator>();
 
 	/**
-	 * Calculates hyperlink for the given request by delegating the request to a located
+	 * Calculates multiple hyperlinks for the given request by delegating the request to a located
 	 * {@link IHyperlinkCalculator} returned by {@link #locateHyperlinkCalculator(String, String)}.
 	 */
-	public IHyperlink createHyperlink(String name, String target, Node node, Node parentNode,
-			IDocument document, ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
+	public IHyperlink[] createHyperlinks(String name, String target, Node node, Node parentNode, IDocument document,
+			ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
 
 		String parentNodeName = null;
 		String parentNamespaceUri = null;
@@ -54,11 +54,39 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 			parentNamespaceUri = parentNode.getNamespaceURI();
 		}
 
-		IHyperlinkCalculator calculator = locateHyperlinkCalculator(parentNamespaceUri,
-				parentNodeName, node.getLocalName(), name);
+		IHyperlinkCalculator calculator = locateHyperlinkCalculator(parentNamespaceUri, parentNodeName, node
+				.getLocalName(), name);
+
+		if (calculator instanceof IMultiHyperlinkCalculator) {
+			return ((IMultiHyperlinkCalculator) calculator).createHyperlinks(name, target, node, parentNode, document,
+					textViewer, hyperlinkRegion, cursor);
+		}
+		else if (calculator != null) {
+			return new IHyperlink[] { calculator.createHyperlink(name, target, node, parentNode, document, textViewer,
+					hyperlinkRegion, cursor) };
+		}
+		return null;
+	}
+
+	/**
+	 * Calculates hyperlink for the given request by delegating the request to a located {@link IHyperlinkCalculator}
+	 * returned by {@link #locateHyperlinkCalculator(String, String)}.
+	 */
+	public IHyperlink createHyperlink(String name, String target, Node node, Node parentNode, IDocument document,
+			ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
+
+		String parentNodeName = null;
+		String parentNamespaceUri = null;
+		if (parentNode != null) {
+			parentNodeName = parentNode.getLocalName();
+			parentNamespaceUri = parentNode.getNamespaceURI();
+		}
+
+		IHyperlinkCalculator calculator = locateHyperlinkCalculator(parentNamespaceUri, parentNodeName, node
+				.getLocalName(), name);
 		if (calculator != null) {
-			return calculator.createHyperlink(name, target, node, parentNode, document, textViewer,
-					hyperlinkRegion, cursor);
+			return calculator.createHyperlink(name, target, node, parentNode, document, textViewer, hyperlinkRegion,
+					cursor);
 		}
 		return null;
 	}
@@ -68,8 +96,8 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 	 * @param nodeName the local (non-namespace qualified) name of the element
 	 * @param attributeName the local (non-namespace qualified) name of the attribute
 	 */
-	protected String createRegisteredName(String parentNamespaceUri, String parentNodeName,
-			String nodeName, String attributeName) {
+	protected String createRegisteredName(String parentNamespaceUri, String parentNodeName, String nodeName,
+			String attributeName) {
 		StringBuilder builder = new StringBuilder();
 		if (StringUtils.hasText(parentNamespaceUri)) {
 			builder.append("/parentNamespaceUri=");
@@ -122,18 +150,17 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 			parentNamespaceUri = parentNode.getNamespaceURI();
 		}
 
-		return locateHyperlinkCalculator(parentNamespaceUri, parentNodeName, attr.getOwnerElement()
-				.getLocalName(), attr.getLocalName()) != null;
+		return locateHyperlinkCalculator(parentNamespaceUri, parentNodeName, attr.getOwnerElement().getLocalName(),
+				attr.getLocalName()) != null;
 	}
 
 	/**
-	 * Locates a {@link IContentAssistCalculator} in the {@link #calculators} store for the given
-	 * <code>nodeName</code> and <code>attributeName</code>.
+	 * Locates a {@link IContentAssistCalculator} in the {@link #calculators} store for the given <code>nodeName</code>
+	 * and <code>attributeName</code>.
 	 */
-	private IHyperlinkCalculator locateHyperlinkCalculator(String parentNamespaceUri,
-			String parentNodeName, String nodeName, String attributeName) {
-		String key = createRegisteredName(parentNamespaceUri, parentNodeName, nodeName,
-				attributeName);
+	private IHyperlinkCalculator locateHyperlinkCalculator(String parentNamespaceUri, String parentNodeName,
+			String nodeName, String attributeName) {
+		String key = createRegisteredName(parentNamespaceUri, parentNodeName, nodeName, attributeName);
 		if (this.calculators.containsKey(key)) {
 			return this.calculators.get(key);
 		}
@@ -149,31 +176,28 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 	}
 
 	/**
-	 * Subclasses can call this to register the supplied {@link IHyperlinkCalculator} to handle the
-	 * specified attribute. The attribute name is the local (non-namespace qualified) name.
+	 * Subclasses can call this to register the supplied {@link IHyperlinkCalculator} to handle the specified attribute.
+	 * The attribute name is the local (non-namespace qualified) name.
 	 */
 	protected void registerHyperlinkCalculator(String attributeName, IHyperlinkCalculator calculator) {
 		registerHyperlinkCalculator(null, attributeName, calculator);
 	}
 
 	/**
-	 * Subclasses can call this to register the supplied {@link IHyperlinkCalculator} to handle the
-	 * specified attribute <b>only</b> for a given element. The attribute name is the local
-	 * (non-namespace qualified) name.
+	 * Subclasses can call this to register the supplied {@link IHyperlinkCalculator} to handle the specified attribute
+	 * <b>only</b> for a given element. The attribute name is the local (non-namespace qualified) name.
 	 */
-	protected void registerHyperlinkCalculator(String nodeName, String attributeName,
-			IHyperlinkCalculator calculator) {
+	protected void registerHyperlinkCalculator(String nodeName, String attributeName, IHyperlinkCalculator calculator) {
 		registerHyperlinkCalculator(null, null, nodeName, attributeName, calculator);
 	}
 
 	/**
-	 * Subclasses can call this to register the supplied {@link IHyperlinkCalculator} to handle the
-	 * specified attribute <b>only</b> for a given element. The attribute name is the local
-	 * (non-namespace qualified) name.
+	 * Subclasses can call this to register the supplied {@link IHyperlinkCalculator} to handle the specified attribute
+	 * <b>only</b> for a given element. The attribute name is the local (non-namespace qualified) name.
 	 */
-	protected void registerHyperlinkCalculator(String parentNamespaceUri, String parentNodeName,
-			String nodeName, String attributeName, IHyperlinkCalculator calculator) {
-		this.calculators.put(createRegisteredName(parentNamespaceUri, parentNodeName, nodeName,
-				attributeName), calculator);
+	protected void registerHyperlinkCalculator(String parentNamespaceUri, String parentNodeName, String nodeName,
+			String attributeName, IHyperlinkCalculator calculator) {
+		this.calculators.put(createRegisteredName(parentNamespaceUri, parentNodeName, nodeName, attributeName),
+				calculator);
 	}
 }
