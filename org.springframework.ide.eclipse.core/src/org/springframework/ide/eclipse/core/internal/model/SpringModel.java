@@ -27,6 +27,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -322,8 +323,10 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 					}
 					if (addedOrRemoved) {
 						for (ISpringProject project : SpringCore.getModel().getProjects()) {
-							if (project.getProject().equals(delta.getElement().getJavaProject().getProject())
-									|| JdtUtils.getJavaProject(project.getProject()).isOnClasspath(delta.getElement())) {
+							IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
+							if (javaProject != null
+									&& (javaProject.equals(delta.getElement().getJavaProject()) || javaProject
+											.isOnClasspath(delta.getElement()))) {
 								SpringCoreUtils.buildProject(project.getProject());
 							}
 						}
