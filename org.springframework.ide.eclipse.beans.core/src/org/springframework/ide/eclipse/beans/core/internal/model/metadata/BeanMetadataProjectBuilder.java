@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,8 +41,8 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
 
 /**
- * {@link IProjectBuilder} that triggers the creation and lifecycle of {@link IBeanMetadata} stored
- * in the {@link IBeanMetadataModel}.
+ * {@link IProjectBuilder} that triggers the creation and lifecycle of {@link IBeanMetadata} stored in the
+ * {@link IBeanMetadataModel}.
  * @author Christian Dupuis
  * @since 2.0.5
  */
@@ -57,8 +57,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 	/**
 	 * {@inheritDoc}
 	 */
-	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor)
-			throws CoreException {
+	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Attaching Spring meta data");
 		if (affectedResources.size() > 0) {
 			Job job = new BeanMetadataBuilderJob(affectedBeans);
@@ -85,8 +84,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 	/**
 	 * {@inheritDoc}
 	 */
-	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
-			throws CoreException {
+	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind) throws CoreException {
 		Set<IResource> resources = new HashSet<IResource>();
 
 		if (kind != IncrementalProjectBuilder.FULL_BUILD && resource instanceof IFile
@@ -97,9 +95,8 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
 
 			if (structureManager == null
-					|| structureManager.hasStructuralChanges(resource,
-							ITypeStructureCache.FLAG_ANNOTATION
-									| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
+					|| structureManager.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
+							| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
 				for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
 					IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 					resources.add(beansConfig.getElementResource());
@@ -115,14 +112,12 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 			}
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
-			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils
-					.getResourceModelElement(resource);
+			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils.getResourceModelElement(resource);
 			if (beansConfig instanceof IImportedBeansConfig) {
 				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
 			}
 			for (IBeansImport beansImport : beansConfig.getImports()) {
-				for (IImportedBeansConfig importedBeansConfig : beansImport
-						.getImportedBeansConfigs()) {
+				for (IImportedBeansConfig importedBeansConfig : beansImport.getImportedBeansConfigs()) {
 					resources.add(importedBeansConfig.getElementResource());
 					addBeans(importedBeansConfig);
 				}

@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.MarkerUtils;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.TypeStructureState;
@@ -118,9 +117,6 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 				// Add resources that are in a config set with the changed resources
 				propagateChangedResourceToConfigSets(resources);
 
-			}
-			else if (JdtUtils.isClassPathFile(resource) || SpringCoreUtils.isManifest(resource)) {
-				propagateChangedResourceToProject(resource, resources);
 			}
 			else if (BeansResourceChangeListener.requiresRefresh((IFile) resource)) {
 				propagateChangedResourceToProject(resource, resources);
