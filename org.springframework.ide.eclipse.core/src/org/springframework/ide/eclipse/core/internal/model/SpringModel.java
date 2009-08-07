@@ -24,10 +24,15 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.ISpringResourceChangeEvents;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringModel;
@@ -36,11 +41,10 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This model manages instances of {@link IProject}s. It's populated from Eclipse's current
- * workspace and receives {@link IResourceChangeEvent}s for workspaces changes.
+ * This model manages instances of {@link IProject}s. It's populated from Eclipse's current workspace and receives
+ * {@link IResourceChangeEvent}s for workspaces changes.
  * <p>
- * The single instance of {@link ISpringModel} is available from the static method
- * {@link SpringCore#getModel()}.
+ * The single instance of {@link ISpringModel} is available from the static method {@link SpringCore#getModel()}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
@@ -59,6 +63,8 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 	protected Map<IProject, ISpringProject> projects;
 
 	private IResourceChangeListener workspaceListener;
+
+	private IElementChangedListener classpathListener;
 
 	public SpringModel() {
 		super(null, ISpringModel.ELEMENT_NAME);
@@ -94,8 +100,10 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new SpringResourceChangeListener(new ResourceChangeEventHandler());
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.addResourceChangeListener(workspaceListener,
-				SpringResourceChangeListener.LISTENER_FLAGS);
+		workspace.addResourceChangeListener(workspaceListener, SpringResourceChangeListener.LISTENER_FLAGS);
+
+		classpathListener = new ClasspathChangedListener();
+		JavaCore.addElementChangedListener(classpathListener);
 	}
 
 	public void shutdown() {
@@ -104,7 +112,10 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(workspaceListener);
 		workspaceListener = null;
-		
+
+		JavaCore.removeElementChangedListener(classpathListener);
+		classpathListener = null;
+
 		try {
 			w.lock();
 			// Remove all projects
@@ -290,5 +301,36 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 			}
 		}
 	}
-	
+
+	/**
+	 * {@link IElementChangedListener} that listens for changes to the resolved classpath and triggers a project
+	 * re-build
+	 */
+	private class ClasspathChangedListener implements IElementChangedListener {
+
+		public void elementChanged(ElementChangedEvent event) {
+			for (IJavaElementDelta delta : event.getDelta().getAffectedChildren()) {
+				if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
+						|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
+					boolean addedOrRemoved = false;
+					for (IJavaElementDelta classpathDelta : delta.getAffectedChildren()) {
+						if ((classpathDelta.getFlags() & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0
+								|| (classpathDelta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) {
+							addedOrRemoved = true;
+							break;
+						}
+					}
+					if (addedOrRemoved) {
+						for (ISpringProject project : SpringCore.getModel().getProjects()) {
+							if (project.getProject().equals(delta.getElement().getJavaProject().getProject())
+									|| JdtUtils.getJavaProject(project.getProject()).isOnClasspath(delta.getElement())) {
+								SpringCoreUtils.buildProject(project.getProject());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
