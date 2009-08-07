@@ -470,7 +470,7 @@ public final class SpringCoreUtils {
 		if (rule != null) {
 			job.setRule(rule);
 		}
-		job.setPriority(Job.INTERACTIVE);
+		job.setPriority(Job.BUILD);
 		job.setSystem(true);
 		job.schedule();
 	}
@@ -549,5 +549,4 @@ public final class SpringCoreUtils {
 		// not found
 		return null;
 	}
-
 }
