@@ -231,8 +231,7 @@ public final class Introspector {
 	 */
 	public static IMethod findMethod(IType type, String methodName, int argCount, Public publics, Static statics)
 			throws JavaModelException {
-
-		if (type.isInterface()) {
+		if (type != null && type.isInterface()) {
 			IMethod method = findMethodOnType(type, methodName, argCount, publics, statics);
 			if (method != null) {
 				return method;
@@ -400,6 +399,9 @@ public final class Introspector {
 	 * Returns the super type of the given type.
 	 */
 	public static IType getSuperType(IType type) throws JavaModelException {
+		if (type == null) {
+			return null;
+		}
 		String name = type.getSuperclassName();
 		if (name == null && !type.getFullyQualifiedName().equals(Object.class.getName())) {
 			name = Object.class.getName();
