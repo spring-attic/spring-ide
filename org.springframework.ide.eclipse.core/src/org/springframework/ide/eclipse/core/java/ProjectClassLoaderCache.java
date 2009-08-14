@@ -310,7 +310,7 @@ class ProjectClassLoaderCache {
 
 		public ClassLoader getClassLoader() {
 			if (useParentClassLoader) {
-				return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
+				return new URLClassLoader(urls, this.getClass().getClassLoader());
 			}
 			else {
 				return new URLClassLoader(urls);
