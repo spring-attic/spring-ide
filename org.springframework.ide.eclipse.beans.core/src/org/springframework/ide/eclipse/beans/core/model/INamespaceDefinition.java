@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model;
 
+import java.util.Properties;
 import java.util.Set;
 
 import org.osgi.framework.Bundle;
@@ -57,5 +58,7 @@ public interface INamespaceDefinition {
 	 * Returns the {@link Bundle} that hosts the namespace.
 	 */
 	Bundle getBundle();
+	
+	Properties getUriMapping();
 
 }

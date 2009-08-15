@@ -69,6 +69,9 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/** preference key to specify the default namespace version */
 	public static final String NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID = "default.version.";
 
+	/** preference key to specify if versions should be taken from the classpath */
+	public static final String NAMESPACE_DEFAULT_FROM_CLASSPATH_ID = "default.version.check.classpath";
+
 	/** The shared instance */
 	private static BeansCorePlugin plugin;
 
@@ -122,6 +125,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 		nsManager = new NamespaceManager(context);
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
+		getPreferenceStore().setDefault(NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 
 		Job modelJob = new Job("Initializing Beans Model") {
 

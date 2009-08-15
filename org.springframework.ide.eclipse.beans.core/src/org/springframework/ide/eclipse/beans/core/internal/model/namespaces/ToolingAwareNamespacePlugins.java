@@ -145,7 +145,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 					namespaceDefinitionRegistry.get(namespaceUri).addUri(props.getProperty(key));
 				}
 				else {
-					NamespaceDefinition namespaceDefinition = new NamespaceDefinition();
+					NamespaceDefinition namespaceDefinition = new NamespaceDefinition(props);
 					namespaceDefinition.setName(name);
 					namespaceDefinition.setPrefix(prefix);
 					namespaceDefinition.setIconPath(icon);
@@ -294,9 +294,9 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	/**
 	 * Default implementation of {@link INamespaceDefinition}.
 	 */
-	class NamespaceDefinition implements INamespaceDefinition {
+	static class NamespaceDefinition implements INamespaceDefinition {
 		
-		private Pattern versionPattern = Pattern.compile(".*-([0-9,.a-zA-z]*)\\.xsd");
+		private Pattern versionPattern = Pattern.compile(".*-([0-9,.]*)\\.xsd");
 
 		private Bundle bundle;
 
@@ -311,6 +311,12 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		private Set<String> schemaLocations = new HashSet<String>();
 
 		private Set<String> uris = new HashSet<String>();
+		
+		private Properties uriMapping = new Properties();
+		
+		public NamespaceDefinition(Properties uriMapping) {
+			this.uriMapping = uriMapping;
+		}
 
 		public void addSchemaLocation(String schemaLocation) {
 			schemaLocations.add(schemaLocation);
@@ -331,6 +337,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		 * {@inheritDoc}
 		 */
 		public String getDefaultSchemaLocation() {
+			// Per convention the version-less XSD is the default
 			String defaultSchemaLocation = null;
 			for (String schemaLocation : schemaLocations) {
 				if (!versionPattern.matcher(schemaLocation).matches()) {
@@ -348,7 +355,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		/**
 		 * {@inheritDoc}
 		 */
-		public String getDefaultUri() {
+		protected String getDefaultUri() {
 			String defaultUri = null;
 			Version version = Version.MINIMUM_VERSION;
 			for (String uri : uris) {
@@ -437,6 +444,13 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		 */
 		public void setPrefix(String prefix) {
 			this.prefix = prefix;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public Properties getUriMapping() {
+			return this.uriMapping;
 		}
 	}
 	
