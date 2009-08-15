@@ -38,13 +38,14 @@ import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResul
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanClassQuery;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanPropertyQuery;
+import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanReferenceQuery;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link IQueryParticipant} implementation that hooks into JDT's Java reference search and displays
- * {@link IBean} that have the class or property name under question
+ * {@link IQueryParticipant} implementation that hooks into JDT's Java reference search and displays {@link IBean} that
+ * have the class or property name under question
  * 
  * @author Christian Dupuis
  * @author Torsten Juergeleit
@@ -70,11 +71,9 @@ public class BeansJavaSearchParticipant implements IQueryParticipant, IMatchPres
 		return this;
 	}
 
-	public void search(final ISearchRequestor requestor, QuerySpecification querySpecification,
-			IProgressMonitor monitor) {
+	public void search(final ISearchRequestor requestor, QuerySpecification querySpecification, IProgressMonitor monitor) {
 
-		if (querySpecification.getLimitTo() != LIMIT_TO_REF
-				&& querySpecification.getLimitTo() != LIMIT_TO_ALL) {
+		if (querySpecification.getLimitTo() != LIMIT_TO_REF && querySpecification.getLimitTo() != LIMIT_TO_ALL) {
 			return;
 		}
 
@@ -108,8 +107,7 @@ public class BeansJavaSearchParticipant implements IQueryParticipant, IMatchPres
 				search = elementQuerySpecification.getElement().getElementName();
 			}
 
-			int type = ((ElementQuerySpecification) querySpecification).getElement()
-					.getElementType();
+			int type = ((ElementQuerySpecification) querySpecification).getElement().getElementType();
 			if (type == IJavaElement.TYPE) {
 				searchFor = SEARCH_FOR_TYPES;
 			}
@@ -122,16 +120,17 @@ public class BeansJavaSearchParticipant implements IQueryParticipant, IMatchPres
 			search = ((PatternQuerySpecification) querySpecification).getPattern();
 		}
 
-		ISearchQuery query = null;
+		List<ISearchQuery> queries = new ArrayList<ISearchQuery>();
 		BeansSearchScope scope = BeansSearchScope.newSearchScope();
 		if (searchFor == SEARCH_FOR_TYPES) {
-			query = new BeanClassQuery(scope, search, true, false);
+			queries.add(new BeanClassQuery(scope, search, true, false));
 		}
 		else if (searchFor == SEARCH_FOR_FIELDS) {
-			query = new BeanPropertyQuery(scope, search, true, false);
+			queries.add(new BeanPropertyQuery(scope, search, true, false));
+			queries.add(new BeanReferenceQuery(scope, search, true, false));
 		}
 
-		if (query != null) {
+		for (ISearchQuery query : queries) {
 			query.run(monitor);
 
 			BeansSearchResult searchResult = (BeansSearchResult) query.getSearchResult();
@@ -139,20 +138,25 @@ public class BeansJavaSearchParticipant implements IQueryParticipant, IMatchPres
 				Match[] matches = searchResult.getMatches(obj);
 				if (matches != null && matches.length > 0) {
 					for (Match match : matches) {
-						IBean bean = (IBean) match.getElement();
-						IType type = JdtUtils.getJavaType(bean.getElementResource().getProject(),
-								bean.getClassName());
-						if (project == null || project.isOnClasspath(type)) {
-							if (searchFor == SEARCH_FOR_FIELDS) {
-								// check if the match fits to the selected class
-								String beanClass = BeansModelUtils.getBeanClass(bean, null);
-								if (requiredTypeNames.contains(beanClass)) {
+						if (match.getElement() instanceof IBean) {
+							IBean bean = (IBean) match.getElement();
+							IType type = JdtUtils.getJavaType(bean.getElementResource().getProject(), bean
+									.getClassName());
+							if (project == null || (type != null && project.isOnClasspath(type))) {
+								if (searchFor == SEARCH_FOR_FIELDS) {
+									// check if the match fits to the selected class
+									String beanClass = BeansModelUtils.getBeanClass(bean, null);
+									if (requiredTypeNames.contains(beanClass)) {
+										requestor.reportMatch(match);
+									}
+								}
+								else {
 									requestor.reportMatch(match);
 								}
 							}
-							else {
-								requestor.reportMatch(match);
-							}
+						}
+						else {
+							requestor.reportMatch(match);
 						}
 					}
 				}
@@ -160,8 +164,7 @@ public class BeansJavaSearchParticipant implements IQueryParticipant, IMatchPres
 		}
 	}
 
-	private void getTypeHierachy(IProgressMonitor monitor, List<String> requiredTypeNames,
-			IType baseType) {
+	private void getTypeHierachy(IProgressMonitor monitor, List<String> requiredTypeNames, IType baseType) {
 		try {
 			IType[] types = baseType.newTypeHierarchy(monitor).getAllSubtypes(baseType);
 			requiredTypeNames.add(baseType.getFullyQualifiedName());
@@ -179,8 +182,7 @@ public class BeansJavaSearchParticipant implements IQueryParticipant, IMatchPres
 		return new BeansSearchLabelProvider(true);
 	}
 
-	public void showMatch(Match match, int currentOffset, int currentLength, boolean activate)
-			throws PartInitException {
+	public void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		if (match.getElement() instanceof IResourceModelElement) {
 			BeansUIUtils.openInEditor((IResourceModelElement) match.getElement(), activate);
 		}
