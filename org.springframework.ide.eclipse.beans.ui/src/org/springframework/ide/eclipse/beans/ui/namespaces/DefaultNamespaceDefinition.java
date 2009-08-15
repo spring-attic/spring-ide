@@ -36,7 +36,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings({ "deprecation", "restriction" })
+@SuppressWarnings( { "deprecation", "restriction" })
 public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
 	private Pattern versionPattern = Pattern.compile(".*-([0-9,.]*)\\.xsd");
@@ -52,6 +52,10 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 	private Set<String> locations = new HashSet<String>();
 
 	private Properties uriMapping = new Properties();
+
+	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation, Image image) {
+		this(prefix, uri, defaultLocation, new Properties(), image);
+	}
 
 	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation,
 			Properties namespaceDefinition, Image image) {
@@ -118,18 +122,19 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 		Set<String> existingLocations = new HashSet<String>();
 		try {
 			for (Map.Entry<Object, Object> entry : uriMapping.entrySet()) {
-				
-				// Check that we are looking for relevant entries only; e.g. util, tool and beans are in the same package
+
+				// Check that we are looking for relevant entries only; e.g. util, tool and beans are in the same
+				// package
 				if (((String) entry.getKey()).startsWith(uri)) {
 					String fileLocation = (String) entry.getValue();
-					
+
 					// Get the package name from the location
 					String packageName = "";
 					int ix = fileLocation.lastIndexOf('/');
 					if (ix > 0) {
 						packageName = fileLocation.substring(0, ix).replace('/', '.');
 					}
-					
+
 					// Search in all project packages
 					for (IPackageFragmentRoot root : jp.getPackageFragmentRoots()) {
 						IPackageFragment pf = root.getPackageFragment(packageName);
