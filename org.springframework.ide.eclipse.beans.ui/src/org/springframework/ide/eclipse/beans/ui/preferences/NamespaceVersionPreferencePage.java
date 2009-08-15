@@ -31,6 +31,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -124,14 +125,17 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 	private TableViewer xsdViewer;
 
 	private CheckboxTableViewer versionViewer;
-
+	
+	private Button classpathCheckbox;
+	
 	private Map<INamespaceDefinition, String> selectedVersion = new HashMap<INamespaceDefinition, String>();
 
 	private INamespaceDefinition selectedNamespaceDefinition;
 
 	public Composite createPreferenceContent(Composite parent) {
-
+		
 		List<INamespaceDefinition> namespaces = NamespaceUtils.getNamespaceDefinitions();
+		boolean checkClasspath = true;
 		if (isProjectPreferencePage()) {
 			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
 					BeansCorePlugin.PLUGIN_ID);
@@ -140,6 +144,7 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 						+ namespace.getNamespaceURI(), "");
 				selectedVersion.put(namespace, version);
 			}
+			checkClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 		}
 		else {
 			Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
@@ -148,6 +153,7 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 						+ namespace.getNamespaceURI());
 				selectedVersion.put(namespace, version);
 			}
+			checkClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 		}
 
 		initializeDialogUnits(parent);
@@ -157,7 +163,11 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		composite.setFont(parent.getFont());
-
+		
+		classpathCheckbox = new Button(composite, SWT.CHECK);
+		classpathCheckbox.setText("Use highest XSD version that is available on the project's classpath");
+		classpathCheckbox.setSelection(checkClasspath);
+		
 		Label namespaceLabel = new Label(composite, SWT.NONE);
 		namespaceLabel.setText("Select XSD namespace to configure default version:");
 
@@ -194,8 +204,7 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		});
 
 		Label versionLabel = new Label(composite, SWT.NONE);
-		versionLabel
-				.setText("Select default schema version (if none is selected the versionless schema will be used):");
+		versionLabel.setText("Select default schema version (if none is selected the versionless schema will be used):");
 
 		versionViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		versionViewer.getTable().setLayoutData(gd);
@@ -252,6 +261,8 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 						BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID + entry.getKey().getNamespaceURI(),
 						entry.getValue());
 			}
+			SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+					BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, classpathCheckbox.getSelection());
 		}
 		else {
 			for (Map.Entry<INamespaceDefinition, String> entry : selectedVersion.entrySet()) {
@@ -259,6 +270,8 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 						BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID + entry.getKey().getNamespaceURI(),
 						entry.getValue());
 			}
+			BeansCorePlugin.getDefault().getPluginPreferences().setValue(
+					BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, classpathCheckbox.getSelection());
 		}
 		BeansCorePlugin.getDefault().savePluginPreferences();
 		return true;
