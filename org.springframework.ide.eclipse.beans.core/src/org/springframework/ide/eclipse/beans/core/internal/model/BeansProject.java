@@ -73,7 +73,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 	private final IProject project;
 
-	protected volatile Set<String> configSuffixes;
+	protected volatile Set<String> configSuffixes = new LinkedHashSet<String>();
 
 	/** the internal flag to specify if import processing is enabled */
 	protected volatile boolean isImportsEnabled = DEFAULT_IMPORTS_ENABLED;
@@ -81,19 +81,19 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/** Internal version number; intentionally set to lower value */
 	protected volatile String version = "2.0.0";
 
-	protected volatile Map<String, IBeansConfig> configs;
+	protected volatile Map<String, IBeansConfig> configs = new HashMap<String, IBeansConfig>();
 
-	protected volatile Map<String, IBeansConfig> autoDetectedConfigs;
+	protected volatile Map<String, IBeansConfig> autoDetectedConfigs = new HashMap<String, IBeansConfig>();
 
-	protected volatile Map<String, Set<String>> autoDetectedConfigsByLocator;
+	protected volatile Map<String, Set<String>> autoDetectedConfigsByLocator = new HashMap<String, Set<String>>();
 
-	protected volatile Map<String, String> locatorByAutoDetectedConfig;
+	protected volatile Map<String, String> locatorByAutoDetectedConfig = new HashMap<String, String>();
 
-	protected volatile Map<String, IBeansConfigSet> configSets;
+	protected volatile Map<String, IBeansConfigSet> configSets = new HashMap<String, IBeansConfigSet>();
 
-	protected volatile Map<String, IBeansConfigSet> autoDetectedConfigSets;
+	protected volatile Map<String, IBeansConfigSet> autoDetectedConfigSets = new HashMap<String, IBeansConfigSet>();
 
-	protected volatile Map<String, String> autoDetectedConfigSetsByLocator;
+	protected volatile Map<String, String> autoDetectedConfigSetsByLocator = new HashMap<String, String>();
 
 	protected volatile IBeansConfigEventListener eventListener;
 

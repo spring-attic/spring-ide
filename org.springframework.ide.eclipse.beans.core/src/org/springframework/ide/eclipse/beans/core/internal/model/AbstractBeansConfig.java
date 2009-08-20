@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -49,18 +50,18 @@ import org.springframework.util.ObjectUtils;
 public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements IBeansConfig {
 
 	/** List of aliases (in registration order) */
-	protected volatile Map<String, IBeanAlias> aliases;
+	protected volatile Map<String, IBeanAlias> aliases = new HashMap<String, IBeanAlias>();
 
 	/**
 	 * List of bean class names mapped to list of beans implementing the corresponding class
 	 */
-	protected volatile Map<String, Set<IBean>> beanClassesMap;
+	protected volatile Map<String, Set<IBean>> beanClassesMap = new HashMap<String, Set<IBean>>();
 
 	/** List of bean names mapped beans (in registration order) */
-	protected volatile Map<String, IBean> beans;
+	protected volatile Map<String, IBean> beans = new HashMap<String, IBean>();
 
 	/** List of components (in registration order) */
-	protected volatile Set<IBeansComponent> components;
+	protected volatile Set<IBeansComponent> components = new LinkedHashSet<IBeansComponent>();
 
 	/** Defaults values for this beans config file */
 	protected volatile DocumentDefaultsDefinition defaults;
@@ -69,7 +70,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	protected IFile file;
 
 	/** List of imports (in registration order) */
-	protected volatile Set<IBeansImport> imports;
+	protected volatile Set<IBeansImport> imports = new LinkedHashSet<IBeansImport>();
 
 	/** Indicator for a beans configuration embedded in a ZIP file */
 	protected boolean isArchived;
@@ -82,7 +83,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	protected long modificationTimestamp;
 
 	/** Set of parsing errors */
-	protected Set<ValidationProblem> problems;
+	protected Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>();
 
 	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	/**
 	 * The table of Spring Beans projects
 	 */
-	private volatile Map<IProject, IBeansProject> projects;
+	private volatile Map<IProject, IBeansProject> projects = new HashMap<IProject, IBeansProject>();
 
 	private IResourceChangeListener workspaceListener;
 
