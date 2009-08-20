@@ -65,6 +65,9 @@ public abstract class JdtAnnotationUtils {
 
 	public static void processAnnotation(IMemberValuePair member, IType annotationType,
 			Map<String, Object> attributesMap, IType type) throws JavaModelException {
+		if (annotationType == null) {
+			return;
+		}
 		IMethod test = annotationType.getMethod(member.getMemberName(), null);
 		int kind = Signature.getTypeSignatureKind(test.getReturnType());
 		String returnTypeName = Signature.getElementType(test.getReturnType());
