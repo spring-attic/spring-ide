@@ -265,8 +265,14 @@
 	</target>
 
 	<target name="pack200" if="pack200.enable">
-
-		<java jvm="${java.home}/bin/java" jar="${builder}/../org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar" fork="true"
+		
+		<path id="eclipse.classpath">
+			<fileset dir="${builder}/../eclipse/plugins">
+    			<include name="org.eclipse.equinox.launcher_*.jar"/>
+			</fileset>
+		</path>
+		
+		<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main" fork="true" classpathref="eclipse.classpath"
 			failonerror="true" maxmemory="256m" dir="${buildDirectory}">
 			<arg line="-application org.eclipse.update.core.siteOptimizer" />
 			<arg line="-jarProcessor -verbose -processAll -repack -pack -outputDir ${updateSiteStagingLocation} ${updateSiteStagingLocation}" />
@@ -275,8 +281,14 @@
 	</target>
 
 	<target name="p2" if="p2.enable">
-
-		<java jvm="${java.home}/bin/java" jar="${builder}/../org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar" fork="true"
+		
+		<path id="eclipse.classpath">
+			<fileset dir="${builder}/../eclipse/plugins">
+    			<include name="org.eclipse.equinox.launcher_*.jar"/>
+			</fileset>
+		</path>
+		
+		<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main" fork="true" classpathref="eclipse.classpath"
 			failonerror="true" maxmemory="256m" dir="${buildDirectory}">
 			<arg line="-application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator" />
 			<arg line="-updateSite ${updateSiteStagingLocation} -site file://${updateSiteStagingLocation}/site.xml -metadataRepository file://${updateSiteStagingLocation} -metadataRepositoryName 'Spring IDE Update Site' -artifactRepository file://${updateSiteStagingLocation} -artifactRepositoryName 'Spring IDE Artifacts' -compress -reusePack200Files -noDefaultIUs" />

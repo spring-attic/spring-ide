@@ -105,16 +105,16 @@ class ProjectClassLoaderCache {
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Returns a {@link ClassLoader} for the given project. 
+	 * Returns a {@link ClassLoader} for the given project.
 	 */
 	protected static ClassLoader getClassLoader(IResource project) {
 		return getClassLoader(project.getProject(), true);
 	}
 
 	/**
-	 * Returns a {@link ClassLoader} for the given project. 
+	 * Returns a {@link ClassLoader} for the given project.
 	 */
 	protected static ClassLoader getClassLoader(IProject project, boolean useParentClassLoader) {
 		ClassLoader classLoader = findClassLoaderInCache(project, useParentClassLoader);
@@ -277,7 +277,7 @@ class ProjectClassLoaderCache {
 			}
 		}
 	}
-	
+
 	/**
 	 * Internal cache entry
 	 */
@@ -331,15 +331,18 @@ class ProjectClassLoaderCache {
 		}
 
 		public void elementChanged(ElementChangedEvent event) {
-			for (IJavaElementDelta delta : event.getDelta().getAffectedChildren()) {
-				if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
-						|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
-					if (JdtUtils.getJavaProject(project).isOnClasspath(delta.getElement())) {
-						removeClassLoaderEntryFromCache(this);
+			IJavaProject javaProject = JdtUtils.getJavaProject(project);
+			if (javaProject != null) {
+				for (IJavaElementDelta delta : event.getDelta().getAffectedChildren()) {
+					if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
+							|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
+						if (javaProject.isOnClasspath(delta.getElement())) {
+							removeClassLoaderEntryFromCache(this);
+						}
 					}
 				}
 			}
 		}
 	}
-	
+
 }

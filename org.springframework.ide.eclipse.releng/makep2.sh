@@ -11,7 +11,7 @@
 ################################################################################
 
 WORKSPACE=`pwd`
-STAGINGLOCATION=$HOME/Desktop/update
+STAGINGLOCATION=$WORKSPACE/updatesite
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
 
 $WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator \
