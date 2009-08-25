@@ -16,7 +16,7 @@
    <extension
          point="org.springframework.ide.eclipse.beans.core.metadataproviders">
       <metadataProvider
-            class="org.springframework.ide.eclipse.beans.core.autowire.provider.AnnotationReferenceMetadataProvider">
+            class="org.springframework.ide.eclipse.beans.core.internal.autowire.provider.AnnotationReferenceMetadataProvider">
       </metadataProvider>
    </extension>
 

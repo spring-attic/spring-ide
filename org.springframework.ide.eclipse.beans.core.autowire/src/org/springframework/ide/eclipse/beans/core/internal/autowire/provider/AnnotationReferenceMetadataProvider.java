@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.autowire.provider;
+package org.springframework.ide.eclipse.beans.core.internal.autowire.provider;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -41,8 +41,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.core.autowire.AnnotatedBeanReference;
+import org.springframework.ide.eclipse.beans.core.autowire.internal.model.AnnotatedProperty;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.model.AnnotatedProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -260,8 +260,8 @@ public class AnnotationReferenceMetadataProvider extends BeanMetadataProviderAda
 	 * @param root the root ASTNode to analyze
 	 * @return a list of all annotation nodes
 	 */
-	protected ASTAnnotationVisitor getAnnotationNodes(final ASTNode root) {
-		ASTAnnotationVisitor visitor = new ASTAnnotationVisitor();
+	protected AstAnnotationVisitor getAnnotationNodes(final ASTNode root) {
+		AstAnnotationVisitor visitor = new AstAnnotationVisitor();
 		root.accept(visitor);
 		return visitor;
 	}
@@ -337,7 +337,7 @@ public class AnnotationReferenceMetadataProvider extends BeanMetadataProviderAda
 		getASTParser().setSource(type.getCompilationUnit());
 
 		// perform the AST parse and return the resource nodes
-		ASTAnnotationVisitor annotationVisitor = getAnnotationNodes(getASTParser().createAST(
+		AstAnnotationVisitor annotationVisitor = getAnnotationNodes(getASTParser().createAST(
 				monitor));
 		String className = type.getFullyQualifiedName();
 

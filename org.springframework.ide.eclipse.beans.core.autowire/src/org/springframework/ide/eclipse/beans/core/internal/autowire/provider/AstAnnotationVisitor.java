@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.autowire.provider;
+package org.springframework.ide.eclipse.beans.core.internal.autowire.provider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
  * @author Jared Rodriguez
  * @since 2.0.5
  */
-public class ASTAnnotationVisitor extends ASTVisitor {
+public class AstAnnotationVisitor extends ASTVisitor {
 	
 	private ArrayList<ASTNode> annotations = new ArrayList<ASTNode>();
 
