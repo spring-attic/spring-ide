@@ -50,7 +50,7 @@ import org.springframework.util.ObjectUtils;
 public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements IBeansConfig {
 
 	/** List of aliases (in registration order) */
-	protected volatile Map<String, IBeanAlias> aliases = new HashMap<String, IBeanAlias>();
+	protected volatile Map<String, IBeanAlias> aliases = new LinkedHashMap<String, IBeanAlias>();
 
 	/**
 	 * List of bean class names mapped to list of beans implementing the corresponding class
@@ -58,7 +58,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	protected volatile Map<String, Set<IBean>> beanClassesMap = new HashMap<String, Set<IBean>>();
 
 	/** List of bean names mapped beans (in registration order) */
-	protected volatile Map<String, IBean> beans = new HashMap<String, IBean>();
+	protected volatile Map<String, IBean> beans = new LinkedHashMap<String, IBean>();
 
 	/** List of components (in registration order) */
 	protected volatile Set<IBeansComponent> components = new LinkedHashSet<IBeansComponent>();

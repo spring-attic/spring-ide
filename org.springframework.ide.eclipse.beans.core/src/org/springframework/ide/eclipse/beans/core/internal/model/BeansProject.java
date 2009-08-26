@@ -81,19 +81,19 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/** Internal version number; intentionally set to lower value */
 	protected volatile String version = "2.0.0";
 
-	protected volatile Map<String, IBeansConfig> configs = new HashMap<String, IBeansConfig>();
+	protected volatile Map<String, IBeansConfig> configs = new LinkedHashMap<String, IBeansConfig>();
 
-	protected volatile Map<String, IBeansConfig> autoDetectedConfigs = new HashMap<String, IBeansConfig>();
+	protected volatile Map<String, IBeansConfig> autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
 
-	protected volatile Map<String, Set<String>> autoDetectedConfigsByLocator = new HashMap<String, Set<String>>();
+	protected volatile Map<String, Set<String>> autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<String>>();
 
-	protected volatile Map<String, String> locatorByAutoDetectedConfig = new HashMap<String, String>();
+	protected volatile Map<String, String> locatorByAutoDetectedConfig = new LinkedHashMap<String, String>();
 
-	protected volatile Map<String, IBeansConfigSet> configSets = new HashMap<String, IBeansConfigSet>();
+	protected volatile Map<String, IBeansConfigSet> configSets = new LinkedHashMap<String, IBeansConfigSet>();
 
-	protected volatile Map<String, IBeansConfigSet> autoDetectedConfigSets = new HashMap<String, IBeansConfigSet>();
+	protected volatile Map<String, IBeansConfigSet> autoDetectedConfigSets = new LinkedHashMap<String, IBeansConfigSet>();
 
-	protected volatile Map<String, String> autoDetectedConfigSetsByLocator = new HashMap<String, String>();
+	protected volatile Map<String, String> autoDetectedConfigSetsByLocator = new LinkedHashMap<String, String>();
 
 	protected volatile IBeansConfigEventListener eventListener;
 
@@ -920,18 +920,9 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			if (this.modelPopulated) {
 				return;
 			}
-			// Initialize the model's data structures and read the project description file
-			configSuffixes = new LinkedHashSet<String>();
-			configs = new LinkedHashMap<String, IBeansConfig>();
-			configSets = new LinkedHashMap<String, IBeansConfigSet>();
-			autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
-			autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<String>>();
-			locatorByAutoDetectedConfig = new LinkedHashMap<String, String>();
-			autoDetectedConfigSets = new LinkedHashMap<String, IBeansConfigSet>();
-			autoDetectedConfigSetsByLocator = new LinkedHashMap<String, String>();
-			eventListener = new DefaultBeansConfigEventListener();
-
+			this.eventListener = new DefaultBeansConfigEventListener();
 			this.modelPopulated = true;
+			
 			BeansProjectDescriptionReader.read(this);
 
 			// Remove all invalid configs from this project

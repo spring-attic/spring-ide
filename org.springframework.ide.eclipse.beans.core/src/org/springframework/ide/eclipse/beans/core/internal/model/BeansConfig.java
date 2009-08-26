@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,12 +72,10 @@ import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.XmlC
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigEventListener;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
@@ -196,12 +193,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				isModelPopulated = false;
 				modificationTimestamp = IResource.NULL_STAMP;
 				defaults = null;
-				imports = null;
-				aliases = null;
-				beans = null;
+				imports.clear();
+				aliases.clear();
+				beans.clear();
 				isBeanClassesMapPopulated = false;
-				beanClassesMap = null;
-				problems = null;
+				beanClassesMap.clear();
+				problems.clear();
 
 				// Reset all config sets which contain this config
 				for (IBeansConfigEventListener eventListener : eventListeners) {
@@ -300,13 +297,6 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				for (IBeansConfigEventListener eventListener : eventListeners) {
 					eventListener.onReadStart(this);
 				}
-
-				// Reset internal structures
-				imports = new LinkedHashSet<IBeansImport>();
-				aliases = new LinkedHashMap<String, IBeanAlias>();
-				components = new LinkedHashSet<IBeansComponent>();
-				beans = new LinkedHashMap<String, IBean>();
-				problems = new LinkedHashSet<ValidationProblem>();
 
 				if (file != null) {
 					modificationTimestamp = file.getModificationStamp();
