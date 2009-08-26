@@ -734,13 +734,13 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			w.lock();
 			this.modelPopulated = false;
 			configSuffixes = null;
-			configs = null;
-			configSets = null;
-			autoDetectedConfigs = null;
-			autoDetectedConfigsByLocator = null;
-			locatorByAutoDetectedConfig = null;
-			autoDetectedConfigSets = null;
-			autoDetectedConfigSetsByLocator = null;
+			configs.clear();
+			configSets.clear();
+			autoDetectedConfigs.clear();
+			autoDetectedConfigsByLocator.clear();
+			locatorByAutoDetectedConfig.clear();
+			autoDetectedConfigSets.clear();
+			autoDetectedConfigSetsByLocator.clear();
 		}
 		finally {
 			w.unlock();
