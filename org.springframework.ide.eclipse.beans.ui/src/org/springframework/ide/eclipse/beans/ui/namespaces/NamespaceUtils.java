@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,8 @@ public class NamespaceUtils {
 	public static final String NAMESPACES_EXTENSION_POINT = BeansUIPlugin.PLUGIN_ID + ".namespaces";
 
 	public static final String DEFAULT_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
+
+	public static final String TOOLS_NAMESPACE_URI = "http://www.springframework.org/schema/tool";
 
 	/**
 	 * Returns the namespace URI for the given {@link ISourceModelElement} or
@@ -148,15 +150,14 @@ public class NamespaceUtils {
 						String icon = namespaceDefinition.getIconPath();
 						image = getImage(ns, icon);
 					}
-					
+
 					DefaultNamespaceDefinition def = null;
 					if (namespaceDefinition != null) {
-						def = new DefaultNamespaceDefinition(prefix, uri, schemaLocation,
-							namespaceDefinition.getUriMapping(), image);
+						def = new DefaultNamespaceDefinition(prefix, uri, schemaLocation, namespaceDefinition
+								.getUriMapping(), image);
 					}
 					else {
-						def = new DefaultNamespaceDefinition(prefix, uri, schemaLocation,
-								new Properties(), image);
+						def = new DefaultNamespaceDefinition(prefix, uri, schemaLocation, new Properties(), image);
 					}
 
 					// get schema locations from nested child elements
@@ -192,6 +193,13 @@ public class NamespaceUtils {
 				return o1.getNamespacePrefix().compareTo(o2.getNamespacePrefix());
 			}
 		});
+
+		// remove the tool namespace as we don't want to surface on the UI
+		for (INamespaceDefinition definition : new ArrayList<INamespaceDefinition>(namespaceDefinitions)) {
+			if (TOOLS_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
+				namespaceDefinitions.remove(definition);
+			}
+		}
 
 		return namespaceDefinitions;
 	}
