@@ -733,7 +733,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		try {
 			w.lock();
 			this.modelPopulated = false;
-			configSuffixes = null;
+			configSuffixes.clear();
 			configs.clear();
 			configSets.clear();
 			autoDetectedConfigs.clear();
