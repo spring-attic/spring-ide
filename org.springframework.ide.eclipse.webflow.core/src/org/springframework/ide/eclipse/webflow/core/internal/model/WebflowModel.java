@@ -53,13 +53,9 @@ public class WebflowModel extends AbstractModelElement implements
 
 	private List<IWebflowModelListener> listners = new ArrayList<IWebflowModelListener>();
 
-	private Map<IProject, IWebflowProject> projects;
+	private Map<IProject, IWebflowProject> projects = new ConcurrentHashMap<IProject, IWebflowProject>();
 
 	private IResourceChangeListener workspaceListener;
-
-	public WebflowModel() {
-		this.projects = new ConcurrentHashMap<IProject, IWebflowProject>();
-	}
 
 	public boolean hasProject(IProject project) {
 		try {
