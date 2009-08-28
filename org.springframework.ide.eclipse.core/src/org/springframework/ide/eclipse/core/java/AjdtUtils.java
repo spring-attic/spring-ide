@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,20 +31,27 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
- * Utility class that tries to locate {@link IType} instances from the AJDT type
- * Hierarchy.
+ * Utility class that tries to locate {@link IType} instances from the AJDT type Hierarchy.
  * @author Christian Dupuis
  * @since 2.0
  */
 public class AjdtUtils {
 
+	private static final String AJDT_CLASS = "org.eclipse.contribution.jdt.IsWovenTester";
+
+	private static final boolean IS_JDT_WEAVING_PRESENT = isJdtWeavingPresent();
+
 	@SuppressWarnings("unchecked")
 	public static IType getAjdtType(IProject project, String className) {
+
+		if (IS_JDT_WEAVING_PRESENT && JdtWeavingTester.isJdtWeavingActive()) {
+			return null;
+		}
+
 		IJavaProject javaProject = JdtUtils.getJavaProject(project);
 		if (javaProject != null && className != null) {
 			try {
-				List<AJCompilationUnit> ajcus = AJCompilationUnitManager.INSTANCE
-						.getAJCompilationUnits(javaProject);
+				List<AJCompilationUnit> ajcus = AJCompilationUnitManager.INSTANCE.getAJCompilationUnits(javaProject);
 				if (ajcus != null) {
 					for (AJCompilationUnit ajcu : ajcus) {
 						IType[] types = ajcu.getAllTypes();
@@ -69,10 +76,14 @@ public class AjdtUtils {
 
 	@SuppressWarnings("unchecked")
 	public static Set<IMethod> getDeclaredMethods(IType type) throws JavaModelException {
+
+		if (IS_JDT_WEAVING_PRESENT && JdtWeavingTester.isJdtWeavingActive()) {
+			return null;
+		}
+
 		Set<IMethod> methods = new HashSet<IMethod>();
 		AJRelationshipType[] types = new AJRelationshipType[] { AJRelationshipManager.DECLARED_ON };
-		List<AJRelationship> rels = AJModel.getInstance().getAllRelationships(
-				type.getResource().getProject(), types);
+		List<AJRelationship> rels = AJModel.getInstance().getAllRelationships(type.getResource().getProject(), types);
 		for (AJRelationship rel : rels) {
 			if (rel.getTarget().equals(type)) {
 				IntertypeElement iType = (IntertypeElement) rel.getSource();
@@ -80,5 +91,15 @@ public class AjdtUtils {
 			}
 		}
 		return methods;
+	}
+
+	public static boolean isJdtWeavingPresent() {
+		try {
+			Class.forName(AJDT_CLASS);
+			return true;
+		}
+		catch (ClassNotFoundException e) {
+			return false;
+		}
 	}
 }
