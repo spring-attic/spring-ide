@@ -196,6 +196,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				imports.clear();
 				aliases.clear();
 				beans.clear();
+				components.clear();
 				isBeanClassesMapPopulated = false;
 				beanClassesMap.clear();
 				problems.clear();
