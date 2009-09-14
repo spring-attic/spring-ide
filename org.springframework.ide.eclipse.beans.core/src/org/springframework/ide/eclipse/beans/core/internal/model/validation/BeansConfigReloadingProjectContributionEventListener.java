@@ -73,7 +73,7 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
 		try {
 			if (kind != IncrementalProjectBuilder.FULL_BUILD) {
-				if (delta == null || kind == IncrementalProjectBuilder.FULL_BUILD) {
+				if (delta == null) {
 					ResourceTreeVisitor visitor = new ResourceTreeVisitor();
 					project.accept(visitor);
 				}
