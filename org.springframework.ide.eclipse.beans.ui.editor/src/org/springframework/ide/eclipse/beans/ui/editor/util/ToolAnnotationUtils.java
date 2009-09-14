@@ -26,7 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Utility class to providing helper methods to work with the tool annotations defined in Spring
+ * Utility class providing helper methods to work with the tool annotations defined in Spring
  * core.
  * @author Christian Dupuis
  * @since 2.0.3
