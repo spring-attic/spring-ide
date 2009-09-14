@@ -181,8 +181,8 @@ public abstract class AbstractXmlValidationRule implements IValidationRule<IBean
 	}
 
 	/**
-	 * Internal validation context implementation that coverts {@link Node} object back to {@link IResourceModelElement}
-	 * s.
+	 * Internal validation context implementation that converts {@link Node} object back to
+	 * {@link IResourceModelElement} s.
 	 */
 	private static class XmlValidationContext implements IXmlValidationContext {
 
