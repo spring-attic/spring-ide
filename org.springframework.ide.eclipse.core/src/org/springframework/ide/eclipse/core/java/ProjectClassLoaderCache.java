@@ -336,7 +336,7 @@ class ProjectClassLoaderCache {
 				for (IJavaElementDelta delta : event.getDelta().getAffectedChildren()) {
 					if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
 							|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
-						if (javaProject.isOnClasspath(delta.getElement())) {
+						if (javaProject.equals(delta.getElement()) || javaProject.isOnClasspath(delta.getElement())) {
 							removeClassLoaderEntryFromCache(this);
 						}
 					}
