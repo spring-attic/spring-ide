@@ -264,12 +264,34 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 
-	protected void maybeAddNamespaceHandlerFor(Bundle bundle, boolean isLazy) {
-		nsManager.maybeAddNamespaceHandlerFor(bundle, isLazy);
+	protected void maybeAddNamespaceHandlerFor(final Bundle bundle, final boolean isLazy) {
+		Job job = new Job("Registering Namespace") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				nsManager.maybeAddNamespaceHandlerFor(bundle, isLazy);
+				return Status.OK_STATUS;
+			}
+			
+		};
+		job.setSystem(true);
+		job.setPriority(Job.INTERACTIVE);
+		job.schedule();
 	}
 
-	protected void maybeRemoveNameSpaceHandlerFor(Bundle bundle) {
-		nsManager.maybeRemoveNameSpaceHandlerFor(bundle);
+	protected void maybeRemoveNameSpaceHandlerFor(final Bundle bundle) {
+		Job job = new Job("Ungegistering Namespace") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				nsManager.maybeRemoveNameSpaceHandlerFor(bundle);
+				return Status.OK_STATUS;
+			}
+			
+		};
+		job.setSystem(true);
+		job.setPriority(Job.INTERACTIVE);
+		job.schedule();
 	}
 
 	protected void initNamespaceHandlers(BundleContext context) {
@@ -285,10 +307,10 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		for (int i = 0; i < previousBundles.length; i++) {
 			Bundle bundle = previousBundles[i];
 			if (OsgiBundleUtils.isBundleResolved(bundle)) {
-				maybeAddNamespaceHandlerFor(bundle, false);
+				nsManager.maybeAddNamespaceHandlerFor(bundle, false);
 			}
 			else if (OsgiBundleUtils.isBundleLazyActivated(bundle)) {
-				maybeAddNamespaceHandlerFor(bundle, true);
+				nsManager.maybeAddNamespaceHandlerFor(bundle, true);
 			}
 		}
 
@@ -364,8 +386,8 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 			case BundleEvent.LAZY_ACTIVATION: {
 				push(bundle);
 				maybeAddNamespaceHandlerFor(bundle, true);
-				}
 				break;
+			}
 			case BundleEvent.RESOLVED: {
 				if (!pop(bundle)) {
 					maybeAddNamespaceHandlerFor(bundle, false);
