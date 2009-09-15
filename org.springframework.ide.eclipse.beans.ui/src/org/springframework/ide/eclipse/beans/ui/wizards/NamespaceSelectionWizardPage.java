@@ -172,6 +172,12 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 
 		xsdViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(final CheckStateChangedEvent event) {
+				Object obj = event.getElement();
+				selectedNamespaceDefinition = (INamespaceDefinition) obj;
+				versionViewer.setInput(obj);
+				if (selectedVersion.containsKey(selectedNamespaceDefinition)) {
+					versionViewer.setCheckedElements(new Object[] { selectedVersion.get(selectedNamespaceDefinition) });
+				}
 
 				if (event.getChecked() && selectedNamespaceDefinition != null
 						&& selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
@@ -192,7 +198,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		versionViewer.setContentProvider(new VersionContentProvider());
 		versionViewer.setLabelProvider(new VersionLabelProvider());
 		versionViewer.setSorter(new ViewerSorter());
-		
+
 		versionViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(final CheckStateChangedEvent event) {
 				if (event.getChecked()) {
