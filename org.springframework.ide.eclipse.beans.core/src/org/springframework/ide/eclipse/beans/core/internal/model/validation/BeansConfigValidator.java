@@ -271,9 +271,10 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 		public void init(IResource resource) {
 			if (resource instanceof IFile) {
 				rootElement = BeansCorePlugin.getModel().getConfig((IFile) resource);
-				if (rootElement.resourceChanged()) {
-					((BeansConfig) rootElement).reload();
-				}
+//				TODO CD not sure why this is here at all. Removing for now as it seems to be of no usage
+//				if (rootElement.resourceChanged()) {
+//					((BeansConfig) rootElement).reload();
+//				}
 			}
 		}
 
