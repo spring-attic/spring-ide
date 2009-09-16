@@ -80,7 +80,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	}
 
 	/**
-	 * {@inheritDoc} 
+	 * {@inheritDoc}
 	 */
 	@Override
 	boolean removePlugin(Bundle bundle) {
@@ -114,58 +114,59 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		this.namespaceDefinitionsByBundle.put(bundle, namespaceDefinitions);
 
 		Enumeration<URL> schemas = bundle.findEntries(META_INF, SPRING_SCHEMAS, false);
-		while (schemas.hasMoreElements()) {
-			Properties props = loadProperties(schemas.nextElement());
+		if (schemas != null) {
+			while (schemas.hasMoreElements()) {
+				Properties props = loadProperties(schemas.nextElement());
 
-			for (Object xsd : props.keySet()) {
+				for (Object xsd : props.keySet()) {
 
-				String key = xsd.toString();
-				String uri = "platform:/plugin/" + bundle.getSymbolicName() + "/" + props.getProperty(key);
-				String namespaceUri = getTargetNamespace(bundle.getEntry(props.getProperty(key)));
-				String icon = null;
-				String prefix = null;
-				String name = null;
+					String key = xsd.toString();
+					String uri = "platform:/plugin/" + bundle.getSymbolicName() + "/" + props.getProperty(key);
+					String namespaceUri = getTargetNamespace(bundle.getEntry(props.getProperty(key)));
+					String icon = null;
+					String prefix = null;
+					String name = null;
 
-				// Add catalog entry to XML catalog
-				addCatalogEntry(bundle, key, uri, catalogEntries, ICatalogEntry.ENTRY_TYPE_URI);
+					// Add catalog entry to XML catalog
+					addCatalogEntry(bundle, key, uri, catalogEntries, ICatalogEntry.ENTRY_TYPE_URI);
 
-				Enumeration<URL> tooling = bundle.findEntries(META_INF, SPRING_TOOLING, false);
-				if (tooling != null) {
-					while (tooling.hasMoreElements()) {
-						Properties toolingProps = loadProperties(tooling.nextElement());
+					Enumeration<URL> tooling = bundle.findEntries(META_INF, SPRING_TOOLING, false);
+					if (tooling != null) {
+						while (tooling.hasMoreElements()) {
+							Properties toolingProps = loadProperties(tooling.nextElement());
 
-						icon = toolingProps.getProperty(namespaceUri + "@icon");
-						prefix = toolingProps.getProperty(namespaceUri + "@prefix");
-						name = toolingProps.getProperty(namespaceUri + "@name");
+							icon = toolingProps.getProperty(namespaceUri + "@icon");
+							prefix = toolingProps.getProperty(namespaceUri + "@prefix");
+							name = toolingProps.getProperty(namespaceUri + "@name");
+						}
+					}
+
+					if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
+						namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
+						namespaceDefinitionRegistry.get(namespaceUri).addUri(props.getProperty(key));
+					}
+					else {
+						NamespaceDefinition namespaceDefinition = new NamespaceDefinition(props);
+						namespaceDefinition.setName(name);
+						namespaceDefinition.setPrefix(prefix);
+						namespaceDefinition.setIconPath(icon);
+						namespaceDefinition.addSchemaLocation(key);
+						namespaceDefinition.setBundle(bundle);
+						namespaceDefinition.setNamespaceUri(namespaceUri);
+						namespaceDefinition.addUri(props.getProperty(key));
+						namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
+						namespaceDefinitions.add(namespaceDefinition);
 					}
 				}
+			}
 
-				if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
-					namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
-					namespaceDefinitionRegistry.get(namespaceUri).addUri(props.getProperty(key));
-				}
-				else {
-					NamespaceDefinition namespaceDefinition = new NamespaceDefinition(props);
-					namespaceDefinition.setName(name);
-					namespaceDefinition.setPrefix(prefix);
-					namespaceDefinition.setIconPath(icon);
-					namespaceDefinition.addSchemaLocation(key);
-					namespaceDefinition.setBundle(bundle);
-					namespaceDefinition.setNamespaceUri(namespaceUri);
-					namespaceDefinition.addUri(props.getProperty(key));
-					namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
-					namespaceDefinitions.add(namespaceDefinition);
-				}
+			// Add catalog entry to namespace uri
+			for (NamespaceDefinition definition : namespaceDefinitions) {
+				addCatalogEntry(definition.getBundle(), definition.getNamespaceUri(), "platform:/plugin/"
+						+ bundle.getSymbolicName() + "/" + definition.getDefaultUri(), catalogEntries,
+						ICatalogEntry.ENTRY_TYPE_PUBLIC);
 			}
 		}
-
-		// Add catalog entry to namespace uri
-		for (NamespaceDefinition definition : namespaceDefinitions) {
-			addCatalogEntry(definition.getBundle(), definition.getNamespaceUri(), "platform:/plugin/"
-					+ bundle.getSymbolicName() + "/" + definition.getDefaultUri(), catalogEntries,
-					ICatalogEntry.ENTRY_TYPE_PUBLIC);
-		}
-
 	}
 
 	/**
@@ -191,7 +192,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		if (systemCatalog == null) {
 			return;
 		}
-		
+
 		ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
 		if (catalogElement instanceof ICatalogEntry) {
 			ICatalogEntry entry = (ICatalogEntry) catalogElement;
@@ -237,7 +238,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		if (xmlCore == null) {
 			return null;
 		}
-		
+
 		ICatalog systemCatalog = null;
 		ICatalog defaultCatalog = xmlCore.getDefaultXMLCatalog();
 
@@ -295,7 +296,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	 * Default implementation of {@link INamespaceDefinition}.
 	 */
 	static class NamespaceDefinition implements INamespaceDefinition {
-		
+
 		private Pattern versionPattern = Pattern.compile(".*-([0-9,.]*)\\.xsd");
 
 		private Bundle bundle;
@@ -311,9 +312,9 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		private Set<String> schemaLocations = new HashSet<String>();
 
 		private Set<String> uris = new HashSet<String>();
-		
+
 		private Properties uriMapping = new Properties();
-		
+
 		public NamespaceDefinition(Properties uriMapping) {
 			this.uriMapping = uriMapping;
 		}
@@ -325,14 +326,14 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		public void addUri(String uri) {
 			uris.add(uri);
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public Bundle getBundle() {
 			return bundle;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -445,7 +446,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		public void setPrefix(String prefix) {
 			this.prefix = prefix;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -453,31 +454,31 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 			return this.uriMapping;
 		}
 	}
-	
+
 	static class Version implements Comparable<Version> {
 
-	    private static final String MINIMUM_VERSION_STRING = "0";
+		private static final String MINIMUM_VERSION_STRING = "0";
 
-	    public static final Version MINIMUM_VERSION = new Version(MINIMUM_VERSION_STRING);
+		public static final Version MINIMUM_VERSION = new Version(MINIMUM_VERSION_STRING);
 
-	    private final org.osgi.framework.Version version;
+		private final org.osgi.framework.Version version;
 
-	    public Version(String v) {
-	    	org.osgi.framework.Version tempVersion = null;
-	    	try {
-	    		tempVersion = org.osgi.framework.Version.parseVersion(v);
-	    	}
-	    	catch (Exception e) {
-	    		// make sure that we don't crash on any new version numbers format that we don't support
-	    		BeansCorePlugin.log("Cannot convert schema vesion", e);
-	    		tempVersion = org.osgi.framework.Version.parseVersion(MINIMUM_VERSION_STRING);
-	    	}
-	    	this.version = tempVersion;
-	    }
+		public Version(String v) {
+			org.osgi.framework.Version tempVersion = null;
+			try {
+				tempVersion = org.osgi.framework.Version.parseVersion(v);
+			}
+			catch (Exception e) {
+				// make sure that we don't crash on any new version numbers format that we don't support
+				BeansCorePlugin.log("Cannot convert schema vesion", e);
+				tempVersion = org.osgi.framework.Version.parseVersion(MINIMUM_VERSION_STRING);
+			}
+			this.version = tempVersion;
+		}
 
-	    public int compareTo(Version v2) {
-	        return this.version.compareTo(v2.version);
-	    }
+		public int compareTo(Version v2) {
+			return this.version.compareTo(v2.version);
+		}
 	}
 
 }
