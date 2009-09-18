@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,11 +30,10 @@ public class FieldContentAssistCalculator extends ClassContentAssistCalculator {
 	private final JavaElementImageProvider imageProvider = new JavaElementImageProvider();
 
 	public FieldContentAssistCalculator() {
-		super(false);
+		super();
 	}
-	
-	public void computeProposals(IContentAssistContext context,
-			IContentAssistProposalRecorder recorder) {
+
+	public void computeProposals(IContentAssistContext context, IContentAssistProposalRecorder recorder) {
 		String matchString = context.getMatchString();
 		int ix = matchString.lastIndexOf('.');
 		if (ix > 0) {
@@ -45,8 +44,7 @@ public class FieldContentAssistCalculator extends ClassContentAssistCalculator {
 				try {
 					IField[] fields = type.getFields();
 					for (IField field : fields) {
-						if (Flags.isStatic(field.getFlags())
-								&& Flags.isPublic(field.getFlags())) {
+						if (Flags.isStatic(field.getFlags()) && Flags.isPublic(field.getFlags())) {
 							acceptSearchMatch(recorder, field, typeName);
 						}
 					}
@@ -60,13 +58,11 @@ public class FieldContentAssistCalculator extends ClassContentAssistCalculator {
 
 	}
 
-	private void acceptSearchMatch(IContentAssistProposalRecorder recorder, IField field,
-			String typeName) {
+	private void acceptSearchMatch(IContentAssistProposalRecorder recorder, IField field, String typeName) {
 		try {
 			String replaceText = typeName + "." + field.getElementName();
 			String displayText = field.getElementName();
-			Image image = imageProvider.getImageLabel(field, field.getFlags()
-					| JavaElementImageProvider.SMALL_ICONS);
+			Image image = imageProvider.getImageLabel(field, field.getFlags() | JavaElementImageProvider.SMALL_ICONS);
 			recorder.recordProposal(image, 10, displayText, replaceText, field);
 
 		}

@@ -8,6 +8,9 @@
 	<enableImports><![CDATA[true]]></enableImports>
 	<configs>
 		<config>src/ide-953.xml</config>
+		<config>src/ide-855.xml</config>
+		<config>src/ide-771.xml</config>
+		<config>src/sts-385.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

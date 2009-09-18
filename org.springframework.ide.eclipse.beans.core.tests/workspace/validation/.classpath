@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="src" path="src" />
+	<classpathentry kind="con"
+		path="org.eclipse.jdt.launching.JRE_CONTAINER" />
+	<classpathentry kind="output" path="bin" />
+	<classpathentry kind="lib"
+		path="lib/org.springframework.beans-3.0.0.M3.jar" />
+	<classpathentry kind="lib"
+		path="lib/org.springframework.core-3.0.0.M3.jar" />
+	<classpathentry kind="lib"
+		path="lib/org.springframework.context-3.0.0.M3.jar" />
 </classpath>

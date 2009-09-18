@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,6 +28,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils;
+import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
@@ -36,6 +40,10 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAt
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Context that gets passed to an {@link IValidationRule}, encapsulating all relevant information used during
@@ -56,6 +64,8 @@ public class BeansValidationContext extends AbstractValidationContext implements
 
 	private Map<String, Set<BeanDefinition>> beanLookupCache;
 
+	private final Map<AttributeDescriptor, List<ToolAnnotationData>> toolAnnotationLookupCache;
+
 	public BeansValidationContext(IBeansConfig config, IResourceModelElement contextElement) {
 		super(config, contextElement);
 
@@ -63,23 +73,18 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		completeRegistry = createRegistry(config, contextElement, true);
 
 		beanLookupCache = new HashMap<String, Set<BeanDefinition>>();
+		toolAnnotationLookupCache = new HashMap<AttributeDescriptor, List<ToolAnnotationData>>();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
-	 * #getIncompleteRegistry()
+	/**
+	 * {@inheritDoc}
 	 */
 	public BeanDefinitionRegistry getIncompleteRegistry() {
 		return incompleteRegistry;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
-	 * #getCompleteRegistry()
+	/**
+	 * {@inheritDoc}
 	 */
 	public BeanDefinitionRegistry getCompleteRegistry() {
 		return completeRegistry;
@@ -115,11 +120,8 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		return registry;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
-	 * #getClassReaderFactory()
+	/**
+	 * {@inheritDoc}
 	 */
 	public synchronized ClassReaderFactory getClassReaderFactory() {
 		if (this.classReaderFactory == null) {
@@ -129,32 +131,23 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		return this.classReaderFactory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
-	 * #getRootElementProject()
+	/**
+	 * {@inheritDoc}
 	 */
 	public IProject getRootElementProject() {
 		return (getRootElement().getElementResource() != null ? getRootElement().getElementResource().getProject()
 				: null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
-	 * #getRootElementResource()
+	/**
+	 * {@inheritDoc}
 	 */
 	public IResource getRootElementResource() {
 		return getRootElement().getElementResource();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
-	 * #getRegisteredBeanDefinition(java.lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public Set<BeanDefinition> getRegisteredBeanDefinition(String beanName, String beanClass) {
 		Assert.notNull(beanName);
@@ -170,17 +163,17 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		return bds;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext
-	 * #isBeanRegistered(java.lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean isBeanRegistered(String beanName, String beanClass) {
 		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName, beanClass);
 		return bds != null && bds.size() > 0;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected Set<ValidationProblem> createProblems(IResourceModelElement element, String problemId, int severity,
 			String message, ValidationProblemAttribute... attributes) {
@@ -210,4 +203,78 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		return problems;
 	}
 
+	public synchronized List<ToolAnnotationData> getToolAnnotation(Node n, String attributeName) {
+		AttributeDescriptor descriptor = AttributeDescriptor.create(n, attributeName);
+		if (toolAnnotationLookupCache.containsKey(descriptor)) {
+			return toolAnnotationLookupCache.get(descriptor);
+		}
+
+		// Search for tool annotations
+		List<ToolAnnotationData> annotationDatas = new ArrayList<ToolAnnotationData>();
+		List<Element> appInfoElements = ToolAnnotationUtils.getApplicationInformationElements(n, attributeName);
+		for (Element elem : appInfoElements) {
+			NodeList children = elem.getChildNodes();
+			for (int j = 0; j < children.getLength(); j++) {
+				Node annotation = children.item(j);
+				if (annotation.getNodeType() == Node.ELEMENT_NODE
+						&& ToolAnnotationUtils.ANNOTATION_ELEMENT.equals(annotation.getLocalName())
+						&& ToolAnnotationUtils.TOOL_NAMESPACE_URI.equals(annotation.getNamespaceURI())) {
+					ToolAnnotationData annotationData = ToolAnnotationUtils.getToolAnnotationData(annotation);
+					if (annotationData != null) {
+						annotationDatas.add(annotationData);
+					}
+				}
+			}
+		}
+
+		// Add to internal cache
+		toolAnnotationLookupCache.put(descriptor, annotationDatas);
+
+		// / Return found annoatations
+		return annotationDatas;
+	}
+	
+	static class AttributeDescriptor {
+
+		private final String namespaceUri;
+
+		private final String localName;
+
+		private final String attributeName;
+
+		private AttributeDescriptor(String namespaceUri, String localName, String attributeName) {
+			this.namespaceUri = namespaceUri;
+			this.localName = localName;
+			this.attributeName = attributeName;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof AttributeDescriptor)) {
+				return false;
+			}
+			AttributeDescriptor other = (AttributeDescriptor) obj;
+			if (!ObjectUtils.nullSafeEquals(namespaceUri, other.namespaceUri)) {
+				return false;
+			}
+			if (!ObjectUtils.nullSafeEquals(localName, other.localName)) {
+				return false;
+			}
+			return ObjectUtils.nullSafeEquals(attributeName, attributeName);
+		}
+
+		@Override
+		public int hashCode() {
+			int hashCode = 7;
+			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(namespaceUri);
+			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(localName);
+			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(attributeName);
+			return hashCode;
+		}
+		
+		public static AttributeDescriptor create(Node n, String attributeName) {
+			return new AttributeDescriptor(n.getNamespaceURI(), n.getLocalName(), attributeName);
+		}
+
+	}
 }

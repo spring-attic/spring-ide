@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.model.validation;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -26,10 +27,12 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
@@ -95,6 +98,10 @@ public abstract class AbstractXmlValidationRule implements IValidationRule<IBean
 			return;
 		}
 
+		if (!(context instanceof BeansValidationContext)) {
+			return;
+		}
+
 		IStructuredModel model = null;
 		try {
 			model = StructuredModelManager.getModelManager().getExistingModelForRead(element.getElementResource());
@@ -106,9 +113,12 @@ public abstract class AbstractXmlValidationRule implements IValidationRule<IBean
 				if (document != null && document.getDocumentElement() != null) {
 					DomVisitor visitor = new DomVisitor() {
 
+						private IXmlValidationContext xmlContext = new XmlValidationContext(
+								(BeansValidationContext) context, element);
+
 						@Override
 						public void validateNode(Node n) {
-							validate(n, new XmlValidationContext(context, element));
+							validate(n, xmlContext);
 						}
 
 						@Override
@@ -188,89 +198,147 @@ public abstract class AbstractXmlValidationRule implements IValidationRule<IBean
 
 		private final IBeansConfig beansConfig;
 
-		private final IBeansValidationContext delegateContext;
+		private final BeansValidationContext delegateContext;
 
-		public XmlValidationContext(IBeansValidationContext delegateContext, IBeansConfig beansConfig) {
+		public XmlValidationContext(BeansValidationContext delegateContext, IBeansConfig beansConfig) {
 			this.delegateContext = delegateContext;
 			this.beansConfig = beansConfig;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public ClassReaderFactory getClassReaderFactory() {
 			return delegateContext.getClassReaderFactory();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public BeanDefinitionRegistry getCompleteRegistry() {
 			return delegateContext.getCompleteRegistry();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public BeanDefinitionRegistry getIncompleteRegistry() {
 			return delegateContext.getIncompleteRegistry();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public Set<BeanDefinition> getRegisteredBeanDefinition(String beanName, String beanClass) {
 			return delegateContext.getRegisteredBeanDefinition(beanName, beanClass);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public IProject getRootElementProject() {
 			return delegateContext.getRootElementProject();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public IResource getRootElementResource() {
 			return delegateContext.getRootElementResource();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public boolean isBeanRegistered(String beanName, String beanClass) {
 			return delegateContext.isBeanRegistered(beanName, beanClass);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void error(IResourceModelElement element, String problemId, String message,
 				ValidationProblemAttribute... attributes) {
 			delegateContext.error(element, problemId, message, attributes);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void error(Node node, String problemId, String message, ValidationProblemAttribute... attributes) {
 			delegateContext.error(getResourceModelElementFromNode(node), problemId, message, attributes);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public IResourceModelElement getContextElement() {
 			return delegateContext.getContextElement();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public Set<ValidationProblem> getProblems() {
 			return delegateContext.getProblems();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public IResourceModelElement getRootElement() {
 			return delegateContext.getRootElement();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void info(IResourceModelElement element, String problemId, String message,
 				ValidationProblemAttribute... attributes) {
 			delegateContext.info(element, problemId, message, attributes);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void info(Node n, String problemId, String message, ValidationProblemAttribute... attributes) {
 			delegateContext.info(getResourceModelElementFromNode(n), problemId, message, attributes);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void setCurrentRuleId(String ruleId) {
 			delegateContext.setCurrentRuleId(ruleId);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void warning(IResourceModelElement element, String problemId, String message,
 				ValidationProblemAttribute... attributes) {
 			delegateContext.warning(element, problemId, message, attributes);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public void warning(Node n, String problemId, String message, ValidationProblemAttribute... attributes) {
 			delegateContext.warning(getResourceModelElementFromNode(n), problemId, message, attributes);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public List<ToolAnnotationData> getToolAnnotation(Node n, String attributeName) {
+			return delegateContext.getToolAnnotation(n, attributeName);
 		}
 
 		private IResourceModelElement getResourceModelElementFromNode(Node n) {
 			if (n instanceof IDOMNode) {
 				IDOMNode domNode = ((IDOMNode) n);
-				int startLine = domNode.getStructuredDocument().getLineOfOffset(domNode.getStartOffset());
-				int endLine = domNode.getStructuredDocument().getLineOfOffset(domNode.getStartOffset());
+				int startLine = domNode.getStructuredDocument().getLineOfOffset(domNode.getStartOffset()) + 1;
+				int endLine = domNode.getStructuredDocument().getLineOfOffset(domNode.getStartOffset()) + 1;
 				IModelElement modelElement = BeansModelUtils.getMostSpecificModelElement(startLine, endLine,
 						(IFile) beansConfig.getElementResource(), null);
 				if (modelElement instanceof IResourceModelElement) {
@@ -279,6 +347,7 @@ public abstract class AbstractXmlValidationRule implements IValidationRule<IBean
 			}
 			return delegateContext.getRootElement();
 		}
+
 	}
 
 }

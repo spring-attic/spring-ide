@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.core.MarkerUtils;
  * @author Christian Dupuis
  * @since 2.0.5
  */
-public class BeanConstructorArgumentRuleTests extends BeansCoreTestCase {
+public class BeanConstructorArgumentRuleTest extends BeansCoreTestCase {
 
 	private IResource resource = null;
 

@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.util;
+package org.springframework.ide.eclipse.beans.core.namespaces;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,8 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Utility class providing helper methods to work with the tool annotations defined in Spring
- * core.
+ * Utility class to providing helper methods to work with the tool annotations defined in Spring core.
  * @author Christian Dupuis
  * @since 2.0.3
  */
@@ -88,16 +87,13 @@ public abstract class ToolAnnotationUtils {
 				}
 			}
 			if (attrDecl instanceof XSDAttributeUseAdapter) {
-				XSDAttributeUse attribute = (XSDAttributeUse) ((XSDAttributeUseAdapter) attrDecl)
-						.getKey();
+				XSDAttributeUse attribute = (XSDAttributeUse) ((XSDAttributeUseAdapter) attrDecl).getKey();
 				// 1. Check if annotation and tool annotation are actually
 				// present
 				if (attribute.getAttributeDeclaration() != null
 						&& attribute.getAttributeDeclaration().getAnnotation() != null
-						&& attribute.getAttributeDeclaration().getAnnotation()
-								.getApplicationInformation() != null) {
-					return attribute.getAttributeDeclaration().getAnnotation()
-							.getApplicationInformation();
+						&& attribute.getAttributeDeclaration().getAnnotation().getApplicationInformation() != null) {
+					return attribute.getAttributeDeclaration().getAnnotation().getApplicationInformation();
 				}
 				// 2. If no directly attached annotation could be
 				// found, try the referenced type definition if any.
@@ -116,36 +112,44 @@ public abstract class ToolAnnotationUtils {
 	}
 
 	/**
-	 * Returns a instance of {@link ToolAnnotationData}. This data holder carries information of the
-	 * annotation values.
+	 * Returns a instance of {@link ToolAnnotationData}. This data holder carries information of the annotation values.
 	 */
 	public static ToolAnnotationData getToolAnnotationData(Node annotation) {
 		ToolAnnotationData data = new ToolAnnotationData();
-		data.setKind(BeansEditorUtils.getAttribute(annotation, KIND_ATTRIBUTE));
+		data.setKind(getAttribute(annotation, KIND_ATTRIBUTE));
 
 		NodeList children = annotation.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
 			if (EXPECTED_TYPE_ELEMENT.equals(child.getLocalName())
 					&& TOOL_NAMESPACE_URI.equals(child.getNamespaceURI())) {
-				data.setExpectedType(BeansEditorUtils.getAttribute(child, TYPE_ATTRIBUTE));
+				data.setExpectedType(getAttribute(child, TYPE_ATTRIBUTE));
 			}
 			else if (ASSIGNABLE_TO_ELEMENT.equals(child.getLocalName())
 					&& TOOL_NAMESPACE_URI.equals(child.getNamespaceURI())) {
-				data.setAssignableTo(BeansEditorUtils.getAttribute(child, TYPE_ATTRIBUTE));
-				data.setAssignableToRestriction(BeansEditorUtils.getAttribute(child,
-						RESTRITION_ATTRIBUTE));
+				data.setAssignableTo(getAttribute(child, TYPE_ATTRIBUTE));
+				data.setAssignableToRestriction(getAttribute(child, RESTRITION_ATTRIBUTE));
 			}
 			else if (EXPECTED_METHOD_ELEMENT.equals(child.getLocalName())
 					&& TOOL_NAMESPACE_URI.equals(child.getNamespaceURI())) {
-				data.setExpectedMethodType(BeansEditorUtils.getAttribute(child, TYPE_ATTRIBUTE));
-				data.setExpectedMethodRef(BeansEditorUtils.getAttribute(child, TYPE_REF_ATTRIBUTE));
-				data.setExpectedMethodExpression(BeansEditorUtils.getAttribute(child,
-						EXPRESSION_ATTRIBUTE));
+				data.setExpectedMethodType(getAttribute(child, TYPE_ATTRIBUTE));
+				data.setExpectedMethodRef(getAttribute(child, TYPE_REF_ATTRIBUTE));
+				data.setExpectedMethodExpression(getAttribute(child, EXPRESSION_ATTRIBUTE));
 			}
 
 		}
 		return data;
+	}
+
+	private static final String getAttribute(Node node, String attributeName) {
+		if (hasAttribute(node, attributeName)) {
+			return node.getAttributes().getNamedItem(attributeName).getNodeValue();
+		}
+		return null;
+	}
+
+	private static final boolean hasAttribute(Node node, String attributeName) {
+		return (node != null && node.hasAttributes() && node.getAttributes().getNamedItem(attributeName) != null);
 	}
 
 	/**

@@ -17,6 +17,8 @@ import javax.xml.xpath.XPathFactory;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils;
+import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassHierachyContentAssistCalculator;
@@ -29,14 +31,12 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodConte
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IAnnotationBasedContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.util.ToolAnnotationUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.util.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Node;
 
 /**
- * {@link IAnnotationBasedContentAssistProcessor} that calculates content assist proposals based on
- * Spring core's tool namespace annotations.
+ * {@link IAnnotationBasedContentAssistProcessor} that calculates content assist proposals based on Spring core's tool
+ * namespace annotations.
  * <p>
  * Adding the following annotation will trigger a bean reference content assist search:
  * 
@@ -47,9 +47,8 @@ import org.w3c.dom.Node;
  * </pre>
  * 
  * <p>
- * The following will launch the class, package and interface content assist. Depending on the
- * assignable-to value that proposals might be further narrowed to those implementing the interface
- * specified:
+ * The following will launch the class, package and interface content assist. Depending on the assignable-to value that
+ * proposals might be further narrowed to those implementing the interface specified:
  * 
  * <pre>
  * &lt;tool:annotation&gt;
@@ -64,8 +63,7 @@ import org.w3c.dom.Node;
 
 // TODO CD add support for restriction (class, interface, both)
 @SuppressWarnings("restriction")
-public class ToolAnnotationBasedContentAssistProcessor implements
-		IAnnotationBasedContentAssistProcessor {
+public class ToolAnnotationBasedContentAssistProcessor implements IAnnotationBasedContentAssistProcessor {
 
 	private static final String REF_ATTRIBUTE = "ref";
 
@@ -75,21 +73,17 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addAttributeValueProposals(
-			IContentAssistProcessor delegatingContentAssistProcessor, ContentAssistRequest request,
-			Node annotation) {
+	public void addAttributeValueProposals(IContentAssistProcessor delegatingContentAssistProcessor,
+			ContentAssistRequest request, Node annotation) {
 		if (ToolAnnotationUtils.ANNOTATION_ELEMENT.equals(annotation.getLocalName())
 				&& ToolAnnotationUtils.TOOL_NAMESPACE_URI.equals(annotation.getNamespaceURI())) {
 
-			ToolAnnotationData annotationData = ToolAnnotationUtils
-					.getToolAnnotationData(annotation);
+			ToolAnnotationData annotationData = ToolAnnotationUtils.getToolAnnotationData(annotation);
 
 			String matchString = BeansEditorUtils.prepareMatchString(request);
 
-			IContentAssistContext context = new DefaultContentAssistContext(request, null,
-					matchString);
-			IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(
-					request);
+			IContentAssistContext context = new DefaultContentAssistContext(request, null, matchString);
+			IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(request);
 
 			if (REF_ATTRIBUTE.equals(annotationData.getKind())) {
 				// bean reference content assist
@@ -99,27 +93,21 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 			if (Class.class.getName().equals(annotationData.getExpectedType())) {
 				// class content assist
 				if (annotationData.getAssignableTo() == null) {
-					getClassContentAssistCalculator(annotationData).computeProposals(context,
-							recorder);
+					getClassContentAssistCalculator(annotationData).computeProposals(context, recorder);
 				}
 				else {
-					getClassHierachyContentAssistCalculator(annotationData).computeProposals(
-							context, recorder);
+					getClassHierachyContentAssistCalculator(annotationData).computeProposals(context, recorder);
 				}
 			}
 			if (annotationData.getExpectedMethodType() != null) {
-				String className = evaluateXPathExpression(annotationData.getExpectedMethodType(),
-						context.getNode());
-				new NonFilteringMethodContentAssistCalculator(className).computeProposals(context,
-						recorder);
+				String className = evaluateXPathExpression(annotationData.getExpectedMethodType(), context.getNode());
+				new NonFilteringMethodContentAssistCalculator(className).computeProposals(context, recorder);
 			}
 			else if (annotationData.getExpectedMethodRef() != null) {
-				String typeName = evaluateXPathExpression(annotationData.getExpectedMethodRef(),
-						context.getNode());
-				String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
-						.getDocument(), typeName);
-				new NonFilteringMethodContentAssistCalculator(className).computeProposals(context,
-						recorder);
+				String typeName = evaluateXPathExpression(annotationData.getExpectedMethodRef(), context.getNode());
+				String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context.getDocument(),
+						typeName);
+				new NonFilteringMethodContentAssistCalculator(className).computeProposals(context, recorder);
 			}
 		}
 	}
@@ -142,8 +130,7 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 		}
 	}
 
-	protected IContentAssistCalculator getClassContentAssistCalculator(
-			ToolAnnotationData annotationData) {
+	protected IContentAssistCalculator getClassContentAssistCalculator(ToolAnnotationData annotationData) {
 		if ("class-only".equals(annotationData.getAssignableToRestriction())) {
 			return new ClassContentAssistCalculator(false);
 		}
@@ -153,8 +140,7 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 		return new ClassContentAssistCalculator();
 	}
 
-	protected IContentAssistCalculator getClassHierachyContentAssistCalculator(
-			ToolAnnotationData annotationData) {
+	protected IContentAssistCalculator getClassHierachyContentAssistCalculator(ToolAnnotationData annotationData) {
 		if ("class-only".equals(annotationData.getAssignableToRestriction())) {
 			return new ClassHierachyContentAssistCalculator(annotationData.getAssignableTo(),
 					BeansJavaCompletionUtils.FLAG_CLASS);

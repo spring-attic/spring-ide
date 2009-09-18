@@ -51,7 +51,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IBeansValidationContext> {
 
 	/** Magic beans names that should not be reported as invalid bean reference */
-	private static final List<String> BEANS_TO_IGNORE = Arrays.asList(new String[] { "bundleContext" });
+	public static final List<String> BEANS_TO_IGNORE = Arrays.asList(new String[] { "bundleContext" });
 
 	/**
 	 * Returns <code>true</code> if this rule is able to validate the given {@link IModelElement} with the specified
@@ -144,6 +144,10 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 		else if (value instanceof BeanReference) {
 			beanName = ((BeanReference) value).getBeanName();
 		}
+		validateBeanReference(element, context, beanName);
+	}
+
+	private void validateBeanReference(IResourceModelElement element, IBeansValidationContext context, String beanName) {
 		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName) && !BEANS_TO_IGNORE.contains(beanName)) {
 			try {
 				BeanDefinition refBd = context.getCompleteRegistry().getBeanDefinition(beanName);

@@ -66,7 +66,7 @@ public class IntrospectorTest extends BeansCoreTestCase {
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		Set<IMethod> cons = Introspector.findAllConstructors(foo);
 		assertTrue(!cons.isEmpty());
-		assertTrue(cons.toArray().length == 4);
+		assertTrue(cons.toArray().length == 5);
 	}
 
 	public void testFindAllMethodsWithFilter() throws CoreException, IOException {
@@ -79,7 +79,7 @@ public class IntrospectorTest extends BeansCoreTestCase {
 			}
 		});
 		assertTrue(!methods.isEmpty());
-		checkResult(methods, 11);
+		checkResult(methods, 24);
 
 		methods = Introspector.findAllMethods(foo, "set", new IMethodFilter() {
 
@@ -97,7 +97,7 @@ public class IntrospectorTest extends BeansCoreTestCase {
 		// only methods; no constructors
 		Set<IMethod> methods = Introspector.findAllMethods(foo, "", -1, Public.DONT_CARE,
 				Static.DONT_CARE);
-		checkResult(methods, 11);
+		checkResult(methods, 24);
 		// only public setters (static does not matter)
 		methods = Introspector.findAllMethods(foo, "set", 1, Public.YES, Static.DONT_CARE);
 		checkResult(methods, 3);
@@ -106,10 +106,10 @@ public class IntrospectorTest extends BeansCoreTestCase {
 		checkResult(methods, 2);
 		// only protected methods setters (static does not matter)
 		methods = Introspector.findAllMethods(foo, "", -1, Public.NO, Static.DONT_CARE);
-		checkResult(methods, 5);
+		checkResult(methods, 9);
 		// only protected methods setters (static)
 		methods = Introspector.findAllMethods(foo, "", -1, Public.NO, Static.YES);
-		checkResult(methods, 2);
+		checkResult(methods, 4);
 	}
 
 	public void testGetAllImplementedInterfaces() throws CoreException, IOException {
@@ -126,10 +126,10 @@ public class IntrospectorTest extends BeansCoreTestCase {
 		IProject project = createPredefinedProject("validation");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		Set<IMethod> methods = Introspector.getAllMethods(foo);
-		checkResult(methods, 11);
+		checkResult(methods, 24);
 		IType base = JdtUtils.getJavaType(project, "org.springframework.Base");
 		methods = Introspector.getAllMethods(base);
-		checkResult(methods, 7);
+		checkResult(methods, 20);
 	}
 
 	private void checkResult(Set<IMethod> methods, int expectedSize) {
