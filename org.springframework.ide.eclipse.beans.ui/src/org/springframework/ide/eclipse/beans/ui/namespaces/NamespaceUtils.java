@@ -190,7 +190,10 @@ public class NamespaceUtils {
 
 		Collections.sort(namespaceDefinitions, new Comparator<INamespaceDefinition>() {
 			public int compare(INamespaceDefinition o1, INamespaceDefinition o2) {
-				return o1.getNamespacePrefix().compareTo(o2.getNamespacePrefix());
+				if (o1 != null && o1.getNamespacePrefix() != null && o2 != null && o2.getNamespacePrefix() != null) {
+					return o1.getNamespacePrefix().compareTo(o2.getNamespacePrefix());
+				}
+				return 0;
 			}
 		});
 
