@@ -73,9 +73,20 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 	 */
 	private List<String> ignorableClasses = null;
 
+	/**
+	 * Internal list of bean names that should be ignored by this validation rule.
+	 */
+	private List<String> ignorableBeans = new ArrayList<String>();
+
 	public void setIgnorableClasses(String classNames) {
 		if (StringUtils.hasText(classNames)) {
 			this.ignorableClasses = Arrays.asList(StringUtils.delimitedListToStringArray(classNames, ",", "\r\n\f "));
+		}
+	}
+
+	public void setIgnorableBeans(String beanNames) {
+		if (StringUtils.hasText(beanNames)) {
+			this.ignorableBeans = Arrays.asList(StringUtils.delimitedListToStringArray(beanNames, ",", "\r\n\f "));
 		}
 	}
 
@@ -227,8 +238,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 	 */
 	private void validateBeanReference(Node n, Node attribute, IXmlValidationContext context) {
 		String beanName = attribute.getNodeValue();
-		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName)
-				&& !BeanReferenceRule.BEANS_TO_IGNORE.contains(beanName)) {
+		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName) && !ignorableBeans.contains(beanName)) {
 			try {
 				BeanDefinition refBd = context.getCompleteRegistry().getBeanDefinition(beanName);
 				if (refBd.isAbstract() || (refBd.getBeanClassName() == null && refBd.getFactoryBeanName() == null)) {

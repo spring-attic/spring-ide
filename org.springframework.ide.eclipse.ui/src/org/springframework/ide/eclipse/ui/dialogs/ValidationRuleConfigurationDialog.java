@@ -76,14 +76,14 @@ public class ValidationRuleConfigurationDialog extends TrayDialog {
 
 		Composite composite = new Composite(parentComposite, SWT.NULL);
 		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
+		layout.numColumns = 1;
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		GridData labelData = new GridData();
-		labelData.widthHint = 120;
+//		labelData.widthHint = 120;
 		GridData textData = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL);
-
+		textData.widthHint = 550;
 		for (Map.Entry<String, String> entry : propertyValues.entrySet()) {
 			Label label = new Label(composite, SWT.NONE);
 			label.setText(validationRule.getPropertyDescription(entry.getKey()) + ":");

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 	/**
 	 * Internal list of full-qualified class names that should be ignored by this validation rule.
 	 */
-	private List<String> ignorableClasses = null;
+	private List<String> ignorableClasses = new ArrayList<String>();
 
 	public void setIgnorableClasses(String classNames) {
 		if (StringUtils.hasText(classNames)) {

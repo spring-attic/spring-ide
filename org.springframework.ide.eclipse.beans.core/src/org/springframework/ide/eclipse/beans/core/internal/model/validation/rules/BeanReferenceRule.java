@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.util.StringUtils;
 
 /**
  * Validates a given {@link IBean}'s or {@link IBeansValueHolder}'s bean reference(s).
@@ -50,8 +52,16 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  */
 public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IBeansValidationContext> {
 
-	/** Magic beans names that should not be reported as invalid bean reference */
-	public static final List<String> BEANS_TO_IGNORE = Arrays.asList(new String[] { "bundleContext" });
+	/**
+	 * Internal list of bean names that should be ignored by this validation rule.
+	 */
+	private List<String> ignorableBeans = new ArrayList<String>();
+
+	public void setIgnorableBeans(String beanNames) {
+		if (StringUtils.hasText(beanNames)) {
+			this.ignorableBeans = Arrays.asList(StringUtils.delimitedListToStringArray(beanNames, ",", "\r\n\f "));
+		}
+	}
 
 	/**
 	 * Returns <code>true</code> if this rule is able to validate the given {@link IModelElement} with the specified
@@ -95,7 +105,7 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 		if (bean.isChildBean()) {
 			String parentName = bean.getParentName();
 			if (parentName != null && !SpringCoreUtils.hasPlaceHolder(parentName)
-					&& !BEANS_TO_IGNORE.contains(parentName)) {
+					&& !ignorableBeans.contains(parentName)) {
 				try {
 					context.getCompleteRegistry().getBeanDefinition(parentName);
 				}
@@ -117,7 +127,7 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 	}
 
 	private void validateDependsOnBean(IBean bean, String beanName, IBeansValidationContext context) {
-		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName) && !BEANS_TO_IGNORE.contains(beanName)) {
+		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName) && !ignorableBeans.contains(beanName)) {
 			try {
 				BeanDefinition dependsBd = context.getCompleteRegistry().getBeanDefinition(beanName);
 				if (dependsBd.isAbstract()
@@ -148,7 +158,7 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 	}
 
 	private void validateBeanReference(IResourceModelElement element, IBeansValidationContext context, String beanName) {
-		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName) && !BEANS_TO_IGNORE.contains(beanName)) {
+		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName) && !ignorableBeans.contains(beanName)) {
 			try {
 				BeanDefinition refBd = context.getCompleteRegistry().getBeanDefinition(beanName);
 				if (refBd.isAbstract() || (refBd.getBeanClassName() == null && refBd.getFactoryBeanName() == null)) {
