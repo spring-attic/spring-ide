@@ -10,14 +10,26 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -34,6 +46,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -47,6 +60,11 @@ import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Some helper methods.
@@ -61,6 +79,34 @@ public final class SpringCoreUtils {
 	public static final String EL_PLACEHOLDER_PREFIX = "#{";
 
 	public static final String PLACEHOLDER_SUFFIX = "}";
+
+	private static final String SOURCE_PATH = "source-path";
+
+	private static final String DEPLOY_PATH = "deploy-path";
+
+	private static final String XPATH_EXPRESSION = "//project-modules/wb-module/wb-resource";
+
+	private static XPathExpression expression;
+
+	private static DocumentBuilder builder;
+
+	static {
+		try {
+			XPathFactory newInstance = XPathFactory.newInstance();
+			XPath xpath = newInstance.newXPath();
+			expression = xpath.compile(XPATH_EXPRESSION);
+		}
+		catch (XPathExpressionException e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
+			builder = xmlFact.newDocumentBuilder();
+		}
+		catch (ParserConfigurationException e) {
+		}
+	}
 
 	/**
 	 * Folder name of OSGi bundle manifests directories
@@ -548,5 +594,57 @@ public final class SpringCoreUtils {
 		}
 		// not found
 		return null;
+	}
+
+	public static IFile getDeploymentDescriptor(IProject project) {
+		if (SpringCoreUtils.hasProjectFacet(project, "jst.web")) {
+			IFile settingsFile = project.getFile(".settings/org.eclipse.wst.common.component");
+			if (settingsFile.exists()) {
+				try {
+					NodeList nodes = (NodeList) expression.evaluate(parseDocument(settingsFile.getContents()),
+							XPathConstants.NODESET);
+					for (int i = 0; i < nodes.getLength(); i++) {
+						Element element = (Element) nodes.item(i);
+						if ("/".equals(element.getAttribute(DEPLOY_PATH))) {
+							String path = element.getAttribute(SOURCE_PATH);
+							if (path != null) {
+								IFile deploymentDescriptor = project.getFile(new Path(path).append("WEB-INF").append(
+										"web.xml"));
+								if (deploymentDescriptor.exists()) {
+									return deploymentDescriptor;
+								}
+							}
+						}
+					}
+				}
+				catch (Exception e) {
+					SpringCore.log(e);
+				}
+			}
+		}
+		return null;
+	}
+
+	public static Document parseDocument(InputStream inputStream) {
+		try {
+			Document doc = builder.parse(new InputSource(inputStream));
+			return doc;
+		}
+		catch (SAXException e) {
+			throw new RuntimeException(e);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		finally {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				}
+				catch (IOException e) {
+					// nothing to do
+				}
+			}
+		}
 	}
 }
