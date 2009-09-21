@@ -210,7 +210,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder 
 			catch (Throwable e) {
 				AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
 						"AspectDefinitionBuilder.exceptionOnAdvisorNode", aspectNode));
-				Activator.log(e);
+//				Activator.log(e);
 			}
 		}
 	}
