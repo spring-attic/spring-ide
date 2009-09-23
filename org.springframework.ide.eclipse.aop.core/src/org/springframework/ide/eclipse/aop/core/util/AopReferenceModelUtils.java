@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
@@ -48,6 +49,17 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 public class AopReferenceModelUtils {
 
 	private static final String JAVA_FILE_EXTENSION = ".java";
+
+	public static String getJavaElementLinkNameForMarker(IMember je) {
+		if (je == null) {
+			return "";
+		}
+		// use element name instead, qualified with parent
+		if (je instanceof IMethod) {
+			return ((IMethod) je).getDeclaringType().getFullyQualifiedName() + '.' + readableName((IMethod) je);
+		}
+		return getJavaElementLinkName(je);
+	}
 
 	public static String getJavaElementLinkName(IJavaElement je) {
 		if (je == null) {
@@ -82,7 +94,7 @@ public class AopReferenceModelUtils {
 
 	public static String readableName(IMethod method) {
 
-		StringBuffer buffer = new StringBuffer(method.getDeclaringType().getFullyQualifiedName()).append(".").append(method.getElementName());
+		StringBuffer buffer = new StringBuffer(method.getElementName());
 		buffer.append('(');
 		String[] parameterTypes = method.getParameterTypes();
 		int length;
