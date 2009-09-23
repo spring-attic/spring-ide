@@ -173,10 +173,8 @@ public class AopReferenceModelBuilderJob extends Job {
 			final IResource file, final IAopProject aopProject, final AspectDefinitionMatcher matcher,
 			IProgressMonitor monitor) {
 		try {
-			AopLog
-					.log(AopLog.BUILDER, Activator.getFormattedMessage(
-							"AopReferenceModelBuilder.processingBeanDefinition", bean, bean.getElementResource()
-									.getFullPath()));
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+				"AopReferenceModelBuilder.processingBeanDefinition", bean, bean.getElementResource().getFullPath()));
 
 			// check if bean is abstract
 			if (bean.isAbstract()) {

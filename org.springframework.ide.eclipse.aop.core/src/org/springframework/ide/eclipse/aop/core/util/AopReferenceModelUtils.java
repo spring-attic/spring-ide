@@ -82,7 +82,7 @@ public class AopReferenceModelUtils {
 
 	public static String readableName(IMethod method) {
 
-		StringBuffer buffer = new StringBuffer(method.getElementName());
+		StringBuffer buffer = new StringBuffer(method.getDeclaringType().getFullyQualifiedName()).append(".").append(method.getElementName());
 		buffer.append('(');
 		String[] parameterTypes = method.getParameterTypes();
 		int length;

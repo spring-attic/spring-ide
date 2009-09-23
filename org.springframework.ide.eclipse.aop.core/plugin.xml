@@ -197,10 +197,13 @@
 	<extension
        point="org.springframework.ide.eclipse.aop.core.aspectdefinitionbuilder">
     	<aspectDefinitionBuilder
-        	  class="org.springframework.ide.eclipse.aop.core.internal.model.builder.XmlAspectDefinitionBuilder">
+        	class="org.springframework.ide.eclipse.aop.core.internal.model.builder.XmlAspectDefinitionBuilder">
     	</aspectDefinitionBuilder>
     	<aspectDefinitionBuilder
           	class="org.springframework.ide.eclipse.aop.core.internal.model.builder.AnnotationAspectDefinitionBuilder">
+    	</aspectDefinitionBuilder>
+    	<aspectDefinitionBuilder
+          	class="org.springframework.ide.eclipse.aop.core.internal.model.builder.TransactionalXmlAspectDefinitionBuilder">
     	</aspectDefinitionBuilder>
  	</extension>
 

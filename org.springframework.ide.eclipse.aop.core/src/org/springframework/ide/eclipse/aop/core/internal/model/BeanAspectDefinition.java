@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
-		IPersistableElement {
+public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPersistableElement {
 
 	protected String adivceMethodName;
 
@@ -72,7 +71,7 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		hashCode = hashCode + ObjectUtils.nullSafeHashCode(throwing);
 		return 12 * hashCode;
 	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -106,7 +105,7 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 			return false;
 		return ObjectUtils.nullSafeEquals(this.throwing, that.throwing);
 	}
-	
+
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(IPersistableElement.class)) {
 			return this;
@@ -117,8 +116,7 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 	public Method getAdviceMethod() {
 		try {
 			Class<?> aspectClass = ClassUtils.loadClass(this.aspectClassName);
-			Method method = BeanUtils.resolveSignature(this.adivceMethodName,
-					aspectClass);
+			Method method = BeanUtils.resolveSignature(this.adivceMethodName, aspectClass);
 			return method;
 		}
 		catch (ClassNotFoundException e) {
@@ -174,62 +172,34 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		return type;
 	}
 
-
 	public boolean isProxyTargetClass() {
 		return this.isProxyTargetClass;
 	}
-
+	
 	public void saveState(IMemento memento) {
-		memento
-				.putString(
-						BeanAspectDefinitionElementFactory.ADVICE_METHOD_NAME_ATTRIBUTE,
-						this.adivceMethodName);
-		memento.putString(
-				BeanAspectDefinitionElementFactory.ADVICE_CLASS_NAME_ATTRIBUTE,
-				this.aspectClassName);
-		if (this.adivceMethodParameterTypes != null
-				&& this.adivceMethodParameterTypes.length > 0) {
-			memento
-					.putString(
-							BeanAspectDefinitionElementFactory.ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE,
-							StringUtils
-									.arrayToCommaDelimitedString(this.adivceMethodParameterTypes));
+		memento.putString(BeanAspectDefinitionElementFactory.ADVICE_METHOD_NAME_ATTRIBUTE, this.adivceMethodName);
+		memento.putString(BeanAspectDefinitionElementFactory.ADVICE_CLASS_NAME_ATTRIBUTE, this.aspectClassName);
+		if (this.adivceMethodParameterTypes != null && this.adivceMethodParameterTypes.length > 0) {
+			memento.putString(BeanAspectDefinitionElementFactory.ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE, StringUtils
+					.arrayToCommaDelimitedString(this.adivceMethodParameterTypes));
 		}
-		memento.putString(
-				BeanAspectDefinitionElementFactory.ASPECT_NAME_ATTRIBUTE,
-				this.aspectName);
-		memento
-				.putString(
-						BeanAspectDefinitionElementFactory.POINTCUT_EXPRESSION_ATTRIBUTE,
-						this.pointcutExpressionString);
-		memento.putString(
-				BeanAspectDefinitionElementFactory.RETURNING_ATTRIBUTE,
-				this.returning);
-		memento.putString(
-				BeanAspectDefinitionElementFactory.THROWING_ATTRIBUTE,
-				this.throwing);
+		memento.putString(BeanAspectDefinitionElementFactory.ASPECT_NAME_ATTRIBUTE, this.aspectName);
+		memento.putString(BeanAspectDefinitionElementFactory.POINTCUT_EXPRESSION_ATTRIBUTE,
+				this.pointcutExpressionString);
+		memento.putString(BeanAspectDefinitionElementFactory.RETURNING_ATTRIBUTE, this.returning);
+		memento.putString(BeanAspectDefinitionElementFactory.THROWING_ATTRIBUTE, this.throwing);
 		if (this.argNames != null && this.argNames.length > 0) {
-			memento.putString(
-					BeanAspectDefinitionElementFactory.ARG_NAMES_ATTRIBUTE,
-					StringUtils.arrayToCommaDelimitedString(this.argNames));
+			memento.putString(BeanAspectDefinitionElementFactory.ARG_NAMES_ATTRIBUTE, StringUtils
+					.arrayToCommaDelimitedString(this.argNames));
 		}
-		memento
-				.putInteger(
-						BeanAspectDefinitionElementFactory.ASPECT_START_LINE_NUMBER_ATTRIBUTE,
-						this.aspectStartLineNumber);
-		memento
-		.putInteger(
-				BeanAspectDefinitionElementFactory.ASPECT_END_LINE_NUMBER_ATTRIBUTE,
+		memento.putInteger(BeanAspectDefinitionElementFactory.ASPECT_START_LINE_NUMBER_ATTRIBUTE,
+				this.aspectStartLineNumber);
+		memento.putInteger(BeanAspectDefinitionElementFactory.ASPECT_END_LINE_NUMBER_ATTRIBUTE,
 				this.aspectEndLineNumber);
-		memento.putString(BeanAspectDefinitionElementFactory.FILE_ATTRIBUTE,
-				this.file.getFullPath().toString());
-		memento
-				.putString(
-						BeanAspectDefinitionElementFactory.PROXY_TARGET_CLASS_ATTRIBUTE,
-						Boolean.toString(this.isProxyTargetClass));
-		memento.putString(
-				BeanAspectDefinitionElementFactory.ADVICE_TYPE_ATTRIBUTE,
-				this.type.toString());
+		memento.putString(BeanAspectDefinitionElementFactory.FILE_ATTRIBUTE, this.file.getFullPath().toString());
+		memento.putString(BeanAspectDefinitionElementFactory.PROXY_TARGET_CLASS_ATTRIBUTE, Boolean
+				.toString(this.isProxyTargetClass));
+		memento.putString(BeanAspectDefinitionElementFactory.ADVICE_TYPE_ATTRIBUTE, this.type.toString());
 	}
 
 	public void setAdviceMethodName(String adivceMethodName) {

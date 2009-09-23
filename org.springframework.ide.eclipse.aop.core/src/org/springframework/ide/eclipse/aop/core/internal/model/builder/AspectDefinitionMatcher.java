@@ -46,8 +46,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Utility class that tries to locate matches of Spring AOP configurations given by
- * {@link IAspectDefinition}.
+ * Utility class that tries to locate matches of Spring AOP configurations given by {@link IAspectDefinition}.
  * <p>
  * Uses Spring AOP's {@link AspectJExpressionPointcut} infrastructure to determine matches.
  * <p>
@@ -69,8 +68,8 @@ public class AspectDefinitionMatcher {
 	 * @return the set of {@link IMethod} that match the given {@link IAspectDefinition}
 	 * @throws Throwable any exception occurred during reflective invocation
 	 */
-	public Set<IMethod> matches(final Class<?> targetClass, final IBean targetBean,
-			final IAspectDefinition info, final IProject project) throws Throwable {
+	public Set<IMethod> matches(final Class<?> targetClass, final IBean targetBean, final IAspectDefinition info,
+			final IProject project) throws Throwable {
 		Set<IMethod> matches = new LinkedHashSet<IMethod>();
 
 		// check aspect definition
@@ -86,15 +85,15 @@ public class AspectDefinitionMatcher {
 			beanNames.addAll(Arrays.asList(targetBean.getAliases()));
 		}
 		for (String beanName : beanNames) {
-			ClassUtils.invokeMethod(proxyCreationContextClass, "setCurrentProxiedBeanName",
-					new Object[] { beanName }, new Class[] { String.class });
+			ClassUtils.invokeMethod(proxyCreationContextClass, "setCurrentProxiedBeanName", new Object[] { beanName },
+					new Class[] { String.class });
 			try {
 				matches.addAll(internalMatches(targetClass, targetBean, info, project));
 			}
 			finally {
 				// reset bean name on thread local
-				ClassUtils.invokeMethod(proxyCreationContextClass, "setCurrentProxiedBeanName",
-						new Object[] { null }, new Class[] { String.class });
+				ClassUtils.invokeMethod(proxyCreationContextClass, "setCurrentProxiedBeanName", new Object[] { null },
+						new Class[] { String.class });
 			}
 		}
 		return matches;
@@ -103,8 +102,8 @@ public class AspectDefinitionMatcher {
 	/**
 	 * Checks if the given matching candidate method is a legal match for Spring AOP.
 	 * <p>
-	 * Legal matches need to be public and either defined on the class and/or interface depending on
-	 * the <code>isProxyTargetClass</code>.
+	 * Legal matches need to be public and either defined on the class and/or interface depending on the
+	 * <code>isProxyTargetClass</code>.
 	 */
 	private boolean checkMethod(Class targetClass, Method targetMethod, boolean isProxyTargetClass) {
 		Assert.notNull(targetClass);
@@ -117,8 +116,7 @@ public class AspectDefinitionMatcher {
 			return true;
 		}
 		else {
-			Class[] targetInterfaces = org.springframework.util.ClassUtils
-					.getAllInterfacesForClass(targetClass);
+			Class[] targetInterfaces = org.springframework.util.ClassUtils.getAllInterfacesForClass(targetClass);
 			// if target class does not implement any interface allow match
 			if (targetInterfaces == null || targetInterfaces.length == 0) {
 				return true;
@@ -126,8 +124,7 @@ public class AspectDefinitionMatcher {
 			for (Class targetInterface : targetInterfaces) {
 				Method[] targetInterfaceMethods = targetInterface.getMethods();
 				for (Method targetInterfaceMethod : targetInterfaceMethods) {
-					Method targetMethodGuess = AopUtils.getMostSpecificMethod(
-							targetInterfaceMethod, targetClass);
+					Method targetMethodGuess = AopUtils.getMostSpecificMethod(targetInterfaceMethod, targetClass);
 					if (targetMethod.equals(targetMethodGuess)) {
 						return true;
 					}
@@ -136,12 +133,12 @@ public class AspectDefinitionMatcher {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Checks if the given <code>targetClass</code> can be proxied in Spring AOP.
 	 */
 	private boolean checkClass(Class targetClass, boolean isProxyTargetClass) throws ClassNotFoundException {
-		
+
 		// check if bean is an infrastructure class
 		if (isInfrastructureClass(targetClass)) {
 			return false;
@@ -151,7 +148,7 @@ public class AspectDefinitionMatcher {
 		if (Modifier.isFinal(targetClass.getModifiers()) && isProxyTargetClass) {
 			return false;
 		}
-		
+
 		// all fine; proceed with the given class
 		return true;
 	}
@@ -172,23 +169,20 @@ public class AspectDefinitionMatcher {
 			Class<?> aspectJAdviceClass = AspectJAdviceClassFactory.getAspectJAdviceClass(info);
 			if (aspectJAdviceClass != null) {
 				Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
-				Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc,
-						null });
+				Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc, null });
 				if (info.getType() == ADVICE_TYPE.AFTER_RETURNING) {
 					if (info.getReturning() != null) {
-						ClassUtils.invokeMethod(aspectJAdvice, "setReturningName", info
-								.getReturning());
+						ClassUtils.invokeMethod(aspectJAdvice, "setReturningName", info.getReturning());
 					}
 				}
 				else if (info.getType() == ADVICE_TYPE.AFTER_THROWING) {
 					if (info.getThrowing() != null) {
-						ClassUtils.invokeMethod(aspectJAdvice, "setThrowingName", info
-								.getThrowing());
+						ClassUtils.invokeMethod(aspectJAdvice, "setThrowingName", info.getThrowing());
 					}
 				}
 				if (info.getArgNames() != null && info.getArgNames().length > 0) {
-					ClassUtils.invokeMethod(aspectJAdvice, "setArgumentNamesFromStringArray",
-							new Object[] { info.getArgNames() });
+					ClassUtils.invokeMethod(aspectJAdvice, "setArgumentNamesFromStringArray", new Object[] { info
+							.getArgNames() });
 				}
 				return ClassUtils.invokeMethod(aspectJAdvice, "getPointcut");
 			}
@@ -212,15 +206,14 @@ public class AspectDefinitionMatcher {
 		}
 		// don't set the declaration scope if no aspect class is yet given
 		if (info.getAspectClassName() != null) {
-			ClassUtils.invokeMethod(pc, "setPointcutDeclarationScope", ClassUtils.loadClass(info
-					.getAspectClassName()));
+			ClassUtils.invokeMethod(pc, "setPointcutDeclarationScope", ClassUtils.loadClass(info.getAspectClassName()));
 		}
 		return pc;
 	}
 
 	private Set<IMethod> internalMatches(final Class<?> targetClass, final IBean targetBean,
 			final IAspectDefinition info, final IProject project) throws Throwable {
-		
+
 		// check if bean class can be processed
 		if (!checkClass(targetClass, info.isProxyTargetClass())) {
 			return Collections.emptySet();
@@ -228,8 +221,7 @@ public class AspectDefinitionMatcher {
 
 		// check if bean is synthetic as this would mean that the BeanPostProcessor would not load
 		BeanDefinition beanDefinition = BeansModelUtils.getMergedBeanDefinition(targetBean, null);
-		if (beanDefinition instanceof RootBeanDefinition
-				&& ((RootBeanDefinition) beanDefinition).isSynthetic()) {
+		if (beanDefinition instanceof RootBeanDefinition && ((RootBeanDefinition) beanDefinition).isSynthetic()) {
 			return Collections.emptySet();
 		}
 
@@ -246,21 +238,40 @@ public class AspectDefinitionMatcher {
 		}
 
 		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass.getName());
-
+		
+		
+		// TODO CD here is room for speed improvements by collecting all vadil methods in one go and then ask for matches
 		ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
-			public void doWith(Method method) throws IllegalArgumentException,
-					IllegalAccessException {
+			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 
-				if (checkMethod(targetClass, method, info.isProxyTargetClass())
-						&& !matchingMethods.contains(method)) {
+				if (checkMethod(targetClass, method, info.isProxyTargetClass()) && !matchingMethods.contains(method)) {
 					try {
-						boolean matches = (Boolean) ClassUtils.invokeMethod(
-								aspectJExpressionPointcut, "matches", method, targetClass);
+						boolean matches = (Boolean) ClassUtils.invokeMethod(aspectJExpressionPointcut, "matches",
+								method, targetClass);
 						if (matches) {
-							IMethod jdtMethod = JdtUtils.getMethod(jdtTargetType, method.getName(),
-									method.getParameterTypes());
-							if (jdtMethod != null) {
-								matchingMethods.add(jdtMethod);
+							addMatchingJdtMethod(matchingMethods, jdtTargetType, method);
+						}
+						// If in proxy interface mode we can match on methods from the interface rather then the actual
+						// class
+						else if (!info.isProxyTargetClass()) {
+							Class[] targetInterfaces = org.springframework.util.ClassUtils
+									.getAllInterfacesForClass(targetClass);
+
+							if (targetInterfaces != null) {
+								for (Class targetInterface : targetInterfaces) {
+									Method[] targetInterfaceMethods = targetInterface.getMethods();
+									for (Method targetInterfaceMethod : targetInterfaceMethods) {
+										Method targetMethodGuess = AopUtils.getMostSpecificMethod(
+												targetInterfaceMethod, targetClass);
+										if (method.equals(targetMethodGuess)) {
+											matches = (Boolean) ClassUtils.invokeMethod(aspectJExpressionPointcut,
+													"matches", targetInterfaceMethod, targetInterface);
+											if (matches) {
+												addMatchingJdtMethod(matchingMethods, jdtTargetType, method);
+											}
+										}
+									}
+								}
 							}
 						}
 					}
@@ -276,6 +287,14 @@ public class AspectDefinitionMatcher {
 							throw new RuntimeException(e);
 						}
 					}
+				}
+			}
+
+			private void addMatchingJdtMethod(final Set<IMethod> matchingMethods, final IType jdtTargetType,
+					Method method) {
+				IMethod jdtMethod = JdtUtils.getMethod(jdtTargetType, method.getName(), method.getParameterTypes());
+				if (jdtMethod != null) {
+					matchingMethods.add(jdtMethod);
 				}
 			}
 		});
