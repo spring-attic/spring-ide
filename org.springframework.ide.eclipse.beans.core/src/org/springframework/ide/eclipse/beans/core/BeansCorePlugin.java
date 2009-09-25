@@ -28,8 +28,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
-import org.osgi.framework.SynchronousBundleListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
@@ -49,8 +49,7 @@ import org.springframework.osgi.util.OsgiBundleUtils;
 public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/**
-	 * Plugin identifier for Spring Beans Core (value
-	 * <code>org.springframework.ide.eclipse.beans.core</code>).
+	 * Plugin identifier for Spring Beans Core (value <code>org.springframework.ide.eclipse.beans.core</code>).
 	 */
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.core";
 
@@ -60,12 +59,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
 
 	/** preference key for defining the parsing timeout */
-	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID
-			+ ".timeoutConfigLoading";
+	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID + ".timeoutConfigLoading";
 
 	/** preference key to enable namespace versions per namespace */
 	public static final String NAMESPACE_VERSION_PROJECT_PREFERENCE_ID = "enable.namespace.versions";
-	
+
 	/** preference key to specify the default namespace version */
 	public static final String NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID = "default.version.";
 
@@ -173,7 +171,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static final IBeansModel getModel() {
 		return getDefault().model;
 	}
-	
+
 	public static final INamespaceDefinitionResolver getNamespaceDefinitionResolver() {
 		return getDefault().nsManager.getNamespacePlugins();
 	}
@@ -241,8 +239,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(
-				createErrorStatus(getResourceString("Plugin.internal_error"), exception));
+		getDefault().getLog().log(createErrorStatus(getResourceString("Plugin.internal_error"), exception));
 	}
 
 	/**
@@ -265,33 +262,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	}
 
 	protected void maybeAddNamespaceHandlerFor(final Bundle bundle, final boolean isLazy) {
-		Job job = new Job("Registering Namespace") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				nsManager.maybeAddNamespaceHandlerFor(bundle, isLazy);
-				return Status.OK_STATUS;
-			}
-			
-		};
-		job.setSystem(true);
-		job.setPriority(Job.INTERACTIVE);
-		job.schedule();
+		nsManager.maybeAddNamespaceHandlerFor(bundle, isLazy);
 	}
 
 	protected void maybeRemoveNameSpaceHandlerFor(final Bundle bundle) {
-		Job job = new Job("Ungegistering Namespace") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				nsManager.maybeRemoveNameSpaceHandlerFor(bundle);
-				return Status.OK_STATUS;
-			}
-			
-		};
-		job.setSystem(true);
-		job.setPriority(Job.INTERACTIVE);
-		job.schedule();
+		nsManager.maybeRemoveNameSpaceHandlerFor(bundle);
 	}
 
 	protected void initNamespaceHandlers(BundleContext context) {
@@ -321,11 +296,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/**
 	 * Common base class for {@link ContextLoaderListener} listeners.
 	 */
-	private abstract class BaseListener implements SynchronousBundleListener {
+	private abstract class BaseListener implements BundleListener {
 
 		/**
-		 * common cache used for tracking down bundles started lazily so they don't get processed
-		 * twice (once when started lazy, once when started fully)
+		 * common cache used for tracking down bundles started lazily so they don't get processed twice (once when
+		 * started lazy, once when started fully)
 		 */
 		protected Map<Bundle, Object> lazyBundleCache = new WeakHashMap<Bundle, Object>();
 
@@ -347,8 +322,8 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		}
 
 		/**
-		 * A bundle has been started, stopped, resolved, or unresolved. This method is a synchronous
-		 * callback, do not do any long-running work in this thread.
+		 * A bundle has been started, stopped, resolved, or unresolved. This method is a synchronous callback, do not do
+		 * any long-running work in this thread.
 		 * 
 		 * @see org.osgi.framework.SynchronousBundleListener#bundleChanged
 		 */
@@ -370,16 +345,14 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Bundle listener used for detecting namespace handler/resolvers. Exists as a separate listener
-	 * so that it can be registered early to avoid race conditions with bundles in INSTALLING state
-	 * but still to avoid premature context creation before the Spring {@link ContextLoaderListener}
-	 * is not fully initialized.
+	 * Bundle listener used for detecting namespace handler/resolvers. Exists as a separate listener so that it can be
+	 * registered early to avoid race conditions with bundles in INSTALLING state but still to avoid premature context
+	 * creation before the Spring {@link ContextLoaderListener} is not fully initialized.
 	 */
 	private class NamespaceBundleLister extends BaseListener {
 
 		@Override
-		protected void handleEvent(BundleEvent event) {
-
+		protected void handleEvent(final BundleEvent event) {
 			Bundle bundle = event.getBundle();
 
 			switch (event.getType()) {
