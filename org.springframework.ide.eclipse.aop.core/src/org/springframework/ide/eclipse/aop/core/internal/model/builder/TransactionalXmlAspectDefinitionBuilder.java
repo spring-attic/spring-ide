@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.util.List;
+import java.util.Set;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.core.resources.IFile;
@@ -22,6 +23,9 @@ import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
@@ -41,6 +45,8 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("restriction")
 public class TransactionalXmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder implements
 		IAspectDefinitionBuilder {
+
+	private static final String TRANSACTION_INTERCEPTOR_CLASS = "org.springframework.transaction.interceptor.TransactionInterceptor";
 
 	private static final String ANNOTATION_EXPRESSION = "(@within(org.springframework.transaction.annotation.Transactional) || @annotation(org.springframework.transaction.annotation.Transactional)) && execution(* *..*(..))";
 
@@ -90,7 +96,21 @@ public class TransactionalXmlAspectDefinitionBuilder extends AbstractAspectDefin
 		JavaAdvisorDefinition info = new JavaAdvisorDefinition();
 		extractLineNumbers(info, (IDOMNode) aspectNode);
 		info.setPointcutExpression(pointcutExpression);
-		info.setAspectClassName("org.springframework.transaction.interceptor.TransactionInterceptor");
+		info.setAspectClassName(TRANSACTION_INTERCEPTOR_CLASS);
+		
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		if (config != null) {
+			Set<IBean> beans = config.getBeans(TRANSACTION_INTERCEPTOR_CLASS);
+			if (beans.size() > 0) {
+				for (IBean bean : beans) {
+					if (info.getAspectStartLineNumber() <= bean.getElementStartLine() && info.getAspectEndLineNumber() >= bean.getElementEndLine()) {
+						info.setAspectName(bean.getElementName());
+						break;
+					}
+				}
+			}
+		}
+
 		info.setType(ADVICE_TYPE.AROUND);
 		info.setAdviceMethodName("invoke");
 		info.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class.getName() });
