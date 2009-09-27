@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,22 +22,17 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 
 /**
- * The images provided by the Spring Beans UI plugin. Initialize the image
- * registry by declaring all of the required graphics. This involves creating
- * JFace image descriptors describing how to create/find the image should it be
- * needed. The image is not actually allocated until requested.
+ * The images provided by the Spring Beans UI plugin. Initialize the image registry by declaring all of the required
+ * graphics. This involves creating JFace image descriptors describing how to create/find the image should it be needed.
+ * The image is not actually allocated until requested.
  * 
- * Prefix conventions Wizard Banners WIZBAN_ Preference Banners PREF_BAN_
- * Property Page Banners PROPBAN_ Color toolbar CTOOL_ Enable toolbar ETOOL_
- * Disable toolbar DTOOL_ Local enabled toolbar ELCL_ Local Disable toolbar
- * DLCL_ Object large OBJL_ Object small OBJS_ View VIEW_ Product images PROD_
- * Misc images MISC_
+ * Prefix conventions Wizard Banners WIZBAN_ Preference Banners PREF_BAN_ Property Page Banners PROPBAN_ Color toolbar
+ * CTOOL_ Enable toolbar ETOOL_ Disable toolbar DTOOL_ Local enabled toolbar ELCL_ Local Disable toolbar DLCL_ Object
+ * large OBJL_ Object small OBJS_ View VIEW_ Product images PROD_ Misc images MISC_
  * 
- * Where are the images? The images (typically gifs) are found in the same
- * location as this plugin class. This may mean the same package directory as
- * the package holding this class. The images are declared using
- * <code>this.getClass()</code> to ensure they are looked up via this plugin
- * class.
+ * Where are the images? The images (typically gifs) are found in the same location as this plugin class. This may mean
+ * the same package directory as the package holding this class. The images are declared using
+ * <code>this.getClass()</code> to ensure they are looked up via this plugin class.
  * 
  * @see org.eclipse.jface.resource.ImageRegistry
  */
@@ -56,8 +51,7 @@ public class OsgiUIImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(Activator.getDefault().getBundle()
-					.getEntry("/"), ICON_PATH_PREFIX);
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle().getEntry("/"), ICON_PATH_PREFIX);
 		}
 		catch (MalformedURLException e) {
 		}
@@ -76,11 +70,17 @@ public class OsgiUIImages {
 	/**
 	 * Available cached Images in the Java plugin image registry.
 	 */
-	public static final String IMG_OBJS_OSGI = NAME_PREFIX
-			+ "spring_osgi_obj.gif";
+	public static final String IMG_OBJS_OSGI = NAME_PREFIX + "spring_osgi_obj.gif";
+	public static final String IMG_BLUEPRINT_OBJS_OSGI = NAME_PREFIX + "blueprint_obj.gif";
+	public static final String IMG_SERVICE_OBJS_OSGI = NAME_PREFIX + "service_obj.gif";
+	public static final String IMG_COMPONENT_OBJS_OSGI = NAME_PREFIX + "component_obj.gif";
+	public static final String IMG_REFERENCE_OBJS_OSGI = NAME_PREFIX + "reference_obj.gif";
 
-	public static final ImageDescriptor DESC_OBJS_OSGI = createManaged(
-			STRUCTURE, IMG_OBJS_OSGI);
+	public static final ImageDescriptor DESC_OBJS_OSGI = createManaged(STRUCTURE, IMG_OBJS_OSGI);
+	public static final ImageDescriptor DESC_BLUEPRINT_OBJS_OSGI = createManaged(STRUCTURE, IMG_BLUEPRINT_OBJS_OSGI);
+	public static final ImageDescriptor DESC_SERVICE_OBJS_OSGI = createManaged(STRUCTURE, IMG_SERVICE_OBJS_OSGI);
+	public static final ImageDescriptor DESC_REFERENCE_OBJS_OSGI = createManaged(STRUCTURE, IMG_REFERENCE_OBJS_OSGI);
+	public static final ImageDescriptor DESC_COMPONENT_OBJS_OSGI = createManaged(STRUCTURE, IMG_COMPONENT_OBJS_OSGI);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
@@ -91,16 +91,16 @@ public class OsgiUIImages {
 	}
 
 	/**
-	 * Sets the three image descriptors for enabled, disabled, and hovered to an
-	 * action. The actions are retrieved from the *tool16 folders.
+	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions are retrieved from
+	 * the *tool16 folders.
 	 */
 	public static void setToolImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "tool16", iconName);
 	}
 
 	/**
-	 * Sets the three image descriptors for enabled, disabled, and hovered to an
-	 * action. The actions are retrieved from the *lcl16 folders.
+	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions are retrieved from
+	 * the *lcl16 folders.
 	 */
 	public static void setLocalImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "lcl16", iconName);
@@ -113,8 +113,7 @@ public class OsgiUIImages {
 	static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
-			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
-					.hasNext();) {
+			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter.hasNext();) {
 				String key = iter.next();
 				imageRegistry.put(key, imageDescriptors.get(key));
 			}
@@ -125,11 +124,9 @@ public class OsgiUIImages {
 
 	// ---- Helper methods to access icons on the file system
 	// -------------------
-	private static void setImageDescriptors(IAction action, String type,
-			String relPath) {
+	private static void setImageDescriptors(IAction action, String type, String relPath) {
 		try {
-			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
-					"d" + type, relPath));
+			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL("d" + type, relPath));
 			if (id != null) {
 				action.setDisabledImageDescriptor(id);
 			}
@@ -137,19 +134,16 @@ public class OsgiUIImages {
 		catch (MalformedURLException e) {
 		}
 		/*
-		 * try { ImageDescriptor id =
-		 * ImageDescriptor.createFromURL(makeIconFileURL( "c" + type, relPath));
-		 * if (id != null) { action.setHoverImageDescriptor(id); } } catch
-		 * (MalformedURLException e) { BeansUIPlugin.log(e); }
+		 * try { ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL( "c" + type, relPath)); if (id !=
+		 * null) { action.setHoverImageDescriptor(id); } } catch (MalformedURLException e) { BeansUIPlugin.log(e); }
 		 */
 		action.setImageDescriptor(create("e" + type, relPath));
 	}
 
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
-			ImageDescriptor result = ImageDescriptor
-					.createFromURL(makeIconFileURL(prefix, name
-							.substring(NAME_PREFIX_LENGTH)));
+			ImageDescriptor result = ImageDescriptor.createFromURL(makeIconFileURL(prefix, name
+					.substring(NAME_PREFIX_LENGTH)));
 			if (imageDescriptors == null) {
 				imageDescriptors = new HashMap<String, ImageDescriptor>();
 			}
@@ -172,8 +166,7 @@ public class OsgiUIImages {
 		}
 	}
 
-	private static URL makeIconFileURL(String prefix, String name)
-			throws MalformedURLException {
+	private static URL makeIconFileURL(String prefix, String name) throws MalformedURLException {
 		if (ICON_BASE_URL == null) {
 			throw new MalformedURLException();
 		}

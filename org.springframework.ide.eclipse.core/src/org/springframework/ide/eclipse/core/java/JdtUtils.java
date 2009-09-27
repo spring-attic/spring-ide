@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -51,6 +52,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -357,25 +359,62 @@ public class JdtUtils {
 		return null;
 	}
 
+	public static IField getField(IType type, String fieldName, String parameterType) {
+		try {
+			Set<IField> methods = Introspector.getAllFields(type);
+			for (IField field : methods) {
+				if (field.getElementName().equals(fieldName)) {
+					return field;
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
 	private static String[] getParameterTypesAsStringArray(Class[] parameterTypes) {
 		String[] parameterTypesAsString = new String[parameterTypes.length];
 		for (int i = 0; i < parameterTypes.length; i++) {
-			parameterTypesAsString[i] = parameterTypes[i].getName();
+			parameterTypesAsString[i] = ClassUtils.getQualifiedName(parameterTypes[i]);
 		}
 		return parameterTypesAsString;
 	}
 
 	private static String[] getParameterTypesAsStringArray(IMethod method) {
+		Set<String> typeParameterNames = new HashSet<String>();
+		try {
+			for (ITypeParameter param : method.getDeclaringType().getTypeParameters()) {
+				typeParameterNames.add(param.getElementName());
+			}
+			for (ITypeParameter param : method.getTypeParameters()) {
+				typeParameterNames.add(param.getElementName());
+			}
+		}
+		catch (JavaModelException e) {
+		}
 		String[] parameterTypesAsString = new String[method.getParameterTypes().length];
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			parameterTypesAsString[i] = resolveClassNameBySignature(method.getParameterTypes()[i], method
-					.getDeclaringType());
+			String parameterTypeString = Signature.getElementType(method.getParameterTypes()[i]);
+			boolean isArray = !parameterTypeString.equals(method.getParameterTypes()[i]);
+			
+			String parameterType = resolveClassNameBySignature(parameterTypeString, method.getDeclaringType());
+			if (typeParameterNames.contains(parameterType)) {
+				parameterTypesAsString[i] = Object.class.getName() + (isArray ? ClassUtils.ARRAY_SUFFIX : "");
+			}
+			else {
+				parameterTypesAsString[i] = parameterType + (isArray ? ClassUtils.ARRAY_SUFFIX : "");
+			}
 		}
 		return parameterTypesAsString;
 	}
 
 	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je) {
 		return new DefaultProjectClassLoaderSupport(je);
+	}
+
+	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je, boolean useParentClassLoader) {
+		return new DefaultProjectClassLoaderSupport(je, useParentClassLoader);
 	}
 
 	public static boolean isAjdtPresent() {
@@ -752,7 +791,11 @@ public class JdtUtils {
 		private ClassLoader weavingClassLoader;
 
 		public DefaultProjectClassLoaderSupport(IProject javaProject) {
-			setupClassLoaders(javaProject);
+			this(javaProject, false);
+		}
+
+		public DefaultProjectClassLoaderSupport(IProject javaProject, boolean useParentClassLoader) {
+			setupClassLoaders(javaProject, useParentClassLoader);
 		}
 
 		/**
@@ -782,9 +825,9 @@ public class JdtUtils {
 			Thread.currentThread().setContextClassLoader(classLoader);
 		}
 
-		private void setupClassLoaders(IProject project) {
+		private void setupClassLoaders(IProject project, boolean useParentClassLoader) {
 			classLoader = Thread.currentThread().getContextClassLoader();
-			weavingClassLoader = ProjectClassLoaderCache.getClassLoader(project, false);
+			weavingClassLoader = ProjectClassLoaderCache.getClassLoader(project, useParentClassLoader);
 		}
 	}
 

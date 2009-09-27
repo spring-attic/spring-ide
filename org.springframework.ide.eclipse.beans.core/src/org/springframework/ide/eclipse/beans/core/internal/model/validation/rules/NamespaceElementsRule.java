@@ -56,13 +56,15 @@ import org.w3c.dom.NodeList;
  */
 public class NamespaceElementsRule extends AbstractXmlValidationRule {
 
-	private static final List<IAttributeValidator> ATTRIBUTE_VALIDATORS;
+	private final List<IAttributeValidator> ATTRIBUTE_VALIDATORS;
 
-	private static final List<IElementValidator> ELEMENT_VALIDATORS;
+	private final List<IElementValidator> ELEMENT_VALIDATORS;
 
-	static {
+	{
 		ATTRIBUTE_VALIDATORS = new ArrayList<IAttributeValidator>();
 		ATTRIBUTE_VALIDATORS.add(new UtilStaticFieldAttributeValidator());
+		ATTRIBUTE_VALIDATORS.add(new BlueprintInterfaceAttributeValidator());
+		ATTRIBUTE_VALIDATORS.add(new BlueprintDependesOnAttributeValidator());
 
 		ELEMENT_VALIDATORS = new ArrayList<IElementValidator>();
 		ELEMENT_VALIDATORS.add(new OsgiInterfacesElementValidator());
@@ -295,7 +297,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 	 * 	&lt;util:constant static-field=&quot;org.springframework.core.Ordered.HIGHEST_PRECEDENCE&quot;/&gt;
 	 * </pre>
 	 */
-	private static class UtilStaticFieldAttributeValidator implements IAttributeValidator {
+	private class UtilStaticFieldAttributeValidator implements IAttributeValidator {
 
 		public boolean supports(Node n, Node attribute) {
 			return "http://www.springframework.org/schema/util".equals(n.getNamespaceURI())
@@ -345,10 +347,11 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 	 * 	&lt;/osgi:reference&gt;
 	 * </pre>
 	 */
-	private static class OsgiInterfacesElementValidator implements IElementValidator {
+	private class OsgiInterfacesElementValidator implements IElementValidator {
 
 		public boolean supports(Node n) {
-			return "http://www.springframework.org/schema/osgi".equals(n.getNamespaceURI())
+			return ("http://www.springframework.org/schema/osgi".equals(n.getNamespaceURI()) || "http://www.osgi.org/xmlns/blueprint/v1.0.0"
+					.equals(n.getNamespaceURI()))
 					&& "interfaces".equals(n.getLocalName());
 		}
 
@@ -356,7 +359,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 			NodeList children = n.getChildNodes();
 			for (int i = 0; i < children.getLength(); i++) {
 				Node child = children.item(i);
-				if (child.getNodeType() == Node.ELEMENT_NODE && "value".equals(child.getNodeName())
+				if (child.getNodeType() == Node.ELEMENT_NODE && "value".equals(child.getLocalName())
 						&& child.getFirstChild() != null && child.getFirstChild().getNodeType() == Node.TEXT_NODE) {
 					String className = child.getFirstChild().getNodeValue();
 					IType type = JdtUtils.getJavaType(context.getRootElementProject(), className);
@@ -377,6 +380,51 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Simply validation for:
+	 * 
+	 * <pre>
+	 * 	&lt;bp:reference interface=&quot;java.util.List&quot;
+	 * </pre>
+	 */
+	private class BlueprintInterfaceAttributeValidator implements IAttributeValidator {
+
+		private final ToolAnnotationData annotationData;
+
+		public BlueprintInterfaceAttributeValidator() {
+			this.annotationData = new ToolAnnotationData();
+			this.annotationData.setAssignableToRestriction("interface-only");
+		}
+
+		public boolean supports(Node n, Node attribute) {
+			return "http://www.osgi.org/xmlns/blueprint/v1.0.0".equals(n.getNamespaceURI())
+					&& "interface".equals(attribute.getLocalName());
+		}
+
+		public void validate(Node n, Node attribute, IXmlValidationContext context) {
+			validateClassName(n, attribute, context, annotationData);
+		}
+	}
+
+	/**
+	 * Simply validation for:
+	 * 
+	 * <pre>
+	 * 	&lt;bp:reference depends-on=&quot;ref&quot;
+	 * </pre>
+	 */
+	private class BlueprintDependesOnAttributeValidator implements IAttributeValidator {
+		
+		public boolean supports(Node n, Node attribute) {
+			return "http://www.osgi.org/xmlns/blueprint/v1.0.0".equals(n.getNamespaceURI())
+			&& "depends-on".equals(attribute.getLocalName());
+		}
+		
+		public void validate(Node n, Node attribute, IXmlValidationContext context) {
+			validateBeanReference(n, attribute, context);
 		}
 	}
 

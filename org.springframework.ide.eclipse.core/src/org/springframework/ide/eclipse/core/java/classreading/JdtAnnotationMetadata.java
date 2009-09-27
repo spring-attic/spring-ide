@@ -49,7 +49,7 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		Set<MethodMetadata> annotationMetadata = new HashSet<MethodMetadata>();
 		for (MethodMetadata method : methodMetadata) {
-			if (method.getAnnotationTypes().contains(annotationType)) {
+			if (method.isAnnotated(annotationType)) {
 				annotationMetadata.add(method);
 			}
 		}
@@ -82,7 +82,7 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 				JdtAnnotationUtils.processAnnotation(annotation, type, annotationMap);
 			}
 			for (IMethod method : Introspector.getAllMethods(type)) {
-				MethodMetadata metadata = new JdtMethodMetadata(type, method);
+				JdtMethodMetadata metadata = new JdtMethodMetadata(type, method);
 				if (metadata.getAnnotationTypes().size() > 0) {
 					methodMetadata.add(metadata);
 				}
@@ -95,6 +95,19 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 	
 	public IType getType() {
 		return type;
+	}
+
+	public boolean hasAnnotatedMethods(String annotationType) {
+		for (MethodMetadata metadata : methodMetadata) {
+			if (metadata.isAnnotated(annotationType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isAnnotated(String annotationType) {
+		return annotationMap.containsKey(annotationType);
 	}
 	
 }

@@ -69,7 +69,7 @@ public abstract class AbstractSourceModelElement extends
 		return getElementResource() instanceof ExternalFile;
 	}
 
-	protected final void setElementSourceLocation(
+	public final void setElementSourceLocation(
 			IModelSourceLocation location) {
 		this.location = location;
 	}

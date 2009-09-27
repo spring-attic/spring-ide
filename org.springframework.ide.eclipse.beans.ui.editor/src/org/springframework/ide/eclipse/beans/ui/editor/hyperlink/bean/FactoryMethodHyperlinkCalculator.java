@@ -45,8 +45,8 @@ public class FactoryMethodHyperlinkCalculator implements IHyperlinkCalculator {
 			IDocument document, ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
 		NamedNodeMap attributes = node.getAttributes();
 		String className = null;
-		if (attributes != null && attributes.getNamedItem("factory-bean") != null) {
-			Node factoryBean = attributes.getNamedItem("factory-bean");
+		if (attributes != null && getFactoryBeanReferenceNode(attributes) != null) {
+			Node factoryBean = getFactoryBeanReferenceNode(attributes);
 			if (factoryBean != null) {
 				String factoryBeanId = factoryBean.getNodeValue();
 				// TODO add factoryBean support for beans defined
@@ -76,6 +76,10 @@ public class FactoryMethodHyperlinkCalculator implements IHyperlinkCalculator {
 		catch (JavaModelException e) {
 		}
 		return null;
+	}
+
+	protected Node getFactoryBeanReferenceNode(NamedNodeMap attributes) {
+		return attributes.getNamedItem("factory-bean");
 	}
 
 }

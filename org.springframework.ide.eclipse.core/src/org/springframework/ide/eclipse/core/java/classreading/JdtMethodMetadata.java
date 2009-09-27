@@ -97,4 +97,8 @@ public class JdtMethodMetadata implements MethodMetadata {
 		}
 	}
 
+	public boolean isAnnotated(String annotationType) {
+		return annotationMap.containsKey(annotationType);
+	}
+
 }

@@ -17,17 +17,15 @@
 	<extension
 		point="org.springframework.ide.eclipse.beans.ui.namespaces">
 		<namespace
-			name="Spring Dynamic Modules"
 			labelProvider="org.springframework.ide.eclipse.osgi.ui.namespaces.OsgiNamespaceLabelProvider"
-			uri="http://www.springframework.org/schema/osgi" 
-			prefix="osgi" 
-			icon="icons/full/obj16/spring_osgi_obj.gif" />
+			uri="http://www.springframework.org/schema/osgi"/>
 		<namespace
-			name="Spring Dynamic Modules Compendium"
 			labelProvider="org.springframework.ide.eclipse.osgi.ui.namespaces.OsgiNamespaceLabelProvider"
-			uri="http://www.springframework.org/schema/osgi-compendium" 
-			prefix="osgi-compendium" 
-			icon="icons/full/obj16/spring_osgi_obj.gif" />
+			uri="http://www.springframework.org/schema/osgi-compendium" />
+		<!-- OSGi blueprint namespace -->
+		<namespace
+			labelProvider="org.springframework.ide.eclipse.blueprint.ui.namespaces.BlueprintNamespaceLabelProvider"
+			uri="http://www.osgi.org/xmlns/blueprint/v1.0.0" /> 
 	</extension>
 	
 	<extension
@@ -46,6 +44,14 @@
 			labelProvider="org.springframework.ide.eclipse.osgi.ui.editor.outline.osgi.OsgiOutlineLabelProvider"
 			name="Spring Dynamic Modules Compendium"
 			uri="http://www.springframework.org/schema/osgi-compendium" />
+		<!-- OSGi blueprint namespace -->
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.osgi.ui.editor.contentassist.blueprint.BlueprintContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.osgi.ui.editor.hyperlink.blueprint.BlueprintHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.osgi.ui.editor.outline.blueprint.BlueprintOutlineLabelProvider"
+			name="OSGi Blueprint Services"
+			uri="http://www.osgi.org/xmlns/blueprint/v1.0.0" />
 	</extension>
 
 </plugin>

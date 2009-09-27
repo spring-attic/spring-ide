@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -388,6 +389,20 @@ public final class Introspector {
 			type = getSuperType(type);
 		}
 		return new HashSet<IMethod>(allMethods.values());
+	}
+
+	public static Set<IField> getAllFields(IType type) throws JavaModelException {
+		Map<String, IField> allMethods = new HashMap<String, IField>();
+		while (type != null) {
+			for (IField method : type.getFields()) {
+				String key = method.getHandleIdentifier();
+				if (!allMethods.containsKey(key)) {
+					allMethods.put(key, method);
+				}
+			}
+			type = getSuperType(type);
+		}
+		return new HashSet<IField>(allMethods.values());
 	}
 
 	public static IMethod getReadableProperty(IType type, String propertyName) throws JavaModelException {

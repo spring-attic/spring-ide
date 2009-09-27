@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -143,9 +143,9 @@ public class BeansEditorUtils {
 	protected static final String SPACE_ENTITY = "&nbsp;"; //$NON-NLS-1$
 
 	/**
-	 * Convert <code>String</code>s in attribute name format (lowercase, hyphens separating words)
-	 * into property name format (camel-cased). For example, <code>transaction-manager</code> is
-	 * converted into <code>transactionManager</code>.
+	 * Convert <code>String</code>s in attribute name format (lowercase, hyphens separating words) into property name
+	 * format (camel-cased). For example, <code>transaction-manager</code> is converted into
+	 * <code>transactionManager</code>.
 	 */
 	public static String attributeNameToPropertyName(String attributeName) {
 		if (attributeName.indexOf("-") == -1) {
@@ -269,8 +269,8 @@ public class BeansEditorUtils {
 		return null;
 	}
 
-	public static final void extractAllMethodsFromPropertyPathElements(List propertyPath,
-			List types, IFile file, int counter, List<IMethod> methods) {
+	public static final void extractAllMethodsFromPropertyPathElements(List propertyPath, List types, IFile file,
+			int counter, List<IMethod> methods) {
 		IMethod method = null;
 		if (propertyPath != null && propertyPath.size() > 0) {
 			if (propertyPath.size() > (counter + 1)) {
@@ -280,8 +280,8 @@ public class BeansEditorUtils {
 					for (int i = 0; i < types.size(); i++) {
 						IType type = (IType) types.get(i);
 						try {
-							IMethod getMethod = Introspector.getReadableProperty(type,
-									(String) propertyPath.get(counter));
+							IMethod getMethod = Introspector.getReadableProperty(type, (String) propertyPath
+									.get(counter));
 							returnType = JdtUtils.getJavaTypeForMethodReturnType(getMethod, type);
 							methods.add(getMethod);
 						}
@@ -292,8 +292,7 @@ public class BeansEditorUtils {
 					if (returnType != null) {
 						List<IType> newTypes = new ArrayList<IType>();
 						newTypes.add(returnType);
-						extractAllMethodsFromPropertyPathElements(propertyPath, newTypes, file,
-								(counter + 1), methods);
+						extractAllMethodsFromPropertyPathElements(propertyPath, newTypes, file, (counter + 1), methods);
 					}
 
 				}
@@ -302,8 +301,7 @@ public class BeansEditorUtils {
 				for (int i = 0; i < types.size(); i++) {
 					IType type = (IType) types.get(i);
 					try {
-						method = Introspector.getWritableProperty(type, (String) propertyPath
-								.get(counter));
+						method = Introspector.getWritableProperty(type, (String) propertyPath.get(counter));
 						methods.add(method);
 
 					}
@@ -314,8 +312,8 @@ public class BeansEditorUtils {
 		}
 	}
 
-	public static final IMethod extractMethodFromPropertyPathElements(List propertyPathElements,
-			List types, IFile file, int counter) {
+	public static final IMethod extractMethodFromPropertyPathElements(List propertyPathElements, List types,
+			IFile file, int counter) {
 		IMethod method = null;
 		if (propertyPathElements != null && propertyPathElements.size() > 0) {
 			if (propertyPathElements.size() > (counter + 1)) {
@@ -326,8 +324,8 @@ public class BeansEditorUtils {
 						IType type = (IType) types.get(i);
 						String propertyPath = (String) propertyPathElements.get(counter);
 						try {
-							IMethod getMethod = Introspector.getReadableProperty(type,
-									PropertyAccessorUtils.getPropertyName(propertyPath));
+							IMethod getMethod = Introspector.getReadableProperty(type, PropertyAccessorUtils
+									.getPropertyName(propertyPath));
 							returnType = JdtUtils.getJavaTypeForMethodReturnType(getMethod, type);
 						}
 						catch (JavaModelException e) {
@@ -337,8 +335,8 @@ public class BeansEditorUtils {
 					if (returnType != null) {
 						List<IType> newTypes = new ArrayList<IType>();
 						newTypes.add(returnType);
-						method = extractMethodFromPropertyPathElements(propertyPathElements,
-								newTypes, file, (counter + 1));
+						method = extractMethodFromPropertyPathElements(propertyPathElements, newTypes, file,
+								(counter + 1));
 					}
 				}
 			}
@@ -358,8 +356,8 @@ public class BeansEditorUtils {
 		return method;
 	}
 
-	public static final IRegion extractPropertyPathFromCursorPosition(IRegion hyperlinkRegion,
-			IRegion cursor, String target, List<String> propertyPaths) {
+	public static final IRegion extractPropertyPathFromCursorPosition(IRegion hyperlinkRegion, IRegion cursor,
+			String target, List<String> propertyPaths) {
 
 		int cursorIndexInTarget = cursor.getOffset() - hyperlinkRegion.getOffset();
 
@@ -369,10 +367,9 @@ public class BeansEditorUtils {
 			if (!preTarget.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
 				int regionOffset = hyperlinkRegion.getOffset()
 						+ preTarget.lastIndexOf(PropertyAccessor.NESTED_PROPERTY_SEPARATOR) + 1;
-				int segmentCount = new StringTokenizer(preTarget,
-						PropertyAccessor.NESTED_PROPERTY_SEPARATOR).countTokens();
-				StringTokenizer tok = new StringTokenizer(target,
-						PropertyAccessor.NESTED_PROPERTY_SEPARATOR);
+				int segmentCount = new StringTokenizer(preTarget, PropertyAccessor.NESTED_PROPERTY_SEPARATOR)
+						.countTokens();
+				StringTokenizer tok = new StringTokenizer(target, PropertyAccessor.NESTED_PROPERTY_SEPARATOR);
 
 				for (int i = 0; i < segmentCount; i++) {
 					propertyPaths.add(tok.nextToken());
@@ -392,8 +389,7 @@ public class BeansEditorUtils {
 	 * Returns the attribute from given node at specified offset.
 	 */
 	public static final Attr getAttrByOffset(Node node, int offset) {
-		if ((node instanceof IndexedRegion) && ((IndexedRegion) node).contains(offset)
-				&& (node.hasAttributes())) {
+		if ((node instanceof IndexedRegion) && ((IndexedRegion) node).contains(offset) && (node.hasAttributes())) {
 			NamedNodeMap attrs = node.getAttributes();
 			// go through each attribute in node and if attribute contains
 			// offset, return that attribute
@@ -410,9 +406,8 @@ public class BeansEditorUtils {
 	}
 
 	/**
-	 * /** Returns the closest IndexedRegion for the offset and viewer allowing for differences
-	 * between viewer offsets and model positions. note: this method returns an IndexedRegion for
-	 * read only
+	 * /** Returns the closest IndexedRegion for the offset and viewer allowing for differences between viewer offsets
+	 * and model positions. note: this method returns an IndexedRegion for read only
 	 * <p>
 	 * Copied from {@link ContentAssistUtils} in order to solve compatibility problems on 3.2.
 	 * @see ContentAssistUtils#getNodeAt(ITextViewer, int)
@@ -459,8 +454,7 @@ public class BeansEditorUtils {
 		Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(file, true);
 		for (IBeansConfig config : allConfigs) {
 			if (config instanceof IImportedBeansConfig) {
-				BeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config,
-						BeansConfig.class);
+				BeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config, BeansConfig.class);
 				configs.add(rootBeansConfig);
 			}
 		}
@@ -516,14 +510,18 @@ public class BeansEditorUtils {
 	public static final String getClassNameForBean(IFile file, Document document, Node node) {
 
 		NamedNodeMap attributes = node.getAttributes();
-		String className = (attributes.getNamedItem("class") != null ? attributes.getNamedItem(
-				"class").getNodeValue() : null);
-		String factoryMethod = (attributes.getNamedItem("factory-method") != null ? attributes
-				.getNamedItem("factory-method").getNodeValue() : null);
-		String factoryBean = (attributes.getNamedItem("factory-bean") != null ? attributes
-				.getNamedItem("factory-bean").getNodeValue() : null);
-		String parent = (attributes.getNamedItem("parent") != null ? attributes.getNamedItem(
-				"parent").getNodeValue() : null);
+		String className = (attributes.getNamedItem("class") != null ? attributes.getNamedItem("class").getNodeValue()
+				: null);
+		String factoryMethod = (attributes.getNamedItem("factory-method") != null ? attributes.getNamedItem(
+				"factory-method").getNodeValue() : null);
+		String factoryBean = (attributes.getNamedItem("factory-bean") != null ? attributes.getNamedItem("factory-bean")
+				.getNodeValue() : null);
+		if (!org.springframework.util.StringUtils.hasText(factoryBean)) {
+			factoryBean = (attributes.getNamedItem("factory-ref") != null ? attributes.getNamedItem("factory-ref")
+					.getNodeValue() : null);
+		}
+		String parent = (attributes.getNamedItem("parent") != null ? attributes.getNamedItem("parent").getNodeValue()
+				: null);
 		if (factoryBean == null && factoryMethod == null && parent == null) {
 			return className;
 		}
@@ -535,8 +533,7 @@ public class BeansEditorUtils {
 			// Factory method on factory bean
 			String factoryClass = getClassNameForBean(file, document, factoryBean);
 			if (factoryClass != null) {
-				return resolveClassNameFromFactoryMethod(factoryMethod, factoryClass, file
-						.getProject());
+				return resolveClassNameFromFactoryMethod(factoryMethod, factoryClass, file.getProject());
 			}
 			return null;
 
@@ -558,8 +555,8 @@ public class BeansEditorUtils {
 			Node beanNode = beanNodes.item(i);
 			NamedNodeMap attributes = beanNode.getAttributes();
 			if (attributes.getNamedItem("id") != null) {
-				String idTemp = (attributes.getNamedItem("id") != null ? attributes.getNamedItem(
-						"id").getNodeValue() : null);
+				String idTemp = (attributes.getNamedItem("id") != null ? attributes.getNamedItem("id").getNodeValue()
+						: null);
 				if (id != null && id.equals(idTemp)) {
 					return getClassNameForBean(file, document, beanNode);
 				}
@@ -583,8 +580,7 @@ public class BeansEditorUtils {
 		Element node = document.getElementById(id);
 		if (node != null && node.getNamespaceURI() != null
 				&& NamespaceUtils.getClassNameProvider(node.getNamespaceURI()).length > 0) {
-			for (IClassNameProvider provider : NamespaceUtils.getClassNameProvider(node
-					.getNamespaceURI())) {
+			for (IClassNameProvider provider : NamespaceUtils.getClassNameProvider(node.getNamespaceURI())) {
 				String className = provider.getClassNameForElement(node);
 				if (className != null) {
 					return className;
@@ -603,23 +599,23 @@ public class BeansEditorUtils {
 		List<IType> classNames = new ArrayList<IType>();
 		NamedNodeMap rootAttributes = node.getAttributes();
 
-		String id = (rootAttributes.getNamedItem("id") != null ? rootAttributes.getNamedItem("id")
-				.getNodeValue() : null);
+		String id = (rootAttributes.getNamedItem("id") != null ? rootAttributes.getNamedItem("id").getNodeValue()
+				: null);
 		if (id == null) {
 			id = node.toString();
 		}
-		String className = (rootAttributes.getNamedItem("class") != null ? rootAttributes
-				.getNamedItem("class").getNodeValue() : null);
-		String parentId = (rootAttributes.getNamedItem("parent") != null ? rootAttributes
-				.getNamedItem("parent").getNodeValue() : null);
+		String className = (rootAttributes.getNamedItem("class") != null ? rootAttributes.getNamedItem("class")
+				.getNodeValue() : null);
+		String parentId = (rootAttributes.getNamedItem("parent") != null ? rootAttributes.getNamedItem("parent")
+				.getNodeValue() : null);
 
 		getClassNamesOfBeans(file, node.getOwnerDocument(), id, className, parentId, classNames,
 				new ArrayList<String>());
 		return classNames;
 	}
 
-	private static final void getClassNamesOfBeans(IFile file, Document document, String id,
-			String className, String parentId, List<IType> classNames, List<String> beans) {
+	private static final void getClassNamesOfBeans(IFile file, Document document, String id, String className,
+			String parentId, List<IType> classNames, List<String> beans) {
 
 		// detect cicular dependencies
 		if (id != null) {
@@ -650,17 +646,16 @@ public class BeansEditorUtils {
 				Node beanNode = beanNodes.item(i);
 				NamedNodeMap attributes = beanNode.getAttributes();
 				if (attributes.getNamedItem("id") != null) {
-					String idTemp = (attributes.getNamedItem("id") != null ? attributes
-							.getNamedItem("id").getNodeValue() : null);
-					String classNameTemp = (attributes.getNamedItem("class") != null ? attributes
-							.getNamedItem("class").getNodeValue() : null);
+					String idTemp = (attributes.getNamedItem("id") != null ? attributes.getNamedItem("id")
+							.getNodeValue() : null);
+					String classNameTemp = (attributes.getNamedItem("class") != null ? attributes.getNamedItem("class")
+							.getNodeValue() : null);
 					String parentIdTemp = (attributes.getNamedItem("parent") != null ? attributes
 							.getNamedItem("parent").getNodeValue() : null);
 
 					if (parentId.equals(idTemp)) {
 						foundLocal = true;
-						getClassNamesOfBeans(file, document, idTemp, classNameTemp, parentIdTemp,
-								classNames, beans);
+						getClassNamesOfBeans(file, document, idTemp, classNameTemp, parentIdTemp, classNames, beans);
 					}
 				}
 			}
@@ -670,8 +665,8 @@ public class BeansEditorUtils {
 				while (iterator.hasNext()) {
 					IBean bean = iterator.next();
 					if (parentId.equals(bean.getElementName())) {
-						getClassNamesOfBeans(file, document, bean.getElementName(), BeansModelUtils
-								.getBeanClass(bean, null), bean.getParentName(), classNames, beans);
+						getClassNamesOfBeans(file, document, bean.getElementName(), BeansModelUtils.getBeanClass(bean,
+								null), bean.getParentName(), classNames, beans);
 						break;
 					}
 				}
@@ -689,8 +684,8 @@ public class BeansEditorUtils {
 				IDocument document = region.getParentDocument();
 				IStructuredModel model = null;
 				try {
-					model = org.eclipse.wst.sse.core.StructuredModelManager.getModelManager()
-							.getExistingModelForRead(document);
+					model = org.eclipse.wst.sse.core.StructuredModelManager.getModelManager().getExistingModelForRead(
+							document);
 					if (model != null) {
 						baselocation = model.getBaseLocation();
 					}
@@ -723,8 +718,8 @@ public class BeansEditorUtils {
 		if (document != null) {
 			IStructuredModel model = null;
 			try {
-				model = org.eclipse.wst.sse.core.StructuredModelManager.getModelManager()
-						.getExistingModelForRead(document);
+				model = org.eclipse.wst.sse.core.StructuredModelManager.getModelManager().getExistingModelForRead(
+						document);
 				if (model != null) {
 					baselocation = model.getBaseLocation();
 				}
@@ -769,8 +764,8 @@ public class BeansEditorUtils {
 			sModel = org.eclipse.wst.sse.core.StructuredModelManager.getModelManager()
 					.getExistingModelForRead(document);
 			if (sModel == null && document instanceof IStructuredDocument) {
-				sModel = org.eclipse.wst.sse.core.StructuredModelManager.getModelManager()
-						.getModelForRead((IStructuredDocument) document);
+				sModel = org.eclipse.wst.sse.core.StructuredModelManager.getModelManager().getModelForRead(
+						(IStructuredDocument) document);
 			}
 			inode = sModel.getIndexedRegion(offset);
 			if (inode == null) {
@@ -795,22 +790,18 @@ public class BeansEditorUtils {
 	 */
 	public static final IProgressMonitor getProgressMonitor() {
 		IWorkbenchWindow activeWorkbenchWindow = Activator.getActiveWorkbenchWindow();
-		
+
 		// this check is to allow for non UI thread call to this method
 		if (activeWorkbenchWindow == null) {
 			return new NullProgressMonitor();
 		}
-		
-		IEditorPart editor = activeWorkbenchWindow.getActivePage().getActiveEditor();
-		if (editor != null
-				&& editor.getEditorSite() != null
-				&& editor.getEditorSite().getActionBars() != null
-				&& editor.getEditorSite().getActionBars().getStatusLineManager() != null
-				&& editor.getEditorSite().getActionBars().getStatusLineManager()
-						.getProgressMonitor() != null) {
 
-			IStatusLineManager manager = editor.getEditorSite().getActionBars()
-					.getStatusLineManager();
+		IEditorPart editor = activeWorkbenchWindow.getActivePage().getActiveEditor();
+		if (editor != null && editor.getEditorSite() != null && editor.getEditorSite().getActionBars() != null
+				&& editor.getEditorSite().getActionBars().getStatusLineManager() != null
+				&& editor.getEditorSite().getActionBars().getStatusLineManager().getProgressMonitor() != null) {
+
+			IStatusLineManager manager = editor.getEditorSite().getActionBars().getStatusLineManager();
 			IProgressMonitor monitor = manager.getProgressMonitor();
 			manager.setMessage("Processing completion proposals");
 			manager.setCancelEnabled(true);
@@ -823,8 +814,8 @@ public class BeansEditorUtils {
 
 	public static final IProject getProject(IDocument document) {
 		IProject project = null;
-		IEditorInput input = Workbench.getInstance().getActiveWorkbenchWindow().getActivePage()
-				.getActiveEditor().getEditorInput();
+		IEditorInput input = Workbench.getInstance().getActiveWorkbenchWindow().getActivePage().getActiveEditor()
+				.getEditorInput();
 		if (input instanceof ZipEntryEditorInput) {
 			ZipEntryStorage storage = (ZipEntryStorage) ((ZipEntryEditorInput) input).getStorage();
 			project = storage.getFile().getProject();
@@ -849,13 +840,11 @@ public class BeansEditorUtils {
 	}
 
 	public static final boolean hasAttribute(Node node, String attributeName) {
-		return (node != null && node.hasAttributes() && node.getAttributes().getNamedItem(
-				attributeName) != null);
+		return (node != null && node.hasAttributes() && node.getAttributes().getNamedItem(attributeName) != null);
 	}
 
 	public static final boolean isSpringStyleOutline() {
-		return Activator.getDefault().getPreferenceStore().getBoolean(
-				IPreferencesConstants.OUTLINE_SPRING);
+		return Activator.getDefault().getPreferenceStore().getBoolean(IPreferencesConstants.OUTLINE_SPRING);
 	}
 
 	public static final String propertyNameToAttributeName(String propertyName) {
@@ -898,8 +887,7 @@ public class BeansEditorUtils {
 		return normalString;
 	}
 
-	private static String resolveClassNameFromFactoryMethod(String factoryMethod, String className,
-			IProject project) {
+	private static String resolveClassNameFromFactoryMethod(String factoryMethod, String className, IProject project) {
 		IType type = JdtUtils.getJavaType(project, className);
 		if (type != null) {
 			try {
@@ -921,8 +909,7 @@ public class BeansEditorUtils {
 		if (matchString == null) {
 			matchString = "";
 		}
-		if (matchString.length() > 0
-				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
+		if (matchString.length() > 0 && (matchString.startsWith("\"") || matchString.startsWith("'"))) {
 			matchString = matchString.substring(1);
 		}
 		return matchString;

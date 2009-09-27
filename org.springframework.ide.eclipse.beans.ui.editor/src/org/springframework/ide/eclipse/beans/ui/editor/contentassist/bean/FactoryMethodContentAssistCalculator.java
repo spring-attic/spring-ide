@@ -42,7 +42,7 @@ public class FactoryMethodContentAssistCalculator implements IContentAssistCalcu
 			IContentAssistProposalRecorder recorder) {
 		Node node = context.getNode();
 		NamedNodeMap attributes = node.getAttributes();
-		Node factoryBean = attributes.getNamedItem("factory-bean");
+		Node factoryBean = getFactoryBeanReferenceNode(attributes);
 
 		String factoryClassName = null;
 		boolean isStatic;
@@ -61,6 +61,10 @@ public class FactoryMethodContentAssistCalculator implements IContentAssistCalcu
 		if (factoryClassName != null) {
 			addFactoryMethodAttributeValueProposals(recorder, context, factoryClassName, isStatic);
 		}
+	}
+
+	protected Node getFactoryBeanReferenceNode(NamedNodeMap attributes) {
+		return attributes.getNamedItem("factory-bean");
 	}
 
 	private void addFactoryMethodAttributeValueProposals(IContentAssistProposalRecorder recorder,
