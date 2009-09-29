@@ -88,7 +88,7 @@
 	         	<property
 	               	description="Bean classes that should get ignored during validation (separate values with comma):"
 	               	name="ignorableClasses"
-	               	value="org.springframework.osgi.service.importer.support.OsgiServiceProxyFactoryBean, org.springframework.osgi.service.importer.support.OsgiServiceCollectionProxyFactoryBean, org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean, org.springframework.osgi.config.OsgiServiceRegistrationListenerAdapter">
+	               	value="org.springframework.osgi.config.internal.OsgiServiceLifecycleListenerAdapter, org.springframework.osgi.service.importer.support.OsgiServiceProxyFactoryBean, org.springframework.osgi.service.importer.support.OsgiServiceCollectionProxyFactoryBean, org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean, org.springframework.osgi.config.OsgiServiceRegistrationListenerAdapter">
 	            </property>
      	    </rule>
 		    <rule id="toolAnnotation"
@@ -99,7 +99,7 @@
 	         	<property
 	               	description="Bean classes that should get ignored during validation (separate values with comma):"
 	               	name="ignorableClasses"
-	               	value="org.springframework.osgi.service.importer.support.OsgiServiceProxyFactoryBean, org.springframework.osgi.service.importer.support.OsgiServiceCollectionProxyFactoryBean, org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean, org.springframework.osgi.config.OsgiServiceRegistrationListenerAdapter">
+	               	value="org.springframework.osgi.config.internal.OsgiServiceLifecycleListenerAdapter, org.springframework.osgi.service.importer.support.OsgiServiceProxyFactoryBean, org.springframework.osgi.service.importer.support.OsgiServiceCollectionProxyFactoryBean, org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean, org.springframework.osgi.config.OsgiServiceRegistrationListenerAdapter">
 	            </property>
 	         	<property
 	               	description="Bean names that should get ignored during validation (separate values with comma):"
