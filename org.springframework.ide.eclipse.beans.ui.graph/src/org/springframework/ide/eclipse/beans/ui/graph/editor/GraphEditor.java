@@ -222,17 +222,19 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				if (getEditorInput() instanceof GraphEditorInput && getGraphicalViewer().getControl() != null) {
-					
+
 					GraphEditorInput input = (GraphEditorInput) getEditorInput();
-					
+
 					final Graph graph = new Graph(input);
 					graph.init();
-					
+
 					Display.getDefault().asyncExec(new Runnable() {
 
 						public void run() {
-							graph.layout(getGraphicalViewer().getControl().getFont());
-							getGraphicalViewer().setContents(graph);
+							if (getGraphicalViewer() != null && getGraphicalViewer().getControl() != null) {
+								graph.layout(getGraphicalViewer().getControl().getFont());
+								getGraphicalViewer().setContents(graph);
+							}
 						}
 					});
 				}
@@ -248,7 +250,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 * Called to configure the graphical viewer before it receives its contents. This is where the root editpart should
 	 * be configured.
 	 */
-	@SuppressWarnings({ "unchecked", "deprecation" })
+	@SuppressWarnings( { "unchecked", "deprecation" })
 	protected void configureGraphicalViewer() {
 		ScalableRootEditPart root = new ScalableRootEditPart();
 
@@ -695,12 +697,12 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	public boolean isSaveAsAllowed() {
 		return true;
 	}
-	
+
 	/**
 	 * {@link ISchedulingRule} implementation that always conflicts with other {@link BlockingOnSelfSchedulingRule}s.
 	 * <p>
-	 * This rule prevents that at no time more than one job with this scheduling rule attached runs.
-t	 */
+	 * This rule prevents that at no time more than one job with this scheduling rule attached runs. t
+	 */
 	private class BlockingOnSelfSchedulingRule implements ISchedulingRule {
 
 		/**
