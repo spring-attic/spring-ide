@@ -16,9 +16,12 @@
 
 	<extension
 		point="org.springframework.ide.eclipse.beans.core.namespaces">
-		<namespace
-			namespaceHandler="org.springframework.ide.eclipse.webflow.core.config.CombiningWebFlowConfigNamespaceHandler"
-			uri="http://www.springframework.org/schema/webflow-config" />
+		<namespace uri="http://www.springframework.org/schema/webflow-config" >
+			<namespaceHandler class="org.springframework.webflow.config.WebFlowConfigNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd" />
+			<namespaceHandler class="org.springframework.webflow.v1.config.WebFlowConfigNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" />
+		</namespace>
 	</extension>
 
 	<extension point="org.eclipse.core.expressions.propertyTesters">
