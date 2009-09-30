@@ -68,6 +68,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DelegatingNamespaceHandlerResolver;
+import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.XmlCatalogDelegatingEntityResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
@@ -97,6 +98,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ClassUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
@@ -126,15 +128,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * {@link IBeansConfigPostProcessor}s that have been contributed by external {@link IBeansConfig} from other
 	 * {@link IBeansConfigSet}
 	 */
-	private volatile Map<IBeansConfigPostProcessor, Set<IBeansConfig>> externalPostProcessors = 
-		new ConcurrentHashMap<IBeansConfigPostProcessor, Set<IBeansConfig>>();
-	
+	private volatile Map<IBeansConfigPostProcessor, Set<IBeansConfig>> externalPostProcessors = new ConcurrentHashMap<IBeansConfigPostProcessor, Set<IBeansConfig>>();
+
 	/** {@link Resource} implementation to be passed to Spring core for reading */
 	private volatile Resource resource;
 
 	/** {@link ProblemReporter} implementation for later use */
 	private volatile ProblemReporter problemReporter;
-	
+
 	/** {@link BeanNameGenerator} implementation for later use */
 	private volatile BeanNameGenerator beanNameGenerator;
 
@@ -323,6 +324,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					problemReporter = new BeansConfigProblemReporter();
 					beanNameGenerator = new UniqueBeanNameGenerator(this);
 
+					final DocumentAccessor documentHolder = new DocumentAccessor();
 					final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry) {
 						@Override
 						public int loadBeanDefinitions(EncodedResource encodedResource)
@@ -344,7 +346,18 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 								// Reset currently processed resource before leaving
 								currentResource = null;
 							}
+						}
 
+						@Override
+						public int registerBeanDefinitions(Document doc, Resource resource)
+								throws BeanDefinitionStoreException {
+							try {
+								documentHolder.pushDocument(doc);
+								return super.registerBeanDefinitions(doc, resource);
+							}
+							finally {
+								documentHolder.popDocument();
+							}
 						}
 					};
 
@@ -357,7 +370,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
 					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
-							NamespaceHandlerResolver.class.getClassLoader(), this));
+							NamespaceHandlerResolver.class.getClassLoader(), this, documentHolder));
 					reader.setBeanNameGenerator(beanNameGenerator);
 
 					try {

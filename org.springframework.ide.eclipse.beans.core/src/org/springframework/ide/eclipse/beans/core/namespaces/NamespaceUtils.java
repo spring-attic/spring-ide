@@ -27,6 +27,8 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.xml.sax.EntityResolver;
 
 /**
@@ -62,8 +64,8 @@ public class NamespaceUtils {
 	/**
 	 * Returns a {@link Map} with all registered {@link NamespaceHandler}s.
 	 */
-	public static Map<String, NamespaceHandler> getNamespaceHandlers() {
-		Map<String, NamespaceHandler> handlers = new HashMap<String, NamespaceHandler>();
+	public static Map<NamespaceHandlerDescriptor, NamespaceHandler> getNamespaceHandlers() {
+		Map<NamespaceHandlerDescriptor, NamespaceHandler> handlers = new HashMap<NamespaceHandlerDescriptor, NamespaceHandler>();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
@@ -75,11 +77,29 @@ public class NamespaceUtils {
 							if (handler instanceof NamespaceHandler) {
 								NamespaceHandler namespaceHandler = (NamespaceHandler) handler;
 								namespaceHandler.init();
-								handlers.put(uri, namespaceHandler);
+								handlers.put(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(uri, null),
+										namespaceHandler);
 							}
 						}
 						catch (CoreException e) {
 							BeansCorePlugin.log(e);
+						}
+					}
+					for (IConfigurationElement namespaceHandlerConfig : config.getChildren("namespaceHandler")) {
+						if (uri != null && namespaceHandlerConfig.getAttribute("class") != null) {
+							try {
+								String schemaLocation = namespaceHandlerConfig.getAttribute("schemaLocation");
+								Object handler = namespaceHandlerConfig.createExecutableExtension("class");
+								if (handler instanceof NamespaceHandler) {
+									NamespaceHandler namespaceHandler = (NamespaceHandler) handler;
+									namespaceHandler.init();
+									handlers.put(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(uri,
+											schemaLocation), namespaceHandler);
+								}
+							}
+							catch (CoreException e) {
+								BeansCorePlugin.log(e);
+							}
 						}
 					}
 				}
@@ -171,5 +191,39 @@ public class NamespaceUtils {
 			}
 		}
 		return handlers;
+	}
+
+	public static class NamespaceHandlerDescriptor {
+
+		private final String namespaceUri;
+
+		private final String schemaLocation;
+
+		NamespaceHandlerDescriptor(String namespaceUri, String schemaLocation) {
+			this.namespaceUri = namespaceUri;
+			this.schemaLocation = schemaLocation;
+		}
+
+		public static NamespaceHandlerDescriptor createNamespaceHandlerDescriptor(String namespaceUri,
+				String schemaLocation) {
+			if (StringUtils.hasText(schemaLocation)) {
+				return new NamespaceHandlerDescriptor(namespaceUri, schemaLocation);
+			}
+			return new NamespaceHandlerDescriptor(namespaceUri, "*");
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof NamespaceHandlerDescriptor)) {
+				return false;
+			}
+			NamespaceHandlerDescriptor other = (NamespaceHandlerDescriptor) obj;
+			return namespaceUri.equals(other.namespaceUri) && schemaLocation.equals(other.schemaLocation);
+		}
+
+		@Override
+		public int hashCode() {
+			return 31 ^ ObjectUtils.nullSafeHashCode(namespaceUri) * ObjectUtils.nullSafeHashCode(schemaLocation);
+		}
 	}
 }

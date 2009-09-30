@@ -72,7 +72,7 @@ This extension point is used to add namespace handlers and model element provide
                   an instance of &lt;samp&gt;org.springframework.beans.factory.xml.NamespaceHandler&lt;/samp&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.springframework.beans.factory.xml.NamespaceHandler"/>
+                  <meta.attribute kind="java" basedOn=":org.springframework.beans.factory.xml.NamespaceHandler" deprecated="true"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -84,6 +84,31 @@ This extension point is used to add namespace handlers and model element provide
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider"/>
                </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="namespaceHandler">
+      <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="namespaceHandler"/>
+         </sequence>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.springframework.beans.factory.xml.NamespaceHandler"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="schemaLocation" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>
