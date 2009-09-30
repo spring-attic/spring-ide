@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,20 @@ package org.springframework.ide.eclipse.beans.ui.graph.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.graph.DirectedGraph;
@@ -25,22 +35,36 @@ import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Font;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This class builds the graphical representation of the model data (given as
- * {@link GraphEditorInput}) via GEF's {@link DirectedGraphLayout}.
+ * This class builds the graphical representation of the model data (given as {@link GraphEditorInput}) via GEF's
+ * {@link DirectedGraphLayout}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public class Graph implements IAdaptable {
 
+	private static final String CLASS_ATTRIBUTE = "class";
+
+	private static final String GRAPH_CONTENT_EXTENDER_EXTENSION_POINT = BeansGraphPlugin.PLUGIN_ID
+			+ ".graphContentExtender";
+
 	/*
-	 * Max width of rows with orphan beans (unconnected beans) if no subgraph is
-	 * available
+	 * Max width of rows with orphan beans (unconnected beans) if no subgraph is available
 	 */
 	private static final int MAX_ORPHAN_ROW_WIDTH = 600;
 
@@ -53,24 +77,43 @@ public class Graph implements IAdaptable {
 
 	private DirectedGraph graph;
 
+	private Map<String, Bean> beans = new HashMap<String, Bean>();
+
+	private List<Reference> beanReferences = new ArrayList<Reference>();
+
+	private String elementId;
+
+	private String contextId;
+
+	public Graph() {
+		graph = new DirectedGraph();
+	}
+
 	public Graph(GraphEditorInput input) {
 		this.input = input;
+		this.elementId = input.getElementId();
+		this.contextId = input.getContextId();
 		init();
 	}
 
 	/**
-	 * Initializes the embedded graph with nodes from GraphEditorInput's beans
-	 * and edges from GraphEditorInput's bean references.
+	 * Initializes the embedded graph with nodes from GraphEditorInput's beans and edges from GraphEditorInput's bean
+	 * references.
 	 */
 	@SuppressWarnings("unchecked")
-	private void init() {
+	public void init() {
+		
+		createBeansMap();
+		createReferences();
+		extendGraphContent();
+		
 		graph = new DirectedGraph();
 
-		for (Bean bean : input.getBeans().values()) {
+		for (Bean bean : beans.values()) {
 			graph.nodes.add(bean);
 		}
-		
-		for (Reference reference : input.getBeansReferences()) {
+
+		for (Reference reference : beanReferences) {
 			graph.edges.add(reference);
 		}
 	}
@@ -80,18 +123,18 @@ public class Graph implements IAdaptable {
 	}
 
 	protected Collection getBeans() {
-		return input.getBeans().values();
+		return beans.values();
 	}
 
 	protected Bean getBean(String name) {
-		return (Bean) input.getBeans().get(name);
+		return (Bean) beans.get(name);
 	}
 
 	public List getNodes() {
 		return graph.nodes;
 	}
 
-	@SuppressWarnings({ "unchecked", "deprecation" })
+	@SuppressWarnings( { "unchecked", "deprecation" })
 	public void layout(Font font) {
 
 		// Iterate through all graph nodes (beans) to calculate label width
@@ -123,8 +166,7 @@ public class Graph implements IAdaptable {
 				graph.nodes.remove(bean);
 			}
 			else {
-				Reference reference = new Reference(BeanType.STANDARD, root,
-						bean, false);
+				Reference reference = new Reference(BeanType.STANDARD, root, bean, false);
 				reference.weight = 0;
 				rootEdges.add(reference);
 				graph.edges.add(reference);
@@ -225,11 +267,145 @@ public class Graph implements IAdaptable {
 			// error message
 			graph = new DirectedGraph();
 			input.setHasError(true);
-e.printStackTrace();
-			MessageDialog.openError(BeansGraphPlugin.getActiveWorkbenchWindow()
-					.getShell(), BeansGraphPlugin
+			MessageDialog.openError(BeansGraphPlugin.getActiveWorkbenchWindow().getShell(), BeansGraphPlugin
 					.getResourceString(ERROR_TITLE), e.getMessage());
 
 		}
 	}
+
+	protected void extendGraphContent() {
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
+				GRAPH_CONTENT_EXTENDER_EXTENSION_POINT);
+		if (point != null) {
+			for (IExtension extension : point.getExtensions()) {
+				for (IConfigurationElement config : extension.getConfigurationElements()) {
+					if (config.getAttribute(CLASS_ATTRIBUTE) != null) {
+						try {
+							Object provider = config.createExecutableExtension(CLASS_ATTRIBUTE);
+							if (provider instanceof IGraphContentExtender) {
+								((IGraphContentExtender) provider).addAdditionalBeans(beans, beanReferences,
+										(IBeansModelElement) getElement(elementId),
+										(IBeansModelElement) getElement(contextId));
+							}
+						}
+						catch (CoreException e) {
+							BeansGraphPlugin.log(e);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Creates a list with all beans belonging to the specified config / config set or being connected with the
+	 * specified bean.
+	 */
+	protected void createBeansMap() {
+		Set<IBean> list = new LinkedHashSet<IBean>();
+		if (getElement(elementId) instanceof IBeansConfig) {
+			IBeansConfig bc = (IBeansConfig) getElement(elementId);
+			list.addAll(bc.getBeans());
+			// add component registered beans
+			addBeansFromComponents(list, bc.getComponents());
+		}
+		else if (getElement(elementId) instanceof IBeansConfigSet) {
+			IBeansConfigSet bcs = (IBeansConfigSet) getElement(elementId);
+			list.addAll(bcs.getBeans());
+			// add component registered beans
+			addBeansFromComponents(list, bcs.getComponents());
+		}
+		else if (getElement(elementId) instanceof IBean) {
+			list.add((IBean) getElement(elementId));
+			for (BeansConnection beanRef : BeansModelUtils.getBeanReferences(getElement(elementId),
+					getElement(contextId), true)) {
+				if (beanRef.getType() != BeanType.INNER) {
+					list.add(beanRef.getTarget());
+				}
+			}
+		}
+
+		// Marshall all beans into a graph bean node
+		beans = new LinkedHashMap<String, Bean>();
+		for (IBean bean : list) {
+			if (shouldAddBean(bean)) {
+				beans.put(bean.getElementName(), new Bean(bean));
+			}
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private boolean shouldAddBean(IBean bean) {
+		return !bean.isInfrastructure()
+				|| (bean.isInfrastructure() && BeansUIPlugin.getDefault().getPluginPreferences().getBoolean(
+						BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID));
+	}
+
+	private void addBeansFromComponents(Set<IBean> beans, Set<IBeansComponent> components) {
+		for (IBeansComponent component : components) {
+			Set<IBean> nestedBeans = component.getBeans();
+			for (IBean nestedBean : nestedBeans) {
+				if (shouldAddBean(nestedBean)) {
+					beans.add(nestedBean);
+				}
+			}
+			addBeansFromComponents(beans, component.getComponents());
+		}
+	}
+
+	protected void createReferences() {
+		beanReferences = new ArrayList<Reference>();
+		// Add all beans defined in GraphEditorInput as nodes to the graph
+		Iterator beans = this.beans.values().iterator();
+		while (beans.hasNext()) {
+			Bean bean = (Bean) beans.next();
+
+			// Add all beans references from bean (parent, factory or
+			// depends-on beans) to list of graph edges
+			Iterator beanRefs = BeansModelUtils.getBeanReferences(bean.getBean(),
+					BeansCorePlugin.getModel().getElement(contextId), false).iterator();
+			while (beanRefs.hasNext()) {
+				BeansConnection beanRef = (BeansConnection) beanRefs.next();
+				Bean targetBean = this.beans.get(beanRef.getTarget().getElementName());
+				if (targetBean != null && targetBean != bean && beanRef.getSource() instanceof IBean) {
+					beanReferences.add(new Reference(beanRef.getType(), bean, targetBean, bean, beanRef.isInner()));
+				}
+			}
+
+			// Add all bean references in bean's constructor arguments to list
+			// of graph edges
+			ConstructorArgument[] cargs = bean.getConstructorArguments();
+			for (ConstructorArgument carg : cargs) {
+				Iterator cargRefs = BeansModelUtils.getBeanReferences(carg.getBeanConstructorArgument(),
+						BeansCorePlugin.getModel().getElement(contextId), false).iterator();
+				while (cargRefs.hasNext()) {
+					BeansConnection beanRef = (BeansConnection) cargRefs.next();
+					Bean targetBean = this.beans.get(beanRef.getTarget().getElementName());
+					if (targetBean != null && targetBean != bean) {
+						beanReferences.add(new Reference(beanRef.getType(), bean, targetBean, carg, beanRef.isInner()));
+					}
+				}
+			}
+
+			// Add all bean references in properties to list of graph edges
+			Property[] properties = bean.getProperties();
+			for (Property property : properties) {
+				Iterator propRefs = BeansModelUtils.getBeanReferences(property.getBeanProperty(),
+						BeansCorePlugin.getModel().getElement(contextId), false).iterator();
+				while (propRefs.hasNext()) {
+					BeansConnection beanRef = (BeansConnection) propRefs.next();
+					Bean targetBean = this.beans.get(beanRef.getTarget().getElementName());
+					if (targetBean != null && targetBean != bean) {
+						beanReferences.add(new Reference(beanRef.getType(), bean, targetBean, property, beanRef
+								.isInner()));
+					}
+				}
+			}
+		}
+	}
+
+	private IModelElement getElement(String elementId) {
+		return BeansCorePlugin.getModel().getElement(elementId);
+	}
+
 }

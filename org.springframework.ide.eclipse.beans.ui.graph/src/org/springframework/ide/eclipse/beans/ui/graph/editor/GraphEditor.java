@@ -25,6 +25,10 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
@@ -102,8 +106,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
  */
 public class GraphEditor extends EditorPart implements ISelectionListener {
 
-	public static final String EDITOR_ID = BeansGraphPlugin.PLUGIN_ID
-			+ ".editor";
+	public static final String EDITOR_ID = BeansGraphPlugin.PLUGIN_ID + ".editor";
 
 	public static final String CONTEXT_MENU_ID = EDITOR_ID + ".contextmenu";
 
@@ -121,8 +124,6 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 
 	private List propertyActions = new ArrayList();
 
-	private Graph graph;
-
 	private IModelChangeListener modelChangeListener = new GraphEditorInputModelChangeListener();
 
 	public GraphEditor() {
@@ -130,43 +131,35 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * Internal {@link IModelChangeListener} that tracks changes in the graphs
-	 * underlying element and context and triggers a refresh if required.
+	 * Internal {@link IModelChangeListener} that tracks changes in the graphs underlying element and context and
+	 * triggers a refresh if required.
 	 */
-	private class GraphEditorInputModelChangeListener implements
-			IModelChangeListener {
+	private class GraphEditorInputModelChangeListener implements IModelChangeListener {
 
 		public void elementChanged(ModelChangeEvent event) {
 			final GraphEditorInput beansInput = (GraphEditorInput) getEditorInput();
 			boolean refresh = false;
 
 			IModelElement changedElement = event.getElement();
-			IModelElement originalInputElement = BeansCorePlugin.getModel()
-					.getElement(beansInput.getElementId());
-			IModelElement originalContextElement = BeansCorePlugin.getModel()
-					.getElement(beansInput.getContextId());
+			IModelElement originalInputElement = BeansCorePlugin.getModel().getElement(beansInput.getElementId());
+			IModelElement originalContextElement = BeansCorePlugin.getModel().getElement(beansInput.getContextId());
 
 			// check if changes appeared in a spring config file
 			if (changedElement instanceof IBeansConfig) {
-				IResource changedResource = ((IBeansConfig) changedElement)
-						.getElementResource();
+				IResource changedResource = ((IBeansConfig) changedElement).getElementResource();
 				refresh = checkForRefresh(changedResource, originalInputElement)
-						|| checkForRefresh(changedResource,
-								originalContextElement);
+						|| checkForRefresh(changedResource, originalContextElement);
 			}
 			// changes occured in the project configuration; added config file
 			// to project or beans config set
 			else if (changedElement instanceof IBeansProject) {
 				IBeansProject beansProject = (IBeansProject) changedElement;
-				refresh = (BeansModelUtils.getChildForElement(beansProject,
-						originalInputElement) != null || BeansModelUtils
-						.getChildForElement(beansProject,
-								originalContextElement) != null);
+				refresh = (BeansModelUtils.getChildForElement(beansProject, originalInputElement) != null || BeansModelUtils
+						.getChildForElement(beansProject, originalContextElement) != null);
 			}
 
 			// most likely a close or remove of project or config
-			if (!refresh && event.getType() == Type.REMOVED
-					&& originalInputElement == null) {
+			if (!refresh && event.getType() == Type.REMOVED && originalInputElement == null) {
 				Display display = getSite().getShell().getDisplay();
 				display.asyncExec(new Runnable() {
 					public void run() {
@@ -179,7 +172,6 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 				Display display = getSite().getShell().getDisplay();
 				display.asyncExec(new Runnable() {
 					public void run() {
-						beansInput.init();
 						setInput(beansInput);
 						initializeGraphicalViewer();
 					}
@@ -187,23 +179,19 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			}
 		}
 
-		private boolean checkForRefresh(IResource changedResource,
-				IModelElement originalInputElement) {
+		private boolean checkForRefresh(IResource changedResource, IModelElement originalInputElement) {
 			boolean refresh = false;
 
 			if (originalInputElement instanceof IBean) {
-				IResource originalResource = ((IBean) originalInputElement)
-						.getElementResource();
+				IResource originalResource = ((IBean) originalInputElement).getElementResource();
 				refresh = originalResource.equals(changedResource);
 			}
 			else if (originalInputElement instanceof IBeansConfig) {
-				IResource originalResource = ((IBeansConfig) originalInputElement)
-						.getElementResource();
+				IResource originalResource = ((IBeansConfig) originalInputElement).getElementResource();
 				refresh = originalResource.equals(changedResource);
 			}
 			else if (originalInputElement instanceof IBeansConfigSet) {
-				refresh = ((IBeansConfigSet) originalInputElement)
-						.hasConfig((IFile) changedResource);
+				refresh = ((IBeansConfigSet) originalInputElement).hasConfig((IFile) changedResource);
 			}
 			return refresh;
 		}
@@ -214,35 +202,53 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		super.setInput(input);
 		if (input instanceof GraphEditorInput) {
 			GraphEditorInput beansInput = (GraphEditorInput) input;
-			graph = new Graph(beansInput);
+			beansInput.init();
 			setPartName(beansInput.getName());
 			setContentDescription(beansInput.getToolTipText());
 		}
-		else {
-			graph = null;
-		}
 	}
-	
+
 	protected void closeEditor() {
 		getSite().getPage().closeEditor(this, false);
 	}
-
 
 	/**
 	 * Sets the contents of the GraphicalViewer after it has been created.
 	 * @see #createGraphicalViewer(Composite)
 	 */
 	protected void initializeGraphicalViewer() {
-		if (graph != null && getGraphicalViewer().getControl() != null) {
-			graph.layout(getGraphicalViewer().getControl().getFont());
-			getGraphicalViewer().setContents(graph);
-		}
+		Job job = new Job("Initialize Beans Graph '" + getPartName() + "'") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (getEditorInput() instanceof GraphEditorInput && getGraphicalViewer().getControl() != null) {
+					
+					GraphEditorInput input = (GraphEditorInput) getEditorInput();
+					
+					final Graph graph = new Graph(input);
+					graph.init();
+					
+					Display.getDefault().asyncExec(new Runnable() {
+
+						public void run() {
+							graph.layout(getGraphicalViewer().getControl().getFont());
+							getGraphicalViewer().setContents(graph);
+						}
+					});
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(new BlockingOnSelfSchedulingRule());
+		job.setPriority(Job.INTERACTIVE);
+		job.schedule();
 	}
 
 	/**
-	 * Called to configure the graphical viewer before it receives its contents.
-	 * This is where the root editpart should be configured.
+	 * Called to configure the graphical viewer before it receives its contents. This is where the root editpart should
+	 * be configured.
 	 */
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	protected void configureGraphicalViewer() {
 		ScalableRootEditPart root = new ScalableRootEditPart();
 
@@ -266,8 +272,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		viewer.setEditPartFactory(new GraphicalPartFactory());
 		viewer.getControl().setBackground(ColorConstants.listBackground);
 
-		ContextMenuProvider provider = new GraphContextMenuProvider(viewer,
-				getActionRegistry());
+		ContextMenuProvider provider = new GraphContextMenuProvider(viewer, getActionRegistry());
 		viewer.setContextMenu(provider);
 		getSite().registerContextMenu(CONTEXT_MENU_ID, provider, viewer);
 	}
@@ -290,8 +295,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			return getGraphicalViewer().getRootEditPart();
 		}
 		if (type == IFigure.class && getGraphicalViewer() != null) {
-			return ((GraphicalEditPart) getGraphicalViewer().getRootEditPart())
-					.getFigure();
+			return ((GraphicalEditPart) getGraphicalViewer().getRootEditPart()).getFigure();
 		}
 		if (type == IContentOutlinePage.class) {
 			return getOutlinePage();
@@ -309,8 +313,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	protected ZoomManager getZoomManager() {
-		return ((ScalableRootEditPart) getGraphicalViewer().getRootEditPart())
-				.getZoomManager();
+		return ((ScalableRootEditPart) getGraphicalViewer().getRootEditPart()).getZoomManager();
 	}
 
 	/**
@@ -321,21 +324,19 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		if (outlinePage == null && getGraphicalViewer() != null) {
 			RootEditPart rootEditPart = getGraphicalViewer().getRootEditPart();
 			if (rootEditPart instanceof ScalableRootEditPart) {
-				outlinePage = new GraphOutlinePage(
-						(ScalableRootEditPart) rootEditPart);
+				outlinePage = new GraphOutlinePage((ScalableRootEditPart) rootEditPart);
 			}
 		}
 		return outlinePage;
 	}
 
 	/**
-	 * Creates actions for this editor and registers them with the
-	 * {@link ActionRegistry}.
+	 * Creates actions for this editor and registers them with the {@link ActionRegistry}.
 	 */
 	protected void createActions() {
 		ActionRegistry registry = getActionRegistry();
 		IAction action;
-		
+
 		action = new ExportAction(this);
 		registry.registerAction(action);
 
@@ -365,8 +366,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	/**
 	 * Realizes the Editor by creating it's Control.
 	 * <P>
-	 * WARNING: This method may or may not be called by the workbench prior to
-	 * {@link #dispose()}.
+	 * WARNING: This method may or may not be called by the workbench prior to {@link #dispose()}.
 	 * @param parent the parent composite
 	 */
 	@Override
@@ -379,8 +379,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 */
 	@Override
 	public void dispose() {
-		getSite().getWorkbenchWindow().getSelectionService()
-				.removeSelectionListener(this);
+		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(this);
 		getEditDomain().setActiveTool(null);
 		getActionRegistry().dispose();
 
@@ -435,10 +434,9 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * Returns the list of {@link IAction IActions} dependant on property
-	 * changes in the Editor. These actions should implement the
-	 * {@link UpdateAction} interface so that they can be updated in response to
-	 * property changes. An example is the "Save" action.
+	 * Returns the list of {@link IAction IActions} dependant on property changes in the Editor. These actions should
+	 * implement the {@link UpdateAction} interface so that they can be updated in response to property changes. An
+	 * example is the "Save" action.
 	 * @return the list of property-dependant actions
 	 */
 	protected List getPropertyActions() {
@@ -446,10 +444,9 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * Returns the list of {@link IAction IActions} dependant on changes in the
-	 * workbench's {@link ISelectionService}. These actions should implement
-	 * the {@link UpdateAction} interface so that they can be updated in
-	 * response to selection changes. An example is the Delete action.
+	 * Returns the list of {@link IAction IActions} dependant on changes in the workbench's {@link ISelectionService}.
+	 * These actions should implement the {@link UpdateAction} interface so that they can be updated in response to
+	 * selection changes. An example is the Delete action.
 	 * @return the list of selection-dependant actions
 	 */
 	protected List getSelectionActions() {
@@ -457,8 +454,8 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * Returns the selection syncronizer object. The synchronizer can be used to
-	 * sync the selection of 2 or more EditPartViewers.
+	 * Returns the selection syncronizer object. The synchronizer can be used to sync the selection of 2 or more
+	 * EditPartViewers.
 	 * @return the syncrhonizer
 	 */
 	protected SelectionSynchronizer getSelectionSynchronizer() {
@@ -469,10 +466,9 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * Hooks the GraphicalViewer to the rest of the Editor. By default, the
-	 * viewer is added to the SelectionSynchronizer, which can be used to keep 2
-	 * or more EditPartViewers in sync. The viewer is also registered as the
-	 * <code>ISelectionProvider</code> for the Editor's PartSite.
+	 * Hooks the GraphicalViewer to the rest of the Editor. By default, the viewer is added to the
+	 * SelectionSynchronizer, which can be used to keep 2 or more EditPartViewers in sync. The viewer is also registered
+	 * as the <code>ISelectionProvider</code> for the Editor's PartSite.
 	 */
 	protected void hookGraphicalViewer() {
 		getSelectionSynchronizer().addViewer(getGraphicalViewer());
@@ -480,17 +476,14 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * Sets the site and input for this editor then creates and initializes the
-	 * actions.
+	 * Sets the site and input for this editor then creates and initializes the actions.
 	 * @see org.eclipse.ui.IEditorPart#init(IEditorSite, IEditorInput)
 	 */
 	@Override
-	public void init(IEditorSite site, IEditorInput input)
-			throws PartInitException {
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		setSite(site);
 		setInput(input);
-		getSite().getWorkbenchWindow().getSelectionService()
-				.addSelectionListener(this);
+		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
 		initializeActionRegistry();
 
 		// add the model change listener
@@ -498,8 +491,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(IWorkbenchPart,
-	 * ISelection)
+	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(IWorkbenchPart, ISelection)
 	 */
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		// If not the active editor, ignore selection changed.
@@ -509,12 +501,10 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * Initializes the ActionRegistry. This registry may be used by {@link
-	 * ActionBarContributor ActionBarContributors} and/or
-	 * {@link ContextMenuProvider ContextMenuProviders}.
+	 * Initializes the ActionRegistry. This registry may be used by {@link ActionBarContributor ActionBarContributors}
+	 * and/or {@link ContextMenuProvider ContextMenuProviders}.
 	 * <P>
-	 * This method may be called on Editor creation, or lazily the first time
-	 * {@link #getActionRegistry()} is called.
+	 * This method may be called on Editor creation, or lazily the first time {@link #getActionRegistry()} is called.
 	 */
 	protected void initializeActionRegistry() {
 		createActions();
@@ -555,11 +545,9 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	}
 
 	/**
-	 * A convenience method for updating a set of actions defined by the given
-	 * List of action IDs. The actions are found by looking up the ID in the
-	 * {@link #getActionRegistry() action registry}. If the corresponding
-	 * action is an {@link UpdateAction}, it will have its
-	 * <code>update()</code> method called.
+	 * A convenience method for updating a set of actions defined by the given List of action IDs. The actions are found
+	 * by looking up the ID in the {@link #getActionRegistry() action registry}. If the corresponding action is an
+	 * {@link UpdateAction}, it will have its <code>update()</code> method called.
 	 * @param actionIds the list of IDs to update
 	 */
 	protected void updateActions(List actionIds) {
@@ -582,8 +570,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		SaveAsDialog dialog = new SaveAsDialog(getSite().getShell());
 		dialog.setOriginalName("graph.jpg");
 		dialog.create();
-		dialog.setMessage(BeansGraphPlugin
-				.getResourceString("Editor.SaveAsDialog.message"));
+		dialog.setMessage(BeansGraphPlugin.getResourceString("Editor.SaveAsDialog.message"));
 		dialog.setOriginalName("graph.png");
 		dialog.open();
 		IPath path = dialog.getResult();
@@ -591,38 +578,22 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
 			IFile file = workspace.getRoot().getFile(path);
 			String ext = file.getFileExtension();
-			if (ext == null
-					|| ext.length() == 0
-					|| !(ext.equalsIgnoreCase("jpg") || ext
-							.equalsIgnoreCase("bmp") || ext
-							.equalsIgnoreCase("png"))) {
-				ErrorDialog
-						.openError(
-								getSite().getShell(),
-								BeansGraphPlugin
-										.getResourceString("Editor.SaveError.title"),
-								null,
-								BeansGraphPlugin
-										.createErrorStatus(BeansGraphPlugin
-												.getResourceString("Editor.SaveAsDialog.error")));
+			if (ext == null || ext.length() == 0
+					|| !(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("bmp") || ext.equalsIgnoreCase("png"))) {
+				ErrorDialog.openError(getSite().getShell(), BeansGraphPlugin
+						.getResourceString("Editor.SaveError.title"), null, BeansGraphPlugin
+						.createErrorStatus(BeansGraphPlugin.getResourceString("Editor.SaveAsDialog.error")));
 			}
-			else if (ext.equalsIgnoreCase("PNG")
-					&& !SpringCoreUtils.isEclipseSameOrNewer(3, 3)) {
-				ErrorDialog
-						.openError(
-								getSite().getShell(),
-								"Problem",
-								"Exporting to PNG format is only supported on Eclipse 3.3 or newer",
-								BeansGraphPlugin
-									.createErrorStatus(BeansGraphPlugin
-										.getResourceString("Editor.SaveAsDialog.error")));
+			else if (ext.equalsIgnoreCase("PNG") && !SpringCoreUtils.isEclipseSameOrNewer(3, 3)) {
+				ErrorDialog.openError(getSite().getShell(), "Problem",
+						"Exporting to PNG format is only supported on Eclipse 3.3 or newer", BeansGraphPlugin
+								.createErrorStatus(BeansGraphPlugin.getResourceString("Editor.SaveAsDialog.error")));
 			}
 			else {
 				if ("PNG".equalsIgnoreCase(ext)) {
 					saveImage(file, SWT.IMAGE_PNG);
 				}
-				else if ("JPG".equalsIgnoreCase(ext)
-						|| "JPEG".equalsIgnoreCase(ext)) {
+				else if ("JPG".equalsIgnoreCase(ext) || "JPEG".equalsIgnoreCase(ext)) {
 					saveImage(file, SWT.IMAGE_JPEG);
 				}
 				else if ("BMP".equalsIgnoreCase(ext)) {
@@ -634,34 +605,26 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 
 	/**
 	 * Saves an encoded image from this viewer.
-	 * @param format one of SWT.IMAGE_BMP, SWT.IMAGE_BMP_RLE, SWT.IMAGE_GIF
-	 * SWT.IMAGE_ICO, SWT.IMAGE_JPEG or SWT.IMAGE_PNG
+	 * @param format one of SWT.IMAGE_BMP, SWT.IMAGE_BMP_RLE, SWT.IMAGE_GIF SWT.IMAGE_ICO, SWT.IMAGE_JPEG or
+	 * SWT.IMAGE_PNG
 	 * @return the bytes of an encoded image for the specified viewer
 	 */
 	public void saveImage(final IFile file, final int format) {
 		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 			@Override
-			public void execute(final IProgressMonitor monitor)
-					throws CoreException {
+			public void execute(final IProgressMonitor monitor) throws CoreException {
 				try {
 					if (file.exists()) {
-						file.setContents(new ByteArrayInputStream(
-								createImage(format)), true, false, monitor);
+						file.setContents(new ByteArrayInputStream(createImage(format)), true, false, monitor);
 					}
 					else {
-						file.create(new ByteArrayInputStream(
-								createImage(format)), true, monitor);
+						file.create(new ByteArrayInputStream(createImage(format)), true, monitor);
 					}
 				}
 				catch (CoreException e) {
-					ErrorDialog
-							.openError(
-									getSite().getShell(),
-									BeansGraphPlugin
-											.getResourceString("Editor.SaveError.title"),
-									BeansGraphPlugin
-											.getResourceString("Editor.SaveError.text"),
-									e.getStatus());
+					ErrorDialog.openError(getSite().getShell(), BeansGraphPlugin
+							.getResourceString("Editor.SaveError.title"), BeansGraphPlugin
+							.getResourceString("Editor.SaveError.text"), e.getStatus());
 				}
 			}
 		};
@@ -679,16 +642,15 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 
 	/**
 	 * Returns the bytes of an encoded image from this viewer.
-	 * @param format one of SWT.IMAGE_BMP, SWT.IMAGE_BMP_RLE, SWT.IMAGE_GIF
-	 * SWT.IMAGE_ICO, SWT.IMAGE_JPEG or SWT.IMAGE_PNG
+	 * @param format one of SWT.IMAGE_BMP, SWT.IMAGE_BMP_RLE, SWT.IMAGE_GIF SWT.IMAGE_ICO, SWT.IMAGE_JPEG or
+	 * SWT.IMAGE_PNG
 	 * @return the bytes of an encoded image for the specified viewer
 	 */
 	public byte[] createImage(int format) {
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
 
 		Device device = getGraphicalViewer().getControl().getDisplay();
-		LayerManager lm = (LayerManager) getGraphicalViewer()
-				.getEditPartRegistry().get(LayerManager.ID);
+		LayerManager lm = (LayerManager) getGraphicalViewer().getEditPartRegistry().get(LayerManager.ID);
 		IFigure figure = lm.getLayer(LayerConstants.PRINTABLE_LAYERS);
 		Rectangle r = figure.getClientArea();
 
@@ -732,5 +694,27 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	@Override
 	public boolean isSaveAsAllowed() {
 		return true;
+	}
+	
+	/**
+	 * {@link ISchedulingRule} implementation that always conflicts with other {@link BlockingOnSelfSchedulingRule}s.
+	 * <p>
+	 * This rule prevents that at no time more than one job with this scheduling rule attached runs.
+t	 */
+	private class BlockingOnSelfSchedulingRule implements ISchedulingRule {
+
+		/**
+		 * Always returns <code>false</code>.
+		 */
+		public boolean contains(ISchedulingRule rule) {
+			return rule == this;
+		}
+
+		/**
+		 * Returns <code>true</code> if <code>rule</code> is of type {@link BlockingOnSelfSchedulingRule}.
+		 */
+		public boolean isConflicting(ISchedulingRule rule) {
+			return rule instanceof BlockingOnSelfSchedulingRule;
+		}
 	}
 }
