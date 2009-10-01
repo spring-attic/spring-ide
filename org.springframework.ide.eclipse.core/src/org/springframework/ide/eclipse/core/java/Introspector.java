@@ -391,6 +391,29 @@ public final class Introspector {
 		return new HashSet<IMethod>(allMethods.values());
 	}
 
+	/**
+	 * Returns <strong>all</strong> constructors of the given {@link IType} instance.
+	 * @param type the type
+	 * @return set of {@link IMethod}
+	 * @throws JavaModelException
+	 */
+	public static Set<IMethod> getAllConstructors(IType type) throws JavaModelException {
+		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
+		for (IMethod method : getMethods(type)) {
+			String key = method.getElementName() + method.getSignature();
+			if (!allMethods.containsKey(key) && method.isConstructor()) {
+				allMethods.put(key, method);
+			}
+		}
+		return new HashSet<IMethod>(allMethods.values());
+	}
+
+	/**
+	 * Returns <strong>all</strong> fields of the given {@link IType} instance.
+	 * @param type the type
+	 * @return set of {@link IMethod}
+	 * @throws JavaModelException
+	 */
 	public static Set<IField> getAllFields(IType type) throws JavaModelException {
 		Map<String, IField> allMethods = new HashMap<String, IField>();
 		while (type != null) {
@@ -549,5 +572,5 @@ public final class Introspector {
 		}
 		return new IMethod[0];
 	}
-	
+
 }

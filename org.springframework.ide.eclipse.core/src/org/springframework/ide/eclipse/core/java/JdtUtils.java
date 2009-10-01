@@ -335,6 +335,11 @@ public class JdtUtils {
 		return getMethod(type, methodName, parameterTypesAsString);
 	}
 
+	public static IMethod getConstructor(IType type, Class[] parameterTypes) {
+		String[] parameterTypesAsString = getParameterTypesAsStringArray(parameterTypes);
+		return getConstructor(type, parameterTypesAsString);
+	}
+
 	public static IMethod getMethod(IType type, String methodName, String[] parameterTypes) {
 		int index = methodName.indexOf('(');
 		if (index >= 0) {
@@ -353,6 +358,23 @@ public class JdtUtils {
 			}
 
 			return Introspector.findMethod(type, methodName, parameterTypes.length, Public.YES, Static.DONT_CARE);
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	public static IMethod getConstructor(IType type, String[] parameterTypes) {
+		try {
+			Set<IMethod> methods = Introspector.getAllConstructors(type);
+			for (IMethod method : methods) {
+				if (method.getParameterTypes().length == parameterTypes.length) {
+					String[] methodParameterTypes = getParameterTypesAsStringArray(method);
+					if (Arrays.deepEquals(parameterTypes, methodParameterTypes)) {
+						return method;
+					}
+				}
+			}
 		}
 		catch (JavaModelException e) {
 		}
