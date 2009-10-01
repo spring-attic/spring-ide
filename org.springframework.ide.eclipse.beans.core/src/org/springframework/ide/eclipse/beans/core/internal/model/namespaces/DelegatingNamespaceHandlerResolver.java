@@ -50,6 +50,10 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 
 	private final DocumentAccessor documentAccessor;
 
+	public DelegatingNamespaceHandlerResolver(ClassLoader classLoader, IBeansConfig beansConfig) {
+		this(classLoader, beansConfig, null);
+	}
+	
 	public DelegatingNamespaceHandlerResolver(ClassLoader classLoader, IBeansConfig beansConfig,
 			DocumentAccessor documentHolder) {
 		super(classLoader);

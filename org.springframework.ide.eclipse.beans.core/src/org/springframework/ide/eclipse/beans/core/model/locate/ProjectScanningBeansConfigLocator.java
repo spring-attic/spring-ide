@@ -107,7 +107,7 @@ public class ProjectScanningBeansConfigLocator extends AbstractJavaProjectPathMa
 	private NamespaceHandlerResolver getNamespaceHandlerResolver(IProject project) {
 		if (!namespaceResoverCache.containsKey(project)) {
 			namespaceResoverCache.put(project, new DelegatingNamespaceHandlerResolver(JdtUtils.getClassLoader(project),
-					null, null));
+					null));
 		}
 		return namespaceResoverCache.get(project);
 	}
