@@ -21,11 +21,9 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  */
 class PassThroughProblemReporter implements IInjectionMetadataProviderProblemReporter {
 
-	@Override
 	public void error(String message, Member member) {
 	}
 
-	@Override
 	public void error(String message, DependencyDescriptor descriptor) {
 	}
 

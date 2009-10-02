@@ -590,7 +590,6 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 
 	private class AutowireProblemReporter implements IInjectionMetadataProviderProblemReporter {
 
-		@Override
 		public void error(String message, Member member) {
 			try {
 				IJavaElement source = AutowireUtils.getJavaElement(project.getProject(), member, -1);
@@ -604,7 +603,6 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			}
 		}
 
-		@Override
 		public void error(String message, DependencyDescriptor descriptor) {
 			if (descriptor.getField() != null) {
 				error(message, descriptor.getField());

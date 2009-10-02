@@ -144,7 +144,6 @@ public class CommonAnnnotationInjectionMetadataProvider implements IInjectionMet
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	public InjectionMetadata findAutowiringMetadata(final Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
