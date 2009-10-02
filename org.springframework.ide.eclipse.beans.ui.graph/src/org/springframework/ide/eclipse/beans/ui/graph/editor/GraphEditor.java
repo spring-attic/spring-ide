@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
@@ -86,6 +88,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.ExportAction;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.GraphContextMenuProvider;
@@ -104,6 +107,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
+@SuppressWarnings("deprecation")
 public class GraphEditor extends EditorPart implements ISelectionListener {
 
 	public static final String EDITOR_ID = BeansGraphPlugin.PLUGIN_ID + ".editor";
@@ -126,8 +130,22 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 
 	private IModelChangeListener modelChangeListener = new GraphEditorInputModelChangeListener();
 
+	private IPropertyChangeListener propertyChangeListener = new GraphEditorPropertyChangeListener();
+
 	public GraphEditor() {
 		setEditDomain(new DefaultEditDomain(this));
+	}
+
+	private class GraphEditorPropertyChangeListener implements IPropertyChangeListener {
+
+		public void propertyChange(PropertyChangeEvent event) {
+			if (event.getProperty().equals(BeansUIPlugin.SHOULD_SHOW_EXTENDED_CONTENT_PREFERENCE_ID)
+					|| event.getProperty().equals(BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID)
+					|| event.getProperty().equals(BeansUIPlugin.SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID)) {
+				initializeGraphicalViewer();
+			}
+		}
+
 	}
 
 	/**
@@ -169,13 +187,13 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			}
 
 			if (refresh) {
-				Display display = getSite().getShell().getDisplay();
-				display.asyncExec(new Runnable() {
-					public void run() {
+//				Display display = getSite().getShell().getDisplay();
+//				display.asyncExec(new Runnable() {
+//					public void run() {
 						setInput(beansInput);
 						initializeGraphicalViewer();
-					}
-				});
+//					}
+//				});
 			}
 		}
 
@@ -387,6 +405,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 
 		// remove the change listener
 		BeansCorePlugin.getModel().removeChangeListener(modelChangeListener);
+		BeansUIPlugin.getDefault().getPluginPreferences().removePropertyChangeListener(propertyChangeListener);
 
 		super.dispose();
 	}
@@ -490,6 +509,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 
 		// add the model change listener
 		BeansCorePlugin.getModel().addChangeListener(modelChangeListener);
+		BeansUIPlugin.getDefault().getPluginPreferences().addPropertyChangeListener(propertyChangeListener);
 	}
 
 	/**
