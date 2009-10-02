@@ -78,6 +78,8 @@ plugin@org.springframework.bundle.osgi.doc=SVN,trunk,https://src.springframework
 plugin@org.springframework.javaconfig=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-javaconfig
 
 # required osgi bundles
+plugin@com.springsource.javax.xml.bind=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.bind-2.1.7.jar
+plugin@com.springsource.javax.xml.bind.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.bind.source-2.1.7.jar
 plugin@com.springsource.javax.xml.ws=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.ws-2.1.1.jar
 plugin@com.springsource.javax.xml.ws.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.ws.source-2.1.1.jar
 plugin@com.springsource.javax.activation=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.activation-1.1.1.jar

@@ -1,5 +1,5 @@
-plugin@com.springsource.javax.xml.ws=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.ws-2.1.1.jar
-plugin@com.springsource.javax.xml.ws.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.ws.source-2.1.1.jar
+plugin@com.springsource.javax.xml.bind=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.bind-2.1.7.jar
+plugin@com.springsource.javax.xml.bind.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.bind.source-2.1.7.jar
 plugin@com.springsource.edu.emory.mathcs.backport=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.edu.emory.mathcs.backport-3.1.0.jar
 plugin@com.springsource.edu.emory.mathcs.backport.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.edu.emory.mathcs.backport.source-3.1.0.jar
 plugin@com.springsource.javax.activation=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.activation-1.1.1.jar
@@ -18,6 +18,8 @@ plugin@com.springsource.javax.servlet.jsp.jstl=GET,https://src.springframework.o
 plugin@com.springsource.javax.servlet.jsp.jstl.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.servlet.jsp.jstl.source-1.2.0.jar
 plugin@com.springsource.javax.servlet.jsp.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.servlet.jsp.source-2.1.0.jar
 plugin@com.springsource.javax.servlet.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.servlet.source-2.5.0.jar
+plugin@com.springsource.javax.xml.bind=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.bind-2.1.7.jar
+plugin@com.springsource.javax.xml.bind.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.bind.source-2.1.7.jar
 plugin@com.springsource.javax.xml.rpc=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.rpc-1.1.0.jar
 plugin@com.springsource.javax.xml.soap=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.soap-1.3.0.jar
 plugin@com.springsource.javax.xml.soap.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.soap.source-1.3.0.jar
