@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.autowire.provider;
+package org.springframework.ide.eclipse.beans.core.autowire.internal.provider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,9 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
  * {@link ASTVisitor} that captures all ASTNodes which represent resource annotations.
  * @author Jared Rodriguez
  * @since 2.0.5
+ * @deprecated As of 2.2.7 this is deprecated in flavor for the new autowiring support
  */
+@Deprecated
 public class AstAnnotationVisitor extends ASTVisitor {
 	
 	private ArrayList<ASTNode> annotations = new ArrayList<ASTNode>();

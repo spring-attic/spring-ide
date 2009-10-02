@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.autowire.provider;
+package org.springframework.ide.eclipse.beans.core.autowire.internal.provider;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -46,7 +46,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.metadata.BeanMetadataProviderAdapter;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
@@ -59,7 +58,9 @@ import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
  * @author Jared Rodriguez
  * @author Christian Dupuis
  * @since 2.0.5
+  * @deprecated As of 2.2.7 this is deprecated in flavor for the new autowiring support
  */
+@Deprecated
 /**
  * TODO: * Do processing only if annotation based autowiring is enabled in {@link IBeansConfig}
  * and/or {@link IBeansConfigSet}. * Process XML autowiring configurations as well

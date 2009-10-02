@@ -13,11 +13,25 @@
  *******************************************************************************/
  -->
 <plugin>
-   <extension
+
+   <!-- As of 2.2.7 this is deprecated in flavor for the new autowiring support -->
+   <!--<extension
          point="org.springframework.ide.eclipse.beans.core.metadataproviders">
       <metadataProvider
-            class="org.springframework.ide.eclipse.beans.core.internal.autowire.provider.AnnotationReferenceMetadataProvider">
+            class="org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AnnotationReferenceMetadataProvider">
       </metadataProvider>
-   </extension>
+   </extension>-->
+   
+   <extension
+	       point="org.springframework.ide.eclipse.core.validators">
+	    <rules validatorId="org.springframework.ide.eclipse.beans.core.beansvalidator">
+		    <rule
+            class="org.springframework.ide.eclipse.beans.core.autowire.internal.validation.rules.AutowireDependencyProblemsRule"
+            description="%autowire.rule.description"
+            enabledByDefault="false"
+            id="autowire"
+            name="%autowire.rule.label"/>
+		</rules>
+	</extension>
 
 </plugin>

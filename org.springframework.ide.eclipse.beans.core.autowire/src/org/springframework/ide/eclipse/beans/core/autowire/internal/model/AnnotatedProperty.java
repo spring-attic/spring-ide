@@ -18,7 +18,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
  * Marker subclass to indicate a {@link BeanProperty} that originates from annotation scanning.
  * @author Jared Rodriguez
  * @since 2.0.5
+ * @deprecated As of 2.2.7 this is deprecated in flavor for the new autowiring support
  */
+@Deprecated
 public class AnnotatedProperty extends BeanProperty {
 
 	public AnnotatedProperty(IBean bean, PropertyValue propValue) {

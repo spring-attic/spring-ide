@@ -16,7 +16,9 @@ import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
  * An actual bean reference that was discovered through annotation processing.
  * @author Jared Rodriguez
  * @since 2.0.5
+ * @deprecated As of 2.2.7 this is deprecated in flavor for the new autowiring support
  */
+@Deprecated
 public class AnnotatedBeanReference {
 
 	private String referenceName = null;

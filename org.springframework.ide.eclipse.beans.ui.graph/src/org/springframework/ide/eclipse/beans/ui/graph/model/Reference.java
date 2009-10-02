@@ -31,6 +31,8 @@ public class Reference extends Edge implements IAdaptable {
 	private Node node;
 	
 	private boolean isInner;
+	
+	private IResourceModelElement sourceLocation;
 
 	public Reference(BeanType type, Bean source, Bean target, boolean isInner) {
 		this(type, source, target, null, isInner);
@@ -41,6 +43,14 @@ public class Reference extends Edge implements IAdaptable {
 		this.type = type;
 		this.node = node;
 		this.isInner = isInner;
+	}
+
+	public Reference(BeanType type, Bean source, Bean target, Node node, boolean isInner, IResourceModelElement sourceLocation) {
+		super(source, target);
+		this.type = type;
+		this.node = node;
+		this.isInner = isInner;
+		this.sourceLocation = sourceLocation;
 	}
 
 	public BeanType getType() {
@@ -67,7 +77,10 @@ public class Reference extends Edge implements IAdaptable {
 	 * Returns the associated beans model element.
 	 */
 	public IResourceModelElement getResourceElement() {
-		if (node instanceof Property) {
+		if (sourceLocation != null) {
+			return sourceLocation;
+		}
+		else if (node instanceof Property) {
 			return ((Property) node).getBean().getBean();
 		}
 		else if (node instanceof ConstructorArgument) {
@@ -93,6 +106,9 @@ public class Reference extends Edge implements IAdaptable {
 		else if (node instanceof ConstructorArgument) {
 			return ((ConstructorArgument) node).getAdapter(adapter);
 		}
+//		else if (sourceLocation != null) {
+//			return sourceLocation.getAdapter(adapter);
+//		}
 		return getSourceBean().getAdapter(adapter);
 	}
 

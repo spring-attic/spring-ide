@@ -1,0 +1,53 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2009 Spring IDE Developers
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Spring IDE Developers - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.beans.core.autowire.internal.validation.rules;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
+import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
+
+/**
+ * {@link IValidationRule} that reads {@link ValidationProblem}s that got stored during processing of autowiring
+ * configurations.
+ * @author Christian Dupuis
+ * @since 2.2.7
+ */
+public class AutowireDependencyProblemsRule implements IValidationRule<BeansConfig, IBeansValidationContext> {
+
+	/**
+	 * Checks if the this rule supports given {@link IModelElement} and {@link IValidationContext}.
+	 * @return true if element is a {@link BeansConfig} and context is {@link IBeansValidationContext}
+	 */
+	public boolean supports(IModelElement element, IValidationContext context) {
+		return element instanceof BeansConfig && context instanceof IBeansValidationContext;
+	}
+
+	/**
+	 * Pass all {@link ValidationProblem}s that are stored in given {@link BeansConfig} into the <code>context</code>.
+	 */
+	public void validate(BeansConfig element, IBeansValidationContext context, IProgressMonitor monitor) {
+		AutowireDependencyProvider provider = new AutowireDependencyProvider(element, (IBeansModelElement) context
+				.getContextElement());
+		provider.seProjectClassLoaderSupport(context.getProjectClassLoaderSupport());
+		
+		provider.resolveAutowiredDependencies();
+		for (ValidationProblem problem : provider.getValidationProblems()) {
+			context.getProblems().add(problem);
+		}
+	}
+
+}

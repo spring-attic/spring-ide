@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.graph.model;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -40,6 +41,9 @@ public class Bean extends Node implements IAdaptable {
 	private Bean[] innerBeans;
 
 	public int preferredHeight;
+	
+	private Set<IBeanProperty> extendedProperties = new LinkedHashSet<IBeanProperty>();
+	private Set<IBeanConstructorArgument> extendedConstructorArgs = new LinkedHashSet<IBeanConstructorArgument>();
 
 	public Bean() {
 		super("empty");
@@ -81,12 +85,17 @@ public class Bean extends Node implements IAdaptable {
 	}
 
 	public boolean hasConstructorArguments() {
-		return bean.getConstructorArguments().size() > 0;
+		return getConstructorArguments().length > 0;
 	}
 
 	public ConstructorArgument[] getConstructorArguments() {
 		ArrayList<ConstructorArgument> list = new ArrayList<ConstructorArgument>();
 		Iterator cargs = bean.getConstructorArguments().iterator();
+		while (cargs.hasNext()) {
+			IBeanConstructorArgument carg = (IBeanConstructorArgument) cargs.next();
+			list.add(new ConstructorArgument(this, carg));
+		}
+		cargs = extendedConstructorArgs.iterator();
 		while (cargs.hasNext()) {
 			IBeanConstructorArgument carg = (IBeanConstructorArgument) cargs.next();
 			list.add(new ConstructorArgument(this, carg));
@@ -110,9 +119,15 @@ public class Bean extends Node implements IAdaptable {
 			IBeanProperty prop = (IBeanProperty) props.next();
 			list.add(new Property(this, prop));
 		}
+		props = extendedProperties.iterator();
+		while (props.hasNext()) {
+			IBeanProperty prop = (IBeanProperty) props.next();
+			list.add(new Property(this, prop));
+		}
 		return list.toArray(new Property[list.size()]);
 	}
 
+	@SuppressWarnings("deprecation")
 	public Bean[] getInnerBeans() {
 		if (innerBeans == null) {
 			Set<Bean> innerBeans = new HashSet<Bean>();
@@ -130,10 +145,19 @@ public class Bean extends Node implements IAdaptable {
 		return this.innerBeans;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private boolean shouldAddBean(IBean bean) {
 		return !bean.isInfrastructure()
 				|| (bean.isInfrastructure() && BeansUIPlugin.getDefault().getPluginPreferences()
 						.getBoolean(BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID));
+	}
+	
+	public void addBeanProperty(IBeanProperty beanProperty) {
+		this.extendedProperties.add(beanProperty);
+	}
+	
+	public void addBeanConstructorArgument(IBeanConstructorArgument constructorArgument) {
+		this.extendedConstructorArgs.add(constructorArgument);
 	}
 
 	public boolean isRootBean() {

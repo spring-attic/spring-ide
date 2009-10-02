@@ -93,7 +93,6 @@ public class Graph implements IAdaptable {
 		this.input = input;
 		this.elementId = input.getElementId();
 		this.contextId = input.getContextId();
-		init();
 	}
 
 	/**
@@ -102,11 +101,11 @@ public class Graph implements IAdaptable {
 	 */
 	@SuppressWarnings("unchecked")
 	public void init() {
-		
+
 		createBeansMap();
 		createReferences();
 		extendGraphContent();
-		
+
 		graph = new DirectedGraph();
 
 		for (Bean bean : beans.values()) {
@@ -273,23 +272,27 @@ public class Graph implements IAdaptable {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	protected void extendGraphContent() {
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
-				GRAPH_CONTENT_EXTENDER_EXTENSION_POINT);
-		if (point != null) {
-			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension.getConfigurationElements()) {
-					if (config.getAttribute(CLASS_ATTRIBUTE) != null) {
-						try {
-							Object provider = config.createExecutableExtension(CLASS_ATTRIBUTE);
-							if (provider instanceof IGraphContentExtender) {
-								((IGraphContentExtender) provider).addAdditionalBeans(beans, beanReferences,
-										(IBeansModelElement) getElement(elementId),
-										(IBeansModelElement) getElement(contextId));
+		if (BeansUIPlugin.getDefault().getPluginPreferences().getBoolean(
+				BeansUIPlugin.SHOULD_SHOW_EXTENDED_CONTENT_PREFERENCE_ID)) {
+			IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
+					GRAPH_CONTENT_EXTENDER_EXTENSION_POINT);
+			if (point != null) {
+				for (IExtension extension : point.getExtensions()) {
+					for (IConfigurationElement config : extension.getConfigurationElements()) {
+						if (config.getAttribute(CLASS_ATTRIBUTE) != null) {
+							try {
+								Object provider = config.createExecutableExtension(CLASS_ATTRIBUTE);
+								if (provider instanceof IGraphContentExtender) {
+									((IGraphContentExtender) provider).addAdditionalBeans(beans, beanReferences,
+											(IBeansModelElement) getElement(elementId),
+											(IBeansModelElement) getElement(contextId));
+								}
 							}
-						}
-						catch (CoreException e) {
-							BeansGraphPlugin.log(e);
+							catch (CoreException e) {
+								BeansGraphPlugin.log(e);
+							}
 						}
 					}
 				}
