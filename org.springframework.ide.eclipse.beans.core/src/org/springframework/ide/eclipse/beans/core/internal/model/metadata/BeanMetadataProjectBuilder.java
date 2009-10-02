@@ -58,7 +58,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 	 * {@inheritDoc}
 	 */
 	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor) throws CoreException {
-		monitor.subTask("Attaching Spring meta data");
+		monitor.subTask("Resolving Spring Meta Data");
 		if (affectedResources.size() > 0) {
 			Job job = new BeanMetadataBuilderJob(affectedBeans);
 			job.schedule();

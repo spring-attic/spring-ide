@@ -193,7 +193,7 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 	@Override
 	protected IValidationContext createContext(IResourceModelElement rootElement, IResourceModelElement contextElement) {
 		if (rootElement instanceof IBeansConfig) {
-			return new BeansValidationContext((IBeansConfig) rootElement, contextElement);
+			return new BeansValidationContext((IBeansConfig) rootElement, contextElement, this.context);
 		}
 		return null;
 	}

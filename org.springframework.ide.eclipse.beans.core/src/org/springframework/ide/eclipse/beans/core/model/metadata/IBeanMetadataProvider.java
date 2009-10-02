@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,19 +18,18 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
 /**
- * Extension point to be implemented if third parties want to contribute {@link IBeanMetadata} or
- * {@link IBeanProperty}s to the Spring IDE core model.
+ * Extension point to be implemented if third parties want to contribute {@link IBeanMetadata} or {@link IBeanProperty}s
+ * to the Spring IDE core model.
  * <p>
- * Note: contributions made over this extension are <b>not</b> stored in the core model and will be
- * terminated after <b>10</b> seconds.
+ * Note: contributions made over this extension are <b>not</b> stored in the core model and will be terminated after
+ * <b>10</b> seconds.
  * @author Christian Dupuis
  * @since 2.0.5
  */
 public interface IBeanMetadataProvider {
 
 	/**
-	 * Contribute {@link IBeanMetadata} for a given {@link IBean} in the context of an
-	 * {@link IBeansConfig}.
+	 * Contribute {@link IBeanMetadata} for a given {@link IBean} in the context of an {@link IBeansConfig}.
 	 * <p>
 	 * Note: implementations of this method are not allowed to return <code>null</code>.
 	 * @param bean the current {@link IBean} to search for bean meta data
@@ -38,12 +37,10 @@ public interface IBeanMetadataProvider {
 	 * @param progressMonitor a {@link IProgressMonitor} to report progress
 	 * @return {@link Set} of {@link IBeanMetadata}
 	 */
-	Set<IBeanMetadata> provideBeanMetadata(IBean bean, IBeansConfig beansConfig,
-			IProgressMonitor progressMonitor);
+	Set<IBeanMetadata> provideBeanMetadata(IBean bean, IBeansConfig beansConfig, IProgressMonitor progressMonitor);
 
 	/**
-	 * Contribute {@link IBeanProperty} for a given {@link IBean} in the context of an
-	 * {@link IBeansConfig}.
+	 * Contribute {@link IBeanProperty} for a given {@link IBean} in the context of an {@link IBeansConfig}.
 	 * <p>
 	 * Note: implementations of this method are not allowed to return <code>null</code>.
 	 * @param bean the current {@link IBean} to search for bean meta data
@@ -51,7 +48,6 @@ public interface IBeanMetadataProvider {
 	 * @param progressMonitor a {@link IProgressMonitor} to report progress
 	 * @return {@link Set} of {@link IBeanProperty}
 	 */
-	Set<IBeanProperty> provideBeanProperties(IBean bean, IBeansConfig beansConfig,
-			IProgressMonitor progressMonitor);
+	Set<IBeanProperty> provideBeanProperties(IBean bean, IBeansConfig beansConfig, IProgressMonitor progressMonitor);
 
 }

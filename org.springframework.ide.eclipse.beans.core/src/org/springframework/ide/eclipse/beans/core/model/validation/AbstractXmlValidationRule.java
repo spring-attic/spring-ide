@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
@@ -346,6 +347,13 @@ public abstract class AbstractXmlValidationRule implements IValidationRule<IBean
 				}
 			}
 			return delegateContext.getRootElement();
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public IProjectClassLoaderSupport getProjectClassLoaderSupport() {
+			return delegateContext.getProjectClassLoaderSupport();
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,8 +37,7 @@ import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
  * @author Christian Dupuis
  * @since 2.0.5
  */
-public class DelegatingAnnotationReadingMetadataProvider extends
-		AbstractAnnotationReadingMetadataProvider {
+public class DelegatingAnnotationReadingMetadataProvider extends AbstractAnnotationReadingMetadataProvider {
 
 	/** The class attribute in the extension point contribution */
 	private static final String CLASS_ATTRIBUTE = "class";
@@ -46,23 +45,24 @@ public class DelegatingAnnotationReadingMetadataProvider extends
 	/** The metadataProvider element in the extension point contribution */
 	private static final String ANNOTATION_METADATA_PROVIDER_ELEMENT = "annotationMetadataProvider";
 
+	private IAnnotationBeanMetadataProvider[] metadataProviders;
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void processFoundAnnotations(final IBean bean,
-			final Set<IBeanMetadata> beanMetaDataSet, final IType type,
-			final IAnnotationMetadata metadata, IProgressMonitor progressMonitor) {
+	protected void processFoundAnnotations(final IBean bean, final Set<IBeanMetadata> beanMetaDataSet,
+			final IType type, final IAnnotationMetadata metadata, IProgressMonitor progressMonitor) {
 		for (final IAnnotationBeanMetadataProvider provider : getMetadataProviders()) {
 			if (progressMonitor.isCanceled()) {
 				return;
 			}
-			
+
 			// make sure that third-party extension don't crash us
 			SafeRunner.run(new ISafeRunnable() {
 
 				public void handleException(Throwable exception) {
-					// nothing to do here 
+					// nothing to do here
 				}
 
 				public void run() throws Exception {
@@ -73,10 +73,15 @@ public class DelegatingAnnotationReadingMetadataProvider extends
 	}
 
 	/**
-	 * Returns the contributed {@link IAnnotationBeanMetadataProvider} from the Eclipse extension
-	 * registry.
+	 * Returns the contributed {@link IAnnotationBeanMetadataProvider} from the Eclipse extension registry.
 	 */
 	protected IAnnotationBeanMetadataProvider[] getMetadataProviders() {
+
+		// We can safely cache the providers at least for the lifetime of this instance
+		if (metadataProviders != null) {
+			return metadataProviders;
+		}
+
 		List<IAnnotationBeanMetadataProvider> providers = new ArrayList<IAnnotationBeanMetadataProvider>();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
 				BeanMetadataBuilderJob.META_DATA_PROVIDERS_EXTENSION_POINT);
@@ -99,7 +104,8 @@ public class DelegatingAnnotationReadingMetadataProvider extends
 				}
 			}
 		}
-		return providers.toArray(new IAnnotationBeanMetadataProvider[providers.size()]);
+		metadataProviders = providers.toArray(new IAnnotationBeanMetadataProvider[providers.size()]);
+		return metadataProviders;
 	}
 
 }

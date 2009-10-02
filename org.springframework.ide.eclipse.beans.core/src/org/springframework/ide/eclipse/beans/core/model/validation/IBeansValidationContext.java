@@ -18,6 +18,7 @@ import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
@@ -53,6 +54,14 @@ public interface IBeansValidationContext extends IValidationContext {
 	 * @since 2.0.1
 	 */
 	ClassReaderFactory getClassReaderFactory();
+
+	/**
+	 * Returns an {@link IProjectClassLoaderSupport} configured for the given project and the default class loader as
+	 * parent
+	 * @return a {@link IProjectClassLoaderSupport} instance
+	 * @since 2.2.7
+	 */
+	IProjectClassLoaderSupport getProjectClassLoaderSupport();
 
 	/**
 	 * Returns the corresponding {@link IProject} that is the parent of the validation target.

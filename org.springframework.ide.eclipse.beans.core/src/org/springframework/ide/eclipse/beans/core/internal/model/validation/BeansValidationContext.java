@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
@@ -37,6 +38,8 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationProblemM
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
+import org.springframework.ide.eclipse.core.project.DefaultProjectContributorState;
+import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.Assert;
@@ -52,7 +55,7 @@ import org.w3c.dom.NodeList;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansValidationContext extends AbstractValidationContext implements IBeansValidationContext {
+public class BeansValidationContext extends AbstractValidationContext implements IBeansValidationContext, IProjectContributorState {
 
 	private static final char KEY_SEPARATOR_CHAR = '/';
 
@@ -62,18 +65,28 @@ public class BeansValidationContext extends AbstractValidationContext implements
 
 	private ClassReaderFactory classReaderFactory;
 
+	private IProjectClassLoaderSupport projectClassLoaderSupport;
+
 	private Map<String, Set<BeanDefinition>> beanLookupCache;
 
 	private final Map<AttributeDescriptor, List<ToolAnnotationData>> toolAnnotationLookupCache;
 
+	private final IProjectContributorState buildState;
+
 	public BeansValidationContext(IBeansConfig config, IResourceModelElement contextElement) {
+		this(config, contextElement, new DefaultProjectContributorState());
+	}
+	
+	public BeansValidationContext(IBeansConfig config, IResourceModelElement contextElement, IProjectContributorState context) {
 		super(config, contextElement);
+		
+		this.buildState = context;
+		
+		this.incompleteRegistry = createRegistry(config, contextElement, false);
+		this.completeRegistry = createRegistry(config, contextElement, true);
 
-		incompleteRegistry = createRegistry(config, contextElement, false);
-		completeRegistry = createRegistry(config, contextElement, true);
-
-		beanLookupCache = new HashMap<String, Set<BeanDefinition>>();
-		toolAnnotationLookupCache = new HashMap<AttributeDescriptor, List<ToolAnnotationData>>();
+		this.beanLookupCache = new HashMap<String, Set<BeanDefinition>>();
+		this.toolAnnotationLookupCache = new HashMap<AttributeDescriptor, List<ToolAnnotationData>>();
 	}
 
 	/**
@@ -130,6 +143,16 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		}
 		return this.classReaderFactory;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public synchronized IProjectClassLoaderSupport getProjectClassLoaderSupport() {
+		if (this.projectClassLoaderSupport == null) {
+			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(getRootElementProject(), true);
+		}
+		return this.projectClassLoaderSupport;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -169,6 +192,20 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	public boolean isBeanRegistered(String beanName, String beanClass) {
 		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName, beanClass);
 		return bds != null && bds.size() > 0;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public <T> T get(Class<T> clazz) {
+		return buildState.get(clazz);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean hold(Object obj) {
+		return buildState.hold(obj);
 	}
 
 	/**

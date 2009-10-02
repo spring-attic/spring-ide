@@ -71,7 +71,7 @@ public class BeanMetadataBuilderJob extends Job {
 	 * {@link IBeansConfig}.
 	 */
 	public BeanMetadataBuilderJob(Map<IBeansConfig, Set<IBean>> affectedBeans) {
-		super("Attaching Spring meta data");
+		super("Resolving Spring Meta Data");
 		this.affectedBeans = affectedBeans;
 		setPriority(Job.BUILD);
 		setSystem(true);
