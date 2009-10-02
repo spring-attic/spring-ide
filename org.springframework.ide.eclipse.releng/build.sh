@@ -17,15 +17,15 @@ STAGINGLOCATION=$WORKSPACE/updatesite/
 TEST_STAGINGLOCATION=$WORKSPACE/testupdatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
 if [ -z "$ECLIPSE_DISTRO_URL" ]; then
- 	ECLIPSE_DISTRO_URL=http://ftp.wh2.tu-dresden.de/pub/mirrors/eclipse/technology/epp/downloads/release/ganymede/SR2/eclipse-jee-ganymede-SR2-macosx-carbon.tar.gz
+ 	ECLIPSE_DISTRO_URL=http://download.springsource.com/release/ECLIPSE/galileo/SR1/eclipse-jee-galileo-SR1-macosx-cocoa-x86_64.tar.gz
 	#ECLIPSE_DISTRO_URL=http://build.eclipse.org/technology/epp/epp_build/34/download/20080623-1700/20080623-1700_eclipse-jee-ganymede-macosx.carbon.ppc.tar.gz
 	#ECLIPSE_DISTRO_URL=http://www.mirrorservice.org/sites/download.eclipse.org/eclipseMirror/technology/epp/downloads/release/ganymede/SR2/eclipse-jee-ganymede-SR2-linux-gtk.tar.gz
 fi
 ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/downloads/drops/R-3.3.1.1-200710231652/eclipse-Automated-Tests-3.3.1.1.zip
 
-MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/e3.4/
-AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/34/update
+MYLYN_UPDATE_SITE_URL=http://eclipse.unixheads.org/eclipse/tools/mylyn/update/e3.4/
+AJDT_UPDATE_SITE_URL=http://eclipse.unixheads.org/eclipse/tools/ajdt/35/dev/update
 
 #-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y
 
@@ -119,57 +119,57 @@ fi
 if [ "$INSTALL_FEATURES" = "1" ] 
 then
 
-	rm -rf ./eclipse/plugins/org.eclipse.mylyn*
-	rm -rf ./eclipse/features/org.eclipse.mylyn*
+#	rm -rf ./eclipse/plugins/org.eclipse.mylyn*
+#	rm -rf ./eclipse/features/org.eclipse.mylyn*
 	
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
-   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
-   		-installIU org.eclipse.mylyn_feature.feature.group
+#	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+#  		-metadataRepository $MYLYN_UPDATE_SITE_URL \
+#   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
+#   		-installIU org.eclipse.mylyn_feature.feature.group
 	
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
-   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
-   		-installIU org.eclipse.mylyn.context_feature.feature.group
+#	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+#   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
+#   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
+#   		-installIU org.eclipse.mylyn.context_feature.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
-   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
-   		-installIU org.eclipse.mylyn.team_feature.feature.group
+#	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+#   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
+#   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
+#   		-installIU org.eclipse.mylyn.team_feature.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
-   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
-   		-installIU org.eclipse.mylyn.ide_feature.feature.group
+#	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+#   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
+#   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
+#   		-installIU org.eclipse.mylyn.ide_feature.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
-   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
-   		-installIU org.eclipse.mylyn.java_feature.feature.group
+#	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+#   		-metadataRepository $MYLYN_UPDATE_SITE_URL \
+#   		-artifactRepository $MYLYN_UPDATE_SITE_URL \
+#   		-installIU org.eclipse.mylyn.java_feature.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+   		-metadataRepository $AJDT_UPDATE_SITE_URL \
+   		-artifactRepository $AJDT_UPDATE_SITE_URL \
    		-installIU org.aspectj.runtime
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+   		-metadataRepository $AJDT_UPDATE_SITE_URL \
+   		-artifactRepository $AJDT_UPDATE_SITE_URL \
    		-installIU org.aspectj.weaver
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+   		-metadataRepository $AJDT_UPDATE_SITE_URL \
+   		-artifactRepository $AJDT_UPDATE_SITE_URL \
    		-installIU org.eclipse.equinox.weaving.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+   		-metadataRepository $AJDT_UPDATE_SITE_URL \
+   		-artifactRepository $AJDT_UPDATE_SITE_URL \
    		-installIU org.eclipse.ajdt.feature.group
 
-	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application \
-   		-metadataRepository http://download.eclipse.org/tools/ajdt/34/update \
-   		-artifactRepository http://download.eclipse.org/tools/ajdt/34/update \
+	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
+   		-metadataRepository $AJDT_UPDATE_SITE_URL \
+   		-artifactRepository $AJDT_UPDATE_SITE_URL \
    		-installIU org.eclipse.contribution.xref.feature.group
 fi
 

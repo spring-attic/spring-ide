@@ -51,6 +51,7 @@ plugin@org.springframework.ide.eclipse.beans.core.autowire=SVN,trunk,https://src
 plugin@org.springframework.ide.eclipse.beans.osgibridge=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.osgibridge
 plugin@org.springframework.ide.eclipse.beans.mylyn=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.mylyn
 plugin@org.springframework.ide.eclipse.beans.ui=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.ui
+plugin@org.springframework.ide.eclipse.beans.ui.autowire=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.ui.autowire
 plugin@org.springframework.ide.eclipse.beans.ui.editor=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.ui.editor
 plugin@org.springframework.ide.eclipse.beans.ui.graph=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.ui.graph
 plugin@org.springframework.ide.eclipse.beans.ui.navigator=SVN,trunk,https://src.springframework.org/svn/spring-ide,,org.springframework.ide.eclipse.beans.ui.navigator

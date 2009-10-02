@@ -123,12 +123,6 @@
 	</feature>
 
 	<feature
-		url="features/org.springframework.ide.eclipse.javaconfig.feature.source_@VERSION@.jar"
-		id="org.springframework.ide.eclipse.javaconfig.feature.source" version="@VERSION@">
-		<category name="Resources / Spring IDE" />
-	</feature>
-	
-	<feature
 		url="features/org.springframework.ide.eclipse.ajdt.feature.source_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.ajdt.feature.source" version="@VERSION@">
 		<category name="Resources / Spring IDE" />
