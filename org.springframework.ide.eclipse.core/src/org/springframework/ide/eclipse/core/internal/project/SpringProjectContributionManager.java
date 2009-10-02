@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.internal.project;
 
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
+import org.springframework.ide.eclipse.core.project.DefaultProjectContributorState;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.core.project.IProjectContributionEventListener;
 import org.springframework.ide.eclipse.core.project.IProjectContributor;
@@ -205,30 +205,6 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 		};
 		SafeRunner.run(code);
-	}
-
-	/**
-	 * Default implementation of the {@link IProjectContributorState} interface.
-	 */
-	private class DefaultProjectContributorState implements IProjectContributorState {
-
-		private Map<Class, Object> managedObjects = new HashMap<Class, Object>();
-
-		@SuppressWarnings("unchecked")
-		public <T> T get(Class<T> clazz) {
-			return (T) managedObjects.get(clazz);
-		}
-
-		public boolean hold(Object obj) {
-			if (managedObjects.containsKey(obj.getClass())) {
-				return false;
-			}
-			else {
-				managedObjects.put(obj.getClass(), obj);
-				return true;
-			}
-		}
-
 	}
 
 	/**

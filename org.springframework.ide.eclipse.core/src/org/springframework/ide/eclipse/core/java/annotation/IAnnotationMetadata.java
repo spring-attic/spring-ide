@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.java.annotation;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 
 /**
@@ -33,6 +34,12 @@ public interface IAnnotationMetadata {
 	 * for the given <code>annotationClass</code>.
 	 */
 	Annotation getTypeLevelAnnotation(String annotationClass);
+	
+	/**
+	 * Returns the method-level annotations meta data grouped by {@link IMethod}
+	 * for the given <code>annotationClasses</code>.
+	 */
+	Map<IField, Annotation> getFieldLevelAnnotations(String... annotationClasses);
 
 	/**
 	 * Returns all type-level annotation classes.
@@ -49,6 +56,12 @@ public interface IAnnotationMetadata {
 	 * Returns <code>true</code> if a any type-level annotation from the given
 	 * <code>annotationClasses</code> has been found.
 	 */
-	boolean hasTypeLevelAnnotation(String... annotationClasses);
+	boolean hasTypeLevelAnnotations(String... annotationClasses);
+
+	/**
+	 * Returns <code>true</code> if a any field-level annotation from the given
+	 * <code>annotationClasses</code> has been found.
+	 */
+	boolean hasFieldLevelAnnotations(String... annotationClasses);
 
 }

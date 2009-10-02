@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.core.java.annotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.objectweb.asm.AnnotationVisitor;
@@ -94,7 +96,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		return false;
 	}
 
-	public boolean hasTypeLevelAnnotation(String... annotationClasses) {
+	public boolean hasTypeLevelAnnotations(String... annotationClasses) {
 		Set<String> foundAnnoatationClasses = getTypeLevelAnnotationClasses();
 		for (String annotationClass : annotationClasses) {
 			if (foundAnnoatationClasses.contains(annotationClass)) {
@@ -235,5 +237,13 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 					.getShortName(className)
 					+ "." + enumValue));
 		}
+	}
+
+	public Map<IField, Annotation> getFieldLevelAnnotations(String... annotationClasses) {
+		return Collections.emptyMap();
+	}
+
+	public boolean hasFieldLevelAnnotations(String... annotationClasses) {
+		return false;
 	}
 }

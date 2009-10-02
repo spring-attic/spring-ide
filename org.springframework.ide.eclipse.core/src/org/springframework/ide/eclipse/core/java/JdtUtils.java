@@ -210,7 +210,7 @@ public class JdtUtils {
 		IJavaProject project = JavaCore.create(config.getProject());
 		return project;
 	}
-
+	
 	/**
 	 * Returns the corresponding Java type for given full-qualified class name.
 	 * @param project the JDT project the class belongs to

@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -41,6 +42,8 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 	private Set<Annotation> classAnnotations = new HashSet<Annotation>();
 
 	private Map<IMethod, Set<Annotation>> methodAnnotations = new LinkedHashMap<IMethod, Set<Annotation>>();
+
+	private Map<IField, Set<Annotation>> fieldAnnotations = new LinkedHashMap<IField, Set<Annotation>>();
 
 	public JdtBasedAnnotationMetadata(IType type) {
 		this.type = type;
@@ -71,6 +74,24 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 				}
 				if (modelAnnotations.size() > 0) {
 					methodAnnotations.put(method, modelAnnotations);
+				}
+			}
+			for (IMethod method : Introspector.getAllConstructors(type)) {
+				Set<Annotation> modelAnnotations = new LinkedHashSet<Annotation>();
+				for (IAnnotation annotation : method.getAnnotations()) {
+					modelAnnotations.add(processAnnotation(annotation));
+				}
+				if (modelAnnotations.size() > 0) {
+					methodAnnotations.put(method, modelAnnotations);
+				}
+			}
+			for (IField field : Introspector.getAllFields(type)) {
+				Set<Annotation> modelAnnotations = new LinkedHashSet<Annotation>();
+				for (IAnnotation annotation : field.getAnnotations()) {
+					modelAnnotations.add(processAnnotation(annotation));
+				}
+				if (modelAnnotations.size() > 0) {
+					fieldAnnotations.put(field, modelAnnotations);
 				}
 			}
 		}
@@ -176,6 +197,32 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 		return false;
 	}
 
+	public Map<IField, Annotation> getFieldLevelAnnotations(String... annotationClasses) {
+		Map<IField, Annotation> fieldAnnotation = new HashMap<IField, Annotation>();
+		for (Map.Entry<IField, Set<Annotation>> entry : fieldAnnotations.entrySet()) {
+			for (Annotation annotation : entry.getValue()) {
+				for (String annotationClass : annotationClasses) {
+					if (annotation.getAnnotationClass().equals(annotationClass)) {
+						fieldAnnotation.put(entry.getKey(), annotation);
+					}
+				}
+			}
+		}
+		return fieldAnnotation;
+	}
+	
+	public boolean hasFieldLevelAnnotations(String... annotationClass) {
+		List<String> annoatations = Arrays.asList(annotationClass);
+		for (Map.Entry<IField, Set<Annotation>> entry : fieldAnnotations.entrySet()) {
+			for (Annotation annotation : entry.getValue()) {
+				if (annoatations.contains(annotation.getAnnotationClass())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	public Set<String> getTypeLevelAnnotationClasses() {
 		Set<String> annotationTypes = new LinkedHashSet<String>();
 		for (Annotation annotation : classAnnotations) {
@@ -193,7 +240,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 		return null;
 	}
 
-	public boolean hasTypeLevelAnnotation(String... annotationClasses) {
+	public boolean hasTypeLevelAnnotations(String... annotationClasses) {
 		Set<String> foundAnnoatationClasses = getTypeLevelAnnotationClasses();
 		for (String annotationClass : annotationClasses) {
 			if (foundAnnoatationClasses.contains(annotationClass)) {
