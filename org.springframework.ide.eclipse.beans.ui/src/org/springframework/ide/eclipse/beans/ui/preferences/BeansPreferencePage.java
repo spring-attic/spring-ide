@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,8 +29,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
 /**
- * {@link IWorkbenchPreferencePage} that allows to change the persistence property for the
- * {@link IBeansModel}.
+ * {@link IWorkbenchPreferencePage} that allows to change the persistence property for the {@link IBeansModel}.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -43,6 +42,8 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 	private FieldEditor graphEditorInfrastructureBeans;
 
 	private IntegerFieldEditor configTimeout;
+
+	private FieldEditor graphEditorExtendedContent;
 
 	protected Control createContents(Composite parent) {
 
@@ -63,7 +64,7 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		timeoutComposite.setLayout(new GridLayout());
 
 		timeoutComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Group timeoutGroup = new Group(timeoutComposite, SWT.NONE);
 		timeoutGroup.setText("Loading Spring configuration files");
 		layout = new GridLayout();
@@ -76,29 +77,26 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		timoutComposite1.setLayout(layout);
 		timoutComposite1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		configTimeout = new IntegerFieldEditor(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID,
-				"Timeout [sec]", timoutComposite1);
+		configTimeout = new IntegerFieldEditor(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, "Timeout [sec]",
+				timoutComposite1);
 		configTimeout.setPage(this);
 		configTimeout.setPreferenceStore(BeansCorePlugin.getDefault().getPreferenceStore());
 		configTimeout.load();
 
-		
 		Composite radioComposite = new Composite(entryTable, SWT.NONE);
 		radioComposite.setLayout(new GridLayout());
 
 		// Create a data that takes up the extra space in the dialog.
 		radioComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Composite radioComposite2 = new Composite(radioComposite, SWT.NONE);
 		layout.marginWidth = 3;
 		layout.marginHeight = 3;
 		radioComposite2.setLayout(layout);
 		radioComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radioEditor = new RadioGroupFieldEditor(
-				BeansUIPlugin.DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID,
-				"Default Double Click Action", 1, new String[][] {
-						{ "Open Configuration File", "true" }, { "Open Java Element", "false" } },
-				radioComposite2, true);
+		radioEditor = new RadioGroupFieldEditor(BeansUIPlugin.DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID,
+				"Default Double Click Action", 1, new String[][] { { "Open Configuration File", "true" },
+						{ "Open Java Element", "false" } }, radioComposite2, true);
 		radioEditor.setPage(this);
 		radioEditor.setPreferenceStore(getPreferenceStore());
 		radioEditor.load();
@@ -120,18 +118,22 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		graphComposite2.setLayout(layout);
 		graphComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		graphEditorInnerBeans = new BooleanFieldEditor(
-				BeansUIPlugin.SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID, "Display inner beans",
-				SWT.NONE, graphComposite2);
+		graphEditorInnerBeans = new BooleanFieldEditor(BeansUIPlugin.SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID,
+				"Display inner beans", SWT.NONE, graphComposite2);
 		graphEditorInnerBeans.setPage(this);
 		graphEditorInnerBeans.setPreferenceStore(getPreferenceStore());
 		graphEditorInnerBeans.load();
 		graphEditorInfrastructureBeans = new BooleanFieldEditor(
-				BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID,
-				"Display infrastructure beans", SWT.NONE, graphComposite2);
+				BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID, "Display infrastructure beans", SWT.NONE,
+				graphComposite2);
 		graphEditorInfrastructureBeans.setPage(this);
 		graphEditorInfrastructureBeans.setPreferenceStore(getPreferenceStore());
 		graphEditorInfrastructureBeans.load();
+		graphEditorExtendedContent = new BooleanFieldEditor(BeansUIPlugin.SHOULD_SHOW_EXTENDED_CONTENT_PREFERENCE_ID,
+				"Display extended content (e.g. Autowired dependencies) [experimental]", SWT.NONE, graphComposite2);
+		graphEditorExtendedContent.setPage(this);
+		graphEditorExtendedContent.setPreferenceStore(getPreferenceStore());
+		graphEditorExtendedContent.load();
 
 		return entryTable;
 	}
@@ -150,10 +152,11 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	public boolean performOk() {
 		radioEditor.store();
+		configTimeout.store();
 		graphEditorInnerBeans.store();
 		graphEditorInfrastructureBeans.store();
-		configTimeout.store();
-		
+		graphEditorExtendedContent.store();
+
 		return super.performOk();
 	}
 

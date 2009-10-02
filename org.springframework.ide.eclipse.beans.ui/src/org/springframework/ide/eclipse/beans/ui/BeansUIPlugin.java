@@ -33,33 +33,30 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 
 /**
- * Central access point for the Spring Framework UI plug-in (id
- * <code>"org.springframework.ide.eclipse.beans.ui"</code>).
+ * Central access point for the Spring Framework UI plug-in (id <code>"org.springframework.ide.eclipse.beans.ui"</code>
+ * ).
  * 
  * @author Torsten Juergeleit
  */
 public class BeansUIPlugin extends AbstractUIPlugin {
 
 	/**
-	 * Plugin identifier for Spring Beans UI (value
-	 * <code>org.springframework.ide.eclipse.beans.ui</code>).
+	 * Plugin identifier for Spring Beans UI (value <code>org.springframework.ide.eclipse.beans.ui</code>).
 	 */
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.ui";
 
-	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
-			+ ".navigator.projectExplorerContent";
+	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID + ".navigator.projectExplorerContent";
 
-	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
-			+ ".navigator.springExplorerContent";
+	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID + ".navigator.springExplorerContent";
 
-	public static final String DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID = PLUGIN_ID
-			+ ".shouldOpenConfigFile";
+	public static final String DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID = PLUGIN_ID + ".shouldOpenConfigFile";
 
 	public static final String SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID = PLUGIN_ID
 			+ ".shouldShowInfrastructureBeans";
 
-	public static final String SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID = PLUGIN_ID
-			+ ".shouldShowInnerBeans";
+	public static final String SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID = PLUGIN_ID + ".shouldShowInnerBeans";
+
+	public static final String SHOULD_SHOW_EXTENDED_CONTENT_PREFERENCE_ID = PLUGIN_ID + ".shouldExtendedContent";
 
 	public static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
@@ -73,7 +70,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	private ILabelProvider labelProvider;
 
 	/** {@link IResourceChangeListener} that gets notified for project nature added events */
-//	private IResourceChangeListener changeListener;
+	// private IResourceChangeListener changeListener;
 
 	/**
 	 * Creates the Spring Beans UI plug-in.
@@ -112,20 +109,21 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 			imageDescriptorRegistry.dispose();
 			imageDescriptorRegistry = null;
 		}
-//		if (changeListener != null) {
-//			ResourcesPlugin.getWorkspace().removeResourceChangeListener(changeListener);
-//		}
+		// if (changeListener != null) {
+		// ResourcesPlugin.getWorkspace().removeResourceChangeListener(changeListener);
+		// }
 		super.stop(context);
 	}
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-//		changeListener = new SpringResourceChangeListener(new SpringNatureAddedEventHandler());
-//		ResourcesPlugin.getWorkspace().addResourceChangeListener(changeListener,
-//				BeansResourceChangeListener.LISTENER_FLAGS);
+		// changeListener = new SpringResourceChangeListener(new SpringNatureAddedEventHandler());
+		// ResourcesPlugin.getWorkspace().addResourceChangeListener(changeListener,
+		// BeansResourceChangeListener.LISTENER_FLAGS);
 		getPreferenceStore().setDefault(DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
 		getPreferenceStore().setDefault(SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID, false);
 		getPreferenceStore().setDefault(SHOULD_SHOW_INNER_BEANS_PREFERENCE_ID, true);
+		getPreferenceStore().setDefault(SHOULD_SHOW_EXTENDED_CONTENT_PREFERENCE_ID, false);
 	}
 
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
@@ -142,8 +140,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns then singleton instance of {@link BeansModelLabelProvider}.
 	 * <p>
-	 * <b>For this instance the dispose method must never be called!! This is done by {@link
-	 * Plugin.stop()} instead.</b>
+	 * <b>For this instance the dispose method must never be called!! This is done by {@link Plugin.stop()} instead.</b>
 	 */
 	public static ILabelProvider getLabelProvider() {
 		return getDefault().internalGetLabelProvider();
@@ -232,8 +229,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(
-				createErrorStatus(getResourceString("Plugin.internal_error"), exception));
+		getDefault().getLog().log(createErrorStatus(getResourceString("Plugin.internal_error"), exception));
 	}
 
 	/**
