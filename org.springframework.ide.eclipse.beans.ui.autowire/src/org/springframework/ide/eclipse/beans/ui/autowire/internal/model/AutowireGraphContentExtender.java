@@ -8,9 +8,10 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.graph.model.autowire;
+package org.springframework.ide.eclipse.beans.ui.autowire.internal.model;
 
 import java.beans.Introspector;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,94 +40,67 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * {@link IGraphContentExtender} that adds autowired dependencies by calling into the autowire support.
- * <p>
- * Gracefully handles cases in which the autowire feature is not installed.
  * @author Christian Dupuis
  * @since 2.2.7
  */
 public class AutowireGraphContentExtender implements IGraphContentExtender {
-
-	/** FQCN for the autowiring support; don't use getClass().getName() to prevent eager class loading */
-	private static final String AUTOWIRE_CLASS = "org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider";
-
-	/** Flag indicating if the autowiring support is installed */
-	private static final boolean IS_AUTOWIRE_PRESENT = isAutowireSupportPresent();
-
-	/**
-	 * Checks if the autowiring class is available on the bundle classpath.
-	 */
-	private static boolean isAutowireSupportPresent() {
-		try {
-			Class.forName(AUTOWIRE_CLASS);
-			return true;
-		}
-		catch (ClassNotFoundException e) {
-			return false;
-		}
-	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void addAdditionalBeans(Map<String, Bean> beans, List<Reference> beansReferences, IBeansModelElement root,
 			IBeansModelElement context) {
-		if (IS_AUTOWIRE_PRESENT) {
-			IGraphContentExtender extender = new AutowireGraphContentExtenderWithDependency();
-			extender.addAdditionalBeans(beans, beansReferences, root, context);
-		}
-	}
+		AutowireDependencyProvider provider = new AutowireDependencyProvider(root, context);
+		Map<IBean, Set<IBeanReference>> autowiredReferences = provider.resolveAutowiredDependencies();
 
-	/**
-	 * Internal class that has the dependency to the autowiring support.
-	 */
-	private static class AutowireGraphContentExtenderWithDependency implements IGraphContentExtender {
+		for (Map.Entry<IBean, Set<IBeanReference>> entry : autowiredReferences.entrySet()) {
+			Bean bean = beans.get(entry.getKey().getElementName());
+			if (bean != null) {
+				Set<String> autowiredProperties = new HashSet<String>();
+				Set<IBeanReference> refs = entry.getValue();
+				for (IBeanReference ref : refs) {
+					Bean targetBean = beans.get(ref.getBeanName());
+					if (targetBean != null) {
+						beansReferences.add(new Reference(BeanType.STANDARD, bean, targetBean, null,
+								!bean.isRootBean(), (IResourceModelElement) ref));
 
-		public void addAdditionalBeans(Map<String, Bean> beans, List<Reference> beansReferences,
-				IBeansModelElement root, IBeansModelElement context) {
-			AutowireDependencyProvider provider = new AutowireDependencyProvider(root, context);
-			Map<IBean, Set<IBeanReference>> autowiredReferences = provider.resolveAutowiredDependencies();
-
-			for (Map.Entry<IBean, Set<IBeanReference>> entry : autowiredReferences.entrySet()) {
-				Bean bean = beans.get(entry.getKey().getElementName());
-				if (bean != null) {
-					Set<IBeanReference> refs = entry.getValue();
-					for (IBeanReference ref : refs) {
-						Bean targetBean = beans.get(ref.getBeanName());
-						if (targetBean != null) {
-							beansReferences.add(new Reference(BeanType.STANDARD, bean, targetBean, null, !bean
-									.isRootBean(), (IResourceModelElement) ref));
-
-							try {
-								IJavaElement source = ((AutowireBeanReference) ref).getSource();
-								if (source instanceof IField) {
-									String propertyName = source.getElementName();
+						try {
+							IJavaElement source = ((AutowireBeanReference) ref).getSource();
+							if (source instanceof IField) {
+								String propertyName = source.getElementName();
+								if (!autowiredProperties.contains(propertyName)) {
 									IBeanProperty newProperty = new BeanProperty(entry.getKey(), new PropertyValue(
 											propertyName, new RuntimeBeanReference(ref.getBeanName())));
 									bean.addBeanProperty(newProperty);
+									autowiredProperties.add(propertyName);
 								}
-								else if (source instanceof IMethod && ((IMethod) source).isConstructor()) {
-									IBeanConstructorArgument newConstructorArg = new BeanConstructorArgument(entry
-											.getKey(), ((AutowireBeanReference) ref).getParameterIndex(),
-											new ValueHolder(new RuntimeBeanReference(ref.getBeanName())));
-									bean.addBeanConstructorArgument(newConstructorArg);
+
+							}
+							else if (source instanceof IMethod && ((IMethod) source).isConstructor()) {
+								IBeanConstructorArgument newConstructorArg = new BeanConstructorArgument(
+										entry.getKey(), ((AutowireBeanReference) ref).getParameterIndex(),
+										new ValueHolder(new RuntimeBeanReference(ref.getBeanName())));
+								bean.addBeanConstructorArgument(newConstructorArg);
+							}
+							else if (source instanceof IMethod && !((IMethod) source).isConstructor()) {
+								String propertyName = source.getElementName();
+								if (propertyName.startsWith("set")) {
+									propertyName = Introspector.decapitalize(propertyName.substring(3));
 								}
-								else if (source instanceof IMethod && !((IMethod) source).isConstructor()) {
-									String propertyName = source.getElementName();
-									if (propertyName.startsWith("set")) {
-										propertyName = Introspector.decapitalize(propertyName.substring(3));
-									}
+								if (!autowiredProperties.contains(propertyName)) {
 									IBeanProperty newProperty = new BeanProperty(entry.getKey(), new PropertyValue(
 											propertyName, new RuntimeBeanReference(ref.getBeanName())));
 									bean.addBeanProperty(newProperty);
+									autowiredProperties.add(propertyName);
 								}
 							}
-							catch (JavaModelException e) {
-							}
+						}
+						catch (JavaModelException e) {
+							// Just ignore this
 						}
 					}
 				}
 			}
 		}
 	}
-
 }

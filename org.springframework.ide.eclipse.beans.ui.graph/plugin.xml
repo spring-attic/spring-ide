@@ -75,11 +75,5 @@
       </actionProvider>
    </extension>
    
-   <extension
-         point="org.springframework.ide.eclipse.beans.ui.graph.graphContentExtender">
-      <graphContentExtender
-            class="org.springframework.ide.eclipse.beans.ui.graph.model.autowire.AutowireGraphContentExtender">
-      </graphContentExtender>
-   </extension>
   	
 </plugin>
