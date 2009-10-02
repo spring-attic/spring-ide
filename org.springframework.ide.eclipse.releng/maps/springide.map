@@ -78,6 +78,8 @@ plugin@org.springframework.bundle.osgi.doc=SVN,trunk,https://src.springframework
 plugin@org.springframework.javaconfig=SVN,trunk,https://src.springframework.org/svn/spring-ide,,required-bundles/spring-javaconfig
 
 # required osgi bundles
+plugin@com.springsource.javax.activation=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.activation-1.1.1.jar
+plugin@com.springsource.javax.activation.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.activation.source-1.1.1.jar
 plugin@com.springsource.javax.xml.soap=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.soap-1.3.0.jar
 plugin@com.springsource.javax.xml.soap.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.xml.soap.source-1.3.0.jar
 plugin@com.springsource.edu.emory.mathcs.backport=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.edu.emory.mathcs.backport-3.1.0.jar
