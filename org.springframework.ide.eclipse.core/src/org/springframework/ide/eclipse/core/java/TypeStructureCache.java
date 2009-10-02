@@ -47,17 +47,17 @@ import org.eclipse.jdt.internal.compiler.env.ClassSignature;
 import org.eclipse.jdt.internal.compiler.env.EnumConstantSignature;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
 import org.eclipse.jdt.internal.compiler.env.IBinaryElementValuePair;
+import org.eclipse.jdt.internal.compiler.env.IBinaryField;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
- * Object that caches instances of {@link TypeStructure}. Furthermore this implementation is able to
- * answer if a given {@link IResource} which represents a class file has structural changes.
+ * Object that caches instances of {@link TypeStructure}. Furthermore this implementation is able to answer if a given
+ * {@link IResource} which represents a class file has structural changes.
  * <p>
- * For this implementation a change of class and method level annotation is considered a structural
- * change.
+ * For this implementation a change of class and method level annotation is considered a structural change.
  * @author Christian Dupuis
  * @since 2.2.0
  */
@@ -138,8 +138,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 						input = ((IFile) resource).getContents();
 						ClassFileReader reader = ClassFileReader.read(input, resource.getName());
 						TypeStructure typeStructure = new TypeStructure(reader);
-						typeStructures.put(new String(reader.getName()).replace('/', '.'),
-								typeStructure);
+						typeStructures.put(new String(reader.getName()).replace('/', '.'), typeStructure);
 					}
 					catch (CoreException e) {
 					}
@@ -174,11 +173,9 @@ public class TypeStructureCache implements ITypeStructureCache {
 				return true;
 			}
 
-			Map<String, TypeStructure> typeStructures = typeStructuresByProject.get(resource
-					.getProject());
+			Map<String, TypeStructure> typeStructures = typeStructuresByProject.get(resource.getProject());
 
-			if (resource != null && resource.getFileExtension() != null
-					&& resource.getFileExtension().equals("java")) {
+			if (resource != null && resource.getFileExtension() != null && resource.getFileExtension().equals("java")) {
 				IJavaElement element = JavaCore.create(resource);
 				if (element instanceof ICompilationUnit && ((ICompilationUnit) element).isOpen()) {
 					try {
@@ -189,10 +186,9 @@ public class TypeStructureCache implements ITypeStructureCache {
 							if (typeStructure == null) {
 								return true;
 							}
-							ClassFileReader reader = getClassFileReaderForClassName(type
-									.getFullyQualifiedName(), resource.getProject());
-							if (reader != null
-									&& hasStructuralChanges(reader, typeStructure, flags)) {
+							ClassFileReader reader = getClassFileReaderForClassName(type.getFullyQualifiedName(),
+									resource.getProject());
+							if (reader != null && hasStructuralChanges(reader, typeStructure, flags)) {
 								return true;
 							}
 						}
@@ -228,8 +224,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 
 			Map<String, TypeStructure> typeStructures = typeStructuresByProject.get(project);
 			for (String recordedClassName : typeStructures.keySet()) {
-				if (className.equals(recordedClassName)
-						|| recordedClassName.startsWith(innerClassName)) {
+				if (className.equals(recordedClassName) || recordedClassName.startsWith(innerClassName)) {
 					typeStructuresToRemove.add(recordedClassName);
 				}
 			}
@@ -278,8 +273,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 		return null;
 	}
 
-	private static File convertPathToFile(IProject project, IPath path)
-			throws MalformedURLException {
+	private static File convertPathToFile(IProject project, IPath path) throws MalformedURLException {
 		if (path != null && project != null && path.removeFirstSegments(1) != null) {
 
 			URI uri = project.findMember(path.removeFirstSegments(1)).getRawLocationURI();
@@ -290,8 +284,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 					return new File(uri);
 				}
 				else {
-					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace()
-							.getPathVariableManager();
+					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
 					return new File(variableManager.resolveURI(uri));
 				}
 			}
@@ -299,8 +292,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 		return null;
 	}
 
-	private boolean hasStructuralChanges(ClassFileReader reader, TypeStructure existingType,
-			int flags) {
+	private boolean hasStructuralChanges(ClassFileReader reader, TypeStructure existingType, int flags) {
 		if (existingType == null) {
 			return true;
 		}
@@ -348,6 +340,37 @@ public class TypeStructureCache implements ITypeStructureCache {
 			}
 			return true;
 		}
+		
+		// fields
+		IBinaryField[] newFields = reader.getFields();
+		if (newFields == null) {
+			newFields = TypeStructure.NoField;
+		}
+
+		IBinaryField[] existingFs = existingType.binFields;
+		if (newFields.length != existingFs.length)
+			return true;
+		new_field_loop: for (int i = 0; i < newFields.length; i++) {
+			IBinaryField field = newFields[i];
+			char[] fieldName = field.getName();
+			for (int j = 0; j < existingFs.length; j++) {
+				if (CharOperation.equals(existingFs[j].getName(), fieldName)) {
+					if (!modifiersEqual(field.getModifiers(), existingFs[j].getModifiers())) {
+						return true;
+					}
+					if (!CharOperation.equals(existingFs[j].getTypeName(), field.getTypeName())) {
+						return true;
+					}
+					if ((flags & FLAG_ANNOTATION) != 0) {
+						if (!annotationsEqual(field.getAnnotations(), existingFs[j].getAnnotations(), flags)) {
+							return true;
+						}
+					}
+					continue new_field_loop;
+				}
+			}
+			return true;
+		}
 
 		// methods
 		IBinaryMethod[] newMethods = reader.getMethods();
@@ -364,8 +387,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 			for (int j = 0; j < existingMs.length; j++) {
 				if (CharOperation.equals(existingMs[j].getSelector(), methodName)) {
 					// candidate match
-					if (!CharOperation.equals(method.getMethodDescriptor(), existingMs[j]
-							.getMethodDescriptor())) {
+					if (!CharOperation.equals(method.getMethodDescriptor(), existingMs[j].getMethodDescriptor())) {
 						continue; // might be overloading
 					}
 					else {
@@ -374,8 +396,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 							return true;
 						}
 						if ((flags & FLAG_ANNOTATION) != 0) {
-							if (!annotationsEqual(method.getAnnotations(), existingMs[j]
-									.getAnnotations(), flags)) {
+							if (!annotationsEqual(method.getAnnotations(), existingMs[j].getAnnotations(), flags)) {
 								return true;
 							}
 						}
@@ -403,14 +424,11 @@ public class TypeStructureCache implements ITypeStructureCache {
 
 		new_annotation_loop: for (int i = 0; i < newAnnotations.length; i++) {
 			for (int j = 0; j < existingAnnotations.length; j++) {
-				if (CharOperation.equals(newAnnotations[j].getTypeName(), existingAnnotations[i]
-						.getTypeName())) {
+				if (CharOperation.equals(newAnnotations[j].getTypeName(), existingAnnotations[i].getTypeName())) {
 					// compare annotation parameters
 					if ((flags & FLAG_ANNOTATION_VALUE) != 0) {
-						IBinaryElementValuePair[] newParameters = newAnnotations[j]
-								.getElementValuePairs();
-						IBinaryElementValuePair[] existingParameters = existingAnnotations[j]
-								.getElementValuePairs();
+						IBinaryElementValuePair[] newParameters = newAnnotations[j].getElementValuePairs();
+						IBinaryElementValuePair[] existingParameters = existingAnnotations[j].getElementValuePairs();
 						if (newParameters == null) {
 							newParameters = TypeStructure.NoElement;
 						}
@@ -460,8 +478,8 @@ public class TypeStructureCache implements ITypeStructureCache {
 		}
 		else if (newValue instanceof ClassSignature) {
 			if (existingValue instanceof ClassSignature) {
-				if (!CharOperation.equals(((ClassSignature) newValue).getTypeName(),
-						((ClassSignature) existingValue).getTypeName())) {
+				if (!CharOperation.equals(((ClassSignature) newValue).getTypeName(), ((ClassSignature) existingValue)
+						.getTypeName())) {
 					return false;
 				}
 			}
@@ -482,9 +500,9 @@ public class TypeStructureCache implements ITypeStructureCache {
 		else if (newValue instanceof EnumConstantSignature) {
 			if (existingValue instanceof EnumConstantSignature) {
 				if (!(CharOperation.equals(((EnumConstantSignature) newValue).getTypeName(),
-						((EnumConstantSignature) existingValue).getTypeName()) && CharOperation
-						.equals(((EnumConstantSignature) newValue).getEnumConstantName(),
-								((EnumConstantSignature) existingValue).getEnumConstantName()))) {
+						((EnumConstantSignature) existingValue).getTypeName()) && CharOperation.equals(
+						((EnumConstantSignature) newValue).getEnumConstantName(),
+						((EnumConstantSignature) existingValue).getEnumConstantName()))) {
 					return false;
 				}
 			}
@@ -551,8 +569,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 			}
 			else if (cu != null) {
 				if (cu instanceof ICompilationUnit) {
-					String name = cu.getElementName()
-							.substring(0, cu.getElementName().length() - 5);
+					String name = cu.getElementName().substring(0, cu.getElementName().length() - 5);
 					sb.insert(0, name);
 				}
 				else {
