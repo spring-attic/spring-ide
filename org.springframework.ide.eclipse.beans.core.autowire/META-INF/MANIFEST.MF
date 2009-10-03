@@ -5,10 +5,7 @@ Bundle-SymbolicName: org.springframework.ide.eclipse.beans.core.autowire;singlet
 Bundle-Version: 2.2.7.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.core.autowire.Activator
 Bundle-Localization: plugin
-Import-Package: javax.annotation,
- javax.ejb,
- javax.xml.ws,
- org.eclipse.core.resources,
+Import-Package: org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.jdt.core,
@@ -44,3 +41,7 @@ Export-Package: org.springframework.ide.eclipse.beans.core.autowire,
  org.springframework.ide.eclipse.beans.core.autowire.internal.model,
  org.springframework.ide.eclipse.beans.core.autowire.internal.provider,
  org.springframework.ide.eclipse.beans.core.autowire.internal.validation.rules
+Bundle-ClassPath: lib/com.springsource.javax.annotation-1.0.0.jar,
+ lib/com.springsource.javax.ejb-3.0.0.jar,
+ lib/com.springsource.javax.xml.ws-2.1.1.jar,
+ .
