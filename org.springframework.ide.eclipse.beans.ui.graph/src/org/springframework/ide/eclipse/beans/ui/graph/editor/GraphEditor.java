@@ -132,6 +132,8 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 
 	private IPropertyChangeListener propertyChangeListener = new GraphEditorPropertyChangeListener();
 
+	private volatile boolean isUpdating = false;
+
 	public GraphEditor() {
 		setEditDomain(new DefaultEditDomain(this));
 	}
@@ -187,13 +189,13 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			}
 
 			if (refresh) {
-//				Display display = getSite().getShell().getDisplay();
-//				display.asyncExec(new Runnable() {
-//					public void run() {
-						setInput(beansInput);
-						initializeGraphicalViewer();
-//					}
-//				});
+				// Display display = getSite().getShell().getDisplay();
+				// display.asyncExec(new Runnable() {
+				// public void run() {
+				setInput(beansInput);
+				initializeGraphicalViewer();
+				// }
+				// });
 			}
 		}
 
@@ -234,41 +236,55 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 * Sets the contents of the GraphicalViewer after it has been created.
 	 * @see #createGraphicalViewer(Composite)
 	 */
-	protected void initializeGraphicalViewer() {
-		Job job = new Job("Initialize Beans Graph '" + getPartName() + "'") {
+	protected synchronized void initializeGraphicalViewer() {
+		// check global boolean
+		if (!isUpdating ) {
+			
+			Job job = new Job("Initialize Beans Graph '" + getPartName() + "'") {
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				if (getEditorInput() instanceof GraphEditorInput && getGraphicalViewer().getControl() != null) {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						if (getEditorInput() instanceof GraphEditorInput && getGraphicalViewer().getControl() != null) {
 
-					GraphEditorInput input = (GraphEditorInput) getEditorInput();
+							GraphEditorInput input = (GraphEditorInput) getEditorInput();
 
-					final Graph graph = new Graph(input);
-					graph.init();
+							final Graph graph = new Graph(input);
+							graph.init();
 
-					Display.getDefault().asyncExec(new Runnable() {
+							Display.getDefault().asyncExec(new Runnable() {
 
-						public void run() {
-							if (getGraphicalViewer() != null && getGraphicalViewer().getControl() != null) {
-								graph.layout(getGraphicalViewer().getControl().getFont());
-								getGraphicalViewer().setContents(graph);
-							}
+								public void run() {
+									if (getGraphicalViewer() != null && getGraphicalViewer().getControl() != null) {
+										graph.layout(getGraphicalViewer().getControl().getFont());
+										getGraphicalViewer().setContents(graph);
+									}
+								}
+							});
 						}
-					});
+						return Status.OK_STATUS;
+					}
+					finally {
+						// reset global boolean value
+						isUpdating = false;
+					}
 				}
-				return Status.OK_STATUS;
-			}
-		};
-		job.setRule(new BlockingOnSelfSchedulingRule());
-		job.setPriority(Job.INTERACTIVE);
-		job.schedule();
+			};
+			job.setRule(new BlockingOnSelfSchedulingRule());
+			job.setPriority(Job.INTERACTIVE);
+			
+			// set global boolean
+			isUpdating = true;
+			
+			job.schedule();
+		}
 	}
 
 	/**
 	 * Called to configure the graphical viewer before it receives its contents. This is where the root editpart should
 	 * be configured.
 	 */
-	@SuppressWarnings( { "unchecked", "deprecation" })
+	@SuppressWarnings( { "unchecked" })
 	protected void configureGraphicalViewer() {
 		ScalableRootEditPart root = new ScalableRootEditPart();
 
