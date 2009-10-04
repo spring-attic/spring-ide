@@ -33,9 +33,11 @@ import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
@@ -62,7 +64,10 @@ public class BeansJavaCompletionUtils {
 	private static final String CLASS_SOURCE_START = "public class " + CLASS_NAME + " {\n"
 			+ "    public void main(String[] args) {\n" + "        ";
 
-	private static CompletionProposalComparator comparator = new CompletionProposalComparator();
+	private static CompletionProposalComparator COMPARATOR = new CompletionProposalComparator();
+
+	private static ILabelProvider JAVA_LABEL_PROVIDER = new JavaElementLabelProvider(
+			JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_POST_QUALIFIED);
 
 	/**
 	 * Add class and package content assist proposals that match the given <code>prefix</code>.
@@ -100,6 +105,23 @@ public class BeansJavaCompletionUtils {
 			ICompilationUnit unit = createSourceCompilationUnit(context.getFile(), prefix);
 			// Special handling of inner classes
 			boolean innerClass = prefix.indexOf('$') > prefix.lastIndexOf('.');
+
+			// Code completion below only provides public and protected inner classes; therefore
+			// we manually add the private inner classes if possible
+			if (innerClass) {
+				String rootClass = prefix.substring(0, prefix.lastIndexOf('$'));
+				IType type = JdtUtils.getJavaType(context.getFile().getProject(), rootClass);
+				if (type != null) {
+					for (IType innerType : type.getTypes()) {
+						if (Flags.isPrivate(innerType.getFlags())
+								&& innerType.getFullyQualifiedName('$').startsWith(prefix)) {
+							recorder.recordProposal(JAVA_LABEL_PROVIDER.getImage(innerType), 10, JAVA_LABEL_PROVIDER
+									.getText(innerType), getClassName(innerType), innerType);
+						}
+					}
+				}
+			}
+			
 			prefix = prefix.replace('$', '.');
 
 			String sourceStart = CLASS_SOURCE_START + prefix;
@@ -227,7 +249,7 @@ public class BeansJavaCompletionUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	private static ICompletionProposal[] order(ICompletionProposal[] proposals) {
-		Arrays.sort(proposals, comparator);
+		Arrays.sort(proposals, COMPARATOR);
 		return proposals;
 	}
 
