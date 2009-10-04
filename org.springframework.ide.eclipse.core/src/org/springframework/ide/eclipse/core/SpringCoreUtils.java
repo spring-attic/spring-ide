@@ -14,9 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -58,6 +56,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
@@ -366,25 +365,22 @@ public final class SpringCoreUtils {
 	public static boolean isEclipseSameOrNewer(int majorVersion, int minorVersion) {
 		Bundle bundle = Platform.getBundle(Platform.PI_RUNTIME);
 		if (bundle != null) {
-			String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
-			StringTokenizer st = new StringTokenizer(version, ".");
+			String versionString = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
 			try {
-				int major = Integer.parseInt(st.nextToken());
+				Version version = new Version(versionString);
+				int major = version.getMajor();
 				if (major > majorVersion) {
 					return true;
 				}
 				if (major == majorVersion) {
-					int minor = Integer.parseInt(st.nextToken());
+					int minor = version.getMinor();
 					if (minor >= minorVersion) {
 						return true;
 					}
 				}
 			}
-			catch (NoSuchElementException e) {
-				// ignore
-			}
-			catch (NumberFormatException e) {
-				// ignore
+			catch (IllegalArgumentException e) {
+				// ignore this exception as this can't occur in pratice
 			}
 		}
 		return false;
@@ -393,33 +389,9 @@ public final class SpringCoreUtils {
 	/**
 	 * Returns true if Eclipse's runtime bundle has the same or a newer than given version.
 	 */
-	public static boolean isVersionSameOrNewer(String version, int majorVersion, int minorVersion, int patchVersion) {
-		StringTokenizer st = new StringTokenizer(version, ".");
-		try {
-			int major = Integer.parseInt(st.nextToken());
-			if (major > majorVersion) {
-				return true;
-			}
-			int minor = Integer.parseInt(st.nextToken());
-			if (major == majorVersion) {
-				if (minor > minorVersion) {
-					return true;
-				}
-			}
-			if (major == majorVersion && minor == minorVersion) {
-				int patch = Integer.parseInt(st.nextToken());
-				if (patch >= patchVersion) {
-					return true;
-				}
-			}
-		}
-		catch (NoSuchElementException e) {
-			// ignore
-		}
-		catch (NumberFormatException e) {
-			// ignore
-		}
-		return false;
+	public static boolean isVersionSameOrNewer(String versionString, int majorVersion, int minorVersion,
+			int microVersion) {
+		return new Version(versionString).compareTo(new Version(majorVersion, minorVersion, microVersion)) >= 0;
 	}
 
 	/**
