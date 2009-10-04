@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
@@ -601,8 +601,8 @@ public final class SpringCoreUtils {
 			IFile settingsFile = project.getFile(".settings/org.eclipse.wst.common.component");
 			if (settingsFile.exists()) {
 				try {
-					NodeList nodes = (NodeList) expression.evaluate(parseDocument(settingsFile.getContents()),
-							XPathConstants.NODESET);
+					NodeList nodes = (NodeList) expression
+							.evaluate(parseDocument(settingsFile), XPathConstants.NODESET);
 					for (int i = 0; i < nodes.getLength(); i++) {
 						Element element = (Element) nodes.item(i);
 						if ("/".equals(element.getAttribute(DEPLOY_PATH))) {
@@ -625,10 +625,15 @@ public final class SpringCoreUtils {
 		return null;
 	}
 
-	public static Document parseDocument(InputStream inputStream) {
+	public static Document parseDocument(IFile deploymentDescriptor) {
 		try {
-			Document doc = builder.parse(new InputSource(inputStream));
-			return doc;
+			if (deploymentDescriptor.getLocationURI() != null) {
+				return builder.parse(new File(deploymentDescriptor.getLocationURI()));
+			}
+			else if (deploymentDescriptor.getRawLocationURI() != null) {
+				return builder.parse(new File(deploymentDescriptor.getRawLocationURI()));
+			}
+			return builder.parse(new InputSource(deploymentDescriptor.getContents()));
 		}
 		catch (SAXException e) {
 			throw new RuntimeException(e);
@@ -636,15 +641,8 @@ public final class SpringCoreUtils {
 		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				}
-				catch (IOException e) {
-					// nothing to do
-				}
-			}
+		catch (CoreException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }
