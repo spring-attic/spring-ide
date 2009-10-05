@@ -34,8 +34,7 @@ public class UpdateFor203 implements IBeansModelUpdate {
 	}
 
 	public boolean requiresUpdate(IBeansProject beansProject) {
-		return !SpringCoreUtils.isVersionSameOrNewer(
-				((BeansProject) beansProject).getVersion(), 2, 0, 3);
+		return !SpringCoreUtils.isVersionSameOrNewer(((BeansProject) beansProject).getVersion(), 2, 0, 3);
 	}
 
 	public void updateProject(IBeansProject beansProject) {

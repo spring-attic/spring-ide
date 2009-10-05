@@ -25,12 +25,15 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
@@ -135,6 +138,17 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 							}
 						}
 					}
+				}
+			}
+		}
+		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
+			IBeansConfig bc = BeansCorePlugin.getModel().getConfig((IFile) resource, true);
+			if (bc.resourceChanged()) {
+				if (bc instanceof IImportedBeansConfig) {
+					configs.add(BeansModelUtils.getParentOfClass(bc, BeansConfig.class));
+				}
+				else {
+					configs.add(bc);
 				}
 			}
 		}
