@@ -200,7 +200,7 @@ class ProjectClassLoaderCache {
 						IPath entryPath = path.getPath();
 						File file = entryPath.toFile();
 						if (file.exists()) {
-							paths.add(file.toURL());
+							paths.add(file.toURI().toURL());
 						}
 						else {
 							// case for project relative links
