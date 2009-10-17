@@ -19,16 +19,23 @@
 	    	id="org.eclipse.mylyn.ui.projectexplorer.filter" 
    		    targetID="org.springframework.ide.eclipse.ui.navigator.springExplorer">
 	    	<action
-            class="org.springframework.ide.eclipse.mylyn.ui.actions.FocusSpringExplorerAction"
-            disabledIcon="icons/elcl16/focus-disabled.gif"
-            enablesFor="*"
-            icon="icons/elcl16/interest-filtering.gif"
-            id="org.springframework.ide.eclipse.beans.mylyn.ui.actions.filterSpringExplorerAction"
-            label="%filterSpringExplorerAction.label"
-            menubarPath="mylyn"
-            style="toggle"
-            toolbarPath="mylyn"
-            tooltip="%filterSpringExplorerAction.tooltip"/>
+	            class="org.springframework.ide.eclipse.mylyn.ui.actions.FocusSpringExplorerAction"
+	            disabledIcon="icons/elcl16/focus-disabled.gif"
+	            enablesFor="*"
+	            icon="icons/elcl16/interest-filtering.gif"
+	            id="org.springframework.ide.eclipse.beans.mylyn.ui.actions.filterSpringExplorerAction"
+	            label="%filterSpringExplorerAction.label"
+	            menubarPath="mylyn"
+	            style="toggle"
+	            toolbarPath="mylyn"
+	            tooltip="%filterSpringExplorerAction.tooltip">
+         	<enablement>
+         		<systemProperty
+                	name="org.eclipse.mylyn.context.core.context.active"
+                	value="true">
+         		</systemProperty>
+         	</enablement>
+      		</action>
 	  	</viewContribution> 
 	</extension>
 	
@@ -110,6 +117,12 @@
              id="org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart">
        </part>
     </actionSetPartAssociation>
+ </extension>
+ <extension
+       point="org.eclipse.mylyn.context.ui.startup">
+    <startup
+          class="org.springframework.ide.eclipse.mylyn.ui.SpringExplorerStartup">
+    </startup>
  </extension>
  
 </plugin>

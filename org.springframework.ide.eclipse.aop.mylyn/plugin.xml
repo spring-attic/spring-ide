@@ -27,8 +27,21 @@
 	           class="org.springframework.ide.eclipse.aop.mylyn.ui.actions.FocusAopReferenceModelNavigatorAction"
 	           style="toggle"
 	           icon="icons/elcl16/interest-filtering.gif"
-	           enablesFor="*" />
+	           enablesFor="*" >
+	         <enablement>
+	         	<systemProperty
+	                name="org.eclipse.mylyn.context.core.context.active"
+	                value="true">
+	         	</systemProperty>
+	         </enablement>
+      		</action>
 	  	</viewContribution> 
 	</extension>
+ <extension
+       point="org.eclipse.mylyn.context.ui.startup">
+    <startup
+          class="org.springframework.ide.eclipse.aop.mylyn.ui.AopReferenceModelNavigatorStartup">
+    </startup>
+ </extension>
 	
 </plugin>
