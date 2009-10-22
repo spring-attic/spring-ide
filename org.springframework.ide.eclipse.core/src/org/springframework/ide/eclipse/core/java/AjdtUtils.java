@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +36,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @author Christian Dupuis
  * @since 2.0
  */
+@SuppressWarnings("deprecation")
 public class AjdtUtils {
 
 	private static final String AJDT_CLASS = "org.eclipse.contribution.jdt.IsWovenTester";
@@ -74,11 +76,11 @@ public class AjdtUtils {
 		return type instanceof IAspectJElement;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( { "unchecked" })
 	public static Set<IMethod> getDeclaredMethods(IType type) throws JavaModelException {
 
 		if (IS_JDT_WEAVING_PRESENT && JdtWeavingTester.isJdtWeavingActive()) {
-			return null;
+			return Collections.emptySet();
 		}
 
 		Set<IMethod> methods = new HashSet<IMethod>();
