@@ -137,7 +137,7 @@ public class AopReferenceModelUtils {
 		if (kind != IncrementalProjectBuilder.FULL_BUILD && resource instanceof IFile
 				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
 
-			// make sure that the aop model is only reprocessed if a java structural change happens
+			// Make sure that the aop model is only reprocessed if a java structural change happens
 			TypeStructureState structureManager = context.get(TypeStructureState.class);
 			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
 
@@ -166,8 +166,21 @@ public class AopReferenceModelUtils {
 				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
 			}
 			configs.add(beansConfig);
+			
+			// Capture imports from other projects -> add importing config
+			for (IBeansProject bp : BeansCorePlugin.getModel().getProjects()) {
+				for (IBeansConfig bc : bp.getConfigs()) {
+					for (IBeansImport bi : bc.getImports()) {
+						for (IImportedBeansConfig ibc : bi.getImportedBeansConfigs()) {
+							if (ibc.getElementResource().equals(resource)) {
+								configs.add(bc);
+							}
+						}
+					}
+				}
+			}
 		}
-		// if the .classpath file is updated redo for every beans config
+		// If the .classpath file is updated redo for every beans config
 		else if (JdtUtils.isClassPathFile(resource)) {
 			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(resource.getProject());
 			if (beansProject != null) {
