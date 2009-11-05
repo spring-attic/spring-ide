@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,16 +30,23 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @since 2.0.5
  */
 public class BeansConfigLocatorFactory {
-
+	
 	/** The beansconfig locator extension point */
 	public static final String BEANSCONFIG_LOCATORS_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID
 			+ ".beansconfiglocators";
+	
+	private static List<BeansConfigLocatorDefinition> configLocatorDefinitions;
 
 	/**
 	 * Returns a {@link List} with all registered {@link BeansConfigLocatorDefinition}s.
 	 */
-	public static List<BeansConfigLocatorDefinition> getBeansConfigLocatorDefinitions() {
-		List<BeansConfigLocatorDefinition> handlers = new ArrayList<BeansConfigLocatorDefinition>();
+	public static synchronized List<BeansConfigLocatorDefinition> getBeansConfigLocatorDefinitions() {
+		// Return the singleton instance
+		if (configLocatorDefinitions != null) {
+			return configLocatorDefinitions;
+		}
+		
+		configLocatorDefinitions = new ArrayList<BeansConfigLocatorDefinition>();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
 				BEANSCONFIG_LOCATORS_EXTENSION_POINT);
 		if (point != null) {
@@ -48,7 +55,7 @@ public class BeansConfigLocatorFactory {
 					try {
 						BeansConfigLocatorDefinition builderDefinition = new BeansConfigLocatorDefinition(
 								config);
-						handlers.add(builderDefinition);
+						configLocatorDefinitions.add(builderDefinition);
 					}
 					catch (CoreException e) {
 						SpringCore.log(e);
@@ -58,14 +65,14 @@ public class BeansConfigLocatorFactory {
 		}
 
 		// Sort definitions based on there defined order
-		Collections.sort(handlers, new Comparator<BeansConfigLocatorDefinition>() {
+		Collections.sort(configLocatorDefinitions, new Comparator<BeansConfigLocatorDefinition>() {
 
 			public int compare(BeansConfigLocatorDefinition o1, BeansConfigLocatorDefinition o2) {
 				return o1.getOrder().compareTo(o2.getOrder());
 			}
 		});
-
-		return handlers;
+		
+		return configLocatorDefinitions;
 
 	}
 
