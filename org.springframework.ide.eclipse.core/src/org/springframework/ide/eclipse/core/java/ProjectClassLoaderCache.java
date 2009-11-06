@@ -161,6 +161,19 @@ class ProjectClassLoaderCache {
 
 			Set<IProject> resolvedProjects = new HashSet<IProject>();
 			addClassPathUrls(project, paths, resolvedProjects);
+
+			if (!useParentClassLoader) {
+				// search for slf4j and remove it; evil classloading issues if it ends up on the classpath and confuses
+				// Spring classes
+				for (URL path : new HashSet<URL>(paths)) {
+					if (path.getFile() != null
+							&& (path.getFile().contains("com.springsource.slf4j.org.apache.commons.logging") || path
+									.getFile().contains("jcl-over-slf4j"))) {
+						paths.remove(path);
+					}
+				}
+			}
+
 			return paths;
 		}
 		finally {
