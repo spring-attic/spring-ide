@@ -166,9 +166,7 @@ public class JdtUtils {
 							paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
 						}
 						else {
-							paths
-									.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/"
-											+ classPathEntry.trim())));
+							paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/" + classPathEntry.trim())));
 						}
 					}
 				}
@@ -210,7 +208,7 @@ public class JdtUtils {
 		IJavaProject project = JavaCore.create(config.getProject());
 		return project;
 	}
-	
+
 	/**
 	 * Returns the corresponding Java type for given full-qualified class name.
 	 * @param project the JDT project the class belongs to
@@ -419,7 +417,7 @@ public class JdtUtils {
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
 			String parameterTypeString = Signature.getElementType(method.getParameterTypes()[i]);
 			boolean isArray = !parameterTypeString.equals(method.getParameterTypes()[i]);
-			
+
 			String parameterType = resolveClassNameBySignature(parameterTypeString, method.getDeclaringType());
 			if (typeParameterNames.contains(parameterType)) {
 				parameterTypesAsString[i] = Object.class.getName() + (isArray ? ClassUtils.ARRAY_SUFFIX : "");
