@@ -328,6 +328,9 @@ public abstract class BeansModelUtils {
 		}
 		else if (element instanceof IBeansConfigSet) {
 			beans.addAll(((IBeansConfigSet) element).getBeans());
+			for (IBeansComponent component : ((IBeansConfigSet) element).getComponents()) {
+				beans.addAll(getBeans(component, monitor));
+			}
 		}
 		else if (element instanceof IBeansComponent) {
 			for (IBeansComponent component : ((IBeansComponent) element).getComponents()) {
