@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,14 +17,12 @@ import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NamespaceHyperl
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHyperlinkDetector;
 
 /**
- * {@link INamespaceHyperlinkDetector} responsible for the
- * <code>aop:*</code> namespace.
+ * {@link INamespaceHyperlinkDetector} responsible for the <code>aop:*</code> namespace.
  * @author Christian Dupuis
  * @author Leo Dos Santos
  * @since 2.0
  */
-public class AopHyperlinkDetector extends NamespaceHyperlinkDetectorSupport
-		implements IHyperlinkDetector {
+public class AopHyperlinkDetector extends NamespaceHyperlinkDetectorSupport implements IHyperlinkDetector {
 
 	@Override
 	public void init() {
@@ -36,9 +34,10 @@ public class AopHyperlinkDetector extends NamespaceHyperlinkDetectorSupport
 		registerHyperlinkCalculator("ref", beanRef);
 		registerHyperlinkCalculator("advice-ref", beanRef);
 		registerHyperlinkCalculator("delegate-ref", beanRef);
+		registerHyperlinkCalculator("include", "name", beanRef);
 
 		registerHyperlinkCalculator("method", new AdviceMethodHyperlinkCalculator());
 		registerHyperlinkCalculator("pointcut-ref", new PointcutReferenceHyperlinkCalculator());
 	}
-	
+
 }

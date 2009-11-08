@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,26 +17,21 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceCo
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 
 /**
- * {@link INamespaceContentAssistProcessor} responsible for the
- * <code>aop:*</code> namespace.
+ * {@link INamespaceContentAssistProcessor} responsible for the <code>aop:*</code> namespace.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class AopContentAssistProcessor extends
-		NamespaceContentAssistProcessorSupport {
+public class AopContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
 
 	public void init() {
 		IContentAssistCalculator beanRef = new BeanReferenceContentAssistCalculator();
 		registerContentAssistCalculator("aspect", "ref", beanRef);
 		registerContentAssistCalculator("advisor", "advice-ref", beanRef);
 		registerContentAssistCalculator("delegate-ref", beanRef);
-		registerContentAssistCalculator("implement-interface",
-				new ClassContentAssistCalculator(true));
-		registerContentAssistCalculator("pointcut-ref",
-				new PointcutReferenceContentAssistCalculator());
-		registerContentAssistCalculator("default-impl",
-				new DefaultImplContentAssistCalculator());
-		registerContentAssistCalculator("method",
-				new AdviceMethodContentAssistCalculator());
+		registerContentAssistCalculator("include", "name", beanRef);
+		registerContentAssistCalculator("implement-interface", new ClassContentAssistCalculator(true));
+		registerContentAssistCalculator("pointcut-ref", new PointcutReferenceContentAssistCalculator());
+		registerContentAssistCalculator("default-impl", new DefaultImplContentAssistCalculator());
+		registerContentAssistCalculator("method", new AdviceMethodContentAssistCalculator());
 	}
 }
