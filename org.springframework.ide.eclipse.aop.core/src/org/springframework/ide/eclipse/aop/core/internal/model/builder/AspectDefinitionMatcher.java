@@ -197,7 +197,7 @@ public class AspectDefinitionMatcher {
 
 	private Object initAspectJExpressionPointcut(IAspectDefinition info) throws Throwable {
 
-		Class<?> expressionPointcutClass = ClassUtils.loadClass(AspectJExpressionPointcut.class);
+		Class<?> expressionPointcutClass = ClassUtils.loadClass("org.springframework.aop.aspectj.AspectJExpressionPointcut");
 		Object pc = expressionPointcutClass.newInstance();
 		for (Method m : expressionPointcutClass.getMethods()) {
 			if (m.getName().equals("setExpression")) {

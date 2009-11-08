@@ -364,8 +364,8 @@ public class AopReferenceModelBuilderJob extends Job {
 					aopProject.clearReferencesForResource(info.getResource());
 				}
 
-				AspectDefinitionMatcher matcher = new AspectDefinitionMatcher();
 				for (IAspectDefinition info : aspectInfos) {
+					AspectDefinitionMatcher matcher = new AspectDefinitionMatcher();
 
 					// build model for config
 					buildAopReferencesForBeansConfig(config, info, matcher, monitor);
