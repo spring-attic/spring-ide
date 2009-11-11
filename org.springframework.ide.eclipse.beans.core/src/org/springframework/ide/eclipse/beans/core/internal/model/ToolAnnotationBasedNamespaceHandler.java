@@ -116,7 +116,6 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 	 * This implementation simply delegates to {@link #parseElement(Node, ParserContext)} and
 	 * registers the returned {@link ComponentDefinition} with the given {@link ParserContext}.
 	 * <p>
-	 * Note: this implementation always returns <code>null</code>.
 	 */
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 
@@ -126,10 +125,10 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 		if (componentDefinition != null) {
 			if (componentDefinition instanceof BeanComponentDefinition) {
 				parserContext.registerBeanComponent((BeanComponentDefinition) componentDefinition);
+				// return the bean definition for the use within Spring
+				return ((BeanComponentDefinition) componentDefinition).getBeanDefinition();
 			}
-			else {
-				parserContext.registerComponent(componentDefinition);
-			}
+			parserContext.registerComponent(componentDefinition);
 		}
 		else {
 
