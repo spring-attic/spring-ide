@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,28 +21,17 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
-/**
- * 
- */
-public class WebflowProjectDescriptionWriter implements
-		IWebflowProjectDescriptionConstants {
+public class WebflowProjectDescriptionWriter implements IWebflowProjectDescriptionConstants {
 
-	/**
-	 * 
-	 * 
-	 * @param description
-	 * @param project
-	 */
-	public static void write(IProject project,
-			WebflowProjectDescription description) {
-		IFile file = project
-				.getFile(new Path(IWebflowProject.DESCRIPTION_FILE));
+	public static void write(IProject project, WebflowProjectDescription description) {
+		IFile file = project.getFile(new Path(IWebflowProject.DESCRIPTION_FILE));
 		try {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
@@ -55,12 +44,12 @@ public class WebflowProjectDescriptionWriter implements
 				os.close();
 			}
 			if (!file.exists()) {
-				file.create(new ByteArrayInputStream(os.toByteArray()),
-						IResource.NONE, null);
+				file.create(new ByteArrayInputStream(os.toByteArray()), IResource.NONE, null);
 			}
 			else {
-				file.setContents(new ByteArrayInputStream(os.toByteArray()),
-						IResource.FORCE, null);
+				if (SpringCoreUtils.validateEdit(file)) {
+					file.setContents(new ByteArrayInputStream(os.toByteArray()), IResource.FORCE, null);
+				}
 			}
 		}
 		catch (IOException e) {
@@ -77,8 +66,7 @@ public class WebflowProjectDescriptionWriter implements
 	 * 
 	 * @throws IOException
 	 */
-	protected static void write(WebflowProjectDescription description,
-			XMLWriter writer) throws IOException {
+	protected static void write(WebflowProjectDescription description, XMLWriter writer) throws IOException {
 		writer.startTag(PROJECT_DESCRIPTION, null);
 		// add version number
 		writer.printSimpleTag(VERSION, CURRENT_VERSION);
@@ -98,14 +86,13 @@ public class WebflowProjectDescriptionWriter implements
 	 * 
 	 * @throws IOException
 	 */
-	protected static void write(String name, String elementTagName,
-			List<IWebflowConfig> configs, XMLWriter writer) throws IOException {
+	protected static void write(String name, String elementTagName, List<IWebflowConfig> configs, XMLWriter writer)
+			throws IOException {
 		writer.startTag(name, null);
 		if (configs != null) {
 			for (IWebflowConfig config : configs) {
 				writer.startTag(CONFIG, null);
-				writer.printSimpleTag(FILE, config.getResource()
-						.getProjectRelativePath().toString());
+				writer.printSimpleTag(FILE, config.getResource().getProjectRelativePath().toString());
 				writer.printCDataTag(NAME, config.getName());
 				Set<IModelElement> beansConfigs = config.getBeansConfigs();
 				if (beansConfigs != null) {

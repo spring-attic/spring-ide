@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,9 @@ public interface IWebflowProject extends IModelElement {
 	 * Returns true if this project's settings can be changed 
 	 * @return true if this project can be changed.
 	 * @since 2.0.3
+	 * @deprecated this is now correctly handled internally using the team provider API
 	 */
+	@Deprecated
 	boolean isUpdatable();
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,10 +36,9 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 
 /**
- * {@link CommonDropAdapterAssistant} that handles drop requests of
- * {@link IResource} instances to the Spring Explorer and requests the origin
- * from within the Spring Explorer, like {@link IBeansConfig} dropped on
- * {@link IBeansConfigSet}.
+ * {@link CommonDropAdapterAssistant} that handles drop requests of {@link IResource} instances to the Spring Explorer
+ * and requests the origin from within the Spring Explorer, like {@link IBeansConfig} dropped on {@link IBeansConfigSet}
+ * .
  * @author Christian Dupuis
  * @since 2.0.2
  */
@@ -48,17 +47,15 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	/**
 	 * Resolve the current {@link IBeansModelElement} from the drop target.
 	 * <p>
-	 * If dragged element can't be resolved to an instance of
-	 * {@link IBeansModelElement} <code>null</code> will be returned.
+	 * If dragged element can't be resolved to an instance of {@link IBeansModelElement} <code>null</code> will be
+	 * returned.
 	 */
-	private IBeansModelElement getBeansModelElementFromTarget(
-			IResource resource, Object target) {
+	private IBeansModelElement getBeansModelElementFromTarget(IResource resource, Object target) {
 		if (target instanceof IWorkspaceRoot) {
 			return BeansCorePlugin.getModel().getProject(resource.getProject());
 		}
 		else if (target instanceof ISpringProject) {
-			return BeansCorePlugin.getModel().getProject(
-					((ISpringProject) target).getProject());
+			return BeansCorePlugin.getModel().getProject(((ISpringProject) target).getProject());
 		}
 		else if (target instanceof IBeansModelElement) {
 			return (IBeansModelElement) target;
@@ -67,8 +64,7 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	}
 
 	/**
-	 * Resolve {@link IProject} instance from the given
-	 * {@link IBeansModelElement}.
+	 * Resolve {@link IProject} instance from the given {@link IBeansModelElement}.
 	 */
 	private IProject getProject(IBeansModelElement modelElement) {
 		IBeansProject beansProject = BeansModelUtils.getProject(modelElement);
@@ -81,8 +77,7 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	/**
 	 * Resolve the current {@link IResource} from the drop target.
 	 * <p>
-	 * If dragged element can't be resolved to an instance of {@link IResource}
-	 * <code>null</code> will be returned.
+	 * If dragged element can't be resolved to an instance of {@link IResource} <code>null</code> will be returned.
 	 */
 	private IResource getResourceFromDropTarget(DropTargetEvent dropTargetEvent) {
 		Object object = dropTargetEvent.data;
@@ -93,8 +88,7 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 			return (IResource) object;
 		}
 		else if (object instanceof IAdaptable) {
-			return (IResource) ((IAdaptable) object)
-					.getAdapter(IResource.class);
+			return (IResource) ((IAdaptable) object).getAdapter(IResource.class);
 		}
 		else {
 			return null;
@@ -102,36 +96,26 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	}
 
 	/**
-	 * Executes the drop action. First it is checked if the dropped object can
-	 * be resolved to an {@link IResource} and if the corresponding
-	 * {@link IProject} has the Spring nature applied.
+	 * Executes the drop action. First it is checked if the dropped object can be resolved to an {@link IResource} and
+	 * if the corresponding {@link IProject} has the Spring nature applied.
 	 * <p>
-	 * If so the dropped object will be added as a {@link IBeansConfig} to the
-	 * corresponding {@link IBeansProject} and - if applicable - added to the
-	 * target {@link IBeansConfigSet}.
+	 * If so the dropped object will be added as a {@link IBeansConfig} to the corresponding {@link IBeansProject} and -
+	 * if applicable - added to the target {@link IBeansConfigSet}.
 	 */
 	@Override
-	public IStatus handleDrop(CommonDropAdapter dropAdapter,
-			DropTargetEvent dropTargetEvent, Object target) {
+	public IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target) {
 		IResource resource = getResourceFromDropTarget(dropTargetEvent);
 
 		// handle drag'n drop from resource
-		if (SpringCoreUtils.isSpringProject(resource)
-				&& resource instanceof IFile) {
+		if (SpringCoreUtils.isSpringProject(resource) && resource instanceof IFile) {
 			IFile file = (IFile) resource;
-			IBeansModelElement parent = getBeansModelElementFromTarget(
-					resource, target);
+			IBeansModelElement parent = getBeansModelElementFromTarget(resource, target);
 			// handle resource drop to project or IWorkspaceRoot
 			if (parent instanceof BeansProject) {
 				BeansProject beansProject = (BeansProject) parent;
-				if (!beansProject.isUpdatable()) {
-					return Status.CANCEL_STATUS;
-				}
-				// check if target project is actually the parent of
-				// resource
+				// check if target project is actually the parent of resource
 				IProject project = getProject(parent);
-				if (resource.getProject().equals(project)
-						&& !beansProject.hasConfig(file)) {
+				if (resource.getProject().equals(project) && !beansProject.hasConfig(file)) {
 					beansProject.addConfig(file, IBeansConfig.Type.MANUAL);
 					return saveProject(beansProject);
 				}
@@ -140,16 +124,13 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 			else if (parent instanceof BeansConfigSet) {
 				BeansConfigSet beansConfigSet = (BeansConfigSet) parent;
 				IProject project = getProject(parent);
-				BeansProject beansProject = (BeansProject) BeansCorePlugin
-						.getModel().getProject(project);
+				BeansProject beansProject = (BeansProject) BeansCorePlugin.getModel().getProject(project);
 				if (!beansProject.isUpdatable()) {
 					return Status.CANCEL_STATUS;
 				}
 				// TODO CD add support for linked project and config sets
-				if (resource.getProject().equals(project)
-						&& !beansConfigSet.hasConfig(file)) {
-					IBeansConfig bc = BeansCorePlugin.getModel().getConfig(
-							(IFile) resource);
+				if (resource.getProject().equals(project) && !beansConfigSet.hasConfig(file)) {
+					IBeansConfig bc = BeansCorePlugin.getModel().getConfig((IFile) resource);
 					// check if resource is already a beans config
 					if (bc != null) {
 						beansConfigSet.addConfig(bc.getElementName());
@@ -167,8 +148,7 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	}
 
 	/**
-	 * Saves the given {@link BeansProject}'s project description and refreshes
-	 * the registered decorators.
+	 * Saves the given {@link BeansProject}'s project description and refreshes the registered decorators.
 	 */
 	private IStatus saveProject(BeansProject beansProject) {
 		beansProject.saveDescription();
@@ -177,19 +157,16 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	}
 
 	/**
-	 * Checks if the drop request is actually support by this
-	 * {@link CommonDropAdapterAssistant}.
+	 * Checks if the drop request is actually support by this {@link CommonDropAdapterAssistant}.
 	 * <p>
-	 * Because JDT's package explorer only supports {@link DND#DROP_COPY}
-	 * requests we check if this is the current operation.
+	 * Because JDT's package explorer only supports {@link DND#DROP_COPY} requests we check if this is the current
+	 * operation.
 	 * <p>
-	 * Note: For some reason this method is called a second time (once the drop
-	 * has been initiated by a mouse button release) by the common navigator
-	 * framework with a possible <code>null</code> target.
+	 * Note: For some reason this method is called a second time (once the drop has been initiated by a mouse button
+	 * release) by the common navigator framework with a possible <code>null</code> target.
 	 */
 	@Override
-	public IStatus validateDrop(Object target, int operation,
-			TransferData transferType) {
+	public IStatus validateDrop(Object target, int operation, TransferData transferType) {
 		if (operation == DND.DROP_COPY) {
 			return Status.OK_STATUS;
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,10 +40,9 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
- * {@link CommonDropAdapterAssistant} that handles drop requests of
- * {@link IResource} instances to the Spring Explorer and requests the origin
- * from within the Spring Explorer, like {@link IBeansConfig} or
- * {@link IBeansConfigSet} on {@link IWebflowConfig}.
+ * {@link CommonDropAdapterAssistant} that handles drop requests of {@link IResource} instances to the Spring Explorer
+ * and requests the origin from within the Spring Explorer, like {@link IBeansConfig} or {@link IBeansConfigSet} on
+ * {@link IWebflowConfig}.
  * @author Christian Dupuis
  * @since 2.0.2
  */
@@ -52,17 +51,14 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	/**
 	 * Resolve the current {@link IModelElement} from the drop target.
 	 * <p>
-	 * If dragged element can't be resolved to an instance of
-	 * {@link IModelElement} <code>null</code> will be returned.
+	 * If dragged element can't be resolved to an instance of {@link IModelElement} <code>null</code> will be returned.
 	 */
-	private IModelElement getWebflowModelElementFromTarget(IResource resource,
-			Object target) {
+	private IModelElement getWebflowModelElementFromTarget(IResource resource, Object target) {
 		if (target instanceof IWorkspaceRoot) {
 			return Activator.getModel().getProject(resource.getProject());
 		}
 		else if (target instanceof ISpringProject) {
-			return Activator.getModel().getProject(
-					((ISpringProject) target).getProject());
+			return Activator.getModel().getProject(((ISpringProject) target).getProject());
 		}
 		else if (target instanceof IModelElement) {
 			return (IModelElement) target;
@@ -78,8 +74,7 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 			return ((IWebflowProject) modelElement).getProject();
 		}
 		else if (modelElement instanceof IWebflowConfig) {
-			return ((IWebflowConfig) modelElement).getElementResource()
-					.getProject();
+			return ((IWebflowConfig) modelElement).getElementResource().getProject();
 		}
 		return null;
 	}
@@ -87,8 +82,7 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	/**
 	 * Resolve the current {@link IResource} from the drop target.
 	 * <p>
-	 * If dragged element can't be resolved to an instance of {@link IResource}
-	 * <code>null</code> will be returned.
+	 * If dragged element can't be resolved to an instance of {@link IResource} <code>null</code> will be returned.
 	 */
 	private IResource getResourceFromDropTarget(DropTargetEvent dropTargetEvent) {
 		Object object = dropTargetEvent.data;
@@ -99,8 +93,7 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 			return (IResource) object;
 		}
 		else if (object instanceof IAdaptable) {
-			return (IResource) ((IAdaptable) object)
-					.getAdapter(IResource.class);
+			return (IResource) ((IAdaptable) object).getAdapter(IResource.class);
 		}
 		else {
 			return null;
@@ -108,37 +101,26 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	}
 
 	/**
-	 * Executes the drop action. First it is checked if the dropped object can
-	 * be resolved to an {@link IResource} and if the corresponding
-	 * {@link IProject} has the Spring nature applied.
+	 * Executes the drop action. First it is checked if the dropped object can be resolved to an {@link IResource} and
+	 * if the corresponding {@link IProject} has the Spring nature applied.
 	 * <p>
-	 * If so the dropped object will be added as a {@link IWebflowConfig} to the
-	 * corresponding {@link IWebflowProject} and - if applicable - added to the
-	 * target {@link IWebflowConfig}'s list of linked
-	 * {@link IBeansModelElement}s.
+	 * If so the dropped object will be added as a {@link IWebflowConfig} to the corresponding {@link IWebflowProject}
+	 * and - if applicable - added to the target {@link IWebflowConfig}'s list of linked {@link IBeansModelElement}s.
 	 */
 	@Override
-	public IStatus handleDrop(CommonDropAdapter dropAdapter,
-			DropTargetEvent dropTargetEvent, Object target) {
+	public IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target) {
 		IResource resource = getResourceFromDropTarget(dropTargetEvent);
 
 		// handle drag'n drop from resource
-		if (SpringCoreUtils.isSpringProject(resource)
-				&& resource instanceof IFile) {
+		if (SpringCoreUtils.isSpringProject(resource) && resource instanceof IFile) {
 			IFile file = (IFile) resource;
-			IModelElement parent = getWebflowModelElementFromTarget(resource,
-					target);
+			IModelElement parent = getWebflowModelElementFromTarget(resource, target);
 			// handle resource drop to project or IWorkspaceRoot
 			if (parent instanceof WebflowProject) {
 				WebflowProject webflowProject = (WebflowProject) parent;
-				if (!webflowProject.isUpdatable()) {
-					return Status.CANCEL_STATUS;
-				}
-				// check if target project is actually the parent of
-				// resource
+				// check if target project is actually the parent of resource
 				IProject project = getProject(parent);
-				if (resource.getProject().equals(project)
-						&& webflowProject.getConfig(file) == null) {
+				if (resource.getProject().equals(project) && webflowProject.getConfig(file) == null) {
 					List<IWebflowConfig> configs = webflowProject.getConfigs();
 					WebflowConfig config = new WebflowConfig(webflowProject);
 					config.setResource(file);
@@ -151,20 +133,15 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 			else if (parent instanceof WebflowConfig) {
 				WebflowConfig webflowConfig = (WebflowConfig) parent;
 				IProject project = getProject(parent);
-				WebflowProject webflowProject = (WebflowProject) Activator
-						.getModel().getProject(project);
+				WebflowProject webflowProject = (WebflowProject) Activator.getModel().getProject(project);
 				if (!webflowProject.isUpdatable()) {
 					return Status.CANCEL_STATUS;
 				}
-				IBeansModelElement beansElement = BeansCorePlugin.getModel()
-						.getConfig(file);
+				IBeansModelElement beansElement = BeansCorePlugin.getModel().getConfig(file);
 
-				if (beansElement != null
-						&& resource.getProject().equals(project)
-						&& !webflowConfig.getBeansConfigs().contains(
-								beansElement)) {
-					Set<IModelElement> beanElements = webflowConfig
-							.getBeansConfigs();
+				if (beansElement != null && resource.getProject().equals(project)
+						&& !webflowConfig.getBeansConfigs().contains(beansElement)) {
+					Set<IModelElement> beanElements = webflowConfig.getBeansConfigs();
 					beanElements.add(beansElement);
 					webflowConfig.setBeansConfigs(beanElements);
 					webflowProject.saveDescription();
@@ -176,19 +153,16 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 	}
 
 	/**
-	 * Checks if the drop request is actually support by this
-	 * {@link CommonDropAdapterAssistant}.
+	 * Checks if the drop request is actually support by this {@link CommonDropAdapterAssistant}.
 	 * <p>
-	 * Because JDT's package explorer only supports {@link DND#DROP_COPY}
-	 * requests we check if this is the current operation.
+	 * Because JDT's package explorer only supports {@link DND#DROP_COPY} requests we check if this is the current
+	 * operation.
 	 * <p>
-	 * Note: For some reason this method is called a second time (once the drop
-	 * has been initiated by a mouse button release) by the common navigator
-	 * framework with a possible <code>null</code> target.
+	 * Note: For some reason this method is called a second time (once the drop has been initiated by a mouse button
+	 * release) by the common navigator framework with a possible <code>null</code> target.
 	 */
 	@Override
-	public IStatus validateDrop(Object target, int operation,
-			TransferData transferType) {
+	public IStatus validateDrop(Object target, int operation, TransferData transferType) {
 		if (operation == DND.DROP_COPY) {
 			return Status.OK_STATUS;
 		}

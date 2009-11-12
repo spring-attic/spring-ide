@@ -138,7 +138,9 @@ public interface IBeansProject extends IBeansModelElement,
 	 * Returns true if this project's settings can be changed 
 	 * @return true if this project can be changed.
 	 * @since 2.0.3
+	 * @deprecated this is now correctly handled internally using the team provider API
 	 */
+	@Deprecated
 	boolean isUpdatable();
 
 }

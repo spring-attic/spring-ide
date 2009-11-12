@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -191,5 +191,9 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 
 	@SuppressWarnings("unchecked")
 	public void registerQualifierType(Class cls) {
+	}
+
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		return null;
 	}
 }

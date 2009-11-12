@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
@@ -617,4 +618,23 @@ public final class SpringCoreUtils {
 			throw new RuntimeException(e);
 		}
 	}
+
+	/**
+	 * Verify that file can safely be modified; eventually checkout the file from source code control.
+	 * @return <code>true</code> if resource can be modified
+	 * @since 2.2.9
+	 */
+	public static boolean validateEdit(IFile... files) {
+		for (IFile file : files) {
+			if (!file.exists()) {
+				return false;
+			}
+		}
+		IStatus status = ResourcesPlugin.getWorkspace().validateEdit(files, IWorkspace.VALIDATE_PROMPT);
+		if (status.isOK()) {
+			return true;
+		}
+		return false;
+	}
+
 }
