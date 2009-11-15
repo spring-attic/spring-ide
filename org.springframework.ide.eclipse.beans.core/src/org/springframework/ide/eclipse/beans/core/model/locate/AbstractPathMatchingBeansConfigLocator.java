@@ -169,14 +169,6 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 	protected abstract List<String> getAllowedFilePatterns();
 
 	/**
-	 * Return the root directories to search for {@link IFile} representing Spring configuration
-	 * files.
-	 * @param project the {@link IProject} to search.
-	 * @return the {@link Set} of {@link IPath}s representing the roots to search
-	 */
-	protected abstract Set<IPath> getRootDirectories(IProject project);
-
-	/**
 	 * Locates matching files in the given <code>folder</code>. Walks down the file tree until no
 	 * further sub-folder is found.
 	 */

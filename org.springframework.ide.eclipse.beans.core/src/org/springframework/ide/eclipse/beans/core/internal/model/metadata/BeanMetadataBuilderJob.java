@@ -33,17 +33,18 @@ import org.eclipse.ui.progress.IProgressConstants;
 import org.springframework.ide.eclipse.beans.core.BeansCoreImages;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
- * {@link Job} implementation that handles loading and attaching {@link IBeanMetadata} for
- * {@link IBeansConfig}.
+ * {@link Job} implementation that handles loading and attaching {@link IBeanMetadata} for {@link IBeansConfig}.
  * @author Christian Dupuis
  * @since 2.0.5
  */
@@ -56,8 +57,7 @@ public class BeanMetadataBuilderJob extends Job {
 	private static final String CLASS_ATTRIBUTE = "class";
 
 	/** The id of the metadata providers extension point */
-	public static final String META_DATA_PROVIDERS_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID
-			+ ".metadataproviders";
+	public static final String META_DATA_PROVIDERS_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID + ".metadataproviders";
 
 	/** Object identifying the job family */
 	private static final Object CONTENT_FAMILY = new Object();
@@ -67,8 +67,7 @@ public class BeanMetadataBuilderJob extends Job {
 
 	/**
 	 * Constructor
-	 * @param affectedBeans the list of affected {@link IBean} keyed by a corresponding
-	 * {@link IBeansConfig}.
+	 * @param affectedBeans the list of affected {@link IBean} keyed by a corresponding {@link IBeansConfig}.
 	 */
 	public BeanMetadataBuilderJob(Map<IBeansConfig, Set<IBean>> affectedBeans) {
 		super("Resolving Spring Meta Data");
@@ -127,22 +126,30 @@ public class BeanMetadataBuilderJob extends Job {
 
 			// Reading contributed IBeanMetadataProviders from the extension point
 			IBeanMetadataProvider[] providers = getMetadataProviders();
+			Set<IBeansProject> projects = new LinkedHashSet<IBeansProject>();
 
 			for (Map.Entry<IBeansConfig, Set<IBean>> entry : affectedBeans.entrySet()) {
+
 				// Do some profiling
 				long start = System.currentTimeMillis();
 				IResource resource = entry.getKey().getElementResource();
+				projects.add(BeansModelUtils.getParentOfClass(entry.getKey(), IBeansProject.class));
 
-				monitor.subTask("Attaching Spring bean meta data to file ["
-						+ resource.getFullPath().toString() + "]");
+				monitor.subTask("Attaching Spring bean meta data to file [" + resource.getFullPath().toString() + "]");
 				attachMetadata(entry.getKey(), entry.getValue(), monitor, providers);
 				monitor.worked(1);
 
 				if (BeanMetadataModel.DEBUG) {
-					System.out.println("Attaching meta data [" + resource.getFullPath().toString()
-							+ "] took " + (System.currentTimeMillis() - start) + "ms");
+					System.out.println("Attaching meta data [" + resource.getFullPath().toString() + "] took "
+							+ (System.currentTimeMillis() - start) + "ms");
 				}
 			}
+
+			// Notify that the model has changed.
+			for (IBeansProject project : projects) {
+				((BeansModel) BeansCorePlugin.getModel()).notifyListeners(project, Type.CHANGED);
+			}
+
 		}
 		finally {
 			affectedBeans = null;
@@ -151,25 +158,22 @@ public class BeanMetadataBuilderJob extends Job {
 	}
 
 	/**
-	 * Iterates over the provided list of {@link IBeanMetadataProvider}s and attaches
-	 * {@link IBeanMetadata} and {@link IBeanProperty}s to the given {@link IBean} instance.
+	 * Iterates over the provided list of {@link IBeanMetadataProvider}s and attaches {@link IBeanMetadata} and
+	 * {@link IBeanProperty}s to the given {@link IBean} instance.
 	 */
-	protected void attachMetadata(IBeansConfig beansConfig, Set<IBean> beans,
-			IProgressMonitor progressMonitor, IBeanMetadataProvider[] providers) {
+	protected void attachMetadata(IBeansConfig beansConfig, Set<IBean> beans, IProgressMonitor progressMonitor,
+			IBeanMetadataProvider[] providers) {
 
 		for (IBean bean : beans) {
 			attachMetadataToBean(beansConfig, progressMonitor, providers, bean);
 		}
-		// Notify that the model has changed.
-		((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansConfig, Type.CHANGED);
 	}
 
 	/**
 	 * Attaches {@link IBeanMetadata} and {@link IBeanProperty} to a single {@link IBean}.
 	 */
-	private void attachMetadataToBean(final IBeansConfig beansConfig,
-			final IProgressMonitor progressMonitor, IBeanMetadataProvider[] providers,
-			final IBean bean) {
+	private void attachMetadataToBean(final IBeansConfig beansConfig, final IProgressMonitor progressMonitor,
+			IBeanMetadataProvider[] providers, final IBean bean) {
 		// Reset meta data attachment before adding
 		BeansCorePlugin.getMetadataModel().clearBeanMetadata(bean);
 		BeansCorePlugin.getMetadataModel().clearBeanProperties(bean);
@@ -189,10 +193,8 @@ public class BeanMetadataBuilderJob extends Job {
 				}
 
 				public void run() throws Exception {
-					beanMetaDataSet.addAll(provider.provideBeanMetadata(bean, beansConfig,
-							progressMonitor));
-					beanProperties.addAll(provider.provideBeanProperties(bean, beansConfig,
-							progressMonitor));
+					beanMetaDataSet.addAll(provider.provideBeanMetadata(bean, beansConfig, progressMonitor));
+					beanProperties.addAll(provider.provideBeanProperties(bean, beansConfig, progressMonitor));
 				}
 			});
 
@@ -214,13 +216,11 @@ public class BeanMetadataBuilderJob extends Job {
 	}
 
 	/**
-	 * Returns the {@link IBeanMetadataProvider}s contributed to the Eclipse extension point
-	 * registry.
+	 * Returns the {@link IBeanMetadataProvider}s contributed to the Eclipse extension point registry.
 	 */
 	protected IBeanMetadataProvider[] getMetadataProviders() {
 		List<IBeanMetadataProvider> providers = new ArrayList<IBeanMetadataProvider>();
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
-				META_DATA_PROVIDERS_EXTENSION_POINT);
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(META_DATA_PROVIDERS_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {

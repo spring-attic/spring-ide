@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -39,7 +38,6 @@ import org.springframework.ide.eclipse.core.java.TypeStructureState;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
-import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManager;
@@ -242,8 +240,6 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 		 * {@inheritDoc}
 		 */
 		public void destory() {
-			// Notify that the model has changed.
-			((BeansModel) BeansCorePlugin.getModel()).notifyListeners(rootElement, Type.CHANGED);
 		}
 
 		/**

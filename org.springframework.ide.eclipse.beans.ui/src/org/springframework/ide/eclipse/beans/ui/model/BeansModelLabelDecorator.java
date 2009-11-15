@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -51,18 +52,16 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringLabelDecorator;
 
 /**
- * This decorator adds an overlay image to all Spring beans config files and their corresponding
- * folders and bean classes (Java source and class files). This decoration is refreshed on every
- * modification to the Spring Beans model. Therefore the decorator adds a
- * {@link IModelChangeListener change listener} to the beans model.
+ * This decorator adds an overlay image to all Spring beans config files and their corresponding folders and bean
+ * classes (Java source and class files). This decoration is refreshed on every modification to the Spring Beans model.
+ * Therefore the decorator adds a {@link IModelChangeListener change listener} to the beans model.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansModelLabelDecorator extends SpringLabelDecorator implements
-		ILightweightLabelDecorator, ILabelDecorator {
+public class BeansModelLabelDecorator extends SpringLabelDecorator implements ILightweightLabelDecorator,
+		ILabelDecorator {
 
-	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID
-			+ ".model.beansModelLabelDecorator";
+	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID + ".model.beansModelLabelDecorator";
 
 	public static void update() {
 		IBaseLabelProvider provider = PlatformUI.getWorkbench().getDecoratorManager()
@@ -76,14 +75,13 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 
-				IBaseLabelProvider provider = PlatformUI.getWorkbench().getDecoratorManager()
-						.getBaseLabelProvider(SpringLabelDecorator.DECORATOR_ID);
+				IBaseLabelProvider provider = PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(
+						SpringLabelDecorator.DECORATOR_ID);
 				if (provider != null) {
 					fireLabelProviderChanged(new LabelProviderChangedEvent(provider));
 				}
 
-				fireLabelProviderChanged(new LabelProviderChangedEvent(
-						BeansModelLabelDecorator.this));
+				fireLabelProviderChanged(new LabelProviderChangedEvent(BeansModelLabelDecorator.this));
 			}
 		});
 	}
@@ -153,6 +151,13 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 
 	protected void decorateFile(IFile file, IDecoration decoration) {
 		IBeansModel model = BeansCorePlugin.getModel();
+		IBeansProject project = model.getProject(file.getProject());
+		
+		if (project instanceof ILazyInitializedModelElement
+				&& !((ILazyInitializedModelElement) project).isInitialized()) {
+			return;
+		}
+		
 		IBeansConfig config = model.getConfig(file, true);
 		if (config != null) {
 			addErrorOverlay(decoration, getSeverity(config));
@@ -163,6 +168,12 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 	protected void decorateFolder(IFolder folder, IDecoration decoration) {
 		IBeansModel model = BeansCorePlugin.getModel();
 		IBeansProject project = model.getProject(folder.getProject());
+		
+		if (project instanceof ILazyInitializedModelElement
+				&& !((ILazyInitializedModelElement) project).isInitialized()) {
+			return;
+		}
+		
 		if (project != null) {
 			String path = folder.getProjectRelativePath().toString() + '/';
 			for (IBeansConfig config : project.getConfigs()) {
@@ -180,7 +191,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 				|| type == IJavaElement.COMPILATION_UNIT) {
 			IBeansModel model = BeansCorePlugin.getModel();
 			IBeansProject project = model.getProject(element.getJavaProject().getProject());
-			if (project != null) {
+			if (project instanceof ILazyInitializedModelElement && ((ILazyInitializedModelElement) project).isInitialized()) {
 				try {
 					if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 
@@ -228,14 +239,18 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 
 	protected int getSeverity(Object element) {
 		int severity = 0;
+		if (element instanceof ILazyInitializedModelElement
+				&& !((ILazyInitializedModelElement) element).isInitialized()) {
+			return 0;
+		}
+
 		if (element instanceof IBeansImport) {
 			severity = getSeverityForImport((IBeansImport) element);
 		}
 		else if (element instanceof ISourceModelElement) {
 			ISourceModelElement source = (ISourceModelElement) element;
-			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
-					source.getElementResource(), source.getElementStartLine(), source
-							.getElementEndLine());
+			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(source.getElementResource(), source
+					.getElementStartLine(), source.getElementEndLine());
 		}
 		else if (element instanceof IResourceModelElement) {
 			if (element instanceof IBeansProject) {
@@ -253,8 +268,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 			else if (element instanceof IBeansConfigSet) {
 				int s = 0;
 				for (IBeansConfig config : ((IBeansConfigSet) element).getConfigs()) {
-					severity = MarkerUtils.getHighestSeverityFromMarkersInRange(config
-							.getElementResource(), -1, -1);
+					severity = MarkerUtils.getHighestSeverityFromMarkersInRange(config.getElementResource(), -1, -1);
 					if (s > severity) {
 						severity = s;
 					}
@@ -267,13 +281,12 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 				severity = getSeverityForConfig((IBeansConfig) element);
 			}
 			else {
-				severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
-						((IResourceModelElement) element).getElementResource(), -1, -1);
+				severity = MarkerUtils.getHighestSeverityFromMarkersInRange(((IResourceModelElement) element)
+						.getElementResource(), -1, -1);
 			}
 		}
 		else if (element instanceof IResource) {
-			severity = MarkerUtils
-					.getHighestSeverityFromMarkersInRange((IResource) element, -1, -1);
+			severity = MarkerUtils.getHighestSeverityFromMarkersInRange((IResource) element, -1, -1);
 		}
 		else if (element instanceof ZipEntryStorage) {
 			IResource resource = ((ZipEntryStorage) element).getFile();
@@ -283,8 +296,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 	}
 
 	private int getSeverityForConfig(IBeansConfig beansConfig) {
-		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(beansConfig
-				.getElementResource(), -1, -1);
+		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(beansConfig.getElementResource(), -1, -1);
 
 		// Check imported configs
 		for (IBeansImport beanImport : beansConfig.getImports()) {
@@ -331,8 +343,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements
 			flags |= BeansModelImageDescriptor.FLAG_ERROR;
 		}
 		if (element instanceof IBeansModelElement && image != null) {
-			ImageDescriptor descriptor = new BeansModelImageDescriptor(image,
-					(IBeansModelElement) element, flags);
+			ImageDescriptor descriptor = new BeansModelImageDescriptor(image, (IBeansModelElement) element, flags);
 			image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 		}
 		return image;

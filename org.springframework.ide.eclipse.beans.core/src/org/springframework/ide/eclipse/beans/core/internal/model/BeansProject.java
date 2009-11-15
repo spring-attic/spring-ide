@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
@@ -61,7 +62,7 @@ import org.springframework.util.ObjectUtils;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansProject extends AbstractResourceModelElement implements IBeansProject {
+public class BeansProject extends AbstractResourceModelElement implements IBeansProject, ILazyInitializedModelElement {
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -922,7 +923,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			}
 			this.eventListener = new DefaultBeansConfigEventListener();
 			this.modelPopulated = true;
-			
+
 			BeansProjectDescriptionReader.read(this);
 
 			// Remove all invalid configs from this project
@@ -1102,6 +1103,21 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					}
 				}
 			}
+		}
+	}
+
+	public boolean isInitialized() {
+		try {
+			r.lock();
+			for (IBeansConfig config : configs.values()) {
+				if (!((ILazyInitializedModelElement) config).isInitialized()) {
+					return false;
+				}
+			}
+			return true;
+		}
+		finally {
+			r.unlock();
 		}
 	}
 

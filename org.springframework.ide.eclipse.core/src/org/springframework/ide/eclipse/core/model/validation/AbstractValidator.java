@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
- * Base {@link IValidator} implementation that abstracts model visiting and provides implementation
- * hooks for sub classes.
+ * Base {@link IValidator} implementation that abstracts model visiting and provides implementation hooks for sub
+ * classes.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
@@ -44,8 +44,7 @@ public abstract class AbstractValidator implements IValidator {
 
 		private IValidationContext context;
 
-		public ValidationVisitor(IValidationContext context,
-				Set<ValidationRuleDefinition> ruleDefinitions) {
+		public ValidationVisitor(IValidationContext context, Set<ValidationRuleDefinition> ruleDefinitions) {
 			this.ruleDefinitions = ruleDefinitions;
 			this.context = context;
 		}
@@ -53,15 +52,14 @@ public abstract class AbstractValidator implements IValidator {
 		@SuppressWarnings("unchecked")
 		public boolean visit(IModelElement element, IProgressMonitor monitor) {
 			if (supports(element)) {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, ruleDefinitions
-						.size());
+				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, ruleDefinitions.size());
 				try {
 					for (ValidationRuleDefinition ruleDefinition : ruleDefinitions) {
 						if (subMonitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						subMonitor.subTask("Validating element '" + element.getElementName()
-								+ "' with rule '" + ruleDefinition.getName() + "'");
+						subMonitor.subTask("Validating element '" + element.getElementName() + "' with rule '"
+								+ ruleDefinition.getName() + "'");
 						IValidationRule rule = ruleDefinition.getRule();
 						if (rule.supports(element, context)) {
 							context.setCurrentRuleId(ruleDefinition.getId());
@@ -92,9 +90,8 @@ public abstract class AbstractValidator implements IValidator {
 	}
 
 	/**
-	 * Returns a newly created {@link IValidationContext} for the given
-	 * {@link IResourceModelElement root element} and it's {@link IResourceModelElement context
-	 * element}.
+	 * Returns a newly created {@link IValidationContext} for the given {@link IResourceModelElement root element} and
+	 * it's {@link IResourceModelElement context element}.
 	 */
 	protected abstract IValidationContext createContext(IResourceModelElement rootElement,
 			IResourceModelElement contextElement);
@@ -115,8 +112,7 @@ public abstract class AbstractValidator implements IValidator {
 	 * Returns the list of enabled {@link ValidationRuleDefinition}s for this validator.
 	 */
 	protected Set<ValidationRuleDefinition> getRuleDefinitions(IResource resource) {
-		return ValidationRuleDefinitionFactory.getEnabledRuleDefinitions(getValidatorId(), resource
-				.getProject());
+		return ValidationRuleDefinitionFactory.getEnabledRuleDefinitions(getValidatorId(), resource.getProject());
 	}
 
 	/**
@@ -126,8 +122,7 @@ public abstract class AbstractValidator implements IValidator {
 		return validatorId;
 	}
 
-	private IValidationElementLifecycleManager initValidationElementCallback(IResource resource,
-			int kind) {
+	private IValidationElementLifecycleManager initValidationElementCallback(IResource resource, int kind) {
 		IValidationElementLifecycleManager callback = createValidationElementLifecycleManager();
 		if (callback instanceof IValidationElementLifecycleManagerExtension) {
 			((IValidationElementLifecycleManagerExtension) callback).setKind(kind);
@@ -174,20 +169,17 @@ public abstract class AbstractValidator implements IValidator {
 		SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, affectedResources.size());
 		try {
 			for (IResource resource : affectedResources) {
-				subMonitor.subTask("Validating resource '" + resource.getFullPath().toString()
-						+ "'");
+				subMonitor.setTaskName("Validating '" + resource.getFullPath().toString().substring(1) + "'");
 				cleanup(resource, subMonitor);
 				if (subMonitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
 
-				IValidationElementLifecycleManager callback = initValidationElementCallback(
-						resource, kind);
+				IValidationElementLifecycleManager callback = initValidationElementCallback(resource, kind);
 
 				IResourceModelElement rootElement = callback.getRootElement();
 
-				// Check if resource model element is external to the workspace -> if so, do not
-				// validate the resource
+				// Check if resource model element is external to the workspace -> if so, do not validate the resource
 				if (rootElement != null && rootElement.isExternal()) {
 					monitor.worked(1);
 					break;
@@ -195,13 +187,11 @@ public abstract class AbstractValidator implements IValidator {
 
 				Set<ValidationRuleDefinition> ruleDefinitions = getRuleDefinitions(resource);
 				if (rootElement != null && ruleDefinitions != null && ruleDefinitions.size() > 0) {
-					Set<ValidationProblem> problems = validate(callback, ruleDefinitions,
-							subMonitor);
+					Set<ValidationProblem> problems = validate(callback, ruleDefinitions, subMonitor);
 					ValidationUtils.createProblemMarkers(resource, problems, getMarkerId());
 				}
 
-				// call close on callback to execute any required resource
-				// cleanup in template
+				// call close on callback to execute any required resource cleanup in template
 				callback.destory();
 
 				subMonitor.worked(1);

@@ -189,7 +189,7 @@ public class ConfigFilesTab {
 		description.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite tableAndButtons = new Composite(composite, SWT.NONE);
-		tableAndButtons.setLayoutData(new GridData(GridData.FILL_BOTH));
+		tableAndButtons.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layout = new GridLayout();
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
@@ -199,8 +199,9 @@ public class ConfigFilesTab {
 		// Create table and viewer for Spring bean config files
 		configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.FULL_SELECTION | SWT.BORDER);
-		GridData data = new GridData(GridData.FILL_BOTH);
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = TABLE_WIDTH;
+		data.heightHint = TABLE_WIDTH;
 		configsTable.setLayoutData(data);
 		configsTable.addSelectionListener(new SelectionAdapter() {
 			@Override

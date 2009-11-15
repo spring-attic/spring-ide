@@ -294,7 +294,6 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				return;
 			}
 			try {
-
 				// Publish start events
 				for (IBeansConfigEventListener eventListener : eventListeners) {
 					eventListener.onReadStart(this);

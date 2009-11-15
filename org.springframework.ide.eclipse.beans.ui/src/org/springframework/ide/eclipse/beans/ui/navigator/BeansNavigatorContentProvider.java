@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.IMemento;
@@ -33,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -46,13 +48,12 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * This class is a content provider for the {@link CommonNavigator} which knows about the beans core
- * model's {@link IModelElement} elements.
+ * This class is a content provider for the {@link CommonNavigator} which knows about the beans core model's
+ * {@link IModelElement} elements.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansNavigatorContentProvider extends BeansModelContentProvider implements
-		ICommonContentProvider {
+public class BeansNavigatorContentProvider extends BeansModelContentProvider implements ICommonContentProvider {
 
 	private String providerID;
 
@@ -75,13 +76,9 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
 					((ISpringProject) parentElement).getProject());
 			if (beansProject != null
-					&& (!beansProject.getConfigs().isEmpty() || !beansProject.getConfigSets()
-							.isEmpty())) {
+					&& (!beansProject.getConfigs().isEmpty() || !beansProject.getConfigSets().isEmpty())) {
 				return new Object[] { beansProject };
 			}
-		}
-		else if (parentElement instanceof IBeansProject) {
-			return getProjectChildren((IBeansProject) parentElement, false);
 		}
 		// check for lazy loading and/or long running elements; if a element is
 		// marked to be long-running, execute the call to super.getChildren()
@@ -90,8 +87,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 		// well)
 		else if (parentElement instanceof ILazyInitializedModelElement
 				&& !((ILazyInitializedModelElement) parentElement).isInitialized()) {
-			triggerDeferredElementLoading(parentElement, ((IModelElement) parentElement)
-					.getElementParent());
+			triggerDeferredElementLoading(parentElement, ((IModelElement) parentElement).getElementParent());
 			return IModelElement.NO_CHILDREN;
 		}
 		else if (parentElement instanceof IBeansImport) {
@@ -101,8 +97,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 	}
 
 	protected Object[] getImportChildren(final Object parentElement) {
-		Set<IImportedBeansConfig> importedBeansConfigs = ((IBeansImport) parentElement)
-				.getImportedBeansConfigs();
+		Set<IImportedBeansConfig> importedBeansConfigs = ((IBeansImport) parentElement).getImportedBeansConfigs();
 		Set<Object> importedFiles = new LinkedHashSet<Object>();
 		for (IBeansConfig bc : importedBeansConfigs) {
 			if (bc.isElementArchived()) {
@@ -164,7 +159,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 
 	@Override
 	public synchronized void elementChanged(ModelChangeEvent event) {
-		
+
 		IModelElement element = event.getElement();
 		if (element instanceof IBeansProject) {
 			IProject project = ((IBeansProject) element).getProject();
@@ -239,7 +234,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 		private final BeansNavigatorContentProvider contentProvider;
 
 		public ModelJob(Object config, Object parent, BeansNavigatorContentProvider contentProvider) {
-			super("Loading model content");
+			super("Initializing Spring Project '" + ((IResourceModelElement) config).getElementResource().getFullPath().toString()+ "'");
 			this.config = config;
 			this.parent = parent;
 			this.contentProvider = contentProvider;
@@ -247,9 +242,6 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask("Loading model content from resource '"
-					+ ((IResourceModelElement) config).getElementResource().getFullPath()
-							.toString() + "'", 2);
 			synchronized (getClass()) {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
@@ -265,8 +257,23 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 					}
 				}
 			}
-			contentProvider.superGetChildren(config);
-			monitor.worked(1);
+			if (config instanceof IBeansProject) {
+				IBeansProject bp = (IBeansProject) config;
+				monitor = new SubProgressMonitor(monitor, bp.getConfigs().size());
+				monitor.beginTask("Initializing Spring Project '"
+						+ ((IResourceModelElement) config).getElementResource().getFullPath().toString() + "'", bp
+						.getConfigs().size());
+				for (IBeansConfig beansConfig : bp.getConfigs()) {
+					monitor.setTaskName("Loading '" + beansConfig.getElementName() + "'");
+					beansConfig.getBeans();
+					monitor.worked(1);
+				}
+			}
+			else {
+				monitor.beginTask("Loading '"
+						+ ((IResourceModelElement) config).getElementResource().getFullPath().toString() + "'", 1);
+				contentProvider.superGetChildren(config);
+			}
 			SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
 				public void run() {
 					contentProvider.refreshViewerForElement(config);
@@ -275,12 +282,11 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 						contentProvider.refreshViewerForElement(SpringCore.getModel().getProject(
 								((IBeansProject) parent).getProject()));
 					}
-					if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
-							.equals(contentProvider.providerID)
+					if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID.equals(contentProvider.providerID)
 							&& config instanceof IResourceModelElement) {
-						contentProvider.refreshViewerForElement(((IResourceModelElement) config)
-								.getElementResource());
+						contentProvider.refreshViewerForElement(((IResourceModelElement) config).getElementResource());
 					}
+					BeansModelLabelDecorator.update();
 				}
 			});
 			monitor.worked(1);
@@ -301,5 +307,5 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 			return MODEL_CONTENT_FAMILY == family;
 		}
 	}
-	
+
 }

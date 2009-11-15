@@ -229,7 +229,9 @@ public class JdtUtils {
 				IType type = null;
 				// First look for the type in the Java project
 				if (javaProject != null) {
-					type = javaProject.findType(className);
+					// TODO CD not sure why we need 
+					type = javaProject.findType(className, new NullProgressMonitor());
+					// type = javaProject.findType(className);
 					if (type != null
 							&& ((type.getDeclaringType() == null && !innerClass) || (type.getDeclaringType() != null && innerClass))) {
 						return type;

@@ -11,7 +11,13 @@
 package org.springframework.ide.eclipse.beans.ui.navigator;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.IFontProvider;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
@@ -40,7 +46,10 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansNavigatorLabelProvider extends BeansModelLabelProvider implements ICommonLabelProvider {
+public class BeansNavigatorLabelProvider extends BeansModelLabelProvider implements ICommonLabelProvider,
+		IFontProvider, IColorProvider {
+
+	private Color grayColor = new Color(Display.getDefault(), 150, 150, 150);
 
 	private String providerID;
 
@@ -119,6 +128,14 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider impleme
 	protected String getProviderID() {
 		return providerID;
 	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (grayColor != null) {
+			grayColor.dispose();
+		}
+	}
 
 	@Override
 	protected Image getImage(Object element, Object parentElement) {
@@ -131,7 +148,11 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider impleme
 
 	@Override
 	protected String getText(Object element, Object parentElement) {
-		if (element instanceof IBeansProject) {
+		if (element instanceof ILazyInitializedModelElement
+				&& !((ILazyInitializedModelElement) element).isInitialized()) {
+			return "initializing..."; // TODO CD Externalize string
+		}
+		else if (element instanceof IBeansProject) {
 			return "Beans"; // TODO CD Externalize string
 		}
 		else if (element instanceof IBeansConfig
@@ -142,10 +163,26 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider impleme
 			return ((IFile) element).getName() + " - "
 					+ ((IFile) element).getProjectRelativePath().removeLastSegments(1).toString();
 		}
-		else if (element instanceof ILazyInitializedModelElement
-				&& !((ILazyInitializedModelElement) element).isInitialized()) {
-			return "loading model content..."; // TODO CD Externalize string
-		}
 		return super.getText(element, parentElement);
+	}
+
+	public Font getFont(Object element) {
+		if (element instanceof ILazyInitializedModelElement
+				&& !((ILazyInitializedModelElement) element).isInitialized()) {
+			return JFaceResources.getFontRegistry().getItalic(JFaceResources.DIALOG_FONT);
+		}
+		return null;
+	}
+
+	public Color getBackground(Object element) {
+		return null;
+	}
+
+	public Color getForeground(Object element) {
+		if (element instanceof ILazyInitializedModelElement
+				&& !((ILazyInitializedModelElement) element).isInitialized()) {
+			return grayColor;
+		}
+		return null;
 	}
 }

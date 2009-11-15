@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
@@ -73,7 +74,8 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 	 */
 	@Override
 	public void start(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
-			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
+			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project,
+			IProgressMonitor monitor) {
 		try {
 			if (kind != IncrementalProjectBuilder.FULL_BUILD) {
 				if (delta == null) {
@@ -97,10 +99,25 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 			BeansCorePlugin.log(e);
 		}
 
-		for (IBeansConfig config : configs) {
-			((BeansConfig) config).reload();
+		// Trigger reloading and reload before validation infrastructure kicks in
+		if (configs.size() > 0) {
+			monitor.beginTask("Initializing Spring Model", configs.size());
+			for (IBeansConfig config : configs) {
+				monitor.subTask("Loading '" + config.getElementResource().getFullPath().toString().substring(1) + "'");
+				((BeansConfig) config).reload();
+				config.getBeans();
+				monitor.worked(1);
+			}
+			monitor.done();
 		}
+	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void finish(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
+			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
 		// Send update event
 		if (configs.size() > 0) {
 			((BeansModel) BeansCorePlugin.getModel()).notifyListeners(BeansCorePlugin.getModel().getProject(project),

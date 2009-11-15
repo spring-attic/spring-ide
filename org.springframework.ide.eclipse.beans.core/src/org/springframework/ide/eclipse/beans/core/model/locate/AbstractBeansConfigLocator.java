@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 
 /**
@@ -35,7 +37,12 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	 */
 	public final boolean isBeansConfig(IFile file) {
 		if (file.isAccessible() && getAllowedFileExtensions().contains(file.getFileExtension())) {
-			return locateBeansConfigs(file.getProject(), null).contains(file);
+			Set<IPath> rootPaths = getRootDirectories(file.getProject());
+			for (IPath path : rootPaths) {
+				if (path.isPrefixOf(file.getFullPath())) {				
+					return locateBeansConfigs(file.getProject(), null).contains(file);
+				}
+			}
 		}
 		return false;
 	}
@@ -63,5 +70,13 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	public void configureBeansConfigSet(IBeansConfigSet configSet) {
 		// no op here
 	}
+	
+	/**
+	 * Return the root directories to search for {@link IFile} representing Spring configuration
+	 * files.
+	 * @param project the {@link IProject} to search.
+	 * @return the {@link Set} of {@link IPath}s representing the roots to search
+	 */
+	protected abstract Set<IPath> getRootDirectories(IProject project);
 
 }

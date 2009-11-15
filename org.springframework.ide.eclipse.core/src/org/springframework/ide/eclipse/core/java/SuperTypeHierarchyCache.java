@@ -65,7 +65,7 @@ public class SuperTypeHierarchyCache {
 		}
 	}
 
-	private static final int CACHE_SIZE = 24;
+	private static final int CACHE_SIZE = 50;
 
 	private static List<HierarchyCacheEntry> HIERACHY_CACHE = new ArrayList<HierarchyCacheEntry>(CACHE_SIZE);
 

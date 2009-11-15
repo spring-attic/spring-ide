@@ -82,7 +82,8 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 		// Fire start event on listeners
 		for (IProjectContributionEventListener listener : listeners) {
-			listener.start(kind, delta, builderDefinitions, validatorDefinitions, state, project);
+			listener.start(kind, delta, builderDefinitions, validatorDefinitions, state, project,
+					new SubProgressMonitor(monitor, 1));
 		}
 
 		// At first run all builders
@@ -105,7 +106,8 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 		// Fire end event on listeners
 		for (IProjectContributionEventListener listener : listeners) {
-			listener.finish(kind, delta, builderDefinitions, validatorDefinitions, state, project);
+			listener.finish(kind, delta, builderDefinitions, validatorDefinitions, state, project,
+					new SubProgressMonitor(monitor, 1));
 		}
 
 		return null;
@@ -168,7 +170,8 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			final int kind, final IProgressMonitor monitor, final List<IProjectContributionEventListener> listeners) {
 
 		for (IProjectContributionEventListener listener : listeners) {
-			listener.startContributor(builderDefinition.getProjectBuilder(), affectedResources);
+			listener.startContributor(builderDefinition.getProjectBuilder(), affectedResources, new SubProgressMonitor(
+					monitor, 1, 0));
 		}
 
 		ISafeRunnable code = new ISafeRunnable() {
@@ -177,8 +180,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 
 			public void run() throws Exception {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1, 0);
-				builderDefinition.getProjectBuilder().build(affectedResources, kind, subMonitor);
+				builderDefinition.getProjectBuilder().build(affectedResources, kind, new SubProgressMonitor(monitor, 1));
 			}
 		};
 		SafeRunner.run(code);
@@ -191,7 +193,8 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			final int kind, final IProgressMonitor monitor, final List<IProjectContributionEventListener> listeners) {
 
 		for (IProjectContributionEventListener listener : listeners) {
-			listener.startContributor(validatorDefinition.getValidator(), affectedResources);
+			listener.startContributor(validatorDefinition.getValidator(), affectedResources, new SubProgressMonitor(
+					monitor, 1));
 		}
 
 		ISafeRunnable code = new ISafeRunnable() {
@@ -200,8 +203,8 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 
 			public void run() throws Exception {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1, 0);
-				validatorDefinition.getValidator().validate(affectedResources, kind, subMonitor);
+				validatorDefinition.getValidator()
+						.validate(affectedResources, kind, new SubProgressMonitor(monitor, 1));
 			}
 		};
 		SafeRunner.run(code);
