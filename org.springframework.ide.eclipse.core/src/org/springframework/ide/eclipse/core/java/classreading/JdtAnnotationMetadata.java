@@ -109,5 +109,9 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 	public boolean isAnnotated(String annotationType) {
 		return annotationMap.containsKey(annotationType);
 	}
+
+	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+		return getAnnotationAttributes(annotationType);
+	}
 	
 }
