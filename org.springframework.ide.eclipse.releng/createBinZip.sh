@@ -50,7 +50,7 @@ install_feature org.springframework.ide.eclipse.mylyn.feature $UPDATESITE
 install_feature org.springframework.ide.eclipse.osgi.feature $UPDATESITE
 install_feature org.springframework.ide.eclipse.security.feature $UPDATESITE
 install_feature org.springframework.ide.eclipse.autowire.feature $UPDATESITE
-install_feature org.springframework.ide.eclipse.batch.feature.source $UPDATESITE
+install_feature org.springframework.ide.eclipse.batch.feature $UPDATESITE
 install_feature org.springframework.ide.eclipse.aop.feature.source $UPDATESITE
 install_feature org.springframework.ide.eclipse.ajdt.feature.source $UPDATESITE
 install_feature org.springframework.ide.eclipse.javaconfig.feature.source $UPDATESITE
