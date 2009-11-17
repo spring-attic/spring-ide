@@ -41,7 +41,7 @@ public class XercesDocumentLoader implements DocumentLoader {
 				parser.setFeature("http://xml.org/sax/features/validation", false);
 				parser.setFeature("http://apache.org/xml/features/validation/dynamic", false);
 				if (validationMode == XmlBeanDefinitionReader.VALIDATION_XSD) {
-					parser.setFeature("http://apache.org/xml/features/validation/schema", false);
+					parser.setFeature("http://apache.org/xml/features/validation/schema", true);
 				}
 			}
 			parser.parse(inputSource);
