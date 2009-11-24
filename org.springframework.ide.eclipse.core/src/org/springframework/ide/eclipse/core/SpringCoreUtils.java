@@ -18,7 +18,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -57,6 +56,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
@@ -98,13 +98,6 @@ public final class SpringCoreUtils {
 		}
 		catch (XPathExpressionException e) {
 			throw new RuntimeException(e);
-		}
-
-		try {
-			DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
-			builder = xmlFact.newDocumentBuilder();
-		}
-		catch (ParserConfigurationException e) {
 		}
 	}
 
@@ -601,12 +594,12 @@ public final class SpringCoreUtils {
 	public static Document parseDocument(IFile deploymentDescriptor) {
 		try {
 			if (deploymentDescriptor.getLocationURI() != null) {
-				return builder.parse(new File(deploymentDescriptor.getLocationURI()));
+				return getDocumentBuilder().parse(new File(deploymentDescriptor.getLocationURI()));
 			}
 			else if (deploymentDescriptor.getRawLocationURI() != null) {
-				return builder.parse(new File(deploymentDescriptor.getRawLocationURI()));
+				return getDocumentBuilder().parse(new File(deploymentDescriptor.getRawLocationURI()));
 			}
-			return builder.parse(new InputSource(deploymentDescriptor.getContents()));
+			return getDocumentBuilder().parse(new InputSource(deploymentDescriptor.getContents()));
 		}
 		catch (SAXException e) {
 			throw new RuntimeException(e);
@@ -617,6 +610,32 @@ public final class SpringCoreUtils {
 		catch (CoreException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static synchronized DocumentBuilder getDocumentBuilder() {
+		if (builder != null) {
+			return builder;
+		}
+		try {
+			// this might fail on IBM J9; therefore we are using the catch to use the OSGi service
+			DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
+			builder = xmlFact.newDocumentBuilder();
+		}
+		catch (Exception e) {
+			ServiceReference reference = SpringCore.getDefault().getBundle().getBundleContext().getServiceReference(
+					DocumentBuilderFactory.class.getName());
+			if (reference != null) {
+				try {
+					builder = ((DocumentBuilderFactory) SpringCore.getDefault().getBundle().getBundleContext().getService(
+							reference)).newDocumentBuilder();
+				}
+				catch (Exception e1) {
+					SpringCore.log(e1);
+				}
+				SpringCore.getDefault().getBundle().getBundleContext().ungetService(reference);
+			}
+		}
+		return builder;
 	}
 
 	/**
