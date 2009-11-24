@@ -18,6 +18,8 @@ import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLAttributes;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XNIException;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.UserDataHandler;
 import org.xml.sax.SAXException;
@@ -28,6 +30,7 @@ import org.xml.sax.SAXException;
  * <b>Requires Xerces 2.7 or newer!!!</b>
  * </p>
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class LineNumberPreservingDOMParser extends DOMParser {
 
@@ -52,14 +55,21 @@ public class LineNumberPreservingDOMParser extends DOMParser {
 
 	private static int getLineNumberFromUserData(Node node, String key) {
 		if (node instanceof NodeImpl) {
-			String line = (String) ((NodeImpl) node).getUserData(key);
-			if (line != null && line.length() > 0) {
-				try {
-					return Integer.parseInt(line);
+			// String line = (String) ((NodeImpl) node).getUserData(key);
+			try {
+				String line = (String) ClassUtils.invokeMethod(node, "getUserData", new Object[] { key },
+						new Class[] { String.class });
+				if (line != null && line.length() > 0) {
+					try {
+						return Integer.parseInt(line);
+					}
+					catch (NumberFormatException e) {
+						// ignore invalid user data
+					}
 				}
-				catch (NumberFormatException e) {
-					// ignore invalid user data
-				}
+			}
+			catch (Throwable e) {
+				// silently ignore that we can't get line numbers
 			}
 		}
 		return -1;
@@ -96,7 +106,14 @@ public class LineNumberPreservingDOMParser extends DOMParser {
 			Node node = (Node) getProperty(CURRENT_ELEMENT_NODE);
 			if (node instanceof NodeImpl) {
 				String line = String.valueOf(locator.getLineNumber());
-				((NodeImpl) node).setUserData(key, line, (UserDataHandler) null);
+				// ((NodeImpl) node).setUserData(key, line, (UserDataHandler) null);
+				try {
+					ClassUtils.invokeMethod(node, "setUserData", new Object[] { key, line, (UserDataHandler) null },
+							new Class[] { String.class, Object.class, UserDataHandler.class });
+				}
+				catch (Throwable e) {
+					SpringCore.log(e);
+				}
 			}
 		}
 		catch (SAXException e) {
