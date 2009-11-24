@@ -196,7 +196,9 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPer
 				this.aspectStartLineNumber);
 		memento.putInteger(BeanAspectDefinitionElementFactory.ASPECT_END_LINE_NUMBER_ATTRIBUTE,
 				this.aspectEndLineNumber);
-		memento.putString(BeanAspectDefinitionElementFactory.FILE_ATTRIBUTE, this.file.getFullPath().toString());
+		if (this.file != null) {
+			memento.putString(BeanAspectDefinitionElementFactory.FILE_ATTRIBUTE, this.file.getFullPath().toString());
+		}
 		memento.putString(BeanAspectDefinitionElementFactory.PROXY_TARGET_CLASS_ATTRIBUTE, Boolean
 				.toString(this.isProxyTargetClass));
 		memento.putString(BeanAspectDefinitionElementFactory.ADVICE_TYPE_ATTRIBUTE, this.type.toString());
