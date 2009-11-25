@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.io.xml;
 
-import org.apache.xerces.dom.NodeImpl;
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
@@ -18,17 +20,12 @@ import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLAttributes;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XNIException;
-import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.w3c.dom.Node;
-import org.w3c.dom.UserDataHandler;
 import org.xml.sax.SAXException;
 
 /**
- * Extended version of Xerces' DOM parser which adds line numbers (as DOM level 3 user data) to every node.
- * <p>
- * <b>Requires Xerces 2.7 or newer!!!</b>
- * </p>
+ * Extended version of Xerces' DOM parser which adds line numbers to an internal structure that can be queried in the
+ * same thread.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -54,25 +51,7 @@ public class LineNumberPreservingDOMParser extends DOMParser {
 	}
 
 	private static int getLineNumberFromUserData(Node node, String key) {
-		if (node instanceof NodeImpl) {
-			// String line = (String) ((NodeImpl) node).getUserData(key);
-			try {
-				String line = (String) ClassUtils.invokeMethod(node, "getUserData", new Object[] { key },
-						new Class[] { String.class });
-				if (line != null && line.length() > 0) {
-					try {
-						return Integer.parseInt(line);
-					}
-					catch (NumberFormatException e) {
-						// ignore invalid user data
-					}
-				}
-			}
-			catch (Throwable e) {
-				// silently ignore that we can't get line numbers
-			}
-		}
-		return -1;
+		return NodeLineNumberAccessor.getLineNumber(node, key);
 	}
 
 	@Override
@@ -104,20 +83,75 @@ public class LineNumberPreservingDOMParser extends DOMParser {
 	private void addLineNumberToCurrentNode(String key) throws XNIException {
 		try {
 			Node node = (Node) getProperty(CURRENT_ELEMENT_NODE);
-			if (node instanceof NodeImpl) {
-				String line = String.valueOf(locator.getLineNumber());
-				// ((NodeImpl) node).setUserData(key, line, (UserDataHandler) null);
-				try {
-					ClassUtils.invokeMethod(node, "setUserData", new Object[] { key, line, (UserDataHandler) null },
-							new Class[] { String.class, Object.class, UserDataHandler.class });
-				}
-				catch (Throwable e) {
-					SpringCore.log(e);
-				}
+			if (node != null) {
+				int line = locator.getLineNumber();
+				NodeLineNumberAccessor.setLineNumber(node, line, key);
 			}
 		}
 		catch (SAXException e) {
 			throw new XNIException(e);
+		}
+	}
+
+	private static class NodeLineNumberAccessor {
+
+		private static ThreadLocal<Map<Node, LineNumbers>> LINE_NUMBERS = new ThreadLocal<Map<Node, LineNumbers>>() {
+			protected Map<Node, LineNumbers> initialValue() {
+				return new WeakHashMap<Node, LineNumbers>();
+			};
+		};
+
+		public static void setLineNumber(Node node, int line, String key) {
+			LineNumbers lineNumbers = null;
+			if (LINE_NUMBERS.get().containsKey(node)) {
+				lineNumbers = LINE_NUMBERS.get().get(node);
+			}
+			else {
+				lineNumbers = new LineNumbers();
+				LINE_NUMBERS.get().put(node, lineNumbers);
+			}
+
+			if (START_LINE.equals(key)) {
+				lineNumbers.setStart(line);
+			}
+			else if (END_LINE.equals(key)) {
+				lineNumbers.setEnd(line);
+			}
+		}
+
+		public static int getLineNumber(Node node, String key) {
+			if (LINE_NUMBERS.get().containsKey(node)) {
+				if (START_LINE.equals(key)) {
+					return LINE_NUMBERS.get().get(node).getStart();
+				}
+				else if (END_LINE.equals(key)) {
+					return LINE_NUMBERS.get().get(node).getEnd();
+				}
+			}
+			return -1;
+		}
+	}
+
+	private static class LineNumbers {
+
+		private int start = -1;
+
+		private int end = -1;
+
+		public int getStart() {
+			return start;
+		}
+
+		public void setStart(int start) {
+			this.start = start;
+		}
+
+		public int getEnd() {
+			return end;
+		}
+
+		public void setEnd(int end) {
+			this.end = end;
 		}
 	}
 }
