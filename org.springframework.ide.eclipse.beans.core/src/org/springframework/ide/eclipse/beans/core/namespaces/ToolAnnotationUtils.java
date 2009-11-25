@@ -71,42 +71,48 @@ public abstract class ToolAnnotationUtils {
 	 * Return a list of annotations that are defined for a given attribute for a specific node.
 	 */
 	public static List<Element> getApplicationInformationElements(Node node, String attributeName) {
-		// Retrieve the declaration
-		CMElementDeclaration elementDecl = ToolAnnotationUtils.getCMElementDeclaration(node);
-		CMAttributeDeclaration attrDecl = null;
+		try {
+			// Retrieve the declaration
+			CMElementDeclaration elementDecl = ToolAnnotationUtils.getCMElementDeclaration(node);
+			CMAttributeDeclaration attrDecl = null;
 
-		// No CMElementDeclaration means no attribute metadata, but
-		// retrieve the declaration for the attribute otherwise
-		if (elementDecl != null) {
-			CMNamedNodeMap attributes = elementDecl.getAttributes();
-			String noprefixName = DOMNamespaceHelper.getUnprefixedName(attributeName);
-			if (attributes != null) {
-				attrDecl = (CMAttributeDeclaration) attributes.getNamedItem(noprefixName);
-				if (attrDecl == null) {
-					attrDecl = (CMAttributeDeclaration) attributes.getNamedItem(attributeName);
+			// No CMElementDeclaration means no attribute metadata, but
+			// retrieve the declaration for the attribute otherwise
+			if (elementDecl != null) {
+				CMNamedNodeMap attributes = elementDecl.getAttributes();
+				String noprefixName = DOMNamespaceHelper.getUnprefixedName(attributeName);
+				if (attributes != null) {
+					attrDecl = (CMAttributeDeclaration) attributes.getNamedItem(noprefixName);
+					if (attrDecl == null) {
+						attrDecl = (CMAttributeDeclaration) attributes.getNamedItem(attributeName);
+					}
+				}
+				if (attrDecl instanceof XSDAttributeUseAdapter) {
+					XSDAttributeUse attribute = (XSDAttributeUse) ((XSDAttributeUseAdapter) attrDecl).getKey();
+					// 1. Check if annotation and tool annotation are actually
+					// present
+					if (attribute.getAttributeDeclaration() != null
+							&& attribute.getAttributeDeclaration().getAnnotation() != null
+							&& attribute.getAttributeDeclaration().getAnnotation().getApplicationInformation() != null) {
+						return attribute.getAttributeDeclaration().getAnnotation().getApplicationInformation();
+					}
+					// 2. If no directly attached annotation could be
+					// found, try the referenced type definition if any.
+					if (attribute.getAttributeDeclaration() != null
+							&& attribute.getAttributeDeclaration().getTypeDefinition() != null
+							&& attribute.getAttributeDeclaration().getTypeDefinition().getAnnotation() != null
+							&& attribute.getAttributeDeclaration().getTypeDefinition().getAnnotation()
+									.getApplicationInformation() != null) {
+						return attribute.getAttributeDeclaration().getTypeDefinition().getAnnotation()
+								.getApplicationInformation();
+					}
+
 				}
 			}
-			if (attrDecl instanceof XSDAttributeUseAdapter) {
-				XSDAttributeUse attribute = (XSDAttributeUse) ((XSDAttributeUseAdapter) attrDecl).getKey();
-				// 1. Check if annotation and tool annotation are actually
-				// present
-				if (attribute.getAttributeDeclaration() != null
-						&& attribute.getAttributeDeclaration().getAnnotation() != null
-						&& attribute.getAttributeDeclaration().getAnnotation().getApplicationInformation() != null) {
-					return attribute.getAttributeDeclaration().getAnnotation().getApplicationInformation();
-				}
-				// 2. If no directly attached annotation could be
-				// found, try the referenced type definition if any.
-				if (attribute.getAttributeDeclaration() != null
-						&& attribute.getAttributeDeclaration().getTypeDefinition() != null
-						&& attribute.getAttributeDeclaration().getTypeDefinition().getAnnotation() != null
-						&& attribute.getAttributeDeclaration().getTypeDefinition().getAnnotation()
-								.getApplicationInformation() != null) {
-					return attribute.getAttributeDeclaration().getTypeDefinition().getAnnotation()
-							.getApplicationInformation();
-				}
-
-			}
+		}
+		catch (Exception e) {
+			// On RAD we get: java.lang.ClassCastException: org.eclipse.xsd.impl.XSDAttributeUseImpl incompatible with
+			// org.eclipse.xsd.XSDAttributeUse
 		}
 		return Collections.emptyList();
 	}
