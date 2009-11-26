@@ -51,8 +51,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 @SuppressWarnings("restriction")
 abstract class ResourceUtils {
 
-	private static final Path JVM_CLASSPATH_CONTAINER = new Path(
-			"org.eclipse.jdt.launching.JRE_CONTAINER");
+	private static final Path JVM_CLASSPATH_CONTAINER = new Path("org.eclipse.jdt.launching.JRE_CONTAINER");
 
 	public static interface RelevantLocationAwareResourceHolder {
 
@@ -190,11 +189,9 @@ abstract class ResourceUtils {
 		return NO_CHILDREN;
 	}
 
-	private static Object[] getNonJavaResources(IPackageFragment fragment)
-			throws JavaModelException {
+	private static Object[] getNonJavaResources(IPackageFragment fragment) throws JavaModelException {
 		Object[] nonJavaResources = fragment.getNonJavaResources();
-		IPackageFragmentRoot root = (IPackageFragmentRoot) fragment
-				.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		IPackageFragmentRoot root = (IPackageFragmentRoot) fragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 		if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
 			for (int i = 0; i < nonJavaResources.length; i++) {
 				Object resource = nonJavaResources[i];
@@ -203,16 +200,15 @@ abstract class ResourceUtils {
 				}
 				else if (resource instanceof IStorage && root.getResource() instanceof IFile) {
 					IStorage storage = (IStorage) resource;
-					nonJavaResources[i] = new ZipEntryStorage((IFile) root.getResource(), storage
-							.getFullPath().toString());
+					nonJavaResources[i] = new ZipEntryStorage((IFile) root.getResource(), storage.getFullPath()
+							.toString());
 				}
 			}
 		}
 		return nonJavaResources;
 	}
 
-	private static Object[] getNonJavaResources(IPackageFragmentRoot root)
-			throws JavaModelException {
+	private static Object[] getNonJavaResources(IPackageFragmentRoot root) throws JavaModelException {
 		Object[] nonJavaResources = root.getNonJavaResources();
 
 		// Replace JAR entries with our own wrapper
@@ -221,8 +217,8 @@ abstract class ResourceUtils {
 				Object resource = nonJavaResources[i];
 				if (resource instanceof IStorage) {
 					IStorage storage = (IStorage) resource;
-					nonJavaResources[i] = new ZipEntryStorage((IFile) root.getResource(), storage
-							.getFullPath().toString());
+					nonJavaResources[i] = new ZipEntryStorage((IFile) root.getResource(), storage.getFullPath()
+							.toString());
 				}
 			}
 		}
@@ -257,8 +253,7 @@ abstract class ResourceUtils {
 		return concatenate(list.toArray(), project.getNonJavaResources());
 	}
 
-	private static Object[] getPackageFragments(IPackageFragmentRoot root)
-			throws JavaModelException {
+	private static Object[] getPackageFragments(IPackageFragmentRoot root) throws JavaModelException {
 		Object[] fragments = root.getChildren();
 		Object[] nonJavaResources = getNonJavaResources(root);
 		if (nonJavaResources == null) {
@@ -281,8 +276,8 @@ abstract class ResourceUtils {
 		}
 	}
 
-	private static Set<Resource> getResource(String path, IProject project,
-			Set<Resource> resources, Set<IProject> projects, boolean lookForAll) {
+	private static Set<Resource> getResource(String path, IProject project, Set<Resource> resources,
+			Set<IProject> projects, boolean lookForAll) {
 
 		if (projects.contains(project)) {
 			return resources;
@@ -297,8 +292,7 @@ abstract class ResourceUtils {
 				return resources;
 			}
 			if (JdtUtils.isJavaProject(project)) {
-				for (IJavaProject jp : JdtUtils.getAllDependingJavaProjects(JdtUtils
-						.getJavaProject(project))) {
+				for (IJavaProject jp : JdtUtils.getAllDependingJavaProjects(JdtUtils.getJavaProject(project))) {
 					getResource(path, jp.getProject(), resources, projects, lookForAll);
 					if (resources.size() > 0 && !lookForAll) {
 						return resources;
@@ -325,10 +319,8 @@ abstract class ResourceUtils {
 		List<RelevantLocationAwareResourceHolder> holders = new ArrayList<RelevantLocationAwareResourceHolder>();
 
 		for (Object child : ResourceUtils.getChildren(project)) {
-			if (child instanceof IPackageFragmentRoot
-					&& ((IPackageFragmentRoot) child).getResource() != null) {
-				String parentPath = ((IPackageFragmentRoot) child).getResource().getRawLocation()
-						.toString();
+			if (child instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) child).getResource() != null) {
+				String parentPath = ((IPackageFragmentRoot) child).getResource().getRawLocation().toString();
 				Object[] packages = ResourceUtils.getChildren(child);
 				boolean isJar = ((IPackageFragmentRoot) child).getKind() == IPackageFragmentRoot.K_BINARY;
 				for (Object p : packages) {
@@ -339,8 +331,8 @@ abstract class ResourceUtils {
 							holders.add(new ResourceHolder(parentPath, resource));
 						}
 						else {
-							holders.add(new ResourceHolder(parentPath, new StorageFolder(resource,
-									(IPackageFragment) p)));
+							holders.add(new ResourceHolder(parentPath,
+									new StorageFolder(resource, (IPackageFragment) p)));
 						}
 
 						Object[] packageChildren = ResourceUtils.getChildren(p);
@@ -382,9 +374,8 @@ abstract class ResourceUtils {
 		}
 	}
 
-	private static void addJarEntryResources(IProject project,
-			List<RelevantLocationAwareResourceHolder> holders, Object child)
-			throws JavaModelException {
+	private static void addJarEntryResources(IProject project, List<RelevantLocationAwareResourceHolder> holders,
+			Object child) throws JavaModelException {
 
 		IPath classpathEntry = ((JarPackageFragmentRoot) child).getRawClasspathEntry().getPath();
 
@@ -400,11 +391,10 @@ abstract class ResourceUtils {
 					if (entryPath.charAt(0) == '/' && entryPath.length() > 1) {
 						entryPath = entryPath.substring(1);
 					}
-					
+
 					if (!jarEntry.isDirectory()) {
-						holders.add(new ResourceHolder(jarPath.toString()
-								+ ZipEntryStorage.DELIMITER, new ExternalFile(file, '/' + jarEntry
-								.getName(), project)));
+						holders.add(new ResourceHolder(jarPath.toString() + ZipEntryStorage.DELIMITER,
+								new ExternalFile(file, '/' + jarEntry.getName(), project)));
 					}
 				}
 			}
@@ -414,8 +404,8 @@ abstract class ResourceUtils {
 
 	}
 
-	private static void deepAddChildren(IFolder obj,
-			List<RelevantLocationAwareResourceHolder> holders, String parentPath) {
+	private static void deepAddChildren(IFolder obj, List<RelevantLocationAwareResourceHolder> holders,
+			String parentPath) {
 		holders.add(new ResourceHolder(parentPath, obj));
 		Object[] children = ResourceUtils.getChildren(obj);
 		for (Object child : children) {
