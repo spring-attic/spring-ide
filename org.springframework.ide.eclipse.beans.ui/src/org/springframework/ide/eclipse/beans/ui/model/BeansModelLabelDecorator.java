@@ -133,7 +133,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements IL
 		if (bean.isAbstract()) {
 			decoration.addOverlay(BeansUIImages.DESC_OVR_ABSTRACT, IDecoration.BOTTOM_RIGHT);
 		}
-		if (!bd.isSingleton()) {
+		if (!bean.isSingleton()) {
 			decoration.addOverlay(BeansUIImages.DESC_OVR_PROTOTYPE, IDecoration.BOTTOM_RIGHT);
 		}
 		if (bd instanceof AnnotatedBeanDefinition) {

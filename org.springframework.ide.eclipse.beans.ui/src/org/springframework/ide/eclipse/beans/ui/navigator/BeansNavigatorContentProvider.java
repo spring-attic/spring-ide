@@ -234,7 +234,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider imp
 		private final BeansNavigatorContentProvider contentProvider;
 
 		public ModelJob(Object config, Object parent, BeansNavigatorContentProvider contentProvider) {
-			super("Initializing Spring Project '" + ((IResourceModelElement) config).getElementResource().getFullPath().toString()+ "'");
+			super("Initializing Spring Project '"
+					+ ((IResourceModelElement) config).getElementResource().getFullPath().toString().substring(1) + "'");
 			this.config = config;
 			this.parent = parent;
 			this.contentProvider = contentProvider;
