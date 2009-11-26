@@ -59,7 +59,13 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
 	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation,
 			Properties namespaceDefinition, Image image) {
-		this.prefix = prefix;
+		if (prefix != null) {
+			this.prefix = prefix;
+		}
+		else {
+			int ix = uri.lastIndexOf('/');
+			this.prefix = uri.substring(ix + 1);
+		}
 		this.uri = uri;
 		this.defaultLocation = defaultLocation;
 		this.uriMapping = namespaceDefinition;
