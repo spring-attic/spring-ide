@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigEventListene
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
@@ -52,9 +53,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	/** List of aliases (in registration order) */
 	protected volatile Map<String, IBeanAlias> aliases = new LinkedHashMap<String, IBeanAlias>();
 
-	/**
-	 * List of bean class names mapped to list of beans implementing the corresponding class
-	 */
+	/** List of bean class names mapped to list of beans implementing the corresponding class */
 	protected volatile Map<String, Set<IBean>> beanClassesMap = new HashMap<String, Set<IBean>>();
 
 	/** List of bean names mapped beans (in registration order) */
@@ -67,20 +66,20 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	protected volatile DocumentDefaultsDefinition defaults;
 
 	/** This bean's config file */
-	protected IFile file;
+	protected volatile IFile file;
 
 	/** List of imports (in registration order) */
 	protected volatile Set<IBeansImport> imports = new LinkedHashSet<IBeansImport>();
 
 	/** Indicator for a beans configuration embedded in a ZIP file */
-	protected boolean isArchived;
+	protected volatile boolean isArchived;
 
 	protected volatile boolean isBeanClassesMapPopulated = false;
 
 	protected volatile boolean isModelPopulated = false;
 
 	/** This bean config file's timestamp of last modification */
-	protected long modificationTimestamp;
+	protected volatile long modificationTimestamp;
 
 	/** Set of parsing errors */
 	protected Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>();
@@ -448,16 +447,21 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	 * {@inheritDoc}
 	 */
 	public Set<IBeansImport> getImports() {
-		// Lazily initialization of this config
-		readConfig();
+		// Check the project if imports are enabled
+		IBeansProject project = BeansModelUtils.getParentOfClass(getElementParent(), IBeansProject.class);
+		if (project != null && project.isImportsEnabled()) {
+			// Lazily initialization of this config
+			readConfig();
 
-		try {
-			r.lock();
-			return Collections.unmodifiableSet(imports);
+			try {
+				r.lock();
+				return Collections.unmodifiableSet(imports);
+			}
+			finally {
+				r.unlock();
+			}
 		}
-		finally {
-			r.unlock();
-		}
+		return Collections.emptySet();
 	}
 
 	/**

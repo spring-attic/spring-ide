@@ -59,6 +59,12 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 		String mergedClassName = mergedBd.getBeanClassName();
 		IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean, mergedClassName, context);
 
+		// Before checking for properties check that type is not a groovy type; groovy can dynamically add getters and
+		// setters
+		if (type != null && JdtUtils.isTypeGroovyElement(type)) {
+			return;
+		}
+
 		// Don't validate a bean without a valid and resolvable IType; this will
 		// be validated by the BeanClassRule
 

@@ -206,7 +206,10 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	public boolean isSingleton() {
 		if (definition instanceof AbstractBeanDefinition) {
-			return ((AbstractBeanDefinition) definition).isSingleton();
+			AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) definition;
+			return beanDefinition.getScope() == null
+					|| AbstractBeanDefinition.SCOPE_SINGLETON.equals(beanDefinition.getScope())
+					|| beanDefinition.isSingleton();
 		}
 		return true;
 	}
