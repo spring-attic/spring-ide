@@ -210,7 +210,7 @@
             name="%wizards.newConfig.name"
             class="org.springframework.ide.eclipse.webflow.ui.wizards.NewWebflowConfigWizard"
             category="org.springframework.ide.eclipse.beans.ui.wizards.category"
-            icon="icons/full/obj16/spring_webflow_obj.gif">
+            icon="icons/full/obj16/new_webflow_obj.gif">
          <description>
             %wizards.newConfig.description
          </description>
