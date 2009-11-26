@@ -30,8 +30,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * {@link IContentAssistProcessor} that delegates to {@link INamespaceContentAssistProcessor}s
- * contribute via the <code>org.springframework.ide.eclipse.beans.ui.editor</code> extension point.
+ * {@link IContentAssistProcessor} that delegates to {@link INamespaceContentAssistProcessor}s contribute via the
+ * <code>org.springframework.ide.eclipse.beans.ui.editor</code> extension point.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -48,8 +48,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 
 		IDOMNode node = (IDOMNode) contentAssistRequest.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor[] processors = NamespaceUtils
-				.getContentAssistProcessor(namespace);
+		INamespaceContentAssistProcessor[] processors = NamespaceUtils.getContentAssistProcessor(namespace);
 		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addAttributeValueProposals(this, contentAssistRequest);
 		}
@@ -64,8 +63,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		super.addAttributeValueProposals(contentAssistRequest);
 	}
 
-	private void addAnnotationBasedAttributeValueProposals(
-			ContentAssistRequest contentAssistRequest, IDOMNode node) {
+	private void addAnnotationBasedAttributeValueProposals(ContentAssistRequest contentAssistRequest, IDOMNode node) {
 
 		IStructuredDocumentRegion open = node.getFirstStructuredDocumentRegion();
 		ITextRegionList openRegions = open.getRegions();
@@ -84,8 +82,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		// the name region is REQUIRED to do anything useful
 		if (nameRegion != null) {
 			String attributeName = open.getText(nameRegion);
-			List<Element> appInfo = ToolAnnotationUtils.getApplicationInformationElements(node,
-					attributeName);
+			List<Element> appInfo = ToolAnnotationUtils.getApplicationInformationElements(node, attributeName);
 			for (Element elem : appInfo) {
 				NodeList children = elem.getChildNodes();
 				for (int j = 0; j < children.getLength(); j++) {
@@ -98,8 +95,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		}
 	}
 
-	private void invokeAnnotationBasedContentAssistProcessor(
-			ContentAssistRequest contentAssistRequest, Node child) {
+	private void invokeAnnotationBasedContentAssistProcessor(ContentAssistRequest contentAssistRequest, Node child) {
 
 		IAnnotationBasedContentAssistProcessor[] annotationProcessors = NamespaceUtils
 				.getAnnotationBasedContentAssistProcessor(child.getNamespaceURI());
@@ -112,8 +108,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addAttributeNameProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor[] processors = NamespaceUtils
-				.getContentAssistProcessor(namespace);
+		INamespaceContentAssistProcessor[] processors = NamespaceUtils.getContentAssistProcessor(namespace);
 		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addAttributeNameProposals(this, request);
 		}
@@ -124,8 +119,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addTagCloseProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor[] processors = NamespaceUtils
-				.getContentAssistProcessor(namespace);
+		INamespaceContentAssistProcessor[] processors = NamespaceUtils.getContentAssistProcessor(namespace);
 		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addTagCloseProposals(this, request);
 		}
@@ -136,8 +130,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addTagInsertionProposals(ContentAssistRequest request, int childPosition) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor[] processors = NamespaceUtils
-				.getContentAssistProcessor(namespace);
+		INamespaceContentAssistProcessor[] processors = NamespaceUtils.getContentAssistProcessor(namespace);
 		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addTagInsertionProposals(this, request, childPosition);
 		}

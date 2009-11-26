@@ -43,17 +43,15 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
- * {@link INamespaceContentAssistProcessor} implementation responsible for the standard
- * <code>bean:*</code> namespace.
+ * {@link INamespaceContentAssistProcessor} implementation responsible for the standard <code>bean:*</code> namespace.
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
 @SuppressWarnings("restriction")
 public class BeansContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
 
-	private void addPropertyNameAttributeNameProposals(ContentAssistRequest request, String prefix,
-			String oldPrefix, Node node, List classNames, boolean attrAtLocationHasValue,
-			String nameSpacePrefix) {
+	private void addPropertyNameAttributeNameProposals(ContentAssistRequest request, String prefix, String oldPrefix,
+			Node node, List classNames, boolean attrAtLocationHasValue, String nameSpacePrefix) {
 
 		PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(request, oldPrefix,
 				attrAtLocationHasValue, nameSpacePrefix);
@@ -76,8 +74,7 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 						Iterator iterator = methods.iterator();
 						while (iterator.hasNext()) {
 							IMethod method = (IMethod) iterator.next();
-							IType returnType = JdtUtils
-									.getJavaTypeForMethodReturnType(method, type);
+							IType returnType = JdtUtils.getJavaTypeForMethodReturnType(method, type);
 
 							if (returnType != null) {
 								List<IType> typesTemp = new ArrayList<IType>();
@@ -85,9 +82,8 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 
 								String newPrefix = oldPrefix + firstPrefix + ".";
 
-								addPropertyNameAttributeNameProposals(request, lastPrefix,
-										newPrefix, node, typesTemp, attrAtLocationHasValue,
-										nameSpacePrefix);
+								addPropertyNameAttributeNameProposals(request, lastPrefix, newPrefix, node, typesTemp,
+										attrAtLocationHasValue, nameSpacePrefix);
 							}
 							return;
 						}
@@ -122,8 +118,8 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 	}
 
 	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix,
-			String namespace, String namespacePrefix, Node attributeNode) {
+	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
+			String namespacePrefix, Node attributeNode) {
 		if ("http://www.springframework.org/schema/p".equals(namespace)) {
 			// check whether an attribute really exists for the replacement
 			// offsets AND if it possesses a value
@@ -134,10 +130,8 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 				AttrImpl existingAttr = (AttrImpl) attrs.item(i);
 				ITextRegion name = existingAttr.getNameRegion();
 				if (sdRegion.getStartOffset(name) <= request.getReplacementBeginPosition()
-						&& sdRegion.getStartOffset(name) + name.getLength() >= request
-								.getReplacementBeginPosition()
-								+ request.getReplacementLength()
-						&& existingAttr.getValueRegion() != null) {
+						&& sdRegion.getStartOffset(name) + name.getLength() >= request.getReplacementBeginPosition()
+								+ request.getReplacementLength() && existingAttr.getValueRegion() != null) {
 					attrAtLocationHasValue = true;
 					break;
 				}
@@ -147,8 +141,7 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 				prefix = BeansEditorUtils.attributeNameToPropertyName(prefix);
 			}
 
-			List classNames = BeansEditorUtils.getClassNamesOfBean(BeansEditorUtils
-					.getFile(request), attributeNode);
+			List classNames = BeansEditorUtils.getClassNamesOfBean(BeansEditorUtils.getFile(request), attributeNode);
 			addPropertyNameAttributeNameProposals(request, prefix, "", attributeNode, classNames,
 					attrAtLocationHasValue, namespacePrefix);
 		}
@@ -182,8 +175,7 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 		registerContentAssistCalculator("key-type", clazz);
 
 		PropertyBeanReferenceContentAssistCalculator propertyBean = new PropertyBeanReferenceContentAssistCalculator();
-		registerContentAssistCalculator(NamespaceUtils.DEFAULT_NAMESPACE_URI, "bean",
-				"property", "ref", propertyBean);
+		registerContentAssistCalculator(NamespaceUtils.DEFAULT_NAMESPACE_URI, "bean", "property", "ref", propertyBean);
 
 		BeanReferenceContentAssistCalculator globalBean = new BeanReferenceContentAssistCalculator();
 		registerContentAssistCalculator("bean", "parent", globalBean);
@@ -198,8 +190,7 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 		registerContentAssistCalculator("entry", "key-ref", globalBean);
 		registerContentAssistCalculator("lookup-method", "bean", globalBean);
 
-		BeanReferenceContentAssistCalculator localBean = new BeanReferenceContentAssistCalculator(
-				false);
+		BeanReferenceContentAssistCalculator localBean = new BeanReferenceContentAssistCalculator(false);
 		registerContentAssistCalculator("ref", "local", localBean);
 		registerContentAssistCalculator("idref", "local", localBean);
 
@@ -208,40 +199,35 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 		registerContentAssistCalculator("bean", "destroy-method", initDestroy);
 
 		registerContentAssistCalculator("bean", "id", new BeanIdContentAssistCalculator());
-		registerContentAssistCalculator("replaced-method", "name",
-				new ReplaceMethodContentAssistCalculator());
-		registerContentAssistCalculator("lookup-method", "name",
-				new LookupMethodContentAssistCalculator());
+		registerContentAssistCalculator("replaced-method", "name", new ReplaceMethodContentAssistCalculator());
+		registerContentAssistCalculator("lookup-method", "name", new LookupMethodContentAssistCalculator());
 
-		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean",
-				"property", "name", new PropertyNameContentAssistCalculator());
-		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean",
-				"property", "value", new PropertyValueContentAssistCalculator());
+		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean", "property", "name",
+				new PropertyNameContentAssistCalculator());
+		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean", "property", "value",
+				new PropertyValueContentAssistCalculator());
 
-		registerContentAssistCalculator("bean", "factory-method",
-				new FactoryMethodContentAssistCalculator());
+		registerContentAssistCalculator("bean", "factory-method", new FactoryMethodContentAssistCalculator());
+
+		registerContentAssistCalculator("bean", "scope", new ScopeContentAssistCalculator());
 
 	}
 
 	@Override
-	protected void postComputeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
-			String matchString, String attributeName, String namespace, String prefix) {
+	protected void postComputeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
+			String attributeName, String namespace, String prefix) {
 
 		if ("bean".equals(node.getNodeName())) {
-			if ("http://www.springframework.org/schema/p".equals(namespace)
-					&& attributeName.endsWith("-ref")) {
+			if ("http://www.springframework.org/schema/p".equals(namespace) && attributeName.endsWith("-ref")) {
 
-				IContentAssistContext context = new DefaultContentAssistContext(request,
-						attributeName, matchString);
-				IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(
-						request);
+				IContentAssistContext context = new DefaultContentAssistContext(request, attributeName, matchString);
+				IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(request);
 				addBeanReferenceProposals(context, recorder);
 			}
 		}
 	}
 
-	private void addBeanReferenceProposals(IContentAssistContext context,
-			IContentAssistProposalRecorder recorder) {
+	private void addBeanReferenceProposals(IContentAssistContext context, IContentAssistProposalRecorder recorder) {
 		BeansCompletionUtils.addBeanReferenceProposals(context, recorder, true);
 
 	}
