@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -65,6 +66,8 @@ public class JdtUtils {
 	public static final String JAVA_FILE_EXTENSION = ".java";
 
 	public static final String CLASS_FILE_EXTENSION = ".class";
+
+	public static final String GROOVY_FILE_EXTENSION = ".groovy";
 
 	private static final String AJDT_CLASS = "org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager";
 
@@ -496,6 +499,26 @@ public class JdtUtils {
 	public static boolean isTypeAjdtElement(IType type) {
 		if (IS_AJDT_PRESENT) {
 			return AjdtUtils.isTypeAjdtElement(type);
+		}
+		return false;
+	}
+	
+	public static boolean isTypeGroovyElement(IType type) {
+		// TODO CD verify following check with Groovy Eclipse
+		ICompilationUnit cu = type.getCompilationUnit();
+		if (cu != null && cu.getResource() != null) {
+			return cu.getResource().getName().endsWith(GROOVY_FILE_EXTENSION);
+		}
+		else if (cu != null) {
+			try {
+				IResource resource = cu.getUnderlyingResource();
+				if (resource != null) {
+					return resource.getName().endsWith(GROOVY_FILE_EXTENSION);
+				}
+			}
+			catch (JavaModelException e) {
+				// ignore
+			}
 		}
 		return false;
 	}
