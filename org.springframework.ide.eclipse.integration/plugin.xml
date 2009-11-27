@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<!--
+/*******************************************************************************
+ * Copyright (c) 2005, 2009 Spring IDE Developers
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Spring IDE Developers - initial API and implementation
+ *******************************************************************************/
+ -->
+<plugin>
+
+	<extension point="org.eclipse.wst.xml.core.catalogContributions">
+		<catalogContribution>
+			<system
+				systemId="http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd"
+				uri="platform:/plugin/org.springframework.ide.eclipse.integration/org/springframework/oxm/v1/config/spring-oxm-1.5.xsd" />
+		</catalogContribution>
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.core.namespaces">
+		<namespace uri="http://www.springframework.org/schema/oxm" >
+			<namespaceHandler class="org.springframework.oxm.config.OxmNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd" />
+			<namespaceHandler class="org.springframework.oxm.v1.config.OxmNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd" />
+		</namespace>
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.namespaces">
+		<namespace
+			name="Spring Oxm"
+			uri="http://www.springframework.org/schema/oxm" 
+			prefix="oxm"
+			icon="icons/full/obj16/spring-oxm.gif"
+			defaultSchemaLocation="http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd" />
+			<schemaLocation url="http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd" />
+		</namespace>
+		<namespace
+			name="Spring Web Services"
+			uri="http://www.springframework.org/schema/web-services" 
+			prefix="ws" 
+			icon="icons/full/obj16/spring-ws.gif" 
+			labelProvider="org.springframework.ide.eclipse.integration.ui.namespaces.WsNamespaceLabelProvider" />
+	</extension>
+
+</plugin>
