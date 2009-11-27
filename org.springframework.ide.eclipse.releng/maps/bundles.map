@@ -1,6 +1,3 @@
-plugin@com.springsource.javax.mail=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.mail-sources-1.4.0.jar
-plugin@com.springsource.javax.mail.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.mail.source-sources-1.4.0.jar
-plugin@required=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/required-.jar
 plugin@com.springsource.edu.emory.mathcs.backport=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.edu.emory.mathcs.backport-3.1.0.jar
 plugin@com.springsource.edu.emory.mathcs.backport.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.edu.emory.mathcs.backport.source-3.1.0.jar
 plugin@com.springsource.javax.activation=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.activation-1.1.1.jar
@@ -14,6 +11,7 @@ plugin@com.springsource.javax.el.source=GET,https://src.springframework.org/svn/
 plugin@com.springsource.javax.jms=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.jms-1.1.0.jar
 plugin@com.springsource.javax.jms.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.jms.source-1.1.0.jar
 plugin@com.springsource.javax.mail=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.mail-1.4.0.jar
+plugin@com.springsource.javax.mail.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.mail.source-1.4.0.jar
 plugin@com.springsource.javax.servlet=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.servlet-2.5.0.jar
 plugin@com.springsource.javax.servlet.jsp=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.servlet.jsp-2.1.0.jar
 plugin@com.springsource.javax.servlet.jsp.jstl=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/com.springsource.javax.servlet.jsp.jstl-1.2.0.jar
