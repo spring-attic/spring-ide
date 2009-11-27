@@ -35,7 +35,7 @@
    </requires>
 
    <plugin
-         id="org.springframework.security"
+         id="org.springframework.security.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
