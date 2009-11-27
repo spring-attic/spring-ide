@@ -81,6 +81,10 @@
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanDefinitionRule"
 		            name="%beansValidator.rule.beanDefinition.name"
 		            description="%beansValidator.rule.beanDefinition.description" />
+		    <rule id="beanDefinition"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanDeprecationRule"
+		            name="%beansValidator.rule.beanDeprecation.name"
+		            description="%beansValidator.rule.beanDeprecation.description" />
 		    <rule id="beanClass"
             		class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRule"
             		description="%beansValidator.rule.beanClass.description"
