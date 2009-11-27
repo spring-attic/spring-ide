@@ -47,6 +47,16 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 		if (hyperlinks.size() == 0 || canShowMultipleHyperlinks) {
 			detectAnnotationBasedHyperlinks(textViewer, region, canShowMultipleHyperlinks, hyperlinks, currentNode);
 		}
+		// Check hyperlinks to make sure that no nulls are in there
+		List<IHyperlink> safeHylerlinks = new ArrayList<IHyperlink>();
+		for (IHyperlink hyperlink : hyperlinks) {
+			if (hyperlink != null) {
+				safeHylerlinks.add(hyperlink);
+			}
+		}
+		
+		hyperlinks = safeHylerlinks;
+		
 		if (hyperlinks.size() > 0) {
 			return hyperlinks.toArray(new IHyperlink[hyperlinks.size()]);
 		}
