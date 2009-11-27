@@ -12,7 +12,7 @@
  *******************************************************************************/
  -->
 <feature
-      id="org.springframework.ide.eclipse.batch.feature.source"
+      id="org.springframework.ide.eclipse.integration.feature.source"
       label="%featureName"
       version="2.3.0.qualifier"
       provider-name="%featureProvider"
@@ -30,7 +30,7 @@
       %license
    </license>
 
-     <plugin
+   <plugin
          id="org.springframework.ide.eclipse.integration.source"
          download-size="0"
          install-size="0"
@@ -162,5 +162,5 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
 </feature>
