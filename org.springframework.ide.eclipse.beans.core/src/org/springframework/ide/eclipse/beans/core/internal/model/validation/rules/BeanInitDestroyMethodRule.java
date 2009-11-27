@@ -41,8 +41,7 @@ public class BeanInitDestroyMethodRule extends AbstractBeanMethodValidationRule 
 		IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean, mergedClassName, context);
 		if (type != null) {
 
-			// For non-factory beans validate bean's init-method and
-			// destroy-method
+			// For non-factory beans validate bean's init-method and destroy-method
 			if (!JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())) {
 				if (mergedBd.isEnforceInitMethod()) {
 					validateMethod(bean, type, MethodType.INIT, bd.getInitMethodName(), 0, Static.DONT_CARE, context);

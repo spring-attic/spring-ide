@@ -17,11 +17,10 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
- * Class that can be used as base class for {@link IValidationRule}
- * implementation that <b>don't</b> support infrastructure beans.
+ * Class that can be used as base class for {@link IValidationRule} implementation that <b>don't</b> support
+ * infrastructure beans.
  * <p>
- * A infrastructure bean is defined by its role flag at
- * {@link BeanDefinition#getRole()}.
+ * A infrastructure bean is defined by its role flag at {@link BeanDefinition#getRole()}.
  * 
  * @author Christian Dupuis
  * @since 2.0.2
@@ -29,33 +28,28 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 public abstract class AbstractNonInfrastructureBeanValidationRule {
 
 	/**
-	 * Returns <code>true</code> if this rule is able to validate the given
-	 * {@link IModelElement} with the specified {@link IValidationContext}.
+	 * Returns <code>true</code> if this rule is able to validate the given {@link IModelElement} with the specified
+	 * {@link IValidationContext}.
 	 * <p>
-	 * First resolves the parent {@link IBean} of the given element to check
-	 * that the bean is not an infrastructure bean. If no parent bean can be
-	 * resolved this implementation assumes that the rule supports the element.
+	 * First resolves the parent {@link IBean} of the given element to check that the bean is not an infrastructure
+	 * bean. If no parent bean can be resolved this implementation assumes that the rule supports the element.
 	 * <p>
-	 * Finally the {@link #supportsModelElementForNonInfrastructureBean} is
-	 * called to give subclasses the option to do further checking.
+	 * Finally the {@link #supportsModelElementForNonInfrastructureBean} is called to give subclasses the option to do
+	 * further checking.
 	 * @param element the element to check
 	 * @param context the validation context
 	 * @return true if given element is supported by this rule implementation
-	 * @see #supportsModelElementForNonInfrastructureBean(IModelElement,
-	 * IBeansValidationContext)
+	 * @see #supportsModelElementForNonInfrastructureBean(IModelElement, IBeansValidationContext)
 	 */
-	public final boolean supports(IModelElement element,
-			IValidationContext context) {
+	public final boolean supports(IModelElement element, IValidationContext context) {
 		IBean bean = resolveBeanFromModelElement(element);
 		return context instanceof IBeansValidationContext
 				&& (bean == null || (bean != null && !bean.isInfrastructure()))
-				&& supportsModelElementForNonInfrastructureBean(element,
-						(IBeansValidationContext) context);
+				&& supportsModelElementForNonInfrastructureBean(element, (IBeansValidationContext) context);
 	}
 
 	/**
-	 * Recursively resolves the parent {@link IBean} instance from the given
-	 * <code>element</code>.
+	 * Recursively resolves the parent {@link IBean} instance from the given <code>element</code>.
 	 */
 	private IBean resolveBeanFromModelElement(IModelElement element) {
 		if (element instanceof IBean) {
@@ -70,14 +64,14 @@ public abstract class AbstractNonInfrastructureBeanValidationRule {
 	}
 
 	/**
-	 * Returns <code>true</code> if this rule is able to validate the given
-	 * {@link IModelElement} with the specified {@link IBeansValidationContext}.
+	 * Returns <code>true</code> if this rule is able to validate the given {@link IModelElement} with the specified
+	 * {@link IBeansValidationContext}.
 	 * <p>
-	 * This default implementation simply returns <code>true</code>. Subclasses
-	 * can override this template method to implement specific checking.
+	 * This default implementation simply returns <code>true</code>. Subclasses can override this template method to
+	 * implement specific checking.
 	 */
-	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, IBeansValidationContext context) {
+	protected boolean supportsModelElementForNonInfrastructureBean(IModelElement element,
+			IBeansValidationContext context) {
 		return true;
 	}
 }
