@@ -45,6 +45,10 @@
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.batch.feature" />
 		</ant>
+		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.integration.feature" />
+		</ant>
  		<ant antfile="${genericTargets}" target="${target}">
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.feature.source" />
@@ -80,6 +84,10 @@
 		<ant antfile="${genericTargets}" target="${target}">
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.batch.feature.source" />
+		</ant>
+		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.integration.feature.source" />
 		</ant>
  	</target>
  
@@ -145,6 +153,11 @@
 			<property name="archiveName" value="springide-batch.zip" />
 		</ant>
  	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.integration.feature">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-integration.zip" />
+		</ant>
+ 	</target>
  	<target name="assemble.org.springframework.ide.eclipse.feature.source">
 		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
 			<property name="archiveName" value="springide.source.zip" />
@@ -193,6 +206,11 @@
  	<target name="assemble.org.springframework.ide.eclipse.batch.feature.source">
 		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
 			<property name="archiveName" value="springide-batch.source.zip" />
+		</ant>
+ 	</target>
+ 	<target name="assemble.org.springframework.ide.eclipse.integration.feature.source">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-integration.source.zip" />
 		</ant>
  	</target>
 

@@ -15,12 +15,12 @@ TARGET_DIR=../required-bundles
 
 echo "...source bundles"
 rm bundles.map
-pwd
+
 
 for II in $TARGET_DIR/*-sources-*; do 
 	echo $II
-	NAME=`expr "$II" : '.*/\(.*\)-sources-.*'`
-	VERSION=`expr "$II" : '.*-sources-\(.*\).jar'`
+	NAME=`expr "$II" : '.*/\([a-z.A-Z]*\)\-.*'`
+	VERSION=`expr "$II" : '.*/[a-z.A-Z]*\-\(.*\).jar'`
 
 	ant -f create-source-bundle.xml -Dbundle.symbolic.name=$NAME -Dbundle.version=$VERSION -Dbundle.home.path=$TARGET_DIR
 	
@@ -34,9 +34,10 @@ done
 
 for II in $TARGET_DIR/*; do 
 	echo $II
-	NAME=`expr "$II" : '.*/\(.*\)-.*'`
-	VERSION=`expr "$II" : '.*-\(.*\).jar'`
-
+	NAME=`expr "$II" : '.*/\([a-z.A-Z]*\)\-.*'`
+	VERSION=`expr "$II" : '.*/[a-z.A-Z]*\-\(.*\).jar'`
+	
+	#echo $NAME $VERSION
 	echo plugin@$NAME=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/$NAME-$VERSION.jar >> bundles.map
 	
 done

@@ -59,6 +59,12 @@
 		<category name="Extensions / Spring IDE" />
 	</feature>
 	
+	<feature
+		url="features/org.springframework.ide.eclipse.integration.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.integration.feature" version="@VERSION@">
+		<category name="Extensions / Spring IDE" />
+	</feature>	
+	
 	<!-- Extensions (Incubation) features -->	
 	<feature
 		url="features/org.springframework.ide.eclipse.autowire.feature_@VERSION@.jar"
@@ -133,6 +139,12 @@
 		id="org.springframework.ide.eclipse.mylyn.feature.source" version="@VERSION@">
 		<category name="Resources / Spring IDE" />
 	</feature>
+		
+	<feature
+		url="features/org.springframework.ide.eclipse.integration.feature.source_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.integration.feature.source" version="@VERSION@">
+		<category name="Resources / Spring IDE" />
+	</feature>		
 		
 	<category-def name="Core / Spring IDE" label="Core / Spring IDE" />
 	<category-def name="Dependencies / Spring IDE" label="Dependencies / Spring IDE" />
