@@ -18,7 +18,15 @@
 		<catalogContribution>
 			<system
 				systemId="http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd"
-				uri="platform:/plugin/org.springframework.ide.eclipse.integration/org/springframework/oxm/v1/config/spring-oxm-1.5.xsd" />
+				uri="xsds/spring-oxm-1.5.xsd" />
+
+			<system
+				systemId="http://www.springframework.org/schema/flex/spring-flex-1.0.xsd"
+				uri="xsds/spring-flex-1.0.xsd" />
+				
+			<public 
+				publicId="http://www.springframework.org/schema/flex"
+				uri="xsds/spring-flex-1.0.xsd" />
 		</catalogContribution>
 	</extension>
 	
@@ -49,6 +57,15 @@
 			prefix="ws" 
 			icon="icons/full/obj16/spring-ws.gif" 
 			labelProvider="org.springframework.ide.eclipse.integration.ui.namespaces.WsNamespaceLabelProvider" />
+		<namespace
+			name="Spring Flex"
+			uri="http://www.springframework.org/schema/flex" 
+			prefix="flex" 
+			icon="icons/full/obj16/spring-flex.gif" 
+			labelProvider="org.springframework.ide.eclipse.integration.ui.namespaces.FlexNamespaceLabelProvider" 
+			defaultSchemaLocation="http://www.springframework.org/schema/flex/spring-flex-1.0.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/flex/spring-flex-1.0.xsd" />
+		</namespace>
 	</extension>
 
 </plugin>

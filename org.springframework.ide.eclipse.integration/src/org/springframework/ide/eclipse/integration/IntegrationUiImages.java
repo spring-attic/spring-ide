@@ -71,8 +71,10 @@ public class IntegrationUiImages {
 	 * Available cached Images in the Java plugin image registry.
 	 */
 	public static final String IMG_OBJS_WS = NAME_PREFIX + "spring-ws.gif";
+	public static final String IMG_OBJS_FLEX = NAME_PREFIX + "spring-flex.gif";
 
 	public static final ImageDescriptor DESC_OBJS_WS = createManaged(STRUCTURE, IMG_OBJS_WS);
+	public static final ImageDescriptor DESC_OBJS_FLEX = createManaged(STRUCTURE, IMG_OBJS_FLEX);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,

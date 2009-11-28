@@ -1,0 +1,819 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema
+	xmlns="http://www.springframework.org/schema/flex"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:tool="http://www.springframework.org/schema/tool"
+	targetNamespace="http://www.springframework.org/schema/flex"
+	elementFormDefault="qualified" attributeFormDefault="unqualified"
+	version="1.0">
+	
+	<xsd:annotation>
+		<xsd:documentation>
+			<![CDATA[
+Spring BlazeDS Integration Configuration Schema
+Authors: Jeremy Grelle, Mark Fisher
+<br>
+A XML-based DSL for configuring Spring BlazeDS Integration.
+]]>
+		</xsd:documentation>
+	</xsd:annotation>
+	
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.5.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-2.5.xsd" />
+	
+	
+	<xsd:element name="message-broker">
+		<xsd:annotation>
+			<xsd:documentation>
+				<![CDATA[
+Configures and bootstraps the BlazeDS MessageBroker as a Spring-managed bean.  The MessageBroker is the central
+hub of communication between the Flex front-end and Java back-end services.  The MessageBroker will be configured
+with a set of sensible default settings, and the necessary supporting infrastructure for routing messages through
+the Spring DispatcherServlet will be automatically installed.  Note that setting a custom id for the MessageBroker 
+is not required unless you are configuring multiple MessageBrokers in one ApplicationContext (this would be 
+considered rare).
+]]>
+			</xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="flex.messaging.MessageBroker"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:sequence minOccurs="0" maxOccurs="1">
+						<xsd:choice minOccurs="0" maxOccurs="unbounded">
+							<xsd:element name="mapping" type="mappingType">
+								<xsd:annotation>
+									<xsd:documentation>
+										<![CDATA[
+Provides a custom handler mapping path for routing requests to the Spring-managed MessageBroker.  By default, a 
+single '/*' mapping is installed.  Specifying one or more mapping elements will override this default mapping.  
+]]>
+									</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="config-processor" type="configProcessorType">
+								<xsd:annotation>
+									<xsd:documentation>
+										<![CDATA[
+Installs a custom instance of org.springframework.flex.config.MessageBrokerConfigProcessor for 
+programmatically modifying the configuration of the MessageBroker.
+]]>
+									</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="exception-translator" type="exceptionTranslatorType">
+								<xsd:annotation>
+									<xsd:documentation>
+										<![CDATA[
+Installs a bean instance of org.springframework.flex.messaging.ExceptionTranslator for 
+applying custom translation from known exception types to a BlazeDS MessageException.
+]]>
+									</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="message-interceptor" type="messageInterceptorType">
+								<xsd:annotation>
+									<xsd:documentation>
+										<![CDATA[
+Installs a bean instance of org.springframework.flex.messaging.MessageInterceptor for 
+applying custom processing to incoming and outgoing BlazeDS Messages.
+]]>
+									</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+						<xsd:element name="remoting-service" minOccurs="0" maxOccurs="1" type="remotingServiceType">
+							<xsd:annotation>
+								<xsd:documentation>
+									<![CDATA[
+Supports custom configuration of the default RemotingService.  Note that this will only take effect if no 
+RemotingService configuration has been specified in the BlazeDS XML configuration files.
+]]>
+								</xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="message-service" minOccurs="0" maxOccurs="1" type="messageServiceType">
+							<xsd:annotation>
+								<xsd:documentation>
+									<![CDATA[
+Supports custom configuration of the default MessageService.  Note that this will only take effect if no 
+MessageService configuration has been specified in the BlazeDS XML configuration files.
+]]>
+								</xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="secured" minOccurs="0" maxOccurs="1" type="securedType">
+							<xsd:annotation>
+								<xsd:documentation>
+									<![CDATA[
+Installs and configures Spring Security integration.  Spring Security must be properly configured in the current
+ApplicationContext in order for this integration to function correctly.  
+]]>
+								</xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="services-config-path" type="xsd:string" default="/WEB-INF/flex/services-config.xml">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+Sets a custom location for the BlazeDS XML configuration file (usually named services-config.xml) used in loading and 
+configuring the MessageBroker.  The file will be loaded using a Spring ResourceLoader, so typical Spring conventions
+such as "classpath:" style paths may be used.  The default location is "/WEB-INF/flex/services-config.xml".  Note
+that this attribute cannot be used in conjunction with the 'configuration-manager' attribute.       								
+]]>
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="configuration-manager" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+Sets a reference to a custom flex.messaging.config.ConfigurationManager bean.  The default provided implementation is
+org.springframework.flex.config.FlexConfigurationManager, which uses Spring's ResourceLoader for resolving
+BlazeDS configuration files.  The most common reason for providing a custom bean instance of this class would be
+to specify an implemention of flex.messaging.config.ConfigurationParser other than the default Apache XPath based 
+implementation.  								
+]]>
+							</xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref" >
+									<tool:expected-type type="flex.messaging.config.ConfigurationManager"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="mapping-order" type="xsd:int">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+Sets the order of the SimpleUrlHandlerMapping that maps requests to this MessageBroker.    								
+]]>
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="disable-default-mapping" type="xsd:boolean" default="false">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+Prevents the default handler mapping class from being installed.  Set this to true only if you are providing your
+own HandlerMapping bean instance for routing requests to the Spring-managed MessageBroker.  The more common approach
+will be to use child <mapping> elements to provide custom paths to the default SimpleUrlHandlerMapping.   								
+]]>
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="remoting-destination">
+		<xsd:annotation>
+			<xsd:documentation>
+				<![CDATA[
+Exports a Spring bean as a destination for Flex AMF-based remoting.  May be used as either a top-level tag with a 
+reference to the bean to be exported, or as child tag of the bean to be exported. 
+]]>
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="ref" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+A reference to the bean to be exported for remoting.  Required when used as a top-level tag.								
+]]>
+					</xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref"/>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="message-broker" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+The id of the Spring-managed MessageBroker that will route messages to the exported bean.  Not required unless an
+explicit id has been specified for the MessageBroker.							
+]]>
+					</xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="flex.messaging.MessageBroker"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="destination-id" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+The id of the remoting destination.  This corresponds to the "destination" property that will be set on the 
+RemoteObject in the Flex client.  By default, this will be set to the name of the bean being exported.  								
+]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="channels" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+A comma-separated list of ids for the BlazeDS channels over which this remoting destination should be exposed.  Only
+needed when overriding the default channels for the RemotingService.								
+]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="include-methods" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+A comma-separated list of names of the methods that will be included for remote invocation.  Optional.  								
+]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="exclude-methods" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+A comma-separated list of names of the methods that will be excluded from remote invocation.  Optional.								
+]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="service-adapter" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+A reference to a custom Spring-managed ServiceAdapter (usually created via a ManageableComponentFactoryBean) to be used when 
+invoking methods on this destination.  Optional.								
+]]>
+					</xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref"/>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="message-destination">
+		<xsd:annotation>
+			<xsd:documentation>
+				<![CDATA[
+Creates a Flex MessageDestination backed by an ActionScriptAdapter for handling "native" BlazeDS messages. Such destinations
+are typically used for communication between multiple Flex clients, but they can also be used for sending simple messages to
+Flex clients from POJOs by using the provided MessageTemplate class.  For asynchronous reception of messages sent by Flex
+clients by POJOs, see the jms-message-destination and integration-message-destination.  
+]]>
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="messageDestinationType">
+					<xsd:attribute name="service-adapter" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+A reference to a custom Spring-managed ServiceAdapter (usually created via a ManageableComponentFactoryBean) to be used when 
+routing messages through this destination.  This can be used to integrate new messaging technologies by providing a custom
+MessagingAdapter.  Note that any of the standard MessagingAdapter attributes set on this tag will be passed through to the
+custom adapter's initialize method.  Optional.	
+]]>
+							</xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref"/>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>	
+
+	<xsd:element name="jms-message-destination">
+		<xsd:annotation>
+			<xsd:documentation>
+				<![CDATA[
+Creates a Flex MessageDestination backed by a Spring-managed JMS MessagingAdapter.
+Exactly one of the 'jms-destination-ref', 'queue-name', or 'topic-name' attributes is required.
+]]>
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="messageDestinationType">	
+					<xsd:attribute name="connection-factory" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+The bean name of the JMS ConnectionFactory to be used by this destination. If not provided, the default
+reference will be "connectionFactory".
+]]>
+							</xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref">
+									<tool:expected-type type="javax.jms.ConnectionFactory"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>			
+					<xsd:attribute name="jms-destination" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+A reference to a JMS Destination instance.
+]]>
+							</xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref">
+									<tool:expected-type type="jaxax.jms.Destination"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="queue-name" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+						<![CDATA[
+The name of a JMS Queue.
+]]>
+							</xsd:documentation>
+						</xsd:annotation>			
+					</xsd:attribute>
+					<xsd:attribute name="topic-name" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+The name of a JMS Topic.
+]]>
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="message-converter" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+A reference to a MessageConverter bean.
+]]>
+							</xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref">
+									<tool:expected-type type="org.springframework.jms.support.converter.MessageConverter"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="destination-resolver" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+A reference to a DestinationResolver bean.
+]]>
+							</xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref">
+									<tool:expected-type type="org.springframework.jms.support.destination.DestinationResolver"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="transaction-manager" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+A reference to a PlatformTransactionManager to be used by this adapter's MessageListenerContainer.
+]]>
+							</xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref">
+									<tool:expected-type type="org.springframework.transaction.PlatformTransactionManager"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="integration-message-destination">
+		<xsd:annotation>
+			<xsd:documentation>
+				<![CDATA[
+Creates a Flex MessageDestination backed by a Spring Integration MessageChannel.
+]]>
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="messageDestinationType">
+					<xsd:attribute name="message-channel" type="xsd:string" use="required">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+A bean reference to a Spring Integration MessageChannel.
+]]>
+							</xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref">
+									<tool:expected-type type="org.springframework.integration.core.MessageChannel"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="extract-payload" type="xsd:boolean">
+						<xsd:annotation>
+							<xsd:documentation>
+								<![CDATA[
+Indicates whether the Flex Message body should be extracted for use as the Spring Integration
+Message's payload. If this flag is set to false, the entire Flex Message will be used as the
+Spring Integration Message payload. The default value is true.
+]]>
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:complexType name="messageDestinationType">
+		<xsd:attribute name="id" type="xsd:ID" use="required">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+The id of the messaging destination. This corresponds to the "destination" property that will be set on 
+Producers and Consumers in the Flex client.
+]]>
+					</xsd:documentation>
+				</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="message-broker" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+The id of the Spring-managed MessageBroker that will route messages to this destination.
+Not required unless an explicit id has been specified for the MessageBroker.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="channels" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+A comma-separated list of ids for the BlazeDS channels over which this messaging destination should be exposed.
+Only needed when overriding the default channels for the MessageService.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="subscription-timeout-minutes" type="xsd:integer">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Subscriptions to this destination that receive no pushed messages in this time interval, in minutes, are automatically unsubscribed. 
+When the value is set to 0 (zero), subscribers are not forced to unsubscribe automatically. The default value is 0.						
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="throttle-inbound-max-frequency" type="xsd:integer">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Controls how many messages per second the message destination accepts.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="throttle-inbound-policy" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+The policy indicates what to do when the message limit set by throttle-inbound-max-frequency is reached:
+* A policy value of NONE specifies no throttling policy (same as frequency of zero).
+* A policy value of ERROR specifies that when the frequency is exceeded, throttle the message and send an error to the client.
+* A policy value of IGNORE specifies that when the frequency is exceeded, throttle the message but don't send an error to the client.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="throttle-outbound-max-frequency" type="xsd:integer">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Controls how many messages per second the server can route to subscribed consumers.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="throttle-outbound-policy" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+The policy indicates what to do when the message limit set by throttle-outbound-max-frequency is reached:
+* A policy value of NONE specifies no throttling policy (same as frequency of zero).
+* A policy value of ERROR specifies that when the frequency is exceeded, throttle the message and send an error to the client.
+* A policy value of IGNORE specifies that when the frequency is exceeded, throttle the message but don't send an error to the client.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="allow-subtopics" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+The subtopic feature lets you divide the messages that a Producer component sends to a 
+destination into specific categories in the destination. You can configure a Consumer component 
+that subscribes to the destination to receive only messages sent to a specific subtopic or set of 
+subtopics. You use wildcard characters (*) to subscribe for messages from more than one subtopic.  
+
+Note: This setting is currently only used by the ActionScriptAdapter.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="cluster-message-routing" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Determines whether a destination in an environment that uses software clustering uses 
+server-to-server (default) or broadcast messaging. With server-to-server mode, data 
+messages are routed only to servers with active subscriptions, but subscribe and unsubscribe 
+messages are broadcast across the cluster. With broadcast messaging, all messages are broadcast 
+across the cluster. For more information, see the “Clustering” section of the BlazeDS Development Guide.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="message-time-to-live" type="xsd:int">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+The number of milliseconds that a message is kept on the server pending delivery before being 
+discarded as undeliverable. 
+
+A value of 0 means the message is not expired.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="send-security-constraint" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Security constraints apply to the operations performed by the messaging adapter. The 
+send-security-constraint property applies to send operations. Note that these constraints
+must be defined in the BlazeDS XML config, but that they may reference Spring Security roles
+if the security integration is enabled. 
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="subscribe-security-constraint" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Security constraints apply to the operations performed by the messaging adapter. The 
+subscribe-security-constraint property applies to subscribe, multi-subscribe, and unsub- 
+scribe operations. Note that these constraints must be defined in the BlazeDS XML config, 
+but that they may reference Spring Security roles if the security integration is enabled.  
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="subtopic-separator" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Token that separates a hierarchical subtopic value. For example, for the subtopic 'foo.bar' 
+the dot (.) is the subtopic separator. The default value is the dot (.) character.
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="mappingType">
+		<xsd:attribute name="pattern" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Ant-style pattern for request paths that should be routed to the MessageBroker.								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="configProcessorType">
+		<xsd:attribute name="ref" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+A reference to a custom bean instance of org.springframework.flex.config.MessageBrokerConfigProcessor.								
+]]>
+				</xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref">
+						<tool:expected-type type="org.springframework.flex.config.MessageBrokerConfigProcessor"/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="exceptionTranslatorType">
+		<xsd:attribute name="ref" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+A reference to a custom bean instance of org.springframework.flex.core.ExceptionTranslator.								
+]]>
+				</xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref">
+						<tool:expected-type type="org.springframework.flex.core.ExceptionTranslator"/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="messageInterceptorType">
+		<xsd:attribute name="ref" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+A reference to a custom bean instance of org.springframework.flex.core.MessageInterceptor.								
+]]>
+				</xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref">
+						<tool:expected-type type="org.springframework.flex.core.MessageInterceptor"/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="securedType">
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="secured-channel" type="securedChannelType">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+Secures a BlazeDS communication channel that is referenced by id.								
+]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="secured-endpoint-path" type="securedEndpointPathType">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+Secures BlazeDS communication channels that have an endpoint URL matching a specified path pattern.								
+]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:choice>
+		<xsd:attribute name="authentication-manager" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+A bean reference to the Spring Security AuthenticationManager.  Only required when a custom id has been provided for
+the AuthenticationManager. 								
+]]>
+				</xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref">
+						<tool:expected-type type="org.springframework.security.AuthenticationManager"/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="access-decision-manager" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+A bean reference to the Spring Security AccessDecisionManager.  Only required when a custom id has been provided for
+the AccessDecisionManager. 								
+]]>
+				</xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref">
+						<tool:expected-type type="org.springframework.security.AccessDecisionManager"/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="per-client-authentication" type="xsd:boolean" default="false">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Enables per-client authentication in BlazeDS when set to true.  Default is false. 								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="securedChannelType">
+		<xsd:attribute name="channel" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+The id of the BlazeDS communication channel to be secured.								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="access" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+The access configuration attributes that apply for the specified channel.								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="securedEndpointPathType">
+		<xsd:attribute name="pattern" type="xsd:string" use="optional" default="**/messagebroker/*">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Ant-style pattern for matching endpoint URLs.  Default is "**/messagebroker/*".								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="access" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+The access configuration attributes that apply for any matching channel endpoint.							
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="remotingServiceType">
+		<xsd:attribute name="default-adapter-id" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Sets a reference to a custom Spring-managed ServiceAdapter (usually configured via a ManageableComponentFactoryBean) to be 
+used as the default adapter for exported remoting destinations.								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="default-channels" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+A comma-separated list of the default channels for the RemotingService.  If not specified, and if no 
+application-wide default channels are found, the first available AMF channel will be used.								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="messageServiceType">
+		<xsd:attribute name="default-adapter-id" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+Sets a reference to a custom Spring-managed ServiceAdapter (usually configured via a ManageableComponentFactoryBean) to be 
+used as the default adapter for exported message destinations.								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="default-channels" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					<![CDATA[
+A comma-separated list of the default channels for the MessagingService.  If not specified, and if no 
+application-wide default channels are found, the first available AMF channel with polling enabled will be used.								
+]]>
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+</xsd:schema>
