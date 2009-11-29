@@ -169,7 +169,7 @@ public abstract class AbstractValidator implements IValidator {
 		SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, affectedResources.size());
 		try {
 			for (IResource resource : affectedResources) {
-				subMonitor.setTaskName("Validating '" + resource.getFullPath().toString().substring(1) + "'");
+				subMonitor.subTask("Validating '" + resource.getFullPath().toString().substring(1) + "'");
 				cleanup(resource, subMonitor);
 				if (subMonitor.isCanceled()) {
 					throw new OperationCanceledException();

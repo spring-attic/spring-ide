@@ -68,22 +68,27 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 	 * {@inheritDoc}
 	 */
 	protected final IProject[] build(final int kind, Map args, final IProgressMonitor monitor) throws CoreException {
-		IProject project = getProject();
-		IResourceDelta delta = getDelta(project);
+		final IProject project = getProject();
+		final IResourceDelta delta = getDelta(project);
 
-		List<ProjectBuilderDefinition> builderDefinitions = ProjectBuilderDefinitionFactory
+		final List<ProjectBuilderDefinition> builderDefinitions = ProjectBuilderDefinitionFactory
 				.getProjectBuilderDefinitions();
-		List<ValidatorDefinition> validatorDefinitions = ValidatorDefinitionFactory.getValidatorDefinitions();
-		List<IProjectContributionEventListener> listeners = ProjectContributionEventListenerFactory
+		final List<ValidatorDefinition> validatorDefinitions = ValidatorDefinitionFactory.getValidatorDefinitions();
+		final List<IProjectContributionEventListener> listeners = ProjectContributionEventListenerFactory
 				.getProjectContributionEventListeners();
 
 		// Set up the state object
-		IProjectContributorState state = prepareState(project, builderDefinitions, validatorDefinitions);
+		final IProjectContributorState state = prepareState(project, builderDefinitions, validatorDefinitions);
 
 		// Fire start event on listeners
-		for (IProjectContributionEventListener listener : listeners) {
-			listener.start(kind, delta, builderDefinitions, validatorDefinitions, state, project,
-					new SubProgressMonitor(monitor, 1));
+		for (final IProjectContributionEventListener listener : listeners) {
+			execute(new SafeExecutableWithMonitor() {
+
+				public void execute(IProgressMonitor subMonitor) throws Exception {
+					listener.start(kind, delta, builderDefinitions, validatorDefinitions, state, project, subMonitor);
+				}
+			}, monitor);
+
 		}
 
 		// At first run all builders
@@ -105,9 +110,13 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 		}
 
 		// Fire end event on listeners
-		for (IProjectContributionEventListener listener : listeners) {
-			listener.finish(kind, delta, builderDefinitions, validatorDefinitions, state, project,
-					new SubProgressMonitor(monitor, 1));
+		for (final IProjectContributionEventListener listener : listeners) {
+			execute(new SafeExecutableWithMonitor() {
+
+				public void execute(IProgressMonitor subMonitor) throws Exception {
+					listener.finish(kind, delta, builderDefinitions, validatorDefinitions, state, project, subMonitor);
+				}
+			}, monitor);
 		}
 
 		return null;
@@ -167,35 +176,60 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 	 * Runs all given {@link IProjectBuilder} in the order as they are given in the set.
 	 */
 	private void runBuilder(final ProjectBuilderDefinition builderDefinition, final Set<IResource> affectedResources,
-			final int kind, final IProgressMonitor monitor, final List<IProjectContributionEventListener> listeners) {
+			final int kind, IProgressMonitor monitor, final List<IProjectContributionEventListener> listeners) {
 
-		for (IProjectContributionEventListener listener : listeners) {
-			listener.startContributor(builderDefinition.getProjectBuilder(), affectedResources, new SubProgressMonitor(
-					monitor, 1, 0));
+		for (final IProjectContributionEventListener listener : listeners) {
+
+			execute(new SafeExecutableWithMonitor() {
+
+				public void execute(IProgressMonitor subMonitor) throws Exception {
+					listener.startContributor(builderDefinition.getProjectBuilder(), affectedResources, subMonitor);
+				}
+			}, monitor);
+
 		}
 
-		ISafeRunnable code = new ISafeRunnable() {
-			public void handleException(Throwable e) {
-				// nothing to do - exception is already logged
-			}
+		execute(new SafeExecutableWithMonitor() {
 
-			public void run() throws Exception {
-				builderDefinition.getProjectBuilder().build(affectedResources, kind, new SubProgressMonitor(monitor, 1));
+			public void execute(IProgressMonitor subMonitor) throws Exception {
+				builderDefinition.getProjectBuilder().build(affectedResources, kind, subMonitor);
 			}
-		};
-		SafeRunner.run(code);
+		}, monitor);
+
 	}
 
 	/**
 	 * Runs all given {@link IValidator} in the order as they are given in the set.
 	 */
 	private void runValidator(final ValidatorDefinition validatorDefinition, final Set<IResource> affectedResources,
-			final int kind, final IProgressMonitor monitor, final List<IProjectContributionEventListener> listeners) {
+			final int kind, IProgressMonitor monitor, List<IProjectContributionEventListener> listeners) {
 
-		for (IProjectContributionEventListener listener : listeners) {
-			listener.startContributor(validatorDefinition.getValidator(), affectedResources, new SubProgressMonitor(
-					monitor, 1));
+		for (final IProjectContributionEventListener listener : listeners) {
+
+			execute(new SafeExecutableWithMonitor() {
+
+				public void execute(IProgressMonitor subMonitor) throws Exception {
+					listener.startContributor(validatorDefinition.getValidator(), affectedResources, subMonitor);
+				}
+			}, monitor);
+
 		}
+
+		execute(new SafeExecutableWithMonitor() {
+
+			public void execute(IProgressMonitor subMonitor) throws Exception {
+				validatorDefinition.getValidator().validate(affectedResources, kind, subMonitor);
+			}
+		}, monitor);
+
+	}
+
+	protected IProgressMonitor createProgressMonitor(IProgressMonitor monitor) {
+		return new SubProgressMonitor(monitor, 1);
+	}
+
+	protected void execute(final SafeExecutableWithMonitor executable, IProgressMonitor monitor) {
+		final IProgressMonitor subMonitor = createProgressMonitor(monitor);
 
 		ISafeRunnable code = new ISafeRunnable() {
 			public void handleException(Throwable e) {
@@ -203,11 +237,18 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 
 			public void run() throws Exception {
-				validatorDefinition.getValidator()
-						.validate(affectedResources, kind, new SubProgressMonitor(monitor, 1));
+				executable.execute(subMonitor);
 			}
 		};
 		SafeRunner.run(code);
+
+		subMonitor.done();
+	}
+
+	protected interface SafeExecutableWithMonitor {
+
+		void execute(IProgressMonitor monitor) throws Exception;
+
 	}
 
 	/**
