@@ -52,7 +52,7 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.IAutowireDependencyResolver;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.InjectionMetadata.InjectedElement;
@@ -341,7 +341,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			BeanDefinition beanDef = BeansModelUtils.getMergedBeanDefinition(bean, context);
 			if (beanDef.getPropertyValues().size() > 0) {
 				BeanWrapperImpl wrapper = new BeanWrapperImpl(true);
-				wrapper.setConversionService(new DefaultConversionService());
+				wrapper.setConversionService(ConversionServiceFactory.createDefaultConversionService());
 				wrapper.setWrappedInstance(provider);
 				for (PropertyValue pv : beanDef.getPropertyValues().getPropertyValueList()) {
 					if (wrapper.isWritableProperty(pv.getName())) {
@@ -364,7 +364,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			BeanDefinition beanDef = BeansModelUtils.getMergedBeanDefinition(bean, context);
 			if (beanDef.getPropertyValues().size() > 0) {
 				BeanWrapperImpl wrapper = new BeanWrapperImpl(true);
-				wrapper.setConversionService(new DefaultConversionService());
+				wrapper.setConversionService(ConversionServiceFactory.createDefaultConversionService());
 				wrapper.setWrappedInstance(provider);
 				for (PropertyValue pv : beanDef.getPropertyValues().getPropertyValueList()) {
 					if (wrapper.isWritableProperty(pv.getName())) {
