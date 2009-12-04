@@ -793,16 +793,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * {@inheritDoc}
 	 */
 	public boolean isImportsEnabled() {
-		if (!this.modelPopulated) {
-			populateModel();
-		}
-		try {
-			r.lock();
-			return isImportsEnabled;
-		}
-		finally {
-			r.unlock();
-		}
+		return isImportsEnabled;
 	}
 
 	public void setImportsEnabled(boolean importEnabled) {
@@ -810,16 +801,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	}
 
 	public String getVersion() {
-		if (!this.modelPopulated) {
-			populateModel();
-		}
-		try {
-			r.lock();
-			return version;
-		}
-		finally {
-			r.unlock();
-		}
+		return version;
 	}
 
 	public void setVersion(String version) {
