@@ -1089,9 +1089,17 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	}
 
 	public boolean isInitialized() {
+		if (!this.modelPopulated) {
+			return false;
+		}
 		try {
 			r.lock();
 			for (IBeansConfig config : configs.values()) {
+				if (!((ILazyInitializedModelElement) config).isInitialized()) {
+					return false;
+				}
+			}
+			for (IBeansConfig config : autoDetectedConfigs.values()) {
 				if (!((ILazyInitializedModelElement) config).isInitialized()) {
 					return false;
 				}

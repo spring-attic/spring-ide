@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
@@ -108,7 +109,16 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			w.lock();
 			projects.clear();
 			for (IProject project : SpringCoreUtils.getSpringProjects()) {
-				addProject(new BeansProject(BeansModel.this, project));
+				BeansProject beansProject = new BeansProject(BeansModel.this, project);
+
+				// eargly populate the internal structure of the beans project 
+				beansProject.accept(new IModelElementVisitor() {
+					
+					public boolean visit(IModelElement element, IProgressMonitor monitor) {
+						return element instanceof IBeansProject;
+					}
+				}, new NullProgressMonitor());
+				addProject(beansProject);
 			}
 
 			// Check for update actions

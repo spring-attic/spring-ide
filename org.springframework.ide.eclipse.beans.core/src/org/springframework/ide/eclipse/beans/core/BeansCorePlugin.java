@@ -125,7 +125,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 		getPreferenceStore().setDefault(NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 
-		Job modelJob = new Job("Initializing Beans Model") {
+		Job modelJob = new Job("Initializing Spring Tooling") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -139,7 +139,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 			}
 		};
 		// modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		modelJob.setSystem(true);
+		// modelJob.setSystem(true);
 		modelJob.setPriority(Job.INTERACTIVE);
 		modelJob.schedule();
 	}
