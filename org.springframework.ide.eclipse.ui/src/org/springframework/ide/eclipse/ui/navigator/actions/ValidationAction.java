@@ -48,7 +48,9 @@ public class ValidationAction extends AbstractNavigatorAction {
 	private Map<ValidatorDefinition, Set<IResource>> validatorResources;
 
 	public ValidationAction(ICommonActionExtensionSite site) {
-		super(site, "Validate", SpringUIImages.DESC_OBJS_SPRING);
+		super(site);
+		setText("Validate");
+		setToolTipText("Validate the selected model element");
 	}
 
 	/**

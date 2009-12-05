@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -32,18 +33,21 @@ import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAct
 
 /**
  * Shows the BeansGraph for the currently selected {@link IModelElement}.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class ShowBeansGraphAction extends AbstractNavigatorAction {
 
 	private IResourceModelElement element;
+
 	private IModelElement context;
 
 	public ShowBeansGraphAction(ICommonActionExtensionSite site) {
 		super(site);
-		setText("Open &Graph");	// TODO externalize text
-    }
+		setText("Open Dependency &Graph"); // TODO externalize text
+		setToolTipText("Open the Bean Dependency Graph");
+		setImageDescriptor(BeansGraphImages.DESC_OBJS_BEANS_GPRAH);
+	}
 
 	public boolean isEnabled(IStructuredSelection selection) {
 		if (selection instanceof ITreeSelection) {
@@ -52,18 +56,16 @@ public class ShowBeansGraphAction extends AbstractNavigatorAction {
 				Object tElement = tSelection.getFirstElement();
 				IResourceModelElement rElement = null;
 				if (tElement instanceof IResourceModelElement) {
-					if (tElement instanceof IBeansConfig
-							|| tElement instanceof IBeansConfigSet
-							|| tElement instanceof IBeansComponent
-							|| tElement instanceof IBean) {
+					if (tElement instanceof IBeansConfig || tElement instanceof IBeansConfigSet
+							|| tElement instanceof IBeansComponent || tElement instanceof IBean) {
 						rElement = (IResourceModelElement) tElement;
 					}
-				} else if (tElement instanceof IFile) {
-					rElement = BeansCorePlugin.getModel().getConfig(
-							(IFile) tElement);
-				} else if (tElement instanceof ZipEntryStorage) {
-					rElement = BeansModelUtils
-							.getConfig((ZipEntryStorage) tElement);
+				}
+				else if (tElement instanceof IFile) {
+					rElement = BeansCorePlugin.getModel().getConfig((IFile) tElement);
+				}
+				else if (tElement instanceof ZipEntryStorage) {
+					rElement = BeansModelUtils.getConfig((ZipEntryStorage) tElement);
 				}
 				if (rElement != null) {
 					element = rElement;
@@ -78,10 +80,10 @@ public class ShowBeansGraphAction extends AbstractNavigatorAction {
 	@Override
 	public void run() {
 		IEditorInput input;
-		if (element instanceof IBeansConfig
-				|| element instanceof IBeansConfigSet) {
+		if (element instanceof IBeansConfig || element instanceof IBeansConfigSet) {
 			input = new GraphEditorInput(element.getElementID());
-		} else {
+		}
+		else {
 			input = new GraphEditorInput(element.getElementID(), context.getElementID());
 		}
 		SpringUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);

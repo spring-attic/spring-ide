@@ -107,7 +107,7 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		graphComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Group graphEditorGroup = new Group(graphComposite, SWT.NONE);
-		graphEditorGroup.setText("Beans Graph");
+		graphEditorGroup.setText("Bean Dependency Graph");
 		layout = new GridLayout();
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		graphEditorGroup.setLayout(layout);
