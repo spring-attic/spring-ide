@@ -29,18 +29,15 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansMethodRenameRefactoringParticipant extends
-		AbstractRenameRefactoringParticipant {
+public class BeansMethodRenameRefactoringParticipant extends AbstractRenameRefactoringParticipant {
 
 	@Override
 	protected boolean initialize(Object element) {
 		if (element instanceof IMethod) {
 			IMethod method = (IMethod) element;
-			IJavaProject javaProject = (IJavaProject) method
-					.getAncestor(IJavaElement.JAVA_PROJECT);
+			IJavaProject javaProject = (IJavaProject) method.getAncestor(IJavaElement.JAVA_PROJECT);
 			project = javaProject.getProject();
-			if (SpringCoreUtils.isSpringProject(project)
-					&& method.getElementName().startsWith("set")) {
+			if (SpringCoreUtils.isSpringProject(project) && method.getElementName().startsWith("set")) {
 				elements = new HashMap<Object, Object>();
 				elements.put(method, getArguments().getNewName());
 				return true;
@@ -50,12 +47,10 @@ public class BeansMethodRenameRefactoringParticipant extends
 	}
 
 	@Override
-	protected void addChange(CompositeChange result, IResource resource,
-			IProgressMonitor pm) throws CoreException {
+	protected void addChange(CompositeChange result, IResource resource, IProgressMonitor pm) throws CoreException {
 		if (resource.exists()) {
-			Change change = BeansRefactoringChangeUtils
-					.createMethodRenameChange((IFile) resource,
-							getAffectedElements(), getNewNames(), pm);
+			Change change = BeansRefactoringChangeUtils.createMethodRenameChange((IFile) resource,
+					getAffectedElements(), getNewNames(), pm);
 			if (change != null)
 				result.add(change);
 		}

@@ -29,15 +29,13 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansTypeMoveRefactoringParticipant extends
-		AbstractMoveRefactoringParticipant {
+public class BeansTypeMoveRefactoringParticipant extends AbstractMoveRefactoringParticipant {
 
 	@Override
 	protected boolean initialize(Object element) {
 		if (element instanceof IType) {
 			IType type = (IType) element;
-			IJavaProject javaProject = (IJavaProject) type
-					.getAncestor(IJavaElement.JAVA_PROJECT);
+			IJavaProject javaProject = (IJavaProject) type.getAncestor(IJavaElement.JAVA_PROJECT);
 			project = javaProject.getProject();
 			if (SpringCoreUtils.isSpringProject(project)) {
 				elements = new ArrayList<Object>();
@@ -54,19 +52,17 @@ public class BeansTypeMoveRefactoringParticipant extends
 	}
 
 	@Override
-	protected void addChange(CompositeChange result, IResource resource,
-			IProgressMonitor pm) throws CoreException {
+	protected void addChange(CompositeChange result, IResource resource, IProgressMonitor pm) throws CoreException {
 		if (resource.exists()) {
-			Change change = BeansRefactoringChangeUtils.createRenameChange(
-					(IFile) resource, getAffectedElements(), getNewNames(), pm);
+			Change change = BeansRefactoringChangeUtils.createRenameChange((IFile) resource, getAffectedElements(),
+					getNewNames(), pm);
 			if (change != null)
 				result.add(change);
 		}
 	}
 
 	protected IJavaElement[] getAffectedElements() {
-		return elements.toArray(new IJavaElement[elements
-				.size()]);
+		return elements.toArray(new IJavaElement[elements.size()]);
 	}
 
 	private String[] getNewNames() {
@@ -79,8 +75,7 @@ public class BeansTypeMoveRefactoringParticipant extends
 		}
 		String[] result = new String[elements.size()];
 		for (int i = 0; i < elements.size(); i++) {
-			result[i] = buffer.toString()
-					+ ((IJavaElement) elements.get(i)).getElementName();
+			result[i] = buffer.toString() + ((IJavaElement) elements.get(i)).getElementName();
 		}
 		return result;
 	}

@@ -24,6 +24,17 @@
 	<extension
 		point="org.eclipse.ltk.core.refactoring.renameParticipants">
 		<renameParticipant
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansConfigRenameRefactoringParticipant"
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.beansConfigRenameRefactoringParticipant"
+			name="%beansConfigRenameParticipant.name">
+			<enablement>
+				<with variable="element">
+					<instanceof value="org.eclipse.core.resources.IFile">
+					</instanceof>
+				</with>
+			</enablement>
+		</renameParticipant>
+		<renameParticipant
 			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.BeansTypeRenameRefactoringParticipant"
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.beanTypeRenameParticipant"
 			name="%beanTypeRenameParticipant.name">
@@ -68,6 +79,17 @@
 			<enablement>
 				<with variable="element">
 					<instanceof value="org.eclipse.jdt.core.IType">
+					</instanceof>
+				</with>
+			</enablement>
+		</moveParticipant>
+		<moveParticipant
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansConfigMoveRefactoringParticipant"
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.beansConfigMoveRefactoringParticipant"
+			name="%beansConfigMoveParticipant.name">
+			<enablement>
+				<with variable="element">
+					<instanceof value="org.eclipse.core.resources.IFile">
 					</instanceof>
 				</with>
 			</enablement>

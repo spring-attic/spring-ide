@@ -23,8 +23,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansPackageRenameRefactoringParticipant extends
-		BeansTypeRenameRefactoringParticipant {
+public class BeansPackageRenameRefactoringParticipant extends BeansTypeRenameRefactoringParticipant {
 
 	@Override
 	protected boolean initialize(Object element) {
@@ -33,8 +32,7 @@ public class BeansPackageRenameRefactoringParticipant extends
 				IPackageFragment fragment = (IPackageFragment) element;
 				if (!fragment.containsJavaResources())
 					return false;
-				IJavaProject javaProject = (IJavaProject) fragment
-						.getAncestor(IJavaElement.JAVA_PROJECT);
+				IJavaProject javaProject = (IJavaProject) fragment.getAncestor(IJavaElement.JAVA_PROJECT);
 				project = javaProject.getProject();
 				if (SpringCoreUtils.isSpringProject(project)) {
 					elements = new HashMap<Object, Object>();

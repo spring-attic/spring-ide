@@ -36,16 +36,15 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
  * Abstract super class for implementing {@link RenameParticipant}
  * @author Christian Dupuis
  */
-public abstract class AbstractRenameRefactoringParticipant extends
-		RenameParticipant {
+public abstract class AbstractRenameRefactoringParticipant extends RenameParticipant {
 
 	protected IProject project;
 
 	protected Map<Object, Object> elements;
 
 	@Override
-	public RefactoringStatus checkConditions(IProgressMonitor pm,
-			CheckConditionsContext context) throws OperationCanceledException {
+	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context)
+			throws OperationCanceledException {
 		return new RefactoringStatus();
 	}
 
@@ -54,8 +53,7 @@ public abstract class AbstractRenameRefactoringParticipant extends
 	}
 
 	@Override
-	public Change createChange(IProgressMonitor pm) throws CoreException,
-			OperationCanceledException {
+	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		if (!getArguments().getUpdateReferences()) {
 			return null;
 		}
@@ -75,13 +73,12 @@ public abstract class AbstractRenameRefactoringParticipant extends
 		return (result.getChildren().length == 0) ? null : result;
 	}
 
-	protected abstract void addChange(CompositeChange result,
-			IResource resource, IProgressMonitor pm) throws CoreException;
+	protected abstract void addChange(CompositeChange result, IResource resource, IProgressMonitor pm)
+			throws CoreException;
 
 	protected IJavaElement[] getAffectedElements() {
 		Set<Object> objects = elements.keySet();
-		return objects
-				.toArray(new IJavaElement[objects.size()]);
+		return objects.toArray(new IJavaElement[objects.size()]);
 	}
 
 	protected String[] getNewNames() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,15 +29,13 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansTypeRenameRefactoringParticipant extends
-		AbstractRenameRefactoringParticipant {
-	
+public class BeansTypeRenameRefactoringParticipant extends AbstractRenameRefactoringParticipant {
+
 	@Override
 	protected boolean initialize(Object element) {
 		if (element instanceof IType) {
 			IType type = (IType) element;
-			IJavaProject javaProject = (IJavaProject) type
-					.getAncestor(IJavaElement.JAVA_PROJECT);
+			IJavaProject javaProject = (IJavaProject) type.getAncestor(IJavaElement.JAVA_PROJECT);
 			project = javaProject.getProject();
 			if (SpringCoreUtils.isSpringProject(project)) {
 				elements = new HashMap<Object, Object>();
@@ -49,12 +47,11 @@ public class BeansTypeRenameRefactoringParticipant extends
 	}
 
 	@Override
-	protected void addChange(CompositeChange result, IResource resource,
-			IProgressMonitor pm) throws CoreException {
-		
+	protected void addChange(CompositeChange result, IResource resource, IProgressMonitor pm) throws CoreException {
+
 		if (resource.exists()) {
-			Change change = BeansRefactoringChangeUtils.createRenameChange(
-					(IFile) resource, getAffectedElements(), getNewNames(), pm);
+			Change change = BeansRefactoringChangeUtils.createRenameChange((IFile) resource, getAffectedElements(),
+					getNewNames(), pm);
 			if (change != null) {
 				result.add(change);
 			}
