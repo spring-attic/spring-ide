@@ -21,7 +21,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -106,8 +105,8 @@ public class ProjectScanningBeansConfigLocator extends AbstractJavaProjectPathMa
 	 */
 	private NamespaceHandlerResolver getNamespaceHandlerResolver(IProject project) {
 		if (!namespaceResoverCache.containsKey(project)) {
-			namespaceResoverCache.put(project, new DelegatingNamespaceHandlerResolver(JdtUtils.getClassLoader(project),
-					null));
+			namespaceResoverCache.put(project, new DelegatingNamespaceHandlerResolver(NamespaceHandlerResolver.class
+					.getClassLoader(), null));
 		}
 		return namespaceResoverCache.get(project);
 	}
@@ -178,7 +177,7 @@ public class ProjectScanningBeansConfigLocator extends AbstractJavaProjectPathMa
 			catch (IOException e) {
 				BeansCorePlugin.log(e);
 			}
-			catch (CoreException e) {
+			catch (Exception e) {
 				BeansCorePlugin.log(e);
 			}
 			finally {
