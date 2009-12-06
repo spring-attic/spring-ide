@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -177,7 +178,7 @@ public class ProjectScanningBeansConfigLocator extends AbstractJavaProjectPathMa
 			catch (IOException e) {
 				BeansCorePlugin.log(e);
 			}
-			catch (Exception e) {
+			catch (CoreException e) {
 				BeansCorePlugin.log(e);
 			}
 			finally {
