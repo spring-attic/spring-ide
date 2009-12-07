@@ -28,7 +28,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.eclipse.wst.xml.core.internal.catalog.CatalogContributorRegistryReader;
 import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalog;
@@ -39,6 +41,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
+import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.osgi.util.OsgiBundleUtils;
 import org.w3c.dom.Document;
@@ -62,13 +65,17 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	private static final String SPRING_TOOLING = "spring.tooling";
 
 	/** XML catalog entries keyed by the registering bundle */
-	private final Map<Bundle, Set<ICatalogElement>> catalogEntriesByBundle = new HashMap<Bundle, Set<ICatalogElement>>();
+	private volatile Map<Bundle, Set<ICatalogElement>> catalogEntriesByBundle = new HashMap<Bundle, Set<ICatalogElement>>();
 
 	/** Namespace definitions keyed by the namespace uri */
-	private final Map<String, NamespaceDefinition> namespaceDefinitionRegistry = new HashMap<String, NamespaceDefinition>();
+	private volatile Map<String, NamespaceDefinition> namespaceDefinitionRegistry = new HashMap<String, NamespaceDefinition>();
 
 	/** Namespace definition set keyed by the registering bundle */
-	private final Map<Bundle, Set<NamespaceDefinition>> namespaceDefinitionsByBundle = new HashMap<Bundle, Set<NamespaceDefinition>>();
+	private volatile Map<Bundle, Set<NamespaceDefinition>> namespaceDefinitionsByBundle = new HashMap<Bundle, Set<NamespaceDefinition>>();
+
+	/** Listeners to inform about namespace changes */
+	private volatile Set<INamespaceDefinitionListener> namespaceDefinitionListeners = Collections
+			.synchronizedSet(new HashSet<INamespaceDefinitionListener>());
 
 	/**
 	 * {@inheritDoc}
@@ -154,7 +161,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 						namespaceDefinition.setBundle(bundle);
 						namespaceDefinition.setNamespaceUri(namespaceUri);
 						namespaceDefinition.addUri(props.getProperty(key));
-						namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
+						registerNamespaceDefinition(namespaceUri, namespaceDefinition);
 						namespaceDefinitions.add(namespaceDefinition);
 					}
 				}
@@ -166,6 +173,23 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 						+ bundle.getSymbolicName() + "/" + definition.getDefaultUri(), catalogEntries,
 						ICatalogEntry.ENTRY_TYPE_PUBLIC);
 			}
+		}
+	}
+
+	private void registerNamespaceDefinition(String uri, final NamespaceDefinition definition) {
+		namespaceDefinitionRegistry.put(uri, definition);
+
+		for (final INamespaceDefinitionListener listener : namespaceDefinitionListeners) {
+			SafeRunner.run(new ISafeRunnable() {
+
+				public void run() throws Exception {
+					listener.onNamespaceDefinitionRegistered(definition);
+				}
+
+				public void handleException(Throwable exception) {
+					BeansCorePlugin.log(exception);
+				}
+			});
 		}
 	}
 
@@ -286,9 +310,36 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 
 		if (namespaceDefinitionsByBundle.containsKey(bundle)) {
 			for (NamespaceDefinition definition : namespaceDefinitionsByBundle.get(bundle)) {
-				namespaceDefinitionRegistry.remove(definition.getNamespaceUri());
+				unregisterNamespaceDefinition(definition);
 			}
 			namespaceDefinitionsByBundle.remove(bundle);
+		}
+	}
+
+	private void unregisterNamespaceDefinition(final NamespaceDefinition definition) {
+		namespaceDefinitionRegistry.remove(definition.getNamespaceUri());
+
+		for (final INamespaceDefinitionListener listener : namespaceDefinitionListeners) {
+			SafeRunner.run(new ISafeRunnable() {
+
+				public void run() throws Exception {
+					listener.onNamespaceDefinitionUnregistered(definition);
+				}
+
+				public void handleException(Throwable exception) {
+					BeansCorePlugin.log(exception);
+				}
+			});
+		}
+	}
+
+	public void unregisterNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
+		namespaceDefinitionListeners.remove(listener);
+	}
+
+	public void registerNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
+		if (!namespaceDefinitionListeners.contains(listener)) {
+			namespaceDefinitionListeners.add(listener);
 		}
 	}
 
@@ -480,5 +531,4 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 			return this.version.compareTo(v2.version);
 		}
 	}
-
 }

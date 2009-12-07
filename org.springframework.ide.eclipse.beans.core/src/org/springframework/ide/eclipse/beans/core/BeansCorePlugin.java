@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
 import org.springframework.ide.eclipse.core.MessageUtils;
@@ -120,7 +121,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	@Override
 	public void start(final BundleContext context) throws Exception {
 		super.start(context);
-
+		
 		nsManager = new NamespaceManager(context);
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 		getPreferenceStore().setDefault(NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
@@ -182,6 +183,14 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	public static final ExecutorService getExecutorService() {
 		return getDefault().executorService;
+	}
+	
+	public static final void registerNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
+		getDefault().nsManager.getNamespacePlugins().registerNamespaceDefinitionListener(listener);
+	}
+
+	public static final void unregisterNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
+		getDefault().nsManager.getNamespacePlugins().unregisterNamespaceDefinitionListener(listener);
 	}
 
 	/**
@@ -270,7 +279,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	}
 
 	protected void initNamespaceHandlers(BundleContext context) {
-		nsManager = new NamespaceManager(context);
 
 		// register listener first to make sure any bundles in INSTALLED state
 		// are not lost

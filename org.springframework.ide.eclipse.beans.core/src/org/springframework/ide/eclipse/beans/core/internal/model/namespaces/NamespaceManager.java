@@ -184,4 +184,5 @@ public class NamespaceManager {
 		this.namespacePlugins.destroy();
 		this.namespacePlugins = null;
 	}
+	
 }
