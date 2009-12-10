@@ -906,6 +906,10 @@ public class BeansEditorUtils {
 
 	public static String prepareMatchString(ContentAssistRequest request) {
 		String matchString = request.getMatchString();
+		return prepareMatchString(matchString);
+	}
+
+	public static String prepareMatchString(String matchString) {
 		if (matchString == null) {
 			matchString = "";
 		}

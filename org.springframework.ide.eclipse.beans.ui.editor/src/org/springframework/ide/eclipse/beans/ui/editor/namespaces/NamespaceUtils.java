@@ -22,6 +22,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.Activator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IAnnotationBasedContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IAnnotationBasedHyperlinkDetector;
 import org.w3c.dom.Element;
 

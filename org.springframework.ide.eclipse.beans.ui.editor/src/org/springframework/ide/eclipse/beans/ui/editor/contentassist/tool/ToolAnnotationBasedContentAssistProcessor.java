@@ -15,20 +15,16 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassHierachyContentAssistCalculator;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DefaultContentAssistContext;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DefaultContentAssistProposalRecorder;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IAnnotationBasedContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.MethodContentAssistCalculator;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IAnnotationBasedContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -62,7 +58,6 @@ import org.w3c.dom.Node;
  */
 
 // TODO CD add support for restriction (class, interface, both)
-@SuppressWarnings("restriction")
 public class ToolAnnotationBasedContentAssistProcessor implements IAnnotationBasedContentAssistProcessor {
 
 	private static final String REF_ATTRIBUTE = "ref";
@@ -73,17 +68,12 @@ public class ToolAnnotationBasedContentAssistProcessor implements IAnnotationBas
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addAttributeValueProposals(IContentAssistProcessor delegatingContentAssistProcessor,
-			ContentAssistRequest request, Node annotation) {
+	public void addAttributeValueProposals(IContentAssistContext context, IContentAssistProposalRecorder recorder,
+			Node annotation) {
 		if (ToolAnnotationUtils.ANNOTATION_ELEMENT.equals(annotation.getLocalName())
 				&& ToolAnnotationUtils.TOOL_NAMESPACE_URI.equals(annotation.getNamespaceURI())) {
 
 			ToolAnnotationData annotationData = ToolAnnotationUtils.getToolAnnotationData(annotation);
-
-			String matchString = BeansEditorUtils.prepareMatchString(request);
-
-			IContentAssistContext context = new DefaultContentAssistContext(request, null, matchString);
-			IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(request);
 
 			if (REF_ATTRIBUTE.equals(annotationData.getKind())) {
 				// bean reference content assist

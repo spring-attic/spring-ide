@@ -10,24 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
-import java.util.List;
-
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
-import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
-import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
-import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IAnnotationBasedContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
-import org.w3c.dom.Element;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * {@link IContentAssistProcessor} that delegates to {@link INamespaceContentAssistProcessor}s contribute via the
@@ -38,6 +29,9 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("restriction")
 public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor {
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void addAttributeValueProposals(ContentAssistRequest contentAssistRequest) {
 
@@ -53,57 +47,18 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 			processor.addAttributeValueProposals(this, contentAssistRequest);
 		}
 
-		// only calculate content assists based on annotations if no other processor
-		// kicked in already.
+		// only calculate content assists based on annotations if no other processor kicked in already.
 		if (contentAssistRequest.getCompletionProposals() == null
 				|| contentAssistRequest.getCompletionProposals().length == proposalCount) {
-			addAnnotationBasedAttributeValueProposals(contentAssistRequest, node);
+			new ToolAnnotationContentAssistProcessor().addAttributeValueProposals(this, contentAssistRequest);
 		}
 
 		super.addAttributeValueProposals(contentAssistRequest);
 	}
 
-	private void addAnnotationBasedAttributeValueProposals(ContentAssistRequest contentAssistRequest, IDOMNode node) {
-
-		IStructuredDocumentRegion open = node.getFirstStructuredDocumentRegion();
-		ITextRegionList openRegions = open.getRegions();
-		int i = openRegions.indexOf(contentAssistRequest.getRegion());
-		if (i < 0) {
-			return;
-		}
-		ITextRegion nameRegion = null;
-		while (i >= 0) {
-			nameRegion = openRegions.get(i--);
-			if (nameRegion.getType() == DOMRegionContext.XML_TAG_ATTRIBUTE_NAME) {
-				break;
-			}
-		}
-
-		// the name region is REQUIRED to do anything useful
-		if (nameRegion != null) {
-			String attributeName = open.getText(nameRegion);
-			List<Element> appInfo = ToolAnnotationUtils.getApplicationInformationElements(node, attributeName);
-			for (Element elem : appInfo) {
-				NodeList children = elem.getChildNodes();
-				for (int j = 0; j < children.getLength(); j++) {
-					Node child = children.item(j);
-					if (child.getNodeType() == Node.ELEMENT_NODE) {
-						invokeAnnotationBasedContentAssistProcessor(contentAssistRequest, child);
-					}
-				}
-			}
-		}
-	}
-
-	private void invokeAnnotationBasedContentAssistProcessor(ContentAssistRequest contentAssistRequest, Node child) {
-
-		IAnnotationBasedContentAssistProcessor[] annotationProcessors = NamespaceUtils
-				.getAnnotationBasedContentAssistProcessor(child.getNamespaceURI());
-		for (IAnnotationBasedContentAssistProcessor annotationProcessor : annotationProcessors) {
-			annotationProcessor.addAttributeValueProposals(this, contentAssistRequest, child);
-		}
-	}
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void addAttributeNameProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
@@ -115,6 +70,9 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		super.addAttributeNameProposals(request);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void addTagCloseProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
@@ -126,6 +84,9 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		super.addTagCloseProposals(request);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void addTagInsertionProposals(ContentAssistRequest request, int childPosition) {
 		IDOMNode node = (IDOMNode) request.getNode();
@@ -139,6 +100,47 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 
 	public ITextViewer getTextViewer() {
 		return fTextViewer;
+	}
+
+	/**
+	 * {@link INamespaceContentAssistProcessor} implementation that wraps a {@link ToolAnnotationContentAssistCalulator}
+	 * to create content assist proposals basd on tool annotations.
+	 * @since 2.3.0
+	 */
+	private static class ToolAnnotationContentAssistProcessor extends AbstractContentAssistProcessor {
+
+		private final ToolAnnotationContentAssistCalulator calculator = new ToolAnnotationContentAssistCalulator();
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
+				String namespacePrefix, Node attributeNode) {
+			// nothing do on annotations
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
+				String attributeName, String namespace, String prefix) {
+			IContentAssistContext context = new DefaultContentAssistContext(request, attributeName, BeansEditorUtils
+					.prepareMatchString(matchString));
+			IContentAssistProposalRecorder recorder = new DefaultContentAssistProposalRecorder(request);
+
+			calculator.computeProposals(context, recorder);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+			// nothing do on annotations
+		}
+
 	}
 
 }

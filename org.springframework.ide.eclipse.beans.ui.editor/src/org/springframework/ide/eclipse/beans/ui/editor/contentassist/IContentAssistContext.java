@@ -60,5 +60,5 @@ public interface IContentAssistContext {
 	 * @return the owning document
 	 */
 	Document getDocument();
-
+	
 }

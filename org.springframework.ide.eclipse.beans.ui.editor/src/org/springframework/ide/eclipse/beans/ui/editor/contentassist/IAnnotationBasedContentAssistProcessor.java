@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,19 +8,15 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.w3c.dom.Node;
 
 /**
- * Implementations of this interface are able to calculate content assist
- * proposals based on a given annotation element.
+ * Implementations of this interface are able to calculate content assist proposals based on a given annotation element.
  * @author Christian Dupuis
  * @since 2.0.3
  */
-@SuppressWarnings("restriction")
 public interface IAnnotationBasedContentAssistProcessor {
 
 	/**
@@ -31,8 +27,7 @@ public interface IAnnotationBasedContentAssistProcessor {
 	/**
 	 * Add content assist proposals for attribute values.
 	 */
-	void addAttributeValueProposals(
-			IContentAssistProcessor delegatingContentAssistProcessor,
-			ContentAssistRequest request, Node annotation);
+	void addAttributeValueProposals(IContentAssistContext context, IContentAssistProposalRecorder recorder,
+			Node annotation);
 
 }

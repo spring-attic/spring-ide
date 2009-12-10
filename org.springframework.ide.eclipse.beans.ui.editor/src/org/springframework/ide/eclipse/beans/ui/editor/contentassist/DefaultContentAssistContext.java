@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
- * Default implementation of {@link IContentAssistContext} that is used on the WTP XML editor
- * environment.
+ * Default implementation of {@link IContentAssistContext} that is used on the WTP XML editor environment.
  * <p>
  * This implementation wraps the WTP internal class {@link ContentAssistRequest}.
  * @author Christian Dupuis
@@ -32,17 +31,16 @@ public class DefaultContentAssistContext implements IContentAssistContext {
 	private final String matchString;
 
 	private final ContentAssistRequest request;
-	
+
 	/**
 	 * Creates a new {@link DefaultContentAssistContext}
 	 */
-	public DefaultContentAssistContext(ContentAssistRequest request, String attributeName,
-			String matchString) {
+	public DefaultContentAssistContext(ContentAssistRequest request, String attributeName, String matchString) {
 		this.request = request;
 		this.attributeName = attributeName;
-		this.matchString = matchString;
+		this.matchString = BeansEditorUtils.prepareMatchString(matchString);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -63,8 +61,7 @@ public class DefaultContentAssistContext implements IContentAssistContext {
 	public String getMatchString() {
 		return matchString;
 	}
-	
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -78,7 +75,7 @@ public class DefaultContentAssistContext implements IContentAssistContext {
 	public Node getParentNode() {
 		return request.getNode().getParentNode();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
