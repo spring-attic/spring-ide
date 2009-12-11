@@ -122,20 +122,20 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 			else if (kind != IncrementalProjectBuilder.FULL_BUILD) {
 
 				// Now check for bean classes and java structure
-				TypeStructureState structureManager = context.get(TypeStructureState.class);
-				BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
+				TypeStructureState structureState = context.get(TypeStructureState.class);
+				BeansTypeHierachyState hierachyState = context.get(BeansTypeHierachyState.class);
 
-				if (structureManager == null
-						|| structureManager.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
-								| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
+				if (structureState == null
+						|| structureState.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
+								| ITypeStructureCache.FLAG_ANNOTATION_VALUE | ITypeStructureCache.FLAG_TAB_BITS)) {
 
-					// capture removal of java source files
+					// Capture removal of java source files
 					if (deltaKind == IResourceDelta.REMOVED
 							&& resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
 						propagateChangedResourceToProject(resource, resources);
 					}
 					else {
-						for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
+						for (IBean bean : hierachyState.getBeansByContainingTypes(resource)) {
 							IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 							// Resolve imported config files to their root importing one
 							if (beansConfig instanceof IImportedBeansConfig) {

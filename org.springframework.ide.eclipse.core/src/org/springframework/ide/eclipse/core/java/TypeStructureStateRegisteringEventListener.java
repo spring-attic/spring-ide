@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.JavaCore;
+import org.springframework.core.Ordered;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.internal.project.SpringProjectContributionManager.ResourceDeltaVisitor;
@@ -34,26 +35,27 @@ import org.springframework.ide.eclipse.core.project.ProjectContributionEventList
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link IProjectContributionEventListener} implementation that manages the lifecycle of the
- * {@link TypeStructureCache}.
+ * {@link IProjectContributionEventListener} implementation that manages the lifecycle of the {@link TypeStructureCache}
+ * .
  * @author Christian Dupuis
  * @since 2.2.0
  * @see #updateTypeStructures(int, IProject, IResourceDelta)
  */
-public class TypeStructureStateRegisteringEventListener extends
-		ProjectContributionEventListenerAdapter {
+public class TypeStructureStateRegisteringEventListener extends ProjectContributionEventListenerAdapter implements Ordered {
 
-	public void start(int kind, IResourceDelta delta,
-			List<ProjectBuilderDefinition> builderDefinitions,
-			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state,
-			IProject project) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void start(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
+			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
 		state.hold(new TypeStructureState());
 	}
 
-	public void finish(int kind, IResourceDelta delta,
-			List<ProjectBuilderDefinition> builderDefinitions,
-			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state,
-			IProject project) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void finish(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
+			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
 		try {
 			// Update type structures at the end of each build
 			updateTypeStructures(kind, project, delta);
@@ -65,8 +67,7 @@ public class TypeStructureStateRegisteringEventListener extends
 	/**
 	 * Updates the type structures for a given project.s
 	 */
-	private void updateTypeStructures(int kind, IProject project, IResourceDelta delta)
-			throws CoreException {
+	private void updateTypeStructures(int kind, IProject project, IResourceDelta delta) throws CoreException {
 		// Record type structures
 		if (delta == null || kind == IncrementalProjectBuilder.FULL_BUILD
 				|| kind == IncrementalProjectBuilder.CLEAN_BUILD) {
@@ -83,15 +84,14 @@ public class TypeStructureStateRegisteringEventListener extends
 				JavaResourceRecordingProjectContributor contributor = new JavaResourceRecordingProjectContributor();
 				ResourceDeltaVisitor visitor = new ResourceDeltaVisitor(contributor, kind);
 				delta.accept(visitor);
-				SpringCore.getTypeStructureCache().recordTypeStructures(
-					project, visitor.getResources().toArray(new IResource[visitor.getResources().size()]));
+				SpringCore.getTypeStructureCache().recordTypeStructures(project,
+						visitor.getResources().toArray(new IResource[visitor.getResources().size()]));
 			}
 		}
 	}
 
 	/**
-	 * Records a complete snapshot of the type structure of all java class files in the given
-	 * project.
+	 * Records a complete snapshot of the type structure of all java class files in the given project.
 	 */
 	private void recoredFullTypeStructures(IProject project) throws CoreException {
 		// remove pre-existing state as we are doing a clean build
@@ -116,16 +116,21 @@ public class TypeStructureStateRegisteringEventListener extends
 			// nothing to do
 		}
 
-		public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
-				throws CoreException {
-			if (resource.getName().endsWith(ClassUtils.CLASS_FILE_SUFFIX)
-					&& JavaCore.create(resource) != null) {
+		public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind) throws CoreException {
+			if (resource.getName().endsWith(ClassUtils.CLASS_FILE_SUFFIX) && JavaCore.create(resource) != null) {
 				Set<IResource> resources = new HashSet<IResource>();
 				resources.add(resource);
 				return resources;
 			}
 			return Collections.emptySet();
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE;
 	}
 
 }

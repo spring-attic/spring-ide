@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
+import org.springframework.core.OrderComparator;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
@@ -25,16 +26,13 @@ import org.springframework.ide.eclipse.core.SpringCore;
  */
 public class ProjectContributionEventListenerFactory {
 
-	public static final String LISTENERS_EXTENSION_POINT = SpringCore.PLUGIN_ID
-			+ ".listeners";
+	public static final String LISTENERS_EXTENSION_POINT = SpringCore.PLUGIN_ID + ".listeners";
 
 	public static List<IProjectContributionEventListener> getProjectContributionEventListeners() {
-		List<IProjectContributionEventListener> listenerDefinitions =
-				new ArrayList<IProjectContributionEventListener>();
-		for (IExtension extension : Platform.getExtensionRegistry()
-				.getExtensionPoint(LISTENERS_EXTENSION_POINT).getExtensions()) {
-			for (IConfigurationElement element : extension
-					.getConfigurationElements()) {
+		List<IProjectContributionEventListener> listenerDefinitions = new ArrayList<IProjectContributionEventListener>();
+		for (IExtension extension : Platform.getExtensionRegistry().getExtensionPoint(LISTENERS_EXTENSION_POINT)
+				.getExtensions()) {
+			for (IConfigurationElement element : extension.getConfigurationElements()) {
 				try {
 					Object listener = element.createExecutableExtension("class");
 					if (listener instanceof IProjectContributionEventListener) {
@@ -46,6 +44,9 @@ public class ProjectContributionEventListenerFactory {
 				}
 			}
 		}
+
+		// Sort depending on the defined order
+		OrderComparator.sort(listenerDefinitions);
 		
 		return listenerDefinitions;
 	}

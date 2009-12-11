@@ -39,7 +39,7 @@ import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorD
  * @since 2.2.0
  */
 public interface IProjectContributionEventListener {
-
+	
 	/**
 	 * Signals that {@link IProjectContributor}s are about to be executed.
 	 * @param kind one of {@link IncrementalProjectBuilder#AUTO_BUILD}, {@link IncrementalProjectBuilder#CLEAN_BUILD},

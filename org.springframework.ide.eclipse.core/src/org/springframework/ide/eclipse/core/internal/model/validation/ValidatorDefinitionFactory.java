@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,16 +22,14 @@ import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
- * Helper class that loads {@link ValidatorDefinition}s from the Platforms
- * extension point registry.
+ * Helper class that loads {@link ValidatorDefinition}s from the Platforms extension point registry.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
  */
 public class ValidatorDefinitionFactory {
 
-	public static final String VALIDATORS_EXTENSION_POINT = SpringCore.PLUGIN_ID
-			+ ".validators";
+	public static final String VALIDATORS_EXTENSION_POINT = SpringCore.PLUGIN_ID + ".validators";
 
 	public static final String VALIDATOR_ELEMENT = "validator";
 
@@ -39,17 +37,13 @@ public class ValidatorDefinitionFactory {
 	 * Returns all contributed {@link ValidatorDefinition}.
 	 */
 	public static List<ValidatorDefinition> getValidatorDefinitions() {
-		List<ValidatorDefinition> validatorDefinitions =
-				new ArrayList<ValidatorDefinition>();
-		for (IExtension extension : Platform.getExtensionRegistry()
-				.getExtensionPoint(VALIDATORS_EXTENSION_POINT)
-						.getExtensions()) {
-			for (IConfigurationElement element : extension
-					.getConfigurationElements()) {
+		List<ValidatorDefinition> validatorDefinitions = new ArrayList<ValidatorDefinition>();
+		for (IExtension extension : Platform.getExtensionRegistry().getExtensionPoint(VALIDATORS_EXTENSION_POINT)
+				.getExtensions()) {
+			for (IConfigurationElement element : extension.getConfigurationElements()) {
 				if (VALIDATOR_ELEMENT.equals(element.getName())) {
 					try {
-						ValidatorDefinition validatorDefinition =
-									new ValidatorDefinition(element);
+						ValidatorDefinition validatorDefinition = new ValidatorDefinition(element);
 						validatorDefinitions.add(validatorDefinition);
 					}
 					catch (CoreException e) {
@@ -67,13 +61,13 @@ public class ValidatorDefinitionFactory {
 				else {
 					return Integer.valueOf(v1.getOrder()).compareTo(Integer.valueOf(v2.getOrder()));
 				}
-			}});
+			}
+		});
 		return validatorDefinitions;
 	}
 
 	/**
-	 * Returns a specific {@link ValidatorDefinition} or null if the requested
-	 * one can't be found.
+	 * Returns a specific {@link ValidatorDefinition} or null if the requested one can't be found.
 	 * @param validatorId the id of the desired {@link ValidatorDefinition}
 	 */
 	public static ValidatorDefinition getValidatorDefinition(String validatorId) {

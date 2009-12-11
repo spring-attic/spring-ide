@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,26 +22,21 @@ import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
- * Helper class that loads {@link ProjectBuilderDefinition} from the Platforms
- * extension point registry.
+ * Helper class that loads {@link ProjectBuilderDefinition} from the Platforms extension point registry.
  * @author Christian Dupuis
  * @since 2.0
  */
 public class ProjectBuilderDefinitionFactory {
 
-	public static final String BUILDERS_EXTENSION_POINT = SpringCore.PLUGIN_ID
-			+ ".builders";
+	public static final String BUILDERS_EXTENSION_POINT = SpringCore.PLUGIN_ID + ".builders";
 
 	public static List<ProjectBuilderDefinition> getProjectBuilderDefinitions() {
-		List<ProjectBuilderDefinition> builderDefinitions =
-				new ArrayList<ProjectBuilderDefinition>();
-		for (IExtension extension : Platform.getExtensionRegistry()
-				.getExtensionPoint(BUILDERS_EXTENSION_POINT).getExtensions()) {
-			for (IConfigurationElement element : extension
-					.getConfigurationElements()) {
+		List<ProjectBuilderDefinition> builderDefinitions = new ArrayList<ProjectBuilderDefinition>();
+		for (IExtension extension : Platform.getExtensionRegistry().getExtensionPoint(BUILDERS_EXTENSION_POINT)
+				.getExtensions()) {
+			for (IConfigurationElement element : extension.getConfigurationElements()) {
 				try {
-					ProjectBuilderDefinition builderDefinition =
-							new ProjectBuilderDefinition(element);
+					ProjectBuilderDefinition builderDefinition = new ProjectBuilderDefinition(element);
 					builderDefinitions.add(builderDefinition);
 				}
 				catch (CoreException e) {
@@ -49,14 +44,15 @@ public class ProjectBuilderDefinitionFactory {
 				}
 			}
 		}
-		
+
 		// Sort definitions based on there defined order
-		Collections.sort(builderDefinitions, new Comparator<ProjectBuilderDefinition>(){
+		Collections.sort(builderDefinitions, new Comparator<ProjectBuilderDefinition>() {
 
 			public int compare(ProjectBuilderDefinition o1, ProjectBuilderDefinition o2) {
 				return o1.getOrder().compareTo(o2.getOrder());
-			}});
-		
+			}
+		});
+
 		return builderDefinitions;
 	}
 }

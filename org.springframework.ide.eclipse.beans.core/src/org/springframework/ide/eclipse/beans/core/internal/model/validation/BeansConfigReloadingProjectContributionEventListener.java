@@ -65,7 +65,7 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 	/** The context namespace URI */
 	private static final String CONTEXT_NAMESPACE_URI = "http://www.springframework.org/schema/context";
 
-	private final TypeStructureState structureManager = new TypeStructureState();
+	private TypeStructureState structureState = null;
 
 	/** Internal cache of {@link IBeansConfig} instances that should be reloaded */
 	private final Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
@@ -77,6 +77,12 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 	public void start(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
 			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project,
 			IProgressMonitor monitor) {
+		// Get the type structure cache for this build
+		structureState = state.get(TypeStructureState.class);
+		if (structureState == null) {
+			structureState = new TypeStructureState();
+		}
+		
 		try {
 			if (kind != IncrementalProjectBuilder.FULL_BUILD) {
 				if (delta == null) {
@@ -135,7 +141,7 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 	private void checkResource(IResource resource) {
 		// Only reset if the resource represents a Java source file and the types have structural changes
 		if (resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)
-				&& structureManager.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
+				&& structureState.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
 						| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
 
 			// Reset configs that use component-scanning and annotation-config

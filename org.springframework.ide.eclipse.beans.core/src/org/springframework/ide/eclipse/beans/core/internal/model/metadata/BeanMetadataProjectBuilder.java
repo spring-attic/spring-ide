@@ -91,13 +91,13 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 				&& resource.getName().endsWith(JdtUtils.JAVA_FILE_EXTENSION)) {
 
 			// Make sure that only a structural change to a java source file triggers a rebuild
-			TypeStructureState structureManager = context.get(TypeStructureState.class);
-			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
+			TypeStructureState structureState = context.get(TypeStructureState.class);
+			BeansTypeHierachyState hierachyState = context.get(BeansTypeHierachyState.class);
 
-			if (structureManager == null
-					|| structureManager.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
+			if (structureState == null
+					|| structureState.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
 							| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
-				for (IBean bean : hierachyManager.getBeansByContainingTypes(resource)) {
+				for (IBean bean : hierachyState.getBeansByContainingTypes(resource)) {
 					IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 					resources.add(beansConfig.getElementResource());
 					if (affectedBeans.containsKey(beansConfig)) {

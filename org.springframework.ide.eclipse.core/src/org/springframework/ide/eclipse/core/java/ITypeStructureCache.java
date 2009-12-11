@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,9 @@ public interface ITypeStructureCache {
 
 	/** Flag indicating that changes to class and/or method-level annotation values are of interest */
 	int FLAG_ANNOTATION_VALUE = 1 << 4;
+	
+	/** Flag indicating that changes to tagbits and standard annotations are of interest */
+	int FLAG_TAB_BITS = 1 << 5;
 
 	/**
 	 * Returns <code>true</code> if the java types represented by the given <code>resource</code>
