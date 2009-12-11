@@ -227,7 +227,6 @@ public class AopReferenceModelUtils {
 	}
 
 	public static IBean getBeanFromElementId(String elementId) {
-		System.out.println(elementId);
 		IBeansModel model = BeansCorePlugin.getModel();
 		return (IBean) model.getElement(elementId);
 	}
