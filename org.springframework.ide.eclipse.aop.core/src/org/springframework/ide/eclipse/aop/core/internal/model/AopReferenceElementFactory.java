@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,10 @@ public class AopReferenceElementFactory implements IElementFactory {
 
 	protected static final String BEAN_ATTRIBUTE = "bean";
 
+	protected static final String BEAN_FILE_ATTRIBUTE = "bean-file";
+
+	protected static final String BEAN_START_LINE_ATTRIBUTE = "bean-start-line";
+
 	protected static final String FILE_ATTRIBUTE = "file";
 
 	protected static final String TARGET_ATTRIBUTE = "target";
@@ -38,13 +42,11 @@ public class AopReferenceElementFactory implements IElementFactory {
 	protected static final String SOURCE_ATTRIBUTE = "source";
 
 	protected static final String ADVICE_TYPE_ATTRIBUTE = "advice-type";
-	
-	public static String FACTORY_ID = Activator.PLUGIN_ID
-			+ ".aopReferenceElementFactory";
+
+	public static String FACTORY_ID = Activator.PLUGIN_ID + ".aopReferenceElementFactory";
 
 	public final IAdaptable createElement(IMemento memento) {
-		ADVICE_TYPE type = ADVICE_TYPE.valueOf(memento
-				.getString(ADVICE_TYPE_ATTRIBUTE));
+		ADVICE_TYPE type = ADVICE_TYPE.valueOf(memento.getString(ADVICE_TYPE_ATTRIBUTE));
 		String sourceHandle = memento.getString(SOURCE_ATTRIBUTE);
 		IJavaElement source = null;
 		if (sourceHandle != null) {
@@ -60,11 +62,22 @@ public class AopReferenceElementFactory implements IElementFactory {
 		IResource member = root.findMember(fileName);
 
 		String beanId = memento.getString(BEAN_ATTRIBUTE);
-		if (member != null && member instanceof IFile && source != null
-				&& target != null && source instanceof IMember
-				&& target instanceof IMember) {
-			return new AopReference(type, (IMember) source, (IMember) target,
-					member, beanId);
+		Integer beanStartline = memento.getInteger(BEAN_START_LINE_ATTRIBUTE);
+		if (beanStartline == null) {
+			beanStartline = 0;
+		}
+		
+		String beanFileName = memento.getString(BEAN_FILE_ATTRIBUTE);
+		IResource beanResource = null;
+		// Pre 2.3.0 version weren't persisting the file attribute; so be careful
+		if (beanFileName != null) {
+			beanResource = root.findMember(beanFileName);
+		}
+
+		if (member != null && member instanceof IFile && source != null && target != null && source instanceof IMember
+				&& target instanceof IMember && beanResource != null && beanResource instanceof IFile) {
+			return new AopReference(type, (IMember) source, (IMember) target, member, beanId, beanResource,
+					beanStartline);
 		}
 		return null;
 	}

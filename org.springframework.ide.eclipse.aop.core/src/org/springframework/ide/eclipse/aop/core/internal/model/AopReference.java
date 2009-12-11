@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,10 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 
 	private String bean;
 
+	private IResource beanResource;
+
+	private int beanStartline;
+
 	private IAspectDefinition definition;
 
 	private IResource file;
@@ -41,21 +45,25 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 
 	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def, IResource file,
 			IBean bean) {
-		this(type, source, target, def, file, bean.getElementID());
+		this(type, source, target, def, file, bean.getElementID(), bean.getElementResource(), bean
+				.getElementStartLine());
 	}
 
 	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def, IResource file,
-			String beanId) {
+			String beanId, IResource beanResource, int beanStartline) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
 		this.definition = def;
 		this.file = file;
 		this.bean = beanId;
+		this.beanResource = beanResource;
+		this.beanStartline = beanStartline;
 	}
 
-	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IResource file, String beanId) {
-		this(type, source, target, null, file, beanId);
+	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IResource file, String beanId,
+			IResource beanResource, int beanStartline) {
+		this(type, source, target, null, file, beanId, beanResource, beanStartline);
 	}
 
 	@Override
@@ -114,6 +122,14 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		return this.bean;
 	}
 
+	public IResource getTargetBeanResource() {
+		return this.beanResource;
+	}
+
+	public int getTargetBeanStartline() {
+		return beanStartline;
+	}
+
 	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(source);
@@ -136,6 +152,11 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 			memento.putString(AopReferenceElementFactory.FILE_ATTRIBUTE, this.file.getFullPath().toString());
 		}
 		memento.putString(AopReferenceElementFactory.BEAN_ATTRIBUTE, this.bean);
+		memento.putInteger(AopReferenceElementFactory.BEAN_START_LINE_ATTRIBUTE, this.beanStartline);
+		if (this.beanResource != null) {
+			memento.putString(AopReferenceElementFactory.BEAN_FILE_ATTRIBUTE, this.beanResource.getFullPath()
+					.toString());
+		}
 	}
 
 	public void setDefinition(IAspectDefinition definition) {

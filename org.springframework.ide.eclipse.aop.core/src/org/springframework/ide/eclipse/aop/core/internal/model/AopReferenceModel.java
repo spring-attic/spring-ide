@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,8 +60,7 @@ public class AopReferenceModel implements IAopReferenceModel {
 	public List<IAopReference> getAdviceDefinition(IJavaElement je) {
 		List<IAopReference> advices = new LinkedList<IAopReference>();
 		for (IAopReference reference : getAllReferences()) {
-			if (reference.getSource() != null
-					&& reference.getSource().equals(je)) {
+			if (reference.getSource() != null && reference.getSource().equals(je)) {
 				advices.add(reference);
 			}
 		}
@@ -79,17 +78,12 @@ public class AopReferenceModel implements IAopReferenceModel {
 	public List<IAopReference> getAllReferencesForResource(IResource resource) {
 		List<IAopReference> references = new ArrayList<IAopReference>();
 		for (IAopReference ref : getAllReferences()) {
-			if ((ref.getResource() != null && ref.getResource()
-					.equals(resource))
-					|| (AopReferenceModelUtils.getBeanFromElementId(ref
-							.getTargetBeanId()) != null && resource
-							.equals(AopReferenceModelUtils
-									.getBeanFromElementId(ref.getTargetBeanId())
+			if ((ref.getResource() != null && ref.getResource().equals(resource))
+					|| (AopReferenceModelUtils.getBeanFromElementId(ref.getTargetBeanId()) != null && resource
+							.equals(AopReferenceModelUtils.getBeanFromElementId(ref.getTargetBeanId())
 									.getElementResource()))
-					|| (ref.getSource() != null && resource.equals(ref
-							.getSource().getResource()))
-					|| (ref.getTarget() != null && resource.equals(ref
-							.getTarget().getResource()))
+					|| (ref.getSource() != null && resource.equals(ref.getSource().getResource()))
+					|| (ref.getTarget() != null && resource.equals(ref.getTarget().getResource()))
 					|| (ref.getDefinition().getResource().equals(resource))) {
 				references.add(ref);
 			}
@@ -146,8 +140,7 @@ public class AopReferenceModel implements IAopReferenceModel {
 
 	}
 
-	public void registerAopModelChangedListener(
-			IAopModelChangedListener listener) {
+	public void registerAopModelChangedListener(IAopModelChangedListener listener) {
 		this.listeners.add(listener);
 	}
 
@@ -182,11 +175,9 @@ public class AopReferenceModel implements IAopReferenceModel {
 
 	public void start() {
 		// Add a ResourceChangeListener to the Eclipse Workspace
-		workspaceListener = new SpringResourceChangeListener(
-				new AopResourceChangeEvents());
+		workspaceListener = new SpringResourceChangeListener(new AopResourceChangeEvents());
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.addResourceChangeListener(workspaceListener,
-				SpringResourceChangeListener.LISTENER_FLAGS);
+		workspace.addResourceChangeListener(workspaceListener, SpringResourceChangeListener.LISTENER_FLAGS);
 
 		persistence = new AopReferenceModelPeristence();
 		persistence.loadReferenceModel();
@@ -195,20 +186,17 @@ public class AopReferenceModel implements IAopReferenceModel {
 		// BeansCorePlugin.getModel().addChangeListener(modelChangeListener);
 	}
 
-	public void unregisterAopModelChangedListener(
-			IAopModelChangedListener listener) {
+	public void unregisterAopModelChangedListener(IAopModelChangedListener listener) {
 		this.listeners.remove(listener);
 	}
 
 	/*
 	 * private class AopBeansModelListener implements IModelChangeListener {
 	 * 
-	 * public void elementChanged(ModelChangeEvent event) { if (event.getType() ==
-	 * ModelChangeEvent.Type.REMOVED && event.getSource() instanceof IResource) {
-	 * IResource resource = (IResource) event.getSource(); IJavaProject jp =
-	 * JdtUtils.getJavaProject(resource.getProject()); if (jp != null) {
-	 * IAopProject ap = getProject(jp); if (ap != null) {
-	 * ap.clearReferencesForResource(resource);
-	 * AopReferenceModelMarkerUtils.deleteProblemMarkers(resource); } } } } }
+	 * public void elementChanged(ModelChangeEvent event) { if (event.getType() == ModelChangeEvent.Type.REMOVED &&
+	 * event.getSource() instanceof IResource) { IResource resource = (IResource) event.getSource(); IJavaProject jp =
+	 * JdtUtils.getJavaProject(resource.getProject()); if (jp != null) { IAopProject ap = getProject(jp); if (ap !=
+	 * null) { ap.clearReferencesForResource(resource); AopReferenceModelMarkerUtils.deleteProblemMarkers(resource); } }
+	 * } } }
 	 */
 }

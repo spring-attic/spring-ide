@@ -138,11 +138,11 @@ public class AopReferenceModelUtils {
 				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
 
 			// Make sure that the aop model is only reprocessed if a java structural change happens
-			TypeStructureState structureManager = context.get(TypeStructureState.class);
-			BeansTypeHierachyState hierachyManager = context.get(BeansTypeHierachyState.class);
+			TypeStructureState structureState = context.get(TypeStructureState.class);
+			BeansTypeHierachyState hierachyState = context.get(BeansTypeHierachyState.class);
 
-			if (structureManager == null
-					|| structureManager.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
+			if (structureState == null
+					|| structureState.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
 							| ITypeStructureCache.FLAG_ANNOTATION_VALUE)) {
 				if (deltaKind == IResourceDelta.REMOVED) {
 					IBeansProject beansProject = BeansCorePlugin.getModel().getProject(resource.getProject());
@@ -153,7 +153,7 @@ public class AopReferenceModelUtils {
 					}
 				}
 				else {
-					for (IBeansConfig config : hierachyManager.getConfigsByContainingTypes(resource)) {
+					for (IBeansConfig config : hierachyState.getConfigsByContainingTypes(resource)) {
 						configs.add(config);
 					}
 				}
@@ -227,6 +227,7 @@ public class AopReferenceModelUtils {
 	}
 
 	public static IBean getBeanFromElementId(String elementId) {
+		System.out.println(elementId);
 		IBeansModel model = BeansCorePlugin.getModel();
 		return (IBean) model.getElement(elementId);
 	}

@@ -86,23 +86,20 @@ public class AopReferenceModelMarkerUtils {
 			createProblemMarker(reference.getTarget().getResource(), "aspect declarations <"
 					+ reference.getDefinition().getAspectName() + ">", 1,
 					JdtUtils.getLineNumber(reference.getTarget()), markerId, sourceResource);
-			if (AopReferenceModelUtils.getBeanFromElementId(reference.getTargetBeanId()) != null) {
-				createProblemMarker(AopReferenceModelUtils.getBeanFromElementId(reference.getTargetBeanId())
-						.getElementResource(), "aspect declarations <" + reference.getDefinition().getAspectName()
-						+ ">", 1, AopReferenceModelUtils.getBeanFromElementId(reference.getTargetBeanId())
-						.getElementStartLine(), markerId, sourceResource);
+			if (reference.getTargetBeanResource() != null && reference.getTargetBeanStartline() > 0) {
+				createProblemMarker(reference.getTargetBeanResource(), "aspect declarations <"
+						+ reference.getDefinition().getAspectName() + ">", 1, reference.getTargetBeanStartline(),
+						markerId, sourceResource);
 			}
 		}
 		else {
 			createProblemMarker(reference.getTarget().getResource(), "advised by "
 					+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), 1, JdtUtils
 					.getLineNumber(reference.getTarget()), markerId, sourceResource);
-			if (AopReferenceModelUtils.getBeanFromElementId(reference.getTargetBeanId()) != null) {
-				createProblemMarker(AopReferenceModelUtils.getBeanFromElementId(reference.getTargetBeanId())
-						.getElementResource(), "advised by "
-						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), 1,
-						AopReferenceModelUtils.getBeanFromElementId(reference.getTargetBeanId()).getElementStartLine(),
-						markerId, sourceResource);
+			if (reference.getTargetBeanResource() != null && reference.getTargetBeanStartline() > 0) {
+				createProblemMarker(reference.getTargetBeanResource(), "advised by "
+						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), 1, reference
+						.getTargetBeanStartline(), markerId, sourceResource);
 			}
 		}
 	}
