@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.model.validation;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -22,14 +23,13 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Christian Dupuis
  * @since 2.0
  */
-public abstract class AbstractBeanValidationRule extends
-		AbstractNonInfrastructureBeanValidationRule implements
+public abstract class AbstractBeanValidationRule extends AbstractNonInfrastructureBeanValidationRule implements
 		IValidationRule<IBean, IBeansValidationContext> {
 
 	@Override
-	protected final boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, IBeansValidationContext context) {
-		return element instanceof Bean
+	protected final boolean supportsModelElementForNonInfrastructureBean(IModelElement element,
+			IBeansValidationContext context) {
+		return element instanceof Bean && !(((Bean) element).getBeanDefinition() instanceof AnnotatedBeanDefinition)
 				&& supportsBean((IBean) element, context);
 	}
 
@@ -44,9 +44,7 @@ public abstract class AbstractBeanValidationRule extends
 	}
 
 	/**
-	 * Execute the concrete validation logic of the given {@link IBean} under
-	 * the given {@link IBeansValidationContext}.
+	 * Execute the concrete validation logic of the given {@link IBean} under the given {@link IBeansValidationContext}.
 	 */
-	public abstract void validate(IBean bean, IBeansValidationContext context,
-			IProgressMonitor monitor);
+	public abstract void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor);
 }
