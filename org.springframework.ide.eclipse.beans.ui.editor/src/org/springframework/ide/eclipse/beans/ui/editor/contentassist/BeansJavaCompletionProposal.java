@@ -144,7 +144,6 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			String charBeforeCursor = document.get(getReplacementOffset(), 1);
-			System.out.println(charBeforeCursor);
 		}
 		catch (BadLocationException e) {
 		}
