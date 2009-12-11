@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.support.AopUtils;
@@ -167,9 +168,14 @@ public class AspectDefinitionMatcher {
 			pointcutExpressionCache.put(info, pc);
 
 			Class<?> aspectJAdviceClass = AspectJAdviceClassFactory.getAspectJAdviceClass(info);
-			if (aspectJAdviceClass != null) {
-				Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
-				Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc, null });
+			Class<?> aspectInstanceFactoryClass = ClassUtils.loadClass(SimpleAspectInstanceFactory.class);
+			if (aspectJAdviceClass != null && aspectInstanceFactoryClass != null) {
+				Constructor<?> ctor = aspectInstanceFactoryClass.getConstructors()[0];
+				Object aspectInstanceFactory = ctor.newInstance(aspectJAdviceClass);
+				
+				ctor = aspectJAdviceClass.getConstructors()[0];
+				Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc, aspectInstanceFactory});
+				
 				if (info.getType() == ADVICE_TYPE.AFTER_RETURNING) {
 					if (info.getReturning() != null) {
 						ClassUtils.invokeMethod(aspectJAdvice, "setReturningName", info.getReturning());
