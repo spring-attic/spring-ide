@@ -118,6 +118,10 @@ public class EventTraceView extends ViewPart implements
 	}
 
 	private void appendEventText(String msg, int category) {
+		if (text.isDisposed()) {
+			return;
+		}
+		
 		IViewSite site = getViewSite();
 		if (site == null) {
 			return;
