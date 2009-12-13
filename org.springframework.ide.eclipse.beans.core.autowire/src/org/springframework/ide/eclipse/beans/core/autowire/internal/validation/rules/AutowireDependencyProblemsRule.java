@@ -46,7 +46,7 @@ public class AutowireDependencyProblemsRule implements IValidationRule<BeansConf
 		
 		provider.resolveAutowiredDependencies();
 		for (ValidationProblem problem : provider.getValidationProblems()) {
-			context.getProblems().add(problem);
+			context.addProblems(problem);
 		}
 	}
 
