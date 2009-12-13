@@ -17,35 +17,29 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 /**
- * This {@link PropertyTester} is used to check properties of the BeansCoreModel
- * in <code><test property="..."/></code> expressions.
+ * This {@link PropertyTester} is used to check properties of the BeansCoreModel in <code><test property="..."/></code>
+ * expressions.
  * <p>
  * Currently the following properties are supported:
  * <ul>
- * <li><strong>isBeansConfig</strong> checks if a given {@link IFile} is a
- * BeansConfig file</li>
- * <li><strong>isInfrstructureBean</strong> checks if a given {@link IBean} is
- * a {@link BeanDefinition#ROLE_INFRASTRUCTURE}</li>
+ * <li><strong>isBeansConfig</strong> checks if a given {@link IFile} is a BeansConfig file</li>
+ * <li><strong>isInfrstructureBean</strong> checks if a given {@link IBean} is a
+ * {@link BeanDefinition#ROLE_INFRASTRUCTURE}</li>
  * </ul>
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public class BeansModelPropertyTester extends PropertyTester {
 
-	public boolean test(Object receiver, String property, Object[] args,
-			Object expectedValue) {
+	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
 		if (receiver instanceof IFile && "isBeansConfig".equals(property)) {
-			boolean isBeansConfig = BeansCoreUtils
-					.isBeansConfig((IFile) receiver, true);
-			return expectedValue == null ? isBeansConfig
-					: isBeansConfig == ((Boolean) expectedValue).booleanValue();
+			boolean isBeansConfig = BeansCoreUtils.isBeansConfig((IFile) receiver, true);
+			return expectedValue == null ? isBeansConfig : isBeansConfig == ((Boolean) expectedValue).booleanValue();
 		}
-		else if (receiver instanceof IBean
-				&& "isInfrstructureBean".equals(property)) {
+		else if (receiver instanceof IBean && "isInfrstructureBean".equals(property)) {
 			boolean isInfrstructureBean = ((IBean) receiver).isInfrastructure();
-			return expectedValue == null ? isInfrstructureBean
-					: isInfrstructureBean == ((Boolean) expectedValue)
-							.booleanValue();
+			return expectedValue == null ? isInfrstructureBean : isInfrstructureBean == ((Boolean) expectedValue)
+					.booleanValue();
 		}
 		return false;
 	}
