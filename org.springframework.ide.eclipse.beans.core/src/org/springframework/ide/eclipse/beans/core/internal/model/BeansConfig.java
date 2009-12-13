@@ -77,6 +77,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigEventListener;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
@@ -494,11 +495,24 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 		// Create special ReaderEventListener that essentially just passes through component definitions
 		ReaderEventListener eventListener = new BeansConfigPostProcessorReaderEventListener();
-
+		
+		// Collect the beans from this config and all imported configs
 		List<IBean> beansClone = new ArrayList<IBean>();
+		
+		// Important: don't use getBeans or getComponents on this instance -> will lock
 		beansClone.addAll(beans.values());
 		for (IBeansComponent component : components) {
 			beansClone.addAll(component.getBeans());
+		}
+
+		// Now collect from all imported configurations as well
+		for (IBeansImport beansImport : imports) {
+			for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
+				beansClone.addAll(bc.getBeans());
+				for (IBeansComponent component : bc.getComponents()) {
+					beansClone.addAll(component.getBeans());
+				}
+			}
 		}
 
 		// Run all generally contributed post processors
