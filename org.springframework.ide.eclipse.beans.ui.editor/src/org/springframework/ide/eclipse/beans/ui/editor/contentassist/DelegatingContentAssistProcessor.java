@@ -67,6 +67,8 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		for (INamespaceContentAssistProcessor processor : processors) {
 			processor.addAttributeNameProposals(this, request);
 		}
+
+		// Wrap the original request in order to re-sort the proposals
 		super.addAttributeNameProposals(request);
 	}
 
@@ -142,5 +144,136 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		}
 
 	}
+
+	/*private static class RelevanceApplyingContentAssistRequest extends ContentAssistRequest {
+
+		private final ContentAssistRequest delegate;
+
+		public RelevanceApplyingContentAssistRequest(ContentAssistRequest delegate) {
+			super(delegate.getNode(), delegate.getParent(), delegate.getDocumentRegion(), delegate.getRegion(),
+					delegate.getReplacementBeginPosition(), delegate.getReplacementLength(), delegate.getMatchString());
+			this.delegate = delegate;
+		}
+
+		public void addMacro(ICompletionProposal newProposal) {
+			delegate.addMacro(newProposal);
+		}
+
+		public void addProposal(ICompletionProposal newProposal) {
+			if (newProposal instanceof CustomCompletionProposal) {
+				CustomCompletionProposal proposal = (CustomCompletionProposal) newProposal;
+				if (proposal.getDisplayString().equals("id")) {
+					Field field = ReflectionUtils.findField(newProposal.getClass(), "fRelevance");
+					field.setAccessible(true);
+					ReflectionUtils.setField(field, newProposal, Integer.valueOf(10000));
+				}
+			}
+			delegate.addProposal(newProposal);
+		}
+
+		public ICompletionProposal[] getCompletionProposals() {
+			return delegate.getCompletionProposals();
+		}
+
+		public IStructuredDocumentRegion getDocumentRegion() {
+			return delegate.getDocumentRegion();
+		}
+
+		public List getMacros() {
+			return delegate.getMacros();
+		}
+
+		public String getMatchString() {
+			return delegate.getMatchString();
+		}
+
+		public Node getNode() {
+			return delegate.getNode();
+		}
+
+		public Node getParent() {
+			return delegate.getParent();
+		}
+
+		public List getProposals() {
+			return delegate.getProposals();
+		}
+
+		public ITextRegion getRegion() {
+			return delegate.getRegion();
+		}
+
+		public int getReplacementBeginPosition() {
+			return delegate.getReplacementBeginPosition();
+		}
+
+		public int getReplacementLength() {
+			return delegate.getReplacementLength();
+		}
+
+		public int getStartOffset() {
+			return delegate.getStartOffset();
+		}
+
+		public String getText() {
+			return delegate.getText();
+		}
+
+		public int getTextEndOffset() {
+			return delegate.getTextEndOffset();
+		}
+
+		public void setDocumentRegion(IStructuredDocumentRegion region) {
+			if (delegate != null) {
+				delegate.setDocumentRegion(region);
+			}
+		}
+
+		public void setMatchString(String newMatchString) {
+			if (delegate != null) {
+				delegate.setMatchString(matchString);
+			}
+		}
+
+		public void setNode(Node newNode) {
+			if (delegate != null) {
+				delegate.setNode(newNode);
+			}
+		}
+
+		public void setParent(Node newParent) {
+			if (delegate != null) {
+				delegate.setParent(newParent);
+			}
+		}
+
+		public void setRegion(ITextRegion newRegion) {
+			if (delegate != null) {
+				delegate.setRegion(newRegion);
+			}
+		}
+
+		public void setReplacementBeginPosition(int newReplacementBeginPosition) {
+			if (delegate != null) {
+				delegate.setReplacementBeginPosition(newReplacementBeginPosition);
+			}
+		}
+
+		public void setReplacementLength(int newReplacementLength) {
+			if (delegate != null) {
+				delegate.setReplacementLength(newReplacementLength);
+			}
+		}
+
+		public boolean shouldSeparate() {
+			return delegate.shouldSeparate();
+		}
+
+		@SuppressWarnings("unchecked")
+		protected List sortProposals(List proposalsIn) {
+			Collections.sort(proposalsIn, new ProposalComparator());
+			return proposalsIn;
+		}
+	} */
 
 }
