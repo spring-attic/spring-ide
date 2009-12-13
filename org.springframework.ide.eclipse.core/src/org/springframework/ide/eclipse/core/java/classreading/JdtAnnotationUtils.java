@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.core.java.classreading;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +75,12 @@ public abstract class JdtAnnotationUtils {
 		if (member.getValueKind() == IMemberValuePair.K_STRING && returnType.equals(String.class.getName())) {
 			if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 				if (member.getValue().getClass().isArray()) {
-					attributesMap.put(member.getMemberName(), member.getValue());
+					Object[] values = (Object[]) member.getValue();
+					String[] newValues = new String[values.length];
+					for (int i = 0; i < values.length; i++) {
+						newValues[i] = values[i].toString();
+					}
+					attributesMap.put(member.getMemberName(), newValues);
 				}
 				else {
 					attributesMap.put(member.getMemberName(), new String[] { member.getValue().toString() });
@@ -88,26 +92,41 @@ public abstract class JdtAnnotationUtils {
 		}
 		// support for class
 		else if (member.getValueKind() == IMemberValuePair.K_CLASS && returnType.equals(Class.class.getName())) {
+			ClassLoader cls = JdtUtils.getProjectClassLoaderSupport(type.getJavaProject().getProject(), true)
+					.getProjectClassLoader();
 			if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 				if (member.getValue().getClass().isArray()) {
-					String[] values = Arrays.asList((Object[]) member.getValue()).toArray(new String[0]);
+					Object[] classNames = (Object[]) member.getValue();
+					Class[] values = new Class[classNames.length];
 					for (int i = 0; i < values.length; i++) {
-						String className = values[i];
-						values[i] = JdtUtils.resolveClassName(className, type);
+						String className = (String) classNames[i];
+						try {
+							values[i] = loadClass(type, className, cls);
+						}
+						catch (ClassNotFoundException e) {
+						}
 					}
 					attributesMap.put(member.getMemberName(), values);
 				}
 				else if (member.getValue() instanceof String) {
 					String className = (String) member.getValue();
-					attributesMap.put(member.getMemberName(),
-							new String[] { JdtUtils.resolveClassName(className, type) });
+					try {
+						attributesMap.put(member.getMemberName(), new Class[] { loadClass(type, className, cls) });
+					}
+					catch (ClassNotFoundException e) {
+					}
 				}
 				else {
 					attributesMap.put(member.getMemberName(), member.getValue().toString());
 				}
 			}
 			else {
-				attributesMap.put(member.getMemberName(), member.getValue().toString());
+				String className = (String) member.getValue();
+				try {
+					attributesMap.put(member.getMemberName(), loadClass(type, className, cls));
+				}
+				catch (ClassNotFoundException e) {
+				}
 			}
 		}
 		// support for empty string[]s
@@ -138,6 +157,23 @@ public abstract class JdtAnnotationUtils {
 		}
 		else {
 			attributesMap.put(member.getMemberName(), member.getValue());
+		}
+	}
+	
+	private static Class<?> loadClass(IType type, String className, ClassLoader cls) throws ClassNotFoundException {
+		className = JdtUtils.resolveClassName(className, type);
+		try {
+			IType newType = type.getJavaProject().findType(className);
+			if (newType != null) {
+				className = newType.getFullyQualifiedName('$');
+				return cls.loadClass(className);
+			}
+			else {
+				throw new ClassNotFoundException(className);
+			}
+		}
+		catch (JavaModelException e) {
+			throw new ClassNotFoundException(className);
 		}
 	}
 

@@ -20,9 +20,11 @@ import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Christian Dupuis
@@ -33,8 +35,8 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 	private final IType type;
 
 	private Map<String, Map<String, Object>> annotationMap = new HashMap<String, Map<String, Object>>();
-	
-	private Set<MethodMetadata> methodMetadata = new HashSet<MethodMetadata>();  
+
+	private Set<MethodMetadata> methodMetadata = new HashSet<MethodMetadata>();
 
 	public JdtAnnotationMetadata(IType type) {
 		super(type);
@@ -57,6 +59,27 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 	}
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+		return getAnnotationAttributes(annotationType, false);
+	}
+
+	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+		if (classValuesAsString) {
+			Map<String, Object> annotationAttributes = new HashMap<String, Object>(annotationMap.get(annotationType));
+			for (Map.Entry<String, Object> entry : annotationMap.get(annotationType).entrySet()) {
+				if (entry.getValue() instanceof Class) {
+					annotationAttributes.put(entry.getKey(), ClassUtils.getQualifiedName((Class<?>) entry.getValue()));
+				}
+				else if (entry.getValue() instanceof Class[]) {
+					Class[] classes = (Class[]) entry.getValue();
+					String[] classNames = new String[classes.length];
+					for (int i = 0; i < classes.length; i++) {
+						classNames[i] = ClassUtils.getQualifiedName(classes[i]);
+					}
+					annotationAttributes.put(entry.getKey(), classNames);
+				}
+			}
+			return annotationAttributes;
+		}
 		return annotationMap.get(annotationType);
 	}
 
@@ -75,7 +98,7 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 	public boolean hasMetaAnnotation(String metaAnnotationType) {
 		return false;
 	}
-	
+
 	private void init() {
 		try {
 			for (IAnnotation annotation : Introspector.getAllAnnotations(type)) {
@@ -92,7 +115,7 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 			throw new JdtMetadataReaderException(e);
 		}
 	}
-	
+
 	public IType getType() {
 		return type;
 	}
@@ -107,11 +130,7 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 	}
 
 	public boolean isAnnotated(String annotationType) {
-		return annotationMap.containsKey(annotationType);
+		return !ImportResource.class.getName().equals(annotationType) && annotationMap.containsKey(annotationType);
 	}
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		return getAnnotationAttributes(annotationType);
-	}
-	
 }

@@ -24,15 +24,22 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * @since 2.2.5
  */
 public class JdtMetadataReaderFactory implements MetadataReaderFactory {
-	
+
 	private final IJavaProject project;
-	
+
 	public JdtMetadataReaderFactory(IJavaProject project) {
 		this.project = project;
 	}
 
 	public MetadataReader getMetadataReader(String className) throws IOException {
 		IType type = JdtUtils.getJavaType(project.getProject(), className);
+		if (type == null && !className.contains("$")) {
+			int ix = className.lastIndexOf('.');
+			if (ix > 1) {
+				className = className.substring(0, ix) + "$" + className.substring(ix + 1, className.length());
+				type = JdtUtils.getJavaType(project.getProject(), className);
+			}
+		}
 		if (type == null) {
 			throw new IOException("Could not find " + className);
 		}
@@ -42,5 +49,5 @@ public class JdtMetadataReaderFactory implements MetadataReaderFactory {
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		throw new JdtMetadataReaderException("'getMetadataReader' is not supported");
 	}
-	
+
 }
