@@ -255,7 +255,7 @@
 
 	<!-- Event trace view -->
 	<extension point="org.eclipse.ui.views">
-		<view name="Spring AOP Event Trace"
+		<view name="AOP Event Trace"
 			icon="icons/full/obj16/console_view.gif"
 			category="org.springframework.ide.eclipse.ui.views"
 			class="org.springframework.ide.eclipse.aop.ui.tracing.EventTraceView"
