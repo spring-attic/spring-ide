@@ -448,7 +448,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	 */
 	public Set<IBeansImport> getImports() {
 		// Check the project if imports are enabled
-		IBeansProject project = BeansModelUtils.getParentOfClass(getElementParent(), IBeansProject.class);
+		IBeansProject project = BeansModelUtils.getParentOfClass(this, IBeansProject.class);
 		if (project != null && project.isImportsEnabled()) {
 			// Lazily initialization of this config
 			readConfig();
