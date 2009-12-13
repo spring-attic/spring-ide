@@ -300,13 +300,15 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 		Set<String> matchingBeans = new HashSet<String>();
 		for (IBean bean : beans) {
 			String beanClassName = ValidationRuleUtils.getBeanClassName(bean, context);
-			try {
-				Class<?> beanClass = ClassUtils.loadClass(beanClassName);
-				if (requiredType.isAssignableFrom(beanClass)) {
-					matchingBeans.add(bean.getElementName());
+			if (beanClassName != null) {
+				try {
+					Class<?> beanClass = ClassUtils.loadClass(beanClassName);
+					if (requiredType.isAssignableFrom(beanClass)) {
+						matchingBeans.add(bean.getElementName());
+					}
 				}
-			}
-			catch (ClassNotFoundException e) {
+				catch (ClassNotFoundException e) {
+				}
 			}
 		}
 		return (String[]) matchingBeans.toArray(new String[matchingBeans.size()]);
