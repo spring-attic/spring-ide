@@ -43,8 +43,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManager;
 import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManagerExtension;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
-import org.springframework.ide.eclipse.core.project.IProjectContributorState;
-import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
 
 /**
  * {@link IValidator} implementation that is responsible for validating the {@link IBeansModelElement}s.
@@ -52,10 +50,7 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorStateAwar
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansConfigValidator extends AbstractValidator implements IProjectContributorStateAware {
-
-	/** Internal state object */
-	private IProjectContributorState context = null;
+public class BeansConfigValidator extends AbstractValidator {
 
 	private Set<String> affectedBeans = new LinkedHashSet<String>();
 
@@ -122,8 +117,8 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 			else if (kind != IncrementalProjectBuilder.FULL_BUILD) {
 
 				// Now check for bean classes and java structure
-				TypeStructureState structureState = context.get(TypeStructureState.class);
-				BeansTypeHierachyState hierachyState = context.get(BeansTypeHierachyState.class);
+				TypeStructureState structureState = getProjectContributorState().get(TypeStructureState.class);
+				BeansTypeHierachyState hierachyState = getProjectContributorState().get(BeansTypeHierachyState.class);
 
 				if (structureState == null
 						|| structureState.hasStructuralChanges(resource, ITypeStructureCache.FLAG_ANNOTATION
@@ -191,7 +186,7 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 	@Override
 	protected IValidationContext createContext(IResourceModelElement rootElement, IResourceModelElement contextElement) {
 		if (rootElement instanceof IBeansConfig) {
-			return new BeansValidationContext((IBeansConfig) rootElement, contextElement, this.context);
+			return new BeansValidationContext((IBeansConfig) rootElement, contextElement);
 		}
 		return null;
 	}
@@ -223,10 +218,6 @@ public class BeansConfigValidator extends AbstractValidator implements IProjectC
 	@Override
 	protected IValidationElementLifecycleManager createValidationElementLifecycleManager() {
 		return new BeanElementLifecycleManager();
-	}
-
-	public void setProjectContributorState(IProjectContributorState context) {
-		this.context = context;
 	}
 
 	private static class BeanElementLifecycleManager implements IValidationElementLifecycleManagerExtension {

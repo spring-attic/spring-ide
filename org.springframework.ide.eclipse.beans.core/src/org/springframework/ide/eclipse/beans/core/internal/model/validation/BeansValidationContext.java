@@ -38,8 +38,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationProblemM
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
-import org.springframework.ide.eclipse.core.project.DefaultProjectContributorState;
-import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.Assert;
@@ -55,8 +53,8 @@ import org.w3c.dom.NodeList;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansValidationContext extends AbstractValidationContext implements IBeansValidationContext, IProjectContributorState {
-
+public class BeansValidationContext extends AbstractValidationContext implements IBeansValidationContext {
+ 
 	private static final char KEY_SEPARATOR_CHAR = '/';
 
 	private BeanDefinitionRegistry incompleteRegistry;
@@ -71,16 +69,8 @@ public class BeansValidationContext extends AbstractValidationContext implements
 
 	private final Map<AttributeDescriptor, List<ToolAnnotationData>> toolAnnotationLookupCache;
 
-	private final IProjectContributorState buildState;
-
 	public BeansValidationContext(IBeansConfig config, IResourceModelElement contextElement) {
-		this(config, contextElement, new DefaultProjectContributorState());
-	}
-	
-	public BeansValidationContext(IBeansConfig config, IResourceModelElement contextElement, IProjectContributorState context) {
 		super(config, contextElement);
-		
-		this.buildState = context;
 		
 		this.incompleteRegistry = createRegistry(config, contextElement, false);
 		this.completeRegistry = createRegistry(config, contextElement, true);
@@ -197,20 +187,6 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/**
 	 * {@inheritDoc}
 	 */
-	public <T> T get(Class<T> clazz) {
-		return buildState.get(clazz);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean hold(Object obj) {
-		return buildState.hold(obj);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Set<ValidationProblem> createProblems(IResourceModelElement element, String problemId, int severity,
 			String message, ValidationProblemAttribute... attributes) {
@@ -314,4 +290,5 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		}
 
 	}
+
 }

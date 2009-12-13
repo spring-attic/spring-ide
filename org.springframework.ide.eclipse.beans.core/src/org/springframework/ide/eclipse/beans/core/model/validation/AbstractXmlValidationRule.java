@@ -356,6 +356,13 @@ public abstract class AbstractXmlValidationRule implements IValidationRule<IBean
 			return delegateContext.getProjectClassLoaderSupport();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
+		public void addProblems(ValidationProblem... problems) {
+			delegateContext.addProblems(problems);
+		}
+
 	}
 
 }
