@@ -41,6 +41,8 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  */ 
 public class ImportedBeansConfig extends AbstractBeansConfig implements IImportedBeansConfig {
 
+	private IModelElement[] children = null;
+	
 	public ImportedBeansConfig(IBeansImport beansImport, Resource resource, Type type) {
 		super(beansImport, resource.getFilename(), type);
 		init(resource);
@@ -48,17 +50,7 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 
 	@Override
 	public IModelElement[] getElementChildren() {
-
-		List<ISourceModelElement> children = new ArrayList<ISourceModelElement>(imports);
-		children.addAll(aliases.values());
-		children.addAll(components);
-		children.addAll(beans.values());
-		Collections.sort(children, new Comparator<ISourceModelElement>() {
-			public int compare(ISourceModelElement element1, ISourceModelElement element2) {
-				return element1.getElementStartLine() - element2.getElementStartLine();
-			}
-		});
-		return children.toArray(new IModelElement[children.size()]);
+		return children;
 	}
 
 	@Override
@@ -83,6 +75,17 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 
 	protected void readFinish() {
 		isModelPopulated = true;
+		
+		List<ISourceModelElement> allChildren = new ArrayList<ISourceModelElement>(imports);
+		allChildren.addAll(aliases.values());
+		allChildren.addAll(components);
+		allChildren.addAll(beans.values());
+		Collections.sort(allChildren, new Comparator<ISourceModelElement>() {
+			public int compare(ISourceModelElement element1, ISourceModelElement element2) {
+				return element1.getElementStartLine() - element2.getElementStartLine();
+			}
+		});
+		children = allChildren.toArray(new IModelElement[allChildren.size()]);
 	}
 
 	protected void addBean(IBean bean) {

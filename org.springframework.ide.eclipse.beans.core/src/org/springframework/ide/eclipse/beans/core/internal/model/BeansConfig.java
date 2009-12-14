@@ -142,6 +142,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 	/** {@link BeanDefinitionRegistry} implementation for later use */
 	private volatile SimpleBeanDefinitionRegistry registry;
+	
+	/** Internal cache for all children */
+	private transient IModelElement[] children; 
 
 	/**
 	 * Creates a new {@link BeansConfig}.
@@ -161,16 +164,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 		try {
 			r.lock();
-			List<ISourceModelElement> children = new ArrayList<ISourceModelElement>(imports);
-			children.addAll(aliases.values());
-			children.addAll(components);
-			children.addAll(beans.values());
-			Collections.sort(children, new Comparator<ISourceModelElement>() {
-				public int compare(ISourceModelElement element1, ISourceModelElement element2) {
-					return element1.getElementStartLine() - element2.getElementStartLine();
-				}
-			});
-			return children.toArray(new IModelElement[children.size()]);
+			return children;
 		}
 		finally {
 			r.unlock();
@@ -202,7 +196,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				isBeanClassesMapPopulated = false;
 				beanClassesMap.clear();
 				problems.clear();
-
+				children = null;
+				
 				// Reset all config sets which contain this config
 				for (IBeansConfigEventListener eventListener : eventListeners) {
 					eventListener.onReset(this);
@@ -435,6 +430,19 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				}
 			}
 			finally {
+				
+				// Prepare the internal cache of all children for faster access
+				List<ISourceModelElement> allChildren = new ArrayList<ISourceModelElement>(imports);
+				allChildren.addAll(aliases.values());
+				allChildren.addAll(components);
+				allChildren.addAll(beans.values());
+				Collections.sort(allChildren, new Comparator<ISourceModelElement>() {
+					public int compare(ISourceModelElement element1, ISourceModelElement element2) {
+						return element1.getElementStartLine() - element2.getElementStartLine();
+					}
+				});
+				this.children = allChildren.toArray(new IModelElement[allChildren.size()]);
+				
 				this.isModelPopulated = true;
 				w.unlock();
 
