@@ -22,8 +22,7 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 
 /**
- * Factory class that creates *fresh* instances of non-thread safe
- * {@link IAspectDefinitionBuilder}.
+ * Factory class that creates *fresh* instances of non-thread safe {@link IAspectDefinitionBuilder}.
  * @author Christian Dupuis
  * @since 2.0
  */
