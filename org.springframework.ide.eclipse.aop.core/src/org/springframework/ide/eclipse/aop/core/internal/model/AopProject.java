@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,11 @@
 package org.springframework.ide.eclipse.aop.core.internal.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -31,7 +33,7 @@ public class AopProject implements IAopProject {
 
 	private IJavaProject project;
 
-	private Set<IAopReference> references = new LinkedHashSet<IAopReference>();
+	private Set<IAopReference> references = new CopyOnWriteArraySet<IAopReference>();
 
 	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -44,7 +46,7 @@ public class AopProject implements IAopProject {
 	}
 
 	public void addAopReference(IAopReference reference) {
-		AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference [" + reference + "]");
+		AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference '" + reference + "'");
 		try {
 			w.lock();
 			this.references.add(reference);
@@ -71,7 +73,7 @@ public class AopProject implements IAopProject {
 	}
 
 	public Set<IAopReference> getAllReferences() {
-		return this.references;
+		return Collections.unmodifiableSet(this.references);
 	}
 
 	public IJavaProject getProject() {

@@ -27,8 +27,10 @@ import org.springframework.util.ObjectUtils;
  */
 public class AopReference implements IAopReference, IAdaptable, IPersistableElement {
 
-	private String bean;
-
+	private String beanId;
+	
+	private transient IBean bean;
+	
 	private IResource beanResource;
 
 	private int beanStartline;
@@ -47,6 +49,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 			IBean bean) {
 		this(type, source, target, def, file, bean.getElementID(), bean.getElementResource(), bean
 				.getElementStartLine());
+		this.bean = bean;
 	}
 
 	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def, IResource file,
@@ -56,7 +59,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		this.target = target;
 		this.definition = def;
 		this.file = file;
-		this.bean = beanId;
+		this.beanId = beanId;
 		this.beanResource = beanResource;
 		this.beanStartline = beanStartline;
 	}
@@ -80,8 +83,9 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 					|| getTargetBeanId().equals(other.getTargetBeanId())) {
 				return true;
 			}
-			IBean bean1 = AopReferenceModelUtils.getBeanFromElementId(getTargetBeanId());
-			IBean bean2 = AopReferenceModelUtils.getBeanFromElementId(other.getTargetBeanId());
+			
+			IBean bean1 = getTargetBean();
+			IBean bean2 = other.getTargetBean();
 			return ObjectUtils.nullSafeEquals(bean1, bean2);
 		}
 		return false;
@@ -119,7 +123,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 	}
 
 	public String getTargetBeanId() {
-		return this.bean;
+		return this.beanId;
 	}
 
 	public IResource getTargetBeanResource() {
@@ -135,7 +139,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		int hashCode = ObjectUtils.nullSafeHashCode(source);
 		hashCode = 21 + ObjectUtils.nullSafeHashCode(target);
 		hashCode = 24 + ObjectUtils.nullSafeHashCode(file);
-		hashCode = 14 + ObjectUtils.nullSafeHashCode(bean);
+		hashCode = 14 + ObjectUtils.nullSafeHashCode(beanId);
 		hashCode = 12 + ObjectUtils.nullSafeHashCode(definition.getAspectStartLineNumber());
 		return hashCode;
 	}
@@ -151,7 +155,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		if (this.file != null) {
 			memento.putString(AopReferenceElementFactory.FILE_ATTRIBUTE, this.file.getFullPath().toString());
 		}
-		memento.putString(AopReferenceElementFactory.BEAN_ATTRIBUTE, this.bean);
+		memento.putString(AopReferenceElementFactory.BEAN_ATTRIBUTE, this.beanId);
 		memento.putInteger(AopReferenceElementFactory.BEAN_START_LINE_ATTRIBUTE, this.beanStartline);
 		if (this.beanResource != null) {
 			memento.putString(AopReferenceElementFactory.BEAN_FILE_ATTRIBUTE, this.beanResource.getFullPath()
@@ -167,7 +171,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
 		buf.append("Bean definition [");
-		buf.append(this.bean);
+		buf.append(this.beanId);
 		buf.append("] advise target [");
 		buf.append(this.target);
 		buf.append("] advise source [");
@@ -177,4 +181,11 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		buf.append("]");
 		return buf.toString();
 	}
+	
+	private synchronized IBean getTargetBean() {
+		if (bean == null) {
+			bean = AopReferenceModelUtils.getBeanFromElementId(beanId);
+		}
+		return bean;
+	} 
 }
