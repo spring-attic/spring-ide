@@ -17,18 +17,15 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.w3c.dom.Node;
 
 /**
- * Implementations of this interface are fine-grained objects responsible for
- * calculating hyperlinks.
+ * Implementations of this interface are fine-grained objects responsible for calculating hyperlinks.
  * <p>
- * Normally a hyperlink detector would extend the
- * {@link NamespaceHyperlinkDetectorSupport} class and register these
- * {@link IHyperlinkCalculator} instances in the
- * {@link NamespaceHyperlinkDetectorSupport#init()} method.
+ * Normally a hyperlink detector would extend the {@link NamespaceHyperlinkDetectorSupport} class and register these
+ * {@link IHyperlinkCalculator} instances in the {@link NamespaceHyperlinkDetectorSupport#init()} method.
  * @author Christian Dupuis
  * @since 2.0.2
  */
 public interface IHyperlinkCalculator {
-	
+
 	/**
 	 * Detect a hyperlink under the current context.
 	 * @param name the name of the attribute
@@ -40,7 +37,6 @@ public interface IHyperlinkCalculator {
 	 * @param hyperlinkRegion the region the hyperlink request was triggered
 	 * @param cursor the current cursor region
 	 */
-	IHyperlink createHyperlink(String name, String target, Node node,
-			Node parentNode, IDocument document,
+	IHyperlink createHyperlink(String name, String target, Node node, Node parentNode, IDocument document,
 			ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor);
 }

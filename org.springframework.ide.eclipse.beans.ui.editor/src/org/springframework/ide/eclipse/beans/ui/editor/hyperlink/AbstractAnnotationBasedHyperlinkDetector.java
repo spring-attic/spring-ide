@@ -37,7 +37,7 @@ public abstract class AbstractAnnotationBasedHyperlinkDetector implements IAnnot
 			Node annotation) {
 		if (region == null || textViewer == null) {
 			return null;
-		}
+		} 
 
 		IDocument document = textViewer.getDocument();
 		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region.getOffset());

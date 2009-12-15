@@ -23,23 +23,19 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.w3c.dom.Node;
 
 /**
- * {@link IHyperlinkCalculator} implementation that can be used to link to
- * {@link IMethod}.
+ * {@link IHyperlinkCalculator} implementation that can be used to link to {@link IMethod}.
  * <p>
- * Subclasses need to implement the {@link #calculateType} to return the parent
- * type of the method to link to.
+ * Subclasses need to implement the {@link #calculateType} to return the parent type of the method to link to.
  * @author Christian Dupuis
  * @since 2.0.2
  */
 public abstract class MethodHyperlinkCalculator implements IHyperlinkCalculator {
 
-	public IHyperlink createHyperlink(String name, String target, Node node,
-			Node parentNode, IDocument document, ITextViewer textViewer,
-			IRegion hyperlinkRegion, IRegion cursor) {
+	public IHyperlink createHyperlink(String name, String target, Node node, Node parentNode, IDocument document,
+			ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
 		IType type = calculateType(name, target, node, parentNode, document);
 		try {
-			IMethod method = Introspector.findMethod(type, target, -1,
-					Public.DONT_CARE, Static.DONT_CARE);
+			IMethod method = Introspector.findMethod(type, target, -1, Public.DONT_CARE, Static.DONT_CARE);
 			if (method != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, method);
 			}
@@ -50,10 +46,9 @@ public abstract class MethodHyperlinkCalculator implements IHyperlinkCalculator 
 	}
 
 	/**
-	 * Return the {@link IType} instances that should be used to query for the
-	 * {@link IMethod} identified by the given name <code>target</code>.
+	 * Return the {@link IType} instances that should be used to query for the {@link IMethod} identified by the given
+	 * name <code>target</code>.
 	 */
-	protected abstract IType calculateType(String name, String target,
-			Node node, Node parentNode, IDocument document);
+	protected abstract IType calculateType(String name, String target, Node node, Node parentNode, IDocument document);
 
 }

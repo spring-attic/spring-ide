@@ -19,21 +19,16 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMAttr;
-import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * {@link IHyperlinkDetector} implementation that delegates to {@link IHyperlinkDetector}s that are contributed over the
  * namespace extension point.
  * @author Christian Dupuis
  */
-@SuppressWarnings("restriction")
 public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
@@ -54,9 +49,9 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 				safeHylerlinks.add(hyperlink);
 			}
 		}
-		
+
 		hyperlinks = safeHylerlinks;
-		
+
 		if (hyperlinks.size() > 0) {
 			return hyperlinks.toArray(new IHyperlink[hyperlinks.size()]);
 		}
@@ -67,34 +62,9 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 
 	private void detectAnnotationBasedHyperlinks(ITextViewer textViewer, IRegion region,
 			boolean canShowMultipleHyperlinks, List<IHyperlink> hyperlinks, Node currentNode) {
+		ToolAnnotationBasedHyperlinkDetector detector = new ToolAnnotationBasedHyperlinkDetector();
 		if (currentNode != null) {
-			Attr currentAttr = BeansEditorUtils.getAttrByOffset(currentNode, region.getOffset());
-			IDOMAttr attr = (IDOMAttr) currentAttr;
-			if (currentAttr != null && region.getOffset() >= attr.getValueRegionStartOffset()) {
-				List<Element> appInfo = ToolAnnotationUtils.getApplicationInformationElements(currentNode, attr
-						.getLocalName());
-				for (Element elem : appInfo) {
-					NodeList children = elem.getChildNodes();
-					for (int j = 0; j < children.getLength(); j++) {
-						Node child = children.item(j);
-						if (child.getNodeType() == Node.ELEMENT_NODE) {
-							invokeAnnotationBasedHyperlinkDetector(textViewer, region, canShowMultipleHyperlinks,
-									hyperlinks, child);
-						}
-					}
-				}
-
-			}
-		}
-	}
-
-	private void invokeAnnotationBasedHyperlinkDetector(ITextViewer textViewer, IRegion region,
-			boolean canShowMultipleHyperlinks, List<IHyperlink> hyperlinks, Node child) {
-		IAnnotationBasedHyperlinkDetector[] detectors = NamespaceUtils.getAnnotationBasedHyperlinkDetector(child
-				.getNamespaceURI());
-		for (IAnnotationBasedHyperlinkDetector detector : detectors) {
-			IHyperlink[] detectedHyperlinks = detector.detectHyperlinks(textViewer, region, canShowMultipleHyperlinks,
-					child);
+			IHyperlink[] detectedHyperlinks = detector.detectHyperlinks(textViewer, region, canShowMultipleHyperlinks);
 			if (detectedHyperlinks != null) {
 				hyperlinks.addAll(Arrays.asList(detectedHyperlinks));
 			}
@@ -112,6 +82,29 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 					hyperlinks.addAll(Arrays.asList(detectedHyperlinks));
 				}
 			}
+		}
+	}
+
+	private class ToolAnnotationBasedHyperlinkDetector extends AbstractHyperlinkDetector implements IHyperlinkDetector {
+
+		private final ToolAnnotationBasedHyperlinkCalculator calculator = new ToolAnnotationBasedHyperlinkCalculator();
+
+		public IHyperlink createHyperlink(String name, String target, Node node, Node parentNode, IDocument document,
+				ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
+			return calculator.createHyperlink(name, target, node, parentNode, document, textViewer, hyperlinkRegion,
+					cursor);
+		}
+
+		@Override
+		public IHyperlink[] createHyperlinks(String name, String target, Node node, Node parentNode,
+				IDocument document, ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
+			return calculator.createHyperlinks(name, target, node, parentNode, document, textViewer, hyperlinkRegion,
+					cursor);
+		}
+
+		public boolean isLinkableAttr(Attr attr) {
+			// The calculator will know if the attribute is linkable or not
+			return true;
 		}
 	}
 

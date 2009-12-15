@@ -17,21 +17,20 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.w3c.dom.Node;
 
 /**
- * Similar interface to {@link IHyperlinkDetector}. The
- * {@link #detectHyperlinks} takes an additional argument for the annotation
- * node.
+ * Similar interface to {@link IHyperlinkDetector}. The {@link #detectHyperlinks} takes an additional argument for the
+ * annotation node.
  * @author Christian Dupuis
  * @since 2.0.3
  */
 public interface IAnnotationBasedHyperlinkDetector {
-	
+
 	/**
 	 * Detect hyperlinks based on given annotation
 	 * @param textViewer the text viewer
-	 * @param region the region 
+	 * @param region the region
 	 * @param canShowMultipleHyperlinks
 	 * @param annotation the resolved annotation for the hovered attribute
 	 */
-	IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region,
-			boolean canShowMultipleHyperlinks, Node annotation);
+	IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks,
+			Node annotation);
 }
