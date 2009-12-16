@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.core.internal.model.validation.Validation
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.project.DefaultProjectContributorState;
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.IProjectContributorStateAware;
 
@@ -114,7 +115,7 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 			subMonitor.done();
 		}
 	}
-	
+
 	private IValidationElementLifecycleManager initValidationElementCallback(IResource resource, int kind) {
 		IValidationElementLifecycleManager callback = createValidationElementLifecycleManager();
 		if (callback instanceof IValidationElementLifecycleManagerExtension) {
@@ -123,7 +124,7 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 		callback.init(resource);
 		return callback;
 	}
-	
+
 	private Set<ValidationProblem> validate(IValidationElementLifecycleManager callback,
 			Set<ValidationRuleDefinition> ruleDefinitions, SubProgressMonitor subMonitor) {
 		Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>();
@@ -132,7 +133,7 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 			if (context instanceof IProjectContributorStateAware) {
 				((IProjectContributorStateAware) context).setProjectContributorState(contributorState);
 			}
-			
+
 			if (context != null) {
 				IModelElementVisitor visitor = new ValidationVisitor(context, ruleDefinitions);
 				callback.getRootElement().accept(visitor, subMonitor);
@@ -167,7 +168,10 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 	/**
 	 * Returns the {@link IProjectContributorState}.
 	 */
-	protected IProjectContributorState getProjectContributorState() {
+	protected synchronized IProjectContributorState getProjectContributorState() {
+		if (contributorState == null) {
+			contributorState = new DefaultProjectContributorState();
+		}
 		return contributorState;
 	}
 
@@ -184,27 +188,34 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 	protected String getValidatorId() {
 		return validatorId;
 	}
-	
+
 	/**
 	 * Report the progress against the given <code>monitor</code>.
 	 */
 	protected void reportProgress(String message, IProgressMonitor monitor, Object... args) {
-		int errorCount = contributorState.get(ValidationProgressState.class).getErrorCount();
-		int warningCount = contributorState.get(ValidationProgressState.class).getWarningCount();
-		
-		if (errorCount > 0 || warningCount > 0) {
-			StringBuilder builder = new StringBuilder("(Found ");
-			if (errorCount > 0) {
-				builder.append(errorCount).append((errorCount > 1 ? " errors" : " error"));
+		ValidationProgressState progress = getProjectContributorState().get(ValidationProgressState.class);
+		if (progress != null) {
+			
+			int errorCount = progress.getErrorCount();
+			int warningCount = progress.getWarningCount();
+
+			if (errorCount > 0 || warningCount > 0) {
+				StringBuilder builder = new StringBuilder("(Found ");
+				if (errorCount > 0) {
+					builder.append(errorCount).append((errorCount > 1 ? " errors" : " error"));
+				}
+				if (errorCount > 0 && warningCount > 0) {
+					builder.append(" + ");
+				}
+				if (warningCount > 0) {
+					builder.append(warningCount).append((warningCount > 1 ? " warnings" : " warning"));
+				}
+				builder.append(") ").append(message);
+				monitor.subTask(String.format(builder.toString(), args));
 			}
-			if (errorCount > 0 && warningCount > 0) {
-				builder.append(" + ");
+			else {
+				monitor.subTask(String.format(message, args));
 			}
-			if (warningCount > 0) {
-				builder.append(warningCount).append((warningCount > 1 ? " warnings" : " warning"));
-			}
-			builder.append(") ").append(message);
-			monitor.subTask(String.format(builder.toString(), args));
 		}
 		else {
 			monitor.subTask(String.format(message, args));
