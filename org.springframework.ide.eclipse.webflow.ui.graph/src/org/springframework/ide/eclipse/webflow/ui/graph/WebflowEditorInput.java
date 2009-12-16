@@ -56,7 +56,7 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 	}
 
 	public boolean exists() {
-		return false;
+		return true;
 	}
 
 	public Object getAdapter(Class adapter) {

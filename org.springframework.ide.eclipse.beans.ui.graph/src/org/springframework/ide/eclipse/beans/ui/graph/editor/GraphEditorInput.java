@@ -159,7 +159,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	}
 
 	public boolean exists() {
-		return false;
+		return true;
 	}
 
 	public ImageDescriptor getImageDescriptor() {
