@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,14 +22,18 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.beans.BeanMetadataAttribute;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
+import org.springframework.context.annotation.ScannedGenericBeanDefinition;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
@@ -67,7 +71,12 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	public Bean(IModelElement parent, String name, String[] aliases, BeanDefinition definition) {
 		super(parent, name, definition);
-		this.definition = definition;
+		if (definition instanceof ScannedGenericBeanDefinition) {
+			this.definition = new InternalBeanDefinition((ScannedGenericBeanDefinition) definition);
+		}
+		else {
+			this.definition = definition;
+		}
 		this.aliases = aliases;
 	}
 
@@ -347,6 +356,25 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * 
+	 * @since 2.3.1
+	 */
+	private class InternalBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
+
+		private static final long serialVersionUID = 467157320316462045L;
+
+		public InternalBeanDefinition(AbstractBeanDefinition beanDefinition) {
+			setBeanClassName(beanDefinition.getBeanClassName());
+			setSource(beanDefinition.getSource());
+			setResource(beanDefinition.getResource());
+		}
+
+		public AnnotationMetadata getMetadata() {
+			return null;
 		}
 	}
 

@@ -20,13 +20,13 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -93,7 +93,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean).getBeanDefinition();
 		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils
 				.getMergedBeanDefinition(bean, context.getContextElement());
-		if (!(bd instanceof ScannedGenericBeanDefinition)
+		if (!(bd instanceof AnnotatedBeanDefinition)
 				&& mergedBd.getAutowireMode() == AbstractBeanDefinition.AUTOWIRE_NO
 				&& mergedBd.getFactoryBeanName() == null && mergedBd.getFactoryMethodName() == null) {
 
