@@ -28,39 +28,35 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader;
 
 /**
- * Default implementation of the {@link BeanDefinitionRegistry} interface: a
- * full-fledged bean factory based on bean definitions.
+ * Default implementation of the {@link BeanDefinitionRegistry} interface: a full-fledged bean factory based on bean
+ * definitions.
  * 
  * <p>
- * Typical usage is registering all bean definitions first (possibly read from a
- * bean definition file), before accessing beans. Bean definition lookup is
- * therefore an inexpensive operation in a local bean definition table.
+ * Typical usage is registering all bean definitions first (possibly read from a bean definition file), before accessing
+ * beans. Bean definition lookup is therefore an inexpensive operation in a local bean definition table.
  * 
  * <p>
- * Can be used as a standalone bean factory, or as a superclass for custom bean
- * factories. Note that readers for specific bean definition formats are
- * typically implemented separately rather than as bean factory subclasses.
+ * Can be used as a standalone bean factory, or as a superclass for custom bean factories. Note that readers for
+ * specific bean definition formats are typically implemented separately rather than as bean factory subclasses.
  * 
  * <p>
  * <b>Creation of bean instances is not supported!!!</b>
  * 
  * @author Torsten Juergeleit
  */
-public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
-		implements BeanDefinitionRegistry {
+public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory implements BeanDefinitionRegistry {
 	/**
-	 * Whether to allow re-registration of a different definition with the same
-	 * name
+	 * Whether to allow re-registration of a different definition with the same name
 	 */
 	private boolean allowBeanDefinitionOverriding = true;
 
-	/** Whether to allow re-registration of a different alias with the same
-	 *  name */
+	/**
+	 * Whether to allow re-registration of a different alias with the same name
+	 */
 	private boolean allowAliasOverriding = true;
 
 	/** Map of bean definition objects, keyed by bean name */
-	private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap
-		<String, BeanDefinition>();
+	private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<String, BeanDefinition>();
 
 	/** List of bean definition names, in registration order */
 	private final List<String> beanDefinitionNames = new ArrayList<String>();
@@ -82,19 +78,16 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	}
 
 	/**
-	 * Set if it should be allowed to override bean definitions by registering a
-	 * different definition with the same name, automatically replacing the
-	 * former. If not, an exception will be thrown. Default is true.
+	 * Set if it should be allowed to override bean definitions by registering a different definition with the same
+	 * name, automatically replacing the former. If not, an exception will be thrown. Default is true.
 	 */
-	public void setAllowBeanDefinitionOverriding(
-			boolean allowBeanDefinitionOverriding) {
+	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
 	}
 
 	/**
-	 * Set if it should be allowed to override aliases by registering a
-	 * different alias with the same name, automatically replacing the former.
-	 * If not, an exception will be thrown. Default is true.
+	 * Set if it should be allowed to override aliases by registering a different alias with the same name,
+	 * automatically replacing the former. If not, an exception will be thrown. Default is true.
 	 */
 	public void setAllowAliasOverriding(boolean allowAliasOverriding) {
 		this.allowAliasOverriding = allowAliasOverriding;
@@ -105,8 +98,7 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	}
 
 	public String[] getBeanDefinitionNames() {
-		return beanDefinitionNames.toArray(new String[beanDefinitionNames
-				.size()]);
+		return beanDefinitionNames.toArray(new String[beanDefinitionNames.size()]);
 	}
 
 	@Override
@@ -116,16 +108,14 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	}
 
 	/**
-	 * Return a RootBeanDefinition for the given bean name, by merging with the
-	 * parent if the given original bean definition is a child bean definition.
+	 * Return a RootBeanDefinition for the given bean name, by merging with the parent if the given original bean
+	 * definition is a child bean definition.
 	 * 
-	 * @param beanName
-	 *            the name of the bean definition
+	 * @param beanName the name of the bean definition
 	 * @return a merged RootBeanDefinition with overridden properties
 	 */
 	@Override
-	public BeanDefinition getBeanDefinition(String beanName)
-			throws BeansException {
+	public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
 		String transformedBeanName = transformedBeanName(beanName);
 		BeanDefinition bd = beanDefinitionMap.get(transformedBeanName);
 		if (bd == null) {
@@ -134,30 +124,30 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 		return getMergedBeanDefinition(transformedBeanName, bd);
 	}
 
-	public void registerBeanDefinition(String beanName,
-			BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
+	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
+			throws BeanDefinitionStoreException {
 		Object oldBeanDefinition = beanDefinitionMap.get(beanName);
 		if (oldBeanDefinition != null) {
 			if (!allowBeanDefinitionOverriding) {
-				throw new BeanDefinitionStoreException("Overrides bean '"
-						+ oldBeanDefinition + "'");
+				throw new BeanDefinitionStoreException("Overrides bean '" + oldBeanDefinition + "'");
 			}
-		} else {
+		}
+		else {
 			beanDefinitionNames.add(beanName);
 		}
 		beanDefinitionMap.put(beanName, beanDefinition);
 	}
 
 	@Override
-	public void registerAlias(String beanName, String alias)
-			throws BeanDefinitionStoreException {
+	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
 		try {
 			super.registerAlias(beanName, alias);
-		} catch (IllegalArgumentException e) {
-			throw new BeanDefinitionStoreException(
-					DefaultBeanDefinitionDocumentReader.ALIAS_ELEMENT,
-					beanName, e.getMessage());
-		} catch (BeanDefinitionStoreException e) {
+		}
+		catch (IllegalArgumentException e) {
+			throw new BeanDefinitionStoreException(DefaultBeanDefinitionDocumentReader.ALIAS_ELEMENT, beanName, e
+					.getMessage());
+		}
+		catch (BeanDefinitionStoreException e) {
 			if (!allowAliasOverriding) {
 				throw e;
 			}
@@ -165,8 +155,7 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	}
 
 	@Override
-	public Object createBean(String beanName,
-			RootBeanDefinition mergedBeanDefinition, Object[] args)
+	public Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args)
 			throws BeansException {
 		throw new BeanCreationException(beanName, "Not implemented");
 	}
@@ -184,8 +173,7 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 		return text.toString();
 	}
 
-	public void removeBeanDefinition(String beanName)
-			throws NoSuchBeanDefinitionException {
+	public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		throw new BeanCreationException(beanName, "Not implemented");
 	}
 

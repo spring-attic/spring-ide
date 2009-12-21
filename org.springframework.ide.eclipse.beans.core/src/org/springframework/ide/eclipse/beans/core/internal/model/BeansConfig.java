@@ -55,7 +55,6 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
@@ -140,9 +139,6 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	/** {@link BeanNameGenerator} implementation for later use */
 	private volatile BeanNameGenerator beanNameGenerator;
 
-	/** {@link BeanDefinitionRegistry} implementation for later use */
-	private volatile SimpleBeanDefinitionRegistry registry;
-	
 	/** Internal cache for all children */
 	private transient IModelElement[] children; 
 
@@ -309,7 +305,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						resource = new FileResource(file);
 					}
 
-					registry = new SimpleBeanDefinitionRegistry();
+					SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(new BeansDtdResolver(),
 							new PluggableSchemaResolver(PluggableSchemaResolver.class.getClassLoader()));
 					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file.getProject());
@@ -653,7 +649,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 			public void run() throws Exception {
 				postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansConfig.this,
-						beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
+						beans.values(), eventListener, problemReporter, beanNameGenerator, new SimpleBeanDefinitionRegistry(), problems));
 			}
 		});
 	}
