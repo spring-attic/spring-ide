@@ -88,8 +88,6 @@ public final class SpringCoreUtils {
 
 	private static XPathExpression expression;
 
-	private static DocumentBuilder builder;
-
 	static {
 		try {
 			XPathFactory newInstance = XPathFactory.newInstance();
@@ -613,20 +611,17 @@ public final class SpringCoreUtils {
 	}
 
 	private static synchronized DocumentBuilder getDocumentBuilder() {
-		if (builder != null) {
-			return builder;
-		}
 		try {
 			// this might fail on IBM J9; therefore we are using the catch to use the OSGi service
 			DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
-			builder = xmlFact.newDocumentBuilder();
+			return xmlFact.newDocumentBuilder();
 		}
 		catch (Exception e) {
 			ServiceReference reference = SpringCore.getDefault().getBundle().getBundleContext().getServiceReference(
 					DocumentBuilderFactory.class.getName());
 			if (reference != null) {
 				try {
-					builder = ((DocumentBuilderFactory) SpringCore.getDefault().getBundle().getBundleContext().getService(
+					return ((DocumentBuilderFactory) SpringCore.getDefault().getBundle().getBundleContext().getService(
 							reference)).newDocumentBuilder();
 				}
 				catch (Exception e1) {
@@ -635,7 +630,7 @@ public final class SpringCoreUtils {
 				SpringCore.getDefault().getBundle().getBundleContext().ungetService(reference);
 			}
 		}
-		return builder;
+		return null;
 	}
 
 	/**
