@@ -22,18 +22,16 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.beans.BeanMetadataAttribute;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
-import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig.InternalBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
@@ -356,25 +354,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 					}
 				}
 			}
-		}
-	}
-
-	/**
-	 * 
-	 * @since 2.3.1
-	 */
-	private class InternalBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
-
-		private static final long serialVersionUID = 467157320316462045L;
-
-		public InternalBeanDefinition(AbstractBeanDefinition beanDefinition) {
-			setBeanClassName(beanDefinition.getBeanClassName());
-			setSource(beanDefinition.getSource());
-			setResource(beanDefinition.getResource());
-		}
-
-		public AnnotationMetadata getMetadata() {
-			return null;
 		}
 	}
 

@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -55,16 +56,20 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DelegatingNamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor;
@@ -139,6 +144,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	/** {@link BeanNameGenerator} implementation for later use */
 	private volatile BeanNameGenerator beanNameGenerator;
 
+	/** {@link BeanDefinitionRegistry} implementation for later use */
+	private volatile SimpleBeanDefinitionRegistry registry;
+	
 	/** Internal cache for all children */
 	private transient IModelElement[] children; 
 
@@ -305,7 +313,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						resource = new FileResource(file);
 					}
 
-					SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+					registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
 					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(new BeansDtdResolver(),
 							new PluggableSchemaResolver(PluggableSchemaResolver.class.getClassLoader()));
 					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file.getProject());
@@ -649,7 +657,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 			public void run() throws Exception {
 				postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansConfig.this,
-						beans.values(), eventListener, problemReporter, beanNameGenerator, new SimpleBeanDefinitionRegistry(), problems));
+						beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
 			}
 		});
 	}
@@ -1069,4 +1077,39 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		}
 	}
 
+	/**
+	 * @since 2.3.1
+	 */
+	class ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry extends SimpleBeanDefinitionRegistry {
+		
+		@Override
+		public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
+				throws BeanDefinitionStoreException {
+			if (beanDefinition instanceof ScannedGenericBeanDefinition) {
+				super.registerBeanDefinition(beanName, new InternalBeanDefinition((ScannedGenericBeanDefinition) beanDefinition));
+			}
+			else {
+				super.registerBeanDefinition(beanName, beanDefinition);
+			}
+		}
+		
+	}
+	
+	/**
+	 * @since 2.3.1
+	 */
+	protected static class InternalBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
+
+		private static final long serialVersionUID = 467157320316462045L;
+
+		public InternalBeanDefinition(AbstractBeanDefinition beanDefinition) {
+			setBeanClassName(beanDefinition.getBeanClassName());
+			setSource(beanDefinition.getSource());
+			setResource(beanDefinition.getResource());
+		}
+
+		public AnnotationMetadata getMetadata() {
+			return null;
+		}
+	}
 }
