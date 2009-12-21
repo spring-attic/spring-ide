@@ -344,7 +344,6 @@ abstract class ResourceUtils {
 								holders.add(new StorageHolder((ZipEntryStorage) packageChild));
 							}
 						}
-
 					}
 					else if (p instanceof IFolder) {
 						deepAddChildren((IFolder) p, holders, parentPath);
