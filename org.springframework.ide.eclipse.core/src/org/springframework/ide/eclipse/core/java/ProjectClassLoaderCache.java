@@ -358,14 +358,14 @@ class ProjectClassLoaderCache {
 
 		private synchronized ClassLoader getJarClassLoader() {
 			if (jarClassLoader == null) {
-				Set<URL> jars = new HashSet<URL>();
-				Set<URL> dirs = new HashSet<URL>();
+				Set<URL> jars = new LinkedHashSet<URL>();
+				Set<URL> dirs = new LinkedHashSet<URL>();
 				for (URL url : urls) {
-					if (url.getPath().endsWith("/")) {
-						dirs.add(url);
+					if (shouldLoadFromParent(url)) {
+						jars.add(url);
 					}
 					else {
-						jars.add(url);
+						dirs.add(url);
 					}
 				}
 				if (useParentClassLoader) {
@@ -378,6 +378,17 @@ class ProjectClassLoaderCache {
 				directories = (URL[]) dirs.toArray(new URL[dirs.size()]);
 			}
 			return jarClassLoader;
+		}
+		
+		private boolean shouldLoadFromParent(URL url) {
+			String path = url.getPath();
+			if (path.endsWith(".jar")) {
+				return true;
+			}
+			else if (path.contains("/configuration/org.eclipse.osgi/bundles/")) {
+				return true;
+			}
+			return false;
 		}
 	}
 
