@@ -426,8 +426,7 @@ public class AopReferenceModelBuilderJob extends Job {
 						throw new OperationCanceledException();
 					}
 
-					AopLog
-							.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 									"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile.getFullPath()
 											.toString()));
 					monitor.subTask(Activator.getFormattedMessage("AopReferenceModelBuilder.buildingAopReferenceModel",
@@ -461,6 +460,7 @@ public class AopReferenceModelBuilderJob extends Job {
 			AopLog.logEnd(AopLog.BUILDER, PROCESSING_TOOK_MSG);
 		}
 		finally {
+			matcher.close();
 			// schedule marker update job
 			markerJob.schedule();
 		}

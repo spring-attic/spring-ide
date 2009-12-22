@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -98,6 +99,16 @@ public class AspectDefinitionMatcher {
 			}
 		}
 		return matches;
+	}
+	
+	public void close() {
+		for (Object pce : pointcutExpressionCache.values()) {
+			Field field = ReflectionUtils.findField(pce.getClass(), "shadowMatchCache");
+			field.setAccessible(true);
+			Map<?,?> shadowMatchCache = (Map<?, ?>) ReflectionUtils.getField(field, pce);
+			shadowMatchCache.clear();
+		}
+		pointcutExpressionCache.clear();
 	}
 
 	/**
