@@ -22,12 +22,16 @@ public interface IAopReference {
 	ADVICE_TYPE getAdviceType();
 
 	IMember getSource();
+	
+	int getSourceStartLine();
 
 	IAspectDefinition getDefinition();
 
 	IResource getResource();
 
 	IMember getTarget();
+	
+	int getTargetStartLine();
 
 	String getTargetBeanId();
 	

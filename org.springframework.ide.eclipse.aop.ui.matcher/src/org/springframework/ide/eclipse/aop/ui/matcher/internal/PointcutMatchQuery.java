@@ -42,8 +42,8 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.util.Assert;
 
 /**
- * {@link ISearchQuery} implementation matches pointcut expression on
- * {@link IBeansConfig}s that are contained in the given scope.
+ * {@link ISearchQuery} implementation matches pointcut expression on {@link IBeansConfig}s that are contained in the
+ * given scope.
  * @author Christian Dupuis
  * @since 2.0.2
  */
@@ -130,8 +130,7 @@ public class PointcutMatchQuery implements ISearchQuery {
 
 	private boolean isProxyTragetClass;
 
-	public PointcutMatchQuery(PointcutMatcherScope scope, String pattern,
-			boolean isProxyTragetClass) {
+	public PointcutMatchQuery(PointcutMatcherScope scope, String pattern, boolean isProxyTragetClass) {
 		Assert.notNull(scope);
 		this.scope = scope;
 		this.expression = pattern;
@@ -158,8 +157,8 @@ public class PointcutMatchQuery implements ISearchQuery {
 		return PointcutMatcherMessages.MatcherQuery_label;
 	}
 
-	private Set<IAopReference> getMatches(Set<IBean> beans,
-			IAspectDefinition definition, AspectDefinitionMatcher matcher) {
+	private Set<IAopReference> getMatches(Set<IBean> beans, IAspectDefinition definition,
+			AspectDefinitionMatcher matcher) {
 		Set<IAopReference> references = new HashSet<IAopReference>();
 		for (IBean bean : beans) {
 			IProject project = bean.getElementResource().getProject();
@@ -167,12 +166,10 @@ public class PointcutMatchQuery implements ISearchQuery {
 				String className = BeansModelUtils.getBeanClass(bean, null);
 				try {
 					Class<?> targetClass = ClassUtils.loadClass(className);
-					Set<IMethod> matchingMethods = matcher.matches(targetClass,
-							bean, definition, project);
+					Set<IMethod> matchingMethods = matcher.matches(targetClass, bean, definition, project);
 					for (IMethod method : matchingMethods) {
-						IAopReference ref = new AopReference(definition
-								.getType(), null, method, definition, bean
-								.getElementResource(), bean);
+						IAopReference ref = new AopReference(definition.getType(), null, -1, method, JdtUtils
+								.getLineNumber(method), definition, bean.getElementResource(), bean);
 						references.add(ref);
 					}
 				}
@@ -198,8 +195,7 @@ public class PointcutMatchQuery implements ISearchQuery {
 		final PointcutMatcherResult result = (PointcutMatcherResult) getSearchResult();
 		result.removeAll();
 
-		final IAspectDefinition definition = new PointcutDefinition(
-				isProxyTragetClass, expression);
+		final IAspectDefinition definition = new PointcutDefinition(isProxyTragetClass, expression);
 
 		for (final IModelElement element : scope.getModelElements()) {
 			if (monitor.isCanceled()) {
@@ -207,41 +203,30 @@ public class PointcutMatchQuery implements ISearchQuery {
 			}
 
 			final IModelElementVisitor visitor = new IModelElementVisitor() {
-				public boolean visit(final IModelElement element,
-						IProgressMonitor monitor) {
+				public boolean visit(final IModelElement element, IProgressMonitor monitor) {
 
 					if (element instanceof IBeansConfig) {
 						final IBeansConfig config = (IBeansConfig) element;
 
 						monitor.beginTask("Matching pointcut in file ["
-								+ config.getElementResource()
-										.getProjectRelativePath().toString()
-								+ "]", 100);
+								+ config.getElementResource().getProjectRelativePath().toString() + "]", 100);
 
-						IProject project = config.getElementResource()
-								.getProject();
+						IProject project = config.getElementResource().getProject();
 						try {
 							// get beans before messing around with the class
 							// loader
 							final Set<IBean> beans = config.getBeans();
 
-							getClassLoaderSupport(project)
-									.executeCallback(
-											new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
-												public void doWithActiveProjectClassLoader()
-														throws Throwable {
-													for (IAopReference reference : getMatches(
-															beans,
-															definition,
-															new AspectDefinitionMatcher())) {
-														Match match = new Match(
-																reference,
-																Match.UNIT_LINE,
-																-1, -1);
-														result.addMatch(match);
-													}
-												}
-											});
+							getClassLoaderSupport(project).executeCallback(
+									new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
+										public void doWithActiveProjectClassLoader() throws Throwable {
+											for (IAopReference reference : getMatches(beans, definition,
+													new AspectDefinitionMatcher())) {
+												Match match = new Match(reference, Match.UNIT_LINE, -1, -1);
+												result.addMatch(match);
+											}
+										}
+									});
 						}
 						catch (Throwable e) {
 						}
@@ -254,9 +239,7 @@ public class PointcutMatchQuery implements ISearchQuery {
 		}
 
 		Object[] args = new Object[] { new Integer(result.getMatchCount()) };
-		String message = MessageUtils.format(
-				PointcutMatcherMessages.MatcherQuery_status, args);
-		return new Status(IStatus.OK, PointcutMatcherPlugin.PLUGIN_ID, 0,
-				message, null);
+		String message = MessageUtils.format(PointcutMatcherMessages.MatcherQuery_status, args);
+		return new Status(IStatus.OK, PointcutMatcherPlugin.PLUGIN_ID, 0, message, null);
 	}
 }

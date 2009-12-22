@@ -73,6 +73,10 @@ import org.springframework.util.StringUtils;
  */
 public class AopReferenceModelBuilderJob extends Job {
 
+	private static final boolean SHOW_PROGRESS = System.getProperty(
+			"org.springframework.ide.eclipse.aop.core.internal.model.builder.show.progress", "false").equalsIgnoreCase(
+			"true");
+
 	public static final Object CONTENT_FAMILY = new Object();
 
 	private static final String PROCESSING_TOOK_MSG = "Processing took";
@@ -100,7 +104,7 @@ public class AopReferenceModelBuilderJob extends Job {
 		setPriority(Job.BUILD);
 		// make sure that only one Job at a time runs but without blocking the UI
 		setRule(new BlockingOnSelfSchedulingRule());
-		setSystem(true);
+		setSystem(!SHOW_PROGRESS);
 		setProperty(IProgressConstants.ICON_PROPERTY, AopCoreImages.DESC_OBJS_ASPECT);
 	}
 
@@ -218,8 +222,9 @@ public class AopReferenceModelBuilderJob extends Job {
 							}
 
 							if (jdtAspectMember != null) {
-								IAopReference ref = new AopReference(info.getType(), jdtAspectMember, jdtTargetType,
-										info, file, bean);
+								IAopReference ref = new AopReference(info.getType(), jdtAspectMember, JdtUtils
+										.getLineNumber(jdtAspectMember), jdtTargetType, JdtUtils
+										.getLineNumber(jdtTargetType), info, file, bean);
 								aopProject.addAopReference(ref);
 							}
 						}
@@ -245,7 +250,8 @@ public class AopReferenceModelBuilderJob extends Job {
 							Set<IMethod> matchingMethods = matcher.matches(targetClass, bean, info, aopProject
 									.getProject().getProject());
 							for (IMethod method : matchingMethods) {
-								IAopReference ref = new AopReference(info.getType(), jdtAspectMethod, method, info,
+								IAopReference ref = new AopReference(info.getType(), jdtAspectMethod, JdtUtils
+										.getLineNumber(jdtAspectMethod), method, JdtUtils.getLineNumber(method), info,
 										file, bean);
 								aopProject.addAopReference(ref);
 							}
@@ -426,7 +432,8 @@ public class AopReferenceModelBuilderJob extends Job {
 						throw new OperationCanceledException();
 					}
 
-					AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					AopLog
+							.log(AopLog.BUILDER, Activator.getFormattedMessage(
 									"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile.getFullPath()
 											.toString()));
 					monitor.subTask(Activator.getFormattedMessage("AopReferenceModelBuilder.buildingAopReferenceModel",
@@ -602,8 +609,10 @@ public class AopReferenceModelBuilderJob extends Job {
 								AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
 							}
 						}
-						AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
-								"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath().toString()));
+						AopLog
+								.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+										"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath()
+												.toString()));
 					}
 				}
 				// adding markers for exceptions that occurred during parsing

@@ -84,8 +84,8 @@ public class AopReferenceModelMarkerUtils {
 	public static void createTargetMarker(IAopReference reference, String markerId, IResource sourceResource) {
 		if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 			createProblemMarker(reference.getTarget().getResource(), "aspect declarations <"
-					+ reference.getDefinition().getAspectName() + ">", 1,
-					JdtUtils.getLineNumber(reference.getTarget()), markerId, sourceResource);
+					+ reference.getDefinition().getAspectName() + ">", 1, reference.getTargetStartLine(), markerId,
+					sourceResource);
 			if (reference.getTargetBeanResource() != null && reference.getTargetBeanStartline() > 0) {
 				createProblemMarker(reference.getTargetBeanResource(), "aspect declarations <"
 						+ reference.getDefinition().getAspectName() + ">", 1, reference.getTargetBeanStartline(),
@@ -94,8 +94,8 @@ public class AopReferenceModelMarkerUtils {
 		}
 		else {
 			createProblemMarker(reference.getTarget().getResource(), "advised by "
-					+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), 1, JdtUtils
-					.getLineNumber(reference.getTarget()), markerId, sourceResource);
+					+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), 1, reference
+					.getTargetStartLine(), markerId, sourceResource);
 			if (reference.getTargetBeanResource() != null && reference.getTargetBeanStartline() > 0) {
 				createProblemMarker(reference.getTargetBeanResource(), "advised by "
 						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), 1, reference
@@ -111,8 +111,8 @@ public class AopReferenceModelMarkerUtils {
 		if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
 				createProblemMarker(reference.getSource().getResource(), "declared on "
-						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, JdtUtils
-						.getLineNumber(reference.getSource()), markerId, sourceResource);
+						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, reference
+						.getSourceStartLine(), markerId, sourceResource);
 			}
 			else {
 				createProblemMarker(sourceResource, "declared on "
@@ -123,8 +123,8 @@ public class AopReferenceModelMarkerUtils {
 		else {
 			if (reference.getSource() != null) {
 				createProblemMarker(reference.getSource().getResource(), "advises "
-						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, JdtUtils
-						.getLineNumber(reference.getSource()), markerId, sourceResource);
+						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, reference
+						.getSourceStartLine()	, markerId, sourceResource);
 			}
 			createProblemMarker(reference.getDefinition().getResource(), "advises "
 					+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, reference

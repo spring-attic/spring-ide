@@ -27,9 +27,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class AopReference implements IAopReference, IAdaptable, IPersistableElement {
 
-	private String beanId;
-	
 	private transient IBean bean;
+	
+	private String beanId;
 	
 	private IResource beanResource;
 
@@ -40,23 +40,29 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 	private IResource file;
 
 	private IMember source;
+	
+	private int sourceStartLine;
 
 	private IMember target;
+	
+	private int targetStartLine;
 
 	private ADVICE_TYPE type;
 
-	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def, IResource file,
+	public AopReference(ADVICE_TYPE type, IMember source, int sourceStartLine, IMember target, int targetStartLine, IAspectDefinition def, IResource file,
 			IBean bean) {
-		this(type, source, target, def, file, bean.getElementID(), bean.getElementResource(), bean
+		this(type, source, sourceStartLine, target, targetStartLine, def, file, bean.getElementID(), bean.getElementResource(), bean
 				.getElementStartLine());
 		this.bean = bean;
 	}
 
-	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IAspectDefinition def, IResource file,
+	public AopReference(ADVICE_TYPE type, IMember source, int sourceStartLine, IMember target, int targetStartLine, IAspectDefinition def, IResource file,
 			String beanId, IResource beanResource, int beanStartline) {
 		this.type = type;
 		this.source = source;
+		this.sourceStartLine = sourceStartLine;
 		this.target = target;
+		this.targetStartLine = targetStartLine;
 		this.definition = def;
 		this.file = file;
 		this.beanId = beanId;
@@ -64,9 +70,9 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		this.beanStartline = beanStartline;
 	}
 
-	public AopReference(ADVICE_TYPE type, IMember source, IMember target, IResource file, String beanId,
+	public AopReference(ADVICE_TYPE type, IMember source, int sourceStartLine, IMember target, int targetStartLine, IResource file, String beanId,
 			IResource beanResource, int beanStartline) {
-		this(type, source, target, null, file, beanId, beanResource, beanStartline);
+		this(type, source, sourceStartLine, target, targetStartLine, null, file, beanId, beanResource, beanStartline);
 	}
 
 	@Override
@@ -118,6 +124,10 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		return this.source;
 	}
 
+	public int getSourceStartLine() {
+		return this.sourceStartLine;
+	}
+
 	public IMember getTarget() {
 		return this.target;
 	}
@@ -131,7 +141,11 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 	}
 
 	public int getTargetBeanStartline() {
-		return beanStartline;
+		return this.beanStartline;
+	}
+
+	public int getTargetStartLine() {
+		return this.targetStartLine;
 	}
 
 	@Override
@@ -148,9 +162,12 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		memento.putString(AopReferenceElementFactory.ADVICE_TYPE_ATTRIBUTE, this.type.toString());
 		if (this.source != null) {
 			memento.putString(AopReferenceElementFactory.SOURCE_ATTRIBUTE, this.source.getHandleIdentifier());
+			memento.putInteger(AopReferenceElementFactory.SOURCE_START_LINE_ATTRIBUTE, this.sourceStartLine);
+			
 		}
 		if (this.target != null) {
 			memento.putString(AopReferenceElementFactory.TARGET_ATTRIBUTE, this.target.getHandleIdentifier());
+			memento.putInteger(AopReferenceElementFactory.TARGET_START_LINE_ATTRIBUTE, this.targetStartLine);
 		}
 		if (this.file != null) {
 			memento.putString(AopReferenceElementFactory.FILE_ATTRIBUTE, this.file.getFullPath().toString());
@@ -162,7 +179,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 					.toString());
 		}
 	}
-
+	
 	public void setDefinition(IAspectDefinition definition) {
 		this.definition = definition;
 	}
@@ -181,7 +198,7 @@ public class AopReference implements IAopReference, IAdaptable, IPersistableElem
 		buf.append("]");
 		return buf.toString();
 	}
-	
+
 	private synchronized IBean getTargetBean() {
 		if (bean == null) {
 			bean = AopReferenceModelUtils.getBeanFromElementId(beanId);

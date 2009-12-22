@@ -449,7 +449,7 @@ public final class SpringCoreUtils {
 
 	private static void scheduleBuildInBackground(final IProject project, ISchedulingRule rule,
 			final Object[] jobFamilies) {
-		Job job = new WorkspaceJob("Build workspace") {
+		Job job = new WorkspaceJob("Building workspace") {
 
 			@Override
 			public boolean belongsTo(Object family) {
@@ -481,7 +481,7 @@ public final class SpringCoreUtils {
 			job.setRule(rule);
 		}
 		job.setPriority(Job.BUILD);
-		job.setSystem(true);
+		// job.setSystem(true);
 		job.schedule();
 	}
 
