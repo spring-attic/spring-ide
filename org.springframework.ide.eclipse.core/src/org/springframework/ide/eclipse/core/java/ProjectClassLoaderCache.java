@@ -17,7 +17,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +51,7 @@ class ProjectClassLoaderCache {
 
 	private static final String FILE_SCHEME = "file";
 
-	private static ClassLoader addClassLoaderToCache(IProject project, Set<URL> urls, boolean useParentClassLoader) {
+	private static ClassLoader addClassLoaderToCache(IProject project, List<URL> urls, boolean useParentClassLoader) {
 		synchronized (CLASSLOADER_CACHE) {
 			int nEntries = CLASSLOADER_CACHE.size();
 			if (nEntries >= CACHE_SIZE) {
@@ -89,7 +88,7 @@ class ProjectClassLoaderCache {
 	/**
 	 * Add {@link URL}s to the given set of <code>paths</code>.
 	 */
-	private static void addClassPathUrls(IProject project, Set<URL> paths, Set<IProject> resolvedProjects) {
+	private static void addClassPathUrls(IProject project, List<URL> paths, Set<IProject> resolvedProjects) {
 
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
@@ -154,7 +153,7 @@ class ProjectClassLoaderCache {
 		}
 	}
 
-	private static void addUri(Set<URL> paths, URI uri) throws MalformedURLException {
+	private static void addUri(List<URL> paths, URI uri) throws MalformedURLException {
 		File file = new File(uri);
 		if (file.exists()) {
 			if (file.isDirectory()) {
@@ -166,7 +165,7 @@ class ProjectClassLoaderCache {
 		}
 	}
 
-	private static void covertPathToUrl(IProject project, Set<URL> paths, IPath path) throws MalformedURLException {
+	private static void covertPathToUrl(IProject project, List<URL> paths, IPath path) throws MalformedURLException {
 		if (path != null && project != null && path.removeFirstSegments(1) != null
 				&& project.findMember(path.removeFirstSegments(1)) != null) {
 
@@ -221,13 +220,13 @@ class ProjectClassLoaderCache {
 	 * @param useParentClassLoader use the OSGi classloader as parent
 	 * @return a set of {@link URL}s that can be used to construct a {@link URLClassLoader}
 	 */
-	private static Set<URL> getClassPathUrls(IProject project, boolean useParentClassLoader) {
+	private static List<URL> getClassPathUrls(IProject project, boolean useParentClassLoader) {
 		// prepare for tracing
 		long start = System.currentTimeMillis();
 		try {
 
 			// needs to be linked to preserve ordering
-			Set<URL> paths = new LinkedHashSet<URL>();
+			List<URL> paths = new ArrayList<URL>();
 			if (!useParentClassLoader) {
 				// add required libraries from osgi bundles
 				paths.addAll(JdtUtils.getBundleClassPath("org.springframework.core"));
@@ -277,7 +276,7 @@ class ProjectClassLoaderCache {
 	protected static ClassLoader getClassLoader(IProject project, boolean useParentClassLoader) {
 		ClassLoader classLoader = findClassLoaderInCache(project, useParentClassLoader);
 		if (classLoader == null) {
-			Set<URL> urls = getClassPathUrls(project, useParentClassLoader);
+			List<URL> urls = getClassPathUrls(project, useParentClassLoader);
 			classLoader = addClassLoaderToCache(project, urls, useParentClassLoader);
 		}
 		return classLoader;
@@ -307,9 +306,9 @@ class ProjectClassLoaderCache {
 
 		private boolean useParentClassLoader;
 
-		public ClassLoaderCacheEntry(IProject project, Set<URL> urls, boolean useParentClassLoader) {
+		public ClassLoaderCacheEntry(IProject project, List<URL> urls, boolean useParentClassLoader) {
 			this.project = project;
-			this.urls = (URL[]) urls.toArray(new URL[urls.size()]);
+			this.urls = urls.toArray(new URL[urls.size()]);
 			this.useParentClassLoader = useParentClassLoader;
 			markAsAccessed();
 			JavaCore.addElementChangedListener(this, ElementChangedEvent.POST_CHANGE);
@@ -358,8 +357,8 @@ class ProjectClassLoaderCache {
 
 		private synchronized ClassLoader getJarClassLoader() {
 			if (jarClassLoader == null) {
-				Set<URL> jars = new LinkedHashSet<URL>();
-				Set<URL> dirs = new LinkedHashSet<URL>();
+				List<URL> jars = new ArrayList<URL>();
+				List<URL> dirs = new ArrayList<URL>();
 				for (URL url : urls) {
 					if (shouldLoadFromParent(url)) {
 						jars.add(url);
@@ -375,17 +374,17 @@ class ProjectClassLoaderCache {
 				else {
 					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]));
 				}
-				directories = (URL[]) dirs.toArray(new URL[dirs.size()]);
+				directories = dirs.toArray(new URL[dirs.size()]);
 			}
 			return jarClassLoader;
 		}
 		
 		private boolean shouldLoadFromParent(URL url) {
 			String path = url.getPath();
-			if (path.endsWith(".jar")) {
+			if (path.endsWith(".jar") || path.endsWith(".zip")) {
 				return true;
 			}
-			else if (path.contains("/configuration/org.eclipse.osgi/bundles/")) {
+			else if (path.contains("/org.eclipse.osgi/bundles/")) {
 				return true;
 			}
 			return false;
