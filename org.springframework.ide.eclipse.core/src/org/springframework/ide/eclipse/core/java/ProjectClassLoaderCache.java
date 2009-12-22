@@ -17,6 +17,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -357,7 +358,7 @@ class ProjectClassLoaderCache {
 
 		private synchronized ClassLoader getJarClassLoader() {
 			if (jarClassLoader == null) {
-				List<URL> jars = new ArrayList<URL>();
+				Set<URL> jars = new LinkedHashSet<URL>();
 				List<URL> dirs = new ArrayList<URL>();
 				for (URL url : urls) {
 					if (shouldLoadFromParent(url)) {
