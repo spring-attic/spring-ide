@@ -76,7 +76,12 @@ public abstract class AbstractAspectDefinitionBuilder implements IAspectDefiniti
 		}
 		finally {
 			if (model != null) {
-				model.releaseFromRead();
+				try {
+					model.releaseFromRead();
+				}
+				catch (Exception e) {
+					// sometimes WTP throws a NPE in concurrency situations
+				}
 			}
 		}
 		return aspectInfos;
