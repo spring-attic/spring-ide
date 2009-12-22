@@ -31,7 +31,7 @@ import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig.InternalBeanDefinition;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig.InternalScannedGenericBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
@@ -70,7 +70,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	public Bean(IModelElement parent, String name, String[] aliases, BeanDefinition definition) {
 		super(parent, name, definition);
 		if (definition instanceof ScannedGenericBeanDefinition) {
-			this.definition = new InternalBeanDefinition((ScannedGenericBeanDefinition) definition);
+			this.definition = new InternalScannedGenericBeanDefinition((ScannedGenericBeanDefinition) definition);
 		}
 		else {
 			this.definition = definition;

@@ -146,9 +146,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 	/** {@link BeanDefinitionRegistry} implementation for later use */
 	private volatile SimpleBeanDefinitionRegistry registry;
-	
+
 	/** Internal cache for all children */
-	private transient IModelElement[] children; 
+	private transient IModelElement[] children;
 
 	/**
 	 * Creates a new {@link BeansConfig}.
@@ -201,7 +201,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				beanClassesMap.clear();
 				problems.clear();
 				children = null;
-				
+
 				// Reset all config sets which contain this config
 				for (IBeansConfigEventListener eventListener : eventListeners) {
 					eventListener.onReset(this);
@@ -434,7 +434,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				}
 			}
 			finally {
-				
+
 				// Prepare the internal cache of all children for faster access
 				List<ISourceModelElement> allChildren = new ArrayList<ISourceModelElement>(imports);
 				allChildren.addAll(aliases.values());
@@ -446,7 +446,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					}
 				});
 				this.children = allChildren.toArray(new IModelElement[allChildren.size()]);
-				
+
 				this.isModelPopulated = true;
 				w.unlock();
 
@@ -507,10 +507,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 		// Create special ReaderEventListener that essentially just passes through component definitions
 		ReaderEventListener eventListener = new BeansConfigPostProcessorReaderEventListener();
-		
+
 		// Collect the beans from this config and all imported configs
 		List<IBean> beansClone = new ArrayList<IBean>();
-		
+
 		// Important: don't use getBeans or getComponents on this instance -> will lock
 		beansClone.addAll(beans.values());
 		for (IBeansComponent component : components) {
@@ -1078,31 +1078,36 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	}
 
 	/**
+	 * Extension to {@link SimpleBeanDefinitionRegistry} that suppresses registrations of
+	 * {@link ScannedGenericBeanDefinition} instances as those contain references to the a classloader which we want
+	 * to discard.
 	 * @since 2.3.1
 	 */
 	class ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry extends SimpleBeanDefinitionRegistry {
-		
+
 		@Override
 		public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 				throws BeanDefinitionStoreException {
 			if (beanDefinition instanceof ScannedGenericBeanDefinition) {
-				super.registerBeanDefinition(beanName, new InternalBeanDefinition((ScannedGenericBeanDefinition) beanDefinition));
+				super.registerBeanDefinition(beanName, new InternalScannedGenericBeanDefinition(
+						(ScannedGenericBeanDefinition) beanDefinition));
 			}
 			else {
 				super.registerBeanDefinition(beanName, beanDefinition);
 			}
 		}
-		
 	}
-	
+
 	/**
+	 * Alternative to {@link ScannedGenericBeanDefinition} that rejects the internal dependency to a ClassLoader hold
+	 * by the {@link AnnotationMetadata}.
 	 * @since 2.3.1
 	 */
-	protected static class InternalBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
+	protected static class InternalScannedGenericBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
 
 		private static final long serialVersionUID = 467157320316462045L;
 
-		public InternalBeanDefinition(AbstractBeanDefinition beanDefinition) {
+		public InternalScannedGenericBeanDefinition(AbstractBeanDefinition beanDefinition) {
 			setBeanClassName(beanDefinition.getBeanClassName());
 			setSource(beanDefinition.getSource());
 			setResource(beanDefinition.getResource());
