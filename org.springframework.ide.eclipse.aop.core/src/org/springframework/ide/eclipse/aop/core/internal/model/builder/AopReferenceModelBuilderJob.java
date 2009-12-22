@@ -145,11 +145,11 @@ public class AopReferenceModelBuilderJob extends Job {
 				}
 			}
 			if (!monitor.isCanceled()) {
-//				long start = System.currentTimeMillis();
-//				System.out.println(String.format("- building aop model for '%s' resources", affectedResources.size()));
+				long start = System.currentTimeMillis();
+				System.out.println(String.format("- building aop model for '%s' resources", affectedResources.size()));
 				this.buildAopModel(monitor);
-//				System.out.println(String
-//						.format("- aop model building took '%s'", (System.currentTimeMillis() - start)));
+				System.out.println(String
+						.format("- aop model building took '%s'", (System.currentTimeMillis() - start)));
 			}
 			else {
 				return Status.CANCEL_STATUS;
@@ -602,10 +602,8 @@ public class AopReferenceModelBuilderJob extends Job {
 								AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
 							}
 						}
-						AopLog
-								.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
-										"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath()
-												.toString()));
+						AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+								"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath().toString()));
 					}
 				}
 				// adding markers for exceptions that occurred during parsing

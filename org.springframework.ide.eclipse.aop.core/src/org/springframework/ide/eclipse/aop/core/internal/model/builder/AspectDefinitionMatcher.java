@@ -106,6 +106,14 @@ public class AspectDefinitionMatcher {
 			Field field = ReflectionUtils.findField(pce.getClass(), "shadowMatchCache");
 			field.setAccessible(true);
 			Map<?,?> shadowMatchCache = (Map<?, ?>) ReflectionUtils.getField(field, pce);
+			
+			try {
+				Class<?> resolvedTypeClass = pce.getClass().getClassLoader().loadClass("org.aspectj.weaver.ResolvedType");
+				Method resetPrimitivesMethod = resolvedTypeClass.getMethod("resetPrimitives");
+				resetPrimitivesMethod.invoke(resolvedTypeClass);
+			}
+			catch (Exception e) {
+			}
 			shadowMatchCache.clear();
 		}
 		pointcutExpressionCache.clear();

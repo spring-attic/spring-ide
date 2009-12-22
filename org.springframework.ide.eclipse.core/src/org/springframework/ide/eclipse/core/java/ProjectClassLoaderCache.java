@@ -297,7 +297,7 @@ class ProjectClassLoaderCache {
 
 		private URL[] directories;
 
-		private ClassLoader jarClassLoader;
+		private URLClassLoader jarClassLoader;
 
 		private long lastAccess;
 
@@ -318,6 +318,7 @@ class ProjectClassLoaderCache {
 		public void dispose() {
 			JavaCore.removeElementChangedListener(this);
 			this.urls = null;
+			this.jarClassLoader = null;
 		}
 
 		public void elementChanged(ElementChangedEvent event) {
@@ -355,7 +356,7 @@ class ProjectClassLoaderCache {
 			return this.project.equals(project)
 					&& Boolean.valueOf(this.useParentClassLoader).equals(Boolean.valueOf(useParentClassLoader));
 		}
-
+		
 		private synchronized ClassLoader getJarClassLoader() {
 			if (jarClassLoader == null) {
 				Set<URL> jars = new LinkedHashSet<URL>();
