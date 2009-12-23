@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,6 @@ import org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage;
 
 /**
  * This is a collection of UI-related helper methods.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -85,9 +84,8 @@ import org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage;
 public final class SpringUIUtils {
 
 	/**
-	 * Returns the standard display to be used. The method first checks, if the
-	 * thread calling this method has an associated display. If so, this display
-	 * is returned. Otherwise the method returns the default display.
+	 * Returns the standard display to be used. The method first checks, if the thread calling this method has an
+	 * associated display. If so, this display is returned. Otherwise the method returns the default display.
 	 */
 	public static Display getStandardDisplay() {
 		Display display = Display.getCurrent();
@@ -100,17 +98,15 @@ public final class SpringUIUtils {
 	/**
 	 * Returns a button with the given label and selection listener.
 	 */
-	public static Button createButton(Composite parent, String labelText,
-			SelectionListener listener) {
+	public static Button createButton(Composite parent, String labelText, SelectionListener listener) {
 		return createButton(parent, labelText, listener, 0, true);
 	}
 
 	/**
-	 * Returns a button with the given label, indentation, enablement and
-	 * selection listener.
+	 * Returns a button with the given label, indentation, enablement and selection listener.
 	 */
-	public static Button createButton(Composite parent, String labelText,
-			SelectionListener listener, int indentation, boolean enabled) {
+	public static Button createButton(Composite parent, String labelText, SelectionListener listener, int indentation,
+			boolean enabled) {
 		Button button = new Button(parent, SWT.PUSH);
 		button.setFont(parent.getFont());
 		button.setText(labelText);
@@ -119,10 +115,8 @@ public final class SpringUIUtils {
 
 		FontMetrics fontMetrics = getFontMetrics(button);
 		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		int widthHint = Dialog.convertHorizontalDLUsToPixels(fontMetrics,
-				IDialogConstants.BUTTON_WIDTH);
-		gd.widthHint = Math.max(widthHint, button.computeSize(SWT.DEFAULT,
-				SWT.DEFAULT, true).x);
+		int widthHint = Dialog.convertHorizontalDLUsToPixels(fontMetrics, IDialogConstants.BUTTON_WIDTH);
+		gd.widthHint = Math.max(widthHint, button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
 		gd.horizontalIndent = indentation;
 		button.setLayoutData(gd);
 		return button;
@@ -149,17 +143,14 @@ public final class SpringUIUtils {
 	/**
 	 * Returns a text field with the given label and horizontal indentation.
 	 */
-	public static Text createTextField(Composite parent, String labelText,
-			int indentation) {
+	public static Text createTextField(Composite parent, String labelText, int indentation) {
 		return createTextField(parent, labelText, indentation, 0);
 	}
 
 	/**
-	 * Returns a text field with the given label, horizontal indentation and
-	 * width hint.
+	 * Returns a text field with the given label, horizontal indentation and width hint.
 	 */
-	public static Text createTextField(Composite parent, String labelText,
-			int indentation, int widthHint) {
+	public static Text createTextField(Composite parent, String labelText, int indentation, int widthHint) {
 		Composite textArea = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 2;
@@ -203,16 +194,14 @@ public final class SpringUIUtils {
 	}
 
 	/**
-	 * Displays specified preferences or property page and returns
-	 * <code>true</code> if <code>PreferenceDialog.OK</code> was selected.
+	 * Displays specified preferences or property page and returns <code>true</code> if <code>PreferenceDialog.OK</code>
+	 * was selected.
 	 */
-	public static boolean showPreferenceDialog(String propertyPageId,
-			IProject project, Map<String, Object> data) {
+	public static boolean showPreferenceDialog(String propertyPageId, IProject project, Map<String, Object> data) {
 		IPreferenceNode targetNode = null;
 
 		PropertyPageManager pageManager = new PropertyPageManager();
-		PropertyPageContributorManager.getManager().contribute(pageManager,
-				project);
+		PropertyPageContributorManager.getManager().contribute(pageManager, project);
 
 		IPreferenceNode[] nodes = pageManager.getRootSubNodes();
 		for (IPreferenceNode node : nodes) {
@@ -222,22 +211,19 @@ public final class SpringUIUtils {
 			}
 		}
 		if (targetNode != null) {
-			return openPreferenceNode(propertyPageId, targetNode,
-					SpringUIMessages.PropertiesPage_title + project.getName(),
-					project, data);
+			return openPreferenceNode(propertyPageId, targetNode, SpringUIMessages.PropertiesPage_title
+					+ project.getName(), project, data);
 		}
 		return false;
 	}
 
-	private static boolean openPreferenceNode(final String propertyPageId,
-			final IPreferenceNode targetNode, final String title,
-			Object element, Map<String, Object> data) {
+	private static boolean openPreferenceNode(final String propertyPageId, final IPreferenceNode targetNode,
+			final String title, Object element, Map<String, Object> data) {
 
 		PreferenceManager manager = new PreferenceManager();
 		manager.addToRoot(targetNode);
-		final PropertyDialog dialog = new PropertyDialog(SpringUIPlugin
-				.getActiveWorkbenchShell(), manager, new StructuredSelection(
-				element));
+		final PropertyDialog dialog = new PropertyDialog(SpringUIPlugin.getActiveWorkbenchShell(), manager,
+				new StructuredSelection(element));
 
 		if (propertyPageId != null) {
 			dialog.setSelectedNode(propertyPageId);
@@ -270,17 +256,15 @@ public final class SpringUIUtils {
 	}
 
 	/**
-	 * Returns the <code>ITextEditor</code> instance for given
-	 * <code>IEditorPart</code> or <code>null</code> for any non text
-	 * editor.
+	 * Returns the <code>ITextEditor</code> instance for given <code>IEditorPart</code> or <code>null</code> for any non
+	 * text editor.
 	 */
 	public static ITextEditor getTextEditor(IEditorPart part) {
 		if (part instanceof ITextEditor) {
 			return (ITextEditor) part;
 		}
 		else if (part instanceof IAdaptable) {
-			return (ITextEditor) ((IAdaptable) part)
-					.getAdapter(ITextEditor.class);
+			return (ITextEditor) ((IAdaptable) part).getAdapter(ITextEditor.class);
 		}
 		return null;
 	}
@@ -299,8 +283,7 @@ public final class SpringUIUtils {
 			IDocument document = provider.getDocument(input);
 			try {
 				IRegion lineRegion = document.getLineInformation(line - 1);
-				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion
-						.getLength());
+				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
 			}
 			catch (BadLocationException e) {
 				// ignore if specified line is not available in document
@@ -316,8 +299,7 @@ public final class SpringUIUtils {
 	/**
 	 * Opens given model element in associated editor.
 	 */
-	public static IEditorPart openInEditor(IResourceModelElement element,
-			boolean activate) {
+	public static IEditorPart openInEditor(IResourceModelElement element, boolean activate) {
 		IFile file = (IFile) element.getElementResource();
 		if (file != null) {
 			int line = -1;
@@ -336,8 +318,7 @@ public final class SpringUIUtils {
 	/**
 	 * Opens given file in associated editor and go to specified line (if > 0).
 	 */
-	public static IEditorPart openInEditor(IFile file, int line,
-			boolean activate) {
+	public static IEditorPart openInEditor(IFile file, int line, boolean activate) {
 		IEditorPart editor = null;
 		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
 		try {
@@ -345,14 +326,14 @@ public final class SpringUIUtils {
 				IMarker marker = file.createMarker(IMarker.TEXT);
 				marker.setAttribute(IMarker.LINE_NUMBER, line);
 				editor = IDE.openEditor(page, marker, activate);
+				marker.delete();
 			}
 			else {
 				editor = IDE.openEditor(page, file, activate);
 			}
 		}
 		catch (CoreException e) {
-			openError(SpringUIMessages.OpenInEditor_errorMessage, e
-					.getMessage(), e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
 		}
 		return editor;
 	}
@@ -361,15 +342,13 @@ public final class SpringUIUtils {
 		return openInEditor(input, editorId, true);
 	}
 
-	public static IEditorPart openInEditor(IEditorInput input, String editorId,
-			boolean activate) {
+	public static IEditorPart openInEditor(IEditorInput input, String editorId, boolean activate) {
 		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
 		try {
 			return page.openEditor(input, editorId, activate);
 		}
 		catch (PartInitException e) {
-			openError(SpringUIMessages.OpenInEditor_errorMessage, e
-					.getMessage(), e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
 		}
 		return null;
 	}
@@ -383,12 +362,10 @@ public final class SpringUIUtils {
 			return editor;
 		}
 		catch (PartInitException e) {
-			openError(SpringUIMessages.OpenInEditor_errorMessage, e
-					.getMessage(), e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
 		}
 		catch (JavaModelException e) {
-			openError(SpringUIMessages.OpenInEditor_errorMessage, e
-					.getMessage(), e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
 		}
 		return null;
 	}
@@ -422,11 +399,10 @@ public final class SpringUIUtils {
 	}
 
 	/**
-	 * Open an error style dialog for a given <code>CoreException</code> by
-	 * including any extra information from a nested <code>CoreException</code>.
+	 * Open an error style dialog for a given <code>CoreException</code> by including any extra information from a
+	 * nested <code>CoreException</code>.
 	 */
-	public static void openError(String title, String message,
-			CoreException exception) {
+	public static void openError(String title, String message, CoreException exception) {
 		Shell shell = SpringUIPlugin.getActiveWorkbenchShell();
 
 		// Check for a nested CoreException
@@ -438,8 +414,7 @@ public final class SpringUIUtils {
 		if (nestedException != null) {
 			// Open an error dialog and include the extra
 			// status information from the nested CoreException
-			ErrorDialog.openError(shell, title, message, nestedException
-					.getStatus());
+			ErrorDialog.openError(shell, title, message, nestedException.getStatus());
 		}
 		else {
 			// Open a regular error dialog since there is no
@@ -451,14 +426,12 @@ public final class SpringUIUtils {
 	public static IFile getFile(IStructuredDocument document) {
 		if (document != null) {
 			try {
-				IStructuredModel model = StructuredModelManager
-						.getModelManager().getModelForRead(document);
+				IStructuredModel model = StructuredModelManager.getModelManager().getModelForRead(document);
 				IFile resource = null;
 				try {
 					String baselocation = model.getBaseLocation();
 					if (baselocation != null) {
-						IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
-								.getRoot();
+						IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 						IPath filePath = new Path(baselocation);
 						if (filePath.segmentCount() > 0) {
 							resource = root.getFile(filePath);
@@ -478,28 +451,24 @@ public final class SpringUIUtils {
 		}
 		// fall back
 		IEditorPart editor = SpringUIUtils.getActiveEditor();
-		if (editor != null
-				&& editor.getEditorInput() instanceof IFileEditorInput) {
+		if (editor != null && editor.getEditorInput() instanceof IFileEditorInput) {
 			return ((IFileEditorInput) editor.getEditorInput()).getFile();
 		}
 		return null;
 	}
 
 	public static boolean isSortingEnabled() {
-		return SpringUIPlugin.getDefault().getPluginPreferences().getBoolean(
-				SpringUIPlugin.SORTING_ENABLED_KEY);
+		return SpringUIPlugin.getDefault().getPluginPreferences().getBoolean(SpringUIPlugin.SORTING_ENABLED_KEY);
 	}
 
 	public static void setSortingEnabled(boolean isEnabled) {
-		SpringUIPlugin.getDefault().getPluginPreferences().setValue(
-				SpringUIPlugin.SORTING_ENABLED_KEY, isEnabled);
+		SpringUIPlugin.getDefault().getPluginPreferences().setValue(SpringUIPlugin.SORTING_ENABLED_KEY, isEnabled);
 	}
 
 	public static boolean isSpringExplorer(Viewer viewer) {
 		if (viewer instanceof CommonViewer) {
-			return SpringUIPlugin.SPRING_EXPLORER_ID
-					.equals(((CommonViewer) viewer)
-							.getNavigatorContentService().getViewerId());
+			return SpringUIPlugin.SPRING_EXPLORER_ID.equals(((CommonViewer) viewer).getNavigatorContentService()
+					.getViewerId());
 		}
 		return false;
 	}
