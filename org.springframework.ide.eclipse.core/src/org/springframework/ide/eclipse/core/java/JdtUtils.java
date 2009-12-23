@@ -813,7 +813,7 @@ public class JdtUtils {
 		IType interfaceType = getJavaType(resource.getProject(), className);
 		if (type != null && interfaceType != null) {
 			try {
-				IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getSubtypes(interfaceType);
+				IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getAllSubtypes(interfaceType);
 				if (subTypes != null) {
 					for (IType subType : subTypes) {
 						if (subType.equals(type)) {

@@ -204,7 +204,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 					IType superType = JdtUtils.getJavaType(context.getRootElementProject(), annotationData
 							.getAssignableTo());
 					if (superType != null) {
-						IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(superType).getSubtypes(superType);
+						IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(superType).getAllSubtypes(superType);
 						boolean found = false;
 						for (IType subType : subTypes) {
 							if (subType.equals(type)) {

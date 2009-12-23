@@ -1282,7 +1282,7 @@ public abstract class BeansModelUtils {
 						Set<List<IType>> hierachies = new HashSet<List<IType>>();
 						List<IType> relevantTypes = Arrays.asList(types);
 						for (IType type : types) {
-							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type).getSubtypes(type);
+							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type).getAllSubtypes(type);
 							if (subTypes != null && subTypes.length > 0) {
 								hierachies.add(Arrays.asList(subTypes));
 							}
@@ -1352,7 +1352,7 @@ public abstract class BeansModelUtils {
 						Set<List<IType>> hierachies = new HashSet<List<IType>>();
 						List<IType> relevantTypes = Arrays.asList(types);
 						for (IType type : types) {
-							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type).getSubtypes(type);
+							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type).getAllSubtypes(type);
 							if (subTypes != null && subTypes.length > 0) {
 								hierachies.add(Arrays.asList(subTypes));
 							}
