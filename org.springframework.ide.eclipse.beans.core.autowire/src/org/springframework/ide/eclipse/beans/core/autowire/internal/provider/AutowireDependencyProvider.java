@@ -337,7 +337,8 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 		Set<IInjectionMetadataProvider> providers = new HashSet<IInjectionMetadataProvider>();
 		String[] autowiredAnnotationBeanPostProcessorNames = getBeansForType(AutowiredAnnotationBeanPostProcessor.class);
 		for (String autowiredAnnotationBeanPostProcessorName : autowiredAnnotationBeanPostProcessorNames) {
-			AutowiredAnnotationInjectionMetadataProvider provider = new AutowiredAnnotationInjectionMetadataProvider();
+			AutowiredAnnotationInjectionMetadataProvider provider = new AutowiredAnnotationInjectionMetadataProvider(
+					this.classLoaderSupport.getProjectClassLoader());
 
 			IBean bean = getBean(autowiredAnnotationBeanPostProcessorName);
 			BeanDefinition beanDef = BeansModelUtils.getMergedBeanDefinition(bean, context);

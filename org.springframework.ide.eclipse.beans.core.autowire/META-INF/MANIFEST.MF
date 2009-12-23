@@ -44,4 +44,5 @@ Export-Package: org.springframework.ide.eclipse.beans.core.autowire,
 Bundle-ClassPath: lib/com.springsource.javax.annotation-1.0.0.jar,
  lib/com.springsource.javax.ejb-3.0.0.jar,
  lib/com.springsource.javax.xml.ws-2.1.1.jar,
+ lib/com.springsource.javax.inject-1.0.0.jar,
  .

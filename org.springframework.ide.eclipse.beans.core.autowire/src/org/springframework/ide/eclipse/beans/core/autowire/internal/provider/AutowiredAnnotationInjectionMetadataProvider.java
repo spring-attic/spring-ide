@@ -84,17 +84,16 @@ public class AutowiredAnnotationInjectionMetadataProvider implements IInjectionM
 	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<Class<?>, InjectionMetadata>();
 
 	private IInjectionMetadataProviderProblemReporter problemReporter = new PassThroughProblemReporter();
-
+	
 	/**
 	 * Create a new AutowiredAnnotationBeanPostProcessor for Spring's standard {@link Autowired} annotation.
 	 * <p>
 	 * Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
 	 */
 	@SuppressWarnings("unchecked")
-	public AutowiredAnnotationInjectionMetadataProvider() {
+	public AutowiredAnnotationInjectionMetadataProvider(ClassLoader cl) {
 		this.autowiredAnnotationTypes.add(Autowired.class);
 		this.autowiredAnnotationTypes.add(Value.class);
-		ClassLoader cl = AutowiredAnnotationInjectionMetadataProvider.class.getClassLoader();
 		try {
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.inject.Inject"));
 		}

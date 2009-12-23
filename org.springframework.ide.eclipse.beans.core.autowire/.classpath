@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/com.springsource.javax.inject-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/com.springsource.javax.annotation-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/com.springsource.javax.ejb-3.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/com.springsource.javax.xml.ws-2.1.1.jar"/>
