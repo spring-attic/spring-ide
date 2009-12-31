@@ -61,7 +61,6 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
-import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
@@ -86,6 +85,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.io.EclipsePathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.io.FileResource;
@@ -313,9 +313,16 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						resource = new FileResource(file);
 					}
 
+					// Set up classloader to use for NamespaceHandler and XSD loading
+					ClassLoader cl = BeansConfig.class.getClassLoader();
+					if (SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
+							.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false)) {
+						cl = JdtUtils.getClassLoader(file.getProject());
+					}
+
 					registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
 					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(new BeansDtdResolver(),
-							new PluggableSchemaResolver(PluggableSchemaResolver.class.getClassLoader()));
+							new PluggableSchemaResolver(cl));
 					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file.getProject());
 					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(this,
 							resource, sourceExtractor);
@@ -368,8 +375,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
-							NamespaceHandlerResolver.class.getClassLoader(), this, documentHolder));
+					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this, documentHolder));
 					reader.setBeanNameGenerator(beanNameGenerator);
 
 					try {
@@ -1079,8 +1085,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 	/**
 	 * Extension to {@link SimpleBeanDefinitionRegistry} that suppresses registrations of
-	 * {@link ScannedGenericBeanDefinition} instances as those contain references to the a classloader which we want
-	 * to discard.
+	 * {@link ScannedGenericBeanDefinition} instances as those contain references to the a classloader which we want to
+	 * discard.
 	 * @since 2.3.1
 	 */
 	class ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry extends SimpleBeanDefinitionRegistry {
@@ -1099,11 +1105,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	}
 
 	/**
-	 * Alternative to {@link ScannedGenericBeanDefinition} that rejects the internal dependency to a ClassLoader hold
-	 * by the {@link AnnotationMetadata}.
+	 * Alternative to {@link ScannedGenericBeanDefinition} that rejects the internal dependency to a ClassLoader hold by
+	 * the {@link AnnotationMetadata}.
 	 * @since 2.3.1
 	 */
-	protected static class InternalScannedGenericBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
+	protected static class InternalScannedGenericBeanDefinition extends GenericBeanDefinition implements
+			AnnotatedBeanDefinition {
 
 		private static final long serialVersionUID = 467157320316462045L;
 

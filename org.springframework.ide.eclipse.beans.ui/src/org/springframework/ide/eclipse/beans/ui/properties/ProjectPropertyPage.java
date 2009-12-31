@@ -97,8 +97,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		// Build temporary beans core model with a cloned "real" Spring project
 		IProject project = (IProject) getElement();
 		model = new PropertiesModel();
-		PropertiesProject modelProject = new PropertiesProject(model, BeansCorePlugin.getModel()
-				.getProject(project));
+		PropertiesProject modelProject = new PropertiesProject(model, BeansCorePlugin.getModel().getProject(project));
 		model.addProject(modelProject);
 
 		// Build folder with tabs
@@ -138,8 +137,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	public boolean performOk() {
 		IProject project = (IProject) getElement();
 		IBeansProject currentProject = BeansCorePlugin.getModel().getProject(project);
-		boolean userMadeChanges = configFilesTab.hasUserMadeChanges()
-				|| configSetsTab.hasUserMadeChanges();
+		boolean userMadeChanges = configFilesTab.hasUserMadeChanges() || configSetsTab.hasUserMadeChanges();
 
 		PropertiesProject newProject = (PropertiesProject) model.getProject(project);
 
@@ -147,18 +145,19 @@ public class ProjectPropertyPage extends PropertyPage {
 		if (configFilesTab.hasUserMadeChanges()) {
 			for (IBeansConfig currentConfig : currentProject.getConfigs()) {
 				if (!newProject.hasConfig(currentConfig.getElementName())) {
-					MarkerUtils.deleteAllMarkers(currentConfig.getElementResource(),
-							SpringCore.MARKER_ID);
+					MarkerUtils.deleteAllMarkers(currentConfig.getElementResource(), SpringCore.MARKER_ID);
 				}
 			}
 		}
 
 		// Now save modified project description
 		if (userMadeChanges) {
-			SpringCorePreferences.getProjectPreferences(project.getProject(),
-					BeansCorePlugin.PLUGIN_ID).putBoolean(
+			SpringCorePreferences.getProjectPreferences(project.getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
 					BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
 					configFilesTab.shouldIgnoreMissingNamespaceHandler());
+			SpringCorePreferences.getProjectPreferences(project.getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+					BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY,
+					configFilesTab.shouldLoadNamespaceHandlerFromClasspath());
 			newProject.saveDescription();
 		}
 

@@ -83,8 +83,7 @@ import org.springframework.ide.eclipse.ui.dialogs.StorageSelectionValidator;
 import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
 
 /**
- * Property page tab for defining the list of beans config file extensions and the selected beans
- * config files.
+ * Property page tab for defining the list of beans config file extensions and the selected beans config files.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -113,8 +112,9 @@ public class ConfigFilesTab {
 
 	private static final String ENABLE_IMPORT_LABEL = PREFIX + "enableImports.label";
 
-	private static final String IGNORE_MISSING_NAMESPACEHANDLER_LABEL = PREFIX
-			+ "ignoreMissingNamespaceHandler.label";
+	private static final String IGNORE_MISSING_NAMESPACEHANDLER_LABEL = PREFIX + "ignoreMissingNamespaceHandler.label";
+
+	private static final String LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_LABEL = PREFIX + "loadNamespaceHandlerFromClasspath.label";
 
 	private static final String NOTE_LABEL = PREFIX + "note.label";
 
@@ -159,8 +159,9 @@ public class ConfigFilesTab {
 
 	private Button ignoreMissingNamespaceHandlerText;
 
-	public ConfigFilesTab(PropertiesModel model, PropertiesProject project,
-			IModelElement selectedModelElement) {
+	private Button loadNamespaceHandlerFromClasspathText;
+
+	public ConfigFilesTab(PropertiesModel model, PropertiesProject project, IModelElement selectedModelElement) {
 		this.model = model;
 		this.project = project;
 		calculateSelectedElement(selectedModelElement);
@@ -197,8 +198,8 @@ public class ConfigFilesTab {
 		tableAndButtons.setLayout(layout);
 
 		// Create table and viewer for Spring bean config files
-		configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL
-				| SWT.FULL_SELECTION | SWT.BORDER);
+		configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION
+				| SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = TABLE_WIDTH;
 		data.heightHint = TABLE_WIDTH;
@@ -230,13 +231,26 @@ public class ConfigFilesTab {
 		options.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		// Create enable import checkbox
-		enableImportText = SpringUIUtils.createCheckBox(composite, BeansUIPlugin
-				.getResourceString(ENABLE_IMPORT_LABEL));
+		enableImportText = SpringUIUtils
+				.createCheckBox(composite, BeansUIPlugin.getResourceString(ENABLE_IMPORT_LABEL));
 		enableImportText.setSelection(project.isImportsEnabled());
 		enableImportText.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleImportEnabledChanged();
+			}
+		});
+
+		// Load namespace handler and XSDs from classpath
+		loadNamespaceHandlerFromClasspathText = SpringUIUtils.createCheckBox(composite, BeansUIPlugin
+				.getResourceString(LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_LABEL));
+		loadNamespaceHandlerFromClasspathText.setSelection(SpringCorePreferences.getProjectPreferences(
+				project.getProject(), BeansCorePlugin.PLUGIN_ID).getBoolean(
+				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false));
+		loadNamespaceHandlerFromClasspathText.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				hasUserMadeChanges = true;
 			}
 		});
 
@@ -254,10 +268,8 @@ public class ConfigFilesTab {
 		});
 
 		// Create suffix text field
-		suffixesText = SpringUIUtils.createTextField(composite, BeansUIPlugin
-				.getResourceString(SUFFIXES_LABEL));
-		suffixesText.setText(StringUtils.collectionToDelimitedString(project.getConfigSuffixes(),
-				","));
+		suffixesText = SpringUIUtils.createTextField(composite, BeansUIPlugin.getResourceString(SUFFIXES_LABEL));
+		suffixesText.setText(StringUtils.collectionToDelimitedString(project.getConfigSuffixes(), ","));
 		suffixesText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				handleSuffixesTextModified();
@@ -266,8 +278,7 @@ public class ConfigFilesTab {
 
 		// Create error label
 		errorLabel = new Label(composite, SWT.NONE);
-		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-				| GridData.HORIZONTAL_ALIGN_FILL));
+		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		errorLabel.setForeground(JFaceColors.getErrorText(parent.getDisplay()));
 		errorLabel.setBackground(JFaceColors.getErrorBackground(parent.getDisplay()));
 		// Create button area
@@ -277,10 +288,9 @@ public class ConfigFilesTab {
 		layout.marginWidth = 0;
 		buttonArea.setLayout(layout);
 		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		addButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin
-				.getResourceString(ADD_BUTTON), buttonListener);
-		removeButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin
-				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
+		addButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin.getResourceString(ADD_BUTTON), buttonListener);
+		removeButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin.getResourceString(REMOVE_BUTTON),
+				buttonListener, 0, false);
 		scanButton = SpringUIUtils.createButton(buttonArea, "Scan...", buttonListener);
 		model.addChangeListener(modelChangeListener);
 		handleSuffixesTextModified();
@@ -293,6 +303,10 @@ public class ConfigFilesTab {
 
 	public boolean shouldIgnoreMissingNamespaceHandler() {
 		return this.ignoreMissingNamespaceHandlerText.getSelection();
+	}
+
+	public boolean shouldLoadNamespaceHandlerFromClasspath() {
+		return this.loadNamespaceHandlerFromClasspathText.getSelection();
 	}
 
 	private void handleImportEnabledChanged() {
@@ -311,8 +325,8 @@ public class ConfigFilesTab {
 	}
 
 	/**
-	 * The user has modified the comma-separated list of config suffixes. Validate the input and
-	 * update the "Add" button enablement and error label accordingly.
+	 * The user has modified the comma-separated list of config suffixes. Validate the input and update the "Add" button
+	 * enablement and error label accordingly.
 	 */
 	private void handleSuffixesTextModified() {
 		String errorMessage = null;
@@ -393,11 +407,9 @@ public class ConfigFilesTab {
 	}
 
 	protected void handleScanButtonPressed() {
-		ScannedFilesContentProvider contentProvider = new ScannedFilesContentProvider(suffixesText
-				.getText());
-		CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(SpringUIUtils
-				.getStandardDisplay().getActiveShell(), new ScannedFilesLabelProvider(),
-				contentProvider) {
+		ScannedFilesContentProvider contentProvider = new ScannedFilesContentProvider(suffixesText.getText());
+		CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(SpringUIUtils.getStandardDisplay()
+				.getActiveShell(), new ScannedFilesLabelProvider(), contentProvider) {
 
 			@Override
 			protected Control createDialogArea(Composite parent) {
@@ -438,15 +450,14 @@ public class ConfigFilesTab {
 	}
 
 	/**
-	 * The user has pressed the add button. Opens the configuration selection dialog and adds the
-	 * selected configuration.
+	 * The user has pressed the add button. Opens the configuration selection dialog and adds the selected
+	 * configuration.
 	 */
 	private void handleAddButtonPressed() {
 		SelectionStatusDialog dialog;
 		if (SpringCoreUtils.isEclipseSameOrNewer(3, 2)) {
-			FilteredElementTreeSelectionDialog selDialog = new FilteredElementTreeSelectionDialog(
-					SpringUIUtils.getStandardDisplay().getActiveShell(), new LabelProvider(),
-					new NonJavaResourceContentProvider());
+			FilteredElementTreeSelectionDialog selDialog = new FilteredElementTreeSelectionDialog(SpringUIUtils
+					.getStandardDisplay().getActiveShell(), new LabelProvider(), new NonJavaResourceContentProvider());
 			selDialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
@@ -454,9 +465,8 @@ public class ConfigFilesTab {
 			dialog = selDialog;
 		}
 		else {
-			ElementTreeSelectionDialog selDialog = new ElementTreeSelectionDialog(SpringUIUtils
-					.getStandardDisplay().getActiveShell(), new LabelProvider(),
-					new NonJavaResourceContentProvider());
+			ElementTreeSelectionDialog selDialog = new ElementTreeSelectionDialog(SpringUIUtils.getStandardDisplay()
+					.getActiveShell(), new LabelProvider(), new NonJavaResourceContentProvider());
 			selDialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
@@ -471,7 +481,7 @@ public class ConfigFilesTab {
 				for (Object element : selection) {
 					String config = null;
 					if (element instanceof ZipEntryStorage) {
-						ZipEntryStorage storage = (ZipEntryStorage) element; 
+						ZipEntryStorage storage = (ZipEntryStorage) element;
 						config = storage.getFullName();
 					}
 					else if (element instanceof IFile) {
@@ -479,19 +489,17 @@ public class ConfigFilesTab {
 						config = file.getProjectRelativePath().toString();
 					}
 					else if (element instanceof JarEntryFile) {
-						IPath fullPath = ((JarPackageFragmentRoot) ((JarEntryFile) element)
-								.getPackageFragmentRoot()).getPath();
+						IPath fullPath = ((JarPackageFragmentRoot) ((JarEntryFile) element).getPackageFragmentRoot())
+								.getPath();
 						String entryName = ((JarEntryFile) element).getFullPath().toString();
 						for (String name : JavaCore.getClasspathVariableNames()) {
 							IPath variablePath = JavaCore.getClasspathVariable(name);
 							if (variablePath != null && variablePath.isPrefixOf(fullPath)) {
-								if (MessageDialog.openQuestion(SpringUIUtils.getStandardDisplay()
-										.getActiveShell(), "Use classpath variable",
-										"Do you want to use the classpath variable '" + name
-												+ "' to refer to the config file\n'" + entryName
-												+ "'?")) {
-									fullPath = new Path(name).append(fullPath
-											.removeFirstSegments(variablePath.segmentCount()));
+								if (MessageDialog.openQuestion(SpringUIUtils.getStandardDisplay().getActiveShell(),
+										"Use classpath variable", "Do you want to use the classpath variable '" + name
+												+ "' to refer to the config file\n'" + entryName + "'?")) {
+									fullPath = new Path(name).append(fullPath.removeFirstSegments(variablePath
+											.segmentCount()));
 								}
 								break;
 							}
@@ -532,17 +540,15 @@ public class ConfigFilesTab {
 		public ScannedFilesContentProvider(final String fileSuffixes) {
 			final Set<IFile> files = new LinkedHashSet<IFile>();
 			IRunnableWithProgress runnable = new IRunnableWithProgress() {
-				public void run(final IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					ProjectScanningBeansConfigLocator locator = new ProjectScanningBeansConfigLocator(
-							fileSuffixes);
+				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					ProjectScanningBeansConfigLocator locator = new ProjectScanningBeansConfigLocator(fileSuffixes);
 					files.addAll(locator.locateBeansConfigs(project.getProject(), monitor));
 				}
 			};
 
 			try {
-				IRunnableContext context = new ProgressMonitorDialog(SpringUIUtils
-						.getStandardDisplay().getActiveShell());
+				IRunnableContext context = new ProgressMonitorDialog(SpringUIUtils.getStandardDisplay()
+						.getActiveShell());
 				context.run(true, true, runnable);
 			}
 			catch (InvocationTargetException e) {
@@ -626,7 +632,7 @@ public class ConfigFilesTab {
 				if (element instanceof JarPackageFragmentRoot) {
 					try {
 						IResource resource = ((JarPackageFragmentRoot) element).getUnderlyingResource();
-						// Exclude jars that come from different workspace projects; only jars 
+						// Exclude jars that come from different workspace projects; only jars
 						// coming from outside the workspace have no underlying resource
 						return resource == null || resource.getProject().equals(project.getProject());
 					}
