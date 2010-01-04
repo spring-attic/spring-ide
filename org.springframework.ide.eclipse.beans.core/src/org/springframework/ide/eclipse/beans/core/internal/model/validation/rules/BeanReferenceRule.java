@@ -113,7 +113,21 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 					context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName + "' not found");
 				}
 				catch (BeanDefinitionStoreException e) {
-					context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName + "' not found");
+					
+					// Need to make sure that the parent of a parent does not use placeholders
+					Throwable exp = e;
+					boolean placeHolderFound = false;
+					while (exp != null && exp.getCause() != null) {
+						String msg = exp.getCause().getMessage();
+						if (msg.contains(SpringCoreUtils.PLACEHOLDER_PREFIX) && msg.contains(SpringCoreUtils.PLACEHOLDER_SUFFIX)) {
+							placeHolderFound = true;
+							break;
+						}
+						exp = exp.getCause();
+					}
+					if (!placeHolderFound) {
+						context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName + "' not found");
+					}
 				}
 			}
 		}
