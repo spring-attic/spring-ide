@@ -176,14 +176,14 @@ public class ConfigSetsTab {
 		layout.marginHeight = 3;
 		layout.marginWidth = 3;
 		composite.setLayout(layout);
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Label description = new Label(composite, SWT.WRAP);
 		description.setText(BeansUIPlugin.getResourceString(DESCRIPTION));
 		description.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite tableAndButtons = new Composite(composite, SWT.NONE);
-		tableAndButtons.setLayoutData(new GridData(GridData.FILL_BOTH));
+		tableAndButtons.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layout = new GridLayout();
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
@@ -192,8 +192,9 @@ public class ConfigSetsTab {
 
 		// Create table and viewer for Spring bean configurations
 		configSetsTree = new Tree(tableAndButtons, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-		GridData data = new GridData(GridData.FILL_BOTH);
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = TABLE_WIDTH;
+		data.heightHint = TABLE_WIDTH;
 		configSetsTree.setLayoutData(data);
 		configSetsTree.addSelectionListener(new SelectionAdapter() {
 			@Override
