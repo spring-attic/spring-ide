@@ -22,8 +22,8 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractXmlValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IXmlValidationContext;
@@ -242,14 +242,26 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 		String beanName = attribute.getNodeValue();
 		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName) && !ignorableBeans.contains(beanName)) {
 			try {
-				BeanDefinition refBd = context.getCompleteRegistry().getBeanDefinition(beanName);
-				if (refBd.isAbstract() || (refBd.getBeanClassName() == null && refBd.getFactoryBeanName() == null)) {
-					context.error(n, "INVALID_REFERENCED_BEAN", "Referenced bean '" + beanName
-							+ "' is invalid (abstract or no bean class and no factory bean)");
-				}
+				context.getCompleteRegistry().getBeanDefinition(beanName);
 			}
 			catch (NoSuchBeanDefinitionException e) {
 				context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Referenced bean '" + beanName + "' not found");
+			}
+			catch (BeanDefinitionStoreException e) {
+				// Need to make sure that the parent of a parent does not use placeholders
+				Throwable exp = e;
+				boolean placeHolderFound = false;
+				while (exp != null && exp.getCause() != null) {
+					String msg = exp.getCause().getMessage();
+					if (msg.contains(SpringCoreUtils.PLACEHOLDER_PREFIX) && msg.contains(SpringCoreUtils.PLACEHOLDER_SUFFIX)) {
+						placeHolderFound = true;
+						break;
+					}
+					exp = exp.getCause();
+				}
+				if (!placeHolderFound) {
+					context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Refrenced bean '" + beanName + "' not found");
+				}
 			}
 		}
 	}
