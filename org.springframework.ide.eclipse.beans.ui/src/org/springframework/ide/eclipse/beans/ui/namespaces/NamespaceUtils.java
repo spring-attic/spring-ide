@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -40,7 +41,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  */
 public class NamespaceUtils {
-
+	
 	public static final String NAMESPACES_EXTENSION_POINT = BeansUIPlugin.PLUGIN_ID + ".namespaces";
 
 	public static final String DEFAULT_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
@@ -118,8 +119,12 @@ public class NamespaceUtils {
 	}
 
 	public static List<INamespaceDefinition> getNamespaceDefinitions() {
+		return getNamespaceDefinitions(null);
+	}
+
+	public static List<INamespaceDefinition> getNamespaceDefinitions(IProject project) {
 		List<INamespaceDefinition> namespaceDefinitions = new ArrayList<INamespaceDefinition>();
-		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin.getNamespaceDefinitionResolver();
+		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin.getNamespaceDefinitionResolver(project);
 		Set<org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition> detectedNamespaceDefinitions = definitionResolver
 				.getNamespaceDefinitions();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
@@ -175,7 +180,7 @@ public class NamespaceUtils {
 		}
 
 		for (org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition : detectedNamespaceDefinitions) {
-			String ns = namespaceDefinition.getBundle().getSymbolicName();
+			String ns = (namespaceDefinition.getBundle() != null ? namespaceDefinition.getBundle().getSymbolicName() : null);
 			String icon = namespaceDefinition.getIconPath();
 			Image image = null;
 			if (icon != null) {
@@ -197,7 +202,7 @@ public class NamespaceUtils {
 			}
 		});
 
-		// remove the tool namespace as we don't want to surface on the UI
+		// Remove the tool namespace as we don't want to surface on the UI
 		for (INamespaceDefinition definition : new ArrayList<INamespaceDefinition>(namespaceDefinitions)) {
 			if (TOOLS_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
 				namespaceDefinitions.remove(definition);
@@ -206,7 +211,7 @@ public class NamespaceUtils {
 
 		return namespaceDefinitions;
 	}
-
+	
 	public static INamespaceDefinition getDefaultNamespaceDefinition() {
 		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin.getNamespaceDefinitionResolver();
 		org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition = definitionResolver

@@ -41,7 +41,7 @@ import org.springframework.util.CollectionUtils;
  */
 public class ProjectClasspathExtensibleUriResolver implements URIResolverExtension {
 
-	private static final String DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.schemas";
+	private static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
 
 	/**
 	 * {@inheritDoc}
@@ -167,7 +167,7 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 	private Map<String, String> getSchemaMappings(IProject project) {
 		Map<String, String> handlerMappings = new ConcurrentHashMap<String, String>();
 		try {
-			Properties mappings = PropertiesLoaderUtils.loadAllProperties(DEFAULT_HANDLER_MAPPINGS_LOCATION, JdtUtils
+			Properties mappings = PropertiesLoaderUtils.loadAllProperties(DEFAULT_SCHEMA_MAPPINGS_LOCATION, JdtUtils
 					.getProjectClassLoaderSupport(project).getProjectClassLoader());
 			CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
 		}

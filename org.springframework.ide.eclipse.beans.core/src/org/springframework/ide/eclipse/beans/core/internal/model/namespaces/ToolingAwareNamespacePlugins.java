@@ -346,7 +346,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	/**
 	 * Default implementation of {@link INamespaceDefinition}.
 	 */
-	static class NamespaceDefinition implements INamespaceDefinition {
+	public static class NamespaceDefinition implements INamespaceDefinition {
 
 		private Pattern versionPattern = Pattern.compile(".*-([0-9,.]*)\\.xsd");
 

@@ -17,6 +17,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -124,7 +125,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	@Override
 	public void start(final BundleContext context) throws Exception {
 		super.start(context);
-		
+
 		nsManager = new NamespaceManager(context);
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 		getPreferenceStore().setDefault(NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
@@ -175,8 +176,17 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static final IBeansModel getModel() {
 		return getDefault().model;
 	}
-
+	
 	public static final INamespaceDefinitionResolver getNamespaceDefinitionResolver() {
+		return getNamespaceDefinitionResolver(null);
+	}
+
+	public static final INamespaceDefinitionResolver getNamespaceDefinitionResolver(IProject project) {
+// TODO CD do we want to add this back? 
+//		if (project != null) {
+//			return new ProjectClasspathNamespaceDefinitionResolver(project, getDefault().nsManager
+//					.getNamespacePlugins());
+//		}
 		return getDefault().nsManager.getNamespacePlugins();
 	}
 
@@ -187,7 +197,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static final ExecutorService getExecutorService() {
 		return getDefault().executorService;
 	}
-	
+
 	public static final void registerNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
 		getDefault().nsManager.getNamespacePlugins().registerNamespaceDefinitionListener(listener);
 	}
