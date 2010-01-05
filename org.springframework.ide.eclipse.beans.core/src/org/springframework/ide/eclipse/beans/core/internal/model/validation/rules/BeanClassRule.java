@@ -61,7 +61,7 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 						&& !(bean.getElementSourceLocation() instanceof JavaModelSourceLocation)) {
 					context.warning(bean, "CLASS_NOT_CLASS", "Class '" + className + "' is an interface");
 				}
-				else if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
+				else if (type == null) {
 					context.error(bean, "CLASS_NOT_FOUND", "Class '" + className + "' not found");
 				}
 			}

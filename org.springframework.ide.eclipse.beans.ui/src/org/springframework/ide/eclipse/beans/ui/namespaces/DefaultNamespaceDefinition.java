@@ -39,7 +39,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 @SuppressWarnings( { "deprecation", "restriction" })
 public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
-	private Pattern versionPattern = Pattern.compile(".*-([0-9,.]*)\\.xsd");
+	private static final Pattern VERSION_PATTERN = Pattern.compile(".*-([0-9,.]*)\\.xsd");
 
 	private final String prefix;
 
@@ -172,7 +172,7 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 		Version version = Version.MINIMUM_VERSION;
 		for (String location : existingLocations) {
 			Version tempVersion = Version.MINIMUM_VERSION;
-			Matcher matcher = versionPattern.matcher(location);
+			Matcher matcher = VERSION_PATTERN.matcher(location);
 			if (matcher.matches()) {
 				tempVersion = new Version(matcher.group(1));
 			}

@@ -366,6 +366,8 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 
 		private Properties uriMapping = new Properties();
 
+		private String defaultSchemaLocation = null;
+
 		public NamespaceDefinition(Properties uriMapping) {
 			this.uriMapping = uriMapping;
 		}
@@ -388,18 +390,19 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		/**
 		 * {@inheritDoc}
 		 */
-		public String getDefaultSchemaLocation() {
-			// Per convention the version-less XSD is the default
-			String defaultSchemaLocation = null;
-			for (String schemaLocation : schemaLocations) {
-				if (!versionPattern.matcher(schemaLocation).matches()) {
-					defaultSchemaLocation = schemaLocation;
+		public synchronized String getDefaultSchemaLocation() {
+			if (defaultSchemaLocation == null) {
+				// Per convention the version-less XSD is the default
+				for (String schemaLocation : schemaLocations) {
+					if (!versionPattern.matcher(schemaLocation).matches()) {
+						defaultSchemaLocation = schemaLocation;
+					}
 				}
-			}
-			if (defaultSchemaLocation == null && schemaLocations.size() > 0) {
-				List<String> locations = new ArrayList<String>(schemaLocations);
-				Collections.sort(locations);
-				defaultSchemaLocation = locations.get(0);
+				if (defaultSchemaLocation == null && schemaLocations.size() > 0) {
+					List<String> locations = new ArrayList<String>(schemaLocations);
+					Collections.sort(locations);
+					defaultSchemaLocation = locations.get(0);
+				}
 			}
 			return defaultSchemaLocation;
 		}
