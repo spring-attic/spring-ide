@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,7 +63,6 @@ import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.util.StringUtils;
 
 /**
  * Handles creation and modification of the {@link AopReferenceModel}.
@@ -246,7 +244,7 @@ public class AopReferenceModelBuilderJob extends Job {
 						}
 
 						if (jdtAspectMethod != null) {
-							// long start = System.currentTimeMillis();
+//							 long start = System.currentTimeMillis();
 							Set<IMethod> matchingMethods = matcher.matches(targetClass, bean, info, aopProject
 									.getProject().getProject());
 							for (IMethod method : matchingMethods) {
@@ -255,8 +253,8 @@ public class AopReferenceModelBuilderJob extends Job {
 										file, bean);
 								aopProject.addAopReference(ref);
 							}
-							// System.out.println(String.format("--- matching on '%s' took '%s'", targetClass, (System
-							// .currentTimeMillis() - start)));
+//							 System.out.println(String.format("--- matching on '%s' took '%s'", targetClass, (System
+//							 .currentTimeMillis() - start)));
 						}
 					}
 				}
@@ -314,7 +312,7 @@ public class AopReferenceModelBuilderJob extends Job {
 
 			if (javaProject != null && config != null) {
 
-				// long start = System.currentTimeMillis();
+//	     		long start = System.currentTimeMillis();
 
 				aopProject = ((AopReferenceModel) Activator.getModel()).getProjectWithInitialization(javaProject);
 				aopProject.clearReferencesForResource(currentFile);
@@ -322,9 +320,9 @@ public class AopReferenceModelBuilderJob extends Job {
 				// Prepare class loaders
 				this.classLoaderSupport = createWeavingClassLoaderSupport(project.getProject());
 
-				AopLog.log(AopLog.BUILDER_CLASSPATH, Activator.getFormattedMessage(
-						"AopReferenceModelBuilder.aopBuilderClassPath", StringUtils.arrayToDelimitedString(
-								((URLClassLoader) classLoaderSupport.getProjectClassLoader()).getURLs(), ";")));
+//				AopLog.log(AopLog.BUILDER_CLASSPATH, Activator.getFormattedMessage(
+//						"AopReferenceModelBuilder.aopBuilderClassPath", StringUtils.arrayToDelimitedString(
+//								((URLClassLoader) classLoaderSupport.getProjectClassLoader()).getURLs(), ";")));
 
 				List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
 				Set<IAspectDefinitionBuilder> builders = AspectDefinitionBuilderUtils.getAspectDefinitionBuilder();
@@ -344,11 +342,10 @@ public class AopReferenceModelBuilderJob extends Job {
 					aopProject.clearReferencesForResource(info.getResource());
 				}
 
-				// System.out.println(String.format("-- preparing aop model for file '%s' took '%s'", currentFile,
-				// (System
-				// .currentTimeMillis() - start)));
-				//
-				// start = System.currentTimeMillis();
+//				System.out.println(String.format("-- preparing aop model for file '%s' took '%s'", currentFile, (System
+//						.currentTimeMillis() - start)));
+//
+//				start = System.currentTimeMillis();
 
 				for (IAspectDefinition info : aspectInfos) {
 					// build model for config
@@ -358,9 +355,8 @@ public class AopReferenceModelBuilderJob extends Job {
 					buildAopReferencesFromBeansConfigSets(project, config, info, monitor);
 				}
 
-				// System.out.println(String.format("-- building aop model for file '%s' took '%s'", currentFile,
-				// (System
-				// .currentTimeMillis() - start)));
+//				System.out.println(String.format("-- building aop model for file '%s' took '%s'", currentFile, (System
+//						.currentTimeMillis() - start)));
 			}
 		}
 		return aopProject;
