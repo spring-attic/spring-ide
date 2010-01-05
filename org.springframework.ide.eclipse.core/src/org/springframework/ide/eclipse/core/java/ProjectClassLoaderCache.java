@@ -336,6 +336,12 @@ class ProjectClassLoaderCache {
 		}
 
 		public ClassLoader getClassLoader() {
+//			if (useParentClassLoader) {
+//				return new URLClassLoader(urls, this.getClass().getClassLoader());
+//			}
+//			else {
+//				return new URLClassLoader(urls);
+//			}
 			ClassLoader parent = getJarClassLoader();
 			return new URLClassLoader(directories, parent);
 		}
@@ -356,7 +362,7 @@ class ProjectClassLoaderCache {
 			return this.project.equals(project)
 					&& Boolean.valueOf(this.useParentClassLoader).equals(Boolean.valueOf(useParentClassLoader));
 		}
-		
+
 		private synchronized ClassLoader getJarClassLoader() {
 			if (jarClassLoader == null) {
 				Set<URL> jars = new LinkedHashSet<URL>();
@@ -380,7 +386,7 @@ class ProjectClassLoaderCache {
 			}
 			return jarClassLoader;
 		}
-		
+
 		private boolean shouldLoadFromParent(URL url) {
 			String path = url.getPath();
 			if (path.endsWith(".jar") || path.endsWith(".zip")) {

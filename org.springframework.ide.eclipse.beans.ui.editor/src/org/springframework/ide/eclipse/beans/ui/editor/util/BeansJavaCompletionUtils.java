@@ -103,26 +103,25 @@ public class BeansJavaCompletionUtils {
 
 		try {
 			ICompilationUnit unit = createSourceCompilationUnit(context.getFile(), prefix);
-			// Special handling of inner classes
-			boolean innerClass = prefix.indexOf('$') > prefix.lastIndexOf('.');
+
+			char enclosingChar = (prefix.lastIndexOf('$') > 0 ? '$' : '.');
+			prefix = prefix.replace('$', '.');
 
 			// Code completion below only provides public and protected inner classes; therefore
 			// we manually add the private inner classes if possible
-			if (innerClass) {
-				String rootClass = prefix.substring(0, prefix.lastIndexOf('$'));
+			if (prefix.lastIndexOf('.') > 0) {
+				String rootClass = prefix.substring(0, prefix.lastIndexOf('.'));
 				IType type = JdtUtils.getJavaType(context.getFile().getProject(), rootClass);
 				if (type != null) {
 					for (IType innerType : type.getTypes()) {
 						if (Flags.isPrivate(innerType.getFlags())
-								&& innerType.getFullyQualifiedName('$').startsWith(prefix)) {
+								&& innerType.getFullyQualifiedName('.').startsWith(prefix)) {
 							recorder.recordProposal(JAVA_LABEL_PROVIDER.getImage(innerType), 10, JAVA_LABEL_PROVIDER
-									.getText(innerType), getClassName(innerType), innerType);
+									.getText(innerType), innerType.getFullyQualifiedName(enclosingChar), innerType);
 						}
 					}
 				}
 			}
-			
-			prefix = prefix.replace('$', '.');
 
 			String sourceStart = CLASS_SOURCE_START + prefix;
 			String packageName = null;
@@ -141,7 +140,7 @@ public class BeansJavaCompletionUtils {
 
 			ICompletionProposal[] proposals = order(props);
 			for (ICompletionProposal comProposal : proposals) {
-				processJavaCompletionProposal(recorder, comProposal, packageName, innerClass);
+				processJavaCompletionProposal(recorder, comProposal, packageName, enclosingChar);
 			}
 		}
 		catch (Exception e) {
@@ -254,7 +253,7 @@ public class BeansJavaCompletionUtils {
 	}
 
 	private static void processJavaCompletionProposal(IContentAssistProposalRecorder recorder,
-			ICompletionProposal comProposal, String packageName, boolean innerClass) {
+			ICompletionProposal comProposal, String packageName, char enclosingChar) {
 		if (comProposal instanceof JavaCompletionProposal) {
 			JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
 			recorder.recordProposal(prop.getImage(), prop.getRelevance(), prop.getDisplayString(), prop
@@ -269,23 +268,16 @@ public class BeansJavaCompletionUtils {
 			}
 
 			if (prop.getJavaElement() instanceof IType) {
-				if (!((((IType) prop.getJavaElement()).getDeclaringType() == null && !innerClass) || (((IType) prop
-						.getJavaElement()).getDeclaringType() != null && innerClass))) {
-					return;
-				}
 				// Make sure that JDT's type filter preferences are applied
 				if (TypeFilter.isFiltered((IType) prop.getJavaElement())) {
 					return;
 				}
-			}
 
-			String replacementString = prop.getQualifiedTypeName();
-			if (innerClass) {
-				replacementString = getClassName(((IType) prop.getJavaElement()));
-			}
+				String replacementString = ((IType) prop.getJavaElement()).getFullyQualifiedName(enclosingChar);
 
-			recorder.recordProposal(prop.getImage(), prop.getRelevance(), prop.getDisplayString(), replacementString,
-					prop.getJavaElement());
+				recorder.recordProposal(prop.getImage(), prop.getRelevance(), prop.getDisplayString(),
+						replacementString, prop.getJavaElement());
+			}
 		}
 	}
 
@@ -313,12 +305,4 @@ public class BeansJavaCompletionUtils {
 		}
 	}
 
-	private static String getClassName(IType type) {
-		if (type.getDeclaringType() == null) {
-			return type.getFullyQualifiedName();
-		}
-		else {
-			return getClassName(type.getDeclaringType()) + "$" + type.getElementName();
-		}
-	}
 }

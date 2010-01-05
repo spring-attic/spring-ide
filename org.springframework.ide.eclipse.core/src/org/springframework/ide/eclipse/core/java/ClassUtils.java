@@ -143,7 +143,22 @@ public class ClassUtils {
 	public static Class<?> loadClass(String className)
 			throws ClassNotFoundException {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		return loader.loadClass(className);
+		try {
+			return loader.loadClass(className);
+		}
+		catch (ClassNotFoundException ex) {
+			int lastDotIndex = className.lastIndexOf('.');
+			if (lastDotIndex != -1) {
+				String innerClassName = className.substring(0, lastDotIndex) + '$' + className.substring(lastDotIndex + 1);
+				try {
+					return loader.loadClass(innerClassName);
+				}
+				catch (ClassNotFoundException ex2) {
+					// swallow - let original exception get through
+				}
+			}
+			throw ex;
+		}
 	}
 
 	public static Class<?> loadClass(Class clazz) throws ClassNotFoundException {
