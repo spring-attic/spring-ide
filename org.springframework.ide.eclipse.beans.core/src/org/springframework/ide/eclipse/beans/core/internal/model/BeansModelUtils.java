@@ -457,17 +457,6 @@ public abstract class BeansModelUtils {
 	}
 
 	/**
-	 * Returns all {@link IBeansConfig}s that use the {@link IType}s in the given <code>file</code> as bean class.
-	 * <p>
-	 * This implementation considers <b>all</b> inner classes as potential bean classes as well. <code>null</code> will
-	 * never be returned.
-	 * @since 2.0.5
-	 */
-	public static Set<IBeansConfig> getConfigsByTypes(IFile file) {
-		return getConfigsByContainingTypes(file);
-	}
-
-	/**
 	 * Returns all {@link IBeansConfigSet} the given {@link IModelElement} belongs to.
 	 * @param element the model element to get the beans config for
 	 * @throws IllegalArgumentException if unsupported model element specified
@@ -809,17 +798,6 @@ public abstract class BeansModelUtils {
 			name.append("<null>");
 		}
 		return name.toString();
-	}
-
-	/**
-	 * Checks if a the {@link IType}s contained in the given <code>file</code> instance are used as Bean classes
-	 * anywhere in the core model.
-	 * <p>
-	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
-	 * @since 2.0.5
-	 */
-	public static boolean isBeanClass(IFile file) {
-		return getConfigsByContainingTypes(file).size() > 0;
 	}
 
 	/**
@@ -1266,7 +1244,7 @@ public abstract class BeansModelUtils {
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
 	 */
-	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource) {
+	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource, IProgressMonitor monitor) {
 		Set<IBeansConfig> files = new LinkedHashSet<IBeansConfig>();
 
 		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
@@ -1282,7 +1260,8 @@ public abstract class BeansModelUtils {
 						Set<List<IType>> hierachies = new HashSet<List<IType>>();
 						List<IType> relevantTypes = Arrays.asList(types);
 						for (IType type : types) {
-							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type).getAllSubtypes(type);
+							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type, monitor).getAllSubtypes(
+									type);
 							if (subTypes != null && subTypes.length > 0) {
 								hierachies.add(Arrays.asList(subTypes));
 							}
@@ -1336,7 +1315,7 @@ public abstract class BeansModelUtils {
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
 	 */
-	public static Set<IBean> getBeansByContainingTypes(IResource resource) {
+	public static Set<IBean> getBeansByContainingTypes(IResource resource, IProgressMonitor monitor) {
 		Set<IBean> files = new LinkedHashSet<IBean>();
 
 		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
@@ -1352,7 +1331,8 @@ public abstract class BeansModelUtils {
 						Set<List<IType>> hierachies = new HashSet<List<IType>>();
 						List<IType> relevantTypes = Arrays.asList(types);
 						for (IType type : types) {
-							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type).getAllSubtypes(type);
+							IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(type, monitor).getAllSubtypes(
+									type);
 							if (subTypes != null && subTypes.length > 0) {
 								hierachies.add(Arrays.asList(subTypes));
 							}
