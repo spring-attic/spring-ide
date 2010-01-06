@@ -16,7 +16,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -61,6 +63,8 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 
 	private final ResourceLoader resourceLoader;
 
+	private final Map<String, Resource[]> resolvedResources = new ConcurrentHashMap<String, Resource[]>();
+
 	public EclipsePathMatchingResourcePatternResolver(IProject project) {
 		this(project, JdtUtils.getClassLoader(project));
 	}
@@ -79,8 +83,14 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 	}
 
 	public Resource getResource(String location) {
-//		long start = System.currentTimeMillis();
+		// long start = System.currentTimeMillis();
 		try {
+
+			// Check cache first
+			if (resolvedResources.containsKey(location)) {
+				return resolvedResources.get(location)[0];
+			}
+
 			Resource resource = patternResolver.getResource(location);
 			if (resource != null) {
 				try {
@@ -99,11 +109,13 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 				catch (IOException e) {
 				}
 			}
+			
+			resolvedResources.put(location, new Resource[] { resource });
 			return resource;
 		}
 		finally {
-//			System.out.println(String.format("--- resolving location '%s' took '%s'ms", location, (System
-//					.currentTimeMillis() - start)));
+			// System.out.println(String.format("--- resolving location '%s' took '%s'ms", location, (System
+			// .currentTimeMillis() - start)));
 		}
 	}
 
@@ -115,9 +127,14 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 	}
 
 	public Resource[] getResources(String locationPattern) throws IOException {
-//		long start = System.currentTimeMillis();
+		// long start = System.currentTimeMillis();
 		try {
 
+			// Check cache first
+			if (resolvedResources.containsKey(locationPattern)) {
+				return resolvedResources.get(locationPattern);
+			}
+			
 			Resource[] resources = patternResolver.getResources(locationPattern);
 			Set<Resource> foundResources = new HashSet<Resource>();
 
@@ -139,11 +156,14 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 				// The implementation is called too often to log
 			}
 
-			return (Resource[]) foundResources.toArray(new Resource[foundResources.size()]);
+			Resource[] result = foundResources.toArray(new Resource[foundResources.size()]);
+			resolvedResources.put(locationPattern, result);
+			
+			return result;
 		}
 		finally {
-//			System.out.println(String.format("--- resolving resource pattern '%s' took '%s'ms", locationPattern,
-//					(System.currentTimeMillis() - start)));
+			// System.out.println(String.format("--- resolving resource pattern '%s' took '%s'ms", locationPattern,
+			// (System.currentTimeMillis() - start)));
 		}
 	}
 
@@ -160,6 +180,44 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 			else if (resource instanceof IJarEntryResource) {
 				if (((IJarEntryResource) resource).getName().equals(fileName)) {
 					return (IStorage) resource;
+				}
+			}
+		}
+		return null;
+	}
+
+	private Resource processClassResource(String path, String fileName, String typeName, IPackageFragmentRoot root,
+			IJavaElement[] children) throws JavaModelException {
+		for (IJavaElement je : children) {
+			if (je instanceof ICompilationUnit) {
+				for (IType type : ((ICompilationUnit) je).getAllTypes()) {
+					if (type.getFullyQualifiedName('$').equals(typeName)) {
+						if (root.getRawClasspathEntry().getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+
+							IPath outputLocation = root.getRawClasspathEntry().getOutputLocation();
+							if (outputLocation == null) {
+								outputLocation = root.getJavaProject().getOutputLocation();
+							}
+							IResource classResource = ResourcesPlugin.getWorkspace().getRoot().findMember(
+									outputLocation.append(path));
+							if (classResource != null) {
+								return new FileResource((IFile) classResource);
+							}
+						}
+					}
+				}
+			}
+			else if (je instanceof IClassFile) {
+				if (((IClassFile) je).getElementName().equals(fileName)) {
+					// Workspace jar or resource
+					if (root.getResource() != null) {
+						return new StorageResource(new ZipEntryStorage((IFile) root.getResource(), path), project);
+					}
+					// Workspace external jar
+					else {
+						File jarFile = root.getPath().toFile();
+						return new ExternalFile(jarFile, path, project);
+					}
 				}
 			}
 		}
@@ -253,44 +311,6 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 										((IJarEntryResource) storage).getFullPath().toString(), project);
 							}
 						}
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	private Resource processClassResource(String path, String fileName, String typeName, IPackageFragmentRoot root,
-			IJavaElement[] children) throws JavaModelException {
-		for (IJavaElement je : children) {
-			if (je instanceof ICompilationUnit) {
-				for (IType type : ((ICompilationUnit) je).getAllTypes()) {
-					if (type.getFullyQualifiedName('$').equals(typeName)) {
-						if (root.getRawClasspathEntry().getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-
-							IPath outputLocation = root.getRawClasspathEntry().getOutputLocation();
-							if (outputLocation == null) {
-								outputLocation = root.getJavaProject().getOutputLocation();
-							}
-							IResource classResource = ResourcesPlugin.getWorkspace().getRoot().findMember(
-									outputLocation.append(path));
-							if (classResource != null) {
-								return new FileResource((IFile) classResource);
-							}
-						}
-					}
-				}
-			}
-			else if (je instanceof IClassFile) {
-				if (((IClassFile) je).getElementName().equals(fileName)) {
-					// Workspace jar or resource
-					if (root.getResource() != null) {
-						return new StorageResource(new ZipEntryStorage((IFile) root.getResource(), path), project);
-					}
-					// Workspace external jar
-					else {
-						File jarFile = root.getPath().toFile();
-						return new ExternalFile(jarFile, path, project);
 					}
 				}
 			}
