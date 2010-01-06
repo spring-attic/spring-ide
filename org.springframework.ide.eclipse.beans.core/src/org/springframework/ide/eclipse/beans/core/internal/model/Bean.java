@@ -63,6 +63,8 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	private Integer hashCode = null;
 
+	private Boolean isFactory = null;
+
 	public Bean(IModelElement parent, BeanDefinitionHolder bdHolder) {
 		this(parent, bdHolder.getBeanName(), bdHolder.getAliases(), bdHolder.getBeanDefinition());
 	}
@@ -253,21 +255,24 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return false;
 	}
 
-	public boolean isFactory() {
-		if (definition instanceof AbstractBeanDefinition) {
+	public synchronized boolean isFactory() {
+		if (isFactory == null && definition instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition bd = (AbstractBeanDefinition) definition;
 			if (bd.getFactoryBeanName() != null) {
-				return true;
+				isFactory = Boolean.TRUE;
 			}
 			if (isRootBean() && bd.getFactoryMethodName() != null) {
-				return true;
+				isFactory = Boolean.TRUE;
 			}
 			IType type = BeansModelUtils.getBeanType(this, null);
 			if (type != null) {
-				return JdtUtils.doesImplement(getElementResource(), type, FactoryBean.class.getName());
+				isFactory = JdtUtils.doesImplement(getElementResource(), type, FactoryBean.class.getName());
 			}
 		}
-		return false;
+		else {
+			isFactory = Boolean.FALSE;
+		}
+		return isFactory;
 	}
 
 	@Override
