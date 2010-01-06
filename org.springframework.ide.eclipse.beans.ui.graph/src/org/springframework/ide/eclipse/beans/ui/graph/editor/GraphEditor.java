@@ -238,14 +238,15 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 */
 	protected synchronized void initializeGraphicalViewer() {
 		// check global boolean
-		if (!isUpdating ) {
-			
+		if (!isUpdating) {
+
 			Job job = new Job("Initialize Beans Graph '" + getPartName() + "'") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						if (getEditorInput() instanceof GraphEditorInput && getGraphicalViewer().getControl() != null) {
+						if (getEditorInput() instanceof GraphEditorInput && getGraphicalViewer() != null
+								&& getGraphicalViewer().getControl() != null) {
 
 							GraphEditorInput input = (GraphEditorInput) getEditorInput();
 
@@ -272,10 +273,10 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			};
 			job.setRule(new BlockingOnSelfSchedulingRule());
 			job.setPriority(Job.INTERACTIVE);
-			
+
 			// set global boolean
 			isUpdating = true;
-			
+
 			job.schedule();
 		}
 	}
