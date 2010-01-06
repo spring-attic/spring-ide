@@ -47,8 +47,6 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 	 * {@inheritDoc}
 	 */
 	public String resolve(IFile file, String baseLocation, String publicId, String systemId) {
-		// long start = System.currentTimeMillis();
-		// try {
 
 		// systemId is already resolved; so don't touch
 		if (systemId != null && systemId.startsWith("jar:")) {
@@ -60,15 +58,19 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 				&& BeansCoreUtils.isBeansConfig(file)
 				&& SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
 						.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false)) {
-			return resolveOnClasspath(file, systemId);
+//			long start = System.currentTimeMillis();
+			String result = null;
+			try {
+				result = resolveOnClasspath(file, systemId);
+				return result;
+			}
+			finally {
+//				System.out.println(String.format("-- resolve of '%s' took '%s'ms -> result '%s'", publicId, (System
+//						.currentTimeMillis() - start), result));
+			}
 		}
 		return null;
 
-		// }
-		// finally {
-		// System.out.println(String.format("-- resolve of '%s' took '%s'ms", publicId,
-		// (System.currentTimeMillis() - start)));
-		// }
 	}
 
 	/**

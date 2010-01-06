@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -52,7 +53,7 @@ public class BeansTypeHierachyState {
 		// First check the internal cache for faster access
 		if (!beansByType.containsKey(resource)) {
 			// Only if not in cache do the calculation
-			beansByType.put(resource, BeansModelUtils.getBeansByContainingTypes(resource));
+			beansByType.put(resource, BeansModelUtils.getBeansByContainingTypes(resource, new NullProgressMonitor()));
 		}
 		return beansByType.get(resource);
 	}
@@ -71,7 +72,7 @@ public class BeansTypeHierachyState {
 		// First check the internal cache for faster access
 		if (!configsByType.containsKey(resource)) {
 			// Only if not in cache do the calculation
-			configsByType.put(resource, BeansModelUtils.getConfigsByContainingTypes(resource));
+			configsByType.put(resource, BeansModelUtils.getConfigsByContainingTypes(resource, new NullProgressMonitor()));
 		}
 		return configsByType.get(resource);
 	}

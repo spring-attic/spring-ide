@@ -190,6 +190,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		if (file != null) {
 			try {
 				w.lock();
+				// System.out.println(String.format("++- resetting config '%s'", file.getFullPath().toString()));
 				isModelPopulated = false;
 				modificationTimestamp = IResource.NULL_STAMP;
 				defaults = null;
@@ -300,13 +301,15 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				}
 
 				if (file != null) {
+
 					modificationTimestamp = file.getModificationStamp();
 					if (isArchived) {
 						if (file instanceof Resource) {
 							resource = (Resource) file;
 						}
 						else {
-							resource = new StorageResource(new ZipEntryStorage(file.getProject(), getElementName()));
+							resource = new StorageResource(new ZipEntryStorage(file.getProject(), getElementName()),
+									file.getProject());
 						}
 					}
 					else {
@@ -375,7 +378,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this, documentHolder));
+					reader
+							.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,
+									documentHolder));
 					reader.setBeanNameGenerator(beanNameGenerator);
 
 					try {
@@ -480,10 +485,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					eventListener.onReadEnd(this);
 				}
 
-				if (BeansModel.DEBUG) {
-					System.out.println("Parsing of file '" + this.file.getProjectRelativePath().toString() + "' took "
-							+ (System.currentTimeMillis() - start) + "ms");
-				}
+//				if (BeansModel.DEBUG) {
+				System.out.println(String.format("%s,%s",
+						(System.currentTimeMillis() - start), file.getFullPath().toString()));
+//					System.out.println(String.format("+-- reading config '%s' took %sms",
+//							file.getFullPath().toString(), (System.currentTimeMillis() - start)));
+//				}
 			}
 		}
 	}

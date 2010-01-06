@@ -330,7 +330,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					}
 					return true;
 				}
-				else if (type == IBeansConfig.Type.AUTO_DETECTED) {
+				else if (type == IBeansConfig.Type.AUTO_DETECTED && !autoDetectedConfigs.containsKey(configName)) {
 					populateAutoDetectedConfigsAndConfigSets();
 					return true;
 				}
