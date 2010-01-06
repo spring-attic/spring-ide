@@ -109,7 +109,7 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 				catch (IOException e) {
 				}
 			}
-			
+
 			resolvedResources.put(location, new Resource[] { resource });
 			return resource;
 		}
@@ -134,7 +134,7 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 			if (resolvedResources.containsKey(locationPattern)) {
 				return resolvedResources.get(locationPattern);
 			}
-			
+
 			Resource[] resources = patternResolver.getResources(locationPattern);
 			Set<Resource> foundResources = new HashSet<Resource>();
 
@@ -158,7 +158,7 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 
 			Resource[] result = foundResources.toArray(new Resource[foundResources.size()]);
 			resolvedResources.put(locationPattern, result);
-			
+
 			return result;
 		}
 		finally {
@@ -238,15 +238,23 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 			URL url = resource.getURL();
 			String path = url.getPath();
 			int ix = path.indexOf('!');
-			String entryName = path.substring(ix + 1);
-			path = path.substring(0, ix);
+			if (ix > 0) {
+				String entryName = path.substring(ix + 1);
+				path = path.substring(0, ix);
 
-			try {
-				return new ExternalFile(new File(new URI(path)), entryName, project);
+				try {
+					return new ExternalFile(new File(new URI(path)), entryName, project);
+				}
+				catch (URISyntaxException e) {
+				}
 			}
-			catch (URISyntaxException e) {
+			else {
+				IResource[] allResourcesFor = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(
+						resource.getURI());
+				for (IResource res : allResourcesFor) {
+					return new FileResource((IFile) res);
+				}
 			}
-
 		}
 		else if (resource instanceof ClassPathResource) {
 			String path = ((ClassPathResource) resource).getPath();

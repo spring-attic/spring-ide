@@ -23,9 +23,13 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 
@@ -103,8 +107,39 @@ public class FileResource extends AbstractResource implements IAdaptable {
 			throw new IllegalStateException("File not found");
 		}
 		IFile relativeFile = file.getParent().getFile(new Path(relativePath));
-		if (relativeFile != null) {
+		if (relativeFile != null && relativeFile.exists()) {
 			return new FileResource(relativeFile);
+		}
+		else if (JdtUtils.isJavaProject(file)) {
+			try {
+				IPath filePath = file.getFullPath();
+				IPath newPath = null;
+				// First figure out the path within the source folder
+				for (IClasspathEntry entry : JdtUtils.getJavaProject(file).getRawClasspath()) {
+					if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+						if (entry.getPath().isPrefixOf(filePath)) {
+							newPath = filePath.removeFirstSegments(entry.getPath().segmentCount());
+							break;
+						}
+					}
+				}
+				// Second try to retrieve the relative path
+				if (newPath != null) {
+					newPath = newPath.removeLastSegments(1).append(relativePath);
+					for (IClasspathEntry entry : JdtUtils.getJavaProject(file).getRawClasspath()) {
+						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							if (!entry.getPath().isPrefixOf(filePath)) {
+								IFile newfile = ResourcesPlugin.getWorkspace().getRoot().getFile(entry.getPath().append(newPath));
+								if (newfile.exists()) {
+									return new FileResource(newfile);
+								}
+							}
+						}
+					}	
+				}
+			}
+			catch (JavaModelException e) {
+			}
 		}
 		throw new FileNotFoundException("Cannot create relative resource '" + relativePath + "' for "
 				+ getDescription());
