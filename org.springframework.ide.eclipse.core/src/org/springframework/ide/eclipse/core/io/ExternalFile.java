@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -234,7 +234,7 @@ public class ExternalFile extends AbstractResource implements IFile {
 	@Override
 	public Resource createRelative(String relativePath) throws IOException {
 		String pathToUse = StringUtils.applyRelativePath(entryName, relativePath);
-		return new ExternalFile(file, pathToUse, project);
+		return new EclipsePathMatchingResourcePatternResolver(project).getResource(pathToUse);
 	}
 
 	public IMarker createMarker(String type) throws CoreException {

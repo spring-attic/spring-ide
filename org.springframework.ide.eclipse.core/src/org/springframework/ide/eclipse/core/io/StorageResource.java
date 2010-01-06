@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -29,9 +30,11 @@ import org.springframework.util.StringUtils;
  */
 public class StorageResource extends AbstractResource implements IAdaptable {
 
+	private IProject project;
+	
 	private ZipEntryStorage storage;
 
-	public StorageResource(ZipEntryStorage storage) {
+	public StorageResource(ZipEntryStorage storage, IProject project) {
 		this.storage = storage;
 	}
 
@@ -76,7 +79,7 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(storage.getEntryName(),
 				relativePath);
-		return new EclipseClassPathResource(pathToUse, storage.getFile().getProject());
+		return new EclipsePathMatchingResourcePatternResolver(project).getResource(pathToUse);
 	}
 
 	@Override

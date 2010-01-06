@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,26 +12,37 @@ package org.springframework.ide.eclipse.core.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
 
 /**
  * Eclipse specific {@link ResourceLoader} implementation that understands the same rules applied by
@@ -41,33 +52,23 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0.3
  * @see PathMatchingResourcePatternResolver
- * @see AntPathMatcher
  */
 public class EclipsePathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
-	private final ResourceLoader resourceLoader;
+	private final PathMatchingResourcePatternResolver patternResolver;
 
 	private final IProject project;
 
-	private final PathMatcher pathMatcher = new AntPathMatcher();
-
-	private final PathMatchingResourcePatternResolver patternResolver;
+	private final ResourceLoader resourceLoader;
 
 	public EclipsePathMatchingResourcePatternResolver(IProject project) {
 		this(project, JdtUtils.getClassLoader(project));
 	}
 
 	public EclipsePathMatchingResourcePatternResolver(IProject project, ClassLoader classLoader) {
-		this.resourceLoader = new EclipseFileResourceLoader(project, classLoader);
+		this.resourceLoader = new EclipseFileResourceLoader(this, classLoader);
 		this.project = project;
 		this.patternResolver = new PathMatchingResourcePatternResolver(classLoader);
-	}
-
-	/**
-	 * Return the ResourceLoader that this pattern resolver works with.
-	 */
-	public ResourceLoader getResourceLoader() {
-		return this.resourceLoader;
 	}
 
 	/**
@@ -77,151 +78,224 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 		return getResourceLoader().getClassLoader();
 	}
 
-	/**
-	 * Returns matching resources.
-	 */
-	public Resource[] getResources(String locationPattern) throws IOException {
-		Assert.notNull(locationPattern, "Location pattern must not be null");
-		if (locationPattern.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
-			return patternResolver.getResources(locationPattern);
-		}
-		else if (locationPattern.startsWith(CLASSPATH_ALL_URL_PREFIX)) {
-			// a class path resource (multiple resources for same name possible)
-			if (pathMatcher.isPattern(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()))) {
-				// a class path resource pattern
-				return findEclipsePathMatchingResources(locationPattern);
-			}
-			else {
-				// all class path resources with the given name
-				return findAllEclipseClassPathResources(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()));
-			}
-		}
-		else {
-			// Only look for a pattern after a prefix here
-			// (to not get fooled by a pattern symbol in a strange prefix).
-			int prefixEnd = locationPattern.indexOf(":") + 1;
-			if (pathMatcher.isPattern(locationPattern.substring(prefixEnd))) {
-				// a file pattern
-				return findEclipsePathMatchingResources(locationPattern);
-			}
-			else {
-				// a single resource with the given name
-				return new Resource[] { getResourceLoader().getResource(locationPattern) };
-			}
-		}
-	}
-
-	protected Resource[] findAllEclipseClassPathResources(String location) {
-		String path = location;
-		if (path.startsWith("/")) {
-			path = path.substring(1);
-		}
-		Set<Resource> resources = org.springframework.ide.eclipse.core.io.ResourceUtils.getAllResources(path, project);
-		return resources.toArray(new Resource[resources.size()]);
-	}
-
-	protected Resource[] findEclipsePathMatchingResources(String locationPattern) throws IOException {
-		String rootDirPath = determineEclipseRootDir(locationPattern);
-		String subPattern = locationPattern.substring(rootDirPath.length());
-		Resource[] rootDirResources = getResources(rootDirPath);
-		Set<Resource> result = new LinkedHashSet<Resource>(16);
-		for (int i = 0; i < rootDirResources.length; i++) {
-			Resource rootDirResource = rootDirResources[i];
-			result.addAll(doFindEclipsePathMatchingFileResources(rootDirResource, subPattern));
-		}
-		return result.toArray(new Resource[result.size()]);
-	}
-
-	protected String determineEclipseRootDir(String location) {
-		int prefixEnd = location.indexOf(":") + 1;
-		int rootDirEnd = location.length();
-		while (rootDirEnd > prefixEnd && pathMatcher.isPattern(location.substring(prefixEnd, rootDirEnd))) {
-			rootDirEnd = location.lastIndexOf('/', rootDirEnd - 2) + 1;
-		}
-		if (rootDirEnd == 0) {
-			rootDirEnd = prefixEnd;
-		}
-		return location.substring(0, rootDirEnd);
-	}
-
-	protected Set<Resource> doFindEclipsePathMatchingFileResources(Resource rootDirResource, String subPattern)
-			throws IOException {
-		IFolder rootDir = null;
-		if (rootDirResource instanceof EclipseResource) {
-			if (((EclipseResource) rootDirResource).getRawResource() instanceof IFolder) {
-				rootDir = (IFolder) ((EclipseResource) rootDirResource).getRawResource();
-			}
-		}
-		else if (rootDirResource instanceof IAdaptable) {
-			if (((IAdaptable) rootDirResource).getAdapter(IResource.class) instanceof IFolder) {
-				rootDir = (IFolder) ((IAdaptable) rootDirResource).getAdapter(IResource.class);
-			}
-		}
-
-		if (rootDir == null) {
-			return Collections.emptySet();
-		}
-		return doFindEclipseMatchingFileSystemResources(rootDir, subPattern);
-	}
-
-	protected Set<Resource> doFindEclipseMatchingFileSystemResources(IFolder rootDir, String subPattern)
-			throws IOException {
-		Set<IResource> matchingFiles = retrieveEclipseMatchingFiles(rootDir, subPattern);
-		Set<Resource> result = new LinkedHashSet<Resource>(matchingFiles.size());
-		for (IResource file : matchingFiles) {
-
-			if (file instanceof IFile) {
-				result.add(new FileResource((IFile) file));
-			}
-			else if (file instanceof StorageFile) {
-				result.add(new StorageResource(((StorageFile) file).getStorage()));
-			}
-		}
-		return result;
-	}
-
-	protected Set<IResource> retrieveEclipseMatchingFiles(IFolder rootDir, String pattern) throws IOException {
-		String fullPattern = StringUtils.replace(rootDir.getRawLocation().toString(), File.separator, "/");
-		if (!pattern.startsWith("/")) {
-			fullPattern += "/";
-		}
-		fullPattern = fullPattern + StringUtils.replace(pattern, File.separator, "/");
-		Set<IResource> result = new LinkedHashSet<IResource>(8);
-		doRetrieveEclipseMatchingFiles(fullPattern, rootDir, result);
-		return result;
-	}
-
-	protected void doRetrieveEclipseMatchingFiles(String fullPattern, IFolder dir, Set<IResource> result)
-			throws IOException {
-		IResource[] dirContents = null;
-		try {
-			dirContents = dir.members();
-		}
-		catch (CoreException e) {
-			throw new IOException("Could not retrieve contents of directory [" + dir.getRawLocation() + "]");
-		}
-		if (dirContents == null) {
-			throw new IOException("Could not retrieve contents of directory [" + dir.getRawLocation() + "]");
-		}
-		for (int i = 0; i < dirContents.length; i++) {
-			IResource content = dirContents[i];
-			String currPath = StringUtils.replace(content.getRawLocation().toString(), File.separator, "/");
-			if (content instanceof IFolder && pathMatcher.matchStart(fullPattern, currPath + "/")) {
-				doRetrieveEclipseMatchingFiles(fullPattern, (IFolder) content, result);
-			}
-			if (pathMatcher.match(fullPattern, currPath)) {
-				result.add(content);
-			}
-		}
-	}
-
 	public Resource getResource(String location) {
-		if (location.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
-			return patternResolver.getResource(location);
+//		long start = System.currentTimeMillis();
+		try {
+			Resource resource = patternResolver.getResource(location);
+			if (resource != null) {
+				try {
+					IJavaProject javaProject = JdtUtils.getJavaProject(project);
+					IPackageFragmentRoot[] roots = javaProject.getAllPackageFragmentRoots();
+					Resource newResource = processRawResource(roots, resource);
+					if (newResource != null) {
+						resource = newResource;
+					}
+					else {
+						System.out.println(String.format("!-- could not resolve '%s'", resource));
+					}
+				}
+				catch (JavaModelException e) {
+				}
+				catch (IOException e) {
+				}
+			}
+			return resource;
 		}
-		else {
-			return getResourceLoader().getResource(location);
+		finally {
+//			System.out.println(String.format("--- resolving location '%s' took '%s'ms", location, (System
+//					.currentTimeMillis() - start)));
 		}
+	}
+
+	/**
+	 * Return the ResourceLoader that this pattern resolver works with.
+	 */
+	public ResourceLoader getResourceLoader() {
+		return this.resourceLoader;
+	}
+
+	public Resource[] getResources(String locationPattern) throws IOException {
+//		long start = System.currentTimeMillis();
+		try {
+
+			Resource[] resources = patternResolver.getResources(locationPattern);
+			Set<Resource> foundResources = new HashSet<Resource>();
+
+			try {
+				IJavaProject javaProject = JdtUtils.getJavaProject(project);
+				IPackageFragmentRoot[] roots = javaProject.getAllPackageFragmentRoots();
+
+				for (Resource resource : resources) {
+					Resource newResource = processRawResource(roots, resource);
+					if (newResource != null) {
+						foundResources.add(newResource);
+					}
+					else {
+						System.out.println(String.format("!-- could not resolve '%s'", resource));
+					}
+				}
+			}
+			catch (JavaModelException e) {
+				// The implementation is called too often to log
+			}
+
+			return (Resource[]) foundResources.toArray(new Resource[foundResources.size()]);
+		}
+		finally {
+//			System.out.println(String.format("--- resolving resource pattern '%s' took '%s'ms", locationPattern,
+//					(System.currentTimeMillis() - start)));
+		}
+	}
+
+	/**
+	 * Verify if the <code>resources</code> array contains a file matching <code>fileName</code>.
+	 */
+	private IStorage contains(Object[] resources, String fileName) {
+		for (Object resource : resources) {
+			if (resource instanceof IResource) {
+				if (((IResource) resource).getName().equals(fileName)) {
+					return (IStorage) resource;
+				}
+			}
+			else if (resource instanceof IJarEntryResource) {
+				if (((IJarEntryResource) resource).getName().equals(fileName)) {
+					return (IStorage) resource;
+				}
+			}
+		}
+		return null;
+	}
+
+	private Resource processRawResource(IPackageFragmentRoot[] roots, Resource resource) throws IOException,
+			JavaModelException {
+		if (resource instanceof FileSystemResource) {
+			// This can only be something in the Eclipse workspace
+			IResource[] allResourcesFor = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(
+					resource.getURI());
+			for (IResource res : allResourcesFor) {
+				return new FileResource((IFile) res);
+			}
+		}
+		else if (resource instanceof UrlResource) {
+			URL url = resource.getURL();
+			String path = url.getPath();
+			int ix = path.indexOf('!');
+			String entryName = path.substring(ix + 1);
+			path = path.substring(0, ix);
+
+			try {
+				return new ExternalFile(new File(new URI(path)), entryName, project);
+			}
+			catch (URISyntaxException e) {
+			}
+
+		}
+		else if (resource instanceof ClassPathResource) {
+			String path = ((ClassPathResource) resource).getPath();
+			String fileName = path;
+			String packageName = "";
+			int ix = path.lastIndexOf('/');
+			if (ix > 0) {
+				fileName = path.substring(ix + 1);
+				packageName = path.substring(0, ix).replace('/', '.');
+			}
+			if (fileName.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
+				String typeName = packageName + "." + fileName.substring(0, fileName.length() - 6);
+				for (IPackageFragmentRoot root : roots) {
+					Resource storage = null;
+
+					if ("".equals(packageName) && root.exists()) {
+						storage = processClassResource(path, fileName, typeName, root, root.getChildren());
+					}
+
+					IPackageFragment packageFragment = root.getPackageFragment(packageName);
+					if (storage == null && packageFragment != null && packageFragment.exists()) {
+						storage = processClassResource(path, fileName, typeName, root, packageFragment.getChildren());
+					}
+
+					if (storage != null) {
+						return storage;
+					}
+				}
+			}
+
+			else {
+				for (IPackageFragmentRoot root : roots) {
+					IStorage storage = null;
+
+					// Look in the root of the package fragment root
+					if ("".equals(packageName) && root.exists()) {
+						storage = contains(root.getNonJavaResources(), fileName);
+					}
+
+					// Check the package
+					IPackageFragment packageFragment = root.getPackageFragment(packageName);
+					if (storage == null && packageFragment != null && packageFragment.exists()) {
+						storage = contains(packageFragment.getNonJavaResources(), fileName);
+					}
+
+					// Found the resource in the package fragment root? -> construct usable Resource
+					if (storage != null) {
+						if (storage instanceof IFile) {
+							return new FileResource((IFile) storage);
+						}
+						else if (storage instanceof IJarEntryResource) {
+
+							// Workspace jar or resource
+							if (root.getResource() != null) {
+								return new StorageResource(new ZipEntryStorage((IFile) root.getResource(),
+										((IJarEntryResource) storage).getFullPath().toString()), project);
+							}
+							// Workspace external jar
+							else {
+								File jarFile = root.getPath().toFile();
+								return new ExternalFile(jarFile,
+										((IJarEntryResource) storage).getFullPath().toString(), project);
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private Resource processClassResource(String path, String fileName, String typeName, IPackageFragmentRoot root,
+			IJavaElement[] children) throws JavaModelException {
+		for (IJavaElement je : children) {
+			if (je instanceof ICompilationUnit) {
+				for (IType type : ((ICompilationUnit) je).getAllTypes()) {
+					if (type.getFullyQualifiedName('$').equals(typeName)) {
+						if (root.getRawClasspathEntry().getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+
+							IPath outputLocation = root.getRawClasspathEntry().getOutputLocation();
+							if (outputLocation == null) {
+								outputLocation = root.getJavaProject().getOutputLocation();
+							}
+							IResource classResource = ResourcesPlugin.getWorkspace().getRoot().findMember(
+									outputLocation.append(path));
+							if (classResource != null) {
+								return new FileResource((IFile) classResource);
+							}
+						}
+					}
+				}
+			}
+			else if (je instanceof IClassFile) {
+				if (((IClassFile) je).getElementName().equals(fileName)) {
+					// Workspace jar or resource
+					if (root.getResource() != null) {
+						return new StorageResource(new ZipEntryStorage((IFile) root.getResource(), path), project);
+					}
+					// Workspace external jar
+					else {
+						File jarFile = root.getPath().toFile();
+						return new ExternalFile(jarFile, path, project);
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 }
