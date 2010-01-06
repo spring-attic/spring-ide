@@ -60,6 +60,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -86,6 +87,7 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.EclipsePathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.io.FileResource;
@@ -104,6 +106,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ClassUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
@@ -381,6 +384,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader
 							.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,
 									documentHolder));
+					reader.setDocumentReaderClass(ImportPlaceholderSuppressingBeanDefinitionDocumentReader.class);
 					reader.setBeanNameGenerator(beanNameGenerator);
 
 					try {
@@ -485,12 +489,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					eventListener.onReadEnd(this);
 				}
 
-//				if (BeansModel.DEBUG) {
-				System.out.println(String.format("%s,%s",
-						(System.currentTimeMillis() - start), file.getFullPath().toString()));
-//					System.out.println(String.format("+-- reading config '%s' took %sms",
-//							file.getFullPath().toString(), (System.currentTimeMillis() - start)));
-//				}
+				// if (BeansModel.DEBUG) {
+				System.out.println(String.format("%s,%s", (System.currentTimeMillis() - start), file.getFullPath()
+						.toString()));
+				// System.out.println(String.format("+-- reading config '%s' took %sms",
+				// file.getFullPath().toString(), (System.currentTimeMillis() - start)));
+				// }
 			}
 		}
 	}
@@ -1131,4 +1135,28 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			return null;
 		}
 	}
+
+	/**
+	 * Extension to the default {@link DefaultBeanDefinitionDocumentReader} to suppress import statements with
+	 * placeholders in resource attributes as this is not support in the IDE.
+	 * @since 2.3.1
+	 */
+	public static class ImportPlaceholderSuppressingBeanDefinitionDocumentReader extends
+			DefaultBeanDefinitionDocumentReader {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void importBeanDefinitionResource(Element ele) {
+			String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+			if (SpringCoreUtils.hasPlaceHolder(location)) {
+				getReaderContext().warning("Resource location contains placeholder", ele);
+			}
+			else {
+				super.importBeanDefinitionResource(ele);
+			}
+		}
+	}
+	
 }
