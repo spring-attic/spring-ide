@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 
 /**
@@ -68,7 +69,12 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 							.getConfig((ZipEntryStorage) tElement);
 				}
 				if (element != null) {
-					project = BeansModelUtils.getProject(element).getProject();
+					if (element instanceof IResourceModelElement) {
+						project = ((IResourceModelElement) element).getElementResource().getProject();
+					}
+					else {
+						project = BeansModelUtils.getProject(element).getProject();
+					}
 					block = getProjectPropertyPageBlock(
 							tSelection.getPaths()[0]);
 					modelElement = element;
