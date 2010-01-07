@@ -48,7 +48,6 @@ import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -81,7 +80,7 @@ public class AopReferenceModelBuilderJob extends Job {
 
 	private Set<IResource> affectedResources;
 
-	private Map<IFile, Set<IAspectDefinition>> aspectDefinitionCache = null;
+	private Map<IFile, List<IAspectDefinition>> aspectDefinitionCache = null;
 
 	private IProject currentProject;
 
@@ -89,7 +88,9 @@ public class AopReferenceModelBuilderJob extends Job {
 
 	private MarkerModifyingJob markerJob = null;
 
-	private AspectDefinitionMatcher matcher = null;
+	private AspectDefinitionMatcher aspectDefinitionMatcher = null;
+
+	private AspectDefinitionBuilderHelper aspectDefinitionBuilder;
 
 	/**
 	 * Constructor to create a {@link AopReferenceModelBuilderJob} instance.
@@ -148,10 +149,9 @@ public class AopReferenceModelBuilderJob extends Job {
 			}
 			if (!monitor.isCanceled()) {
 				long start = System.currentTimeMillis();
-				System.out.println(String.format("- building aop model for '%s' resources", affectedResources.size()));
 				this.buildAopModel(monitor);
-				System.out.println(String
-						.format("- aop model building took '%s'", (System.currentTimeMillis() - start)));
+				System.out.println(String.format("+- aop model building for %s resources took %sms",
+						affectedResources.size(), (System.currentTimeMillis() - start)));
 			}
 			else {
 				return Status.CANCEL_STATUS;
@@ -170,10 +170,8 @@ public class AopReferenceModelBuilderJob extends Job {
 	private void buildAopReferencesForBean(final IBean bean, final IModelElement context, final IAspectDefinition info,
 			final IResource file, final IAopProject aopProject, IProgressMonitor monitor) {
 		try {
-			AopLog
-					.log(AopLog.BUILDER, Activator.getFormattedMessage(
-							"AopReferenceModelBuilder.processingBeanDefinition", bean, bean.getElementResource()
-									.getFullPath()));
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.processingBeanDefinition", bean, bean.getElementResource().getFullPath()));
 
 			// check if bean is abstract
 			if (bean.isAbstract()) {
@@ -244,17 +242,17 @@ public class AopReferenceModelBuilderJob extends Job {
 						}
 
 						if (jdtAspectMethod != null) {
-//							 long start = System.currentTimeMillis();
-							Set<IMethod> matchingMethods = matcher.matches(targetClass, bean, info, aopProject
-									.getProject().getProject());
+							// long start = System.currentTimeMillis();
+							Set<IMethod> matchingMethods = aspectDefinitionMatcher.matches(targetClass, bean, info,
+									aopProject.getProject().getProject());
 							for (IMethod method : matchingMethods) {
 								IAopReference ref = new AopReference(info.getType(), jdtAspectMethod, JdtUtils
 										.getLineNumber(jdtAspectMethod), method, JdtUtils.getLineNumber(method), info,
 										file, bean);
 								aopProject.addAopReference(ref);
 							}
-//							 System.out.println(String.format("--- matching on '%s' took '%s'", targetClass, (System
-//							 .currentTimeMillis() - start)));
+							// System.out.println(String.format("--- matching on '%s' took '%s'", targetClass, (System
+							// .currentTimeMillis() - start)));
 						}
 					}
 				}
@@ -312,7 +310,7 @@ public class AopReferenceModelBuilderJob extends Job {
 
 			if (javaProject != null && config != null) {
 
-//	     		long start = System.currentTimeMillis();
+				// long start = System.currentTimeMillis();
 
 				aopProject = ((AopReferenceModel) Activator.getModel()).getProjectWithInitialization(javaProject);
 				aopProject.clearReferencesForResource(currentFile);
@@ -320,19 +318,17 @@ public class AopReferenceModelBuilderJob extends Job {
 				// Prepare class loaders
 				this.classLoaderSupport = createWeavingClassLoaderSupport(project.getProject());
 
-//				AopLog.log(AopLog.BUILDER_CLASSPATH, Activator.getFormattedMessage(
-//						"AopReferenceModelBuilder.aopBuilderClassPath", StringUtils.arrayToDelimitedString(
-//								((URLClassLoader) classLoaderSupport.getProjectClassLoader()).getURLs(), ";")));
+				// AopLog.log(AopLog.BUILDER_CLASSPATH, Activator.getFormattedMessage(
+				// "AopReferenceModelBuilder.aopBuilderClassPath", StringUtils.arrayToDelimitedString(
+				// ((URLClassLoader) classLoaderSupport.getProjectClassLoader()).getURLs(), ";")));
 
 				List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
-				Set<IAspectDefinitionBuilder> builders = AspectDefinitionBuilderUtils.getAspectDefinitionBuilder();
-				aspectInfos.addAll(buildAspectDefinitions(currentFile, builders));
+				aspectInfos.addAll(buildAspectDefinitions(currentFile));
 
 				for (IBeansImport beansImport : config.getImports()) {
 					for (IImportedBeansConfig importedConfig : beansImport.getImportedBeansConfigs()) {
 						if (importedConfig.getElementResource() instanceof IFile) {
-							aspectInfos.addAll(buildAspectDefinitions((IFile) importedConfig.getElementResource(),
-									builders));
+							aspectInfos.addAll(buildAspectDefinitions((IFile) importedConfig.getElementResource()));
 						}
 					}
 				}
@@ -342,10 +338,11 @@ public class AopReferenceModelBuilderJob extends Job {
 					aopProject.clearReferencesForResource(info.getResource());
 				}
 
-//				System.out.println(String.format("-- preparing aop model for file '%s' took '%s'", currentFile, (System
-//						.currentTimeMillis() - start)));
-//
-//				start = System.currentTimeMillis();
+				// System.out.println(String.format("-- preparing aop model for file '%s' took '%s'", currentFile,
+				// (System
+				// .currentTimeMillis() - start)));
+				//
+				// start = System.currentTimeMillis();
 
 				for (IAspectDefinition info : aspectInfos) {
 					// build model for config
@@ -355,8 +352,9 @@ public class AopReferenceModelBuilderJob extends Job {
 					buildAopReferencesFromBeansConfigSets(project, config, info, monitor);
 				}
 
-//				System.out.println(String.format("-- building aop model for file '%s' took '%s'", currentFile, (System
-//						.currentTimeMillis() - start)));
+				// System.out.println(String.format("-- building aop model for file '%s' took '%s'", currentFile,
+				// (System
+				// .currentTimeMillis() - start)));
 			}
 		}
 		return aopProject;
@@ -386,16 +384,12 @@ public class AopReferenceModelBuilderJob extends Job {
 		}
 	}
 
-	private Set<IAspectDefinition> buildAspectDefinitions(IFile file, Set<IAspectDefinitionBuilder> builders) {
+	private List<IAspectDefinition> buildAspectDefinitions(IFile file) {
 		if (aspectDefinitionCache.containsKey(file)) {
 			return aspectDefinitionCache.get(file);
 		}
 
-		Set<IAspectDefinition> definitions = new HashSet<IAspectDefinition>();
-		for (IAspectDefinitionBuilder builder : builders) {
-			definitions.addAll(builder.buildAspectDefinitions(file, classLoaderSupport));
-		}
-
+		List<IAspectDefinition> definitions = aspectDefinitionBuilder.buildAspectDefinitions(file, classLoaderSupport);
 		aspectDefinitionCache.put(file, definitions);
 
 		return definitions;
@@ -412,8 +406,9 @@ public class AopReferenceModelBuilderJob extends Job {
 				affectedResources.size()));
 
 		markerJob = new MarkerModifyingJob();
-		matcher = new AspectDefinitionMatcher();
-		aspectDefinitionCache = new HashMap<IFile, Set<IAspectDefinition>>();
+		aspectDefinitionMatcher = new AspectDefinitionMatcher();
+		aspectDefinitionCache = new HashMap<IFile, List<IAspectDefinition>>();
+		aspectDefinitionBuilder = new AspectDefinitionBuilderHelper();
 
 		monitor.beginTask(Activator.getFormattedMessage("AopReferenceModelBuilder.startBuildingAopReferenceModel"),
 				affectedResources.size());
@@ -428,10 +423,8 @@ public class AopReferenceModelBuilderJob extends Job {
 						throw new OperationCanceledException();
 					}
 
-					AopLog
-							.log(AopLog.BUILDER, Activator.getFormattedMessage(
-									"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile.getFullPath()
-											.toString()));
+					AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+									"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile.getFullPath().toString()));
 					monitor.subTask(Activator.getFormattedMessage("AopReferenceModelBuilder.buildingAopReferenceModel",
 							currentFile.getFullPath().toString()));
 
@@ -463,7 +456,8 @@ public class AopReferenceModelBuilderJob extends Job {
 			AopLog.logEnd(AopLog.BUILDER, PROCESSING_TOOK_MSG);
 		}
 		finally {
-			matcher.close();
+			aspectDefinitionMatcher.close();
+			aspectDefinitionBuilder.close();
 			// schedule marker update job
 			markerJob.schedule();
 		}
@@ -605,10 +599,8 @@ public class AopReferenceModelBuilderJob extends Job {
 								AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
 							}
 						}
-						AopLog
-								.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
-										"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath()
-												.toString()));
+						AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+							"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath().toString()));
 					}
 				}
 				// adding markers for exceptions that occurred during parsing

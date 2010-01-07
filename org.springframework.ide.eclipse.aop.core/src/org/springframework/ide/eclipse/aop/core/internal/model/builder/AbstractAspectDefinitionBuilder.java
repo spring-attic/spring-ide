@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,21 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.springframework.ide.eclipse.aop.core.Activator;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
-import org.springframework.ide.eclipse.core.io.ExternalFile;
-import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 
@@ -36,56 +27,6 @@ import org.w3c.dom.Node;
  */
 @SuppressWarnings("restriction")
 public abstract class AbstractAspectDefinitionBuilder implements IAspectDefinitionBuilder {
-
-	public final List<IAspectDefinition> buildAspectDefinitions(IFile file,
-			IProjectClassLoaderSupport classLoaderSupport) {
-		final List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
-
-		IStructuredModel model = null;
-		try {
-			if (file instanceof ExternalFile) {
-				if (model == null) {
-					model = StructuredModelManager.getModelManager().getModelForRead(
-							file.getName(), file.getContents(), null);
-				}
-			}
-			else {
-				try {
-					model = StructuredModelManager.getModelManager().getExistingModelForRead(file);
-				}
-				catch (RuntimeException e) {
-					// sometimes WTP throws a NPE in concurrency situations
-				}
-				if (model == null) {
-					model = StructuredModelManager.getModelManager().getModelForRead(file);
-				}
-
-			}
-			if (model != null) {
-				IDOMDocument document = ((DOMModelImpl) model).getDocument();
-				if (document != null && document.getDocumentElement() != null) {
-					doBuildAspectDefinitions(document, file, aspectInfos, classLoaderSupport);
-				}
-			}
-		}
-		catch (IOException e) {
-			Activator.log(e);
-		}
-		catch (CoreException e) {
-			Activator.log(e);
-		}
-		finally {
-			if (model != null) {
-				try {
-					model.releaseFromRead();
-				}
-				catch (Exception e) {
-					// sometimes WTP throws a NPE in concurrency situations
-				}
-			}
-		}
-		return aspectInfos;
-	}
 
 	protected String getAttribute(Node node, String attributeName) {
 		if (hasAttribute(node, attributeName)) {
@@ -101,7 +42,15 @@ public abstract class AbstractAspectDefinitionBuilder implements IAspectDefiniti
 		return (node != null && node.hasAttributes() && node.getAttributes().getNamedItem(
 				attributeName) != null);
 	}
+	
+	protected void extractLineNumbers(IAspectDefinition def, IDOMNode node) {
+		if (def instanceof BeanAspectDefinition) {
+			BeanAspectDefinition bDef = (BeanAspectDefinition) def;
+			bDef.setAspectStartLineNumber(((IDOMDocument) node.getOwnerDocument())
+					.getStructuredDocument().getLineOfOffset(node.getStartOffset()) + 1);
+			bDef.setAspectEndLineNumber(((IDOMDocument) node.getOwnerDocument())
+					.getStructuredDocument().getLineOfOffset(node.getEndOffset()) + 1);
+		}
+	}
 
-	protected abstract void doBuildAspectDefinitions(IDOMDocument document, IFile file,
-			List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport);
 }

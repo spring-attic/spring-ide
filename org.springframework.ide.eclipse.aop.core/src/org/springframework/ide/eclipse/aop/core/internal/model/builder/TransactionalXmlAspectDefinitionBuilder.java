@@ -17,12 +17,12 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.JavaAdvisorDefinition;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
+import org.springframework.ide.eclipse.aop.core.model.builder.IDocumentFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -52,9 +52,9 @@ public class TransactionalXmlAspectDefinitionBuilder extends AbstractAspectDefin
 
 	private static final String TX_NAMESPACE_URI = "http://www.springframework.org/schema/tx";
 
-	public void doBuildAspectDefinitions(IDOMDocument document, IFile file, List<IAspectDefinition> aspectInfos,
-			IProjectClassLoaderSupport classLoaderSupport) {
-		parseAnnotationDrivenElement(document, file, aspectInfos, classLoaderSupport);
+	public void buildAspectDefinitions(List<IAspectDefinition> aspectInfos, IFile file,
+			IProjectClassLoaderSupport classLoaderSupport, IDocumentFactory factory) {
+		parseAnnotationDrivenElement(factory.createDocument(file), file, aspectInfos, classLoaderSupport);
 	}
 
 	private void addAspectDefinition(IAspectDefinition info, List<IAspectDefinition> aspectInfos) {
@@ -62,18 +62,12 @@ public class TransactionalXmlAspectDefinitionBuilder extends AbstractAspectDefin
 		aspectInfos.add(info);
 	}
 
-	private void extractLineNumbers(IAspectDefinition def, IDOMNode node) {
-		if (def instanceof BeanAspectDefinition) {
-			BeanAspectDefinition bDef = (BeanAspectDefinition) def;
-			bDef.setAspectStartLineNumber(((IDOMDocument) node.getOwnerDocument()).getStructuredDocument()
-					.getLineOfOffset(node.getStartOffset()) + 1);
-			bDef.setAspectEndLineNumber(((IDOMDocument) node.getOwnerDocument()).getStructuredDocument()
-					.getLineOfOffset(node.getEndOffset()) + 1);
-		}
-	}
-
 	private void parseAnnotationDrivenElement(final IDOMDocument document, IFile file,
 			final List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
+		if (document == null) {
+			return;
+		}
+		
 		NodeList list = document.getDocumentElement().getElementsByTagNameNS(TX_NAMESPACE_URI, "annotation-driven");
 
 		for (int i = 0; i < list.getLength(); i++) {

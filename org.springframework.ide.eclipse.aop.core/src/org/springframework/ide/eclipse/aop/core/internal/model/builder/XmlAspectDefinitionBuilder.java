@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
+import org.springframework.ide.eclipse.aop.core.model.builder.IDocumentFactory;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
@@ -98,24 +99,14 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder 
 
 	private static final String TYPES_MATCHING_ATTRIBUTE = "types-matching";
 
-	public void doBuildAspectDefinitions(IDOMDocument document, IFile file,
-			List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
-		parseAopConfigElement(document, file, aspectInfos, classLoaderSupport);
+	public void buildAspectDefinitions(List<IAspectDefinition> aspectInfos, IFile file,
+			IProjectClassLoaderSupport classLoaderSupport, IDocumentFactory factory) {
+		parseAopConfigElement(factory.createDocument(file), file, aspectInfos, classLoaderSupport);
 	}
 
 	private void addAspectDefinition(IAspectDefinition info, List<IAspectDefinition> aspectInfos) {
 		AopLog.log(AopLog.BUILDER_MESSAGES, info.toString());
 		aspectInfos.add(info);
-	}
-
-	private void extractLineNumbers(IAspectDefinition def, IDOMNode node) {
-		if (def instanceof BeanAspectDefinition) {
-			BeanAspectDefinition bDef = (BeanAspectDefinition) def;
-			bDef.setAspectStartLineNumber(((IDOMDocument) node.getOwnerDocument())
-					.getStructuredDocument().getLineOfOffset(node.getStartOffset()) + 1);
-			bDef.setAspectEndLineNumber(((IDOMDocument) node.getOwnerDocument())
-					.getStructuredDocument().getLineOfOffset(node.getEndOffset()) + 1);
-		}
 	}
 
 	private String getPointcut(final Node aspectNode, Map<String, String> rootPointcuts,
@@ -217,6 +208,10 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder 
 
 	private void parseAopConfigElement(final IDOMDocument document, IFile file,
 			final List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
+		if (document == null) {
+			return;
+		}
+		
 		NodeList list = document.getDocumentElement().getElementsByTagNameNS(AOP_NAMESPACE_URI,
 				CONFIG_ELEMENT);
 

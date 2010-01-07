@@ -17,10 +17,6 @@ import java.util.regex.Pattern;
 
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
@@ -29,6 +25,7 @@ import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinit
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
+import org.springframework.ide.eclipse.aop.core.model.builder.IDocumentFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -66,11 +63,14 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 
 	private ClassReaderFactory classReaderFactory = null;
 
-	public void doBuildAspectDefinitions(IDOMDocument document, IFile file,
-			List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
+	private IDocumentFactory documentFactory = null;
+
+	public void buildAspectDefinitions(List<IAspectDefinition> aspectInfos, IFile file,
+			IProjectClassLoaderSupport classLoaderSupport, IDocumentFactory factory) {
 		if (BeansCoreUtils.isBeansConfig(file, true)) {
+			this.documentFactory = factory;
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(file, true);
-			parseAnnotationAspects(document, beansConfig, aspectInfos, classLoaderSupport);
+			parseAnnotationAspects(factory.createDocument(file), beansConfig, aspectInfos, classLoaderSupport);
 		}
 	}
 
@@ -79,16 +79,16 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		aspectInfos.add(info);
 	}
 
-	private void createAnnotationAspectDefinition(IBean bean, final String id,
-			final String className, final List<IAspectDefinition> aspectInfos) throws Throwable {
+	private void createAnnotationAspectDefinition(IBean bean, final String id, final String className,
+			final List<IAspectDefinition> aspectInfos) throws Throwable {
 
 		ClassReader classReader = getClassReader(className);
 		if (classReader == null) {
 			return;
 		}
 
-		AdviceAnnotationVisitor v = new AdviceAnnotationVisitor(id, className, bean
-				.getElementStartLine(), bean.getElementEndLine());
+		AdviceAnnotationVisitor v = new AdviceAnnotationVisitor(id, className, bean.getElementStartLine(), bean
+				.getElementEndLine());
 		classReader.accept(v, false);
 
 		List<IAspectDefinition> aspectDefinitions = v.getAspectDefinitions();
@@ -112,24 +112,21 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 	}
 
 	private void parseAnnotationAspectFromSingleBean(IBeansConfig beansConfig,
-			IProjectClassLoaderSupport classLoaderSupport,
-			final List<IAspectDefinition> aspectDefinitions,
+			IProjectClassLoaderSupport classLoaderSupport, final List<IAspectDefinition> aspectDefinitions,
 			AspectJAutoProxyConfiguration configuration, final IBean bean) {
 		final String id = bean.getElementName();
 		final String className = BeansModelUtils.getBeanClass(bean, beansConfig);
 		if (className != null && configuration.isIncluded(id)) {
 
 			try {
-				classLoaderSupport
-						.executeCallback(new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
+				classLoaderSupport.executeCallback(new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
 
-							public void doWithActiveProjectClassLoader() throws Throwable {
-								if (validateAspect(className)) {
-									createAnnotationAspectDefinition(bean, id, className,
-											aspectDefinitions);
-								}
-							}
-						});
+					public void doWithActiveProjectClassLoader() throws Throwable {
+						if (validateAspect(className)) {
+							createAnnotationAspectDefinition(bean, id, className, aspectDefinitions);
+						}
+					}
+				});
 			}
 			catch (Throwable e) {
 				AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
@@ -141,9 +138,11 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 
 	private void parseAnnotationAspects(IDOMDocument document, IBeansConfig beansConfig,
 			List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
-
-		AspectJAutoProxyConfiguration configuration = getAspectJAutoProxyConfiguration(beansConfig,
-				document);
+		if (document == null) {
+			return;
+		}
+		
+		AspectJAutoProxyConfiguration configuration = getAspectJAutoProxyConfiguration(beansConfig, document);
 
 		// not configured for auto proxing
 		if (!configuration.isAutoProxy()) {
@@ -153,22 +152,20 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
 
 		for (IBean bean : beansConfig.getBeans()) {
-			parseAnnotationAspectFromSingleBean(beansConfig, classLoaderSupport, aspectDefinitions,
-					configuration, bean);
+			parseAnnotationAspectFromSingleBean(beansConfig, classLoaderSupport, aspectDefinitions, configuration, bean);
 		}
 
 		if (configuration.isProxyTargetClass()) {
 			for (IAspectDefinition def : aspectDefinitions) {
-				((BeanAspectDefinition) def).setProxyTargetClass(configuration
-						.isProxyTargetClass());
+				((BeanAspectDefinition) def).setProxyTargetClass(configuration.isProxyTargetClass());
 			}
 		}
 
 		aspectInfos.addAll(aspectDefinitions);
 	}
 
-	private AspectJAutoProxyConfiguration getAspectJAutoProxyConfiguration(
-			IBeansConfig beansConfig, IDOMDocument document) {
+	private AspectJAutoProxyConfiguration getAspectJAutoProxyConfiguration(IBeansConfig beansConfig,
+			IDOMDocument document) {
 
 		AspectJAutoProxyConfiguration configuration = new AspectJAutoProxyConfiguration();
 
@@ -179,45 +176,9 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		for (IBeansConfigSet configSet : BeansModelUtils.getConfigSets(beansConfig)) {
 			for (IBeansConfig config : configSet.getConfigs()) {
 				if (!config.equals(beansConfig)) {
-					IStructuredModel model = null;
-					try {
-						if (config.isExternal()) {
-							if (model == null) {
-								model = StructuredModelManager.getModelManager().getModelForRead(
-										config.getElementResource().getName(),
-										((IFile) config.getElementResource()).getContents(), null);
-							}
-						}
-						else {
-							try {
-								model = StructuredModelManager.getModelManager()
-										.getExistingModelForRead(config.getElementResource());
-							}
-							catch (RuntimeException e) {
-								// sometimes WTP throws a NPE in concurrency situations
-							}
-							if (model == null) {
-								model = StructuredModelManager.getModelManager().getModelForRead(
-										(IFile) config.getElementResource());
-							}
-						}
-						if (model != null) {
-							document = ((DOMModelImpl) model).getDocument();
-							if (document != null && document.getDocumentElement() != null) {
-								getAspectJConfigurationForDocument(document, configuration);
-							}
-						}
-					}
-					catch (IOException e) {
-						Activator.log(e);
-					}
-					catch (CoreException e) {
-						Activator.log(e);
-					}
-					finally {
-						if (model != null) {
-							model.releaseFromRead();
-						}
+					document = documentFactory.createDocument((IFile) config.getElementResource());
+					if (document != null && document.getDocumentElement() != null) {
+						getAspectJConfigurationForDocument(document, configuration);
 					}
 				}
 			}
@@ -226,8 +187,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		return configuration;
 	}
 
-	private void getAspectJConfigurationForDocument(IDOMDocument document,
-			AspectJAutoProxyConfiguration configuration) {
+	private void getAspectJConfigurationForDocument(IDOMDocument document, AspectJAutoProxyConfiguration configuration) {
 		NodeList list = getAspectJAutoProxyNodes(document);
 
 		if (list.getLength() > 0) {
@@ -237,11 +197,9 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		for (int i = 0; i < list.getLength(); i++) {
 			Node node = list.item(i);
 			configuration.addIncludePattern(node);
-			if (node.getAttributes() != null
-					&& node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE) != null) {
+			if (node.getAttributes() != null && node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE) != null) {
 				boolean proxyTargetClass = Boolean.valueOf(
-						node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE)
-								.getNodeValue()).booleanValue();
+						node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE).getNodeValue()).booleanValue();
 				if (proxyTargetClass) {
 					configuration.setProxyTargetClass(proxyTargetClass);
 				}
@@ -250,8 +208,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 	}
 
 	private NodeList getAspectJAutoProxyNodes(IDOMDocument document) {
-		return document.getDocumentElement().getElementsByTagNameNS(AOP_NAMESPACE_URI,
-				ASPECTJ_AUTOPROXY_ELEMENT);
+		return document.getDocumentElement().getElementsByTagNameNS(AOP_NAMESPACE_URI, ASPECTJ_AUTOPROXY_ELEMENT);
 	}
 
 	private boolean validateAspect(String className) throws Throwable {
@@ -283,8 +240,8 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 						PerClauseKind.PERCFLOW.toString())) {
 					return false;
 				}
-				if (v.getClassInfo().getAspectAnnotation().getValue().toUpperCase().toString()
-						.equals(PerClauseKind.PERCFLOWBELOW.toString())) {
+				if (v.getClassInfo().getAspectAnnotation().getValue().toUpperCase().toString().equals(
+						PerClauseKind.PERCFLOWBELOW.toString())) {
 					return false;
 				}
 			}
@@ -309,8 +266,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 	}
 
 	/**
-	 * Merged representation of all <aop:aspectj-autoproxy /> elements in all
-	 * {@link IBeansConfigSet}s
+	 * Merged representation of all <aop:aspectj-autoproxy /> elements in all {@link IBeansConfigSet}s
 	 */
 	class AspectJAutoProxyConfiguration {
 
@@ -352,8 +308,8 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		}
 
 		/**
-		 * If no &lt;aop:include&gt; elements were used then includePatterns will be null and all
-		 * beans are included. If includePatterns is non-null, then one of the patterns must match.
+		 * If no &lt;aop:include&gt; elements were used then includePatterns will be null and all beans are included. If
+		 * includePatterns is non-null, then one of the patterns must match.
 		 */
 		public boolean isIncluded(String beanName) {
 			if (includePatterns == null) {
