@@ -126,16 +126,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 				// Second try to retrieve the relative path
 				if (newPath != null) {
 					newPath = newPath.removeLastSegments(1).append(relativePath);
-					for (IClasspathEntry entry : JdtUtils.getJavaProject(file).getRawClasspath()) {
-						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-							if (!entry.getPath().isPrefixOf(filePath)) {
-								IFile newfile = ResourcesPlugin.getWorkspace().getRoot().getFile(entry.getPath().append(newPath));
-								if (newfile.exists()) {
-									return new FileResource(newfile);
-								}
-							}
-						}
-					}	
+					return new EclipsePathMatchingResourcePatternResolver(file.getProject()).getResource(newPath.toString());	
 				}
 			}
 			catch (JavaModelException e) {
