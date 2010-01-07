@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.core.java.SuperTypeHierarchyCache;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -201,21 +200,10 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 			try {
 				// Check if type is part for give type hierarchy
 				if (annotationData.getAssignableTo() != null) {
-					IType superType = JdtUtils.getJavaType(context.getRootElementProject(), annotationData
-							.getAssignableTo());
-					if (superType != null) {
-						IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(superType).getAllSubtypes(superType);
-						boolean found = false;
-						for (IType subType : subTypes) {
-							if (subType.equals(type)) {
-								found = true;
-								break;
-							}
-						}
-						if (!found) {
-							context.error(n, "CLASS_IS_NOT_IN_HIERACHY", "'" + className + "' is not a sub type of '"
-									+ annotationData.getAssignableTo() + "'");
-						}
+					if (!JdtUtils.doesImplement(context.getRootElementResource(), type, annotationData
+									.getAssignableTo())) {
+						context.error(n, "CLASS_IS_NOT_IN_HIERACHY", "'" + className + "' is not a sub type of '"
+								+ annotationData.getAssignableTo() + "'");
 					}
 				}
 
@@ -253,7 +241,8 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 				boolean placeHolderFound = false;
 				while (exp != null && exp.getCause() != null) {
 					String msg = exp.getCause().getMessage();
-					if (msg.contains(SpringCoreUtils.PLACEHOLDER_PREFIX) && msg.contains(SpringCoreUtils.PLACEHOLDER_SUFFIX)) {
+					if (msg.contains(SpringCoreUtils.PLACEHOLDER_PREFIX)
+							&& msg.contains(SpringCoreUtils.PLACEHOLDER_SUFFIX)) {
 						placeHolderFound = true;
 						break;
 					}
@@ -331,7 +320,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 								context.error(n, "FIELD_NOT_FOUND", "Field '" + fieldName + "' not found on class '"
 										+ className + "'");
 							}
-							else if (!Flags.isStatic(field.getFlags())) {
+							else if (!type.isEnum() && !Flags.isStatic(field.getFlags())) {
 								context.error(n, "FIELD_NOT_FOUND", "Field '" + fieldName + "' on class '" + className
 										+ "' is not static");
 							}
@@ -429,12 +418,12 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 	 * </pre>
 	 */
 	private class BlueprintDependesOnAttributeValidator implements IAttributeValidator {
-		
+
 		public boolean supports(Node n, Node attribute) {
 			return "http://www.osgi.org/xmlns/blueprint/v1.0.0".equals(n.getNamespaceURI())
-			&& "depends-on".equals(attribute.getLocalName());
+					&& "depends-on".equals(attribute.getLocalName());
 		}
-		
+
 		public void validate(Node n, Node attribute, IXmlValidationContext context) {
 			validateBeanReference(n, attribute, context);
 		}
