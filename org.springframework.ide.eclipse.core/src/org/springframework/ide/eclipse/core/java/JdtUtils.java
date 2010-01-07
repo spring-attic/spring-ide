@@ -169,7 +169,9 @@ public class JdtUtils {
 							paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
 						}
 						else {
-							paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/" + classPathEntry.trim())));
+							paths
+									.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/"
+											+ classPathEntry.trim())));
 						}
 					}
 				}
@@ -230,7 +232,7 @@ public class JdtUtils {
 				IType type = null;
 				// First look for the type in the Java project
 				if (javaProject != null) {
-					// TODO CD not sure why we need 
+					// TODO CD not sure why we need
 					type = javaProject.findType(className, new NullProgressMonitor());
 					// type = javaProject.findType(className);
 					if (type != null) {
@@ -499,7 +501,7 @@ public class JdtUtils {
 		}
 		return false;
 	}
-	
+
 	public static boolean isTypeGroovyElement(IType type) {
 		// TODO CD verify following check with Groovy Eclipse
 		ICompilationUnit cu = type.getCompilationUnit();
@@ -804,26 +806,43 @@ public class JdtUtils {
 	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
 	 */
 	public static boolean doesImplement(IResource resource, IType type, String className) {
-		if (resource == null || type == null || className == null) {
-			return false;
-		}
-		IType interfaceType = getJavaType(resource.getProject(), className);
-		if (type != null && interfaceType != null) {
+//		long start = System.currentTimeMillis();
+//		try {
+			if (resource == null || type == null || className == null) {
+				return false;
+			}
 			try {
-				IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getAllSubtypes(interfaceType);
-				if (subTypes != null) {
-					for (IType subType : subTypes) {
-						if (subType.equals(type)) {
-							return true;
-						}
-					}
-				}
+				ClassLoader cls = getProjectClassLoaderSupport(resource.getProject()).getProjectClassLoader();
+				Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
+				Class<?> interfaceClass = cls.loadClass(className);
+				return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
 			}
-			catch (JavaModelException e) {
-				SpringCore.log(e);
+			catch (ClassNotFoundException e) {
+				return false;
 			}
-		}
-		return false;
+//			IType interfaceType = getJavaType(resource.getProject(), className);
+//			if (type != null && interfaceType != null) {
+//				try {
+//					IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getAllSubtypes(
+//							interfaceType);
+//					if (subTypes != null) {
+//						for (IType subType : subTypes) {
+//							if (subType.equals(type)) {
+//								return true;
+//							}
+//						}
+//					}
+//				}
+//				catch (JavaModelException e) {
+//					SpringCore.log(e);
+//				}
+//			}
+//			return false;
+//		}
+//		finally {
+//			System.out.println(String.format("|--- %sms - hierarchy check for %s in %s",
+//					(System.currentTimeMillis() - start), type.getFullyQualifiedName(), className));
+//		}
 	}
 
 	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
