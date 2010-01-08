@@ -37,6 +37,9 @@ public class DefaultReferenceableElementsLocator implements
 			if (BeansEditorUtils.hasAttribute(node, "id")) {
 				nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
 			}
+			else if (BeansEditorUtils.hasAttribute(node, "alias")) {
+				nodes.put(BeansEditorUtils.getAttribute(node, "alias"), node);
+			}
 		}
 		return nodes;
 	}
