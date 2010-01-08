@@ -111,6 +111,13 @@ This extension point is used to add namespace handlers and model element provide
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="provider" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

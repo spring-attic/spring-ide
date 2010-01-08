@@ -444,17 +444,6 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						}
 					}
 					catch (Throwable e) {
-						// Look for CNFE while loading namespace handlers
-						while (e.getCause() != null) {
-							Throwable rootCause = e.getCause();
-							if (rootCause instanceof FatalBeanException
-									&& rootCause.getCause() instanceof ClassNotFoundException) {
-								problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, rootCause.getMessage(),
-										file, -1));
-								break;
-							}
-							e = rootCause.getCause();
-						}
 						// Skip SAXParseExceptions because they're already handled by the SAX ErrorHandler
 						if (!(e.getCause() instanceof SAXParseException)
 								&& !(e instanceof BeanDefinitionParsingException)) {

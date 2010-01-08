@@ -19,8 +19,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -73,7 +75,13 @@ public class NamespaceUtils {
 					String uri = config.getAttribute("uri");
 					if (uri != null && config.getAttribute("namespaceHandler") != null) {
 						try {
-							Object handler = config.createExecutableExtension("namespaceHandler");
+							String handlerClassName = config.getAttribute("class");
+							String provider = config.getAttribute("provider");
+							if (!StringUtils.hasLength(provider)) {
+								provider = extension.getContributor().getName();
+							}
+							Class<?> handlerClass = Platform.getBundle(provider).loadClass(handlerClassName);
+							Object handler = BeanUtils.instantiate(handlerClass);
 							if (handler instanceof NamespaceHandler) {
 								NamespaceHandler namespaceHandler = (NamespaceHandler) handler;
 								namespaceHandler.init();
@@ -81,7 +89,10 @@ public class NamespaceUtils {
 										namespaceHandler);
 							}
 						}
-						catch (CoreException e) {
+						catch (InvalidRegistryObjectException e) {
+							BeansCorePlugin.log(e);
+						}
+						catch (ClassNotFoundException e) {
 							BeansCorePlugin.log(e);
 						}
 					}
@@ -89,7 +100,13 @@ public class NamespaceUtils {
 						if (uri != null && namespaceHandlerConfig.getAttribute("class") != null) {
 							try {
 								String schemaLocation = namespaceHandlerConfig.getAttribute("schemaLocation");
-								Object handler = namespaceHandlerConfig.createExecutableExtension("class");
+								String handlerClassName = namespaceHandlerConfig.getAttribute("class");
+								String provider = namespaceHandlerConfig.getAttribute("provider");
+								if (!StringUtils.hasLength(provider)) {
+									provider = extension.getContributor().getName();
+								}
+								Class<?> handlerClass = Platform.getBundle(provider).loadClass(handlerClassName);
+								Object handler = BeanUtils.instantiate(handlerClass);
 								if (handler instanceof NamespaceHandler) {
 									NamespaceHandler namespaceHandler = (NamespaceHandler) handler;
 									namespaceHandler.init();
@@ -97,7 +114,10 @@ public class NamespaceUtils {
 											schemaLocation), namespaceHandler);
 								}
 							}
-							catch (CoreException e) {
+							catch (InvalidRegistryObjectException e) {
+								BeansCorePlugin.log(e);
+							}
+							catch (ClassNotFoundException e) {
 								BeansCorePlugin.log(e);
 							}
 						}
@@ -147,13 +167,18 @@ public class NamespaceUtils {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					if ("namespaceHandlerResolver".equals(config.getName()) && config.getAttribute("class") != null) {
 						try {
-							Object handler = config.createExecutableExtension("class");
+							String handlerClassName = config.getAttribute("class");
+							Class<?> handlerClass = Platform.getBundle(extension.getContributor().getName()).loadClass(handlerClassName);
+							Object handler = BeanUtils.instantiate(handlerClass);
 							if (handler instanceof NamespaceHandlerResolver) {
 								NamespaceHandlerResolver namespaceHandlerResolver = (NamespaceHandlerResolver) handler;
 								handlers.add(namespaceHandlerResolver);
 							}
 						}
-						catch (CoreException e) {
+						catch (InvalidRegistryObjectException e) {
+							BeansCorePlugin.log(e);
+						}
+						catch (ClassNotFoundException e) {
 							BeansCorePlugin.log(e);
 						}
 					}
