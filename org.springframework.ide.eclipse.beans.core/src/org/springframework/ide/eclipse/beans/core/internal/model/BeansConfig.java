@@ -35,11 +35,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IPersistableElement;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -60,10 +63,13 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
+import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -336,7 +342,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					problemReporter = new BeansConfigProblemReporter();
 					beanNameGenerator = new UniqueBeanNameGenerator(this);
 
-					final DocumentAccessor documentHolder = new DocumentAccessor();
+					final DocumentAccessor documentAccessor = new DocumentAccessor();
 					final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry) {
 						@Override
 						public int loadBeanDefinitions(EncodedResource encodedResource)
@@ -364,11 +370,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						public int registerBeanDefinitions(Document doc, Resource resource)
 								throws BeanDefinitionStoreException {
 							try {
-								documentHolder.pushDocument(doc);
+								documentAccessor.pushDocument(doc);
 								return super.registerBeanDefinitions(doc, resource);
 							}
 							finally {
-								documentHolder.popDocument();
+								documentAccessor.popDocument();
 							}
 						}
 					};
@@ -381,10 +387,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader
-							.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,
-									documentHolder));
-					reader.setDocumentReaderClass(ImportPlaceholderSuppressingBeanDefinitionDocumentReader.class);
+					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,
+							documentAccessor));
+					reader.setDocumentReaderClass(ErrorSuppressingBeanDefinitionDocumentReader.class);
 					reader.setBeanNameGenerator(beanNameGenerator);
 
 					try {
@@ -439,6 +444,17 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						}
 					}
 					catch (Throwable e) {
+						// Look for CNFE while loading namespace handlers
+						while (e.getCause() != null) {
+							Throwable rootCause = e.getCause();
+							if (rootCause instanceof FatalBeanException
+									&& rootCause.getCause() instanceof ClassNotFoundException) {
+								problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, rootCause.getMessage(),
+										file, -1));
+								break;
+							}
+							e = rootCause.getCause();
+						}
 						// Skip SAXParseExceptions because they're already handled by the SAX ErrorHandler
 						if (!(e.getCause() instanceof SAXParseException)
 								&& !(e instanceof BeanDefinitionParsingException)) {
@@ -1141,8 +1157,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * placeholders in resource attributes as this is not support in the IDE.
 	 * @since 2.3.1
 	 */
-	public static class ImportPlaceholderSuppressingBeanDefinitionDocumentReader extends
-			DefaultBeanDefinitionDocumentReader {
+	public static class ErrorSuppressingBeanDefinitionDocumentReader extends DefaultBeanDefinitionDocumentReader {
 
 		/**
 		 * {@inheritDoc}
@@ -1157,6 +1172,49 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				super.importBeanDefinitionResource(ele);
 			}
 		}
+
+		@Override
+		protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root) {
+			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext);
+			delegate.initDefaults(root);
+			return delegate;
+		}
 	}
-	
+
+	/**
+	 * Extension to {@link BeanDefinitionParserDelegate} that captures the class and linkage errors from loading
+	 * {@link NamespaceHandler}s instances.
+	 * @since 2.3.1
+	 */
+	static class ErrorSuppressingBeanDefinitionParserDelegate extends BeanDefinitionParserDelegate {
+
+		private final XmlReaderContext readerContext;
+
+		public ErrorSuppressingBeanDefinitionParserDelegate(XmlReaderContext readerContext) {
+			super(readerContext);
+			this.readerContext = readerContext;
+		}
+
+		@Override
+		public BeanDefinition parseCustomElement(Element ele, BeanDefinition containingBd) {
+			String namespaceUri = getNamespaceURI(ele);
+			try {
+				readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
+			}
+			catch (FatalBeanException e) {
+				// Beautify the exception message bit
+				String msg = e.getMessage();
+				int ix = msg.indexOf(';');
+				if (ix > 0) {
+					msg = msg.substring(0, ix);
+				}
+				readerContext.warning(msg + ". Check Error Log for more details.", ele);
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID,
+						"Problem loading NamespaceHandler for '" + namespaceUri + "'.", e));
+				return null;
+			}
+			return super.parseCustomElement(ele, containingBd);
+		}
+	}
+
 }
