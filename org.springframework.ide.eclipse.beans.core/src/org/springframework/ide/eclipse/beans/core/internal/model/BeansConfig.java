@@ -1173,6 +1173,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root) {
 			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext);
@@ -1195,6 +1198,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			this.readerContext = readerContext;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public BeanDefinition parseCustomElement(Element ele, BeanDefinition containingBd) {
 			String namespaceUri = getNamespaceURI(ele);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,18 +28,22 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.ui.dialogs.ProjectAndPreferencePage;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ProjectAndPreferencePage} that allows to configure default namepace versions.
@@ -66,7 +70,7 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		public String getText(Object element) {
 			if (element instanceof INamespaceDefinition) {
 				INamespaceDefinition xsdDef = (INamespaceDefinition) element;
-				return xsdDef.getNamespacePrefix() + " - " + xsdDef.getNamespaceURI();
+				return prefixes.get(xsdDef) + " - " + xsdDef.getNamespaceURI();
 			}
 			return "";
 		}
@@ -125,15 +129,19 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 	private TableViewer xsdViewer;
 
 	private CheckboxTableViewer versionViewer;
-	
+
 	private Button classpathCheckbox;
-	
-	private Map<INamespaceDefinition, String> selectedVersion = new HashMap<INamespaceDefinition, String>();
+
+	private Map<INamespaceDefinition, String> versions = new HashMap<INamespaceDefinition, String>();
+
+	private Map<INamespaceDefinition, String> prefixes = new HashMap<INamespaceDefinition, String>();
 
 	private INamespaceDefinition selectedNamespaceDefinition;
 
+	private Text prefixText;
+
 	public Composite createPreferenceContent(Composite parent) {
-		
+
 		List<INamespaceDefinition> namespaces = NamespaceUtils.getNamespaceDefinitions();
 		boolean checkClasspath = true;
 		if (isProjectPreferencePage()) {
@@ -142,7 +150,10 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 			for (INamespaceDefinition namespace : namespaces) {
 				String version = prefs.getString(BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID
 						+ namespace.getNamespaceURI(), "");
-				selectedVersion.put(namespace, version);
+				versions.put(namespace, version);
+				String prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID
+						+ namespace.getNamespaceURI(), namespace.getDefaultNamespacePrefix());
+				prefixes.put(namespace, prefix);
 			}
 			checkClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 		}
@@ -151,7 +162,12 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 			for (INamespaceDefinition namespace : namespaces) {
 				String version = prefs.getString(BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID
 						+ namespace.getNamespaceURI());
-				selectedVersion.put(namespace, version);
+				versions.put(namespace, version);
+				String prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID
+						+ namespace.getNamespaceURI());
+				prefixes.put(namespace,
+						(StringUtils.hasLength(prefix) ? prefix : namespace.getDefaultNamespacePrefix()));
+
 			}
 			checkClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 		}
@@ -163,13 +179,13 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		composite.setFont(parent.getFont());
-		
+
 		classpathCheckbox = new Button(composite, SWT.CHECK);
 		classpathCheckbox.setText("Use highest XSD version that is available on the project's classpath");
 		classpathCheckbox.setSelection(checkClasspath);
-		
+
 		Label namespaceLabel = new Label(composite, SWT.NONE);
-		namespaceLabel.setText("Select XSD namespace to configure default version:");
+		namespaceLabel.setText("Select XSD namespace to configure prefix and default version:");
 
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.widthHint = LIST_VIEWER_WIDTH;
@@ -189,9 +205,9 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 					Object obj = ((IStructuredSelection) event.getSelection()).getFirstElement();
 					selectedNamespaceDefinition = (INamespaceDefinition) obj;
 					versionViewer.setInput(obj);
-					if (selectedVersion.get(selectedNamespaceDefinition) != null) {
-						versionViewer.setCheckedElements(new Object[] { selectedVersion
-								.get(selectedNamespaceDefinition) });
+					prefixText.setText(prefixes.get(selectedNamespaceDefinition));
+					if (versions.get(selectedNamespaceDefinition) != null) {
+						versionViewer.setCheckedElements(new Object[] { versions.get(selectedNamespaceDefinition) });
 					}
 					if (selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
 						versionViewer.getControl().setEnabled(true);
@@ -203,8 +219,50 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 			}
 		});
 
+		new Label(composite, SWT.DELIMITER_SELECTION);
+
+		Composite prefixComposite = new Composite(composite, SWT.NONE);
+		GridLayout prefixLayout = new GridLayout();
+		prefixLayout.numColumns = 2;
+		prefixLayout.marginWidth = 0;
+		prefixLayout.marginHeight = 0;
+		prefixComposite.setLayout(prefixLayout);
+		prefixComposite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+		prefixComposite.setFont(parent.getFont());
+
+		Label prefixLabel = new Label(prefixComposite, SWT.NONE);
+		prefixLabel.setText("Namespace prefix:");
+
+		prefixText = new Text(prefixComposite, SWT.BORDER);
+		prefixText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		prefixText.addModifyListener(new ModifyListener() {
+
+			public void modifyText(ModifyEvent e) {
+				boolean valid = true;
+				for (Map.Entry<INamespaceDefinition, String> entry : prefixes.entrySet()) {
+					if (!entry.getKey().equals(selectedNamespaceDefinition)
+							&& entry.getValue().equals(prefixText.getText())) {
+						setErrorMessage(String.format("Prefix '%s' not unique", entry.getValue()));
+						valid = false;
+					}
+				}
+				setValid(valid);
+				if (valid) {
+					setErrorMessage(null);
+				}
+				if (StringUtils.hasLength(prefixText.getText())) {
+					prefixes.put(selectedNamespaceDefinition, prefixText.getText());
+				}
+				else {
+					prefixes.put(selectedNamespaceDefinition, selectedNamespaceDefinition.getDefaultNamespacePrefix());
+				}
+				xsdViewer.setInput(this);
+			}
+		});
+
 		Label versionLabel = new Label(composite, SWT.NONE);
-		versionLabel.setText("Select default schema version (if none is selected the versionless schema will be used):");
+		versionLabel
+				.setText("Select default schema version (if none is selected the versionless schema will be used):");
 
 		versionViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		versionViewer.getTable().setLayoutData(gd);
@@ -217,12 +275,12 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 				if (event.getChecked()) {
 					versionViewer.setCheckedElements(new Object[] { event.getElement() });
 					if (selectedNamespaceDefinition != null) {
-						selectedVersion.put(selectedNamespaceDefinition, (String) event.getElement());
+						versions.put(selectedNamespaceDefinition, (String) event.getElement());
 					}
 				}
 				else {
 					versionViewer.setCheckedElements(new Object[0]);
-					selectedVersion.put(selectedNamespaceDefinition, "");
+					versions.put(selectedNamespaceDefinition, "");
 				}
 			}
 		});
@@ -256,32 +314,49 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 				SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
 						BeansCorePlugin.NAMESPACE_VERSION_PROJECT_PREFERENCE_ID, false);
 			}
-			for (Map.Entry<INamespaceDefinition, String> entry : selectedVersion.entrySet()) {
+			for (Map.Entry<INamespaceDefinition, String> entry : versions.entrySet()) {
 				SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putString(
 						BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID + entry.getKey().getNamespaceURI(),
+						entry.getValue());
+			}
+			for (Map.Entry<INamespaceDefinition, String> entry : prefixes.entrySet()) {
+				SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putString(
+						BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID + entry.getKey().getNamespaceURI(),
 						entry.getValue());
 			}
 			SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
 					BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, classpathCheckbox.getSelection());
 		}
 		else {
-			for (Map.Entry<INamespaceDefinition, String> entry : selectedVersion.entrySet()) {
+			for (Map.Entry<INamespaceDefinition, String> entry : versions.entrySet()) {
 				BeansCorePlugin.getDefault().getPluginPreferences().setValue(
 						BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID + entry.getKey().getNamespaceURI(),
 						entry.getValue());
 			}
+			for (Map.Entry<INamespaceDefinition, String> entry : prefixes.entrySet()) {
+				BeansCorePlugin.getDefault().getPluginPreferences().setValue(
+						BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID + entry.getKey().getNamespaceURI(),
+						entry.getValue());
+			}
 			BeansCorePlugin.getDefault().getPluginPreferences().setValue(
 					BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, classpathCheckbox.getSelection());
+			BeansCorePlugin.getDefault().savePluginPreferences();
 		}
-		BeansCorePlugin.getDefault().savePluginPreferences();
+		// Set notifications to update UI
+		BeansCorePlugin.notifyNamespaceDefinitionListeners(null);
 		return true;
 	};
-	
+
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		for (Map.Entry<INamespaceDefinition, String> entry : selectedVersion.entrySet()) {
+		for (Map.Entry<INamespaceDefinition, String> entry : versions.entrySet()) {
 			entry.setValue("");
 		}
+		for (Map.Entry<INamespaceDefinition, String> entry : prefixes.entrySet()) {
+			prefixes.put(entry.getKey(), entry.getKey().getDefaultNamespacePrefix());
+		}
+		xsdViewer.setInput(this);
 	}
+
 }

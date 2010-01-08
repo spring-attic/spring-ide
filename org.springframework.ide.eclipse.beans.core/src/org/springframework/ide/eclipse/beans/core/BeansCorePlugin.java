@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,6 +38,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
@@ -72,6 +76,9 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/** preference key to specify the default namespace version */
 	public static final String NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID = "default.version.";
 
+	/** preference key to specify the default namespace version */
+	public static final String NAMESPACE_PREFIX_PREFERENCE_ID = "prefix.";
+
 	/** preference key to specify if versions should be taken from the classpath */
 	public static final String NAMESPACE_DEFAULT_FROM_CLASSPATH_ID = "default.version.check.classpath";
 
@@ -93,6 +100,10 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
+	
+	/** Listeners to inform about namespace changes */
+	private volatile Set<INamespaceDefinitionListener> namespaceDefinitionListeners = Collections
+			.synchronizedSet(new HashSet<INamespaceDefinitionListener>());
 
 	/**
 	 * flag indicating whether the context is down or not - useful during shutdown
@@ -177,6 +188,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		return getDefault().model;
 	}
 	
+	
 	public static final INamespaceDefinitionResolver getNamespaceDefinitionResolver() {
 		return getNamespaceDefinitionResolver(null);
 	}
@@ -198,12 +210,20 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		return getDefault().executorService;
 	}
 
+	public static final void notifyNamespaceDefinitionListeners(INamespaceDefinition namespaceDefinition) {
+		for (INamespaceDefinitionListener listener : getDefault().namespaceDefinitionListeners) {
+			listener.onNamespaceDefinitionRegistered(namespaceDefinition);
+		}
+	}
+
 	public static final void registerNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
 		getDefault().nsManager.getNamespacePlugins().registerNamespaceDefinitionListener(listener);
+		getDefault().namespaceDefinitionListeners.add(listener);
 	}
 
 	public static final void unregisterNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
 		getDefault().nsManager.getNamespacePlugins().unregisterNamespaceDefinitionListener(listener);
+		getDefault().namespaceDefinitionListeners.remove(listener);
 	}
 
 	/**

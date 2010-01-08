@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		writer.println("<?xml version=\"1.0\" encoding=\"" + charSet + "\"?>"); //$NON-NLS-1$ //$NON-NLS-2$
 		writer.println("<beans xmlns=\"" + defaultXsd.getNamespaceURI() + "\"" + lineSeparator
 				+ "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + lineSeparator
-				+ getNamespaceMappings(lineSeparator) + "\txsi:schemaLocation=\""
+				+ getNamespaceMappings(lineSeparator, newFileHandle) + "\txsi:schemaLocation=\""
 				+ getSchemaLocations(lineSeparator, newFileHandle) + "\">" + lineSeparator + lineSeparator
 				+ lineSeparator + "</beans>");
 		writer.flush();
@@ -96,14 +96,14 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		return null;
 	}
 
-	private String getNamespaceMappings(String lineSeparator) {
+	private String getNamespaceMappings(String lineSeparator, IFile file) {
 		INamespaceDefinition defaultXsd = NamespaceUtils.getDefaultNamespaceDefinition();
 		StringBuilder builder = new StringBuilder();
 		for (INamespaceDefinition def : xmlSchemaDefinitions) {
 			if (!def.equals(defaultXsd)) {
 				builder.append("\t");
 				builder.append("xmlns:");
-				builder.append(def.getNamespacePrefix());
+				builder.append(def.getNamespacePrefix(file));
 				builder.append("=\"");
 				builder.append(def.getNamespaceURI());
 				builder.append("\"");
@@ -159,7 +159,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		this.xmlSchemaDefinitions = xmlSchemaDefinitions;
 		Collections.sort(this.xmlSchemaDefinitions, new Comparator<INamespaceDefinition>() {
 			public int compare(INamespaceDefinition o1, INamespaceDefinition o2) {
-				return o1.getNamespacePrefix().compareTo(o2.getNamespacePrefix());
+				return o1.getDefaultNamespacePrefix().compareTo(o2.getDefaultNamespacePrefix());
 			}
 		});
 	}

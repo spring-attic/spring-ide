@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -195,8 +195,8 @@ public class NamespaceUtils {
 
 		Collections.sort(namespaceDefinitions, new Comparator<INamespaceDefinition>() {
 			public int compare(INamespaceDefinition o1, INamespaceDefinition o2) {
-				if (o1 != null && o1.getNamespacePrefix() != null && o2 != null && o2.getNamespacePrefix() != null) {
-					return o1.getNamespacePrefix().compareTo(o2.getNamespacePrefix());
+				if (o1 != null && o1.getDefaultNamespacePrefix() != null && o2 != null && o2.getDefaultNamespacePrefix() != null) {
+					return o1.getDefaultNamespacePrefix().compareTo(o2.getDefaultNamespacePrefix());
 				}
 				return 0;
 			}

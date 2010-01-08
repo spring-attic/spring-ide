@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of {@link INamespaceDefinition}.
@@ -41,15 +42,15 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
 	private static final Pattern VERSION_PATTERN = Pattern.compile(".*-([0-9,.]*)\\.xsd");
 
-	private final String prefix;
-
-	private final String uri;
-
 	private final String defaultLocation;
 
 	private final Image image;
 
 	private Set<String> locations = new HashSet<String>();
+
+	private final String defaultPrefix;
+
+	private final String uri;
 
 	private Properties uriMapping = new Properties();
 
@@ -60,11 +61,11 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation,
 			Properties namespaceDefinition, Image image) {
 		if (prefix != null) {
-			this.prefix = prefix;
+			this.defaultPrefix = prefix;
 		}
 		else {
 			int ix = uri.lastIndexOf('/');
-			this.prefix = uri.substring(ix + 1);
+			this.defaultPrefix = uri.substring(ix + 1);
 		}
 		this.uri = uri;
 		this.defaultLocation = defaultLocation;
@@ -72,18 +73,23 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 		this.image = image;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getNamespacePrefix() {
-		return prefix;
+	public void addSchemaLocation(String location) {
+		locations.add(location);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getNamespaceURI() {
-		return uri;
+	public boolean equals(Object obj) {
+		if (obj instanceof DefaultNamespaceDefinition) {
+			DefaultNamespaceDefinition o = (DefaultNamespaceDefinition) obj;
+			return o.defaultPrefix.equals(defaultPrefix) && o.uri.equals(uri);
+		}
+		return false;
+	}
+
+	public String getDefaultNamespacePrefix() {
+		return defaultPrefix;
 	}
 
 	public String getDefaultSchemaLocation() {
@@ -121,6 +127,57 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 		else {
 			return location;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Image getNamespaceImage() {
+		if (image != null) {
+			return image;
+		}
+		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getNamespacePrefix(IResource resource) {
+		String prefix = null;
+		if (hasProjectSpecificOptions(resource)) {
+			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(resource.getProject(),
+					BeansCorePlugin.PLUGIN_ID);
+			prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID + getNamespaceURI(), ""); 
+		}
+		else {
+			Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
+			prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID + getNamespaceURI());
+		}
+		if (StringUtils.hasLength(prefix)) {
+			return prefix;
+		}
+		return defaultPrefix;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getNamespaceURI() {
+		return uri;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<String> getSchemaLocations() {
+		return locations;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int hashCode() {
+		return defaultPrefix.hashCode() ^ uri.hashCode();
 	}
 
 	private String getDefaultSchemaLocationFromClasspath(IResource resource) {
@@ -182,45 +239,6 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 			}
 		}
 		return highestLocation;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Image getNamespaceImage() {
-		if (image != null) {
-			return image;
-		}
-		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Set<String> getSchemaLocations() {
-		return locations;
-	}
-
-	public void addSchemaLocation(String location) {
-		locations.add(location);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int hashCode() {
-		return prefix.hashCode() ^ uri.hashCode();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean equals(Object obj) {
-		if (obj instanceof DefaultNamespaceDefinition) {
-			DefaultNamespaceDefinition o = (DefaultNamespaceDefinition) obj;
-			return o.prefix.equals(prefix) && o.uri.equals(uri);
-		}
-		return false;
 	}
 
 	private boolean hasProjectSpecificOptions(IResource resource) {
