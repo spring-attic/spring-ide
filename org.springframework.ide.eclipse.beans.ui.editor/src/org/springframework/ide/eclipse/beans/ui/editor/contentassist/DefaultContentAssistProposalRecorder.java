@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImageHelper;
+import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImages;
 
 /**
  * Default implementation of {@link IContentAssistProposalRecorder} to record calculated content
@@ -47,6 +49,9 @@ public class DefaultContentAssistProposalRecorder implements IContentAssistPropo
 	 */
 	public void recordProposal(Image image, int relevance, String displayText, String replaceText,
 			Object proposedObject) {
+		if (image == null) {
+			image = XMLEditorPluginImageHelper.getInstance().getImage(XMLEditorPluginImages.IMG_OBJ_ENUM);
+		}
 		request.addProposal(new BeansJavaCompletionProposal(replaceText, request
 				.getReplacementBeginPosition(), request.getReplacementLength(), replaceText
 				.length(), image, displayText, null, relevance, proposedObject));
