@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ public class SecurityContentAssistProcessor extends NamespaceContentAssistProces
 	public void init() {
 		BeanReferenceContentAssistCalculator beanRef = new BeanReferenceContentAssistCalculator(
 				true);
-		registerContentAssistCalculator("http", "access-decision-manager-ref", beanRef);
+		registerContentAssistCalculator("access-decision-manager-ref", beanRef);
 		registerContentAssistCalculator("http", "entry-point-ref", beanRef);
 		registerContentAssistCalculator("openid-login", "user-service-ref", beanRef);
 		registerContentAssistCalculator("remember-me", "user-service-ref", beanRef);

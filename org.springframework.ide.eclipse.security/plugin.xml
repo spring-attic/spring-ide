@@ -2,7 +2,7 @@
 <?eclipse version="3.0"?>
 <!--
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,27 @@
 			labelProvider="org.springframework.ide.eclipse.security.ui.editor.outline.security.SecurityOutlineLabelProvider"
 			name="Spring Security"
 			uri="http://www.springframework.org/schema/security" />
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.core.namespaces">
+		<namespace uri="http://www.springframework.org/schema/security" >
+			<namespaceHandler class="org.springframework.security.v2.config.SecurityNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.xsd" />
+			<namespaceHandler class="org.springframework.security.v2.config.SecurityNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd" />
+			<namespaceHandler class="org.springframework.security.v2.config.SecurityNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.2.xsd" />
+			<namespaceHandler class="org.springframework.security.v2.config.SecurityNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.4.xsd" />
+			
+			<namespaceHandler class="org.springframework.security.config.SecurityNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/security/spring-security.xsd"
+				provider="org.springframework.security.config"/>
+			<namespaceHandler class="org.springframework.security.config.SecurityNamespaceHandler" 
+				schemaLocation="http://www.springframework.org/schema/security/spring-security-3.0.xsd" 
+				provider="org.springframework.security.config"/>
+		</namespace>
 	</extension>
 	
 </plugin>

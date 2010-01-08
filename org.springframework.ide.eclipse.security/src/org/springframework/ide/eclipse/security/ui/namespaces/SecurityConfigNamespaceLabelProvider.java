@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.security.ui.namespaces;
 
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -27,10 +26,7 @@ public class SecurityConfigNamespaceLabelProvider extends DefaultNamespaceLabelP
 
 	@Override
 	public Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating) {
-		if (element instanceof IBean) {
-			return SecurityUIImages.getImage(SecurityUIImages.IMG_OBJS_SECURITY);
-		}
-		return super.getImage(element, context, isDecorating);
+		return SecurityUIImages.getImage(SecurityUIImages.IMG_OBJS_SECURITY);
 	}
 
 }

@@ -25,12 +25,13 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.aop.core.model.builder.IDocumentFactory;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * {@link IAspectDefinitionBuilder} for Spring Security's globar-method-security element.
+ * {@link IAspectDefinitionBuilder} for Spring Security's global-method-security element.
  * @author Christian Dupuis
  * @since 2.0.5
  */
@@ -46,11 +47,17 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 
 	private static final String METHOD_SECURITY_INTERCEPTOR_BEAN_ID = "_methodSecurityInterceptor";
 
-	private static final String METHOD_SECURITY_INTERCEPTOR_CLASS = "org.springframework.security.intercept.method.aopalliance.MethodSecurityInterceptor";
+	private static final String METHOD_SECURITY_INTERCEPTOR_V2_CLASS = "org.springframework.security.intercept.method.aopalliance.MethodSecurityInterceptor";
+
+	private static final String METHOD_SECURITY_INTERCEPTOR_V3_CLASS = "org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor";
 
 	private static final String PROTECT_POINTCUT_ELEMENT = "protect-pointcut";
 
-	private static final String SECURED_ANNOTATION_EXPRESSION = "(@within(org.springframework.security.annotation.Secured) || @annotation(org.springframework.security.annotation.Secured)) && execution(* *..*(..))";
+	private static final String SECURED_ANNOTATION_EXPRESSION = "(@within($CLASS) || @annotation($CLASS)) && execution(* *..*(..))";
+
+	private static final String SECURED_ANNOTATION_V2_CLASS = "org.springframework.security.annotation.Secured";
+
+	private static final String SECURED_ANNOTATION_V3_CLASS = "org.springframework.security.access.annotation.Secured";
 
 	private static final String SECURITY_NAMESPACE_URI = "http://www.springframework.org/schema/security";
 
@@ -69,9 +76,27 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 		if (document == null) {
 			return;
 		}
-		
+
 		NodeList list = document.getDocumentElement().getElementsByTagNameNS(SECURITY_NAMESPACE_URI,
 				GLOBAL_METHOD_SECURITY_ELEMENT);
+
+		if (list.getLength() == 0) {
+			return;
+		}
+		
+		// Check if Spring Security 2.0 or 3.0 is being used?
+		boolean present20 = ClassUtils.isPresent(METHOD_SECURITY_INTERCEPTOR_V2_CLASS, classLoaderSupport
+				.getProjectClassLoader());
+		boolean present30 = ClassUtils.isPresent(METHOD_SECURITY_INTERCEPTOR_V3_CLASS, classLoaderSupport
+				.getProjectClassLoader());
+		if (present30 && present20) {
+			// both versions are on the classpath -> what to do?
+			return;
+		}
+		else if (!present20 && !present30) {
+			// no Spring Security on classpath -> return
+			return;
+		}
 
 		for (int i = 0; i < list.getLength(); i++) {
 			List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
@@ -83,17 +108,18 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 			String securedAnnotations = getAttribute(node, "secured-annotations");
 			String jsr250Annoatations = getAttribute(node, "jsr250-annotations");
 			if ("enabled".equals(securedAnnotations)) {
-				createAnnotationInfo(file, aspectInfos, node, SECURED_ANNOTATION_EXPRESSION);
+				createAnnotationInfo(file, aspectInfos, node, SECURED_ANNOTATION_EXPRESSION.replace("$CLASS",
+						(present30 ? SECURED_ANNOTATION_V3_CLASS : SECURED_ANNOTATION_V2_CLASS)), present30);
 			}
 			if ("enabled".equals(jsr250Annoatations)) {
-				createAnnotationInfo(file, aspectInfos, node, JSR250_ANNOTATION_EXPRESSION);
+				createAnnotationInfo(file, aspectInfos, node, JSR250_ANNOTATION_EXPRESSION, present30);
 			}
 
 			NodeList children = node.getChildNodes();
 			for (int j = 0; j < children.getLength(); j++) {
 				Node child = children.item(j);
 				if (PROTECT_POINTCUT_ELEMENT.equals(child.getLocalName())) {
-					parseProtectPointcutElement(file, child, aspectDefinitions);
+					parseProtectPointcutElement(file, child, aspectDefinitions, present30);
 				}
 			}
 
@@ -102,30 +128,34 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 	}
 
 	private void createAnnotationInfo(IFile file, final List<IAspectDefinition> aspectInfos, Node node,
-			String expression) {
-		JavaAdvisorDefinition info1 = prepareJavaAdvisorDefinition(file, node, expression);
+			String expression, boolean present30) {
+		JavaAdvisorDefinition info1 = prepareJavaAdvisorDefinition(file, node, expression, present30);
 		info1.setProxyTargetClass(true);
 		addAspectDefinition(info1, aspectInfos);
-		JavaAdvisorDefinition info2 = prepareJavaAdvisorDefinition(file, node, expression);
+		JavaAdvisorDefinition info2 = prepareJavaAdvisorDefinition(file, node, expression, present30);
 		info2.setProxyTargetClass(false);
 		addAspectDefinition(info2, aspectInfos);
 	}
 
-	private void parseProtectPointcutElement(IFile file, Node protectPointcutNode, List<IAspectDefinition> aspectInfos) {
+	private void parseProtectPointcutElement(IFile file, Node protectPointcutNode, List<IAspectDefinition> aspectInfos,
+			boolean present30) {
 
 		String pointcutExpression = getAttribute(protectPointcutNode, EXPRESSION_ATTRIBUTE);
 
 		if (StringUtils.hasText(pointcutExpression)) {
-			JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(file, protectPointcutNode, pointcutExpression);
+			JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(file, protectPointcutNode, pointcutExpression,
+					present30);
 			addAspectDefinition(info, aspectInfos);
 		}
 	}
 
-	private JavaAdvisorDefinition prepareJavaAdvisorDefinition(IFile file, Node aspectNode, String pointcutExpression) {
+	private JavaAdvisorDefinition prepareJavaAdvisorDefinition(IFile file, Node aspectNode, String pointcutExpression,
+			boolean present30) {
 		JavaAdvisorDefinition info = new JavaAdvisorDefinition();
 		extractLineNumbers(info, (IDOMNode) aspectNode);
 		info.setPointcutExpression(pointcutExpression);
-		info.setAspectClassName(METHOD_SECURITY_INTERCEPTOR_CLASS);
+		info.setAspectClassName((present30 ? METHOD_SECURITY_INTERCEPTOR_V3_CLASS
+				: METHOD_SECURITY_INTERCEPTOR_V2_CLASS));
 		info.setAspectName(METHOD_SECURITY_INTERCEPTOR_BEAN_ID);
 		info.setType(ADVICE_TYPE.AROUND);
 		info.setAdviceMethodName("invoke");

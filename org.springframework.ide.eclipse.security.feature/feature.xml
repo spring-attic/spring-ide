@@ -42,7 +42,14 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.security.annotation"
+         id="org.springframework.security.config"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.security.web"
          download-size="0"
          install-size="0"
          version="0.0.0"
