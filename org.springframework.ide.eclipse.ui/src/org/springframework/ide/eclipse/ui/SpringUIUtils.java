@@ -323,10 +323,31 @@ public final class SpringUIUtils {
 		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
 		try {
 			if (line > 0) {
-				IMarker marker = file.createMarker(IMarker.TEXT);
-				marker.setAttribute(IMarker.LINE_NUMBER, line);
-				editor = IDE.openEditor(page, marker, activate);
-				marker.delete();
+				editor = IDE.openEditor(page, file, activate);
+				ITextEditor textEditor = null;
+				if (editor instanceof ITextEditor) {
+					textEditor = (ITextEditor) editor;
+				}
+				else if (editor instanceof IAdaptable) {
+					textEditor = (ITextEditor) ((IAdaptable) editor).getAdapter(ITextEditor.class);
+				}
+				if (textEditor != null) {
+					IDocument document = textEditor.getDocumentProvider().getDocument(editor.getEditorInput());
+					try {
+						int start = document.getLineOffset(line - 1);
+						((ITextEditor) textEditor).selectAndReveal(start, 0);
+						page.activate(editor);
+					}
+					catch (BadLocationException x) {
+						// ignore
+					}
+				}
+				else {
+					IMarker marker = file.createMarker(IMarker.TEXT);
+					marker.setAttribute(IMarker.LINE_NUMBER, line);
+					editor = IDE.openEditor(page, marker, activate);
+					marker.delete();
+				}
 			}
 			else {
 				editor = IDE.openEditor(page, file, activate);
