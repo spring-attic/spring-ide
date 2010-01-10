@@ -495,7 +495,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				}
 
 				// if (BeansModel.DEBUG) {
-				System.out.println(String.format("%s,%s", (System.currentTimeMillis() - start), file.getFullPath()
+				System.out.println(String.format("%s, loading %s", (System.currentTimeMillis() - start), file.getFullPath()
 						.toString()));
 				// System.out.println(String.format("+-- reading config '%s' took %sms",
 				// file.getFullPath().toString(), (System.currentTimeMillis() - start)));

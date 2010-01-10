@@ -150,8 +150,8 @@ public class AopReferenceModelBuilderJob extends Job {
 			if (!monitor.isCanceled()) {
 				long start = System.currentTimeMillis();
 				this.buildAopModel(monitor);
-				System.out.println(String.format("+- aop model building for %s resources took %sms",
-						affectedResources.size(), (System.currentTimeMillis() - start)));
+				System.out.println(String.format("%s, aop model building for %s resources",
+						(System.currentTimeMillis() - start), affectedResources.size()));
 			}
 			else {
 				return Status.CANCEL_STATUS;
