@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,8 +80,7 @@ import org.springframework.util.StringUtils;
 public class BeanListSelectionDialog extends SelectionStatusDialog {
 
 	/**
-	 * Implements a {@link ViewFilter} based on content typed in the filter
-	 * field
+	 * Implements a {@link ViewFilter} based on content typed in the filter field
 	 */
 	private static class BeanFilter extends ViewerFilter {
 
@@ -98,8 +97,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 		}
 
 		@Override
-		public boolean select(Viewer viewer, Object parentElement,
-				Object element) {
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (matcher == null) {
 				return beanActivationHistory.contains(element);
 			}
@@ -120,16 +118,14 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 					}
 				}
 				if (isUpperCasePattern) {
-					if (SearchPattern.camelCaseMatch(filterText, StringUtils
-							.capitalize(bean.getElementName()))) {
+					if (SearchPattern.camelCaseMatch(filterText, StringUtils.capitalize(bean.getElementName()))) {
 						return true;
 					}
 					String className = bean.getClassName();
 					if (className != null) {
 						int i = className.lastIndexOf('.');
 						if (i > 0 && i < className.length()) {
-							if (SearchPattern.camelCaseMatch(filterText, 0,
-									filterText.length(), className, i + 1,
+							if (SearchPattern.camelCaseMatch(filterText, 0, filterText.length(), className, i + 1,
 									className.length())) {
 								return true;
 							}
@@ -165,8 +161,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 		}
 	}
 
-	private static final String DIALOG_SETTINGS = BeanListSelectionDialog.class
-			.getName();
+	private static final String DIALOG_SETTINGS = BeanListSelectionDialog.class.getName();
 
 	private static final String HEIGHT = "height";
 
@@ -184,21 +179,18 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 
 	private int fWidth = 60;
 
-	private final LabelProvider labelProvider = new BeansModelLabelProvider(
-			true);
+	private final LabelProvider labelProvider = new BeansModelLabelProvider(true);
 
 	private TableViewer viewer;
 
 	public BeanListSelectionDialog(Shell parent) {
 		super(parent);
-		setTitle(BeansUIPlugin
-				.getResourceString("BeanListSelectionDialog.title"));
+		setTitle(BeansUIPlugin.getResourceString("BeanListSelectionDialog.title"));
 		setStatusLineAboveButtons(true);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		setBlockOnOpen(true);
 
-		IDialogSettings settings = BeansUIPlugin.getDefault()
-				.getDialogSettings();
+		IDialogSettings settings = BeansUIPlugin.getDefault().getDialogSettings();
 		fSettings = settings.getSection(DIALOG_SETTINGS);
 		if (fSettings == null) {
 			fSettings = new DialogSettings(DIALOG_SETTINGS);
@@ -225,11 +217,9 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 		Composite area = (Composite) super.createDialogArea(parent);
 
 		Label message = new Label(area, SWT.NONE);
-		message.setText(BeansUIPlugin
-				.getResourceString("BeanListSelectionDialog.message"));
+		message.setText(BeansUIPlugin.getResourceString("BeanListSelectionDialog.message"));
 		final Text filterText = new Text(area, SWT.SINGLE | SWT.BORDER);
-		filterText.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true,
-				false));
+		filterText.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true, false));
 
 		Label matches = new Label(area, SWT.NONE);
 		matches.setText("&Matching beans:");
@@ -251,12 +241,10 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 		final List<IBean> historyList = new ArrayList<IBean>();
 		final List<IBean> historyBeans = new ArrayList<IBean>();
 		IRunnableWithProgress runnable = new IRunnableWithProgress() {
-			public void run(final IProgressMonitor monitor)
-					throws InvocationTargetException, InterruptedException {
+			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 
-					historyBeans.addAll(BeansUIActivationHistory
-							.getBeanActivationHistory());
+					historyBeans.addAll(BeansUIActivationHistory.getBeanActivationHistory());
 					Collections.reverse(historyBeans);
 					historyList.addAll(historyBeans);
 
@@ -284,8 +272,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 
 		viewer.setInput(beanList);
 
-		final BeanListSelectionDialog.BeanFilter filter = new BeanListSelectionDialog.BeanFilter(
-				historyBeans);
+		final BeanListSelectionDialog.BeanFilter filter = new BeanListSelectionDialog.BeanFilter(historyBeans);
 		viewer.addFilter(filter);
 		viewer.setComparator(new ViewerComparator() {
 
@@ -310,8 +297,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 				}
 
 				// Both are not in task history; sort by summary...
-				return labelProvider.getText(e1).compareTo(
-						labelProvider.getText(e2));
+				return labelProvider.getText(e1).compareTo(labelProvider.getText(e2));
 			}
 
 			private IBean getCorrespondingTask(Object o) {
@@ -370,8 +356,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 		fLabel.setFont(fForm.getFont());
 		fForm.setContent(fLabel);
 
-		IWorkbenchWindow window = PlatformUI.getWorkbench()
-				.getActiveWorkbenchWindow();
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		ISelection selection = window.getSelectionService().getSelection();
 		if (selection instanceof ITextSelection) {
 			String text = ((ITextSelection) selection).getText();
@@ -422,8 +407,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 	 * Handles a selection changed event:
 	 * <ol>
 	 * <li>validate the current selection
-	 * <li>if an element is selected then show the element's resource (full
-	 * path and icon)
+	 * <li>if an element is selected then show the element's resource (full path and icon)
 	 * </ol>
 	 */
 	protected void handleSelectionChanged() {
@@ -431,13 +415,9 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 		if (!viewer.getSelection().isEmpty()) {
 			ISelection sel = viewer.getSelection();
 			if (sel instanceof IStructuredSelection) {
-				IBean bean = (IBean) ((IStructuredSelection) sel)
-						.getFirstElement();
-				fLabel
-						.setImage(labelProvider.getImage(bean
-								.getElementParent()));
-				fLabel.setText(bean.getElementResource().getFullPath()
-						.toString());
+				IBean bean = (IBean) ((IStructuredSelection) sel).getFirstElement();
+				fLabel.setImage(labelProvider.getImage(bean.getElementParent()));
+				fLabel.setText(bean.getElementResource().getFullPath().toString().substring(1));
 			}
 		}
 		else {
@@ -447,8 +427,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 	}
 
 	/**
-	 * Initializes itself from the dialog settings with the same state as at the
-	 * previous invocation.
+	 * Initializes itself from the dialog settings with the same state as at the previous invocation.
 	 */
 	private void readSettings() {
 		try {
@@ -477,12 +456,10 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 	protected boolean validateCurrentSelection() {
 		IStatus status;
 		if (viewer.getSelection().isEmpty()) {
-			status = new Status(IStatus.ERROR, PlatformUI.PLUGIN_ID,
-					IStatus.ERROR, "", null);
+			status = new Status(IStatus.ERROR, PlatformUI.PLUGIN_ID, IStatus.ERROR, "", null);
 		}
 		else {
-			status = new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK,
-					"", //$NON-NLS-1$
+			status = new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK, "", //$NON-NLS-1$
 					null);
 		}
 
