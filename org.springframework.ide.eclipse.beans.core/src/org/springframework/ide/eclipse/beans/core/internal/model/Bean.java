@@ -257,6 +257,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	public synchronized boolean isFactory() {
 		if (isFactory == null && definition instanceof AbstractBeanDefinition) {
+			isFactory = Boolean.FALSE;
 			AbstractBeanDefinition bd = (AbstractBeanDefinition) definition;
 			if (bd.getFactoryBeanName() != null) {
 				isFactory = Boolean.TRUE;
@@ -268,9 +269,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			if (type != null) {
 				isFactory = JdtUtils.doesImplement(getElementResource(), type, FactoryBean.class.getName());
 			}
-		}
-		else {
-			isFactory = Boolean.FALSE;
 		}
 		return isFactory;
 	}

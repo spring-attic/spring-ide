@@ -68,6 +68,13 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 	@Override
 	public NamespaceHandler resolve(String namespaceUri) {
 
+		// First check for a namespace handler provided by Spring.
+		NamespaceHandler namespaceHandler = super.resolve(namespaceUri);
+
+		if (namespaceHandler != null) {
+			return namespaceHandler;
+		}
+
 		SchemaLocations schemaLocations = new SchemaLocations();
 		if (documentAccessor != null) {
 			Document doc = documentAccessor.getCurrentDocument();
@@ -77,14 +84,6 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 			}
 		}
 
-		NamespaceHandler namespaceHandler = null;
-
-		// First check for a namespace handler provided by Spring.
-		namespaceHandler = super.resolve(namespaceUri);
-
-		if (namespaceHandler != null) {
-			return namespaceHandler;
-		}
 
 		// Then check for a namespace handler contributed for the specific schemalocation
 		String schemaLocation = schemaLocations.getSchemaLocation(namespaceUri);

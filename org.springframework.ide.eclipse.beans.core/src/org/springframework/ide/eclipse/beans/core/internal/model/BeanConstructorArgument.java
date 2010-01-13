@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,36 +18,43 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Holds the data of an {@link IBean}'s constructor argument.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeanConstructorArgument extends AbstractBeansValueHolder
 		implements IBeanConstructorArgument {
 
-	private int index;
-	private String type;
-	
-	public BeanConstructorArgument(IBean bean, ValueHolder vHolder) {
-		this(bean, -1, vHolder);
+	protected static final String createName(int index, ValueHolder vHolder) {
+		StringBuffer buf = new StringBuffer();
+		if (index >= 0) {
+			buf.append(index);
+		}
+		if (vHolder.getType() != null) {
+			if (buf.length() > 0) {
+				buf.append(" - ");
+			}
+			buf.append(vHolder.getType());
+		}
+		if (buf.length() == 0) {
+			buf.append(BeansModelUtils.getValueName(vHolder.getValue()));
+		}
+		return buf.toString();
 	}
+	private int index;
+	private String name;
+	
+	private String type;
 
 	public BeanConstructorArgument(IBean bean, int index,
 			ValueHolder vHolder) {
 		super(bean, createName(index, vHolder), vHolder.getValue(), vHolder);
 		this.index = index;
 		this.type = vHolder.getType();
+		this.name = vHolder.getName();
 	}
 
-	public int getElementType() {
-		return IBeansModelElementTypes.CONSTRUCTOR_ARGUMENT_TYPE;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public String getType() {
-		return type;
+	public BeanConstructorArgument(IBean bean, ValueHolder vHolder) {
+		this(bean, -1, vHolder);
 	}
 
 	@Override
@@ -62,6 +69,22 @@ public class BeanConstructorArgument extends AbstractBeansValueHolder
 		if (!ObjectUtils.nullSafeEquals(this.index, that.index)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.type, that.type)) return false;
 		return super.equals(other);
+	}
+
+	public int getElementType() {
+		return IBeansModelElementTypes.CONSTRUCTOR_ARGUMENT_TYPE;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getType() {
+		return type;
 	}
 
 	@Override
@@ -80,22 +103,5 @@ public class BeanConstructorArgument extends AbstractBeansValueHolder
 		text.append(", type=");
 		text.append(type);
 		return text.toString();
-	}
-
-	protected static final String createName(int index, ValueHolder vHolder) {
-		StringBuffer buf = new StringBuffer();
-		if (index >= 0) {
-			buf.append(index);
-		}
-		if (vHolder.getType() != null) {
-			if (buf.length() > 0) {
-				buf.append(" - ");
-			}
-			buf.append(vHolder.getType());
-		}
-		if (buf.length() == 0) {
-			buf.append(BeansModelUtils.getValueName(vHolder.getValue()));
-		}
-		return buf.toString();
 	}
 }
