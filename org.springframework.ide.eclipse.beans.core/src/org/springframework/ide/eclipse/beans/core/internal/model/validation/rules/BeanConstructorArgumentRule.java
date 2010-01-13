@@ -56,7 +56,6 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 
 	@Override
 	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
-		BeanDefinition bd = ((Bean) bean).getBeanDefinition();
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean, context.getContextElement());
 
 		// If any constructor argument defined in bean the validate the merged constructor arguments
