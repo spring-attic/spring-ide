@@ -461,6 +461,24 @@ public final class Introspector {
 		return findMethod(type, "set" + base, 1, Public.YES, Static.NO);
 	}
 
+	public static Set<IMethod> getConstructors(IType type, int argCount, boolean isNonPublicAllowed) throws JavaModelException {
+		IMethod[] methods = getMethods(type);
+		
+		Set<IMethod> ctors = new LinkedHashSet<IMethod>();
+		if (argCount > 0) {
+			for (IMethod method : methods) {
+				if (method.isConstructor()) {
+					if (method.getNumberOfParameters() == argCount) {
+						if (isNonPublicAllowed || Flags.isPublic(method.getFlags())) {
+							ctors.add(method);
+						}
+					}
+				}
+			}
+		}
+		return ctors;
+	}
+
 	/**
 	 * Returns <code>true</code> if the given type has a public constructor with the specified number of arguments. If a
 	 * constructor with no arguments is requested then the absence of a constructor (the JVM adds an implicit
