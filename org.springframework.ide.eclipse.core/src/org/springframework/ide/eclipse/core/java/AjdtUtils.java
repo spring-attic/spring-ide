@@ -25,7 +25,6 @@ import org.eclipse.ajdt.core.model.AJRelationshipManager;
 import org.eclipse.ajdt.core.model.AJRelationshipType;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -50,10 +49,9 @@ public class AjdtUtils {
 			return null;
 		}
 
-		IJavaProject javaProject = JdtUtils.getJavaProject(project);
-		if (javaProject != null && className != null) {
+		if (project != null && className != null) {
 			try {
-				List<AJCompilationUnit> ajcus = AJCompilationUnitManager.INSTANCE.getAJCompilationUnits(javaProject);
+				List<AJCompilationUnit> ajcus = AJCompilationUnitManager.INSTANCE.getCachedCUs(project);
 				if (ajcus != null) {
 					for (AJCompilationUnit ajcu : ajcus) {
 						IType[] types = ajcu.getAllTypes();
