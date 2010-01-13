@@ -41,8 +41,8 @@ import org.springframework.ide.eclipse.core.type.asm.AnnotationMetadataReadingVi
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 
 /**
- * Validates a given {@link IBean}'s constructor argument. Skips abstract beans and those beans
- * that use a <code>factory-bean</code> and/or <code>factory-method</code> attributes.
+ * Validates a given {@link IBean}'s constructor argument. Skips abstract beans and those beans that use a
+ * <code>factory-bean</code> and/or <code>factory-method</code> attributes.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
@@ -57,31 +57,15 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 	@Override
 	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
 		BeanDefinition bd = ((Bean) bean).getBeanDefinition();
-		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean, context
-				.getContextElement());
+		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean, context.getContextElement());
 
-		// Validate merged constructor arguments in bean's class (child beans
-		// not supported)
-		String className = bd.getBeanClassName();
-		if (className != null && !SpringCoreUtils.hasPlaceHolder(className)) {
-			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(),
-					className);
+		// If any constructor argument defined in bean the validate the merged constructor arguments
+		// in merged bean's class (child beans fully supported)
+		String mergedClassName = mergedBd.getBeanClassName();
+		if (mergedClassName != null && !SpringCoreUtils.hasPlaceHolder(mergedClassName)) {
+			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), mergedClassName);
 			if (type != null) {
 				validateConstructorArguments(bean, type, context);
-			}
-		}
-
-		// If any constructor argument defined in bean the validate the merged
-		// constructor arguments in merged bean's class (child beans fully
-		// supported)
-		if (!bd.getConstructorArgumentValues().isEmpty()) {
-			String mergedClassName = mergedBd.getBeanClassName();
-			if (mergedClassName != null && !SpringCoreUtils.hasPlaceHolder(mergedClassName)) {
-				IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(),
-						mergedClassName);
-				if (type != null) {
-					validateConstructorArguments(bean, type, context);
-				}
 			}
 		}
 	}
@@ -91,25 +75,24 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 
 		// Skip validation if auto-wiring or a factory are involved
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean).getBeanDefinition();
-		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils
-				.getMergedBeanDefinition(bean, context.getContextElement());
+		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils.getMergedBeanDefinition(bean,
+				context.getContextElement());
 		if (!(bd instanceof AnnotatedBeanDefinition)
 				&& mergedBd.getAutowireMode() == AbstractBeanDefinition.AUTOWIRE_NO
 				&& mergedBd.getFactoryBeanName() == null && mergedBd.getFactoryMethodName() == null) {
 
-			// Check for default constructor if no constructor arguments are
-			// available
-			final int numArguments = (mergedBd.getConstructorArgumentValues() == null ? 0
-					: mergedBd.getConstructorArgumentValues().getArgumentCount());
+			// Check for default constructor if no constructor arguments are available
+			final int numArguments = (mergedBd.getConstructorArgumentValues() == null ? 0 : mergedBd
+					.getConstructorArgumentValues().getArgumentCount());
 			try {
+				// Make sure that the constructor exists and we need
 				if (!Introspector.hasConstructor(type, numArguments, true)) {
 					ISourceModelElement element = BeansModelUtils.getFirstConstructorArgument(bean);
 					if (element == null) {
 						element = bean;
 					}
 
-					AnnotationMetadata metadata = getAnnotationMetadata(context
-							.getClassReaderFactory(), bean, type);
+					AnnotationMetadata metadata = getAnnotationMetadata(context.getClassReaderFactory(), bean, type);
 					// add check if prototype and configurable and if constructor
 					// is autowired do this at the latest possible stage due to
 					// performance considerations
@@ -118,10 +101,27 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 									AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
 									AutowiredAnnotationBeanPostProcessor.class.getName()))) {
 						context.error(bean, "NO_CONSTRUCTOR", "No constructor with " + numArguments
-								+ (numArguments == 1 ? " argument" : " arguments")
-								+ " defined in class '" + type.getFullyQualifiedName() + "'");
+								+ (numArguments == 1 ? " argument" : " arguments") + " defined in class '"
+								+ type.getFullyQualifiedName() + "'");
 					}
 				}
+				// Validate the actual constructors for name, type matches
+//				else if (numArguments > 0) {
+//					Set<IMethod> ctors = Introspector.getConstructors(type, numArguments, true);
+//					if (ctors.size() == 1) {
+//						List<String> parameterNames = Arrays.asList(ctors.iterator().next().getParameterNames());
+//						for (IBeanConstructorArgument argument : bean.getConstructorArguments()) {
+//							String name = argument.getName();
+//							if (name != null && !parameterNames.contains(name)) {
+//								context.warning(argument, "MISSING_CONSTRUCTOR_ARG_NAME", String.format(
+//										"Cannot find constructor parameter with name '%s'", name));
+//							}
+//						}
+//					}
+//					else {
+//						
+//					}
+//				}
 			}
 			catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
@@ -130,11 +130,11 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 	}
 
 	/**
-	 * Retrieves a instance of {@link AnnotationMetadata} that contains information about used
-	 * annotations in the class under question
+	 * Retrieves a instance of {@link AnnotationMetadata} that contains information about used annotations in the class
+	 * under question
 	 */
-	private AnnotationMetadata getAnnotationMetadata(final ClassReaderFactory classReaderFactory,
-			final IBean bean, final IType type) {
+	private AnnotationMetadata getAnnotationMetadata(final ClassReaderFactory classReaderFactory, final IBean bean,
+			final IType type) {
 		final String className = type.getFullyQualifiedName();
 		final AnnotationMetadata visitor = new AnnotationMetadata();
 		try {
@@ -147,11 +147,9 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		}
 		return visitor;
 	}
-	
 
 	/**
-	 * ASM based visitor that checks the precedence of an {@link Autowired} annotation on <b>any</b>
-	 * constructor.
+	 * ASM based visitor that checks the precedence of an {@link Autowired} annotation on <b>any</b> constructor.
 	 */
 	private static class AnnotationMetadata extends AnnotationMetadataReadingVisitor {
 
@@ -162,8 +160,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		private boolean isConstructorAutowired = false;
 
 		@Override
-		public MethodVisitor visitMethod(int modifier, String name, String params, String arg3,
-				String[] arg4) {
+		public MethodVisitor visitMethod(int modifier, String name, String params, String arg3, String[] arg4) {
 			if (CONSTRUCTOR_NAME.equals(name)) {
 				return new EmptyVisitor() {
 					@Override
@@ -186,5 +183,5 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 			return super.hasAnnotation(Configurable.class.getName());
 		}
 	}
-	
+
 }
