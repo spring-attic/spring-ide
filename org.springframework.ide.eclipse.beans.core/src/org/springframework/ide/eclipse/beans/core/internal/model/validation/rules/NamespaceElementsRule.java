@@ -107,11 +107,17 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 	 */
 	@Override
 	protected void validate(Node n, IXmlValidationContext context) {
+		validate(n, null, context);
+	}
 
-		// Validate with one of the pre-configured validators
-		for (IElementValidator validator : ELEMENT_VALIDATORS) {
-			if (validator.supports(n)) {
-				validator.validate(n, context);
+	public void validate(Node n, String attributeNameToCheck, IXmlValidationContext context) {
+
+		if (attributeNameToCheck == null) {
+			// Validate with one of the pre-configured validators
+			for (IElementValidator validator : ELEMENT_VALIDATORS) {
+				if (validator.supports(n)) {
+					validator.validate(n, context);
+				}
 			}
 		}
 
@@ -121,6 +127,11 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 			for (int i = 0; i < attributes.getLength(); i++) {
 				Node attribute = attributes.item(i);
 				String attributeName = attribute.getLocalName();
+
+				// Only check attribute that is marked to check
+				if (attributeNameToCheck != null && !attributeNameToCheck.equals(attributeName)) {
+					continue;
+				}
 
 				// Attributes can be annotated with Tool annotation -> validate based on annotation
 				for (ToolAnnotationData annotationData : context.getToolAnnotation(n, attributeName)) {
@@ -201,7 +212,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 				// Check if type is part for give type hierarchy
 				if (annotationData.getAssignableTo() != null) {
 					if (!JdtUtils.doesImplement(context.getRootElementResource(), type, annotationData
-									.getAssignableTo())) {
+							.getAssignableTo())) {
 						context.error(n, "CLASS_IS_NOT_IN_HIERACHY", "'" + className + "' is not a sub type of '"
 								+ annotationData.getAssignableTo() + "'");
 					}
