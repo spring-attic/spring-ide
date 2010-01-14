@@ -12,6 +12,8 @@ package org.springframework.security.v2.config;
 
 import java.lang.reflect.Constructor;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -47,9 +49,11 @@ public class SecurityNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser(Elements.USER_SERVICE, new UserServiceBeanDefinitionParser());
 		registerBeanDefinitionParser(Elements.JDBC_USER_SERVICE, new JdbcUserServiceBeanDefinitionParser());
 
-		registerBeanDefinitionParser(Elements.AUTHENTICATION_PROVIDER,
+		registerBeanDefinitionParser(
+				Elements.AUTHENTICATION_PROVIDER,
 				(BeanDefinitionParser) loadParser("org.springframework.security.config.AuthenticationProviderBeanDefinitionParser"));
-		registerBeanDefinitionParser(Elements.GLOBAL_METHOD_SECURITY,
+		registerBeanDefinitionParser(
+				Elements.GLOBAL_METHOD_SECURITY,
 				(BeanDefinitionParser) loadParser("org.springframework.security.config.GlobalMethodSecurityBeanDefinitionParser"));
 		registerBeanDefinitionParser(Elements.AUTHENTICATION_MANAGER, new AuthenticationManagerBeanDefinitionParser());
 		registerBeanDefinitionParser(Elements.FILTER_INVOCATION_DEFINITION_SOURCE,
@@ -57,7 +61,8 @@ public class SecurityNamespaceHandler extends NamespaceHandlerSupport {
 
 		// Decorators
 		registerBeanDefinitionDecorator(Elements.INTERCEPT_METHODS, new InterceptMethodsBeanDefinitionDecorator());
-		registerBeanDefinitionDecorator(Elements.FILTER_CHAIN_MAP,
+		registerBeanDefinitionDecorator(
+				Elements.FILTER_CHAIN_MAP,
 				(BeanDefinitionDecorator) loadParser("org.springframework.security.config.FilterChainMapBeanDefinitionDecorator"));
 		registerBeanDefinitionDecorator(Elements.CUSTOM_FILTER, new OrderedFilterBeanDefinitionDecorator());
 		registerBeanDefinitionDecorator(Elements.CUSTOM_AUTH_PROVIDER,
@@ -73,7 +78,7 @@ public class SecurityNamespaceHandler extends NamespaceHandlerSupport {
 			return BeanUtils.instantiateClass(ctor);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			Activator.getDefault().getLog().log(new Status(IStatus.ERROR, "", "Problem loading NamespaceParsers", e));
 		}
 		return null;
 	}
