@@ -48,7 +48,7 @@ public class SecurityNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser(Elements.JDBC_USER_SERVICE, new JdbcUserServiceBeanDefinitionParser());
 
 		registerBeanDefinitionParser(Elements.AUTHENTICATION_PROVIDER,
-				(BeanDefinitionParser) loadParser("org.springframework.security.config.AuthenticationManagerBeanDefinitionParser"));
+				(BeanDefinitionParser) loadParser("org.springframework.security.config.AuthenticationProviderBeanDefinitionParser"));
 		registerBeanDefinitionParser(Elements.GLOBAL_METHOD_SECURITY,
 				(BeanDefinitionParser) loadParser("org.springframework.security.config.GlobalMethodSecurityBeanDefinitionParser"));
 		registerBeanDefinitionParser(Elements.AUTHENTICATION_MANAGER, new AuthenticationManagerBeanDefinitionParser());
