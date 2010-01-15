@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,11 +18,10 @@ import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.ToolAnnotationBasedNamespaceHandler;
+import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor.SchemaLocations;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils.NamespaceHandlerDescriptor;
-import org.springframework.util.StringUtils;
-import org.w3c.dom.Document;
 
 /**
  * This {@link NamespaceHandlerResolver} provides a {@link NamespaceHandler} for a given namespace URI. Depending on
@@ -42,6 +40,8 @@ import org.w3c.dom.Document;
  */
 public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerResolver {
 
+	private static final SchemaLocations EMPTY_SCHEMA_LOCATIONS = new SchemaLocations();
+	
 	private NamespaceHandler toolAnnotationNamespaceHandler;
 
 	private final Map<NamespaceHandlerDescriptor, NamespaceHandler> namespaceHandlers;
@@ -75,15 +75,10 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 			return namespaceHandler;
 		}
 
-		SchemaLocations schemaLocations = new SchemaLocations();
+		SchemaLocations schemaLocations = EMPTY_SCHEMA_LOCATIONS;
 		if (documentAccessor != null) {
-			Document doc = documentAccessor.getCurrentDocument();
-			if (doc != null && doc.getDocumentElement() != null) {
-				schemaLocations.initSchemaLocations(doc.getDocumentElement().getAttributeNS(
-						"http://www.w3.org/2001/XMLSchema-instance", "schemaLocation"));
-			}
+			schemaLocations = documentAccessor.getCurrentSchemaLocations();
 		}
-
 
 		// Then check for a namespace handler contributed for the specific schemalocation
 		String schemaLocation = schemaLocations.getSchemaLocation(namespaceUri);
@@ -119,29 +114,5 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 		// Finally fall back to the tool annotation based namespace handler.
 		return toolAnnotationNamespaceHandler;
 	}
-
-	/**
-	 * Internal class that parses the value of the <code>schemaLocation</code> attribute and offers accessors to the
-	 * mapping.
-	 */
-	private class SchemaLocations {
-
-		private Map<String, String> mapping = new HashMap<String, String>();
-
-		public void initSchemaLocations(String schemaLocations) {
-			if (StringUtils.hasLength(schemaLocations)) {
-				String[] tokens = StringUtils.tokenizeToStringArray(schemaLocations, " \r\n");
-				if (tokens.length % 2 == 0) {
-					for (int i = 0; i < tokens.length; i = i + 2) {
-						mapping.put(tokens[i], tokens[i + 1]);
-					}
-				}
-			}
-		}
-
-		public String getSchemaLocation(String namespaceUri) {
-			return mapping.get(namespaceUri);
-		}
-	}
-
+	
 }
