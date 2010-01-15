@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,8 +62,8 @@ import org.springframework.ide.eclipse.ui.SpringUIMessages;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
- * UI component that enables the use to enable and disable {@link IValidator}s
- * and {@link IValidationRule}s on a per project basis.
+ * UI component that enables the use to enable and disable {@link IValidator}s and {@link IValidationRule}s on a per
+ * project basis.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -93,8 +93,7 @@ public class ProjectValidatorPropertyTab {
 
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof ValidatorDefinition) {
-				return this.validationRuleDefinitions.get((ValidatorDefinition) parentElement)
-						.toArray();
+				return this.validationRuleDefinitions.get((ValidatorDefinition) parentElement).toArray();
 			}
 			else {
 				return IModelElement.NO_CHILDREN;
@@ -137,8 +136,7 @@ public class ProjectValidatorPropertyTab {
 				if (icon != null && ns != null) {
 					image = SpringUIPlugin.getDefault().getImageRegistry().get(icon);
 					if (image == null) {
-						ImageDescriptor imageDescriptor = SpringUIPlugin.imageDescriptorFromPlugin(
-								ns, icon);
+						ImageDescriptor imageDescriptor = SpringUIPlugin.imageDescriptorFromPlugin(ns, icon);
 						SpringUIPlugin.getDefault().getImageRegistry().put(icon, imageDescriptor);
 						image = SpringUIPlugin.getDefault().getImageRegistry().get(icon);
 					}
@@ -170,6 +168,8 @@ public class ProjectValidatorPropertyTab {
 	private Button configureButton;
 
 	private Map<ValidationRuleDefinition, Map<String, String>> changedPropertyValues = new HashMap<ValidationRuleDefinition, Map<String, String>>();
+
+	private Map<ValidationRuleDefinition, Map<String, Integer>> changedMessageSeverities = new HashMap<ValidationRuleDefinition, Map<String, Integer>>();
 
 	private SelectionListener buttonListener = new SelectionAdapter() {
 		@Override
@@ -207,16 +207,25 @@ public class ProjectValidatorPropertyTab {
 					ValidationRuleDefinition ruleDef = (ValidationRuleDefinition) obj;
 					Map<String, String> propertyValues = null;
 					if (changedPropertyValues.containsKey(ruleDef)) {
-						propertyValues = changedPropertyValues.get(ruleDef);
+						propertyValues = new HashMap<String, String>(changedPropertyValues.get(ruleDef));
 					}
 					else {
 						propertyValues = new HashMap<String, String>(ruleDef.getPropertyValues());
 					}
 
+					Map<String, Integer> messageSeverities = null;
+					if (changedMessageSeverities.containsKey(ruleDef)) {
+						messageSeverities = new HashMap<String, Integer>(changedMessageSeverities.get(ruleDef));
+					}
+					else {
+						messageSeverities = new HashMap<String, Integer>(ruleDef.getMessageSeverities());
+					}
+
 					ValidationRuleConfigurationDialog dialog = new ValidationRuleConfigurationDialog(this.shell,
-							propertyValues, ruleDef);
+							propertyValues, messageSeverities, ruleDef);
 					if (dialog.open() == Dialog.OK) {
 						changedPropertyValues.put(ruleDef, propertyValues);
+						changedMessageSeverities.put(ruleDef, messageSeverities);
 					}
 				}
 			}
@@ -297,8 +306,7 @@ public class ProjectValidatorPropertyTab {
 		Label descriptionLabel = new Label(composite, SWT.NONE);
 		descriptionLabel.setText(SpringUIMessages.ProjectValidatorPropertyPage_builderDescription);
 
-		descriptionText = new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.BORDER
-				| SWT.H_SCROLL);
+		descriptionText = new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.BORDER | SWT.H_SCROLL);
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 30;
 		descriptionText.setLayoutData(data);
@@ -339,8 +347,7 @@ public class ProjectValidatorPropertyTab {
 		Object[] members = contentProvider.getChildren(container);
 		for (int i = members.length - 1; i >= 0; i--) {
 			Object element = members[i];
-			boolean elementGrayChecked = validatorViewer.getGrayed(element)
-					|| validatorViewer.getChecked(element);
+			boolean elementGrayChecked = validatorViewer.getGrayed(element) || validatorViewer.getChecked(element);
 			if (state) {
 				validatorViewer.setChecked(element, true);
 				validatorViewer.setGrayed(element, false);
@@ -388,8 +395,7 @@ public class ProjectValidatorPropertyTab {
 			text = ((ValidationRuleDefinition) definition).getDescription();
 		}
 		if (text == null || text.length() == 0) {
-			descriptionText
-					.setText(SpringUIMessages.ProjectValidatorPropertyPage_noBuilderDescription);
+			descriptionText.setText(SpringUIMessages.ProjectValidatorPropertyPage_noBuilderDescription);
 		}
 		else {
 			descriptionText.setText(text);
@@ -423,7 +429,8 @@ public class ProjectValidatorPropertyTab {
 
 	private void updateConfigureButtonEnablement(Object firstElement) {
 		if (firstElement instanceof ValidationRuleDefinition
-				&& ((ValidationRuleDefinition) firstElement).getPropertyValues().size() > 0) {
+				&& (((ValidationRuleDefinition) firstElement).getPropertyValues().size() > 0 || ((ValidationRuleDefinition) firstElement)
+						.getMessageSeverities().size() > 0)) {
 			configureButton.setEnabled(true);
 		}
 		else {
@@ -437,8 +444,8 @@ public class ProjectValidatorPropertyTab {
 		WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
 
 			@Override
-			protected void execute(IProgressMonitor monitor) throws CoreException,
-					InvocationTargetException, InterruptedException {
+			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
+					InterruptedException {
 				for (Map.Entry<ValidatorDefinition, List<ValidationRuleDefinition>> def : validationRuleDefinitions
 						.entrySet()) {
 					boolean enableValidator = false;
@@ -451,8 +458,9 @@ public class ProjectValidatorPropertyTab {
 							rule.setEnabled(false, project);
 						}
 
-						if (changedPropertyValues.containsKey(rule)) {
-							rule.setSpecificConfiguration(changedPropertyValues.get(rule), project);
+						if (changedPropertyValues.containsKey(rule) || changedMessageSeverities.containsKey(rule)) {
+							rule.setSpecificConfiguration(changedPropertyValues.get(rule), changedMessageSeverities
+									.get(rule), project);
 						}
 
 					}
