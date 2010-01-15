@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -254,7 +254,7 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 								ruleDefinition.getName());
 						IValidationRule rule = ruleDefinition.getRule();
 						if (rule.supports(element, context)) {
-							context.setCurrentRuleId(ruleDefinition.getId());
+							context.setCurrentRuleDefinition(ruleDefinition);
 							rule.validate(element, context, monitor);
 						}
 						subMonitor.worked(1);

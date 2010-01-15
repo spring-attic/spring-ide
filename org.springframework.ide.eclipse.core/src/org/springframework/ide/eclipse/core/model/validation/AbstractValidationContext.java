@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
@@ -37,7 +38,7 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 
 	private IProjectContributorState contributorState;
 
-	private String currentRuleId;
+	private ValidationRuleDefinition currentRuleDefinition;
 
 	private Set<ValidationProblem> errors;
 
@@ -54,7 +55,7 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 		this.warnings = new LinkedHashSet<ValidationProblem>();
 		this.errors = new LinkedHashSet<ValidationProblem>();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -139,8 +140,8 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setCurrentRuleId(String ruleId) {
-		currentRuleId = ruleId;
+	public void setCurrentRuleDefinition(ValidationRuleDefinition ruleDefinition) {
+		currentRuleDefinition = ruleDefinition;
 	}
 
 	/**
@@ -184,8 +185,9 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 				.asList(attributes));
 		attributeList.add(new ValidationProblemAttribute(MarkerUtils.ELEMENT_ID_KEY, elementId));
 
-		return new ValidationProblem(currentRuleId, problemId, severity, message, element.getElementResource(), line,
-				attributeList.toArray(new ValidationProblemAttribute[attributeList.size()]));
+		return new ValidationProblem(currentRuleDefinition.getId(), problemId, getSeverity(problemId, severity),
+				message, element.getElementResource(), line, attributeList
+						.toArray(new ValidationProblemAttribute[attributeList.size()]));
 	}
 
 	/**
@@ -217,12 +219,23 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 
 		return line;
 	}
-	
+
 	/**
-	 * Returns the {@link IProjectContributorState} for subclass implementations. 
+	 * Returns the {@link IProjectContributorState} for subclass implementations.
 	 */
 	protected IProjectContributorState getProjectContributorState() {
 		return contributorState;
+	}
+
+	protected int getSeverity(String messageId, int defaultSeverity) {
+		if (currentRuleDefinition.isEnabled(getRootElement().getElementResource().getProject())) {
+			Integer severity = currentRuleDefinition.getMessageSeverities().get(messageId);
+			if (severity != null) {
+				return severity;
+			}
+			return defaultSeverity;
+		}
+		return IValidationProblemMarker.SEVERITY_UNKOWN;
 	}
 
 }

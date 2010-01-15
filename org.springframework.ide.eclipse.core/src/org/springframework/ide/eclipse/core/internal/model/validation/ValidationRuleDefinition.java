@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,12 +22,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.core.model.validation.IValidationProblemMarker;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.util.StringUtils;
 
 /**
- * Wraps a {@link IValidationRule} and all the information from it's definition
- * via the corresponding extension point.
+ * Wraps a {@link IValidationRule} and all the information from it's definition via the corresponding extension point.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
@@ -44,6 +44,8 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 
 	private static final String PROPERTY_PREFIX = "validator.rule.property.";
 
+	private static final String MESSAGE_PREFIX = "validator.rule.message.";
+
 	private static final String ID_ATTRIBUTE = "id";
 
 	private static final String NAME_ATTRIBUTE = "name";
@@ -51,6 +53,12 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 	private static final String PROPERTY_ELEMENT = "property";
 
 	private static final String VALUE_ATTRIBUTE = "value";
+
+	private static final String MESSAGE_ELEMENT = "message";
+
+	private static final String LABEL_ATTRIBUTE = "label";
+
+	private static final String SEVERITY_ATTRIBUTE = "severity";
 
 	private String description;
 
@@ -65,11 +73,16 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 	private Map<String, String> propertyValues;
 
 	private Map<String, String> originalPropertyValues;
-	
+
 	private Map<String, String> propertyDescriptions;
 
-	public ValidationRuleDefinition(String validatorID, IConfigurationElement element)
-			throws CoreException {
+	private Map<String, Integer> originalMessageSeverities;
+
+	private Map<String, Integer> messageSeverities;
+
+	private Map<String, String> messageDescriptions;
+
+	public ValidationRuleDefinition(String validatorID, IConfigurationElement element) throws CoreException {
 		this.validatorId = validatorID;
 		init(element);
 	}
@@ -100,7 +113,7 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 
 	public IValidationRule getRule() {
 		if (propertyValues.size() > 0) {
- 			BeanWrapper wrapper = new BeanWrapperImpl(rule);
+			BeanWrapper wrapper = new BeanWrapperImpl(rule);
 			for (Map.Entry<String, String> entry : propertyValues.entrySet()) {
 				try {
 					wrapper.setPropertyValue(entry.getKey(), entry.getValue());
@@ -122,8 +135,7 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 		if (executable instanceof IValidationRule) {
 			rule = (IValidationRule) executable;
 		}
-		id = element.getContributor().getName() + "." + element.getAttribute(ID_ATTRIBUTE) + "-"
-				+ validatorId;
+		id = element.getContributor().getName() + "." + element.getAttribute(ID_ATTRIBUTE) + "-" + validatorId;
 		name = element.getAttribute(NAME_ATTRIBUTE);
 		description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
 		String enabledByDefault = element.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
@@ -140,18 +152,46 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 		IConfigurationElement[] configurationDataElements = element.getChildren(PROPERTY_ELEMENT);
 		for (IConfigurationElement configurationDataElement : configurationDataElements) {
 			String propertyName = configurationDataElement.getAttribute(NAME_ATTRIBUTE);
-			propertyValues.put(propertyName,
-					configurationDataElement.getAttribute(VALUE_ATTRIBUTE));
+			propertyValues.put(propertyName, configurationDataElement.getAttribute(VALUE_ATTRIBUTE));
 			String desc = configurationDataElement.getAttribute(DESCRIPTION_ATTRIBUTE);
 			if (StringUtils.hasText(desc)) {
 				propertyDescriptions.put(propertyName, desc);
 			}
 		}
 		originalPropertyValues = new HashMap<String, String>(propertyValues);
+
+		// get severity data
+		messageSeverities = new HashMap<String, Integer>();
+		messageDescriptions = new HashMap<String, String>();
+		IConfigurationElement[] messageDataElements = element.getChildren(MESSAGE_ELEMENT);
+		for (IConfigurationElement messageDataElement : messageDataElements) {
+			String messageId = messageDataElement.getAttribute(ID_ATTRIBUTE);
+			String label = messageDataElement.getAttribute(LABEL_ATTRIBUTE);
+			String severity = messageDataElement.getAttribute(SEVERITY_ATTRIBUTE);
+			if ("ERROR".equals(severity)) {
+				messageSeverities.put(messageId, IValidationProblemMarker.SEVERITY_ERROR);
+			}
+			else if ("WARNING".equals(severity)) {
+				messageSeverities.put(messageId, IValidationProblemMarker.SEVERITY_WARNING);
+			}
+			else if ("INFO".equals(severity)) {
+				messageSeverities.put(messageId, IValidationProblemMarker.SEVERITY_INFO);
+			}
+			else {
+				messageSeverities.put(messageId, IValidationProblemMarker.SEVERITY_UNKOWN);
+			}
+			messageDescriptions.put(messageId, label);
+		}
+		originalMessageSeverities = new HashMap<String, Integer>(messageSeverities);
+
 	}
 
 	public Map<String, String> getPropertyValues() {
 		return new HashMap<String, String>(propertyValues);
+	}
+
+	public Map<String, Integer> getMessageSeverities() {
+		return new HashMap<String, Integer>(messageSeverities);
 	}
 
 	@Override
@@ -172,6 +212,11 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 						PROPERTY_PREFIX + entry.getKey(), entry.getValue());
 				propertyValues.put(entry.getKey(), value);
 			}
+			for (Map.Entry<String, Integer> entry : originalMessageSeverities.entrySet()) {
+				String value = SpringCorePreferences.getProjectPreferences(project).getString(
+						MESSAGE_PREFIX + entry.getKey(), Integer.toString(entry.getValue()));
+				messageSeverities.put(entry.getKey(), Integer.valueOf(value));
+			}
 		}
 		else {
 			for (Map.Entry<String, String> entry : originalPropertyValues.entrySet()) {
@@ -181,24 +226,40 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 					propertyValues.put(entry.getKey(), value);
 				}
 			}
+			for (Map.Entry<String, Integer> entry : originalMessageSeverities.entrySet()) {
+				String value = SpringCore.getDefault().getPluginPreferences()
+						.getString(MESSAGE_PREFIX + entry.getKey());
+				if (StringUtils.hasText(value)) {
+					messageSeverities.put(entry.getKey(), Integer.valueOf(value));
+				}
+			}
 		}
 	}
 
-	public void setSpecificConfiguration(Map<String, String> newPropertyValues, IProject project) {
+	public void setSpecificConfiguration(Map<String, String> newPropertyValues,
+			Map<String, Integer> newMessageSeverities, IProject project) {
 		if (project != null && hasProjectSpecificOptions(project)) {
-			for (Map.Entry<String, String> entry : originalPropertyValues.entrySet()) {
-				SpringCorePreferences.getProjectPreferences(project).putString(
-						PROPERTY_PREFIX + entry.getKey(), entry.getValue());
+			for (Map.Entry<String, String> entry : newPropertyValues.entrySet()) {
+				SpringCorePreferences.getProjectPreferences(project).putString(PROPERTY_PREFIX + entry.getKey(),
+						entry.getValue());
+			}
+			for (Map.Entry<String, Integer> entry : newMessageSeverities.entrySet()) {
+				SpringCorePreferences.getProjectPreferences(project).putString(MESSAGE_PREFIX + entry.getKey(),
+						Integer.toString(entry.getValue()));
 			}
 		}
 		else {
 			for (Map.Entry<String, String> entry : newPropertyValues.entrySet()) {
-				SpringCore.getDefault().getPluginPreferences().setValue(
-						PROPERTY_PREFIX + entry.getKey(), entry.getValue());
+				SpringCore.getDefault().getPluginPreferences().setValue(PROPERTY_PREFIX + entry.getKey(),
+						entry.getValue());
+			}
+			for (Map.Entry<String, Integer> entry : newMessageSeverities.entrySet()) {
+				SpringCore.getDefault().getPluginPreferences().setValue(MESSAGE_PREFIX + entry.getKey(),
+						Integer.toString(entry.getValue()));
 			}
 		}
 	}
-	
+
 	public String getPropertyDescription(String propertyName) {
 		if (propertyDescriptions.containsKey(propertyName)) {
 			return propertyDescriptions.get(propertyName);
@@ -206,4 +267,10 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 		return propertyName;
 	}
 
+	public String getMessageLabel(String messageId) {
+		if (messageDescriptions.containsKey(messageId)) {
+			return messageDescriptions.get(messageId);
+		}
+		return messageId;
+	}
 }

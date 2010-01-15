@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,10 @@ public final class ValidationUtils {
 			Set<ValidationProblem> problems, String markerId) {
 		if (problems != null) {
 			for (ValidationProblem problem : problems) {
-				createProblemMarker(resource, problem, markerId);
+				// Don't install problems that are configured to get ignored
+				if (problem.getSeverity() >= 0) {
+					createProblemMarker(resource, problem, markerId);
+				}
 			}
 		}
 	}

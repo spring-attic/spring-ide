@@ -2,9 +2,9 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.springframework.ide.eclipse.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appinfo>
+      <appInfo>
          <meta.schema plugin="org.springframework.ide.eclipse.core" id="validators" name="Spring Project Validators"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;p&gt;
 This extension-point is used to add one or more validators (and it&apos;s validation rules) to the list of Spring project validators. These validators are called for every modified resource during incremental build of a Spring project.
@@ -12,6 +12,11 @@ This extension-point is used to add one or more validators (and it&apos;s valida
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="validator" minOccurs="0" maxOccurs="unbounded"/>
@@ -49,9 +54,9 @@ This extension-point is used to add one or more validators (and it&apos;s valida
                   the full-qualified name of a class which implements 
 &lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidator&lt;/samp&gt;
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.model.validation.IValidator"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="id" type="string" use="required">
@@ -87,9 +92,9 @@ This extension-point is used to add one or more validators (and it&apos;s valida
                <documentation>
                   an optional icon of this validator
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="resource"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="markerId" type="string" use="required">
@@ -128,6 +133,7 @@ This extension-point is used to add one or more validators (and it&apos;s valida
       <complexType>
          <choice>
             <element ref="property" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="message" minOccurs="0" maxOccurs="unbounded"/>
          </choice>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -135,9 +141,9 @@ This extension-point is used to add one or more validators (and it&apos;s valida
                   the full-qualified name of a class which implements 
 &lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidationRule&lt;/samp&gt;
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.model.validation.IValidationRule"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="id" type="string" use="required">
@@ -202,19 +208,55 @@ This extension-point is used to add one or more validators (and it&apos;s valida
       </complexType>
    </element>
 
+   <element name="message">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="label" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="severity" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+            <simpleType>
+               <restriction base="string">
+                  <enumeration value="ERROR">
+                  </enumeration>
+                  <enumeration value="INFO">
+                  </enumeration>
+                  <enumeration value="WARNING">
+                  </enumeration>
+               </restriction>
+            </simpleType>
+         </attribute>
+      </complexType>
+   </element>
+
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="since"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          2.0
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="examples"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;pre&gt;
 &lt;extension point=&quot;org.springframework.ide.eclipse.core.validators&quot;&gt;
@@ -240,9 +282,9 @@ If this extension was defined in a plug-in with id &lt;samp&gt;org.springframewo
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="apiInfo"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;p&gt;
 Each validator must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidator&lt;/samp&gt;.
@@ -250,11 +292,10 @@ Each validation rule must supply a public, no-argument constructor and implement
       </documentation>
    </annotation>
 
-
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="implementation"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;p&gt;
 This plugin itself does not have any predefined validators and validation rules.
@@ -262,9 +303,9 @@ This plugin itself does not have any predefined validators and validation rules.
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="copyright"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;pre&gt;
 Copyright (c) 2005, 2007 Spring IDE Developers

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.model.validation;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -37,10 +38,9 @@ public interface IValidationContext {
 	IResourceModelElement getContextElement();
 
 	/**
-	 * Sets the id of the current executing rule
-	 * @param ruleId the rule id
+	 * Set the current executing rule. 
 	 */
-	void setCurrentRuleId(String ruleId);
+	void setCurrentRuleDefinition(ValidationRuleDefinition ruleDefinition);
 
 	/**
 	 * Returns the set of reported {@link ValidationProblem}s.
