@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,33 +27,26 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeanAliasRule extends AbstractNonInfrastructureBeanValidationRule
-		implements IValidationRule<IBeanAlias, IBeansValidationContext> {
-	
+public class BeanAliasRule extends AbstractNonInfrastructureBeanValidationRule implements
+		IValidationRule<IBeanAlias, IBeansValidationContext> {
+
 	@Override
-	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, IBeansValidationContext context) {
+	protected boolean supportsModelElementForNonInfrastructureBean(IModelElement element,
+			IBeansValidationContext context) {
 		return element instanceof IBeanAlias;
 	}
-	
-	public void validate(IBeanAlias alias, IBeansValidationContext context,
-			IProgressMonitor monitor) {
+
+	public void validate(IBeanAlias alias, IBeansValidationContext context, IProgressMonitor monitor) {
 		IBeansConfigSet configSet = (context.getContextElement() instanceof IBeansConfigSet ? (IBeansConfigSet) context
-				.getContextElement()
-				: null);
+				.getContextElement() : null);
 		// Validate bean overriding
-		if (context.getIncompleteRegistry().containsBeanDefinition(
-				alias.getElementName())) {
-			if (configSet == null
-					|| BeansModelUtils.getConfig(alias).getBean(
-							alias.getElementName()) != null) {
-				context.error(alias, "BEAN_OVERRIDE",
-						"Overrides another bean in the same config file");
+		if (context.getIncompleteRegistry().containsBeanDefinition(alias.getElementName())) {
+			if (configSet == null || BeansModelUtils.getConfig(alias).getBean(alias.getElementName()) != null) {
+				context.error(alias, "BEAN_OVERRIDE", "Overrides another bean in the same config file");
 			}
 			else if (!configSet.isAllowBeanDefinitionOverriding()) {
-				context.error(alias, "BEAN_OVERRIDE",
-						"Overrides another bean in config set '"
-								+ configSet.getElementName() + "'");
+				context.error(alias, "BEAN_OVERRIDE", "Overrides another bean in config set '"
+						+ configSet.getElementName() + "'");
 			}
 		}
 
@@ -63,8 +56,7 @@ public class BeanAliasRule extends AbstractNonInfrastructureBeanValidationRule
 				continue;
 			}
 			else if (al.getElementName().equals(alias.getElementName())) {
-				context.error(alias, "ALIAS_OVERRIDE",
-						"Overrides another alias in the same config file");
+				context.error(alias, "ALIAS_OVERRIDE", "Overrides another alias in the same config file");
 				break;
 			}
 		}
@@ -79,22 +71,17 @@ public class BeanAliasRule extends AbstractNonInfrastructureBeanValidationRule
 						break;
 					}
 					if (config.getAlias(alias.getElementName()) != null) {
-						context.error(alias, "ALIAS_OVERRIDE",
-								"Overrides another alias in config set '"
-										+ configSet.getElementName() + "'");
+						context.error(alias, "ALIAS_OVERRIDE", "Overrides another alias in config set '"
+								+ configSet.getElementName() + "'");
 						break;
 					}
 				}
 			}
 
 			// Check if corresponding bean exists
-			if (!configSet.isIncomplete()
-					&& !context.getCompleteRegistry().containsBeanDefinition(
-							alias.getBeanName())) {
-				context.warning(alias, "UNDEFINED_REFERENCED_BEAN",
-						"Referenced bean '" + alias.getBeanName()
-								+ "' not found in config set '"
-								+ configSet.getElementName() + "'");
+			if (!configSet.isIncomplete() && !context.getCompleteRegistry().containsBeanDefinition(alias.getBeanName())) {
+				context.warning(alias, "UNDEFINED_REFERENCED_BEAN", "Referenced bean '" + alias.getBeanName()
+						+ "' not found in config set '" + configSet.getElementName() + "'");
 			}
 		}
 	}

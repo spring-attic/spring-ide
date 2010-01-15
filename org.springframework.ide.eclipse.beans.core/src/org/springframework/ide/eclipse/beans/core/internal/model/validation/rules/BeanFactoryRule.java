@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,51 +38,46 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean).getBeanDefinition();
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean, context.getContextElement());
-
-		// Validate a bean's factory bean and factory method
 		String mergedClassName = mergedBd.getBeanClassName();
-		if (mergedClassName != null && !SpringCoreUtils.hasPlaceHolder(mergedClassName)) {
-			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), mergedClassName);
-			if (type != null) {
 
-				// Validate factory bean and it's non-static factory method
-				if (bd.getFactoryBeanName() != null) {
-					if (bd.getFactoryMethodName() == null) {
-						context.error(bean, "NO_FACTORY_METHOD", "A factory bean requires a factory method");
-					}
-					else {
-						validateFactoryBean(bean, bd.getFactoryBeanName(), bd.getFactoryMethodName(), context);
-					}
-				}
+		// Validate factory bean and it's non-static factory method
+		if (bd.getFactoryBeanName() != null) {
+			if (bd.getFactoryMethodName() == null) {
+				context.error(bean, "NO_FACTORY_METHOD", "A factory bean requires a factory method");
+			}
+			else {
+				validateFactoryBean(bean, bd.getFactoryBeanName(), bd.getFactoryMethodName(), context);
+			}
+		}
 
-				// Validate bean's static factory method with bean class from
-				// merged bean definition - skip factory methods with
-				// placeholders
-				else {
-					String methodName = bd.getFactoryMethodName();
-					try {
-						if (methodName != null && !SpringCoreUtils.hasPlaceHolder(methodName)) {
-							// Use constructor argument values of root bean as
-							// arguments for static factory method
-							int argCount = (!bd.isAbstract()
-									&& bd.getAutowireMode() != AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR ? bd
-									.getConstructorArgumentValues().getArgumentCount() : -1);
-							if (type.isEnum()) {
-								if (!"valueOf".equals(methodName) && (argCount == 0 || argCount > 2)) {
-									validateFactoryMethod(bean, mergedClassName, methodName, argCount,
-											Static.DONT_CARE, context);
-								}
-							}
-							else {
-								validateFactoryMethod(bean, mergedClassName, methodName, argCount, Static.DONT_CARE,
-										context);
-							}
+		// Validate bean's static factory method with bean class from merged bean definition - skip
+		// factory methods with placeholders
+		else {
+			String methodName = bd.getFactoryMethodName();
+			try {
+				if (methodName != null && mergedClassName != null && !SpringCoreUtils.hasPlaceHolder(mergedClassName)
+						&& !SpringCoreUtils.hasPlaceHolder(methodName)) {
+					IType type = JdtUtils.getJavaType(context.getRootElementProject(), mergedClassName);
+					if (type == null) {
+						return;
+					}
+					// Use constructor argument values of root bean as arguments for static factory method
+					int argCount = (!bd.isAbstract()
+							&& bd.getAutowireMode() != AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR ? bd
+							.getConstructorArgumentValues().getArgumentCount() : -1);
+					if (type.isEnum()) {
+						if (!"valueOf".equals(methodName) && (argCount == 0 || argCount > 2)) {
+							validateFactoryMethod(bean, mergedClassName, methodName, argCount, Static.DONT_CARE,
+									context);
 						}
 					}
-					catch (JavaModelException e) {
-
+					else {
+						validateFactoryMethod(bean, mergedClassName, methodName, argCount, Static.DONT_CARE, context);
 					}
 				}
+			}
+			catch (JavaModelException e) {
+
 			}
 		}
 
@@ -113,8 +108,9 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 						// Factory beans with factory methods can only be
 						// validated during runtime - so skip them
 						if (factoryBd.getFactoryMethodName() == null) {
-							validateFactoryMethod(bean, factoryBd.getBeanClassName(), methodName, -1, Static.NO,
-									context);
+							validateFactoryMethod(bean, factoryBd.getBeanClassName(), methodName,
+									(bean.getConstructorArguments().size() > 0 ? bean.getConstructorArguments().size()
+											: -1), Static.NO, context);
 						}
 					}
 				}
