@@ -185,8 +185,8 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 				.asList(attributes));
 		attributeList.add(new ValidationProblemAttribute(MarkerUtils.ELEMENT_ID_KEY, elementId));
 
-		return new ValidationProblem(currentRuleDefinition.getId(), problemId, getSeverity(problemId, severity),
-				message, element.getElementResource(), line, attributeList
+		return new ValidationProblem((currentRuleDefinition != null ? currentRuleDefinition.getId() : "UNKOWN"),
+				problemId, getSeverity(problemId, severity), message, element.getElementResource(), line, attributeList
 						.toArray(new ValidationProblemAttribute[attributeList.size()]));
 	}
 
@@ -227,15 +227,20 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 		return contributorState;
 	}
 
+	/**
+	 * Calculates the severity of the given message checking the enablement state of the current
+	 * rule and severity configuration of the check.
+	 * @since 2.3.1 
+	 */
 	protected int getSeverity(String messageId, int defaultSeverity) {
-		if (currentRuleDefinition.isEnabled(getRootElement().getElementResource().getProject())) {
+		if (currentRuleDefinition != null
+				&& currentRuleDefinition.isEnabled(getRootElement().getElementResource().getProject())) {
 			Integer severity = currentRuleDefinition.getMessageSeverities().get(messageId);
 			if (severity != null) {
 				return severity;
 			}
-			return defaultSeverity;
 		}
-		return IValidationProblemMarker.SEVERITY_UNKOWN;
+		return defaultSeverity;
 	}
 
 }
