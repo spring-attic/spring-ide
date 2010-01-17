@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,8 +25,6 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -34,6 +32,7 @@ import org.w3c.dom.Node;
  * {@link IHyperlinkCalculator} for the factory-method attribute.
  * @author Christian Dupuis
  * @author Leo Dos Santos
+ * @author Christian Dupuis
  * @since 2.2.1
  */
 public class FactoryMethodHyperlinkCalculator implements IHyperlinkCalculator {
@@ -41,24 +40,16 @@ public class FactoryMethodHyperlinkCalculator implements IHyperlinkCalculator {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IHyperlink createHyperlink(String name, String target, Node node, Node parentNode,
-			IDocument document, ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
+	public IHyperlink createHyperlink(String name, String target, Node node, Node parentNode, IDocument document,
+			ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
 		NamedNodeMap attributes = node.getAttributes();
 		String className = null;
 		if (attributes != null && getFactoryBeanReferenceNode(attributes) != null) {
 			Node factoryBean = getFactoryBeanReferenceNode(attributes);
 			if (factoryBean != null) {
 				String factoryBeanId = factoryBean.getNodeValue();
-				// TODO add factoryBean support for beans defined
-				// outside of the current xml file
-				Document doc = node.getOwnerDocument();
-				Element bean = doc.getElementById(factoryBeanId);
-				if (bean != null && bean instanceof Node) {
-					NamedNodeMap attribute = ((Node) bean).getAttributes();
-					if (attribute.getNamedItem("class") != null) {
-						className = attribute.getNamedItem("class").getNodeValue();
-					}
-				}
+				className = BeansEditorUtils.getClassNameForBean(BeansEditorUtils.getFile(document), node
+						.getOwnerDocument(), factoryBeanId);
 			}
 		}
 		else if (attributes != null && attributes.getNamedItem("class") != null) {
@@ -67,8 +58,7 @@ public class FactoryMethodHyperlinkCalculator implements IHyperlinkCalculator {
 		try {
 			IFile file = BeansEditorUtils.getFile(document);
 			IType type = JdtUtils.getJavaType(file.getProject(), className);
-			IMethod method = Introspector.findMethod(type, target, -1, Public.DONT_CARE,
-					Static.DONT_CARE);
+			IMethod method = Introspector.findMethod(type, target, -1, Public.DONT_CARE, Static.DONT_CARE);
 			if (method != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, method);
 			}
