@@ -168,6 +168,9 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 		else if (value instanceof BeanReference) {
 			beanName = ((BeanReference) value).getBeanName();
 		}
+		else if (value instanceof String) {
+			beanName = (String) value;
+		}
 		validateBeanReference(element, context, beanName);
 	}
 
