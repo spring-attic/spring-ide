@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -51,6 +52,7 @@ import org.w3c.dom.NodeList;
  * <li>osgi:interfaces value</li>
  * </ul>
  * @author Christian Dupuis
+ * @author Terry Hon
  * @since 2.2.7
  */
 public class NamespaceElementsRule extends AbstractXmlValidationRule {
@@ -182,9 +184,10 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 		IType type = JdtUtils.getJavaType(context.getRootElementProject(), className);
 		try {
 			if (type != null) {
-				if (Introspector.findMethod(type, attribute.getNodeValue(), -1, Public.DONT_CARE, Static.DONT_CARE) == null) {
-					context.error(n, "METHOD_NOT_FOUND", "Method '" + attribute.getNodeValue()
-							+ "' not found in class '" + className + "'");
+				String methodName = attribute.getNodeValue();
+				if (Introspector.findMethod(type, methodName, -1, Public.DONT_CARE, Static.DONT_CARE) == null) {
+					context.error(n, "METHOD_NOT_FOUND", "Method '" + methodName
+							+ "' not found in class '" + className + "'", new ValidationProblemAttribute("METHOD", methodName), new ValidationProblemAttribute("CLASS", className));
 				}
 			}
 		}
@@ -204,7 +207,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 
 			// Verify class is found
 			if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
-				context.error(n, "CLASS_NOT_FOUND", "Class '" + className + "' not found");
+				context.error(n, "CLASS_NOT_FOUND", "Class '" + className + "' not found", new ValidationProblemAttribute("CLASS", className));
 				return;
 			}
 
@@ -244,7 +247,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 				context.getCompleteRegistry().getBeanDefinition(beanName);
 			}
 			catch (NoSuchBeanDefinitionException e) {
-				context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Referenced bean '" + beanName + "' not found");
+				context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Referenced bean '" + beanName + "' not found", new ValidationProblemAttribute("BEAN", beanName));
 			}
 			catch (BeanDefinitionStoreException e) {
 				// Need to make sure that the parent of a parent does not use placeholders
@@ -260,7 +263,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 					exp = exp.getCause();
 				}
 				if (!placeHolderFound) {
-					context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Refrenced bean '" + beanName + "' not found");
+					context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Refrenced bean '" + beanName + "' not found", new ValidationProblemAttribute("BEAN", beanName));
 				}
 			}
 		}
@@ -329,15 +332,15 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 							IField field = type.getField(fieldName);
 							if (!field.exists()) {
 								context.error(n, "FIELD_NOT_FOUND", "Field '" + fieldName + "' not found on class '"
-										+ className + "'");
+										+ className + "'", new ValidationProblemAttribute("CLASS", className), new ValidationProblemAttribute("FIELD", fieldName));
 							}
 							else if (!type.isEnum() && !Flags.isStatic(field.getFlags())) {
-								context.error(n, "FIELD_NOT_FOUND", "Field '" + fieldName + "' on class '" + className
-										+ "' is not static");
+								context.error(n, "FIELD_NOT_STATIC", "Field '" + fieldName + "' on class '" + className
+										+ "' is not static", new ValidationProblemAttribute("CLASS", className), new ValidationProblemAttribute("FIELD", fieldName));
 							}
 						}
 						else {
-							context.error(n, "CLASS_NOT_FOUND", "Class '" + className + "' not found");
+							context.error(n, "CLASS_NOT_FOUND", "Class '" + className + "' not found", new ValidationProblemAttribute("CLASS", className));
 						}
 					}
 				}
@@ -378,7 +381,7 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 
 					// Verify class is found
 					if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
-						context.error(child, "CLASS_NOT_FOUND", "Class '" + className + "' not found");
+						context.error(child, "CLASS_NOT_FOUND", "Class '" + className + "' not found", new ValidationProblemAttribute("Class", className));
 						continue;
 					}
 
