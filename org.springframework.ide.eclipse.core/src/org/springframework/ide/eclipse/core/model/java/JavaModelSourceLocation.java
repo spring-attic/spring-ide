@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,7 @@ import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Java implementation of {@link IModelSourceLocation} interface that takes all
- * relevant information in the constructor.
+ * Java implementation of {@link IModelSourceLocation} interface that takes all relevant information in the constructor.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -35,13 +34,15 @@ public class JavaModelSourceLocation implements Serializable, IModelSourceLocati
 
 	private String handleIdentifier;
 
+	private int lineNumber;
+
 	public JavaModelSourceLocation(IJavaElement type) throws JavaModelException {
 		this.handleIdentifier = type.getHandleIdentifier();
+		this.lineNumber = JdtUtils.getLineNumber(JavaCore.create(handleIdentifier, DefaultWorkingCopyOwner.PRIMARY));
 	}
 
 	public int getEndLine() {
-		return JdtUtils.getLineNumber(JavaCore.create(handleIdentifier,
-				DefaultWorkingCopyOwner.PRIMARY));
+		return lineNumber;
 	}
 
 	public int getStartLine() {
@@ -50,15 +51,14 @@ public class JavaModelSourceLocation implements Serializable, IModelSourceLocati
 
 	public Resource getResource() {
 		try {
-			return new FileResource(JavaCore.create(handleIdentifier,
-					DefaultWorkingCopyOwner.PRIMARY).getUnderlyingResource().getFullPath()
-					.toString());
+			return new FileResource(JavaCore.create(handleIdentifier, DefaultWorkingCopyOwner.PRIMARY)
+					.getUnderlyingResource().getFullPath().toString());
 		}
 		catch (JavaModelException e) {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -70,7 +70,7 @@ public class JavaModelSourceLocation implements Serializable, IModelSourceLocati
 		JavaModelSourceLocation that = (JavaModelSourceLocation) other;
 		return ObjectUtils.nullSafeEquals(this.handleIdentifier, that.handleIdentifier);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return this.handleIdentifier.hashCode();

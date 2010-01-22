@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -271,10 +271,32 @@ public class JdtUtils {
 			try {
 				IMethod method = (IMethod) element;
 				int lines = 0;
-				String targetsource;
 				if (method.getDeclaringType() != null && method.getDeclaringType().getCompilationUnit() != null) {
-					targetsource = method.getDeclaringType().getCompilationUnit().getSource();
-					String sourceuptomethod = targetsource.substring(0, method.getNameRange().getOffset());
+					String targetsource = method.getDeclaringType().getCompilationUnit().getSource();
+					if (targetsource != null) {
+						String sourceuptomethod = targetsource.substring(0, method.getNameRange().getOffset());
+
+						char[] chars = new char[sourceuptomethod.length()];
+						sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
+						for (char element0 : chars) {
+							if (element0 == '\n') {
+								lines++;
+							}
+						}
+						return new Integer(lines + 1);
+					}
+				}
+			}
+			catch (JavaModelException e) {
+			}
+		}
+		else if (element != null && element instanceof IType && ((IType) element).getCompilationUnit() != null) {
+			try {
+				IType type = (IType) element;
+				int lines = 0;
+				String targetsource = type.getCompilationUnit().getSource();
+				if (targetsource != null) {
+					String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
 
 					char[] chars = new char[sourceuptomethod.length()];
 					sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
@@ -289,42 +311,23 @@ public class JdtUtils {
 			catch (JavaModelException e) {
 			}
 		}
-		else if (element != null && element instanceof IType && ((IType) element).getCompilationUnit() != null) {
-			try {
-				IType type = (IType) element;
-				int lines = 0;
-				String targetsource;
-				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
-
-				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
-				for (char element0 : chars) {
-					if (element0 == '\n') {
-						lines++;
-					}
-				}
-				return new Integer(lines + 1);
-			}
-			catch (JavaModelException e) {
-			}
-		}
 		else if (element != null && element instanceof IField) {
 			try {
 				IField type = (IField) element;
 				int lines = 0;
-				String targetsource;
-				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
+				String targetsource = type.getCompilationUnit().getSource();
+				if (targetsource != null) {
+					String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
 
-				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
-				for (char element0 : chars) {
-					if (element0 == '\n') {
-						lines++;
+					char[] chars = new char[sourceuptomethod.length()];
+					sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
+					for (char element0 : chars) {
+						if (element0 == '\n') {
+							lines++;
+						}
 					}
+					return new Integer(lines + 1);
 				}
-				return new Integer(lines + 1);
 			}
 			catch (JavaModelException e) {
 			}
@@ -806,43 +809,43 @@ public class JdtUtils {
 	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
 	 */
 	public static boolean doesImplement(IResource resource, IType type, String className) {
-//		long start = System.currentTimeMillis();
-//		try {
-			if (resource == null || type == null || className == null) {
-				return false;
-			}
-			try {
-				ClassLoader cls = getProjectClassLoaderSupport(resource.getProject()).getProjectClassLoader();
-				Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
-				Class<?> interfaceClass = cls.loadClass(className);
-				return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
-			}
-			catch (ClassNotFoundException e) {
-				return false;
-			}
-//			IType interfaceType = getJavaType(resource.getProject(), className);
-//			if (type != null && interfaceType != null) {
-//				try {
-//					IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getAllSubtypes(
-//							interfaceType);
-//					if (subTypes != null) {
-//						for (IType subType : subTypes) {
-//							if (subType.equals(type)) {
-//								return true;
-//							}
-//						}
-//					}
-//				}
-//				catch (JavaModelException e) {
-//					SpringCore.log(e);
-//				}
-//			}
-//			return false;
-//		}
-//		finally {
-//			System.out.println(String.format("|--- %sms - hierarchy check for %s in %s",
-//					(System.currentTimeMillis() - start), type.getFullyQualifiedName(), className));
-//		}
+		// long start = System.currentTimeMillis();
+		// try {
+		if (resource == null || type == null || className == null) {
+			return false;
+		}
+		try {
+			ClassLoader cls = getProjectClassLoaderSupport(resource.getProject()).getProjectClassLoader();
+			Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
+			Class<?> interfaceClass = cls.loadClass(className);
+			return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
+		}
+		catch (ClassNotFoundException e) {
+			return false;
+		}
+		// IType interfaceType = getJavaType(resource.getProject(), className);
+		// if (type != null && interfaceType != null) {
+		// try {
+		// IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getAllSubtypes(
+		// interfaceType);
+		// if (subTypes != null) {
+		// for (IType subType : subTypes) {
+		// if (subType.equals(type)) {
+		// return true;
+		// }
+		// }
+		// }
+		// }
+		// catch (JavaModelException e) {
+		// SpringCore.log(e);
+		// }
+		// }
+		// return false;
+		// }
+		// finally {
+		// System.out.println(String.format("|--- %sms - hierarchy check for %s in %s",
+		// (System.currentTimeMillis() - start), type.getFullyQualifiedName(), className));
+		// }
 	}
 
 	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
