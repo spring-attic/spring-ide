@@ -12,12 +12,11 @@ package org.springframework.ide.eclipse.core.model.validation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IMarker;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -40,20 +39,14 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 
 	private ValidationRuleDefinition currentRuleDefinition;
 
-	private Set<ValidationProblem> errors;
-
-	private Set<ValidationProblem> infos;
+	private Set<ValidationProblem> problems;
 
 	private IResourceModelElement rootElement;
-
-	private Set<ValidationProblem> warnings;
 
 	public AbstractValidationContext(IResourceModelElement rootElement, IResourceModelElement contextElement) {
 		this.rootElement = rootElement;
 		this.contextElement = contextElement;
-		this.infos = new LinkedHashSet<ValidationProblem>();
-		this.warnings = new LinkedHashSet<ValidationProblem>();
-		this.errors = new LinkedHashSet<ValidationProblem>();
+		this.problems = new LinkedHashSet<ValidationProblem>();
 	}
 
 	/**
@@ -61,20 +54,7 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	 */
 	public void addProblems(ValidationProblem... problems) {
 		if (problems != null) {
-			for (ValidationProblem problem : problems) {
-				if (problem.getSeverity() == IMarker.SEVERITY_ERROR) {
-					errors.add(problem);
-					getProgressReportingState().incrementErrorCount();
-				}
-				else if (problem.getSeverity() == IMarker.SEVERITY_WARNING) {
-					warnings.add(problem);
-					getProgressReportingState().incrementWarningCount();
-				}
-				else if (problem.getSeverity() == IMarker.SEVERITY_INFO) {
-					infos.add(problem);
-					getProgressReportingState().incrementInfoCount();
-				}
-			}
+			addProblems(Arrays.asList(problems));
 		}
 	}
 
@@ -83,9 +63,7 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	 */
 	public void error(IResourceModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes) {
-		int count = errors.size();
-		errors.addAll(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_ERROR, message, attributes));
-		getProgressReportingState().incrementErrorCountBy(errors.size() - count);
+		addProblems(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_ERROR, message, attributes));
 	}
 
 	/**
@@ -106,10 +84,6 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	 * {@inheritDoc}
 	 */
 	public Set<ValidationProblem> getProblems() {
-		Set<ValidationProblem> problems = new HashSet<ValidationProblem>();
-		problems.addAll(infos);
-		problems.addAll(warnings);
-		problems.addAll(errors);
 		return problems;
 	}
 
@@ -132,9 +106,7 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	 */
 	public void info(IResourceModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes) {
-		int count = infos.size();
-		infos.addAll(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_INFO, message, attributes));
-		getProgressReportingState().incrementInfoCountBy(infos.size() - count);
+		addProblems(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_INFO, message, attributes));
 	}
 
 	/**
@@ -156,10 +128,32 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	 */
 	public void warning(IResourceModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes) {
-		int count = warnings.size();
-		warnings.addAll(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_WARNING, message,
-				attributes));
-		getProgressReportingState().incrementWarningCountBy(warnings.size() - count);
+		addProblems(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_WARNING, message, attributes));
+	}
+
+	/**
+	 * Add the given problems to the internal state.
+	 * <p>
+	 * This implementation will make sure that progress is reported correctly. 
+	 */
+	private void addProblems(Collection<ValidationProblem> problems) {
+		if (problems != null) {
+			for (ValidationProblem problem : problems) {
+				if (problem.getSeverity() == IValidationProblemMarker.SEVERITY_ERROR) {
+					this.problems.add(problem);
+					getProgressReportingState().incrementErrorCount();
+				}
+				else if (problem.getSeverity() == IValidationProblemMarker.SEVERITY_WARNING) {
+					this.problems.add(problem);
+					getProgressReportingState().incrementWarningCount();
+				}
+				else if (problem.getSeverity() == IValidationProblemMarker.SEVERITY_INFO) {
+					this.problems.add(problem);
+					getProgressReportingState().incrementInfoCount();
+				}
+				// IValidationProblemMarker.SEVERITY_UNKOWN falls through
+			}
+		}
 	}
 
 	private ValidationProgressState getProgressReportingState() {
@@ -210,7 +204,7 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	protected int getLineNumber(IResourceModelElement element) {
 		int line = (element instanceof ISourceModelElement ? ((ISourceModelElement) element).getElementStartLine() : -1);
 
-		// If the current element does not provide a valid line number iterate up the parent
+		// If the current element does not provide a valid line number -> iterate up the parent
 		// hierarchy
 		if (line == -1 && element.getElementParent() != null
 				&& element.getElementParent() instanceof IResourceModelElement) {
@@ -228,9 +222,9 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	}
 
 	/**
-	 * Calculates the severity of the given message checking the enablement state of the current
-	 * rule and severity configuration of the check.
-	 * @since 2.3.1 
+	 * Calculates the severity of the given message checking the enablement state of the current rule and severity
+	 * configuration of the check.
+	 * @since 2.3.1
 	 */
 	protected int getSeverity(String messageId, int defaultSeverity) {
 		if (currentRuleDefinition != null
