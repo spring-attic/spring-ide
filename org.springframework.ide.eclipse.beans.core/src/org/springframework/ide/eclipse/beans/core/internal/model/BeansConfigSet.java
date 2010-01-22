@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.util.ObjectUtils;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
@@ -73,7 +72,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 	private volatile Type type;
 
 	public BeansConfigSet(IBeansProject project, String name, Type type) {
-		this(project, name, new HashSet<String>(), type);
+		this(project, name, new LinkedHashSet<String>(), type);
 	}
 
 	public BeansConfigSet(IBeansProject project, String name, Set<String> configNames, Type type) {
@@ -258,7 +257,8 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		return new HashSet<IBean>();
 	}
 
-	@Override
+	// TODO CD IDE-1079 commented out to prevent deadlocks
+	/*@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -283,9 +283,10 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		finally {
 			r.unlock();
 		}
-	}
+	}*/
 
-	@Override
+	// TODO CD IDE-1079 commented out to prevent deadlocks
+	/*@Override
 	public int hashCode() {
 		try {
 			r.lock();
@@ -300,7 +301,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		finally {
 			r.unlock();
 		}
-	}
+	}*/
 
 	@Override
 	public String toString() {

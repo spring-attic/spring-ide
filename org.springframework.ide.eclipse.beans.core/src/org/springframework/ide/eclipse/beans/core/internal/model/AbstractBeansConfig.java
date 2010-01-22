@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,6 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-import org.springframework.util.ObjectUtils;
 
 /**
  * This class gathers common functionality for core model components representing a single instance of xml configuration
@@ -144,7 +143,8 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
+	// TODO CD IDE-1079 commented out to prevent deadlocks
+	/*@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -170,7 +170,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 				return false;
 		}
 		return super.equals(other);
-	}
+	}*/
 
 	/**
 	 * {@inheritDoc}
@@ -473,7 +473,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 
 		try {
 			r.lock();
-			return problems;
+			return Collections.unmodifiableSet(problems);
 		}
 		finally {
 			r.unlock();
@@ -523,7 +523,8 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
+	// TODO CD IDE-1079 commented out to prevent deadlocks
+	/*@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(isArchived);
 		if (defaults != null) {
@@ -535,7 +536,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(defaults.getMerge());
 		}
 		return getElementType() * hashCode + super.hashCode();
-	}
+	}*/
 
 	/**
 	 * {@inheritDoc}
