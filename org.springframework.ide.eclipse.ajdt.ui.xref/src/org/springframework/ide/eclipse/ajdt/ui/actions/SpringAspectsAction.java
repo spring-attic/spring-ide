@@ -31,10 +31,8 @@ public class SpringAspectsAction implements IWorkbenchWindowActionDelegate {
     public void run(IAction action) {
 	    Shell shell = UIPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
 	    if (projects != null && shell != null) {
-	        boolean ask = true;
 	        for (IProject project : projects) {
-	            // only ask if AJ editor is not set to default
-                ask = ! new SpringAspectsToolingEnabler(project, shell, ask).run();
+                new SpringAspectsToolingEnabler(project, shell).run();
             }
 	    }
 	}

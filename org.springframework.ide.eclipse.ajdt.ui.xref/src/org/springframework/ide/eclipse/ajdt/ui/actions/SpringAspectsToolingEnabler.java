@@ -42,6 +42,8 @@ import org.springframework.ide.eclipse.core.SpringCore;
 public class SpringAspectsToolingEnabler {
 
 	// the stand alone spring aspects jar name
+    final private static Pattern SPRING_ASPECTS_JAR_PATTERN = Pattern
+            .compile(".*spring-aspects.*\\.jar");
 	final private static String SPRING_ASPECTS_JAR_NAME = "spring-aspects.jar";
 
 	// part of the name for the spring aspects jar included in BRITS.
@@ -56,6 +58,11 @@ public class SpringAspectsToolingEnabler {
 	final private Shell shell;
 
 	final private boolean askToChangeDefaultEditor;
+
+	
+	public SpringAspectsToolingEnabler(IProject project, Shell shell) {
+	    this(project, shell, false);
+	}
 
 	public SpringAspectsToolingEnabler(IProject project, Shell shell,
 			boolean askToChangeDefaultEditor) {
@@ -101,8 +108,8 @@ public class SpringAspectsToolingEnabler {
 				// spring jar is on build path
 				MessageDialog
 						.openInformation(shell,
-								"Add " + SPRING_ASPECTS_JAR_NAME + " to build path", "Please add "
-										+ SPRING_ASPECTS_JAR_NAME + " to build path of "
+								"Add " + SPRING_ASPECTS_JAR_NAME + " to build path", "Please add a version of "
+										+ SPRING_ASPECTS_JAR_NAME + "\nto build path of "
 										+ project.getName() + " and run this command again.");
 
 			}
@@ -182,7 +189,7 @@ public class SpringAspectsToolingEnabler {
 
 	private boolean isSpringAspectsEntry(IClasspathEntry entry) {
 		String path = entry.getPath().toOSString();
-		return path.endsWith(SPRING_ASPECTS_JAR_NAME)
+		return SPRING_ASPECTS_JAR_PATTERN.matcher(path).matches()
 				|| SPRING_ASPECTS_PATTERN.matcher(path).matches();
 	}
 
