@@ -138,6 +138,13 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 		}
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getNamespacePrefix() {
+		return defaultPrefix;
+	}
 
 	/**
 	 * {@inheritDoc}

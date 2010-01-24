@@ -22,6 +22,9 @@ import org.eclipse.swt.graphics.Image;
  */
 public interface INamespaceDefinition {
 
+	@Deprecated
+	String getNamespacePrefix();
+
 	String getNamespacePrefix(IResource resource);
 	
 	String getDefaultNamespacePrefix();
