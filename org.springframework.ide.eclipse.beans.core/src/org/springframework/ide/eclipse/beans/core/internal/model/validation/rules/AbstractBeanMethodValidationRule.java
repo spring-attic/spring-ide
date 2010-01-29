@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 
 /**
  * Base class for valdating a given {@link IBean}'s methods.
@@ -42,6 +43,7 @@ public abstract class AbstractBeanMethodValidationRule extends AbstractBeanValid
 				// First check if we can find any matching method regardless of
 				// visibility, if not create error marker
 				if (method == null) {
+					String className = type.getFullyQualifiedName();
 					if (methodType == MethodType.FACTORY) {
 						context.error(bean, "UNDEFINED_FACTORY_BEAN_METHOD", (statics == Static.YES ? "Static"
 								: "Non-static")
@@ -49,15 +51,19 @@ public abstract class AbstractBeanMethodValidationRule extends AbstractBeanValid
 								+ methodName
 								+ "' "
 								+ (argCount != -1 ? "with " + argCount + " arguments " : "")
-								+ "not found in factory bean class '" + type.getFullyQualifiedName() + "'");
+								+ "not found in factory bean class '" + className + "'",
+								new ValidationProblemAttribute("CLASS", className), new ValidationProblemAttribute(
+										"METHOD", methodName));
 					}
 					else if (methodType == MethodType.INIT) {
 						context.error(bean, "UNDEFINED_INIT_METHOD", "Init-method '" + methodName
-								+ "' not found in bean class '" + type.getFullyQualifiedName() + "'");
+								+ "' not found in bean class '" + className + "'", new ValidationProblemAttribute(
+								"CLASS", className), new ValidationProblemAttribute("METHOD", methodName));
 					}
 					else if (methodType == MethodType.DESTROY) {
 						context.error(bean, "UNDEFINED_DESTROY_METHOD", "Destroy-method '" + methodName
-								+ "' not found in bean class '" + type.getFullyQualifiedName() + "'");
+								+ "' not found in bean class '" + className + "'", new ValidationProblemAttribute(
+								"CLASS", className), new ValidationProblemAttribute("METHOD", methodName));
 					}
 				}
 
@@ -65,26 +71,18 @@ public abstract class AbstractBeanMethodValidationRule extends AbstractBeanValid
 				// properties
 				// If we find a matching method, but the visibility is not
 				// public, then just create a warning
-				/*else if (!Flags.isPublic(method.getFlags())) {
-					if (methodType == MethodType.FACTORY) {
-						context.warning(bean, "UNDEFINED_FACTORY_BEAN_METHOD", (statics == Static.NO ? "Non-static"
-								: "Static")
-								+ " factory method '"
-								+ methodName
-								+ "' "
-								+ (argCount != -1 ? "with " + argCount + " arguments " : "")
-								+ "is not public in factory bean class '" + type.getFullyQualifiedName() + "'");
-					}
-					else if (methodType == MethodType.INIT) {
-						context.warning(bean, "UNDEFINED_INIT_METHOD", "Init-method '" + methodName
-								+ "' is not public in bean class '" + type.getFullyQualifiedName() + "'");
-					}
-					else if (methodType == MethodType.DESTROY) {
-						context.warning(bean, "UNDEFINED_DESTROY_METHOD", "Destroy-method '" + methodName
-								+ "' is not public in bean class '" + type.getFullyQualifiedName() + "'");
-					}
-				} */
-			} 
+				/*
+				 * else if (!Flags.isPublic(method.getFlags())) { if (methodType == MethodType.FACTORY) {
+				 * context.warning(bean, "UNDEFINED_FACTORY_BEAN_METHOD", (statics == Static.NO ? "Non-static" :
+				 * "Static") + " factory method '" + methodName + "' " + (argCount != -1 ? "with " + argCount +
+				 * " arguments " : "") + "is not public in factory bean class '" + type.getFullyQualifiedName() + "'");
+				 * } else if (methodType == MethodType.INIT) { context.warning(bean, "UNDEFINED_INIT_METHOD",
+				 * "Init-method '" + methodName + "' is not public in bean class '" + type.getFullyQualifiedName() +
+				 * "'"); } else if (methodType == MethodType.DESTROY) { context.warning(bean,
+				 * "UNDEFINED_DESTROY_METHOD", "Destroy-method '" + methodName + "' is not public in bean class '" +
+				 * type.getFullyQualifiedName() + "'"); } }
+				 */
+			}
 			catch (JavaModelException e) {
 				// Suppress this expection here
 				// BeansCorePlugin.log(e);

@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidat
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 
 /**
  * Validates a given {@link IBean}'s factory bean and factory method.
@@ -100,7 +101,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 				if (factoryBd.getFactoryBeanName() == null) {
 					if (factoryBd.isAbstract() || factoryBd.getBeanClassName() == null) {
 						context.error(bean, "INVALID_FACTORY_BEAN", "Referenced factory bean '" + beanName
-								+ "' is invalid (abstract or no bean class)");
+								+ "' is invalid (abstract or no bean class)", new ValidationProblemAttribute("BEAN",
+								beanName));
 					}
 					else {
 
@@ -119,7 +121,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 
 				// Skip error "parent name is equal to bean name"
 				if (!e.getBeanName().equals(bean.getElementName())) {
-					context.error(bean, "UNDEFINED_FACTORY_BEAN", "Factory bean '" + beanName + "' not found");
+					context.error(bean, "UNDEFINED_FACTORY_BEAN", "Factory bean '" + beanName + "' not found",
+							new ValidationProblemAttribute("BEAN", beanName));
 				}
 			}
 		}

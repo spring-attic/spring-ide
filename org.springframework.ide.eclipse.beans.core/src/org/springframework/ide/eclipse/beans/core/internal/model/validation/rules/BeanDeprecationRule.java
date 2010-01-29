@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 
 /**
  * Validates a given {@link IBean}'s bean class for deprecation.
@@ -75,7 +76,8 @@ public class BeanDeprecationRule extends AbstractNonInfrastructureBeanValidation
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), className);
 			try {
 				if (type != null && Flags.isDeprecated(type.getFlags())) {
-					context.warning(bean, "CLASS_IS_DEPRECATED", "Class '" + className + "' is marked deprecated");
+					context.warning(bean, "CLASS_IS_DEPRECATED", "Class '" + className + "' is marked deprecated",
+							new ValidationProblemAttribute("CLASS", className));
 				}
 			}
 			catch (JavaModelException e) {
@@ -108,7 +110,8 @@ public class BeanDeprecationRule extends AbstractNonInfrastructureBeanValidation
 				}
 				if (method != null && Flags.isDeprecated(method.getFlags())) {
 					context.warning(bean, "METHOD_IS_DEPRECATED", "Method '" + method.getElementName()
-							+ "' is marked deprecated");
+							+ "' is marked deprecated", new ValidationProblemAttribute("CLASS", type
+							.getFullyQualifiedName()), new ValidationProblemAttribute("METHOD", methodName));
 				}
 			}
 			catch (JavaModelException e) {

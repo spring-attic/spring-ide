@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.util.StringUtils;
 
@@ -88,6 +89,7 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 
 			// First check for nested property path
 			int nestedIndex = getNestedPropertySeparatorIndex(propertyName, false);
+			String className = type.getFullyQualifiedName();
 			if (nestedIndex >= 0) {
 				String nestedPropertyName = propertyName.substring(0, nestedIndex);
 				PropertyTokenHolder tokens = getPropertyNameTokens(nestedPropertyName);
@@ -95,7 +97,8 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 				IMethod getter = Introspector.findMethod(type, getterName, 0, Public.YES, Static.NO);
 				if (getter == null) {
 					context.error(property, "NO_GETTER", "No getter found for nested property '" + nestedPropertyName
-							+ "' in class '" + type.getFullyQualifiedName() + "'");
+							+ "' in class '" + className + "'", new ValidationProblemAttribute("CLASS", className),
+							new ValidationProblemAttribute("PROPERTY", nestedPropertyName));
 				}
 				else {
 
@@ -117,11 +120,13 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 				// Finally check property
 				if (!Introspector.isValidPropertyName(propertyName)) {
 					context.error(property, "INVALID_PROPERTY_NAME", "Invalid property name '" + propertyName
-							+ "' - not JavaBean compliant");
+							+ "' - not JavaBean compliant", new ValidationProblemAttribute("CLASS", className),
+							new ValidationProblemAttribute("PROPERTY", propertyName));
 				}
 				else if (!Introspector.hasWritableProperty(type, propertyName)) {
 					context.error(property, "NO_SETTER", "No setter found for property '" + propertyName
-							+ "' in class '" + type.getFullyQualifiedName() + "'");
+							+ "' in class '" + className + "'", new ValidationProblemAttribute("CLASS", className),
+							new ValidationProblemAttribute("PROPERTY", propertyName));
 				}
 
 				// TODO If mapped property then check type of setter's argument

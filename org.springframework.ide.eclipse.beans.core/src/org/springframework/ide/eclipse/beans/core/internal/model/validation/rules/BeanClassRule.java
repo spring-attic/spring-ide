@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidat
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.util.StringUtils;
 
 /**
@@ -59,10 +60,12 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 			try {
 				if (type != null && type.isInterface()
 						&& !(bean.getElementSourceLocation() instanceof JavaModelSourceLocation)) {
-					context.warning(bean, "CLASS_NOT_CLASS", "Class '" + className + "' is an interface");
+					context.warning(bean, "CLASS_NOT_CLASS", "Class '" + className + "' is an interface",
+							new ValidationProblemAttribute("CLASS", className));
 				}
 				else if (type == null) {
-					context.error(bean, "CLASS_NOT_FOUND", "Class '" + className + "' not found");
+					context.error(bean, "CLASS_NOT_FOUND", "Class '" + className + "' not found",
+							new ValidationProblemAttribute("CLASS", className));
 				}
 			}
 			catch (JavaModelException e) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.util.StringUtils;
 
 /**
@@ -110,23 +111,26 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 					context.getCompleteRegistry().getBeanDefinition(parentName);
 				}
 				catch (NoSuchBeanDefinitionException e) {
-					context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName + "' not found");
+					context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName + "' not found",
+							new ValidationProblemAttribute("BEAN", parentName));
 				}
 				catch (BeanDefinitionStoreException e) {
-					
+
 					// Need to make sure that the parent of a parent does not use placeholders
 					Throwable exp = e;
 					boolean placeHolderFound = false;
 					while (exp != null && exp.getCause() != null) {
 						String msg = exp.getCause().getMessage();
-						if (msg.contains(SpringCoreUtils.PLACEHOLDER_PREFIX) && msg.contains(SpringCoreUtils.PLACEHOLDER_SUFFIX)) {
+						if (msg.contains(SpringCoreUtils.PLACEHOLDER_PREFIX)
+								&& msg.contains(SpringCoreUtils.PLACEHOLDER_SUFFIX)) {
 							placeHolderFound = true;
 							break;
 						}
 						exp = exp.getCause();
 					}
 					if (!placeHolderFound) {
-						context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName + "' not found");
+						context.warning(bean, "UNDEFINED_PARENT_BEAN", "Parent bean '" + parentName + "' not found",
+								new ValidationProblemAttribute("BEAN", parentName));
 					}
 				}
 			}
@@ -147,14 +151,16 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 				if (dependsBd.isAbstract()
 						|| (dependsBd.getBeanClassName() == null && dependsBd.getFactoryBeanName() == null)) {
 					context.error(bean, "INVALID_DEPENDS_ON_BEAN", "Referenced depends-on bean '" + beanName
-							+ "' is invalid (abstract or no bean class and no " + "factory bean)");
+							+ "' is invalid (abstract or no bean class and no " + "factory bean)",
+							new ValidationProblemAttribute("BEAN", beanName));
 				}
 			}
 			catch (NoSuchBeanDefinitionException e) {
 
 				// Skip error "parent name is equal to bean name"
 				if (!e.getBeanName().equals(bean.getElementName())) {
-					context.warning(bean, "UNDEFINED_DEPENDS_ON_BEAN", "Depends-on bean '" + beanName + "' not found");
+					context.warning(bean, "UNDEFINED_DEPENDS_ON_BEAN", "Depends-on bean '" + beanName + "' not found",
+							new ValidationProblemAttribute("BEAN", beanName));
 				}
 			}
 		}
@@ -180,7 +186,8 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 				BeanDefinition refBd = context.getCompleteRegistry().getBeanDefinition(beanName);
 				if (refBd.isAbstract() || (refBd.getBeanClassName() == null && refBd.getFactoryBeanName() == null)) {
 					context.error(element, "INVALID_REFERENCED_BEAN", "Referenced bean '" + beanName + "' is invalid "
-							+ "(abstract or no bean class and " + "no factory bean)");
+							+ "(abstract or no bean class and " + "no factory bean)", new ValidationProblemAttribute(
+							"BEAN", beanName));
 				}
 			}
 			catch (NoSuchBeanDefinitionException e) {
@@ -195,20 +202,23 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 							IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(element).getProject(),
 									beanClassName);
 							if (type != null) {
-								if (!JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())) {
+								if (!JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class
+										.getName())) {
 									context.error(element, "INVALID_FACTORY_BEAN", "Referenced factory bean '"
-											+ tempBeanName + "' does not implement the " + "interface 'FactoryBean'");
+											+ tempBeanName + "' does not implement the " + "interface 'FactoryBean'",
+											new ValidationProblemAttribute("BEAN", tempBeanName));
 								}
 							}
 							else {
 								context.warning(element, "INVALID_REFERENCED_BEAN", "Referenced factory bean '"
-										+ tempBeanName + "' implementation class not found");
+										+ tempBeanName + "' implementation class not found",
+										new ValidationProblemAttribute("BEAN", tempBeanName));
 							}
 						}
 					}
 					catch (NoSuchBeanDefinitionException be) {
 						context.warning(element, "UNDEFINED_FACTORY_BEAN", "Referenced factory bean '" + tempBeanName
-								+ "' not found");
+								+ "' not found", new ValidationProblemAttribute("BEAN", tempBeanName));
 					}
 					catch (BeanDefinitionStoreException be) {
 						// ignore unresolvable parent bean exceptions
@@ -216,7 +226,7 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 				}
 				else {
 					context.warning(element, "UNDEFINED_REFERENCED_BEAN", "Referenced bean '" + beanName
-							+ "' not found");
+							+ "' not found", new ValidationProblemAttribute("BEAN", beanName));
 				}
 			}
 			catch (BeanDefinitionStoreException e) {
