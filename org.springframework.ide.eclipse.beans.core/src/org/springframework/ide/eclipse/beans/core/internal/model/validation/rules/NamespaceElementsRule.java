@@ -186,8 +186,9 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 			if (type != null) {
 				String methodName = attribute.getNodeValue();
 				if (Introspector.findMethod(type, methodName, -1, Public.DONT_CARE, Static.DONT_CARE) == null) {
-					context.error(n, "METHOD_NOT_FOUND", "Method '" + methodName
-							+ "' not found in class '" + className + "'", new ValidationProblemAttribute("METHOD", methodName), new ValidationProblemAttribute("CLASS", className));
+					context.error(n, "METHOD_NOT_FOUND", "Method '" + methodName + "' not found in class '" + className
+							+ "'", new ValidationProblemAttribute("METHOD", methodName),
+							new ValidationProblemAttribute("CLASS", className));
 				}
 			}
 		}
@@ -207,7 +208,8 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 
 			// Verify class is found
 			if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
-				context.error(n, "CLASS_NOT_FOUND", "Class '" + className + "' not found", new ValidationProblemAttribute("CLASS", className));
+				context.error(n, "CLASS_NOT_FOUND", "Class '" + className + "' not found",
+						new ValidationProblemAttribute("CLASS", className));
 				return;
 			}
 
@@ -247,7 +249,8 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 				context.getCompleteRegistry().getBeanDefinition(beanName);
 			}
 			catch (NoSuchBeanDefinitionException e) {
-				context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Referenced bean '" + beanName + "' not found", new ValidationProblemAttribute("BEAN", beanName));
+				context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Referenced bean '" + beanName + "' not found",
+						new ValidationProblemAttribute("BEAN", beanName));
 			}
 			catch (BeanDefinitionStoreException e) {
 				// Need to make sure that the parent of a parent does not use placeholders
@@ -263,7 +266,8 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 					exp = exp.getCause();
 				}
 				if (!placeHolderFound) {
-					context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Refrenced bean '" + beanName + "' not found", new ValidationProblemAttribute("BEAN", beanName));
+					context.warning(n, "UNDEFINED_REFERENCED_BEAN", "Refrenced bean '" + beanName + "' not found",
+							new ValidationProblemAttribute("BEAN", beanName));
 				}
 			}
 		}
@@ -332,15 +336,18 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 							IField field = type.getField(fieldName);
 							if (!field.exists()) {
 								context.error(n, "FIELD_NOT_FOUND", "Field '" + fieldName + "' not found on class '"
-										+ className + "'", new ValidationProblemAttribute("CLASS", className), new ValidationProblemAttribute("FIELD", fieldName));
+										+ className + "'", new ValidationProblemAttribute("CLASS", className),
+										new ValidationProblemAttribute("FIELD", fieldName));
 							}
 							else if (!type.isEnum() && !Flags.isStatic(field.getFlags())) {
 								context.error(n, "FIELD_NOT_STATIC", "Field '" + fieldName + "' on class '" + className
-										+ "' is not static", new ValidationProblemAttribute("CLASS", className), new ValidationProblemAttribute("FIELD", fieldName));
+										+ "' is not static", new ValidationProblemAttribute("CLASS", className),
+										new ValidationProblemAttribute("FIELD", fieldName));
 							}
 						}
 						else {
-							context.error(n, "CLASS_NOT_FOUND", "Class '" + className + "' not found", new ValidationProblemAttribute("CLASS", className));
+							context.error(n, "CLASS_NOT_FOUND", "Class '" + className + "' not found",
+									new ValidationProblemAttribute("CLASS", className));
 						}
 					}
 				}
@@ -381,7 +388,8 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 
 					// Verify class is found
 					if (type == null || (type.getDeclaringType() != null && className.indexOf('$') == -1)) {
-						context.error(child, "CLASS_NOT_FOUND", "Class '" + className + "' not found", new ValidationProblemAttribute("Class", className));
+						context.error(child, "CLASS_NOT_FOUND", "Class '" + className + "' not found",
+								new ValidationProblemAttribute("Class", className));
 						continue;
 					}
 
