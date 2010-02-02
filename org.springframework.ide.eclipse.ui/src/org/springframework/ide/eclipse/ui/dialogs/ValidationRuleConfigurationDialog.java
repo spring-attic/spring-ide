@@ -20,6 +20,7 @@ import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -92,14 +93,16 @@ public class ValidationRuleConfigurationDialog extends TrayDialog {
 			composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 			composite.setLayout(layout);
 
-			GridData labelData = new GridData();
-			labelData = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL);
 			// labelData.widthHint = 120;
 			GridData textData = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL);
 			textData.widthHint = 450;
 			for (Map.Entry<String, String> entry : propertyValues.entrySet()) {
+				GridData labelData = new GridData();
+				labelData = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL);
 				Label label = new Label(composite, SWT.NONE);
 				label.setText(validationRule.getPropertyDescription(entry.getKey()) + ":");
+				Point size = label.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				labelData.widthHint = size.x;
 				label.setLayoutData(labelData);
 
 				Text text = new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -124,17 +127,18 @@ public class ValidationRuleConfigurationDialog extends TrayDialog {
 			
 			Composite severityComposite = new Composite(group, SWT.NULL);
 			severityComposite.setLayout(layout);
-			severityComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+//			severityComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-			GridData labelData = new GridData();
-			labelData = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL);
-			labelData.widthHint = 120;
 			GridData textData = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL);
-			textData.widthHint = 450;
+//			textData.widthHint = 450;
 
 			for (Map.Entry<String, Integer> entry : messageSeverities.entrySet()) {
+				GridData labelData = new GridData();
+				labelData = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL);
 				Label label = new Label(severityComposite, SWT.NONE);
 				label.setText(validationRule.getMessageLabel(entry.getKey()) + ":");
+				Point size = label.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				labelData.widthHint = size.x;
 				label.setLayoutData(labelData);
 
 				Combo text = new Combo(severityComposite, SWT.SINGLE | SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
