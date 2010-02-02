@@ -72,19 +72,31 @@
 		    <rule id="beanAlias"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanAliasRule"
 		            name="%beansValidator.rule.beanAlias.name"
-		            description="%beansValidator.rule.beanAlias.description" />
+		            description="%beansValidator.rule.beanAlias.description" >
+	            <message id="BEAN_OVERRIDE" label="Overrides another bean" severity="ERROR" />
+	            <message id="ALIAS_OVERRIDE" label="Overrides another alias" severity="ERROR" />
+	            <message id="UNDEFINED_REFERENCED_BEAN" label="Referenced bean not found" severity="WARNING" />
+		    </rule>
 		    <rule id="beanDefinitionHolder"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanDefinitionHolderRule"
 		            name="%beansValidator.rule.beanDefinitionHolder.name"
-		            description="%beansValidator.rule.beanDefinitionHolder.description" />
+		            description="%beansValidator.rule.beanDefinitionHolder.description" >
+	            <message id="BEAN_OVERRIDE" label="Overrides another bean" severity="ERROR" />
+	            <message id="INVALID_ALIAS" label="Invalid alias" severity="ERROR" />
+		    </rule>
 		    <rule id="beanDefinition"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanDefinitionRule"
 		            name="%beansValidator.rule.beanDefinition.name"
-		            description="%beansValidator.rule.beanDefinition.description" />
+		            description="%beansValidator.rule.beanDefinition.description" >
+   	            <message id="INVALID_BEAN_DEFINITION" label="Invalid bean definition" severity="ERROR" />
+		    </rule>
 		    <rule id="beanDefinition"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanDeprecationRule"
 		            name="%beansValidator.rule.beanDeprecation.name"
-		            description="%beansValidator.rule.beanDeprecation.description" />
+		            description="%beansValidator.rule.beanDeprecation.description" >
+   	            <message id="CLASS_IS_DEPRECATED" label="Deprecated class" severity="WARNING" />
+   	            <message id="METHOD_IS_DEPRECATED" label="Deprecated method" severity="WARNING" />
+		    </rule>
 		    <rule id="beanClass"
             		class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRule"
             		description="%beansValidator.rule.beanClass.description"
@@ -94,14 +106,8 @@
 	               	name="ignorableClasses"
 	               	value="org.springframework.osgi.config.internal.OsgiServiceLifecycleListenerAdapter, org.springframework.osgi.service.importer.support.OsgiServiceProxyFactoryBean, org.springframework.osgi.service.importer.support.OsgiServiceCollectionProxyFactoryBean, org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean, org.springframework.osgi.config.OsgiServiceRegistrationListenerAdapter">
 	            </property>
-	            <message 
-	               id="CLASS_NOT_CLASS"
-                   label="Class is interface"
-                   severity="WARNING" />
-	            <message
-                   id="CLASS_NOT_FOUND"
-                   label="Class not found"
-                   severity="ERROR" />
+	            <message id="CLASS_NOT_CLASS" label="Class is interface" severity="WARNING" />
+	            <message id="CLASS_NOT_FOUND" label="Class not found" severity="ERROR" />
      	    </rule>
 		    <rule id="toolAnnotation"
             		class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRule"
@@ -118,23 +124,48 @@
 	               	name="ignorableBeans"
 	               	value="bundleContext">
 	            </property>
-     	    </rule>
+   	            <message id="CLASS_NOT_FOUND" label="Class not found" severity="ERROR" />
+   	            <message id="METHOD_NOT_FOUND" label="Method not found" severity="ERROR" />
+   	            <message id="CLASS_IS_NOT_IN_HIERACHY" label="Class not sub-type" severity="ERROR" />
+   	            <message id="CLASS_IS_INTERFACE" label="Class is interface" severity="ERROR" />
+   	            <message id="CLASS_IS_INTERFACE" label="Class is not interface" severity="ERROR" />
+   	            <message id="UNDEFINED_REFERENCED_BEAN" label="Referenced bean not found" severity="WARNING" />
+   	            <message id="FIELD_NOT_FOUND" label="Field not found" severity="ERROR" />
+   	            <message id="FIELD_NOT_STATIC" label="Field is not static" severity="ERROR" />
+		    </rule>
 		    <rule id="beanInitDestroyMethod"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRule"
 		            name="%beansValidator.rule.beanInitDestroyMethod.name"
-		            description="%beansValidator.rule.beanInitDestroyMethod.description" />
+		            description="%beansValidator.rule.beanInitDestroyMethod.description" >
+   	            <message id="UNDEFINED_FACTORY_BEAN_METHOD" label="Factory method not found" severity="ERROR" />
+   	            <message id="UNDEFINED_INIT_METHOD" label="Init method not found" severity="ERROR" />
+   	            <message id="UNDEFINED_DESTROY_METHOD" label="Destroy method not found" severity="ERROR" />
+		    </rule>
 		    <rule id="beanFactory"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanFactoryRule"
 		            name="%beansValidator.rule.beanFactory.name"
-		            description="%beansValidator.rule.beanFactory.description" />
+		            description="%beansValidator.rule.beanFactory.description" >
+   	            <message id="NO_FACTORY_METHOD" label="No factory method" severity="ERROR" />
+   	            <message id="INVALID_FACTORY_BEAN" label="Factory bean invalid" severity="ERROR" />
+   	            <message id="UNDEFINED_FACTORY_BEAN" label="Factory bean not found" severity="ERROR" />
+   	            <message id="UNDEFINED_FACTORY_BEAN_METHOD" label="Factory method not found" severity="ERROR" />
+   	            <message id="UNDEFINED_INIT_METHOD" label="Init method not found" severity="ERROR" />
+   	            <message id="UNDEFINED_DESTROY_METHOD" label="Destroy method not found" severity="ERROR" />
+		    </rule>
 		    <rule id="beanConstructorArgument"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentRule"
 		            name="%beansValidator.rule.beanConstructorArgument.name"
-		            description="%beansValidator.rule.beanConstructorArgument.description" />
+		            description="%beansValidator.rule.beanConstructorArgument.description" >
+   	            <message id="NO_CONSTRUCTOR" label="Constructor not found" severity="ERROR" />
+		    </rule>
 		    <rule id="beanProperty"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRule"
 		            name="%beansValidator.rule.beanProperty.name"
-		            description="%beansValidator.rule.beanProperty.description" />
+		            description="%beansValidator.rule.beanProperty.description" >
+   	            <message id="NO_GETTER" label="No getter found" severity="ERROR" />
+   	            <message id="INVALID_PROPERTY_NAME" label="Invalid property name" severity="ERROR" />
+   	            <message id="NO_SETTER" label="No setter found" severity="ERROR" />
+		    </rule>
 		    <rule id="beanReference"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRule"
 		            name="%beansValidator.rule.beanReference.name"
@@ -144,12 +175,20 @@
 	               	name="ignorableBeans"
 	               	value="bundleContext">
 	            </property>
+   	            <message id="UNDEFINED_PARENT_BEAN" label="Parent bean not found" severity="WARNING" />
+   	            <message id="INVALID_DEPENDS_ON_BEAN" label="Invalid dependent bean" severity="ERROR" />
+   	            <message id="INVALID_REFERENCED_BEAN" label="Invalid referenced bean" severity="ERROR" />
+   	            <message id="INVALID_FACTORY_BEAN" label="Invalid factory bean" severity="ERROR" />
+   	            <message id="UNDEFINED_FACTORY_BEAN" label="Factory bean not found" severity="WARNING" />
+   	            <message id="UNDEFINED_REFERENCED_BEAN" label="Referenced bean not found" severity="WARNING" />
 		    </rule>
 		    <rule id="requiredProperty"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRule"
 		            name="%beansValidator.rule.requiredProperty.name"
 		            description="%beansValidator.rule.requiredProperty.description"
-		            enabledByDefault="false" />
+		            enabledByDefault="false" >
+   	            <message id="REQUIRED_PROPERTY_MISSING" label="Required property missing" severity="WARNING" />
+		    </rule>
 		    <rule id="parsingProblems"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.SpringParsingProblemsRule"
 		            name="%beansValidator.rule.parsingProblems.name"
@@ -157,7 +196,10 @@
 		    <rule id="methodOverride"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanMethodOverrideRule"
 		            name="%beansValidator.rule.methodOverride.name"
-		            description="%beansValidator.rule.methodOverride.description" />
+		            description="%beansValidator.rule.methodOverride.description" >
+   	            <message id="UNDEFINED_REPLACE_METHOD" label="Replace method not found" severity="ERROR" />
+   	            <message id="UNDEFINED_LOOKUP_METHOD" label="Lookup method not found" severity="ERROR" />
+		    </rule>
 	    </rules>
 	</extension>
 	
