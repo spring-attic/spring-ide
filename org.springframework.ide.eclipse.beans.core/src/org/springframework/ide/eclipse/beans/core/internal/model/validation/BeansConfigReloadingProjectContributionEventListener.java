@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -82,7 +83,7 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 		if (structureState == null) {
 			structureState = new TypeStructureState();
 		}
-		
+
 		try {
 			if (kind != IncrementalProjectBuilder.FULL_BUILD) {
 				if (delta == null) {
@@ -111,7 +112,8 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 			IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
 			subMonitor.beginTask("Initializing Spring Model", configs.size());
 			for (IBeansConfig config : configs) {
-				subMonitor.subTask("Loading '" + config.getElementResource().getFullPath().toString().substring(1) + "'");
+				subMonitor.subTask("Loading '" + config.getElementResource().getFullPath().toString().substring(1)
+						+ "'");
 				((BeansConfig) config).reload();
 				config.getBeans();
 				subMonitor.worked(1);
@@ -154,11 +156,11 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 								XmlSourceLocation location = (XmlSourceLocation) component.getElementSourceLocation();
 								if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
 										&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
-									propagateToConfigsFromConfigSet(config);
+									propagateToConfigsFromConfigSet(config, false);
 								}
 								else if (ANNOTATION_CONFIG_ELEMENT_NAME.equals(location.getLocalName())
 										&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
-									propagateToConfigsFromConfigSet(config);
+									propagateToConfigsFromConfigSet(config, false);
 								}
 							}
 						}
@@ -168,25 +170,42 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
 			IBeansConfig bc = BeansCorePlugin.getModel().getConfig((IFile) resource, true);
+			// Resources are loaded by isBeansConfig from the top; so the resourceChanged check here is not sufficient
 			if (bc.resourceChanged()) {
 				if (bc instanceof IImportedBeansConfig) {
-					configs.add(BeansModelUtils.getParentOfClass(bc, BeansConfig.class));
+					propagateToConfigsFromConfigSet(BeansModelUtils.getParentOfClass(bc, BeansConfig.class), false);
 				}
 				else {
-					configs.add(bc);
+					propagateToConfigsFromConfigSet(bc, false);
 				}
+			}
+			else {
+				propagateToConfigsFromConfigSet(bc, true);
 			}
 		}
 	}
 
-	private void propagateToConfigsFromConfigSet(IBeansConfig config) {
+	private void propagateToConfigsFromConfigSet(IBeansConfig config, boolean onlyImportsCheck) {
 		// Add config to make sure that in case on config set is configured
-		configs.add(config);
+		if (!onlyImportsCheck) {
+			configs.add(config);
+		}
 
 		for (IBeansProject beansProject : BeansCorePlugin.getModel().getProjects()) {
-			for (IBeansConfigSet configSet : beansProject.getConfigSets()) {
-				if (configSet.hasConfig((IFile) config.getElementResource())) {
-					configs.addAll(configSet.getConfigs());
+			if (!onlyImportsCheck) {
+				for (IBeansConfigSet configSet : beansProject.getConfigSets()) {
+					if (configSet.hasConfig((IFile) config.getElementResource())) {
+						configs.addAll(configSet.getConfigs());
+					}
+				}
+			}
+			for (IBeansConfig bc : beansProject.getConfigs()) {
+				for (IBeansImport beansImport : bc.getImports()) {
+					for (IImportedBeansConfig importedBeansConfig : beansImport.getImportedBeansConfigs()) {
+						if (config.getElementResource().equals(importedBeansConfig.getElementResource())) {
+							configs.add(bc);
+						}
+					}
 				}
 			}
 		}

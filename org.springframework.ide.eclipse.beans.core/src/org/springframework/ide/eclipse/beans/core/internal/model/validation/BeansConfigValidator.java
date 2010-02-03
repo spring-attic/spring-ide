@@ -134,7 +134,8 @@ public class BeansConfigValidator extends AbstractValidator {
 							IBeansConfig beansConfig = BeansModelUtils.getConfig(bean);
 							// Resolve imported config files to their root importing one
 							if (beansConfig instanceof IImportedBeansConfig) {
-								IBeansConfig importingConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
+								IBeansConfig importingConfig = BeansModelUtils.getParentOfClass(beansConfig,
+										BeansConfig.class);
 								if (importingConfig != null) {
 									resources.add(importingConfig.getElementResource());
 									affectedBeans.add(bean.getElementID());
@@ -177,6 +178,20 @@ public class BeansConfigValidator extends AbstractValidator {
 					if (!resources.contains(bc.getElementResource())) {
 						resources.add(bc.getElementResource());
 						addBeans(bc);
+					}
+				}
+			}
+			for (IBeansProject beansProject : BeansCorePlugin.getModel().getProjects()) {
+				for (IBeansConfig bc : beansProject.getConfigs()) {
+					for (IBeansImport beansImport : bc.getImports()) {
+						for (IImportedBeansConfig importedBeansConfig : beansImport.getImportedBeansConfigs()) {
+							if (resource.equals(importedBeansConfig.getElementResource())) {
+								if (!resources.contains(bc.getElementResource())) {
+									resources.add(bc.getElementResource());
+									addBeans(bc);
+								}
+							}
+						}
 					}
 				}
 			}
