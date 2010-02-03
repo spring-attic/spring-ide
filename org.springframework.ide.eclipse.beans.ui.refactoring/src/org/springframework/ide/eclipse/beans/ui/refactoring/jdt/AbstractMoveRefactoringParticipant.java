@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.refactoring.jdt;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,16 +36,15 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
  * 
  * @author Christian Dupuis
  */
-public abstract class AbstractMoveRefactoringParticipant extends
-		MoveParticipant implements ISharableParticipant {
+public abstract class AbstractMoveRefactoringParticipant extends MoveParticipant implements ISharableParticipant {
 
 	protected IProject project;
 
 	protected List<Object> elements;
 
 	@Override
-	public RefactoringStatus checkConditions(IProgressMonitor pm,
-			CheckConditionsContext context) throws OperationCanceledException {
+	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context)
+			throws OperationCanceledException {
 		return new RefactoringStatus();
 	}
 
@@ -53,20 +53,27 @@ public abstract class AbstractMoveRefactoringParticipant extends
 	}
 
 	@Override
-	public Change createChange(IProgressMonitor pm) throws CoreException,
-			OperationCanceledException {
+	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		if (!getArguments().getUpdateReferences()) {
 			return null;
 		}
+		Set<IResource> processedResources = new HashSet<IResource>();
+
 		CompositeChange result = new CompositeChange(getName());
 		Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
 		for (IBeansProject beansProject : projects) {
 			Set<IBeansConfig> beansConfigs = beansProject.getConfigs();
 			for (IBeansConfig beansConfig : beansConfigs) {
-				addChange(result, beansConfig.getElementResource(), pm);
+				if (!processedResources.contains(beansConfig.getElementResource())) {
+					addChange(result, beansConfig.getElementResource(), pm);
+					processedResources.add(beansConfig.getElementResource());
+				}
 				for (IBeansImport import_ : beansConfig.getImports()) {
 					for (IBeansConfig config : import_.getImportedBeansConfigs()) {
-						addChange(result, config.getElementResource(), pm);
+						if (!processedResources.contains(config.getElementResource())) {
+							addChange(result, config.getElementResource(), pm);
+							processedResources.add(config.getElementResource());
+						}
 					}
 				}
 			}
@@ -74,6 +81,6 @@ public abstract class AbstractMoveRefactoringParticipant extends
 		return (result.getChildren().length == 0) ? null : result;
 	}
 
-	protected abstract void addChange(CompositeChange result,
-			IResource resource, IProgressMonitor pm) throws CoreException;
+	protected abstract void addChange(CompositeChange result, IResource resource, IProgressMonitor pm)
+			throws CoreException;
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.refactoring.jdt;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -57,15 +58,23 @@ public abstract class AbstractRenameRefactoringParticipant extends RenamePartici
 		if (!getArguments().getUpdateReferences()) {
 			return null;
 		}
+		Set<IResource> processedResources = new HashSet<IResource>();
+
 		CompositeChange result = new CompositeChange(getName());
 		Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
 		for (IBeansProject beansProject : projects) {
 			Set<IBeansConfig> beansConfigs = beansProject.getConfigs();
 			for (IBeansConfig beansConfig : beansConfigs) {
-				addChange(result, beansConfig.getElementResource(), pm);
+				if (!processedResources.contains(beansConfig.getElementResource())) {
+					addChange(result, beansConfig.getElementResource(), pm);
+					processedResources.add(beansConfig.getElementResource());
+				}
 				for (IBeansImport import_ : beansConfig.getImports()) {
 					for (IBeansConfig config : import_.getImportedBeansConfigs()) {
-						addChange(result, config.getElementResource(), pm);
+						if (!processedResources.contains(config.getElementResource())) {
+							addChange(result, config.getElementResource(), pm);
+							processedResources.add(config.getElementResource());
+						}
 					}
 				}
 			}
