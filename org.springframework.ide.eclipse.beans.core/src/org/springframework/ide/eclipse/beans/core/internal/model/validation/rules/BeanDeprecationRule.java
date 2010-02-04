@@ -111,7 +111,7 @@ public class BeanDeprecationRule extends AbstractNonInfrastructureBeanValidation
 				if (method != null && Flags.isDeprecated(method.getFlags())) {
 					context.warning(bean, "METHOD_IS_DEPRECATED", "Method '" + method.getElementName()
 							+ "' is marked deprecated", new ValidationProblemAttribute("CLASS", type
-							.getFullyQualifiedName()), new ValidationProblemAttribute("METHOD", methodName));
+							.getFullyQualifiedName()), new ValidationProblemAttribute("METHOD_OBJ", method));
 				}
 			}
 			catch (JavaModelException e) {
