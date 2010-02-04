@@ -50,6 +50,14 @@ public class NamespaceUtils {
 
 	public static final String DEFAULT_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
+	private static Set<NamespaceHandlerResolver> namespaceHandlerResolvers;
+
+	private static Map<String, IModelElementProvider> modelElementProviders;
+
+	private static Set<EntityResolver> entityResolvers;
+
+	private static Map<NamespaceHandlerDescriptor, NamespaceHandler> namespaceHandlers;
+
 	/**
 	 * Returns the namespace URI for the given {@link BeanMetadataElement} or
 	 * <code>"http://www.springframework.org/schema/beans"</code> if no namespace URI found.
@@ -68,38 +76,18 @@ public class NamespaceUtils {
 	/**
 	 * Returns a {@link Map} with all registered {@link NamespaceHandler}s.
 	 */
-	public static Map<NamespaceHandlerDescriptor, NamespaceHandler> getNamespaceHandlers() {
-		Map<NamespaceHandlerDescriptor, NamespaceHandler> handlers = new HashMap<NamespaceHandlerDescriptor, NamespaceHandler>();
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
-		if (point != null) {
-			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension.getConfigurationElements()) {
-					String uri = config.getAttribute("uri");
-					if (uri != null && config.getAttribute("namespaceHandler") != null) {
-						try {
-							String handlerClassName = config.getAttribute("class");
-							String provider = config.getAttribute("provider");
-							if (!StringUtils.hasLength(provider)) {
-								provider = extension.getContributor().getName();
-							}
-							Object handler = loadHandler(provider, handlerClassName);
-							if (handler instanceof NamespaceHandler) {
-								NamespaceHandler namespaceHandler = (NamespaceHandler) handler;
-								namespaceHandler.init();
-								handlers.put(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(uri, null),
-										namespaceHandler);
-							}
-						}
-						catch (InvalidRegistryObjectException e) {
-							BeansCorePlugin.log(e);
-						}
-					}
-					for (IConfigurationElement namespaceHandlerConfig : config.getChildren("namespaceHandler")) {
-						if (uri != null && namespaceHandlerConfig.getAttribute("class") != null) {
+	public synchronized static Map<NamespaceHandlerDescriptor, NamespaceHandler> getNamespaceHandlers() {
+		if (namespaceHandlers == null) {
+			Map<NamespaceHandlerDescriptor, NamespaceHandler> handlers = new HashMap<NamespaceHandlerDescriptor, NamespaceHandler>();
+			IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
+			if (point != null) {
+				for (IExtension extension : point.getExtensions()) {
+					for (IConfigurationElement config : extension.getConfigurationElements()) {
+						String uri = config.getAttribute("uri");
+						if (uri != null && config.getAttribute("namespaceHandler") != null) {
 							try {
-								String schemaLocation = namespaceHandlerConfig.getAttribute("schemaLocation");
-								String handlerClassName = namespaceHandlerConfig.getAttribute("class");
-								String provider = namespaceHandlerConfig.getAttribute("provider");
+								String handlerClassName = config.getAttribute("class");
+								String provider = config.getAttribute("provider");
 								if (!StringUtils.hasLength(provider)) {
 									provider = extension.getContributor().getName();
 								}
@@ -107,8 +95,93 @@ public class NamespaceUtils {
 								if (handler instanceof NamespaceHandler) {
 									NamespaceHandler namespaceHandler = (NamespaceHandler) handler;
 									namespaceHandler.init();
-									handlers.put(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(uri,
-											schemaLocation), namespaceHandler);
+									handlers.put(
+											NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(uri, null),
+											namespaceHandler);
+								}
+							}
+							catch (InvalidRegistryObjectException e) {
+								BeansCorePlugin.log(e);
+							}
+						}
+						for (IConfigurationElement namespaceHandlerConfig : config.getChildren("namespaceHandler")) {
+							if (uri != null && namespaceHandlerConfig.getAttribute("class") != null) {
+								try {
+									String schemaLocation = namespaceHandlerConfig.getAttribute("schemaLocation");
+									String handlerClassName = namespaceHandlerConfig.getAttribute("class");
+									String provider = namespaceHandlerConfig.getAttribute("provider");
+									if (!StringUtils.hasLength(provider)) {
+										provider = extension.getContributor().getName();
+									}
+									Object handler = loadHandler(provider, handlerClassName);
+									if (handler instanceof NamespaceHandler) {
+										NamespaceHandler namespaceHandler = (NamespaceHandler) handler;
+										namespaceHandler.init();
+										handlers.put(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(uri,
+												schemaLocation), namespaceHandler);
+									}
+								}
+								catch (InvalidRegistryObjectException e) {
+									BeansCorePlugin.log(e);
+								}
+							}
+						}
+					}
+				}
+			}
+			namespaceHandlers = handlers;
+		}
+		return namespaceHandlers;
+	}
+
+	/**
+	 * Returns a {@link Map} with all registered {@link IModelElementProvider}s.
+	 */
+	public synchronized static Map<String, IModelElementProvider> getElementProviders() {
+		if (modelElementProviders == null) {
+			Map<String, IModelElementProvider> providers = new HashMap<String, IModelElementProvider>();
+			IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
+			if (point != null) {
+				for (IExtension extension : point.getExtensions()) {
+					for (IConfigurationElement config : extension.getConfigurationElements()) {
+						String uri = config.getAttribute("uri");
+						if (uri != null && config.getAttribute("elementProvider") != null) {
+							try {
+								Object provider = config.createExecutableExtension("elementProvider");
+								if (provider instanceof IModelElementProvider) {
+									providers.put(uri, (IModelElementProvider) provider);
+								}
+							}
+							catch (CoreException e) {
+								BeansCorePlugin.log(e);
+							}
+						}
+					}
+				}
+			}
+			modelElementProviders = providers;
+		}
+		return modelElementProviders;
+	}
+
+	/**
+	 * Returns a {@link Set} with all registered {@link NamespaceHandlerResolver}s.
+	 * @since 2.0.1
+	 */
+	public synchronized static Set<NamespaceHandlerResolver> getNamespaceHandlerResolvers() {
+		if (namespaceHandlerResolvers == null) {
+			Set<NamespaceHandlerResolver> handlers = new HashSet<NamespaceHandlerResolver>();
+			IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(RESOLVERS_EXTENSION_POINT);
+			if (point != null) {
+				for (IExtension extension : point.getExtensions()) {
+					for (IConfigurationElement config : extension.getConfigurationElements()) {
+						if ("namespaceHandlerResolver".equals(config.getName()) && config.getAttribute("class") != null) {
+							try {
+								String handlerClassName = config.getAttribute("class");
+								Object handler = loadHandler(handlerClassName, extension.getContributor().getName());
+								if (handler instanceof NamespaceHandlerResolver) {
+									NamespaceHandlerResolver namespaceHandlerResolver = (NamespaceHandlerResolver) handler;
+									handlers.add(namespaceHandlerResolver);
 								}
 							}
 							catch (InvalidRegistryObjectException e) {
@@ -118,107 +191,55 @@ public class NamespaceUtils {
 					}
 				}
 			}
+			// Add the OSGi-based namespace handler resolver
+			handlers.add(BeansCorePlugin.getNamespaceDefinitionResolver());
+			namespaceHandlerResolvers = handlers;
 		}
-		return handlers;
-	}
-
-	/**
-	 * Returns a {@link Map} with all registered {@link IModelElementProvider}s.
-	 */
-	public static Map<String, IModelElementProvider> getElementProviders() {
-		Map<String, IModelElementProvider> providers = new HashMap<String, IModelElementProvider>();
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
-		if (point != null) {
-			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension.getConfigurationElements()) {
-					String uri = config.getAttribute("uri");
-					if (uri != null && config.getAttribute("elementProvider") != null) {
-						try {
-							Object provider = config.createExecutableExtension("elementProvider");
-							if (provider instanceof IModelElementProvider) {
-								providers.put(uri, (IModelElementProvider) provider);
-							}
-						}
-						catch (CoreException e) {
-							BeansCorePlugin.log(e);
-						}
-					}
-				}
-			}
-		}
-		return providers;
-	}
-
-	/**
-	 * Returns a {@link Set} with all registered {@link NamespaceHandlerResolver}s.
-	 * @since 2.0.1
-	 */
-	public static Set<NamespaceHandlerResolver> getNamespaceHandlerResolvers() {
-		Set<NamespaceHandlerResolver> handlers = new HashSet<NamespaceHandlerResolver>();
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(RESOLVERS_EXTENSION_POINT);
-		if (point != null) {
-			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension.getConfigurationElements()) {
-					if ("namespaceHandlerResolver".equals(config.getName()) && config.getAttribute("class") != null) {
-						try {
-							String handlerClassName = config.getAttribute("class");
-							Object handler = loadHandler(handlerClassName, extension.getContributor().getName());
-							if (handler instanceof NamespaceHandlerResolver) {
-								NamespaceHandlerResolver namespaceHandlerResolver = (NamespaceHandlerResolver) handler;
-								handlers.add(namespaceHandlerResolver);
-							}
-						}
-						catch (InvalidRegistryObjectException e) {
-							BeansCorePlugin.log(e);
-						}
-					}
-				}
-			}
-		}
-		// Add the OSGi-based namespace handler resolver
-		handlers.add(BeansCorePlugin.getNamespaceDefinitionResolver());
-		return handlers;
+		return namespaceHandlerResolvers;
 	}
 
 	/**
 	 * Returns a {@link Set} with all registered {@link EntityResolver}s.
 	 * @since 2.0.1
 	 */
-	public static Set<EntityResolver> getEntityResolvers() {
-		Set<EntityResolver> handlers = new HashSet<EntityResolver>();
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(RESOLVERS_EXTENSION_POINT);
-		if (point != null) {
-			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension.getConfigurationElements()) {
-					if ("entityResolver".equals(config.getName()) && config.getAttribute("class") != null) {
-						try {
-							Object handler = config.createExecutableExtension("class");
-							if (handler instanceof EntityResolver) {
-								EntityResolver entityResolver = (EntityResolver) handler;
-								handlers.add(entityResolver);
+	public synchronized static Set<EntityResolver> getEntityResolvers() {
+		if (entityResolvers == null) {
+			Set<EntityResolver> handlers = new HashSet<EntityResolver>();
+			IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(RESOLVERS_EXTENSION_POINT);
+			if (point != null) {
+				for (IExtension extension : point.getExtensions()) {
+					for (IConfigurationElement config : extension.getConfigurationElements()) {
+						if ("entityResolver".equals(config.getName()) && config.getAttribute("class") != null) {
+							try {
+								Object handler = config.createExecutableExtension("class");
+								if (handler instanceof EntityResolver) {
+									EntityResolver entityResolver = (EntityResolver) handler;
+									handlers.add(entityResolver);
+								}
 							}
-						}
-						catch (CoreException e) {
-							BeansCorePlugin.log(e);
+							catch (CoreException e) {
+								BeansCorePlugin.log(e);
+							}
 						}
 					}
 				}
 			}
+			entityResolvers = handlers;
 		}
-		return handlers;
+		return entityResolvers;
 	}
 
 	private static Object loadHandler(String providerBundle, String handlerClassName) {
 		Bundle bundle = Platform.getBundle(providerBundle);
 		if (bundle != null) {
-			Class<?> handlerClass;
 			try {
-				handlerClass = bundle.loadClass(handlerClassName);
+				Class<?> handlerClass = bundle.loadClass(handlerClassName);
 				return BeanUtils.instantiate(handlerClass);
 			}
 			catch (ClassNotFoundException e) {
 				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, 1, String.format(
-						"Problem loading handler with class '%s' from bundle '%s'", handlerClassName, providerBundle), e));
+						"Problem loading handler with class '%s' from bundle '%s'", handlerClassName, providerBundle),
+						e));
 			}
 		}
 		else {

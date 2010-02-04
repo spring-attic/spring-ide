@@ -103,13 +103,10 @@ public abstract class AbstractXmlValidationRule implements IValidationRule<IBean
 		if (!(context instanceof BeansValidationContext)) {
 			return;
 		}
-
+		
 		IStructuredModel model = null;
 		try {
-			model = StructuredModelManager.getModelManager().getExistingModelForRead(element.getElementResource());
-			if (model == null) {
-				model = StructuredModelManager.getModelManager().getModelForRead((IFile) element.getElementResource());
-			}
+			model = StructuredModelManager.getModelManager().getModelForRead((IFile) element.getElementResource());
 			if (model != null) {
 				Document document = ((DOMModelImpl) model).getDocument();
 				if (document != null && document.getDocumentElement() != null) {

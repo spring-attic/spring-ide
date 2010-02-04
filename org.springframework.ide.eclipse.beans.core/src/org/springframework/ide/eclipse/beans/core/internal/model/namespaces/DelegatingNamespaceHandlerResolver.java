@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,7 +42,7 @@ import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils.Name
 public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerResolver {
 
 	private static final SchemaLocations EMPTY_SCHEMA_LOCATIONS = new SchemaLocations();
-	
+
 	private NamespaceHandler toolAnnotationNamespaceHandler;
 
 	private final Map<NamespaceHandlerDescriptor, NamespaceHandler> namespaceHandlers;
@@ -50,10 +51,12 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 
 	private final DocumentAccessor documentAccessor;
 
+	private final Map<String, NamespaceHandler> resolvedNamespaceHandlers = new HashMap<String, NamespaceHandler>();
+
 	public DelegatingNamespaceHandlerResolver(ClassLoader classLoader, IBeansConfig beansConfig) {
 		this(classLoader, beansConfig, null);
 	}
-	
+
 	public DelegatingNamespaceHandlerResolver(ClassLoader classLoader, IBeansConfig beansConfig,
 			DocumentAccessor documentHolder) {
 		super(classLoader);
@@ -67,52 +70,67 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 
 	@Override
 	public NamespaceHandler resolve(String namespaceUri) {
-
-		// First check for a namespace handler provided by Spring.
-		NamespaceHandler namespaceHandler = super.resolve(namespaceUri);
-
-		if (namespaceHandler != null) {
-			return namespaceHandler;
+		// Check cache first
+		if (resolvedNamespaceHandlers.containsKey(namespaceUri)) {
+			return resolvedNamespaceHandlers.get(namespaceUri);
 		}
 
-		SchemaLocations schemaLocations = EMPTY_SCHEMA_LOCATIONS;
-		if (documentAccessor != null) {
-			schemaLocations = documentAccessor.getCurrentSchemaLocations();
-		}
+		NamespaceHandler namespaceHandler = null;
 
-		// Then check for a namespace handler contributed for the specific schemalocation
-		String schemaLocation = schemaLocations.getSchemaLocation(namespaceUri);
-		if (schemaLocation != null) {
-			namespaceHandler = namespaceHandlers.get(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(
-					namespaceUri, schemaLocation));
+		try {
+			// First check for a namespace handler provided by Spring.
+			namespaceHandler = super.resolve(namespaceUri);
+
 			if (namespaceHandler != null) {
 				return namespaceHandler;
 			}
-		}
 
-		// Then check for a namespace handler provided by an extension.
-		namespaceHandler = namespaceHandlers.get(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(
-				namespaceUri, null));
-		if (namespaceHandler != null) {
-			return namespaceHandler;
-		}
+			SchemaLocations schemaLocations = EMPTY_SCHEMA_LOCATIONS;
+			if (documentAccessor != null) {
+				schemaLocations = documentAccessor.getCurrentSchemaLocations();
+			}
 
-		// Then check the contributed NamespaceHandlerResolver.
-		for (NamespaceHandlerResolver resolver : namespaceHandlerResolvers) {
-			try {
-				namespaceHandler = resolver.resolve(namespaceUri);
+			// Then check for a namespace handler contributed for the specific schemalocation
+			String schemaLocation = schemaLocations.getSchemaLocation(namespaceUri);
+			if (schemaLocation != null) {
+				namespaceHandler = namespaceHandlers.get(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(
+						namespaceUri, schemaLocation));
 				if (namespaceHandler != null) {
 					return namespaceHandler;
 				}
 			}
-			catch (Exception e) {
-				// Make sure a contributed NamespaceHandlerResolver can't prevent parsing.
-				BeansCorePlugin.log(e);
+
+			// Then check for a namespace handler provided by an extension.
+			namespaceHandler = namespaceHandlers.get(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(
+					namespaceUri, null));
+			if (namespaceHandler != null) {
+				return namespaceHandler;
+			}
+
+			// Then check the contributed NamespaceHandlerResolver.
+			for (NamespaceHandlerResolver resolver : namespaceHandlerResolvers) {
+				try {
+					namespaceHandler = resolver.resolve(namespaceUri);
+					if (namespaceHandler != null) {
+						return namespaceHandler;
+					}
+				}
+				catch (Exception e) {
+					// Make sure a contributed NamespaceHandlerResolver can't prevent parsing.
+					BeansCorePlugin.log(e);
+				}
+			}
+
+			// Finally fall back to the tool annotation based namespace handler.
+			return toolAnnotationNamespaceHandler;
+		}
+		finally {
+			
+			// Add to cache for subsequent faster access
+			if (namespaceHandler != null) {
+				resolvedNamespaceHandlers.put(namespaceUri, namespaceHandler);
 			}
 		}
-
-		// Finally fall back to the tool annotation based namespace handler.
-		return toolAnnotationNamespaceHandler;
 	}
-	
+
 }
