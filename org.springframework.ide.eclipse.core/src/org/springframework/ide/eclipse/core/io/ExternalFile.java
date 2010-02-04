@@ -484,6 +484,26 @@ public class ExternalFile extends AbstractResource implements IFile {
 	public File getFile() throws IOException {
 		return file;
 	}
+	
+	public boolean isHidden(int options) {
+		return false;
+	}
+
+	public boolean isTeamPrivateMember(int options) {
+		return false;
+	}
+
+	public boolean hasFilters() {
+		return false;
+	}
+
+	public boolean isVirtual() {
+		return true;
+	}
+
+	public void setDerived(boolean arg0, IProgressMonitor arg1) throws CoreException {
+	}
+
 
 	class ExternalMarker implements IMarker {
 
@@ -583,15 +603,4 @@ public class ExternalFile extends AbstractResource implements IFile {
 		}
 
 	}
-
-	public boolean isHidden(int options) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public boolean isTeamPrivateMember(int options) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }
