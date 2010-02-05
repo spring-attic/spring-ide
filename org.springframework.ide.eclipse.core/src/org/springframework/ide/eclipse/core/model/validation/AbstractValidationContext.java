@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.model.validation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,6 +77,13 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	/**
 	 * {@inheritDoc}
 	 */
+	public <T> T get(Class<T> clazz, String filterText) {
+		return contributorState.get(clazz, filterText);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public IResourceModelElement getContextElement() {
 		return contextElement;
 	}
@@ -99,6 +107,13 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	 */
 	public boolean hold(Object obj) {
 		return contributorState.hold(obj);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean hold(Object obj, Dictionary<String, String> attributes) {
+		return contributorState.hold(obj, attributes);
 	}
 
 	/**

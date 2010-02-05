@@ -54,7 +54,7 @@ import org.w3c.dom.NodeList;
  * @since 2.0
  */
 public class BeansValidationContext extends AbstractValidationContext implements IBeansValidationContext {
- 
+	
 	private static final char KEY_SEPARATOR_CHAR = '/';
 
 	private BeanDefinitionRegistry incompleteRegistry;
