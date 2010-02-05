@@ -14,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -33,6 +35,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link INewWizard} implementation that creates a new {@link IBeansConfig} instance.
@@ -98,8 +101,21 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 		// create the new Spring project operation
 		mainPage.setXmlSchemaDefinitions(xsdPage.getXmlSchemaDefinitions());
 		mainPage.setSchemaVersions(xsdPage.getSchemaVersions());
-		final IFile file = mainPage.createNewFile();
 
+		// append file extension
+		if (!StringUtils.hasText(mainPage.getFileExtension())) {
+			IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(mainPage.getContainerFullPath());
+			mainPage.setFileExtension("xml");
+			BeansProject beansProject = getProject(resource);
+			if (beansProject != null) {
+				Set<String> suffixes = beansProject.getConfigSuffixes();
+				if (!suffixes.isEmpty()) {
+					mainPage.setFileExtension(suffixes.iterator().next());
+				}
+			}
+		}
+
+		final IFile file = mainPage.createNewFile();
 		BeansProject beansProject = getProject(file);
 
 		if (beansProject == null) {
@@ -142,7 +158,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 		}
 	}
 
-	private BeansProject getProject(IFile file) {
+	private BeansProject getProject(IResource file) {
 		return (BeansProject) BeansCorePlugin.getModel().getProject(file.getProject());
 	}
 }

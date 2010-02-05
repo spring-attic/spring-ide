@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowProjec
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.Activator;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Christian Dupuis
@@ -91,6 +92,11 @@ public class NewWebflowConfigWizard extends Wizard implements INewWizard {
 
 	private void createNewConfig() {
 
+		// append file extension
+		if (!StringUtils.hasText(mainPage.getFileExtension())) {
+			mainPage.setFileExtension("xml");
+		}
+		
 		// create the new Spring project operation
 		final IFile file = mainPage.createNewFile();
 		newConfig = new WebflowConfig(getProject(file));
