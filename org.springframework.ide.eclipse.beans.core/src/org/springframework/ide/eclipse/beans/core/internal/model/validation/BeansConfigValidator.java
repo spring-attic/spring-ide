@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
-import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -44,8 +43,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManager;
 import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManagerExtension;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
-import org.springframework.ide.eclipse.core.project.CollectionState;
-import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 
 /**
  * {@link IValidator} implementation that is responsible for validating the {@link IBeansModelElement}s.
@@ -54,11 +51,6 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorState;
  * @since 2.0
  */
 public class BeansConfigValidator extends AbstractValidator {
-
-	private static final String COLLECTION_STATE_FILTER = CollectionState.getFilter(IBeansConfig.class);
-
-	private static final Dictionary<String, String> COLLECTION_STATE_ATTRIBUTES = CollectionState
-			.getAttributes(IBeansConfig.class);
 
 	private Set<String> affectedBeans = new LinkedHashSet<String>();
 
@@ -158,26 +150,7 @@ public class BeansConfigValidator extends AbstractValidator {
 				}
 			}
 		}
-		
-		// Register reloaded configs so that downstream parties can use this knowledge
-		registerAffectedResources(resources);
-
 		return resources;
-	}
-
-	/**
-	 * Registers affected resources in the {@link IProjectContributorState}.
-	 */
-	@SuppressWarnings("unchecked")
-	private void registerAffectedResources(Set<IResource> resources) {
-		CollectionState<IResource> resourceState = getProjectContributorState().get(CollectionState.class,
-				COLLECTION_STATE_FILTER);
-		if (resourceState == null) {
-			getProjectContributorState().hold(new CollectionState<IResource>(resources), COLLECTION_STATE_ATTRIBUTES);
-		}
-		else {
-			resourceState.get().addAll(resources);
-		}
 	}
 
 	/**

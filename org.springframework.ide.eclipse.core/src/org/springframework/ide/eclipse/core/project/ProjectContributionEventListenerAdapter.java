@@ -56,7 +56,6 @@ public class ProjectContributionEventListenerAdapter implements IProjectContribu
 	/**
 	 * {@inheritDoc}
 	 */
-
 	public void finishContributor(IProjectContributor contributor, Set<IResource> affectedResources,
 			IProgressMonitor monitor) {
 		finishContributor(contributor, affectedResources);

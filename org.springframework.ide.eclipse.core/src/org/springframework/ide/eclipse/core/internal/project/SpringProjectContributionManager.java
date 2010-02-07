@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,7 +177,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 	 */
 	private void runBuilder(final ProjectBuilderDefinition builderDefinition, final Set<IResource> affectedResources,
 			final int kind, IProgressMonitor monitor, final List<IProjectContributionEventListener> listeners) {
-
+		
 		for (final IProjectContributionEventListener listener : listeners) {
 
 			execute(new SafeExecutableWithMonitor() {
@@ -196,6 +196,16 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 		}, monitor);
 
+		for (final IProjectContributionEventListener listener : listeners) {
+			
+			execute(new SafeExecutableWithMonitor() {
+				
+				public void execute(IProgressMonitor subMonitor) throws Exception {
+					listener.finishContributor(builderDefinition.getProjectBuilder(), affectedResources, subMonitor);
+				}
+			}, monitor);
+			
+		}
 	}
 
 	/**
@@ -222,6 +232,16 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 		}, monitor);
 
+		for (final IProjectContributionEventListener listener : listeners) {
+			
+			execute(new SafeExecutableWithMonitor() {
+				
+				public void execute(IProgressMonitor subMonitor) throws Exception {
+					listener.finishContributor(validatorDefinition.getValidator(), affectedResources, subMonitor);
+				}
+			}, monitor);
+			
+		}
 	}
 
 	protected IProgressMonitor createProgressMonitor(IProgressMonitor monitor) {
