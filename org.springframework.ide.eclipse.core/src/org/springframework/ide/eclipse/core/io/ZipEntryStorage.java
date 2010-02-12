@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,8 +37,7 @@ import org.springframework.util.ObjectUtils;
 public class ZipEntryStorage implements IStorage, IAdaptable {
 
 	/**
-	 * This string (with the value of "!") is used to delimit the ZIP file name from the
-	 * corresponding ZIP entry
+	 * This string (with the value of "!") is used to delimit the ZIP file name from the corresponding ZIP entry
 	 */
 	public static final String DELIMITER = "!";
 
@@ -52,12 +52,12 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	private IResourceModelElement parentModelElement;
 
 	/**
-	 * Creates a <code>ZipEntryStorage</code> from a full-qualified name of a ZIP file entry
-	 * (project-relative path to the ZIP file plus full path of the ZIP file entry delimited by
-	 * <code>DELIMITER</code>) and the project which contains the ZIP file.
+	 * Creates a <code>ZipEntryStorage</code> from a full-qualified name of a ZIP file entry (project-relative path to
+	 * the ZIP file plus full path of the ZIP file entry delimited by <code>DELIMITER</code>) and the project which
+	 * contains the ZIP file.
 	 * @param project the project which contains the ZIP file
-	 * @param fullName the full-qualified name of the ZIP file entry (project-relative path to the
-	 * ZIP file plus full path of the ZIP file entry delimited by <code>DELIMITER</code>)
+	 * @param fullName the full-qualified name of the ZIP file entry (project-relative path to the ZIP file plus full
+	 * path of the ZIP file entry delimited by <code>DELIMITER</code>)
 	 */
 	public ZipEntryStorage(IProject project, String fullName) {
 		int pos = fullName.indexOf(ZipEntryStorage.DELIMITER);
@@ -77,8 +77,7 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	}
 
 	/**
-	 * Creates a <code>ZipEntryStorage</code> from a full path of a ZIP file entry and the
-	 * corresponding ZIP file.
+	 * Creates a <code>ZipEntryStorage</code> from a full path of a ZIP file entry and the corresponding ZIP file.
 	 * @param file the ZIP file
 	 * @param entryName the full path of the ZIP file entry
 	 */
@@ -97,8 +96,7 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	 * @param element the archived model element
 	 */
 	public ZipEntryStorage(IResourceModelElement element) {
-		if (element == null || !element.isElementArchived()
-				|| !(element.getElementResource() instanceof IFile)) {
+		if (element == null || !element.isElementArchived() || !(element.getElementResource() instanceof IFile)) {
 			throw new IllegalArgumentException("Missing or wrong model element: " + element);
 		}
 		this.fullName = element.getElementName();
@@ -124,10 +122,16 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 			}
 			ZipEntry entry = file.getEntry(cleanedEntryName);
 			if (entry == null) {
-				throw new CoreException(SpringCore.createErrorStatus("Invalid path '"
-						+ cleanedEntryName + "'", null));
+				throw new CoreException(SpringCore.createErrorStatus("Invalid path '" + cleanedEntryName + "'", null));
 			}
-			return file.getInputStream(entry);
+
+			InputStream is = file.getInputStream(entry);
+			byte[] bytes = new byte[is.available()];
+			is.read(bytes);
+			is.close();
+			file.close();
+
+			return new ByteArrayInputStream(bytes);
 		}
 		catch (IOException e) {
 			throw new CoreException(SpringCore.createErrorStatus(e.getMessage(), e));
@@ -146,8 +150,8 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	}
 
 	/**
-	 * Returns the full-qualified name of the ZIP file entry (project-relative path to the ZIP file
-	 * plus full path of the ZIP file entry delimited by <code>DELIMITER</code>).
+	 * Returns the full-qualified name of the ZIP file entry (project-relative path to the ZIP file plus full path of
+	 * the ZIP file entry delimited by <code>DELIMITER</code>).
 	 */
 	public String getFullName() {
 		return fullName;
@@ -162,8 +166,8 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 	}
 
 	/**
-	 * Returns the full-qualified name of the ZIP file entry (workspace-relative path to the ZIP
-	 * file plus full path of the ZIP file entry delimited by <code>DELIMITER</code>).
+	 * Returns the full-qualified name of the ZIP file entry (workspace-relative path to the ZIP file plus full path of
+	 * the ZIP file entry delimited by <code>DELIMITER</code>).
 	 */
 	public String getAbsoluteName() {
 		return file.getProject().getFullPath().append(fullName).toString();

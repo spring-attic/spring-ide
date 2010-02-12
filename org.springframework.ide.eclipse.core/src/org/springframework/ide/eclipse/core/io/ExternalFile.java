@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,7 +134,14 @@ public class ExternalFile extends AbstractResource implements IFile {
 			if (entry == null) {
 				throw new CoreException(SpringCore.createErrorStatus("Invalid path '" + cleanedEntryName + "'", null));
 			}
-			return file.getInputStream(entry);
+			
+			InputStream is = file.getInputStream(entry);
+			byte[] bytes = new byte[is.available()];
+			is.read(bytes);
+			is.close();
+			file.close();
+			
+			return new ByteArrayInputStream(bytes); 
 		}
 		catch (IOException e) {
 			throw new CoreException(SpringCore.createErrorStatus(e.getMessage(), e));
