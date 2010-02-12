@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,6 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -211,7 +210,7 @@ public class BeansActiveFoldingListener extends AbstractContextListener {
 			IFileEditorInput editorInput = (IFileEditorInput) editor.getEditorInput();
 			IFile file = editorInput.getFile();
 
-			if (file != null && BeansCoreUtils.isBeansConfig(file)) {
+			if (file != null && BeansContextStructureBridge.isBeansConfig(file)) {
 
 				final IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(file);
 

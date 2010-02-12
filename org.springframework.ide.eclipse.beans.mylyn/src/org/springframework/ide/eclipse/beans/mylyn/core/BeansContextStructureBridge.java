@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.mylyn.context.core.AbstractContextStructureBridge;
 import org.eclipse.mylyn.context.core.ContextCore;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.internal.resources.ui.ResourceStructureBridge;
+import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
@@ -30,15 +30,16 @@ import org.springframework.ide.eclipse.beans.core.model.metadata.IClassMetadata;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 
 /**
- * {@link AbstractContextStructureBridge} extension that integrates the {@link IBeansModel} with
- * Mylyn.
+ * {@link AbstractContextStructureBridge} extension that integrates the {@link IBeansModel} with Mylyn.
  * @author Christian Dupuis
  * @since 2.0
  */
+@SuppressWarnings("restriction")
 public class BeansContextStructureBridge extends AbstractContextStructureBridge {
 
 	public static final String CONTENT_TYPE = "spring/beans";
@@ -46,10 +47,9 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 	@Override
 	public boolean acceptsObject(Object object) {
 		return object instanceof IModelElement
-				|| (object instanceof IResource && BeansCoreUtils.isBeansConfig((IResource) object))
 				// Make this bridge aware of meta data contributions
 				|| object instanceof BeanMetadataNode || object instanceof BeanMetadataReference
-				|| object instanceof IBeanMetadata;
+				|| object instanceof IBeanMetadata || (object instanceof IFile && isBeansConfig((IFile) object));
 	}
 
 	@Override
@@ -62,17 +62,18 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 		if (obj instanceof IModelElement) {
 			IModelElement modelElement = (IModelElement) obj;
 
-			IModelElement[] children = modelElement.getElementChildren();
-			for (IModelElement child : children) {
-				IInteractionElement node = ContextCore.getContextManager().getElement(
-						getHandleIdentifier(child));
-				if (node != null && node.getInterest().isInteresting()) {
-					return false;
-				}
-				if (!canFilter(child)) {
-					return false;
-				}
-			}
+			// not necessary, context propagation will make all parent elements interesting
+			// IModelElement[] children = modelElement.getElementChildren();
+			// for (IModelElement child : children) {
+			// IInteractionElement node = ContextCore.getContextManager().getElement(
+			// getHandleIdentifier(child));
+			// if (node != null && node.getInterest().isInteresting()) {
+			// return false;
+			// }
+			// if (!canFilter(child)) {
+			// return false;
+			// }
+			// }
 
 			if (modelElement instanceof ISpringProject) {
 				IBeansProject beansProject = BeansModelUtils.getProject(modelElement);
@@ -82,15 +83,13 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 				return true;
 			}
 
-			IInteractionElement node = ContextCore.getContextManager().getElement(
-					getHandleIdentifier(obj));
+			IInteractionElement node = ContextCore.getContextManager().getElement(getHandleIdentifier(obj));
 			if (node != null && node.getInterest().isInteresting()) {
 				return false;
 			}
 		}
-		else if ((obj instanceof IResource && BeansCoreUtils.isBeansConfig((IResource) obj))) {
-			IInteractionElement node = ContextCore.getContextManager().getElement(
-					getHandleIdentifier(obj));
+		else if ((obj instanceof IFile && isBeansConfig((IFile) obj))) {
+			IInteractionElement node = ContextCore.getContextManager().getElement(getHandleIdentifier(obj));
 			if (node != null && node.getInterest().isInteresting()) {
 				return false;
 			}
@@ -135,8 +134,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 			}
 		}
 
-		AbstractContextStructureBridge parentBridge = ContextCore
-				.getStructureBridge(parentContentType);
+		AbstractContextStructureBridge parentBridge = ContextCore.getStructureBridge(parentContentType);
 		if (parentBridge != null && !parentBridge.canFilter(obj)) {
 			return false;
 		}
@@ -175,15 +173,20 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 	}
 
 	@Override
+	public String getHandleForOffsetInObject(Object arg0, int arg1) {
+		return null;
+	}
+
+	@Override
 	public String getHandleIdentifier(Object obj) {
 		if (obj instanceof IModelElement) {
 			return ((IModelElement) obj).getElementID();
 		}
-		else if ((obj instanceof IResource && BeansCoreUtils.isBeansConfig((IResource) obj))) {
-			return BeansModelUtils.getResourceModelElement(obj).getElementID();
-		}
 		else if (obj instanceof IBeanMetadata) {
 			return ((IBeanMetadata) obj).getHandleIdentifier();
+		}
+		else if ((obj instanceof IFile && isBeansConfig((IFile) obj))) {
+			return BeansModelUtils.getResourceModelElement(obj).getElementID();
 		}
 		return null;
 	}
@@ -193,7 +196,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 		if (obj instanceof IModelElement) {
 			return ((IModelElement) obj).getElementName();
 		}
-		else if ((obj instanceof IResource && BeansCoreUtils.isBeansConfig((IResource) obj))) {
+		else if ((obj instanceof IFile && isBeansConfig((IFile) obj))) {
 			return BeansModelUtils.getResourceModelElement(obj).getElementName();
 		}
 		return null;
@@ -212,8 +215,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 				return obj;
 			}
 		}
-		AbstractContextStructureBridge parentBridge = ContextCore
-				.getStructureBridge(parentContentType);
+		AbstractContextStructureBridge parentBridge = ContextCore.getStructureBridge(parentContentType);
 		if (parentBridge != null) {
 			obj = parentBridge.getObjectForHandle(handle);
 		}
@@ -225,12 +227,10 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 	public String getParentHandle(String handle) {
 		Object obj = getObjectForHandle(handle);
 		if (obj instanceof IBeansProject) {
-			return SpringCore.getModel().getProject(((IBeansProject) obj).getProject())
-					.getElementID();
+			return SpringCore.getModel().getProject(((IBeansProject) obj).getProject()).getElementID();
 		}
 		else if (obj instanceof ISpringProject) {
-			AbstractContextStructureBridge parentBridge = ContextCore
-					.getStructureBridge(parentContentType);
+			AbstractContextStructureBridge parentBridge = ContextCore.getStructureBridge(parentContentType);
 			if (parentBridge != null && parentBridge instanceof ResourceStructureBridge) {
 				return parentBridge.getHandleIdentifier(((ISpringProject) obj).getProject());
 			}
@@ -242,8 +242,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 			}
 		}
 		else {
-			AbstractContextStructureBridge parentBridge = ContextCore
-					.getStructureBridge(parentContentType);
+			AbstractContextStructureBridge parentBridge = ContextCore.getStructureBridge(parentContentType);
 
 			if (parentBridge != null && parentBridge instanceof ResourceStructureBridge) {
 				return parentBridge.getParentHandle(handle);
@@ -261,9 +260,42 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 		return false;
 	}
 
-	@Override
-	public String getHandleForOffsetInObject(Object arg0, int arg1) {
+	public static boolean isBeansConfig(IFile configFile) {
+		return isBeansConfig(configFile, true);
+	}
+
+	private static IBeansConfig getBeansConfig(IFile configFile, IBeansProject project, boolean includeImports) {
+		for (String suffix : project.getConfigSuffixes()) {
+			if (configFile.getName().endsWith(suffix)) {
+				if (includeImports && Display.getCurrent() != null && project instanceof ILazyInitializedModelElement
+						&& !((ILazyInitializedModelElement) project).isInitialized()) {
+					// skip: it's too expensive to load the model on the UI thread
+					includeImports = false;
+				}
+				IBeansConfig bc = project.getConfig(configFile, includeImports);
+				if (bc != null) {
+					return bc;
+				}
+			}
+		}
 		return null;
+	}
+
+	private static boolean isBeansConfig(IFile configFile, boolean includeImports) {
+		IBeansProject project = BeansCorePlugin.getModel().getProject(configFile.getProject());
+		if (project != null) {
+			IBeansConfig bc = getBeansConfig(configFile, project, includeImports);
+			if (bc != null)
+				return true;
+		}
+
+		for (IBeansProject p : BeansCorePlugin.getModel().getProjects()) {
+			IBeansConfig bc = getBeansConfig(configFile, p, includeImports);
+			if (bc != null)
+				return true;
+		}
+
+		return false;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.mylyn.core.BeansContextStructureBridge;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.w3c.dom.Text;
 
@@ -47,7 +47,7 @@ public class BeansUserInteractionMonitor extends AbstractUserInteractionMonitor 
 			IEditorInput editorInput = textEditor.getEditorInput();
 			if (editorInput instanceof IFileEditorInput) {
 				IFile file = ((IFileEditorInput) editorInput).getFile();
-				if (BeansCoreUtils.isBeansConfig(file)) {
+				if (BeansContextStructureBridge.isBeansConfig(file)) {
 
 					int startLine = ((ITextSelection) selection).getStartLine() + 1;
 					int endLine = ((ITextSelection) selection).getEndLine() + 1;

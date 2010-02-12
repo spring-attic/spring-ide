@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,14 +13,14 @@ package org.springframework.ide.eclipse.beans.mylyn.ui;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.mylyn.monitor.ui.AbstractEditorTracker;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.mylyn.core.BeansContextStructureBridge;
 
 /**
  * {@link AbstractEditorTracker} extension that registers
@@ -69,8 +69,8 @@ public class BeansActiveFoldingEditorTracker extends AbstractEditorTracker {
 	protected boolean editorShouldBeRegistered(IEditorPart editor) {
 		IEditorInput editorInput = editor.getEditorInput();
 		if (editorInput != null && editorInput instanceof IFileEditorInput) {
-			IResource resource = ((IFileEditorInput) editorInput).getFile();
-			return BeansCoreUtils.isBeansConfig(resource);
+			IFile resource = ((IFileEditorInput) editorInput).getFile();
+			return BeansContextStructureBridge.isBeansConfig(resource);
 		}
 		return false;
 	}
