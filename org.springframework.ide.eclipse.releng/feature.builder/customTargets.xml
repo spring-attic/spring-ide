@@ -78,8 +78,30 @@
 	<!-- ===================================================================== -->
 	<!-- Steps to do after setup but before starting the build proper -->
 	<!-- ===================================================================== -->
-	<target name="postSetup">
+	<target name="postSetup" if="skipFetch">
 		<antcall target="getBaseComponents" />
+		<copy todir="${buildDirectory}/plugins">
+			<fileset dir="${builder}/../../">
+				<include name="**/org.*/**"/>
+				<exclude name="**/.svn/**"/>
+				<exclude name="**/bin/**"/>
+				<exclude name="**/*.feature/**" />
+				<exclude name="**/*.feature.source/**" />
+				<exclude name="**/*.releng/**" />
+				<exclude name="**/required-bundles/**" />
+			</fileset>
+		</copy>
+		<copy todir="${buildDirectory}/plugins">
+			<fileset dir="${builder}/../../required-bundles">
+				<include name="**.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="${buildDirectory}/features">
+			<fileset dir="${builder}/../../">
+				<include name="**/*.feature/**" />
+				<include name="**/*.feature.source/**" />
+			</fileset>
+		</copy>
 	</target>
 
 	<!-- ===================================================================== -->

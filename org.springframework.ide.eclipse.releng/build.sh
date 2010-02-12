@@ -160,7 +160,7 @@ then
 	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
    		-metadataRepository $AJDT_UPDATE_SITE_URL \
    		-artifactRepository $AJDT_UPDATE_SITE_URL \
-   		-installIU org.eclipse.equinox.weaving.feature.group
+   		-installIU org.eclipse.contribution.weaving.feature.group
 
 	$WORKSPACE/eclipse/eclipse -nosplash -application org.eclipse.equinox.p2.director \
    		-metadataRepository $AJDT_UPDATE_SITE_URL \
