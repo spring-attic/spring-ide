@@ -73,7 +73,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 						}
 					}
 					else {
-						validateFactoryMethod(bean, mergedClassName, methodName, argCount, Static.DONT_CARE, context);
+						validateFactoryMethod(bean, mergedClassName, methodName, argCount, Static.YES, context);
 					}
 				}
 			}
