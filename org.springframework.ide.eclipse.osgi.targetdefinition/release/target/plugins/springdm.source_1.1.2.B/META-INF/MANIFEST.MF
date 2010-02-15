@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Bundle-SymbolicName: springdm.source;singleton:=true
-Bundle-Version: 1.1.2.B
-Bundle-ManifestVersion: 2

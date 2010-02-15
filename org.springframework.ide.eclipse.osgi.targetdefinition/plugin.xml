@@ -23,12 +23,6 @@
             name="%releaseTarget.name">
       </target>
    
-      <!-- Target Definiton for latest snapshot Spring DM version -->	
-      <target
-            definition="snapshot/spring-dm-snapshot.target"
-            id="org.springframework.ide.eclipse.osgi.targetdefinition.snapshot"
-            name="%snapshotTarget.name">
-      </target>
    </extension>
 
 </plugin>
