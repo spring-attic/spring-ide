@@ -46,6 +46,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
@@ -59,6 +60,7 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -389,7 +391,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setErrorHandler(new BeansConfigErrorHandler());
 					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,
 							documentAccessor));
-					reader.setDocumentReaderClass(ErrorSuppressingBeanDefinitionDocumentReader.class);
+					reader.setDocumentReaderClass(ToolingFriendlyBeanDefinitionDocumentReader.class);
 					reader.setBeanNameGenerator(beanNameGenerator);
 
 					try {
@@ -495,8 +497,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				}
 
 				// if (BeansModel.DEBUG) {
-				System.out.println(String.format("%s, loading %s", (System.currentTimeMillis() - start), file.getFullPath()
-						.toString()));
+				System.out.println(String.format("%s, loading %s", (System.currentTimeMillis() - start), file
+						.getFullPath().toString()));
 				// System.out.println(String.format("+-- reading config '%s' took %sms",
 				// file.getFullPath().toString(), (System.currentTimeMillis() - start)));
 				// }
@@ -1146,7 +1148,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * placeholders in resource attributes as this is not support in the IDE.
 	 * @since 2.3.1
 	 */
-	public static class ErrorSuppressingBeanDefinitionDocumentReader extends DefaultBeanDefinitionDocumentReader {
+	public static class ToolingFriendlyBeanDefinitionDocumentReader extends DefaultBeanDefinitionDocumentReader {
 
 		/**
 		 * {@inheritDoc}
@@ -1170,6 +1172,34 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext);
 			delegate.initDefaults(root);
 			return delegate;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
+			Object source = bdHolder.getSource();
+			if (bdHolder != null) {
+				bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
+
+				// Make sure that a decorated bean gets a source attachment
+				if (bdHolder.getSource() == null) {
+					((AbstractBeanDefinition) bdHolder.getBeanDefinition()).setSource(source);
+				}
+				
+				try {
+					// Register the final decorated instance.
+					BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
+				}
+				catch (BeanDefinitionStoreException ex) {
+					getReaderContext().error(
+							"Failed to register bean definition with name '" + bdHolder.getBeanName() + "'", ele, ex);
+				}
+				// Send registration event.
+				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
+			}
 		}
 	}
 
