@@ -27,11 +27,11 @@ import org.springframework.core.type.MethodMetadata;
  */
 public class JdtMethodMetadata implements MethodMetadata {
 
-	private final IType type;
+	private final Map<String, Map<String, Object>> annotationMap = new LinkedHashMap<String, Map<String, Object>>();
 
 	private final IMethod method;
 
-	private final Map<String, Map<String, Object>> annotationMap = new LinkedHashMap<String, Map<String, Object>>();
+	private final IType type;
 
 	public JdtMethodMetadata(IType type, IMethod method) {
 		this.type = type;
@@ -47,11 +47,23 @@ public class JdtMethodMetadata implements MethodMetadata {
 		return annotationMap.keySet();
 	}
 
+	public String getDeclaringClassName() {
+		return this.method.getDeclaringType().getFullyQualifiedName('$');
+	}
+
+	public IMethod getMethod() {
+		return method;
+	}
+
 	public String getMethodName() {
 		return method.getElementName();
 	}
 
 	public boolean hasAnnotation(String annotationType) {
+		return annotationMap.containsKey(annotationType);
+	}
+
+	public boolean isAnnotated(String annotationType) {
 		return annotationMap.containsKey(annotationType);
 	}
 
@@ -82,10 +94,6 @@ public class JdtMethodMetadata implements MethodMetadata {
 		}
 	}
 
-	public IMethod getMethod() {
-		return method;
-	}
-
 	private void init() {
 		try {
 			for (IAnnotation annotation : method.getAnnotations()) {
@@ -95,10 +103,6 @@ public class JdtMethodMetadata implements MethodMetadata {
 		catch (JavaModelException e) {
 			throw new JdtMetadataReaderException(e);
 		}
-	}
-
-	public boolean isAnnotated(String annotationType) {
-		return annotationMap.containsKey(annotationType);
 	}
 
 }
