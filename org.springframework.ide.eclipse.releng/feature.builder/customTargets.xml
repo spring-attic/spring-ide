@@ -297,7 +297,7 @@
 		<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main" fork="true" classpathref="eclipse.classpath"
 			failonerror="true" maxmemory="256m" dir="${buildDirectory}">
 			<arg line="-application org.eclipse.update.core.siteOptimizer" />
-			<arg line="-jarProcessor -verbose -processAll -repack -pack -sign ${builder}/../sign.sh -outputDir ${updateSiteStagingLocation} ${updateSiteStagingLocation}" />
+			<arg line="-jarProcessor -verbose -processAll -repack -pack -sign ${buildDirectory}/../sign.sh -outputDir ${updateSiteStagingLocation} ${updateSiteStagingLocation}" />
 		</java>
 
 	</target>
