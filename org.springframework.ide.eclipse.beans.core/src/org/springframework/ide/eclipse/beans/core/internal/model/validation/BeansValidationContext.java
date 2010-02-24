@@ -113,6 +113,13 @@ public class BeansValidationContext extends AbstractValidationContext implements
 				BeansModelUtils.register(csConfig, registry);
 			}
 		}
+		else if (contextElement instanceof IBeansConfig && !config.equals(contextElement)) {
+			registry.setAllowAliasOverriding(true);
+			registry.setAllowBeanDefinitionOverriding(true);
+			if (fillCompletely) {
+				BeansModelUtils.register((IBeansConfig) contextElement, registry);
+			}
+		}
 		else {
 			registry.setAllowAliasOverriding(false);
 			registry.setAllowBeanDefinitionOverriding(false);
