@@ -25,11 +25,6 @@ for II in $TARGET_DIR/*-sources-*jar; do
 	ant -f create-source-bundle.xml -Dbundle.symbolic.name=$NAME -Dbundle.version=$VERSION -Dbundle.home.path=$TARGET_DIR
 
 	rm $II
-	#echo plugin@$NAME=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/$NAME-$VERSION.jar >> bundles.map
-	#echo plugin@$NAME.source=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/$NAME.source-$VERSION.jar >> bundles.map
-	
-	#echo bundle@$NAME.source=GET,https://src.springsource.org/svn/dm-server-tools/main-branches/jersey/required-bundles/$NAME.source-$VERSION.jar >> bundles.map
-	
 done
 
 for II in $TARGET_DIR/*.jar; do 
@@ -37,7 +32,9 @@ for II in $TARGET_DIR/*.jar; do
 	NAME=`expr "$II" : '.*/\([a-z.A-Z]*\)\-.*'`
 	VERSION=`expr "$II" : '.*/[a-z.A-Z]*\-\(.*\).jar'`
 	
-	#echo $NAME $VERSION
+	echo $NAME $VERSION
 	echo plugin@$NAME=GET,https://src.springframework.org/svn/spring-ide/trunk/required-bundles/$NAME-$VERSION.jar >> maps/bundles.map
+	
+	#../org.springframework.ide.eclipse.jarprocessor/main.sh $II
 	
 done
