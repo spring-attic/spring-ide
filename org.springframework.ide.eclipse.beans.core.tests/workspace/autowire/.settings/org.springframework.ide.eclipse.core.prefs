@@ -1,15 +1,15 @@
 #Fri Oct 02 00:36:46 CEST 2009
 eclipse.preferences.version=1
-org.springframework.ide.eclipse.core.builders.enable.aopreferencemodelbuilder=true
+org.springframework.ide.eclipse.core.builders.enable.aopreferencemodelbuilder=false
 org.springframework.ide.eclipse.core.builders.enable.beanmetadatabuilder=true
 org.springframework.ide.eclipse.core.builders.enable.osgibundleupdater=false
 org.springframework.ide.eclipse.core.enable.project.preferences=true
-org.springframework.ide.eclipse.core.validator.enable.com.springsource.server.ide.manifest.core.manifestvalidator=true
+org.springframework.ide.eclipse.core.validator.enable.com.springsource.server.ide.manifest.core.manifestvalidator=false
 org.springframework.ide.eclipse.core.validator.enable.com.springsource.sts.bestpractices.beansvalidator=false
 org.springframework.ide.eclipse.core.validator.enable.com.springsource.sts.server.quickfix.manifestvalidator=false
 org.springframework.ide.eclipse.core.validator.enable.org.springframework.ide.eclipse.beans.core.beansvalidator=true
 org.springframework.ide.eclipse.core.validator.enable.org.springframework.ide.eclipse.core.springvalidator=false
-org.springframework.ide.eclipse.core.validator.enable.org.springframework.ide.eclipse.webflow.core.validator=true
+org.springframework.ide.eclipse.core.validator.enable.org.springframework.ide.eclipse.webflow.core.validator=false
 org.springframework.ide.eclipse.core.validator.rule.enable.com.springsource.server.ide.manifest.core.applicationSymbolicNameRule-com.springsource.server.ide.manifest.core.manifestvalidator=true
 org.springframework.ide.eclipse.core.validator.rule.enable.com.springsource.server.ide.manifest.core.applicationVersionRule-com.springsource.server.ide.manifest.core.manifestvalidator=true
 org.springframework.ide.eclipse.core.validator.rule.enable.com.springsource.server.ide.manifest.core.bundleActivationPolicyRule-com.springsource.server.ide.manifest.core.manifestvalidator=true

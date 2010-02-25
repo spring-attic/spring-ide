@@ -65,6 +65,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		allowedRefs.put("testBean3", new Integer[] { 148 });
 		allowedRefs.put("testBean4", new Integer[] { 130 });
 		allowedRefs.put("xy", new Integer[] { 135, 153, 236 });
+		allowedRefs.put("beanFactory", new Integer[] { 140 });
 
 		resource = createPredefinedProjectAndGetResource("autowire",
 				"src/org/springframework/context/annotation/testExtendedResourceInjection-context.xml");
@@ -77,7 +78,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 6);
+		assertTrue(refs.size() == 7);
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -105,6 +106,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		allowedRefs.put("testBean3", new Integer[] { 148 });
 		allowedRefs.put("testBean4", new Integer[] { 130 });
 		allowedRefs.put("xy", new Integer[] { 135, 153 });
+		allowedRefs.put("beanFactory", new Integer[] { 140 });
 
 		resource = createPredefinedProjectAndGetResource("autowire",
 				"src/org/springframework/context/annotation/testExtendedResourceInjectionWithOverriding-context.xml");
@@ -113,11 +115,12 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = config.getBean("annotatedBean");
 
+		
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 5);
+		assertTrue(refs.size() == 6);
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -133,6 +136,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		allowedRefs.put("testBean3", new Integer[] { 201 });
 		allowedRefs.put("testBean4", new Integer[] { 183 });
 		allowedRefs.put("xy", new Integer[] { 188, 206 });
+		allowedRefs.put("beanFactory", new Integer[] { 193 });
 
 		resource = createPredefinedProjectAndGetResource("autowire",
 				"src/org/springframework/context/annotation/testExtendedEjbInjection-context.xml");
@@ -145,10 +149,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		for (IBeanReference ref : refs) {
-			System.out.println(ref);
-		}
-		assertTrue(refs.size() == 6);
+		assertTrue(refs.size() == 7);
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
