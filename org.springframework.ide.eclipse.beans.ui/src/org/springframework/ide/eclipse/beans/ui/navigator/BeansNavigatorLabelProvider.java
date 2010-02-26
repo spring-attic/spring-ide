@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,9 +23,9 @@ import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;

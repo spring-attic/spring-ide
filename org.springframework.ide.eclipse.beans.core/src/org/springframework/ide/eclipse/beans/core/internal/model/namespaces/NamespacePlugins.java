@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,18 +31,17 @@ import org.xml.sax.SAXException;
 /**
  * Spring schema handler/resolver for OSGi environments.
  * 
- * Besides delegation this class also does type filtering to avoid wiring the wrong bundle if
- * multiple versions of the same library (which support the same schema) are available.
+ * Besides delegation this class also does type filtering to avoid wiring the wrong bundle if multiple versions of the
+ * same library (which support the same schema) are available.
  * 
- * Additionally, lazy handlers are supported so that they are checked (and thus loaded) only if no
- * previous handler has been able to satisfy the request.
+ * Additionally, lazy handlers are supported so that they are checked (and thus loaded) only if no previous handler has
+ * been able to satisfy the request.
  * 
  * @author Hal Hildebrand
  * @author Costin Leau
  * @author Christian Dupuis
  */
-public class NamespacePlugins implements NamespaceHandlerResolver,
-		EntityResolver, DisposableBean {
+public class NamespacePlugins implements NamespaceHandlerResolver, EntityResolver, DisposableBean {
 
 	private final LazyBundleRegistry.Activator<Plugin> activation = new LazyBundleRegistry.Activator<Plugin>() {
 
@@ -52,10 +51,9 @@ public class NamespacePlugins implements NamespaceHandlerResolver,
 	};
 
 	final LazyBundleRegistry.Condition condition = new LazyBundleRegistry.Condition() {
-		
-		private final String NS_HANDLER_RESOLVER_CLASS_NAME = NamespaceHandlerResolver.class
-		.getName();
-		
+
+		private final String NS_HANDLER_RESOLVER_CLASS_NAME = NamespaceHandlerResolver.class.getName();
+
 		public boolean pass(Bundle bundle) {
 			try {
 				Class<?> type = bundle.loadClass(NS_HANDLER_RESOLVER_CLASS_NAME);
@@ -67,11 +65,9 @@ public class NamespacePlugins implements NamespaceHandlerResolver,
 			}
 		}
 
-
 	};
 
-	private final LazyBundleRegistry<Plugin> pluginRegistry = new LazyBundleRegistry<Plugin>(
-			condition, activation);
+	private final LazyBundleRegistry<Plugin> pluginRegistry = new LazyBundleRegistry<Plugin>(condition, activation);
 
 	public void destroy() {
 		pluginRegistry.clear();
@@ -90,8 +86,7 @@ public class NamespacePlugins implements NamespaceHandlerResolver,
 		return doResolve(namespaceUri);
 	}
 
-	public InputSource resolveEntity(final String publicId, final String systemId)
-			throws SAXException, IOException {
+	public InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
 		if (System.getSecurityManager() != null) {
 			try {
 				return AccessController.doPrivileged(new PrivilegedExceptionAction<InputSource>() {
@@ -120,21 +115,20 @@ public class NamespacePlugins implements NamespaceHandlerResolver,
 
 	private NamespaceHandler doResolve(final String namespaceUri) {
 		try {
-			return pluginRegistry
-					.apply(new LazyBundleRegistry.Operation<Plugin, NamespaceHandler>() {
+			return pluginRegistry.apply(new LazyBundleRegistry.Operation<Plugin, NamespaceHandler>() {
 
-						public NamespaceHandler operate(Plugin plugin) {
-							try {
-								NamespaceHandler handler = plugin.resolve(namespaceUri);
-								if (handler != null) {
-									return handler;
-								}
-							}
-							catch (IllegalArgumentException ex) {
-							}
-							return null;
+				public NamespaceHandler operate(Plugin plugin) {
+					try {
+						NamespaceHandler handler = plugin.resolve(namespaceUri);
+						if (handler != null) {
+							return handler;
 						}
-					});
+					}
+					catch (IllegalArgumentException ex) {
+					}
+					return null;
+				}
+			});
 		}
 		catch (Exception ex) {
 			// the inner method doesn't declare any exceptions so the cast should be safe
@@ -142,8 +136,7 @@ public class NamespacePlugins implements NamespaceHandlerResolver,
 		}
 	}
 
-	private InputSource doResolveEntity(final String publicId, final String systemId)
-			throws Exception {
+	private InputSource doResolveEntity(final String publicId, final String systemId) throws Exception {
 		if (systemId != null) {
 
 			return pluginRegistry.apply(new LazyBundleRegistry.Operation<Plugin, InputSource>() {
@@ -186,8 +179,8 @@ public class NamespacePlugins implements NamespaceHandlerResolver,
 	}
 
 	/**
-	 * Checks the type compatibility check between the namespace parser wired to Spring DM and the
-	 * discovered bundle class space.
+	 * Checks the type compatibility check between the namespace parser wired to Spring DM and the discovered bundle
+	 * class space.
 	 * @param bundle handler bundle
 	 * @return true if there is type compatibility, false otherwise
 	 */
@@ -206,8 +199,7 @@ public class NamespacePlugins implements NamespaceHandlerResolver,
 	}
 
 	/**
-	 * Wrapper class which implements both {@link EntityResolver} and
-	 * {@link NamespaceHandlerResolver} interfaces.
+	 * Wrapper class which implements both {@link EntityResolver} and {@link NamespaceHandlerResolver} interfaces.
 	 * 
 	 * Simply delegates to the actual implementation discovered in a specific bundle.
 	 */
@@ -236,10 +228,9 @@ public class NamespacePlugins implements NamespaceHandlerResolver,
 			return namespace.resolve(namespaceUri);
 		}
 
-		public InputSource resolveEntity(String publicId, String systemId) throws SAXException,
-				IOException {
+		public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 			return entity.resolveEntity(publicId, systemId);
 		}
 	}
-	
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -54,7 +55,7 @@ import org.w3c.dom.NodeList;
  * @since 2.0
  */
 public class BeansValidationContext extends AbstractValidationContext implements IBeansValidationContext {
-	
+
 	private static final char KEY_SEPARATOR_CHAR = '/';
 
 	private BeanDefinitionRegistry incompleteRegistry;
@@ -71,7 +72,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 
 	public BeansValidationContext(IBeansConfig config, IResourceModelElement contextElement) {
 		super(config, contextElement);
-		
+
 		this.incompleteRegistry = createRegistry(config, contextElement, false);
 		this.completeRegistry = createRegistry(config, contextElement, true);
 
@@ -136,17 +137,18 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	public synchronized ClassReaderFactory getClassReaderFactory() {
 		if (this.classReaderFactory == null) {
 			this.classReaderFactory = new CachingClassReaderFactory(JdtUtils.getClassLoader(getRootElement()
-					.getElementResource().getProject(), false));
+					.getElementResource().getProject(), null));
 		}
 		return this.classReaderFactory;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public synchronized IProjectClassLoaderSupport getProjectClassLoaderSupport() {
 		if (this.projectClassLoaderSupport == null) {
-			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(getRootElementProject(), true);
+			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(getRootElementProject(),
+					BeansCorePlugin.class.getClassLoader());
 		}
 		return this.projectClassLoaderSupport;
 	}
@@ -190,7 +192,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName, beanClass);
 		return bds != null && bds.size() > 0;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -253,7 +255,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		// / Return found annoatations
 		return annotationDatas;
 	}
-	
+
 	static class AttributeDescriptor {
 
 		private final String namespaceUri;
@@ -291,7 +293,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(attributeName);
 			return hashCode;
 		}
-		
+
 		public static AttributeDescriptor create(Node n, String attributeName) {
 			return new AttributeDescriptor(n.getNamespaceURI(), n.getLocalName(), attributeName);
 		}

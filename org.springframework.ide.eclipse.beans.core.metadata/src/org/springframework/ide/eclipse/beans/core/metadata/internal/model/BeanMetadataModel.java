@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.internal.model;
 
 import java.util.Collections;
 import java.util.Map;
@@ -18,11 +18,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadataModel;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IMethodMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
 
 /**
  * {@link IBeanMetadataModel} implementation that saves and reloads its contents from a backing

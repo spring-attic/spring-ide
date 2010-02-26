@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.internal.model;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
+import org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 
 /**
  * Stores and loads the {@link IBeanMetadata}s from the persisted file.
@@ -38,14 +38,14 @@ public class BeanMetadataPersistence {
 	private static final String BEANPROPERTIES_FOLDER_NAME = "/properties/";
 
 	public static void storeMetadata(Map<String, BeanMetadataHolder> metaData) {
-		File file = BeansCorePlugin.getDefault().getStateLocation().append(
-				METADATA_FOLDER_NAME + STATE_FILE_NAME).toFile();
+		File file = BeansMetadataPlugin.getDefault().getStateLocation().append(METADATA_FOLDER_NAME + STATE_FILE_NAME)
+				.toFile();
 		store(metaData, file);
 	}
 
 	public static void storeProperties(Map<String, BeanPropertyDataHolder> properties) {
-		File file = BeansCorePlugin.getDefault().getStateLocation().append(
-				BEANPROPERTIES_FOLDER_NAME + STATE_FILE_NAME).toFile();
+		File file = BeansMetadataPlugin.getDefault().getStateLocation()
+				.append(BEANPROPERTIES_FOLDER_NAME + STATE_FILE_NAME).toFile();
 		store(properties, file);
 	}
 
@@ -61,7 +61,7 @@ public class BeanMetadataPersistence {
 			out.writeObject(obj);
 		}
 		catch (IOException e) {
-			BeansCorePlugin.log(new Status(IStatus.ERROR, BeansCorePlugin.PLUGIN_ID,
+			BeansMetadataPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, BeansMetadataPlugin.PLUGIN_ID,
 					"Exception saving meta data model for class " + obj.getClass(), e));
 		}
 		finally {
@@ -76,8 +76,8 @@ public class BeanMetadataPersistence {
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, BeanMetadataHolder> loadMetadata() {
-		File f = BeansCorePlugin.getDefault().getStateLocation().append(
-				METADATA_FOLDER_NAME + STATE_FILE_NAME).toFile();
+		File f = BeansMetadataPlugin.getDefault().getStateLocation().append(METADATA_FOLDER_NAME + STATE_FILE_NAME)
+				.toFile();
 		Map<String, BeanMetadataHolder> metaData = load(f, Map.class);
 		if (metaData != null) {
 			return metaData;
@@ -88,8 +88,8 @@ public class BeanMetadataPersistence {
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, BeanPropertyDataHolder> loadProperties() {
-		File f = BeansCorePlugin.getDefault().getStateLocation().append(
-				BEANPROPERTIES_FOLDER_NAME + STATE_FILE_NAME).toFile();
+		File f = BeansMetadataPlugin.getDefault().getStateLocation().append(BEANPROPERTIES_FOLDER_NAME + STATE_FILE_NAME)
+				.toFile();
 		Map<String, BeanPropertyDataHolder> metaData = load(f, Map.class);
 		if (metaData != null) {
 			return metaData;
@@ -109,7 +109,7 @@ public class BeanMetadataPersistence {
 			}
 		}
 		catch (Exception e) {
-			BeansCorePlugin.log(new Status(IStatus.ERROR, BeansCorePlugin.PLUGIN_ID,
+			BeansMetadataPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, BeansMetadataPlugin.PLUGIN_ID,
 					"Exception restoring meta data model for class " + clazz, e));
 		}
 		finally {

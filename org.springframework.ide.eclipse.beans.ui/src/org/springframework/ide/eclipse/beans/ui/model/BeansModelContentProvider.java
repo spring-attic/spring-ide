@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Control;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -33,7 +34,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils;

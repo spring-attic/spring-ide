@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.internal.model;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,13 +34,14 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreImages;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadataProvider;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IMethodMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
@@ -57,7 +58,8 @@ public class BeanMetadataBuilderJob extends Job {
 	private static final String CLASS_ATTRIBUTE = "class";
 
 	/** The id of the metadata providers extension point */
-	public static final String META_DATA_PROVIDERS_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID + ".metadataproviders";
+	public static final String META_DATA_PROVIDERS_EXTENSION_POINT = BeansMetadataPlugin.PLUGIN_ID
+			+ ".metadataproviders";
 
 	/** Object identifying the job family */
 	private static final Object CONTENT_FAMILY = new Object();
@@ -175,8 +177,8 @@ public class BeanMetadataBuilderJob extends Job {
 	private void attachMetadataToBean(final IBeansConfig beansConfig, final IProgressMonitor progressMonitor,
 			IBeanMetadataProvider[] providers, final IBean bean) {
 		// Reset meta data attachment before adding
-		BeansCorePlugin.getMetadataModel().clearBeanMetadata(bean);
-		BeansCorePlugin.getMetadataModel().clearBeanProperties(bean);
+		BeansMetadataPlugin.getMetadataModel().clearBeanMetadata(bean);
+		BeansMetadataPlugin.getMetadataModel().clearBeanProperties(bean);
 
 		Set<IBeanMetadata> beanMetaData = new LinkedHashSet<IBeanMetadata>();
 		Set<IMethodMetadata> methodMetaData = new LinkedHashSet<IMethodMetadata>();
@@ -208,10 +210,10 @@ public class BeanMetadataBuilderJob extends Job {
 			}
 		}
 		if (beanMetaData.size() > 0 || methodMetaData.size() > 0) {
-			BeansCorePlugin.getMetadataModel().setBeanMetadata(bean, beanMetaData, methodMetaData);
+			BeansMetadataPlugin.getMetadataModel().setBeanMetadata(bean, beanMetaData, methodMetaData);
 		}
 		if (beanProperties.size() > 0) {
-			BeansCorePlugin.getMetadataModel().setBeanProperties(bean, beanProperties);
+			BeansMetadataPlugin.getMetadataModel().setBeanProperties(bean, beanProperties);
 		}
 	}
 
@@ -234,7 +236,8 @@ public class BeanMetadataBuilderJob extends Job {
 							}
 						}
 						catch (CoreException e) {
-							BeansCorePlugin.log(e);
+							BeansMetadataPlugin.getDefault().getLog().log(
+									new Status(IStatus.ERROR, BeansMetadataPlugin.PLUGIN_ID, 1, "Error loading metadata provider", e));
 						}
 					}
 				}

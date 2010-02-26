@@ -8,14 +8,14 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.internal.model;
 
 import java.io.Serializable;
 import java.util.Set;
 
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IMethodMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IMethodMetadata;
 
 /**
  * Simple holder for {@link IBeanMetadata} and {@link IMethodMetadata} of one {@link IBean}.

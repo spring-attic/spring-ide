@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.internal.model;
 
 import java.io.Serializable;
 import java.util.LinkedHashSet;

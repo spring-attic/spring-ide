@@ -81,7 +81,6 @@ Import-Package: javax.xml.parsers,
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.internal.model,
- org.springframework.ide.eclipse.beans.core.internal.model.metadata,
  org.springframework.ide.eclipse.beans.core.internal.model.namespaces,
  org.springframework.ide.eclipse.beans.core.internal.model.process,
  org.springframework.ide.eclipse.beans.core.internal.model.resources,
@@ -92,11 +91,9 @@ Export-Package: org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.internal.project,
  org.springframework.ide.eclipse.beans.core.model,
  org.springframework.ide.eclipse.beans.core.model.locate,
- org.springframework.ide.eclipse.beans.core.model.metadata,
  org.springframework.ide.eclipse.beans.core.model.process,
  org.springframework.ide.eclipse.beans.core.model.update,
  org.springframework.ide.eclipse.beans.core.model.validation,
  org.springframework.ide.eclipse.beans.core.namespaces
-DynamicImport-Package: *
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy

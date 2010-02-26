@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
@@ -114,7 +114,7 @@ public class Bean extends Node implements IAdaptable {
 			IBeanProperty prop = (IBeanProperty) props.next();
 			list.add(new Property(this, prop));
 		}
-		props = BeansCorePlugin.getMetadataModel().getBeanProperties(bean).iterator();
+		props = BeansMetadataPlugin.getMetadataModel().getBeanProperties(bean).iterator();
 		while (props.hasNext()) {
 			IBeanProperty prop = (IBeanProperty) props.next();
 			list.add(new Property(this, prop));

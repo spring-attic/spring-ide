@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.model;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -23,7 +23,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
+import org.springframework.ide.eclipse.beans.core.metadata.internal.model.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -142,7 +142,7 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 	private ClassReaderFactory getClassReaderFactory(IProject project) {
 		if (!classReaderFactoryCache.containsKey(project)) {
 			classReaderFactoryCache
-					.put(project, new CachingClassReaderFactory(JdtUtils.getClassLoader(project, false)));
+					.put(project, new CachingClassReaderFactory(JdtUtils.getClassLoader(project, null)));
 		}
 		return classReaderFactoryCache.get(project);
 	}

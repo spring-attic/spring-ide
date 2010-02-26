@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1173,10 +1173,10 @@ public abstract class BeansModelUtils {
 			}
 
 			// Add referenced beans from bean annotations contributed into the bean meta data model
-			for (IBeanProperty property : BeansCorePlugin.getMetadataModel().getBeanProperties(bean)) {
-				addBeanReferencesForValue(property, property.getValue(), context, references, referencedBeans,
-						recursive);
-			}
+//			for (IBeanProperty property : BeansCorePlugin.getMetadataModel().getBeanProperties(bean)) {
+//				addBeanReferencesForValue(property, property.getValue(), context, references, referencedBeans,
+//						recursive);
+//			}
 
 			// Add references from inner beans
 			for (IBean nestedBean : getInnerBeans(bean, false)) {

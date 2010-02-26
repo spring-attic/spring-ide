@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -52,7 +51,7 @@ class ProjectClassLoaderCache {
 
 	private static final String FILE_SCHEME = "file";
 
-	private static ClassLoader addClassLoaderToCache(IProject project, List<URL> urls, boolean useParentClassLoader) {
+	private static ClassLoader addClassLoaderToCache(IProject project, List<URL> urls, ClassLoader parentClassLoader) {
 		synchronized (CLASSLOADER_CACHE) {
 			int nEntries = CLASSLOADER_CACHE.size();
 			if (nEntries >= CACHE_SIZE) {
@@ -80,7 +79,7 @@ class ProjectClassLoaderCache {
 					removeClassLoaderEntryFromCache(oldest);
 				}
 			}
-			ClassLoaderCacheEntry newEntry = new ClassLoaderCacheEntry(project, urls, useParentClassLoader);
+			ClassLoaderCacheEntry newEntry = new ClassLoaderCacheEntry(project, urls, parentClassLoader);
 			CLASSLOADER_CACHE.add(newEntry);
 			return newEntry.getClassLoader();
 		}
@@ -193,7 +192,7 @@ class ProjectClassLoaderCache {
 		}
 	}
 
-	private static ClassLoader findClassLoaderInCache(IProject project, boolean useParentClassLoader) {
+	private static ClassLoader findClassLoaderInCache(IProject project, ClassLoader parentClassLoader) {
 		synchronized (CLASSLOADER_CACHE) {
 			for (int i = CLASSLOADER_CACHE.size() - 1; i >= 0; i--) {
 				ClassLoaderCacheEntry entry = (ClassLoaderCacheEntry) CLASSLOADER_CACHE.get(i);
@@ -202,7 +201,7 @@ class ProjectClassLoaderCache {
 					removeClassLoaderEntryFromCache(entry);
 				}
 				else {
-					if (entry.matches(project, useParentClassLoader)) {
+					if (entry.matches(project, parentClassLoader)) {
 						entry.markAsAccessed();
 						return entry.getClassLoader();
 					}
@@ -221,14 +220,14 @@ class ProjectClassLoaderCache {
 	 * @param useParentClassLoader use the OSGi classloader as parent
 	 * @return a set of {@link URL}s that can be used to construct a {@link URLClassLoader}
 	 */
-	private static List<URL> getClassPathUrls(IProject project, boolean useParentClassLoader) {
+	private static List<URL> getClassPathUrls(IProject project, ClassLoader parentClassLoader) {
 		// prepare for tracing
 		long start = System.currentTimeMillis();
 		try {
 
 			// needs to be linked to preserve ordering
 			List<URL> paths = new ArrayList<URL>();
-			if (!useParentClassLoader) {
+			if (parentClassLoader == null) {
 				// add required libraries from osgi bundles
 				paths.addAll(JdtUtils.getBundleClassPath("org.springframework.core"));
 				paths.addAll(JdtUtils.getBundleClassPath("org.springframework.beans"));
@@ -242,7 +241,7 @@ class ProjectClassLoaderCache {
 			Set<IProject> resolvedProjects = new HashSet<IProject>();
 			addClassPathUrls(project, paths, resolvedProjects);
 
-			if (!useParentClassLoader) {
+			if (parentClassLoader == null) {
 				// search for slf4j and remove it; evil classloading issues if it ends up on the classpath and confuses
 				// Spring classes
 				for (URL path : new HashSet<URL>(paths)) {
@@ -274,20 +273,13 @@ class ProjectClassLoaderCache {
 	/**
 	 * Returns a {@link ClassLoader} for the given project.
 	 */
-	protected static ClassLoader getClassLoader(IProject project, boolean useParentClassLoader) {
-		ClassLoader classLoader = findClassLoaderInCache(project, useParentClassLoader);
+	protected static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
+		ClassLoader classLoader = findClassLoaderInCache(project, parentClassLoader);
 		if (classLoader == null) {
-			List<URL> urls = getClassPathUrls(project, useParentClassLoader);
-			classLoader = addClassLoaderToCache(project, urls, useParentClassLoader);
+			List<URL> urls = getClassPathUrls(project, parentClassLoader);
+			classLoader = addClassLoaderToCache(project, urls, parentClassLoader);
 		}
 		return classLoader;
-	}
-
-	/**
-	 * Returns a {@link ClassLoader} for the given project.
-	 */
-	protected static ClassLoader getClassLoader(IResource project) {
-		return getClassLoader(project.getProject(), true);
 	}
 
 	/**
@@ -305,12 +297,12 @@ class ProjectClassLoaderCache {
 
 		private URL[] urls;
 
-		private boolean useParentClassLoader;
+		private ClassLoader parentClassLoader;
 
-		public ClassLoaderCacheEntry(IProject project, List<URL> urls, boolean useParentClassLoader) {
+		public ClassLoaderCacheEntry(IProject project, List<URL> urls, ClassLoader parentClassLoader) {
 			this.project = project;
 			this.urls = urls.toArray(new URL[urls.size()]);
-			this.useParentClassLoader = useParentClassLoader;
+			this.parentClassLoader = parentClassLoader;
 			markAsAccessed();
 			JavaCore.addElementChangedListener(this, ElementChangedEvent.POST_CHANGE);
 		}
@@ -336,12 +328,12 @@ class ProjectClassLoaderCache {
 		}
 
 		public ClassLoader getClassLoader() {
-//			if (useParentClassLoader) {
-//				return new URLClassLoader(urls, this.getClass().getClassLoader());
-//			}
-//			else {
-//				return new URLClassLoader(urls);
-//			}
+			// if (useParentClassLoader) {
+			// return new URLClassLoader(urls, this.getClass().getClassLoader());
+			// }
+			// else {
+			// return new URLClassLoader(urls);
+			// }
 			ClassLoader parent = getJarClassLoader();
 			return new URLClassLoader(directories, parent);
 		}
@@ -358,9 +350,10 @@ class ProjectClassLoaderCache {
 			lastAccess = System.currentTimeMillis();
 		}
 
-		public boolean matches(IProject project, boolean useParentClassLoader) {
+		public boolean matches(IProject project, ClassLoader parentClassLoader) {
 			return this.project.equals(project)
-					&& Boolean.valueOf(this.useParentClassLoader).equals(Boolean.valueOf(useParentClassLoader));
+					&& ((parentClassLoader == null && this.parentClassLoader == null) || (parentClassLoader != null && parentClassLoader
+							.equals(this.parentClassLoader)));
 		}
 
 		private synchronized ClassLoader getJarClassLoader() {
@@ -375,9 +368,9 @@ class ProjectClassLoaderCache {
 						dirs.add(url);
 					}
 				}
-				if (useParentClassLoader) {
-					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]), this.getClass()
-							.getClassLoader());
+				if (parentClassLoader != null) {
+					// We use the parent class loader of the org.springframework.ide.eclipse.beans.core bundle
+					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
 				}
 				else {
 					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]));

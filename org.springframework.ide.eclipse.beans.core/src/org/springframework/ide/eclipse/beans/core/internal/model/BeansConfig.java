@@ -331,7 +331,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					ClassLoader cl = BeansConfig.class.getClassLoader();
 					if (SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
 							.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false)) {
-						cl = JdtUtils.getClassLoader(file.getProject());
+						cl = JdtUtils.getClassLoader(file.getProject(), cl);
 					}
 
 					registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
@@ -1188,7 +1188,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				if (bdHolder.getSource() == null) {
 					((AbstractBeanDefinition) bdHolder.getBeanDefinition()).setSource(source);
 				}
-				
+
 				try {
 					// Register the final decorated instance.
 					BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());

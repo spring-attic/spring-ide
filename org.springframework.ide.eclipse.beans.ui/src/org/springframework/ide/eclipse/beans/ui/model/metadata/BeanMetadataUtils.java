@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,12 +19,12 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
 /**
@@ -151,7 +151,7 @@ public class BeanMetadataUtils {
 
 	private static void addMetaDataForBean(IBeansProject project,
 			Map<String, BeanMetadataReference> metaDataMapping, IBean bean) {
-		for (IBeanMetadata metaData : BeansCorePlugin.getMetadataModel().getBeanMetadata(bean)) {
+		for (IBeanMetadata metaData : BeansMetadataPlugin.getMetadataModel().getBeanMetadata(bean)) {
 			if (!metaDataMapping.containsKey(metaData.getKey())) {
 				metaDataMapping.put(metaData.getKey(), getContenProvider(metaData)
 						.getBeanMetadataReference(metaData, project));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.ReflectionUtils;
@@ -92,8 +93,8 @@ public abstract class JdtAnnotationUtils {
 		}
 		// support for class
 		else if (member.getValueKind() == IMemberValuePair.K_CLASS && returnType.equals(Class.class.getName())) {
-			ClassLoader cls = JdtUtils.getProjectClassLoaderSupport(type.getJavaProject().getProject(), true)
-					.getProjectClassLoader();
+			ClassLoader cls = JdtUtils.getProjectClassLoaderSupport(type.getJavaProject().getProject(),
+					SpringCore.class.getClassLoader()).getProjectClassLoader();
 			if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 				if (member.getValue().getClass().isArray()) {
 					Object[] classNames = (Object[]) member.getValue();
@@ -159,7 +160,7 @@ public abstract class JdtAnnotationUtils {
 			attributesMap.put(member.getMemberName(), member.getValue());
 		}
 	}
-	
+
 	private static Class<?> loadClass(IType type, String className, ClassLoader cls) throws ClassNotFoundException {
 		className = JdtUtils.resolveClassName(className, type);
 		try {

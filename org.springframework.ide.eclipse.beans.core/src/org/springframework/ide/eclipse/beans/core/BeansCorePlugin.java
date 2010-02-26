@@ -35,13 +35,11 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
-import org.springframework.ide.eclipse.beans.core.internal.model.metadata.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.osgi.util.OsgiBundleUtils;
 
@@ -88,8 +86,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/** The singleton beans model */
 	private BeansModel model;
 
-	private BeanMetadataModel metadataModel;
-
 	/** Spring namespace/resolver manager */
 	private NamespaceManager nsManager;
 
@@ -123,7 +119,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public BeansCorePlugin() {
 		plugin = this;
 		model = new BeansModel();
-		metadataModel = new BeanMetadataModel();
 		executorService = Executors.newCachedThreadPool();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
@@ -149,7 +144,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 				initNamespaceHandlers(context);
 
 				model.start();
-				metadataModel.start();
 
 				return Status.OK_STATUS;
 			}
@@ -170,7 +164,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 			isClosed = true;
 		}
 		model.stop();
-		metadataModel.stop();
 		super.stop(context);
 	}
 
@@ -200,10 +193,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 //					.getNamespacePlugins());
 //		}
 		return getDefault().nsManager.getNamespacePlugins();
-	}
-
-	public static final IBeanMetadataModel getMetadataModel() {
-		return getDefault().metadataModel;
 	}
 
 	public static final ExecutorService getExecutorService() {

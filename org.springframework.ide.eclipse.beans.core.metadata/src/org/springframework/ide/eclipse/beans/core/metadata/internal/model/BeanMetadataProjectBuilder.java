@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.internal.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,12 +27,13 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansTypeHierachyState;
+import org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataModel;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.TypeStructureState;
@@ -73,8 +74,8 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 		if (BeansCoreUtils.isBeansConfig(resource) && resource instanceof IFile) {
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource);
 			for (IBean bean : beansConfig.getBeans()) {
-				BeansCorePlugin.getMetadataModel().clearBeanMetadata(bean);
-				BeansCorePlugin.getMetadataModel().clearBeanProperties(bean);
+				BeansMetadataPlugin.getMetadataModel().clearBeanMetadata(bean);
+				BeansMetadataPlugin.getMetadataModel().clearBeanProperties(bean);
 			}
 			// Notify that the model has changed.
 			// ((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansConfig, Type.CHANGED);

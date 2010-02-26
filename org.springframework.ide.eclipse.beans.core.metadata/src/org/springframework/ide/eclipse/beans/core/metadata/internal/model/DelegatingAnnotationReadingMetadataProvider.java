@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +24,11 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.model.AbstractAnnotationReadingMetadataProvider;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IAnnotationBeanMetadataProvider;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
+import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadataProvider;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.metadata.AbstractAnnotationReadingMetadataProvider;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadata;
-import org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider;
 import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
 
 /**

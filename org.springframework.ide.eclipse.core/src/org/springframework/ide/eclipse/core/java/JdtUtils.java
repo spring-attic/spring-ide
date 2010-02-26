@@ -440,8 +440,8 @@ public class JdtUtils {
 		return new DefaultProjectClassLoaderSupport(je);
 	}
 
-	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je, boolean useParentClassLoader) {
-		return new DefaultProjectClassLoaderSupport(je, useParentClassLoader);
+	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je, ClassLoader parentClassLoader) {
+		return new DefaultProjectClassLoaderSupport(je, parentClassLoader);
 	}
 
 	public static boolean isAjdtPresent() {
@@ -785,32 +785,19 @@ public class JdtUtils {
 
 	/**
 	 * Create a {@link ClassLoader} from the class path configuration of the given <code>project</code>.
-	 * <p>
-	 * Note: Calling this method is the same as calling {@link #getClassLoader(IProject, true)}
-	 * @param project the {@link IProject}
-	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path configuration
-	 */
-	public static ClassLoader getClassLoader(IProject project) {
-		return ProjectClassLoaderCache.getClassLoader(project);
-	}
-
-	/**
-	 * Create a {@link ClassLoader} from the class path configuration of the given <code>project</code>.
 	 * @param project the {@link IProject}
 	 * @param useParentClassLoader true if the current OSGi class loader should be used as parent class loader for the
 	 * constructed class loader.
 	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path configuration
 	 */
-	public static ClassLoader getClassLoader(IProject project, boolean useParentClassLoader) {
-		return ProjectClassLoaderCache.getClassLoader(project, useParentClassLoader);
+	public static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
+		return ProjectClassLoaderCache.getClassLoader(project, parentClassLoader);
 	}
 
 	/**
 	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
 	 */
 	public static boolean doesImplement(IResource resource, IType type, String className) {
-		// long start = System.currentTimeMillis();
-		// try {
 		if (resource == null || type == null || className == null) {
 			return false;
 		}
@@ -823,29 +810,26 @@ public class JdtUtils {
 		catch (ClassNotFoundException e) {
 			return false;
 		}
-		// IType interfaceType = getJavaType(resource.getProject(), className);
-		// if (type != null && interfaceType != null) {
-		// try {
-		// IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getAllSubtypes(
-		// interfaceType);
-		// if (subTypes != null) {
-		// for (IType subType : subTypes) {
-		// if (subType.equals(type)) {
-		// return true;
-		// }
-		// }
-		// }
-		// }
-		// catch (JavaModelException e) {
-		// SpringCore.log(e);
-		// }
-		// }
-		// return false;
-		// }
-		// finally {
-		// System.out.println(String.format("|--- %sms - hierarchy check for %s in %s",
-		// (System.currentTimeMillis() - start), type.getFullyQualifiedName(), className));
-		// }
+		catch (Exception e) {
+			IType interfaceType = getJavaType(resource.getProject(), className);
+			if (type != null && interfaceType != null) {
+				try {
+					IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getAllSubtypes(
+							interfaceType);
+					if (subTypes != null) {
+						for (IType subType : subTypes) {
+							if (subType.equals(type)) {
+								return true;
+							}
+						}
+					}
+				}
+				catch (JavaModelException ex) {
+					SpringCore.log(e);
+				}
+			}
+		}
+		return false;
 	}
 
 	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
@@ -855,11 +839,11 @@ public class JdtUtils {
 		private ClassLoader weavingClassLoader;
 
 		public DefaultProjectClassLoaderSupport(IProject javaProject) {
-			this(javaProject, false);
+			this(javaProject, null);
 		}
 
-		public DefaultProjectClassLoaderSupport(IProject javaProject, boolean useParentClassLoader) {
-			setupClassLoaders(javaProject, useParentClassLoader);
+		public DefaultProjectClassLoaderSupport(IProject javaProject, ClassLoader parentClassLoader) {
+			setupClassLoaders(javaProject, parentClassLoader);
 		}
 
 		/**
@@ -889,9 +873,9 @@ public class JdtUtils {
 			Thread.currentThread().setContextClassLoader(classLoader);
 		}
 
-		private void setupClassLoaders(IProject project, boolean useParentClassLoader) {
+		private void setupClassLoaders(IProject project, ClassLoader parentClassLoader) {
 			classLoader = Thread.currentThread().getContextClassLoader();
-			weavingClassLoader = ProjectClassLoaderCache.getClassLoader(project, useParentClassLoader);
+			weavingClassLoader = ProjectClassLoaderCache.getClassLoader(project, parentClassLoader);
 		}
 	}
 

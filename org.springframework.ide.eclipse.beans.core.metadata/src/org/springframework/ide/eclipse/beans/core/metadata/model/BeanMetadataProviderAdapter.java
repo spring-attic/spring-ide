@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.model.metadata;
+package org.springframework.ide.eclipse.beans.core.metadata.model;
 
 import java.util.Collections;
 import java.util.Set;

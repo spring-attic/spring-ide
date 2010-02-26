@@ -302,17 +302,17 @@ public class CommonAnnnotationInjectionMetadataProvider implements IInjectionMet
 		}
 
 		public Set<IBeanReference> getBeanReferences(IBean bean, IBeansModelElement context,
-				AutowireDependencyProvider provider) {
+				IAutowireDependencyResolver resolver) {
 			BeanDefinition bd = BeansModelUtils.getMergedBeanDefinition(bean, context);
 
 			if (!shouldSkip(bd)) {
-				if (fallbackToDefaultTypeMatch && isDefaultName && !provider.containsBean(name)) {
-					return super.getBeanReferences(bean, context, provider);
+				if (fallbackToDefaultTypeMatch && isDefaultName && !resolver.containsBean(name)) {
+					return super.getBeanReferences(bean, context, resolver);
 				}
 				else {
-					String[] matchingBeans = provider.getBeansForType(lookupType);
+					String[] matchingBeans = resolver.getBeansForType(lookupType);
 					for (String matchingBen : matchingBeans) {
-						if (name.equals(matchingBen) || Arrays.asList(provider.getAliases(matchingBen)).contains(name)) {
+						if (name.equals(matchingBen) || Arrays.asList(resolver.getAliases(matchingBen)).contains(name)) {
 							IBeanReference ref = new AutowireBeanReference(bean, new RuntimeBeanReference(matchingBen));
 							if (getMember() instanceof Field) {
 								((AutowireBeanReference) ref).setSource((Field) getMember());
@@ -498,14 +498,14 @@ public class CommonAnnnotationInjectionMetadataProvider implements IInjectionMet
 
 		@Override
 		public Set<IBeanReference> getBeanReferences(IBean bean, IBeansModelElement context,
-				AutowireDependencyProvider provider) {
+				IAutowireDependencyResolver resolver) {
 			BeanDefinition bd = BeansModelUtils.getMergedBeanDefinition(bean, context);
 
 			if (!shouldSkip(bd)) {
 
 				if (StringUtils.hasLength(this.beanName)) {
-					if (provider.containsBean(this.beanName)) {
-						String[] matchingBeans = provider.getBeansForType(this.lookupType);
+					if (resolver.containsBean(this.beanName)) {
+						String[] matchingBeans = resolver.getBeansForType(this.lookupType);
 						for (String matchingBen : matchingBeans) {
 							if (this.beanName.equals(matchingBen)) {
 								IBeanReference ref = new AutowireBeanReference(bean, new RuntimeBeanReference(
@@ -526,7 +526,7 @@ public class CommonAnnnotationInjectionMetadataProvider implements IInjectionMet
 					}
 				}
 			}
-			return super.getBeanReferences(bean, context, provider);
+			return super.getBeanReferences(bean, context, resolver);
 		}
 
 	}

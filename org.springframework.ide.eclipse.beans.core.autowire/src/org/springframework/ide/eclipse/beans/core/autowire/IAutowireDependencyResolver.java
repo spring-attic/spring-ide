@@ -32,5 +32,9 @@ public interface IAutowireDependencyResolver {
 	 * Returns all bean names which bean class matches the given type. 
 	 */
 	String[] getBeansForType(Class<?> lookupType);
+
+	boolean containsBean(String name);
+
+	String[] getAliases(String matchingBen);
 	
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.Arrays;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -45,7 +46,7 @@ public class DefaultNamespaceContentProvider implements ITreeContentProvider {
 		if (parentElement instanceof IBean) {
 			java.util.List<IModelElement> children = new ArrayList<IModelElement>();
 			children.addAll(Arrays.asList(((ISourceModelElement) parentElement).getElementChildren()));
-			children.addAll(BeansCorePlugin.getMetadataModel().getBeanProperties((IBean) parentElement));
+			children.addAll(BeansMetadataPlugin.getMetadataModel().getBeanProperties((IBean) parentElement));
 			return children.toArray(new Object[children.size()]);
 		}
 		else if (parentElement instanceof ISourceModelElement) {
