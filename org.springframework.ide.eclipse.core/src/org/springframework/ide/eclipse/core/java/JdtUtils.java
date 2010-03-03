@@ -798,15 +798,12 @@ public class JdtUtils {
 			return false;
 		}
 		try {
-			ClassLoader cls = getClassLoader(resource.getProject(), SpringCore.class.getClassLoader());
+			ClassLoader cls = getClassLoader(resource.getProject(), null);
 			Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
 			Class<?> interfaceClass = cls.loadClass(className);
 			return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
 		}
-		catch (ClassNotFoundException e) {
-			return false;
-		}
-		catch (Exception e) {
+		catch (Throwable e) {
 			IType interfaceType = getJavaType(resource.getProject(), className);
 			if (type != null && interfaceType != null) {
 				try {
