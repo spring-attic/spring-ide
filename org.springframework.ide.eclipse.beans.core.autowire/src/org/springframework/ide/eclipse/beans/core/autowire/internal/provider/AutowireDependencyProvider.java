@@ -250,6 +250,12 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 				}
 			});
 		}
+		catch (ClassNotFoundException e) {
+			// Ignore here as this can easily happen if project class path is not complete
+		}
+		catch (NoClassDefFoundError e) {
+			// Ignore here as this can easily happen if project class path is not complete
+		}
 		catch (Throwable e) {
 			BeansCorePlugin.log(e);
 		}
