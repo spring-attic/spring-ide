@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadataMo
  */
 public class BeansMetadataPlugin extends Plugin {
 
-	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.core.metamdata";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.core.metadata";
 
 	private static BeansMetadataPlugin plugin;
 	
