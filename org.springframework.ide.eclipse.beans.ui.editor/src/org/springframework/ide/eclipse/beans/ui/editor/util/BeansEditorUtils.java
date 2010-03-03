@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -595,7 +595,7 @@ public class BeansEditorUtils {
 		return getAttribute(bean, "class");
 	}
 
-	public static final List getClassNamesOfBean(IFile file, Node node) {
+	public static final List<IType> getClassNamesOfBean(IFile file, Node node) {
 		List<IType> classNames = new ArrayList<IType>();
 		NamedNodeMap rootAttributes = node.getAttributes();
 

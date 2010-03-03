@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.beans.ui.refactoring.util;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -40,13 +42,14 @@ import org.w3c.dom.NodeList;
 
 /**
  * @author Christian Dupuis
+ * @author Terry Hon
  * @since 2.0
  */
 @SuppressWarnings("restriction")
 public class BeansRefactoringChangeUtils {
 
-	public static Change createMethodRenameChange(IFile file, IJavaElement[] affectedElements,
-			String[] newNames, IProgressMonitor pm) throws CoreException {
+	public static Change createMethodRenameChange(IFile file, IJavaElement[] affectedElements, String[] newNames,
+			IProgressMonitor pm) throws CoreException {
 		IStructuredModel model = null;
 		try {
 			model = StructuredModelManager.getModelManager().getModelForRead(file);
@@ -59,10 +62,9 @@ public class BeansRefactoringChangeUtils {
 			NodeList nodes = document.getElementsByTagName("bean");
 			for (int j = 0; j < affectedElements.length; j++) {
 				for (int i = 0; i < nodes.getLength(); i++) {
-					TextEdit edit = createMethodTextEdit(nodes.item(i), affectedElements[j],
-							newNames[j], file);
-					if (edit != null) {
-						multiEdit.addChild(edit);
+					Set<TextEdit> edits = createMethodTextEdits(nodes.item(i), affectedElements[j], newNames[j], file);
+					if (edits != null) {
+						multiEdit.addChildren(edits.toArray(new TextEdit[edits.size()]));
 					}
 				}
 			}
@@ -86,29 +88,67 @@ public class BeansRefactoringChangeUtils {
 	}
 
 	@SuppressWarnings( { "unchecked" })
-	private static TextEdit createMethodTextEdit(Node node, IJavaElement element, String newName,
-			IFile file) {
+	private static Set<TextEdit> createMethodTextEdits(Node node, IJavaElement element, String newName, IFile file) {
 		if (node == null) {
 			return null;
 		}
 
-		if (element instanceof IMethod && element.getElementName().startsWith("set")) {
-			String methodName = StringUtils.uncapitalize(element.getElementName().substring(3));
-			NodeList nodes = node.getChildNodes();
-			for (int i = 0; i < nodes.getLength(); i++) {
-				Node child = nodes.item(i);
-				if ("property".equals(child.getLocalName())
-						&& BeansEditorUtils.hasAttribute(child, "name")) {
-					String propertyName = BeansEditorUtils.getAttribute(child, "name");
-					if (methodName.equals(propertyName)) {
-						List<IType> types = BeansEditorUtils.getClassNamesOfBean(file, node);
-						if (types.contains(((IMethod) element).getDeclaringType())) {
-							AttrImpl attr = (AttrImpl) child.getAttributes().getNamedItem("name");
-							int offset = attr.getValueRegionStartOffset() + 1;
-							if (offset >= 0) {
-								return new ReplaceEdit(offset, propertyName.length(), newName);
+		Set<TextEdit> result = new HashSet<TextEdit>();
+
+		if (element instanceof IMethod) {
+			if (element.getElementName().startsWith("set")) {
+				String methodName = StringUtils.uncapitalize(element.getElementName().substring(3));
+				NodeList nodes = node.getChildNodes();
+				for (int i = 0; i < nodes.getLength(); i++) {
+					Node child = nodes.item(i);
+					if ("property".equals(child.getLocalName()) && BeansEditorUtils.hasAttribute(child, "name")) {
+						String propertyName = BeansEditorUtils.getAttribute(child, "name");
+						if (methodName.equals(propertyName)) {
+							List<IType> types = BeansEditorUtils.getClassNamesOfBean(file, node);
+							if (types.contains(((IMethod) element).getDeclaringType())) {
+								AttrImpl attr = (AttrImpl) child.getAttributes().getNamedItem("name");
+								int offset = attr.getValueRegionStartOffset() + 1;
+								if (offset >= 0) {
+									result.add(new ReplaceEdit(offset, propertyName.length(), newName));
+								}
 							}
 						}
+					}
+				}
+			}
+			else {
+				TextEdit edit = null;
+				edit = createMethodTextEditForAttribute(node, element, newName, file, "init-method");
+				if (edit != null) {
+					result.add(edit);
+				}
+
+				edit = createMethodTextEditForAttribute(node, element, newName, file, "destroy-method");
+				if (edit != null) {
+					result.add(edit);
+				}
+
+				edit = createMethodTextEditForAttribute(node, element, newName, file, "factory-method");
+				if (edit != null) {
+					result.add(edit);
+				}
+			}
+		}
+		return result;
+	}
+
+	private static TextEdit createMethodTextEditForAttribute(Node node, IJavaElement element, String newName,
+			IFile file, String attrName) {
+		String methodName = element.getElementName();
+		if (BeansEditorUtils.hasAttribute(node, attrName)) {
+			String attrMethodName = BeansEditorUtils.getAttribute(node, attrName);
+			if (methodName.equals(attrMethodName)) {
+				List<IType> types = BeansEditorUtils.getClassNamesOfBean(file, node);
+				if (types.contains(((IMethod) element).getDeclaringType())) {
+					AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem(attrName);
+					int offset = attr.getValueRegionStartOffset() + 1;
+					if (offset >= 0) {
+						return new ReplaceEdit(offset, attrMethodName.length(), newName);
 					}
 				}
 			}
@@ -190,8 +230,8 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	public static TextFileChange createRenameBeanRefsChange(IFile file, String beanId,
-			String newBeanId, IProgressMonitor monitor) throws CoreException {
+	public static TextFileChange createRenameBeanRefsChange(IFile file, String beanId, String newBeanId,
+			IProgressMonitor monitor) throws CoreException {
 		IStructuredModel model = null;
 		try {
 			model = StructuredModelManager.getModelManager().getModelForRead(file);
@@ -224,8 +264,7 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	private static void createRenameBeanRefsTextEdit(Node node, String beanId, String newBeanId,
-			MultiTextEdit multiEdit) {
+	private static void createRenameBeanRefsTextEdit(Node node, String beanId, String newBeanId, MultiTextEdit multiEdit) {
 		if (node == null) {
 			return;
 		}
@@ -246,8 +285,8 @@ public class BeansRefactoringChangeUtils {
 
 	}
 
-	private static void createRenameBeanRefTextEditForAttribute(String attributeName, Node node,
-			String beanId, String newBeanId, MultiTextEdit multiEdit) {
+	private static void createRenameBeanRefTextEditForAttribute(String attributeName, Node node, String beanId,
+			String newBeanId, MultiTextEdit multiEdit) {
 		if (BeansEditorUtils.hasAttribute(node, attributeName)) {
 			String beanRef = BeansEditorUtils.getAttribute(node, attributeName);
 			if (beanRef != null && beanRef.equals(beanId)) {
@@ -260,8 +299,8 @@ public class BeansRefactoringChangeUtils {
 		}
 	}
 
-	public static Change createRenameChange(IFile file, IJavaElement[] affectedElements,
-			String[] newNames, IProgressMonitor monitor) throws CoreException {
+	public static Change createRenameChange(IFile file, IJavaElement[] affectedElements, String[] newNames,
+			IProgressMonitor monitor) throws CoreException {
 		IJavaProject jp = JdtUtils.getJavaProject(file.getProject());
 		IStructuredModel model = null;
 		try {
@@ -280,8 +319,7 @@ public class BeansRefactoringChangeUtils {
 				// check that the element we are about to change is on the file's classpath
 				if (jp == null || (jp != null && jp.isOnClasspath(je))) {
 					for (int i = 0; i < nodes.getLength(); i++) {
-						TextEdit edit = createTextEdit(nodes.item(i), je,
-								newNames[j]);
+						TextEdit edit = createTextEdit(nodes.item(i), je, newNames[j]);
 						if (edit != null) {
 							multiEdit.addChild(edit);
 						}
@@ -312,11 +350,10 @@ public class BeansRefactoringChangeUtils {
 			return null;
 		}
 
-		String oldName = (element instanceof IType) ? ((IType) element).getFullyQualifiedName('$')
-				: element.getElementName();
+		String oldName = (element instanceof IType) ? ((IType) element).getFullyQualifiedName('$') : element
+				.getElementName();
 		String value = BeansEditorUtils.getAttribute(node, "class");
-		if (oldName.equals(value)
-				|| isGoodMatch(value, oldName, element instanceof IPackageFragment)) {
+		if (oldName.equals(value) || isGoodMatch(value, oldName, element instanceof IPackageFragment)) {
 			AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem("class");
 			int offset = attr.getValueRegionStartOffset() + 1;
 			if (offset >= 0) {
@@ -330,8 +367,8 @@ public class BeansRefactoringChangeUtils {
 		if (value == null || value.length() <= oldName.length()) {
 			return false;
 		}
-		boolean goodLengthMatch = isPackage ? value.lastIndexOf('.') <= oldName.length() : value
-				.charAt(oldName.length()) == '$';
+		boolean goodLengthMatch = isPackage ? value.lastIndexOf('.') <= oldName.length() : value.charAt(oldName
+				.length()) == '$';
 		return value.startsWith(oldName) && goodLengthMatch;
 	}
 }

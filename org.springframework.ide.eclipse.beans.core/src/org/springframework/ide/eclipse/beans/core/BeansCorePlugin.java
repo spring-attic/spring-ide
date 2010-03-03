@@ -242,6 +242,10 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		}
 		return bundleString;
 	}
+	
+	public static ClassLoader getClassLoader() {
+		return BeansCorePlugin.class.getClassLoader();
+	}
 
 	/**
 	 * Returns the plugin's resource bundle,

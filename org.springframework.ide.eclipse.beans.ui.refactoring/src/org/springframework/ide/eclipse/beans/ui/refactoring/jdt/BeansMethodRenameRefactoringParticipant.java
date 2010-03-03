@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ public class BeansMethodRenameRefactoringParticipant extends AbstractRenameRefac
 			IMethod method = (IMethod) element;
 			IJavaProject javaProject = (IJavaProject) method.getAncestor(IJavaElement.JAVA_PROJECT);
 			project = javaProject.getProject();
-			if (SpringCoreUtils.isSpringProject(project) && method.getElementName().startsWith("set")) {
+			if (SpringCoreUtils.isSpringProject(project)) {
 				elements = new HashMap<Object, Object>();
 				elements.put(method, getArguments().getNewName());
 				return true;

@@ -472,7 +472,7 @@ public class AopReferenceModelBuilderJob extends Job {
 	protected IProjectClassLoaderSupport createWeavingClassLoaderSupport(IProject project) {
 		if (!project.equals(this.currentProject)) {
 			this.currentProject = project;
-			return JdtUtils.getProjectClassLoaderSupport(project);
+			return JdtUtils.getProjectClassLoaderSupport(project, null);
 		}
 		return this.classLoaderSupport;
 	}

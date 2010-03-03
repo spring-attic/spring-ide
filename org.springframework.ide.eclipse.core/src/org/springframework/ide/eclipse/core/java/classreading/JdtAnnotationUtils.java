@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.ReflectionUtils;
@@ -93,8 +92,7 @@ public abstract class JdtAnnotationUtils {
 		}
 		// support for class
 		else if (member.getValueKind() == IMemberValuePair.K_CLASS && returnType.equals(Class.class.getName())) {
-			ClassLoader cls = JdtUtils.getProjectClassLoaderSupport(type.getJavaProject().getProject(),
-					SpringCore.class.getClassLoader()).getProjectClassLoader();
+			ClassLoader cls = JdtUtils.getClassLoader(type.getJavaProject().getProject(), null);
 			if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 				if (member.getValue().getClass().isArray()) {
 					Object[] classNames = (Object[]) member.getValue();

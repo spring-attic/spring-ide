@@ -148,7 +148,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	public synchronized IProjectClassLoaderSupport getProjectClassLoaderSupport() {
 		if (this.projectClassLoaderSupport == null) {
 			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(getRootElementProject(),
-					BeansCorePlugin.class.getClassLoader());
+					BeansCorePlugin.getClassLoader());
 		}
 		return this.projectClassLoaderSupport;
 	}

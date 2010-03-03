@@ -1180,8 +1180,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		@Override
 		protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
 			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
-			Object source = bdHolder.getSource();
 			if (bdHolder != null) {
+				Object source = bdHolder.getSource();
 				bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 
 				// Make sure that a decorated bean gets a source attachment

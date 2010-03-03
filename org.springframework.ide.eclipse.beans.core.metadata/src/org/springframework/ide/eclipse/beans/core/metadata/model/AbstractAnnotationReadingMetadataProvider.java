@@ -103,9 +103,9 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 			visitor = new JdtBasedAnnotationMetadata(orginalType);
 		}
 		else {
-			// Get the class reader as late as possible 
+			// Get the class reader as late as possible
 			ClassReaderFactory classReaderFactory = getClassReaderFactory(project);
-			
+
 			// Create new annotation meta data
 			visitor = createAnnotationMetadataReadingVisitor();
 
@@ -141,8 +141,8 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 	 */
 	private ClassReaderFactory getClassReaderFactory(IProject project) {
 		if (!classReaderFactoryCache.containsKey(project)) {
-			classReaderFactoryCache
-					.put(project, new CachingClassReaderFactory(JdtUtils.getClassLoader(project, null)));
+			classReaderFactoryCache.put(project, new CachingClassReaderFactory(JdtUtils.getClassLoader(project,
+					null)));
 		}
 		return classReaderFactoryCache.get(project);
 	}

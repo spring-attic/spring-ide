@@ -146,7 +146,7 @@ public class PointcutMatchQuery implements ISearchQuery {
 	}
 
 	private IProjectClassLoaderSupport getClassLoaderSupport(IProject project) {
-		return JdtUtils.getProjectClassLoaderSupport(project);
+		return JdtUtils.getProjectClassLoaderSupport(project, null);
 	}
 
 	public String getExpression() {

@@ -43,7 +43,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.ClassUtils;
 
@@ -67,7 +66,7 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 	private final Map<String, Resource[]> resolvedResources = new ConcurrentHashMap<String, Resource[]>();
 
 	public EclipsePathMatchingResourcePatternResolver(IProject project) {
-		this(project, JdtUtils.getClassLoader(project, SpringCore.class.getClassLoader()));
+		this(project, JdtUtils.getClassLoader(project, null));
 	}
 
 	public EclipsePathMatchingResourcePatternResolver(IProject project, ClassLoader classLoader) {

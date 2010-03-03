@@ -170,7 +170,7 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		Map<String, String> handlerMappings = new ConcurrentHashMap<String, String>();
 		try {
 			Properties mappings = PropertiesLoaderUtils.loadAllProperties(DEFAULT_SCHEMA_MAPPINGS_LOCATION, JdtUtils
-					.getProjectClassLoaderSupport(project).getProjectClassLoader());
+					.getClassLoader(project, null));
 			CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
 		}
 		catch (IOException ex) {

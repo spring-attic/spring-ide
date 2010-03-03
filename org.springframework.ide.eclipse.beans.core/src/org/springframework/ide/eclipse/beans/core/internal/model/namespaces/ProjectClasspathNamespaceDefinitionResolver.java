@@ -75,7 +75,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 				namespaceDefinitionRegistry.put(definition.getNamespaceUri(), (NamespaceDefinition) definition);
 			}
 
-			ClassLoader cls = JdtUtils.getProjectClassLoaderSupport(project).getProjectClassLoader();
+			ClassLoader cls = JdtUtils.getClassLoader(project, null);
 
 			Map<String, String> handlerMappings = new ConcurrentHashMap<String, String>();
 			Map<String, String> toolingMappings = new ConcurrentHashMap<String, String>();

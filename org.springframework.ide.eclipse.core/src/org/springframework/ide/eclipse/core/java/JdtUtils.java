@@ -436,10 +436,6 @@ public class JdtUtils {
 		return parameterTypesAsString;
 	}
 
-	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je) {
-		return new DefaultProjectClassLoaderSupport(je);
-	}
-
 	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je, ClassLoader parentClassLoader) {
 		return new DefaultProjectClassLoaderSupport(je, parentClassLoader);
 	}
@@ -802,7 +798,7 @@ public class JdtUtils {
 			return false;
 		}
 		try {
-			ClassLoader cls = getProjectClassLoaderSupport(resource.getProject()).getProjectClassLoader();
+			ClassLoader cls = getClassLoader(resource.getProject(), SpringCore.class.getClassLoader());
 			Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
 			Class<?> interfaceClass = cls.loadClass(className);
 			return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
@@ -837,10 +833,6 @@ public class JdtUtils {
 		private ClassLoader classLoader;
 
 		private ClassLoader weavingClassLoader;
-
-		public DefaultProjectClassLoaderSupport(IProject javaProject) {
-			this(javaProject, null);
-		}
 
 		public DefaultProjectClassLoaderSupport(IProject javaProject, ClassLoader parentClassLoader) {
 			setupClassLoaders(javaProject, parentClassLoader);
