@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -101,13 +100,17 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 
 	private void init() {
 		try {
-			for (IAnnotation annotation : Introspector.getAllAnnotations(type)) {
+			// Only collect the annotations for the given type; don't iterate up the hierarchy 
+			for (IAnnotation annotation : type.getAnnotations()) {
 				JdtAnnotationUtils.processAnnotation(annotation, type, annotationMap);
 			}
-			for (IMethod method : Introspector.getAllMethods(type)) {
-				JdtMethodMetadata metadata = new JdtMethodMetadata(type, method);
-				if (metadata.getAnnotationTypes().size() > 0) {
-					methodMetadata.add(metadata);
+			// Only collect the methods for the given type; don't iterate up the hierarchy 
+			for (IMethod method : type.getMethods()) {
+				if (!method.isConstructor()) {
+					JdtMethodMetadata metadata = new JdtMethodMetadata(type, method);
+					if (metadata.getAnnotationTypes().size() > 0) {
+						methodMetadata.add(metadata);
+					}
 				}
 			}
 		}
