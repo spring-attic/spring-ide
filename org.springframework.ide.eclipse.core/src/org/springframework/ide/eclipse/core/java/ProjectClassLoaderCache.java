@@ -199,6 +199,10 @@ class ProjectClassLoaderCache {
 				IProject curr = entry.getProject();
 				if (!curr.exists() || !curr.isAccessible() || !curr.isOpen()) {
 					removeClassLoaderEntryFromCache(entry);
+					if (DEBUG_CLASSLOADER) {
+						System.out.println(String.format("> removing classloader for '%s' : total %s", entry
+								.getProject(), CLASSLOADER_CACHE.size()));
+					}
 				}
 				else {
 					if (entry.matches(project, parentClassLoader)) {
@@ -221,46 +225,37 @@ class ProjectClassLoaderCache {
 	 * @return a set of {@link URL}s that can be used to construct a {@link URLClassLoader}
 	 */
 	private static List<URL> getClassPathUrls(IProject project, ClassLoader parentClassLoader) {
-		// prepare for tracing
-		long start = System.currentTimeMillis();
-		try {
 
-			// needs to be linked to preserve ordering
-			List<URL> paths = new ArrayList<URL>();
-			if (parentClassLoader == null) {
-				// add required libraries from osgi bundles
-				paths.addAll(JdtUtils.getBundleClassPath("org.springframework.core"));
-				paths.addAll(JdtUtils.getBundleClassPath("org.springframework.beans"));
-				paths.addAll(JdtUtils.getBundleClassPath("org.springframework.aop"));
-				paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
-				paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.apache.commons.logging"));
-				paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
-				paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aopalliance"));
-			}
+		// needs to be linked to preserve ordering
+		List<URL> paths = new ArrayList<URL>();
+		if (parentClassLoader == null) {
+			// add required libraries from osgi bundles
+			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.core"));
+			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.beans"));
+			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.context"));
+			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.aop"));
+			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
+			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.apache.commons.logging"));
+			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
+			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aopalliance"));
+		}
 
-			Set<IProject> resolvedProjects = new HashSet<IProject>();
-			addClassPathUrls(project, paths, resolvedProjects);
+		Set<IProject> resolvedProjects = new HashSet<IProject>();
+		addClassPathUrls(project, paths, resolvedProjects);
 
-			if (parentClassLoader == null) {
-				// search for slf4j and remove it; evil classloading issues if it ends up on the classpath and confuses
-				// Spring classes
-				for (URL path : new HashSet<URL>(paths)) {
-					if (path.getFile() != null
-							&& (path.getFile().contains("com.springsource.slf4j.org.apache.commons.logging") || path
-									.getFile().contains("jcl-over-slf4j"))) {
-						paths.remove(path);
-					}
+		if (parentClassLoader == null) {
+			// search for slf4j and remove it; evil classloading issues if it ends up on the classpath and confuses
+			// Spring classes
+			for (URL path : new HashSet<URL>(paths)) {
+				if (path.getFile() != null
+						&& (path.getFile().contains("com.springsource.slf4j.org.apache.commons.logging") || path
+								.getFile().contains("jcl-over-slf4j"))) {
+					paths.remove(path);
 				}
 			}
+		}
 
-			return paths;
-		}
-		finally {
-			if (DEBUG_CLASSLOADER) {
-				System.out.println("getClassLoader for '" + project.getProject().getName() + "' took "
-						+ (System.currentTimeMillis() - start) + "ms");
-			}
-		}
+		return paths;
 	}
 
 	private static void removeClassLoaderEntryFromCache(ClassLoaderCacheEntry entry) {
@@ -273,11 +268,15 @@ class ProjectClassLoaderCache {
 	/**
 	 * Returns a {@link ClassLoader} for the given project.
 	 */
-	protected static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
+	protected synchronized static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
 		ClassLoader classLoader = findClassLoaderInCache(project, parentClassLoader);
 		if (classLoader == null) {
 			List<URL> urls = getClassPathUrls(project, parentClassLoader);
 			classLoader = addClassLoaderToCache(project, urls, parentClassLoader);
+			if (DEBUG_CLASSLOADER) {
+				System.out.println(String.format("> creating new classloader for '%s' with parent '%s' : total %s",
+						project.getName(), parentClassLoader, CLASSLOADER_CACHE.size()));
+			}
 		}
 		return classLoader;
 	}
@@ -320,6 +319,10 @@ class ProjectClassLoaderCache {
 					if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
 							|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
 						if (javaProject.equals(delta.getElement()) || javaProject.isOnClasspath(delta.getElement())) {
+							if (DEBUG_CLASSLOADER) {
+								System.out.println(String.format("> removing classloader for '%s' : total %s", project
+										.getName(), CLASSLOADER_CACHE.size()));
+							}
 							removeClassLoaderEntryFromCache(this);
 						}
 					}
