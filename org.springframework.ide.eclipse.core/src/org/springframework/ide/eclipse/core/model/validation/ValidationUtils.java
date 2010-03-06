@@ -29,11 +29,9 @@ import org.springframework.ide.eclipse.core.SpringCore;
 public final class ValidationUtils {
 
 	/**
-	 * Creates the {@link IMarker validation markers} on the specified resource
-	 * for the given validation problems.
+	 * Creates the {@link IMarker validation markers} on the specified resource for the given validation problems.
 	 */
-	public static void createProblemMarkers(IResource resource,
-			Set<ValidationProblem> problems, String markerId) {
+	public static void createProblemMarkers(IResource resource, Set<ValidationProblem> problems, String markerId) {
 		if (problems != null) {
 			for (ValidationProblem problem : problems) {
 				// Don't install problems that are configured to get ignored
@@ -45,14 +43,11 @@ public final class ValidationUtils {
 	}
 
 	/**
-	 * Creates an {@link IMarker validation marker} on the specified resource
-	 * for the given validation problem.
+	 * Creates an {@link IMarker validation marker} on the specified resource for the given validation problem.
 	 * <p>
-	 * Adds the originating resource as marker attribute with the key
-	 * {@link MarkerUtils#ORIGINATING_RESOURCE_KEY}.
+	 * Adds the originating resource as marker attribute with the key {@link MarkerUtils#ORIGINATING_RESOURCE_KEY}.
 	 */
-	public static void createProblemMarker(IResource resource,
-			ValidationProblem problem, String markerId) {
+	public static void createProblemMarker(IResource resource, ValidationProblem problem, String markerId) {
 
 		// Use resource used during reporting of the problem as this might be
 		// more concise.
@@ -65,8 +60,7 @@ public final class ValidationUtils {
 			try {
 
 				// First check if specified marker already exists
-				IMarker[] markers = resource.findMarkers(markerId, false,
-						IResource.DEPTH_ZERO);
+				IMarker[] markers = resource.findMarkers(markerId, false, IResource.DEPTH_ZERO);
 				for (IMarker marker : markers) {
 					int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
 					if (line == problem.getLine()) {
@@ -81,32 +75,32 @@ public final class ValidationUtils {
 				IMarker marker = resource.createMarker(markerId);
 				Map<String, Object> attributes = new HashMap<String, Object>();
 				attributes.put(IMarker.MESSAGE, problem.getMessage());
-				attributes.put(IMarker.SEVERITY, new Integer(problem
-						.getSeverity()));
+				attributes.put(IMarker.SEVERITY, new Integer(problem.getSeverity()));
 
 				// Store the originating resource reference in marker so that
 				// the marker can later on be deleted with a reference from the
 				// initial resource
-				attributes.put(MarkerUtils.ORIGINATING_RESOURCE_KEY,
-						originatingResource.getFullPath().toString());
+				attributes.put(MarkerUtils.ORIGINATING_RESOURCE_KEY, originatingResource.getFullPath().toString());
 				if (problem.getLine() > 0) {
-					attributes.put(IMarker.LINE_NUMBER, new Integer(problem
-							.getLine()));
+					attributes.put(IMarker.LINE_NUMBER, new Integer(problem.getLine()));
 				}
 				if (problem.getErrorId() != null) {
-					attributes.put(IValidationProblemMarker.ERROR_ID, problem
-							.getErrorId());
+					attributes.put(IValidationProblemMarker.ERROR_ID, problem.getErrorId());
 				}
 				if (problem.getRuleId() != null) {
-					attributes.put(IValidationProblemMarker.RULE_ID, problem
-							.getRuleId());
+					attributes.put(IValidationProblemMarker.RULE_ID, problem.getRuleId());
 				}
-				
+
 				// Add validation attributes to the list of marker attributes
 				for (ValidationProblemAttribute attribute : problem.getAttributes()) {
-					attributes.put(attribute.getKey(), attribute.getValue());
+					Object value = attribute.getValue();
+
+					// Marker can only handle value of type String, Integer or Boolean
+					if (value instanceof String || value instanceof Integer || value instanceof Boolean) {
+						attributes.put(attribute.getKey(), value);
+					}
 				}
-				
+
 				marker.setAttributes(attributes);
 			}
 			catch (CoreException e) {
