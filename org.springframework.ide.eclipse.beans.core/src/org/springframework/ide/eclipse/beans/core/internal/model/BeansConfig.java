@@ -287,7 +287,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	protected void readConfig() {
 		if (!this.isModelPopulated) {
 
-			long start = System.currentTimeMillis();
+			// long start = System.currentTimeMillis();
 
 			// Only install Eclipse-based resource loader if enabled in project properties
 			// IMPORTANT: the following block needs to stay before the w.lock()
@@ -497,8 +497,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				}
 
 				// if (BeansModel.DEBUG) {
-				System.out.println(String.format("%s, loading %s", (System.currentTimeMillis() - start), file
-						.getFullPath().toString()));
+				// System.out.println(String.format("%s, loading %s", (System.currentTimeMillis() - start), file
+				// .getFullPath().toString()));
 				// System.out.println(String.format("+-- reading config '%s' took %sms",
 				// file.getFullPath().toString(), (System.currentTimeMillis() - start)));
 				// }
@@ -1181,23 +1181,24 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
 			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 			if (bdHolder != null) {
+				// Obtain source before decorating; decoration might discard the original source location
 				Object source = bdHolder.getSource();
 				bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 
-				// Make sure that a decorated bean gets a source attachment
+				// Set the original source in case it got discared by the decorator
 				if (bdHolder.getSource() == null) {
 					((AbstractBeanDefinition) bdHolder.getBeanDefinition()).setSource(source);
 				}
 
 				try {
-					// Register the final decorated instance.
+					// Register the final decorated instance
 					BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
 				}
 				catch (BeanDefinitionStoreException ex) {
 					getReaderContext().error(
 							"Failed to register bean definition with name '" + bdHolder.getBeanName() + "'", ele, ex);
 				}
-				// Send registration event.
+				// Send registration event
 				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 			}
 		}
