@@ -148,10 +148,10 @@ public class AopReferenceModelBuilderJob extends Job {
 				}
 			}
 			if (!monitor.isCanceled()) {
-				long start = System.currentTimeMillis();
+				// long start = System.currentTimeMillis();
 				this.buildAopModel(monitor);
-				System.out.println(String.format("%s, aop model building for %s resources",
-						(System.currentTimeMillis() - start), affectedResources.size()));
+				// System.out.println(String.format("%s, aop model building for %s resources",
+				// (System.currentTimeMillis() - start), affectedResources.size()));
 			}
 			else {
 				return Status.CANCEL_STATUS;
@@ -170,8 +170,8 @@ public class AopReferenceModelBuilderJob extends Job {
 	private void buildAopReferencesForBean(final IBean bean, final IModelElement context, final IAspectDefinition info,
 			final IResource file, final IAopProject aopProject, IProgressMonitor monitor) {
 		try {
-			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.processingBeanDefinition", bean, bean.getElementResource().getFullPath()));
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage("AopReferenceModelBuilder.processingBeanDefinition", 
+					bean, bean.getElementResource().getFullPath()));
 
 			// check if bean is abstract
 			if (bean.isAbstract()) {
@@ -315,7 +315,7 @@ public class AopReferenceModelBuilderJob extends Job {
 				aopProject = ((AopReferenceModel) Activator.getModel()).getProjectWithInitialization(javaProject);
 				aopProject.clearReferencesForResource(currentFile);
 
-				// Prepare class loaders
+				// Prepare class loader
 				this.classLoaderSupport = createWeavingClassLoaderSupport(project.getProject());
 
 				// AopLog.log(AopLog.BUILDER_CLASSPATH, Activator.getFormattedMessage(
@@ -325,13 +325,7 @@ public class AopReferenceModelBuilderJob extends Job {
 				List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
 				aspectInfos.addAll(buildAspectDefinitions(currentFile));
 
-				for (IBeansImport beansImport : config.getImports()) {
-					for (IImportedBeansConfig importedConfig : beansImport.getImportedBeansConfigs()) {
-						if (importedConfig.getElementResource() instanceof IFile) {
-							aspectInfos.addAll(buildAspectDefinitions((IFile) importedConfig.getElementResource()));
-						}
-					}
-				}
+				addAspectInfosFromImport(config, aspectInfos);
 
 				// remove references for all definitions
 				for (IAspectDefinition info : aspectInfos) {
@@ -358,6 +352,17 @@ public class AopReferenceModelBuilderJob extends Job {
 			}
 		}
 		return aopProject;
+	}
+
+	private void addAspectInfosFromImport(IBeansConfig config, List<IAspectDefinition> aspectInfos) {
+		for (IBeansImport beansImport : config.getImports()) {
+			for (IImportedBeansConfig importedConfig : beansImport.getImportedBeansConfigs()) {
+				if (importedConfig.getElementResource() instanceof IFile) {
+					aspectInfos.addAll(buildAspectDefinitions((IFile) importedConfig.getElementResource()));
+					addAspectInfosFromImport(importedConfig, aspectInfos);
+				}
+			}
+		}
 	}
 
 	/**
@@ -423,8 +428,10 @@ public class AopReferenceModelBuilderJob extends Job {
 						throw new OperationCanceledException();
 					}
 
-					AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-									"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile.getFullPath().toString()));
+					AopLog
+							.log(AopLog.BUILDER, Activator.getFormattedMessage(
+									"AopReferenceModelBuilder.buildingAopReferenceModel", currentFile.getFullPath()
+											.toString()));
 					monitor.subTask(Activator.getFormattedMessage("AopReferenceModelBuilder.buildingAopReferenceModel",
 							currentFile.getFullPath().toString()));
 
@@ -599,8 +606,10 @@ public class AopReferenceModelBuilderJob extends Job {
 								AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
 							}
 						}
-						AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
-							"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath().toString()));
+						AopLog
+								.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+										"AopReferenceModelBuilder.createdProblemMarkers", currentFile.getFullPath()
+												.toString()));
 					}
 				}
 				// adding markers for exceptions that occurred during parsing

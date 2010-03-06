@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.aop.core.util;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -190,22 +191,16 @@ public class AopReferenceModelUtils {
 			}
 		}
 
-		// Correctly add the imported files to the set of affected files
-		Set<IResource> files = new HashSet<IResource>();
+		Set<IResource> files = new LinkedHashSet<IResource>();
 		for (IBeansConfig config : configs) {
 			files.add(config.getElementResource());
-			for (IBeansImport beansImport : config.getImports()) {
-				for (IImportedBeansConfig importedBeansConfig : beansImport.getImportedBeansConfigs()) {
-					files.add(importedBeansConfig.getElementResource());
-				}
-			}
 		}
 
 		return files;
 	}
 
 	public static Set<IResource> getAffectedFilesFromBeansConfig(Set<IResource> files) {
-		Set<IResource> newResources = new HashSet<IResource>();
+		Set<IResource> newResources = new LinkedHashSet<IResource>();
 		for (IResource resource : files) {
 			// add confis from config set
 			IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
