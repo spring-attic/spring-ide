@@ -79,6 +79,17 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			this.definition = definition;
 		}
 		this.aliases = aliases;
+		
+		// Clean out references to resource resolvers
+		ConstructorArgumentValues cargValues = definition.getConstructorArgumentValues();
+		for (Object cargValue : cargValues.getGenericArgumentValues()) {
+			cleanValueHolder((ValueHolder) cargValue);
+		}
+		Map<?, ?> indexedCargValues = cargValues.getIndexedArgumentValues();
+		for (Object key : indexedCargValues.keySet()) {
+			cleanValueHolder((ValueHolder) indexedCargValues.get(key));
+		}
+		
 	}
 
 	public int getElementType() {
@@ -327,14 +338,13 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		constructorArguments = new LinkedHashSet<IBeanConstructorArgument>();
 		ConstructorArgumentValues cargValues = definition.getConstructorArgumentValues();
 		for (Object cargValue : cargValues.getGenericArgumentValues()) {
-			IBeanConstructorArgument carg = new BeanConstructorArgument(this, cleanValueHolder((ValueHolder) cargValue));
+			IBeanConstructorArgument carg = new BeanConstructorArgument(this, (ValueHolder) cargValue);
 			constructorArguments.add(carg);
 		}
 		Map<?, ?> indexedCargValues = cargValues.getIndexedArgumentValues();
 		for (Object key : indexedCargValues.keySet()) {
 			ValueHolder vHolder = (ValueHolder) indexedCargValues.get(key);
-			IBeanConstructorArgument carg = new BeanConstructorArgument(this, ((Integer) key).intValue(),
-					cleanValueHolder(vHolder));
+			IBeanConstructorArgument carg = new BeanConstructorArgument(this, ((Integer) key).intValue(), vHolder);
 			constructorArguments.add(carg);
 		}
 
@@ -361,9 +371,9 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			}
 		}
 	}
-	
+
 	/**
-	 * Cleans out references to ClassLoaders 
+	 * Cleans out references to ClassLoaders
 	 */
 	private ValueHolder cleanValueHolder(ValueHolder vHolder) {
 		if (vHolder.getValue() instanceof ResourceLoader) {
