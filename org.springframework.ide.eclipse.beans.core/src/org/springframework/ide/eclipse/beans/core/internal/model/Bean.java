@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig.InternalScannedGenericBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -326,13 +327,14 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		constructorArguments = new LinkedHashSet<IBeanConstructorArgument>();
 		ConstructorArgumentValues cargValues = definition.getConstructorArgumentValues();
 		for (Object cargValue : cargValues.getGenericArgumentValues()) {
-			IBeanConstructorArgument carg = new BeanConstructorArgument(this, (ValueHolder) cargValue);
+			IBeanConstructorArgument carg = new BeanConstructorArgument(this, cleanValueHolder((ValueHolder) cargValue));
 			constructorArguments.add(carg);
 		}
 		Map<?, ?> indexedCargValues = cargValues.getIndexedArgumentValues();
 		for (Object key : indexedCargValues.keySet()) {
 			ValueHolder vHolder = (ValueHolder) indexedCargValues.get(key);
-			IBeanConstructorArgument carg = new BeanConstructorArgument(this, ((Integer) key).intValue(), vHolder);
+			IBeanConstructorArgument carg = new BeanConstructorArgument(this, ((Integer) key).intValue(),
+					cleanValueHolder(vHolder));
 			constructorArguments.add(carg);
 		}
 
@@ -358,6 +360,16 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Cleans out references to ClassLoaders 
+	 */
+	private ValueHolder cleanValueHolder(ValueHolder vHolder) {
+		if (vHolder.getValue() instanceof ResourceLoader) {
+			vHolder.setValue(vHolder.getValue().getClass().getName());
+		}
+		return vHolder;
 	}
 
 }
