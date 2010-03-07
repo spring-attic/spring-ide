@@ -41,7 +41,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  */
 class ProjectClassLoaderCache {
 
-	private static final int CACHE_SIZE = 24;
+	private static final int CACHE_SIZE = 12;
 
 	private static List<ClassLoaderCacheEntry> CLASSLOADER_CACHE = new ArrayList<ClassLoaderCacheEntry>(CACHE_SIZE);
 
@@ -260,6 +260,10 @@ class ProjectClassLoaderCache {
 
 	private static void removeClassLoaderEntryFromCache(ClassLoaderCacheEntry entry) {
 		synchronized (CLASSLOADER_CACHE) {
+			if (DEBUG_CLASSLOADER) {
+				System.out.println(String.format("> removing classloader for '%s' : total %s", entry.getProject()
+						.getName(), CLASSLOADER_CACHE.size()));
+			}
 			entry.dispose();
 			CLASSLOADER_CACHE.remove(entry);
 		}
@@ -319,10 +323,6 @@ class ProjectClassLoaderCache {
 					if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
 							|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
 						if (javaProject.equals(delta.getElement()) || javaProject.isOnClasspath(delta.getElement())) {
-							if (DEBUG_CLASSLOADER) {
-								System.out.println(String.format("> removing classloader for '%s' : total %s", project
-										.getName(), CLASSLOADER_CACHE.size()));
-							}
 							removeClassLoaderEntryFromCache(this);
 						}
 					}
