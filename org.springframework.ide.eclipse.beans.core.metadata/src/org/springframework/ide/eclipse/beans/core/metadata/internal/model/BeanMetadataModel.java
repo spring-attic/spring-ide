@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadataMo
 import org.springframework.ide.eclipse.beans.core.metadata.model.IMethodMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * {@link IBeanMetadataModel} implementation that saves and reloads its contents from a backing
@@ -34,7 +35,7 @@ public class BeanMetadataModel implements IBeanMetadataModel {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/metadata/debug";
 
-	public static final boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
+	public static final boolean DEBUG = SpringCore.isDebug(DEBUG_OPTION);
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
