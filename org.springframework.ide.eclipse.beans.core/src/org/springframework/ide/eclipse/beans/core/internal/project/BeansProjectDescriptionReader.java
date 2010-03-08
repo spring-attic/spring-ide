@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -37,28 +38,25 @@ import org.xml.sax.SAXException;
  */
 public class BeansProjectDescriptionReader {
 
-	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
-			+ "/project/description/debug";
+	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/project/description/debug";
 
-	public static final boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
+	public static final boolean DEBUG = SpringCore.isDebug(DEBUG_OPTION);
 
 	/**
 	 * Reads project description for given Spring project.
 	 */
 	public static void read(BeansProject project) {
-		IFile file = ((IProject) project.getElementResource()).getFile(new Path(
-				IBeansProject.DESCRIPTION_FILE));
+		IFile file = ((IProject) project.getElementResource()).getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		File rawFile = file.getLocation().toFile();
-		
+
 		if (rawFile.exists()) {
 
 			if (DEBUG) {
-				System.out.println("Reading project description from "
-						+ file.getLocation().toString());
+				System.out.println("Reading project description from " + file.getLocation().toString());
 			}
 
 			BufferedInputStream is = null;
-			try { 
+			try {
 				is = new BufferedInputStream(new FileInputStream(rawFile));
 				BeansProjectDescriptionHandler handler = new BeansProjectDescriptionHandler(project);
 				try {

@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -252,11 +251,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	 */
 	public final ResourceBundle getResourceBundle() {
 		return resourceBundle;
-	}
-
-	public static boolean isDebug(String option) {
-		String value = Platform.getDebugOption(option);
-		return (value != null && value.equalsIgnoreCase("true") ? true : false);
 	}
 
 	public static void log(IStatus status) {

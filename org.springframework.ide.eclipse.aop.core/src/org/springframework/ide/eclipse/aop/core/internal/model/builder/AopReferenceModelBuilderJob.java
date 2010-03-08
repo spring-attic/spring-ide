@@ -58,6 +58,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -73,6 +74,10 @@ public class AopReferenceModelBuilderJob extends Job {
 	private static final boolean SHOW_PROGRESS = System.getProperty(
 			"org.springframework.ide.eclipse.aop.core.internal.model.builder.show.progress", "false").equalsIgnoreCase(
 			"true");
+
+	private static final String DEBUG_OPTION = Activator.PLUGIN_ID + "/builder/debug";
+
+	private static boolean DEBUG_BUILDER = SpringCore.isDebug(DEBUG_OPTION);
 
 	public static final Object CONTENT_FAMILY = new Object();
 
@@ -148,10 +153,12 @@ public class AopReferenceModelBuilderJob extends Job {
 				}
 			}
 			if (!monitor.isCanceled()) {
-				// long start = System.currentTimeMillis();
+				long start = System.currentTimeMillis();
 				this.buildAopModel(monitor);
-				// System.out.println(String.format("%s, aop model building for %s resources",
-				// (System.currentTimeMillis() - start), affectedResources.size()));
+				if (DEBUG_BUILDER) {
+					System.out.println(String.format("> aop model building took %sms for %s resources", (System
+							.currentTimeMillis() - start), affectedResources.size()));
+				}
 			}
 			else {
 				return Status.CANCEL_STATUS;
@@ -170,8 +177,8 @@ public class AopReferenceModelBuilderJob extends Job {
 	private void buildAopReferencesForBean(final IBean bean, final IModelElement context, final IAspectDefinition info,
 			final IResource file, final IAopProject aopProject, IProgressMonitor monitor) {
 		try {
-			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage("AopReferenceModelBuilder.processingBeanDefinition", 
-					bean, bean.getElementResource().getFullPath()));
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage("AopReferenceModelBuilder.processingBeanDefinition", bean, 
+					bean.getElementResource().getFullPath()));
 
 			// check if bean is abstract
 			if (bean.isAbstract()) {

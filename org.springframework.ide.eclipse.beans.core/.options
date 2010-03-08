@@ -2,6 +2,7 @@ org.springframework.ide.eclipse.beans.core/debug=true
 org.springframework.ide.eclipse.beans.core/model/debug=true
 org.springframework.ide.eclipse.beans.core/model/metadata/debug=true
 org.springframework.ide.eclipse.beans.core/model/validator/debug=true
+org.springframework.ide.eclipse.beans.core/model/loading/debug=true
 org.springframework.ide.eclipse.beans.core/reader/debug=true
 org.springframework.ide.eclipse.beans.core/project/debug=true
 org.springframework.ide.eclipse.beans.core/project/nature/debug=true

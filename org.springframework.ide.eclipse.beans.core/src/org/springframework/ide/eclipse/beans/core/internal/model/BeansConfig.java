@@ -94,6 +94,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.EclipsePathMatchingResourcePatternResolver;
@@ -127,6 +128,10 @@ import org.xml.sax.SAXParseException;
  * @author Christian Dupuis
  */
 public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement {
+
+	private static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/loading/debug";
+
+	private static final boolean DEBUG = SpringCore.isDebug(DEBUG_OPTION);
 
 	/** The default element provider used for non-namespaced elements */
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
@@ -287,7 +292,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	protected void readConfig() {
 		if (!this.isModelPopulated) {
 
-			// long start = System.currentTimeMillis();
+			long start = System.currentTimeMillis();
+			long count = 0;
 
 			// Only install Eclipse-based resource loader if enabled in project properties
 			// IMPORTANT: the following block needs to stay before the w.lock()
@@ -425,13 +431,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						try {
 							FutureTask<Integer> task = new FutureTask<Integer>(loadBeanDefinitionOperation);
 							BeansCorePlugin.getExecutorService().submit(task);
-							int count = task.get(BeansCorePlugin.getDefault().getPreferenceStore().getInt(
+							count = task.get(BeansCorePlugin.getDefault().getPreferenceStore().getInt(
 									BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID), TimeUnit.SECONDS);
 
-							if (BeansModel.DEBUG) {
-								System.out.println(count + " bean definitions loaded from '"
-										+ resource.getFile().getAbsolutePath() + "'");
-							}
 							// if we recored an exception use this instead of stupid concurrent exception
 							if (throwables.size() > 0) {
 								throw throwables.iterator().next();
@@ -496,12 +498,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					eventListener.onReadEnd(this);
 				}
 
-				// if (BeansModel.DEBUG) {
-				// System.out.println(String.format("%s, loading %s", (System.currentTimeMillis() - start), file
-				// .getFullPath().toString()));
-				// System.out.println(String.format("+-- reading config '%s' took %sms",
-				// file.getFullPath().toString(), (System.currentTimeMillis() - start)));
-				// }
+				if (DEBUG) {
+					System.out.println(String.format("> loading of %s beans from %s took %sms", count, file
+							.getFullPath().toString(), (System.currentTimeMillis() - start)));
+				}
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
 
@@ -35,7 +36,7 @@ public class BeansProjectDescriptionWriter implements IBeansProjectDescriptionCo
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/project/description/debug";
 
-	public static final boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
+	public static final boolean DEBUG = SpringCore.isDebug(DEBUG_OPTION);
 
 	public static void write(BeansProject project) {
 		IFile file = project.getProject().getFile(new Path(IBeansProject.DESCRIPTION_FILE));
