@@ -50,6 +50,8 @@ class ProjectClassLoaderCache {
 	private static boolean DEBUG_CLASSLOADER = SpringCore.isDebug(DEBUG_OPTION);
 
 	private static final String FILE_SCHEME = "file";
+	
+	private static ClassLoader PARENT_CLASS_LOADER = null; 
 
 	private static ClassLoader addClassLoaderToCache(IProject project, List<URL> urls, ClassLoader parentClassLoader) {
 		synchronized (CLASSLOADER_CACHE) {
@@ -228,18 +230,6 @@ class ProjectClassLoaderCache {
 
 		// needs to be linked to preserve ordering
 		List<URL> paths = new ArrayList<URL>();
-		if (parentClassLoader == null) {
-			// add required libraries from osgi bundles
-			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.core"));
-			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.beans"));
-			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.context"));
-			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.aop"));
-			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
-			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.apache.commons.logging"));
-			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
-			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aopalliance"));
-		}
-
 		Set<IProject> resolvedProjects = new HashSet<IProject>();
 		addClassPathUrls(project, paths, resolvedProjects);
 
@@ -273,6 +263,21 @@ class ProjectClassLoaderCache {
 	 * Returns a {@link ClassLoader} for the given project.
 	 */
 	protected synchronized static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
+		// Setup the root class loader to be used when no explicit parent class loader is given
+		if (parentClassLoader == null && PARENT_CLASS_LOADER == null) {
+			List<URL> paths = new ArrayList<URL>();
+			// add required libraries from osgi bundles
+			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.core"));
+			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.beans"));
+			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.context"));
+			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.aop"));
+			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
+			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.apache.commons.logging"));
+			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
+			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aopalliance"));
+			PARENT_CLASS_LOADER = new URLClassLoader(paths.toArray(new URL[paths.size()]));
+		}
+
 		ClassLoader classLoader = findClassLoaderInCache(project, parentClassLoader);
 		if (classLoader == null) {
 			List<URL> urls = getClassPathUrls(project, parentClassLoader);
@@ -376,7 +381,7 @@ class ProjectClassLoaderCache {
 					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
 				}
 				else {
-					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]));
+					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]), PARENT_CLASS_LOADER);
 				}
 				directories = dirs.toArray(new URL[dirs.size()]);
 			}
