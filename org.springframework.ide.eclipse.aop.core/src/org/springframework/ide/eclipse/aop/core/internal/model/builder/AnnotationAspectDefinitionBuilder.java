@@ -138,7 +138,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 
 	private void parseAnnotationAspects(IDOMDocument document, IBeansConfig beansConfig,
 			List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
-		if (document == null) {
+		if (document == null || document.getStructuredDocument() == null) {
 			return;
 		}
 		

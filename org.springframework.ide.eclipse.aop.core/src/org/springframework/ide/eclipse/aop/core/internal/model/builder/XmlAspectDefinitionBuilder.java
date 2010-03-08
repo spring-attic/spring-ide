@@ -208,7 +208,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder 
 
 	private void parseAopConfigElement(final IDOMDocument document, IFile file,
 			final List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
-		if (document == null) {
+		if (document == null || document.getStructuredDocument() == null) {
 			return;
 		}
 		

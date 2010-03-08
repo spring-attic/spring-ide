@@ -64,7 +64,7 @@ public class TransactionalXmlAspectDefinitionBuilder extends AbstractAspectDefin
 
 	private void parseAnnotationDrivenElement(final IDOMDocument document, IFile file,
 			final List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
-		if (document == null) {
+		if (document == null || document.getStructuredDocument() == null) {
 			return;
 		}
 		
