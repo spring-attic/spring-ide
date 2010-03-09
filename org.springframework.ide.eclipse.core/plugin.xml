@@ -54,9 +54,21 @@
    <extension
          point="org.eclipse.core.variables.dynamicVariables">
       <variable
-            description="description"
+            description="Resolves the path to the given bundle"
             name="bundle_loc"
             resolver="org.springframework.ide.eclipse.core.BundleLocationVariableResolver"
+            supportsArgument="true">
+      </variable>
+      <variable
+            description="Resolves the path to the given bundle's state location"
+            name="bundle_state_loc"
+            resolver="org.springframework.ide.eclipse.core.BundleStateLocationVariableResolver"
+            supportsArgument="true">
+      </variable>
+      <variable
+            description="Resolves the version to the given bundle"
+            name="bundle_version"
+            resolver="org.springframework.ide.eclipse.core.BundleVersionVariableResolver"
             supportsArgument="true">
       </variable>
    </extension>
