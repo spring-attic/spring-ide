@@ -9,7 +9,7 @@
 	<name>Target Platform for Spring Dynamic Modules for OSGi(tm) Service Platforms</name>
 	<properties>
 		<spring.groupId>org.springframework</spring.groupId>
-		<spring.version>3.0.1.RELEASE</spring.version>
+		<spring.version>3.0.1.RELEASE-A</spring.version>
 		<spring.osgi.groupId>org.springframework.osgi</spring.osgi.groupId>
 		<spring.osgi.version>1.2.1</spring.osgi.version>
 		<slf4j.version>1.5.6</slf4j.version>
