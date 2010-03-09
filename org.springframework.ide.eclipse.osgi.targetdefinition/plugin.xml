@@ -24,5 +24,10 @@
       </target>
    
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.startup">
+         <startup class="org.springframework.ide.eclipse.osgi.targetdefinition.TargetStartup"/>
+   </extension>
 
 </plugin>
