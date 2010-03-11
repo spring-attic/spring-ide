@@ -41,14 +41,16 @@ public class TargetStartup implements IStartup {
 			Enumeration<String> paths = bundle.getEntryPaths("/release/target/plugins/");
 			while (paths.hasMoreElements()) {
 				String path = paths.nextElement();
-				URL url = bundle.getEntry(path);
-				int ix = url.getFile().lastIndexOf('/');
-				File copy = new File(rootFolder, url.getFile().substring(ix));
-				if (!copy.exists()) {
-					if (!rootFolder.exists()) {
-						rootFolder.mkdirs();
+				if (path.endsWith(".jar")) {
+					URL url = bundle.getEntry(path);
+					int ix = url.getFile().lastIndexOf('/');
+					File copy = new File(rootFolder, url.getFile().substring(ix));
+					if (!copy.exists()) {
+						if (!rootFolder.exists()) {
+							rootFolder.mkdirs();
+						}
+						FileCopyUtils.copy(url.openStream(), new FileOutputStream(copy));
 					}
-					FileCopyUtils.copy(url.openStream(), new FileOutputStream(copy));
 				}
 			}
 		}
