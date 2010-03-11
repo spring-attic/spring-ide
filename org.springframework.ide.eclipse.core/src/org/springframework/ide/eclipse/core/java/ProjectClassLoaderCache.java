@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -262,15 +263,15 @@ class ProjectClassLoaderCache {
 	/**
 	 * Returns a {@link ClassLoader} for the given project.
 	 */
+	@SuppressWarnings("unchecked")
 	protected synchronized static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
 		// Setup the root class loader to be used when no explicit parent class loader is given
 		if (parentClassLoader == null && PARENT_CLASS_LOADER == null) {
 			List<URL> paths = new ArrayList<URL>();
-			// add required libraries from osgi bundles
-			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.core"));
-			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.beans"));
-			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.context"));
-			paths.addAll(JdtUtils.getBundleClassPath("org.springframework.aop"));
+			Enumeration<String> libs = SpringCore.getDefault().getBundle().getEntryPaths("/lib/");
+			while (libs.hasMoreElements()) {
+				paths.add(SpringCore.getDefault().getBundle().getEntry(libs.nextElement()));
+			}
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.apache.commons.logging"));
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));

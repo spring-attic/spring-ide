@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,11 +11,6 @@
 package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import org.springframework.aop.aspectj.AbstractAspectJAdvice;
-import org.springframework.aop.aspectj.AspectJAfterAdvice;
-import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
-import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
-import org.springframework.aop.aspectj.AspectJAroundAdvice;
-import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.ide.eclipse.aop.core.model.IAdvisorDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
@@ -38,19 +33,19 @@ public class AspectJAdviceClassFactory {
 
 		Class<?> aspectJAdviceClass = null;
 		if (info.getType() == ADVICE_TYPE.AROUND) {
-			aspectJAdviceClass = ClassUtils.loadClass(AspectJAroundAdvice.class);
+			aspectJAdviceClass = ClassUtils.loadClass("org.springframework.ide.eclipse.springframework.aop.aspectj.AspectJAroundAdvice");
 		}
 		else if (info.getType() == ADVICE_TYPE.AFTER) {
-			aspectJAdviceClass = ClassUtils.loadClass(AspectJAfterAdvice.class);
+			aspectJAdviceClass = ClassUtils.loadClass("org.springframework.ide.eclipse.springframework.aop.aspectj.AspectJAfterAdvice");
 		}
 		else if (info.getType() == ADVICE_TYPE.AFTER_RETURNING) {
-			aspectJAdviceClass = ClassUtils.loadClass(AspectJAfterReturningAdvice.class);
+			aspectJAdviceClass = ClassUtils.loadClass("org.springframework.ide.eclipse.springframework.aop.aspectj.AspectJAfterReturningAdvice");
 		}
 		else if (info.getType() == ADVICE_TYPE.AFTER_THROWING) {
-			aspectJAdviceClass = ClassUtils.loadClass(AspectJAfterThrowingAdvice.class);
+			aspectJAdviceClass = ClassUtils.loadClass("org.springframework.ide.eclipse.springframework.aop.aspectj.AspectJAfterThrowingAdvice");
 		}
 		else if (info.getType() == ADVICE_TYPE.BEFORE) {
-			aspectJAdviceClass = ClassUtils.loadClass(AspectJMethodBeforeAdvice.class);
+			aspectJAdviceClass = ClassUtils.loadClass("org.springframework.ide.eclipse.springframework.aop.aspectj.AspectJAroundAdvice");
 		}
 		return aspectJAdviceClass;
 	}

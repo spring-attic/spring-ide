@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,9 +31,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
 import org.springframework.aop.framework.AopInfrastructureBean;
-import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -80,7 +78,8 @@ public class AspectDefinitionMatcher {
 		}
 
 		// expose bean name on thread local
-		Class<?> proxyCreationContextClass = ClassUtils.loadClass(ProxyCreationContext.class);
+		Class<?> proxyCreationContextClass = ClassUtils
+				.loadClass("org.springframework.ide.eclipse.springframework.aop.framework.autoproxy.ProxyCreationContext");
 		List<String> beanNames = new ArrayList<String>();
 		beanNames.add(targetBean.getElementName());
 		if (targetBean.getAliases() != null && targetBean.getAliases().length > 0) {
@@ -100,15 +99,16 @@ public class AspectDefinitionMatcher {
 		}
 		return matches;
 	}
-	
+
 	public void close() {
 		for (Object pce : pointcutExpressionCache.values()) {
 			Field field = ReflectionUtils.findField(pce.getClass(), "shadowMatchCache");
 			field.setAccessible(true);
-			Map<?,?> shadowMatchCache = (Map<?, ?>) ReflectionUtils.getField(field, pce);
-			
+			Map<?, ?> shadowMatchCache = (Map<?, ?>) ReflectionUtils.getField(field, pce);
+
 			try {
-				Class<?> resolvedTypeClass = pce.getClass().getClassLoader().loadClass("org.aspectj.weaver.ResolvedType");
+				Class<?> resolvedTypeClass = pce.getClass().getClassLoader().loadClass(
+						"org.aspectj.weaver.ResolvedType");
 				Method resetPrimitivesMethod = resolvedTypeClass.getMethod("resetPrimitives");
 				resetPrimitivesMethod.invoke(resolvedTypeClass);
 			}
@@ -187,14 +187,16 @@ public class AspectDefinitionMatcher {
 			pointcutExpressionCache.put(info, pc);
 
 			Class<?> aspectJAdviceClass = AspectJAdviceClassFactory.getAspectJAdviceClass(info);
-			Class<?> aspectInstanceFactoryClass = ClassUtils.loadClass(SimpleAspectInstanceFactory.class);
+			Class<?> aspectInstanceFactoryClass = ClassUtils
+					.loadClass("org.springframework.ide.eclipse.springframework.aop.aspectj.SimpleAspectInstanceFactory");
 			if (aspectJAdviceClass != null && aspectInstanceFactoryClass != null) {
 				Constructor<?> ctor = aspectInstanceFactoryClass.getConstructors()[0];
 				Object aspectInstanceFactory = ctor.newInstance(aspectJAdviceClass);
-				
+
 				ctor = aspectJAdviceClass.getConstructors()[0];
-				Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc, aspectInstanceFactory});
-				
+				Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc,
+						aspectInstanceFactory });
+
 				if (info.getType() == ADVICE_TYPE.AFTER_RETURNING) {
 					if (info.getReturning() != null) {
 						ClassUtils.invokeMethod(aspectJAdvice, "setReturningName", info.getReturning());
@@ -222,7 +224,8 @@ public class AspectDefinitionMatcher {
 
 	private Object initAspectJExpressionPointcut(IAspectDefinition info) throws Throwable {
 
-		Class<?> expressionPointcutClass = ClassUtils.loadClass("org.springframework.aop.aspectj.AspectJExpressionPointcut");
+		Class<?> expressionPointcutClass = ClassUtils
+				.loadClass("org.springframework.ide.eclipse.springframework.aop.aspectj.AspectJExpressionPointcut");
 		Object pc = expressionPointcutClass.newInstance();
 		for (Method m : expressionPointcutClass.getMethods()) {
 			if (m.getName().equals("setExpression")) {
@@ -263,9 +266,9 @@ public class AspectDefinitionMatcher {
 		}
 
 		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass.getName());
-		
-		
-		// TODO CD here is room for speed improvements by collecting all valid methods in one go and then ask for matches
+
+		// TODO CD here is room for speed improvements by collecting all valid methods in one go and then ask for
+		// matches
 		ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 
