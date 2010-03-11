@@ -300,10 +300,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			// as it could otherwise create a runtime deadlock
 			ResourceLoader resourceLoader = null;
 			if (((IBeansProject) getElementParent()).isImportsEnabled()) {
-				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject());
+				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject(), JdtUtils
+						.getClassLoader(file.getProject(), BeansCorePlugin.getClassLoader()));
 			}
 			else {
-				resourceLoader = new ClassResourceFilteringPatternResolver(file.getProject());
+				resourceLoader = new ClassResourceFilteringPatternResolver(file.getProject(), JdtUtils.getClassLoader(
+						file.getProject(), BeansCorePlugin.getClassLoader()));
 			}
 
 			w.lock();
@@ -950,8 +952,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		/**
 		 * Creates a new {@link ClassResourceFilteringPatternResolver}
 		 */
-		public ClassResourceFilteringPatternResolver(IProject project) {
-			super(project);
+		public ClassResourceFilteringPatternResolver(IProject project, ClassLoader classLoader) {
+			super(project, classLoader);
 		}
 
 		/**
