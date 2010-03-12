@@ -690,15 +690,15 @@ public abstract class BeansModelUtils {
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static IBeansProject getProject(IModelElement element) {
-//		if (element instanceof IResourceModelElement) {
-//			IResource resource = ((IResourceModelElement) element).getElementResource();
-//			if (resource != null) {
-//				IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
-//				if (project != null) {
-//					return project;
-//				}
-//			}
-//		}
+		if (element instanceof IResourceModelElement) {
+			IResource resource = ((IResourceModelElement) element).getElementResource();
+			if (resource != null) {
+				IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
+				if (project != null) {
+					return project;
+				}
+			}
+		}
 	
 		IBeansProject project = getParentOfClass(element, IBeansProject.class);
 		if (project != null) {
