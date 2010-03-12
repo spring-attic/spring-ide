@@ -166,13 +166,15 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 
 	@Override
 	public void init() {
-		ClassContentAssistCalculator clazz = new ClassContentAssistCalculator(false);
-		registerContentAssistCalculator("bean", "class", clazz);
-		registerContentAssistCalculator("constructor-arg", "type", clazz);
-		registerContentAssistCalculator("arg-type", "match", clazz);
-		registerContentAssistCalculator("value", "type", clazz);
-		registerContentAssistCalculator("value-type", clazz);
-		registerContentAssistCalculator("key-type", clazz);
+		ClassContentAssistCalculator clazzOnly = new ClassContentAssistCalculator(false);
+		ClassContentAssistCalculator clazzAndInterface = new ClassContentAssistCalculator();
+		
+		registerContentAssistCalculator("bean", "class", clazzOnly);
+		registerContentAssistCalculator("constructor-arg", "type", clazzAndInterface);
+		registerContentAssistCalculator("arg-type", "match", clazzAndInterface);
+		registerContentAssistCalculator("value", "type", clazzAndInterface);
+		registerContentAssistCalculator("value-type", clazzAndInterface);
+		registerContentAssistCalculator("key-type", clazzAndInterface);
 
 		PropertyBeanReferenceContentAssistCalculator propertyBean = new PropertyBeanReferenceContentAssistCalculator();
 		registerContentAssistCalculator(NamespaceUtils.DEFAULT_NAMESPACE_URI, "bean", "property", "ref", propertyBean);
