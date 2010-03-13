@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.context;
 
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassHierachyContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
@@ -37,5 +38,9 @@ public class ContextContentAssistProcessor extends
 
 		registerContentAssistCalculator("component-scan", "base-package",
 				new PackageContentAssistCalculator());
+		
+		ClassContentAssistCalculator clazz = new ClassContentAssistCalculator(false);
+		registerContentAssistCalculator("include-filter", "expression", clazz);
+		registerContentAssistCalculator("exclude", "expression", clazz);
 	}
 }

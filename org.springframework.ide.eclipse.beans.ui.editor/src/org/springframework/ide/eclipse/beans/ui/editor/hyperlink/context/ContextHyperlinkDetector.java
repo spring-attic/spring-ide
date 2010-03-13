@@ -31,6 +31,9 @@ public class ContextHyperlinkDetector extends NamespaceHyperlinkDetectorSupport
 		registerHyperlinkCalculator("component-scan", "name-generator",	beanRef);
 		registerHyperlinkCalculator("component-scan", "scope-resolver", beanRef);
 
-		registerHyperlinkCalculator("load-time-weaver", "weaver-class", new ClassHyperlinkCalculator());
+		ClassHyperlinkCalculator clazz = new ClassHyperlinkCalculator();
+		registerHyperlinkCalculator("load-time-weaver", "weaver-class", clazz);
+		registerHyperlinkCalculator("include-filter", "expression", clazz);
+		registerHyperlinkCalculator("exclude-filter", "expression", clazz);
 	}
 }
