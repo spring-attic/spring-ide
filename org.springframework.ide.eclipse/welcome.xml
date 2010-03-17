@@ -13,3 +13,4 @@ project properties and set the properties on the property page "Spring".</p></it
 <p>Select <action pluginId="org.springframework.ide.eclipse.beans.ui" class="org.springframework.ide.eclipse.beans.ui.actions.OpenBeansViewAction">Window->Show View->Other->Spring->Spring Beans</action></p></item>
 
 </welcomePage>
+
