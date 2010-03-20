@@ -20,8 +20,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.beans.factory.xml.NamespaceHandler;
@@ -31,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.Tool
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.CollectionUtils;
 import org.w3c.dom.Document;
@@ -124,17 +123,10 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	}
 
 	private String getTargetNamespace(URL url) {
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setValidating(false);
-		factory.setNamespaceAware(false);
-		DocumentBuilder docBuilder;
 		try {
-			docBuilder = factory.newDocumentBuilder();
+			DocumentBuilder docBuilder = SpringCoreUtils.getDocumentBuilder();
 			Document doc = docBuilder.parse(url.openStream());
 			return doc.getDocumentElement().getAttribute("targetNamespace");
-		}
-		catch (ParserConfigurationException e) {
-			BeansCorePlugin.log(e);
 		}
 		catch (SAXException e) {
 			BeansCorePlugin.log(e);

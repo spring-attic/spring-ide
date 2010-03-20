@@ -86,13 +86,18 @@ public final class SpringCoreUtils {
 
 	private static final String XPATH_EXPRESSION = "//project-modules/wb-module/wb-resource";
 
-	private static XPathExpression expression;
+	private static final Object DOCUMENT_BUILDER_LOCK = new Object();
+
+	private static XPathExpression EXPRESSION;
+
+	private static boolean DOCUMENT_BUILDER_ERROR = false;
+
 
 	static {
 		try {
 			XPathFactory newInstance = XPathFactory.newInstance();
 			XPath xpath = newInstance.newXPath();
-			expression = xpath.compile(XPATH_EXPRESSION);
+			EXPRESSION = xpath.compile(XPATH_EXPRESSION);
 		}
 		catch (XPathExpressionException e) {
 			throw new RuntimeException(e);
@@ -565,7 +570,7 @@ public final class SpringCoreUtils {
 			IFile settingsFile = project.getFile(".settings/org.eclipse.wst.common.component");
 			if (settingsFile.exists()) {
 				try {
-					NodeList nodes = (NodeList) expression
+					NodeList nodes = (NodeList) EXPRESSION
 							.evaluate(parseDocument(settingsFile), XPathConstants.NODESET);
 					for (int i = 0; i < nodes.getLength(); i++) {
 						Element element = (Element) nodes.item(i);
@@ -610,26 +615,36 @@ public final class SpringCoreUtils {
 		}
 	}
 
-	private static synchronized DocumentBuilder getDocumentBuilder() {
-		try {
-			// this might fail on IBM J9; therefore we are using the catch to use the OSGi service
-			DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
-			return xmlFact.newDocumentBuilder();
+	public static DocumentBuilder getDocumentBuilder() {
+		if (!DOCUMENT_BUILDER_ERROR) {
+			try {
+				// this might fail on IBM J9; therefore trying only once and then falling back to
+				// OSGi service reference as it should be
+				DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
+				return xmlFact.newDocumentBuilder();
+			}
+			catch (Exception e) {
+				SpringCore.log(new Status(IStatus.INFO, SpringCore.PLUGIN_ID,
+						"Error creating DocumentBuilderFactory. Switching to OSGi service reference."));
+				DOCUMENT_BUILDER_ERROR = true;
+			}
 		}
-		catch (Exception e) {
-			ServiceReference reference = SpringCore.getDefault().getBundle().getBundleContext().getServiceReference(
-					DocumentBuilderFactory.class.getName());
-			if (reference != null) {
-				try {
+
+		ServiceReference reference = SpringCore.getDefault().getBundle().getBundleContext().getServiceReference(
+				DocumentBuilderFactory.class.getName());
+		if (reference != null) {
+			try {
+				synchronized (DOCUMENT_BUILDER_LOCK) {
 					return ((DocumentBuilderFactory) SpringCore.getDefault().getBundle().getBundleContext().getService(
 							reference)).newDocumentBuilder();
 				}
-				catch (Exception e1) {
-					SpringCore.log(e1);
-				}
-				SpringCore.getDefault().getBundle().getBundleContext().ungetService(reference);
 			}
+			catch (Exception e) {
+				SpringCore.log(e);
+			}
+			SpringCore.getDefault().getBundle().getBundleContext().ungetService(reference);
 		}
+
 		return null;
 	}
 
