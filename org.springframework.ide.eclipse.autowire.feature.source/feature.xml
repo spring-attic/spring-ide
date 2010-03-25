@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.autowire.feature.source"
       label="%featureName"
-      version="2.3.2.qualifier"
+      version="2.3.3.qualifier"
       provider-name="%featureProvider"
       plugin="org.springframework.ide.eclipse">
    
