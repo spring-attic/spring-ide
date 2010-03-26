@@ -23,33 +23,15 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  */
 public class WebflowProjectDescription {
 
-	/**
-	 * 
-	 */
 	private IWebflowProject project;
 
-	/**
-	 * 
-	 */
 	private List<IWebflowConfig> configs;
 
-	/**
-	 * 
-	 * 
-	 * @param project
-	 */
 	public WebflowProjectDescription(IWebflowProject project) {
 		this.project = project;
 		this.configs = new ArrayList<IWebflowConfig>();
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param file
-	 * 
-	 * @return
-	 */
 	public IWebflowConfig addConfig(IFile file) {
 		IWebflowConfig config = new WebflowConfig(project);
 		config.setResource(file);
@@ -57,29 +39,14 @@ public class WebflowProjectDescription {
 		return config;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param file
-	 */
 	public void add(IWebflowConfig file) {
 		configs.add(file);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public List<IWebflowConfig> getConfigs() {
 		return configs;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param file
-	 */
 	public void removeConfig(IFile file) {
 		IWebflowConfig config = null;
 		for (IWebflowConfig c : configs) {
@@ -92,11 +59,6 @@ public class WebflowProjectDescription {
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param configs
-	 */
 	public void setConfigs(List<IWebflowConfig> configs) {
 		this.configs = configs;
 	}

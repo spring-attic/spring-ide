@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,7 +109,7 @@ public class WebflowConfigTab {
 			IModelElement selectedModelElement) {
 		this.project = project;
 		this.element = element;
-		this.configFiles = new HashSet<IWebflowConfig>();
+		this.configFiles = new LinkedHashSet<IWebflowConfig>();
 		this.configFilesToBeansConfigs = new HashMap<IWebflowConfig, Set<IModelElement>>();
 		this.configFilesToNames = new HashMap<IWebflowConfig, String>();
 
