@@ -92,7 +92,6 @@ public final class SpringCoreUtils {
 
 	private static boolean DOCUMENT_BUILDER_ERROR = false;
 
-
 	static {
 		try {
 			XPathFactory newInstance = XPathFactory.newInstance();
@@ -587,7 +586,7 @@ public final class SpringCoreUtils {
 					}
 				}
 				catch (Exception e) {
-					SpringCore.log(e);
+					SpringCore.log(new Status(IStatus.WARNING, SpringCore.PLUGIN_ID, 1, e.getMessage(), e));
 				}
 			}
 		}
