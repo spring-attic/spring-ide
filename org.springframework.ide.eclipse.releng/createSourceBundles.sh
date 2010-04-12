@@ -14,8 +14,7 @@ TARGET_DIR=../required-bundles
 #TARGET_DIR=/Users/cdupuis/Development/Java/work/dm-server-tools/main-branches/jersey/required-bundles
 
 echo "...source bundles"
-rm maps/bundles.map
-
+rm -rf maps/bundles.map
 
 for II in $TARGET_DIR/*-sources-*jar; do 
 	echo $II
@@ -24,7 +23,19 @@ for II in $TARGET_DIR/*-sources-*jar; do
 
 	ant -f create-source-bundle.xml -Dbundle.symbolic.name=$NAME -Dbundle.version=$VERSION -Dbundle.home.path=$TARGET_DIR
 
-	rm $II
+	rm -rf $II
+done
+
+for II in $TARGET_DIR/*-sources.jar; do 
+	echo $II
+	NAME=`expr "$II" : '.*/\([a-z.A-Z]*\)\-.*'`
+	VERSION=`expr "$II" : '.*/[a-z.A-Z]*\-\(.*\)\-sources.jar'`
+	
+	mv $II $TARGET_DIR/$NAME-sources-$VERSION.jar
+	
+	ant -f create-source-bundle.xml -Dbundle.symbolic.name=$NAME -Dbundle.version=$VERSION -Dbundle.home.path=$TARGET_DIR
+
+	rm -rf $TARGET_DIR/$NAME-sources-$VERSION.jar
 done
 
 for II in $TARGET_DIR/*.jar; do 
