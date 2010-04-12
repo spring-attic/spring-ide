@@ -83,6 +83,13 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+         
+   <plugin
+         id="org.springframework.integration.ip"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="org.springframework.integration.jdbc"
@@ -99,14 +106,14 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.integration.mail"
+         id="org.springframework.integration.jmx"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.integration.osgi"
+         id="org.springframework.integration.mail"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -128,13 +135,6 @@
 
    <plugin
          id="org.springframework.integration.stream"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.integration.udp"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -170,6 +170,27 @@
 
    <plugin
          id="com.springsource.javax.mail"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.springsource.org.codehaus.jackson"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.springsource.org.codehaus.jackson.mapper"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.springsource.org.joda.time"
          download-size="0"
          install-size="0"
          version="0.0.0"

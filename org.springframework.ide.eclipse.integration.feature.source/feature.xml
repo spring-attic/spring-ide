@@ -80,6 +80,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.springframework.integration.ip.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.springframework.integration.jdbc.source"
          download-size="0"
          install-size="0"
@@ -94,14 +101,14 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.integration.mail.source"
+         id="org.springframework.integration.jmx.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.integration.osgi.source"
+         id="org.springframework.integration.mail.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -123,13 +130,6 @@
 
    <plugin
          id="org.springframework.integration.stream.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.integration.udp.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
