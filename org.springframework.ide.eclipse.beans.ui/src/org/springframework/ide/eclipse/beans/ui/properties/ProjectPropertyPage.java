@@ -155,9 +155,6 @@ public class ProjectPropertyPage extends PropertyPage {
 			SpringCorePreferences.getProjectPreferences(project.getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
 					BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
 					configFilesTab.shouldIgnoreMissingNamespaceHandler());
-			SpringCorePreferences.getProjectPreferences(project.getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
-					BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY,
-					configFilesTab.shouldLoadNamespaceHandlerFromClasspath());
 			newProject.saveDescription();
 		}
 

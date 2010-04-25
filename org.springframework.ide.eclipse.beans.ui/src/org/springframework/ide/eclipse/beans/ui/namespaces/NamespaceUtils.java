@@ -34,7 +34,6 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
@@ -130,12 +129,15 @@ public class NamespaceUtils {
 
 	public static List<INamespaceDefinition> getNamespaceDefinitions(IProject project) {
 		List<INamespaceDefinition> namespaceDefinitions = new ArrayList<INamespaceDefinition>();
+		
 		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin.getNamespaceDefinitionResolver(project);
 		Set<org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition> detectedNamespaceDefinitions = definitionResolver
 				.getNamespaceDefinitions();
+		
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
-		if (point != null && (project == null || !SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
-				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false))) {
+		if (point != null
+				&& !org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils
+						.useNamespacesFromClasspath(project)) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					String uri = config.getAttribute("uri");

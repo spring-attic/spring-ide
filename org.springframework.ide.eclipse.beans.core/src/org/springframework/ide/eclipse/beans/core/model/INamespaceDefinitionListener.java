@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model;
 
+import org.eclipse.core.resources.IProject;
+
 /**
  * Implementations of this interface will receive notifications when {@link INamespaceDefinition} are registered and
  * unregistered.
@@ -19,13 +21,32 @@ package org.springframework.ide.eclipse.beans.core.model;
 public interface INamespaceDefinitionListener {
 
 	/**
-	 * Event notifying about a processed registration of a {@link INamespaceDefinition}. 
+	 * Event notifying about a processed registration of a {@link INamespaceDefinition}.
 	 */
-	void onNamespaceDefinitionRegistered(INamespaceDefinition namespaceDefinition);
+	void onNamespaceDefinitionRegistered(NamespaceDefinitionChangeEvent event);
 
 	/**
-	 * Event notifying about a processed unregistration of a {@link INamespaceDefinition}. 
+	 * Event notifying about a processed un-registration of a {@link INamespaceDefinition}.
 	 */
-	void onNamespaceDefinitionUnregistered(INamespaceDefinition namespaceDefinition);
+	void onNamespaceDefinitionUnregistered(NamespaceDefinitionChangeEvent event);
 
+	class NamespaceDefinitionChangeEvent {
+		
+		private final INamespaceDefinition namespaceDefinition;
+
+		private final IProject project;
+		
+		public NamespaceDefinitionChangeEvent(INamespaceDefinition namespaceDefinition, IProject project) {
+			this.namespaceDefinition = namespaceDefinition;
+			this.project = project;
+		}
+		
+		public IProject getProject() {
+			return this.project;
+		}
+		
+		public INamespaceDefinition getNamespaceDefinition() {
+			return namespaceDefinition;
+		}
+	}
 }

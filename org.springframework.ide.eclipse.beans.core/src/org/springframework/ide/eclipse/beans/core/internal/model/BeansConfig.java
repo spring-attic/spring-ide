@@ -338,7 +338,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					// Set up classloader to use for NamespaceHandler and XSD loading
 					ClassLoader cl = BeansCorePlugin.getClassLoader();
 					if (SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
-							.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false)) {
+							.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false)) {
 						cl = JdtUtils.getClassLoader(file.getProject(), cl);
 					}
 

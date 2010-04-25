@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,8 +114,6 @@ public class ConfigFilesTab {
 
 	private static final String IGNORE_MISSING_NAMESPACEHANDLER_LABEL = PREFIX + "ignoreMissingNamespaceHandler.label";
 
-	private static final String LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_LABEL = PREFIX + "loadNamespaceHandlerFromClasspath.label";
-
 	private static final String NOTE_LABEL = PREFIX + "note.label";
 
 	private static final String SCAN_NOTE_LABEL = PREFIX + "scan.note.label";
@@ -158,8 +156,6 @@ public class ConfigFilesTab {
 	private boolean hasUserMadeChanges;
 
 	private Button ignoreMissingNamespaceHandlerText;
-
-	private Button loadNamespaceHandlerFromClasspathText;
 
 	public ConfigFilesTab(PropertiesModel model, PropertiesProject project, IModelElement selectedModelElement) {
 		this.model = model;
@@ -241,19 +237,6 @@ public class ConfigFilesTab {
 			}
 		});
 
-		// Load namespace handler and XSDs from classpath
-		loadNamespaceHandlerFromClasspathText = SpringUIUtils.createCheckBox(composite, BeansUIPlugin
-				.getResourceString(LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_LABEL));
-		loadNamespaceHandlerFromClasspathText.setSelection(SpringCorePreferences.getProjectPreferences(
-				project.getProject(), BeansCorePlugin.PLUGIN_ID).getBoolean(
-				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false));
-		loadNamespaceHandlerFromClasspathText.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				hasUserMadeChanges = true;
-			}
-		});
-
 		// Create ignore missing namespace handler checkbox
 		ignoreMissingNamespaceHandlerText = SpringUIUtils.createCheckBox(composite, BeansUIPlugin
 				.getResourceString(IGNORE_MISSING_NAMESPACEHANDLER_LABEL));
@@ -303,10 +286,6 @@ public class ConfigFilesTab {
 
 	public boolean shouldIgnoreMissingNamespaceHandler() {
 		return this.ignoreMissingNamespaceHandlerText.getSelection();
-	}
-
-	public boolean shouldLoadNamespaceHandlerFromClasspath() {
-		return this.loadNamespaceHandlerFromClasspathText.getSelection();
 	}
 
 	private void handleImportEnabledChanged() {

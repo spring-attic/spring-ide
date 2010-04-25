@@ -36,9 +36,8 @@ import org.osgi.framework.Constants;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
-import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.ProjectClasspathNamespaceDefinitionResolver;
+import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.ProjectClasspathNamespaceDefinitionResolverCache;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.core.MessageUtils;
@@ -64,13 +63,13 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
 
 	/** preference key to load namespace handler from classpath */
-	public static final String LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY = "loadNamespaceHandlerFromClasspath";
+	public static final String LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID = "loadNamespaceHandlerFromClasspath";
 
 	/** preference key for defining the parsing timeout */
 	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID + ".timeoutConfigLoading";
 
 	/** preference key to enable namespace versions per namespace */
-	public static final String NAMESPACE_VERSION_PROJECT_PREFERENCE_ID = "enable.namespace.versions";
+	public static final String PROJECT_PROPERTY_ID = "enable.project.preferences";
 
 	/** preference key to specify the default namespace version */
 	public static final String NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID = "default.version.";
@@ -97,7 +96,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
-	
+
 	/** Listeners to inform about namespace changes */
 	private volatile Set<INamespaceDefinitionListener> namespaceDefinitionListeners = Collections
 			.synchronizedSet(new HashSet<INamespaceDefinitionListener>());
@@ -136,6 +135,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		nsManager = new NamespaceManager(context);
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 		getPreferenceStore().setDefault(NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
+		getPreferenceStore().setDefault(LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false);
 
 		Job modelJob = new Job("Initializing Spring Tooling") {
 
@@ -171,46 +171,49 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the shared instance.
 	 */
-	public static final BeansCorePlugin getDefault() {
+	public static BeansCorePlugin getDefault() {
 		return plugin;
 	}
 
 	/**
 	 * Returns the singleton {@link IBeansModel}.
 	 */
-	public static final IBeansModel getModel() {
+	public static IBeansModel getModel() {
 		return getDefault().model;
 	}
-	
-	
-	public static final NamespaceHandlerResolver getNamespaceHandlerResolver() {
+
+	public static NamespaceHandlerResolver getNamespaceHandlerResolver() {
 		return getDefault().nsManager.getNamespacePlugins();
 	}
 
-	public static final INamespaceDefinitionResolver getNamespaceDefinitionResolver(IProject project) {
+	public static INamespaceDefinitionResolver getNamespaceDefinitionResolver() {
+		return getDefault().nsManager.getNamespacePlugins();
+	}
+
+	public static INamespaceDefinitionResolver getNamespaceDefinitionResolver(IProject project) {
 		if (project != null) {
-			return new ProjectClasspathNamespaceDefinitionResolver(project, getDefault().nsManager
-					.getNamespacePlugins());
+			return ProjectClasspathNamespaceDefinitionResolverCache.getResolver(project);
 		}
 		return getDefault().nsManager.getNamespacePlugins();
 	}
 
-	public static final ExecutorService getExecutorService() {
+	public static ExecutorService getExecutorService() {
 		return getDefault().executorService;
 	}
 
-	public static final void notifyNamespaceDefinitionListeners(INamespaceDefinition namespaceDefinition) {
+	public static void notifyNamespaceDefinitionListeners(IProject project) {
 		for (INamespaceDefinitionListener listener : getDefault().namespaceDefinitionListeners) {
-			listener.onNamespaceDefinitionRegistered(namespaceDefinition);
+			listener.onNamespaceDefinitionRegistered(new INamespaceDefinitionListener.NamespaceDefinitionChangeEvent(
+					null, project));
 		}
 	}
 
-	public static final void registerNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
+	public static void registerNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
 		getDefault().nsManager.getNamespacePlugins().registerNamespaceDefinitionListener(listener);
 		getDefault().namespaceDefinitionListeners.add(listener);
 	}
 
-	public static final void unregisterNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
+	public static void unregisterNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
 		getDefault().nsManager.getNamespacePlugins().unregisterNamespaceDefinitionListener(listener);
 		getDefault().namespaceDefinitionListeners.remove(listener);
 	}
@@ -218,7 +221,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the {@link IWorkspace} instance.
 	 */
-	public static final IWorkspace getWorkspace() {
+	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
 
@@ -242,7 +245,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		}
 		return bundleString;
 	}
-	
+
 	public static ClassLoader getClassLoader() {
 		return BeansCorePlugin.class.getClassLoader();
 	}
@@ -250,7 +253,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the plugin's resource bundle,
 	 */
-	public final ResourceBundle getResourceBundle() {
+	public ResourceBundle getResourceBundle() {
 		return resourceBundle;
 	}
 
@@ -291,11 +294,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 
-	protected void maybeAddNamespaceHandlerFor(final Bundle bundle, final boolean isLazy) {
+	protected void maybeAddNamespaceHandlerFor(Bundle bundle, boolean isLazy) {
 		nsManager.maybeAddNamespaceHandlerFor(bundle, isLazy);
 	}
 
-	protected void maybeRemoveNameSpaceHandlerFor(final Bundle bundle) {
+	protected void maybeRemoveNameSpaceHandlerFor(Bundle bundle) {
 		nsManager.maybeRemoveNameSpaceHandlerFor(bundle);
 	}
 

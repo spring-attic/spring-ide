@@ -253,7 +253,7 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 			return false;
 		}
 		return SpringCorePreferences.getProjectPreferences(resource.getProject(), BeansCorePlugin.PLUGIN_ID)
-				.getBoolean(BeansCorePlugin.NAMESPACE_VERSION_PROJECT_PREFERENCE_ID, false);
+				.getBoolean(BeansCorePlugin.PROJECT_PROPERTY_ID, false);
 	}
 
 	static class Version implements Comparable<Version> {

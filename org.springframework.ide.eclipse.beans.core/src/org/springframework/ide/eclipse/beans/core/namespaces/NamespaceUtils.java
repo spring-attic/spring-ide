@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -29,6 +30,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
@@ -227,6 +229,24 @@ public class NamespaceUtils {
 			entityResolvers = handlers;
 		}
 		return entityResolvers;
+	}
+
+	/**
+	 * Checks if a project should load namespace handlers from the classpath or use the global catalog.
+	 */
+	@SuppressWarnings("deprecation")
+	public static boolean useNamespacesFromClasspath(IProject project) {
+		if (project == null) {
+			return false;
+		}
+
+		if (SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
+				BeansCorePlugin.PROJECT_PROPERTY_ID, false)) {
+			return SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
+					BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false);
+		}
+		return BeansCorePlugin.getDefault().getPluginPreferences().getBoolean(
+				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
 	}
 
 	private static Object loadHandler(String providerBundle, String handlerClassName) {

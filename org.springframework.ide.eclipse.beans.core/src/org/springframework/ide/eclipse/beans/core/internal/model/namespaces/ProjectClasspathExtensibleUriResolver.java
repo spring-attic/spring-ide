@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,7 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		if (systemId != null
 				&& BeansCoreUtils.isBeansConfig(file)
 				&& SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
-						.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false)) {
+						.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false)) {
 //			long start = System.currentTimeMillis();
 			String result = null;
 			try {

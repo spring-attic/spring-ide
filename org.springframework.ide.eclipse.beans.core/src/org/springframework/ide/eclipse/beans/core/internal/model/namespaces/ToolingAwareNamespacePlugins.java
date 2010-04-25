@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,26 +11,18 @@
 package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
@@ -186,7 +178,8 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 			SafeRunner.run(new ISafeRunnable() {
 
 				public void run() throws Exception {
-					listener.onNamespaceDefinitionRegistered(definition);
+					listener.onNamespaceDefinitionRegistered(new INamespaceDefinitionListener.NamespaceDefinitionChangeEvent(
+							definition, null));
 				}
 
 				public void handleException(Throwable exception) {
@@ -319,7 +312,8 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 			SafeRunner.run(new ISafeRunnable() {
 
 				public void run() throws Exception {
-					listener.onNamespaceDefinitionUnregistered(definition);
+					listener.onNamespaceDefinitionUnregistered(new INamespaceDefinitionListener.NamespaceDefinitionChangeEvent(
+							definition, null));
 				}
 
 				public void handleException(Throwable exception) {
@@ -336,203 +330,6 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	public void registerNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
 		if (!namespaceDefinitionListeners.contains(listener)) {
 			namespaceDefinitionListeners.add(listener);
-		}
-	}
-
-	/**
-	 * Default implementation of {@link INamespaceDefinition}.
-	 */
-	public static class NamespaceDefinition implements INamespaceDefinition {
-
-		private Pattern versionPattern = Pattern.compile(".*-([0-9,.]*)\\.xsd");
-
-		private Bundle bundle;
-
-		private String iconPath;
-
-		private String name;
-
-		private String namespaceUri;
-
-		private String prefix;
-
-		private Set<String> schemaLocations = new HashSet<String>();
-
-		private Set<String> uris = new HashSet<String>();
-
-		private Properties uriMapping = new Properties();
-
-		private String defaultSchemaLocation = null;
-
-		public NamespaceDefinition(Properties uriMapping) {
-			this.uriMapping = uriMapping;
-		}
-
-		public void addSchemaLocation(String schemaLocation) {
-			schemaLocations.add(schemaLocation);
-		}
-
-		public void addUri(String uri) {
-			uris.add(uri);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public Bundle getBundle() {
-			return bundle;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public synchronized String getDefaultSchemaLocation() {
-			if (defaultSchemaLocation == null) {
-				// Per convention the version-less XSD is the default
-				for (String schemaLocation : schemaLocations) {
-					if (!versionPattern.matcher(schemaLocation).matches()) {
-						defaultSchemaLocation = schemaLocation;
-					}
-				}
-				if (defaultSchemaLocation == null && schemaLocations.size() > 0) {
-					List<String> locations = new ArrayList<String>(schemaLocations);
-					Collections.sort(locations);
-					defaultSchemaLocation = locations.get(0);
-				}
-			}
-			return defaultSchemaLocation;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		protected String getDefaultUri() {
-			String defaultUri = null;
-			Version version = Version.MINIMUM_VERSION;
-			for (String uri : uris) {
-				Version tempVersion = Version.MINIMUM_VERSION;
-				Matcher matcher = versionPattern.matcher(uri);
-				if (matcher.matches()) {
-					tempVersion = new Version(matcher.group(1));
-				}
-				if (tempVersion.compareTo(version) >= 0) {
-					version = tempVersion;
-					defaultUri = uri;
-				}
-			}
-			return defaultUri;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public InputStream getIconStream() {
-	        if (bundle == null || iconPath == null) {
-	            throw new IllegalArgumentException();
-	        }
-
-	        int bundleState = bundle.getState();
-	        if (!((bundleState & (Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING)) != 0)) {
-				return null;
-			}
-
-	        // look for the image (this will check both the plugin and fragment folders
-	        URL fullPathString = FileLocator.find(bundle, new Path(iconPath), null);
-	        if (fullPathString == null) {
-	            try {
-	                fullPathString = new URL(iconPath);
-	            } catch (MalformedURLException e) {
-	                return null;
-	            }
-	        }
-	        
-	        if (fullPathString != null) {
-	        	try {
-					return fullPathString.openStream();
-				}
-				catch (IOException e) {
-					BeansCorePlugin.log(e);
-				}
-	        }
-	        return null;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public String getName() {
-			return name;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public String getNamespaceUri() {
-			return namespaceUri;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public String getPrefix() {
-			if (prefix != null) {
-				return prefix;
-			}
-			int ix = namespaceUri.lastIndexOf('/');
-			if (ix > 0) {
-				return namespaceUri.substring(ix + 1);
-			}
-			return null;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public Set<String> getSchemaLocations() {
-			return schemaLocations;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setBundle(Bundle bundle) {
-			this.bundle = bundle;
-		}
-
-		public void setIconPath(String iconPath) {
-			this.iconPath = iconPath;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setNamespaceUri(String namespaceUri) {
-			this.namespaceUri = namespaceUri;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setPrefix(String prefix) {
-			this.prefix = prefix;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public Properties getUriMapping() {
-			return this.uriMapping;
-		}
-
-		public String getIconPath() {
-			return iconPath;
 		}
 	}
 
