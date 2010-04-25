@@ -192,7 +192,7 @@ public class NamespaceUtils {
 				}
 			}
 			// Add the OSGi-based namespace handler resolver
-			handlers.add(BeansCorePlugin.getNamespaceDefinitionResolver());
+			handlers.add(BeansCorePlugin.getNamespaceHandlerResolver());
 			namespaceHandlerResolvers = handlers;
 		}
 		return namespaceHandlerResolvers;

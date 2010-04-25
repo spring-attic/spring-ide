@@ -27,13 +27,13 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * This class is a label provider which knows about the beans core model's
- * {@link ISourceModelElement source elements} which belong to a namespace.
+ * This class is a label provider which knows about the beans core model's {@link ISourceModelElement source elements}
+ * which belong to a namespace.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
-		ITreePathLabelProvider, IDescriptionProvider {
+public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider, ITreePathLabelProvider,
+		IDescriptionProvider {
 
 	public Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating) {
 		String namespaceUri = NamespaceUtils.getNameSpaceURI(element);
@@ -43,10 +43,10 @@ public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
 			Image image = null;
 
 			org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition = BeansCorePlugin
-					.getNamespaceDefinitionResolver().resolveNamespaceDefinition(namespaceUri);
+					.getNamespaceDefinitionResolver(BeansModelUtils.getProject(element).getProject())
+					.resolveNamespaceDefinition(namespaceUri);
 			if (namespaceDefinition != null && namespaceDefinition.getIconPath() != null) {
-				image = NamespaceUtils.getImage(namespaceDefinition.getBundle().getSymbolicName(),
-						namespaceDefinition.getIconPath());
+				image = NamespaceUtils.getImage(namespaceDefinition);
 			}
 			else {
 				image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN);
@@ -60,10 +60,10 @@ public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
 			Image image = null;
 
 			org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition = BeansCorePlugin
-					.getNamespaceDefinitionResolver().resolveNamespaceDefinition(namespaceUri);
+					.getNamespaceDefinitionResolver(BeansModelUtils.getProject(element).getProject())
+					.resolveNamespaceDefinition(namespaceUri);
 			if (namespaceDefinition != null && namespaceDefinition.getIconPath() != null) {
-				image = NamespaceUtils.getImage(namespaceDefinition.getBundle().getSymbolicName(),
-						namespaceDefinition.getIconPath());
+				image = NamespaceUtils.getImage(namespaceDefinition);
 			}
 			else {
 				image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_COMPONENT);
@@ -97,8 +97,7 @@ public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
 		Object element = elementPath.getLastSegment();
 		if (element instanceof ISourceModelElement && elementPath.getSegmentCount() > 1) {
 			Object parent = elementPath.getParentPath().getLastSegment();
-			IModelElement context = (parent instanceof IModelElement ? (IModelElement) parent
-					: null);
+			IModelElement context = (parent instanceof IModelElement ? (IModelElement) parent : null);
 			// TODO CD revise
 			label.setImage(getImage((ISourceModelElement) element, context, false));
 			label.setText(getText((ISourceModelElement) element, context, false));
@@ -107,8 +106,7 @@ public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
 
 	public String getDescription(Object element) {
 		if (element instanceof ISourceModelElement) {
-			return getElementLabel((ISourceModelElement) element, BeansUILabels.APPEND_PATH
-					| BeansUILabels.DESCRIPTION);
+			return getElementLabel((ISourceModelElement) element, BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
 		}
 		return null;
 	}

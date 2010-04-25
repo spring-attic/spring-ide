@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +28,9 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
@@ -422,8 +426,35 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		/**
 		 * {@inheritDoc}
 		 */
-		public String getIconPath() {
-			return iconPath;
+		public InputStream getIconStream() {
+	        if (bundle == null || iconPath == null) {
+	            throw new IllegalArgumentException();
+	        }
+
+	        int bundleState = bundle.getState();
+	        if (!((bundleState & (Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING)) != 0)) {
+				return null;
+			}
+
+	        // look for the image (this will check both the plugin and fragment folders
+	        URL fullPathString = FileLocator.find(bundle, new Path(iconPath), null);
+	        if (fullPathString == null) {
+	            try {
+	                fullPathString = new URL(iconPath);
+	            } catch (MalformedURLException e) {
+	                return null;
+	            }
+	        }
+	        
+	        if (fullPathString != null) {
+	        	try {
+					return fullPathString.openStream();
+				}
+				catch (IOException e) {
+					BeansCorePlugin.log(e);
+				}
+	        }
+	        return null;
 		}
 
 		/**
@@ -498,6 +529,10 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		 */
 		public Properties getUriMapping() {
 			return this.uriMapping;
+		}
+
+		public String getIconPath() {
+			return iconPath;
 		}
 	}
 

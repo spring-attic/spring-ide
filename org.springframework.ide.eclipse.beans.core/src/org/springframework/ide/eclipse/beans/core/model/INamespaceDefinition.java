@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model;
 
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
-
-import org.osgi.framework.Bundle;
 
 /**
  * Represents a Spring namespace created from reading the <code>spring.tooling</code> file in
@@ -34,10 +33,15 @@ public interface INamespaceDefinition {
 	String getName();
 
 	/**
+	 * Returns the InputStream to a namespace icon with the bundle.
+	 */
+	InputStream getIconStream();
+	
+	/**
 	 * Returns a path to a namespace icon with the bundle.
 	 */
 	String getIconPath();
-
+	
 	/**
 	 * Returns the namespace uri.
 	 */
@@ -55,10 +59,8 @@ public interface INamespaceDefinition {
 	String getDefaultSchemaLocation();
 	
 	/**
-	 * Returns the {@link Bundle} that hosts the namespace.
+	 * Return the url mappings 
 	 */
-	Bundle getBundle();
-	
 	Properties getUriMapping();
 
 }

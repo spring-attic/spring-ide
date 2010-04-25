@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
-
 /**
  * Resolver to obtain references to {@link INamespaceDefinition}s. 
  * <p>
@@ -22,7 +20,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
  * @author Christian Dupuis
  * @since 2.2.5
  */
-public interface INamespaceDefinitionResolver extends NamespaceHandlerResolver {
+public interface INamespaceDefinitionResolver {
 
 	/**
 	 * Resolve a {@link INamespaceDefinition} for the given <code>namespaceUri</code>. May return

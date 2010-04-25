@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.namespaces;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,10 +29,12 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
@@ -41,12 +45,14 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  */
 public class NamespaceUtils {
-	
+
 	public static final String NAMESPACES_EXTENSION_POINT = BeansUIPlugin.PLUGIN_ID + ".namespaces";
 
 	public static final String DEFAULT_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
 	public static final String TOOLS_NAMESPACE_URI = "http://www.springframework.org/schema/tool";
+
+	private static final Object IMAGE_REGISTRY_LOCK = new Object();
 
 	/**
 	 * Returns the namespace URI for the given {@link ISourceModelElement} or
@@ -128,7 +134,8 @@ public class NamespaceUtils {
 		Set<org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition> detectedNamespaceDefinitions = definitionResolver
 				.getNamespaceDefinitions();
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
-		if (point != null) {
+		if (point != null && (project == null || !SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
+				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_PROPERTY, false))) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					String uri = config.getAttribute("uri");
@@ -151,9 +158,7 @@ public class NamespaceUtils {
 						image = getImage(ns, icon);
 					}
 					else if (namespaceDefinition != null) {
-						String ns = namespaceDefinition.getBundle().getSymbolicName();
-						String icon = namespaceDefinition.getIconPath();
-						image = getImage(ns, icon);
+						image = getImage(namespaceDefinition);
 					}
 
 					DefaultNamespaceDefinition def = null;
@@ -180,12 +185,7 @@ public class NamespaceUtils {
 		}
 
 		for (org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition : detectedNamespaceDefinitions) {
-			String ns = (namespaceDefinition.getBundle() != null ? namespaceDefinition.getBundle().getSymbolicName() : null);
-			String icon = namespaceDefinition.getIconPath();
-			Image image = null;
-			if (icon != null) {
-				image = getImage(ns, icon);
-			}
+			Image image = getImage(namespaceDefinition);
 			DefaultNamespaceDefinition def = new DefaultNamespaceDefinition(namespaceDefinition.getPrefix(),
 					namespaceDefinition.getNamespaceUri(), namespaceDefinition.getDefaultSchemaLocation(),
 					namespaceDefinition.getUriMapping(), image);
@@ -195,7 +195,8 @@ public class NamespaceUtils {
 
 		Collections.sort(namespaceDefinitions, new Comparator<INamespaceDefinition>() {
 			public int compare(INamespaceDefinition o1, INamespaceDefinition o2) {
-				if (o1 != null && o1.getDefaultNamespacePrefix() != null && o2 != null && o2.getDefaultNamespacePrefix() != null) {
+				if (o1 != null && o1.getDefaultNamespacePrefix() != null && o2 != null
+						&& o2.getDefaultNamespacePrefix() != null) {
 					return o1.getDefaultNamespacePrefix().compareTo(o2.getDefaultNamespacePrefix());
 				}
 				return 0;
@@ -211,9 +212,9 @@ public class NamespaceUtils {
 
 		return namespaceDefinitions;
 	}
-	
+
 	public static INamespaceDefinition getDefaultNamespaceDefinition() {
-		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin.getNamespaceDefinitionResolver();
+		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin.getNamespaceDefinitionResolver(null);
 		org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition = definitionResolver
 				.resolveNamespaceDefinition(DEFAULT_NAMESPACE_URI);
 
@@ -240,9 +241,7 @@ public class NamespaceUtils {
 							image = getImage(ns, icon);
 						}
 						else if (namespaceDefinition != null) {
-							String ns = namespaceDefinition.getBundle().getSymbolicName();
-							String icon = namespaceDefinition.getIconPath();
-							image = getImage(ns, icon);
+							image = getImage(namespaceDefinition);
 						}
 						return new DefaultNamespaceDefinition(prefix, uri, schemaLocation, namespaceDefinition
 								.getUriMapping(), image);
@@ -252,9 +251,7 @@ public class NamespaceUtils {
 		}
 
 		if (namespaceDefinition != null) {
-			String ns = namespaceDefinition.getBundle().getSymbolicName();
-			String icon = namespaceDefinition.getIconPath();
-			Image image = getImage(ns, icon);
+			Image image = getImage(namespaceDefinition);
 			return new DefaultNamespaceDefinition(namespaceDefinition.getPrefix(), namespaceDefinition
 					.getNamespaceUri(), namespaceDefinition.getDefaultSchemaLocation(), namespaceDefinition
 					.getUriMapping(), image);
@@ -265,19 +262,62 @@ public class NamespaceUtils {
 	/**
 	 * Returns an {@link Image} instance which is located at the indicated icon path.
 	 */
-	public synchronized static Image getImage(String ns, String icon) {
-		if (StringUtils.hasText(icon)) {
-			Image image = BeansUIPlugin.getDefault().getImageRegistry().get(icon);
-			if (image == null) {
-				ImageDescriptor imageDescriptor = BeansUIPlugin.imageDescriptorFromPlugin(ns, icon);
-				BeansUIPlugin.getDefault().getImageRegistry().put(icon, imageDescriptor);
-				image = BeansUIPlugin.getDefault().getImageRegistry().get(icon);
+	public static Image getImage(
+			org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition) {
+		if (StringUtils.hasText(namespaceDefinition.getIconPath())) {
+			synchronized (IMAGE_REGISTRY_LOCK) {
+				Image image = BeansUIPlugin.getDefault().getImageRegistry().get(namespaceDefinition.getIconPath());
+				if (image == null) {
+					InputStream is = namespaceDefinition.getIconStream();
+					if (is != null) {
+						try {
+							ImageDescriptor imageDescriptor = ImageDescriptor.createFromImageData(new ImageData(is));
+							BeansUIPlugin.getDefault().getImageRegistry().put(namespaceDefinition.getIconPath(),
+									imageDescriptor);
+							image = BeansUIPlugin.getDefault().getImageRegistry()
+									.get(namespaceDefinition.getIconPath());
+						}
+						finally {
+							if (is != null) {
+								try {
+									is.close();
+								}
+								catch (IOException e) {
+								}
+							}
+						}
+					}
+					else {
+						BeansUIPlugin.getDefault().getImageRegistry().put(namespaceDefinition.getIconPath(),
+								BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD));
+						image = BeansUIPlugin.getDefault().getImageRegistry().get(namespaceDefinition.getIconPath());
+					}
+				}
+				return image;
 			}
-			return image;
 		}
 		else {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
 		}
 	}
 
+	/**
+	 * Returns an {@link Image} instance which is located at the indicated icon path.
+	 */
+	private static Image getImage(String ns, String icon) {
+		if (StringUtils.hasText(icon)) {
+			synchronized (IMAGE_REGISTRY_LOCK) {
+				Image image = BeansUIPlugin.getDefault().getImageRegistry().get(icon);
+				if (image == null) {
+					ImageDescriptor imageDescriptor = BeansUIPlugin.imageDescriptorFromPlugin(ns, icon);
+					BeansUIPlugin.getDefault().getImageRegistry().put(icon, imageDescriptor);
+					image = BeansUIPlugin.getDefault().getImageRegistry().get(icon);
+				}
+				return image;
+			}
+		}
+		else {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
+		}
+	}
 }

@@ -54,12 +54,10 @@ public class DelegatingLabelProvider extends LabelProvider {
 			}
 		}
 
-		INamespaceDefinition namespaceDefinition = BeansCorePlugin.getNamespaceDefinitionResolver()
+		INamespaceDefinition namespaceDefinition = BeansCorePlugin.getNamespaceDefinitionResolver(null)
 				.resolveNamespaceDefinition(namespace);
-		if (namespaceDefinition != null && namespaceDefinition.getIconPath() != null) {
-			return org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils.getImage(
-					namespaceDefinition.getBundle().getSymbolicName(), namespaceDefinition
-							.getIconPath());
+		if (namespaceDefinition != null) {
+			return org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils.getImage(namespaceDefinition);
 		}
 
 		return xmlProvider.getImage(object);

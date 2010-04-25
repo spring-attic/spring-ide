@@ -33,8 +33,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
+import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
+import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.ProjectClasspathNamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
@@ -181,16 +183,15 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	}
 	
 	
-	public static final INamespaceDefinitionResolver getNamespaceDefinitionResolver() {
-		return getNamespaceDefinitionResolver(null);
+	public static final NamespaceHandlerResolver getNamespaceHandlerResolver() {
+		return getDefault().nsManager.getNamespacePlugins();
 	}
 
 	public static final INamespaceDefinitionResolver getNamespaceDefinitionResolver(IProject project) {
-// TODO CD do we want to add this back? 
-//		if (project != null) {
-//			return new ProjectClasspathNamespaceDefinitionResolver(project, getDefault().nsManager
-//					.getNamespacePlugins());
-//		}
+		if (project != null) {
+			return new ProjectClasspathNamespaceDefinitionResolver(project, getDefault().nsManager
+					.getNamespacePlugins());
+		}
 		return getDefault().nsManager.getNamespacePlugins();
 	}
 
