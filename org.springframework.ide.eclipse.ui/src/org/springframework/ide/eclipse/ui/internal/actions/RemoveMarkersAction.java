@@ -26,13 +26,25 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.core.SpringCore;
 
+/**
+ * This action implementation will remove all Spring-related project markers.
+ * @author Christian Dupuis
+ * @since 2.3.3
+ */
 public class RemoveMarkersAction implements IObjectActionDelegate {
 
 	private List<IProject> selected = new ArrayList<IProject>();
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+		// intentionally left empty
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 		selected.clear();
 		if (selection instanceof IStructuredSelection) {
@@ -62,6 +74,9 @@ public class RemoveMarkersAction implements IObjectActionDelegate {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void run(IAction action) {
 		Iterator iter = selected.iterator();
 		while (iter.hasNext()) {
