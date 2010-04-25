@@ -83,6 +83,13 @@
                menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
                id="org.springframework.ide.eclipse.ui.actions.removeNature">
          </action>
+         <action
+               label="Remove Validation Markers"
+               class="org.springframework.ide.eclipse.ui.internal.actions.RemoveMarkersAction"
+               enablesFor="+"
+               menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
+               id="org.springframework.ide.eclipse.ui.actions.cleanMarkers">
+         </action>
       </objectContribution>
    </extension>
 
