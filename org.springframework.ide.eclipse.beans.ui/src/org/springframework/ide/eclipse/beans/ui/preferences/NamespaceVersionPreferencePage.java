@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.preferences;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Preferences;
@@ -30,11 +33,14 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -94,7 +100,7 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 	private class XsdConfigContentProvider implements IStructuredContentProvider {
 
 		public Object[] getElements(Object obj) {
-			return NamespaceUtils.getNamespaceDefinitions(getProject()).toArray();
+			return getNamespaceDefinitionList().toArray();
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -134,45 +140,82 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 
 	private Button classpathCheckbox;
 
-	private Map<INamespaceDefinition, String> versions = new HashMap<INamespaceDefinition, String>();
+	private Map<INamespaceDefinition, String> versions = new ConcurrentHashMap<INamespaceDefinition, String>();
 
-	private Map<INamespaceDefinition, String> prefixes = new HashMap<INamespaceDefinition, String>();
+	private Map<INamespaceDefinition, String> prefixes = new ConcurrentHashMap<INamespaceDefinition, String>();
 
 	private INamespaceDefinition selectedNamespaceDefinition;
 
 	private Text prefixText;
 
+	private volatile List<INamespaceDefinition> namespaceDefinitionList = new CopyOnWriteArrayList<INamespaceDefinition>();
+
+	private volatile boolean loading = false;
+
+	private synchronized List<INamespaceDefinition> getNamespaceDefinitionList() {
+		if ((namespaceDefinitionList == null || namespaceDefinitionList.size() == 0) && !loading) {
+			loading = true;
+			NamespaceUtils.getNamespaceDefinitions(getProject(), new NamespaceUtils.INamespaceDefinitionTemplate() {
+
+				public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions, IProject project) {
+
+					namespaceDefinitionList = new ArrayList<INamespaceDefinition>(Arrays.asList(namespaceDefinitions));
+
+					versions.clear();
+					prefixes.clear();
+					
+					if (isProjectPreferencePage()) {
+						SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
+								BeansCorePlugin.PLUGIN_ID);
+						for (INamespaceDefinition namespace : namespaceDefinitions) {
+							String version = prefs.getString(BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID
+									+ namespace.getNamespaceURI(), "");
+							versions.put(namespace, version);
+							String prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID
+									+ namespace.getNamespaceURI(), namespace.getDefaultNamespacePrefix());
+							prefixes.put(namespace, prefix);
+						}
+					}
+					else {
+						Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
+						for (INamespaceDefinition namespace : namespaceDefinitions) {
+							String version = prefs.getString(BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID
+									+ namespace.getNamespaceURI());
+							versions.put(namespace, version);
+							String prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID
+									+ namespace.getNamespaceURI());
+							prefixes.put(namespace, (StringUtils.hasLength(prefix) ? prefix : namespace
+									.getDefaultNamespacePrefix()));
+
+						}
+					}
+
+					Display.getDefault().asyncExec(new Runnable() {
+
+						public void run() {
+							refresh();
+						}
+					});
+
+					loading = false;
+				}
+			});
+		}
+		return namespaceDefinitionList;
+	}
+
 	public Composite createPreferenceContent(Composite parent) {
 
-		List<INamespaceDefinition> namespaces = NamespaceUtils.getNamespaceDefinitions(getProject());
 		boolean versionClasspath = true;
 		boolean useClasspath = false;
 		if (isProjectPreferencePage()) {
 			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
 					BeansCorePlugin.PLUGIN_ID);
-			for (INamespaceDefinition namespace : namespaces) {
-				String version = prefs.getString(BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID
-						+ namespace.getNamespaceURI(), "");
-				versions.put(namespace, version);
-				String prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID
-						+ namespace.getNamespaceURI(), namespace.getDefaultNamespacePrefix());
-				prefixes.put(namespace, prefix);
-			}
 			versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 			useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false);
 		}
 		else {
 			Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
-			for (INamespaceDefinition namespace : namespaces) {
-				String version = prefs.getString(BeansCorePlugin.NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID
-						+ namespace.getNamespaceURI());
-				versions.put(namespace, version);
-				String prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID
-						+ namespace.getNamespaceURI());
-				prefixes.put(namespace,
-						(StringUtils.hasLength(prefix) ? prefix : namespace.getDefaultNamespacePrefix()));
-
-			}
 			versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 			useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
 		}
@@ -192,6 +235,31 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		classpathCheckbox = new Button(composite, SWT.CHECK);
 		classpathCheckbox.setText("Load NamespaceHandlers and XSDs from project's classpath [experimental]");
 		classpathCheckbox.setSelection(useClasspath);
+		classpathCheckbox.addSelectionListener(new SelectionAdapter() {
+			
+			public void widgetSelected(SelectionEvent e) {
+				if (isProjectPreferencePage()) {
+					if (useProjectSettings()) {
+						SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+								BeansCorePlugin.PROJECT_PROPERTY_ID, true);
+					}
+					else {
+						SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+								BeansCorePlugin.PROJECT_PROPERTY_ID, false);
+					}
+					SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+							BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, classpathCheckbox.getSelection());
+				}
+				else {
+					BeansCorePlugin.getDefault().getPluginPreferences().setValue(
+							BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, classpathCheckbox.getSelection());
+					BeansCorePlugin.getDefault().savePluginPreferences();
+				}
+				namespaceDefinitionList.clear();
+				refresh();
+			}
+			
+		});
 
 		Label namespaceLabel = new Label(composite, SWT.NONE);
 		namespaceLabel.setText("Select XSD namespace to configure prefix and default version:");
@@ -373,4 +441,7 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		xsdViewer.setInput(this);
 	}
 
+	private void refresh() {
+		xsdViewer.setInput(this);
+	}
 }

@@ -130,6 +130,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 
 			for (Object xsd : schemaMappings.keySet()) {
 				String key = xsd.toString();
+				
 				String namespaceUri = getTargetNamespace(cls.getResource(schemaMappings.getProperty(key)));
 				String icon = toolingMappings.get(namespaceUri + "@icon");
 				String prefix = toolingMappings.get(namespaceUri + "@prefix");
@@ -177,7 +178,15 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 					iconDir.deleteOnExit();
 				}
 
-				File iconFile = new File(iconDir, Integer.toString(namespaceUri.hashCode()));
+				int ix = icon.lastIndexOf('.');
+				File iconFile = null;
+				if (ix > 0) {
+					iconFile = new File(iconDir, Integer.toString(namespaceUri.hashCode()) + icon.substring(ix));
+				}
+				else {
+					iconFile = new File(iconDir, Integer.toString(namespaceUri.hashCode()));
+				}
+				
 				if (iconFile.exists()) {
 					return iconFile;
 				}

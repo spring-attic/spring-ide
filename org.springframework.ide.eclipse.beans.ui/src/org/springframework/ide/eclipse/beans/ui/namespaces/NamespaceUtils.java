@@ -24,7 +24,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -127,13 +131,36 @@ public class NamespaceUtils {
 		return getNamespaceDefinitions(null);
 	}
 
-	public static List<INamespaceDefinition> getNamespaceDefinitions(IProject project) {
+	public static List<INamespaceDefinition> getNamespaceDefinitions(final IProject project,
+			final INamespaceDefinitionTemplate definitionTemplate) {
+		if (definitionTemplate != null) {
+
+			Job namespaceDefinitionJob = new Job((project != null ? String
+					.format("Loading namespaces for project '%s'", project.getName()) : "Loading namespaces")) {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					List<INamespaceDefinition> namespaceDefinitions = getNamespaceDefinitions(project);
+					definitionTemplate.doWithNamespaceDefinitions((INamespaceDefinition[]) namespaceDefinitions
+							.toArray(new INamespaceDefinition[namespaceDefinitions.size()]), project);
+					return Status.OK_STATUS;
+				}
+			};
+			namespaceDefinitionJob.setPriority(Job.INTERACTIVE);
+			namespaceDefinitionJob.schedule();
+
+			return Collections.emptyList();
+		}
+		return getNamespaceDefinitions(project);
+	}
+
+	protected static List<INamespaceDefinition> getNamespaceDefinitions(IProject project) {
 		List<INamespaceDefinition> namespaceDefinitions = new ArrayList<INamespaceDefinition>();
-		
+
 		INamespaceDefinitionResolver definitionResolver = BeansCorePlugin.getNamespaceDefinitionResolver(project);
 		Set<org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition> detectedNamespaceDefinitions = definitionResolver
 				.getNamespaceDefinitions();
-		
+
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(NAMESPACES_EXTENSION_POINT);
 		if (point != null
 				&& !org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils
@@ -279,6 +306,12 @@ public class NamespaceUtils {
 							image = BeansUIPlugin.getDefault().getImageRegistry()
 									.get(namespaceDefinition.getIconPath());
 						}
+						catch (Exception e) {
+							BeansUIPlugin.log(String.format(
+									"Error creating image resource for namespace definition '%s'", namespaceDefinition
+											.getNamespaceUri()), e);
+							return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
+						}
 						finally {
 							if (is != null) {
 								try {
@@ -321,5 +354,11 @@ public class NamespaceUtils {
 		else {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
 		}
+	}
+
+	public interface INamespaceDefinitionTemplate {
+
+		void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions, IProject project);
+
 	}
 }
