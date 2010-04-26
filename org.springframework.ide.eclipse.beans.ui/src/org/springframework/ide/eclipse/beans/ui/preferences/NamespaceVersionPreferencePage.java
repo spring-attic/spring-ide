@@ -52,7 +52,7 @@ import org.springframework.ide.eclipse.ui.dialogs.ProjectAndPreferencePage;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link ProjectAndPreferencePage} that allows to configure default namepace versions.
+ * {@link ProjectAndPreferencePage} that allows to configure default namespace versions.
  * @author Christian Dupuis
  * @since 2.2.5
  */

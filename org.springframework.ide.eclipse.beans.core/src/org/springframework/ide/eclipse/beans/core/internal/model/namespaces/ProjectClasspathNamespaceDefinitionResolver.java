@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
+import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
@@ -65,7 +66,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	private Map<String, NamespaceDefinition> namespaceDefinitionRegistry = null;
 
 	private final IProject project;
-
+	
 	private EnablementPropertyChangeListener propertyChangeListener;
 
 	private final INamespaceDefinitionResolver resolver;
@@ -76,14 +77,14 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 
 		init();
 
-		registerPropertyChangeSupport();
+		registerListeners();
 	}
 
 	/**
 	 * Dispose this resolver instance.
 	 */
 	public void dispose() {
-		unRegisterPropertyChangeSupport();
+		unRegisterListeners();
 	}
 
 	/**
@@ -99,6 +100,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	public INamespaceDefinition resolveNamespaceDefinition(String namespaceUri) {
 		return namespaceDefinitionRegistry.get(namespaceUri);
 	}
+	
 
 	/**
 	 * Load all {@link NamespaceDefinition}s from the project classpath. Also handle extraction of icon file.
@@ -225,20 +227,22 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	 * Register the {@link EnablementPropertyChangeListener} listener to get notifications on changes to the project
 	 * preferences.
 	 */
-	private void registerPropertyChangeSupport() {
+	private void registerListeners() {
 		propertyChangeListener = new EnablementPropertyChangeListener();
 		BeansCorePlugin.getDefault().getPluginPreferences().addPropertyChangeListener(propertyChangeListener);
 		SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getProjectPreferences()
 				.addPreferenceChangeListener(propertyChangeListener);
+		BeansCorePlugin.registerNamespaceDefinitionListener(propertyChangeListener);
 	}
 
 	/**
 	 * Unregister the {@link EnablementPropertyChangeListener}.
 	 */
-	private void unRegisterPropertyChangeSupport() {
+	private void unRegisterListeners() {
 		BeansCorePlugin.getDefault().getPluginPreferences().removePropertyChangeListener(propertyChangeListener);
 		SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getProjectPreferences()
 				.removePreferenceChangeListener(propertyChangeListener);
+		BeansCorePlugin.unregisterNamespaceDefinitionListener(propertyChangeListener);
 	}
 
 	/**
@@ -246,7 +250,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	 * classpath property.
 	 * @since 2.3.3
 	 */
-	private class EnablementPropertyChangeListener implements IPropertyChangeListener, IPreferenceChangeListener {
+	private class EnablementPropertyChangeListener implements IPropertyChangeListener, IPreferenceChangeListener, INamespaceDefinitionListener {
 
 		private static final String KEY = BeansCorePlugin.PLUGIN_ID + "."
 				+ BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID;
@@ -267,6 +271,24 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 		 */
 		public void propertyChange(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
 			if (BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID.equals(event.getProperty())) {
+				init();
+			}
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void onNamespaceDefinitionRegistered(NamespaceDefinitionChangeEvent event) {
+			if (!NamespaceUtils.useNamespacesFromClasspath(project)) {
+				init();
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void onNamespaceDefinitionUnregistered(NamespaceDefinitionChangeEvent event) {
+			if (!NamespaceUtils.useNamespacesFromClasspath(project)) {
 				init();
 			}
 		}
