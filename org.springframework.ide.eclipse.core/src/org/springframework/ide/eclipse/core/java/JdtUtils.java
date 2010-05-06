@@ -169,9 +169,7 @@ public class JdtUtils {
 							paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
 						}
 						else {
-							paths
-									.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/"
-											+ classPathEntry.trim())));
+							paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/" + classPathEntry.trim())));
 						}
 					}
 				}
@@ -797,29 +795,36 @@ public class JdtUtils {
 		if (resource == null || type == null || className == null) {
 			return false;
 		}
-		try {
-			ClassLoader cls = getClassLoader(resource.getProject(), null);
-			Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
-			Class<?> interfaceClass = cls.loadClass(className);
-			return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
+		if (className.startsWith("java.") || className.startsWith("javax.")) {
+			try {
+				ClassLoader cls = getClassLoader(resource.getProject(), null);
+				Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
+				Class<?> interfaceClass = cls.loadClass(className);
+				return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
+			}
+			catch (Throwable e) {
+				// ignore this and fall back to JDT does implement checks
+			}
 		}
-		catch (Throwable e) {
-			IType interfaceType = getJavaType(resource.getProject(), className);
-			if (type != null && interfaceType != null) {
-				try {
-					IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType).getAllSubtypes(
-							interfaceType);
-					if (subTypes != null) {
-						for (IType subType : subTypes) {
-							if (subType.equals(type)) {
-								return true;
-							}
+		return doesImplementWithJdt(resource, type, className);
+	}
+
+	private static boolean doesImplementWithJdt(IResource resource, IType type, String className) {
+		IType interfaceType = getJavaType(resource.getProject(), className);
+		if (type != null && interfaceType != null) {
+			try {
+				IType[] subTypes = SuperTypeHierarchyCache.getTypeHierarchy(interfaceType)
+						.getAllSubtypes(interfaceType);
+				if (subTypes != null) {
+					for (IType subType : subTypes) {
+						if (subType.equals(type)) {
+							return true;
 						}
 					}
 				}
-				catch (JavaModelException ex) {
-					SpringCore.log(e);
-				}
+			}
+			catch (JavaModelException ex) {
+				SpringCore.log(ex);
 			}
 		}
 		return false;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,9 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.ILinkHelperExtension;
@@ -45,32 +47,6 @@ public class BeansNavigatorLinkHelper implements ILinkHelper, ILinkHelperExtensi
 	 * {@inheritDoc}
 	 */
 	public void activateEditor(IWorkbenchPage page, IStructuredSelection selection) {
-		// Commented out due to strange behavior that is not very much inline with the of Eclipse
-		// if (selection != null && !selection.isEmpty()) {
-		// Object sElement = selection.getFirstElement();
-		// if (sElement instanceof ISourceModelElement
-		// || sElement instanceof BeansConfig) {
-		// IResourceModelElement element = (IResourceModelElement)
-		// sElement;
-		// IResource resource = element.getElementResource();
-		// if (resource instanceof IFile && resource.exists()) {
-		// IEditorInput input = new FileEditorInput((IFile) resource);
-		// IEditorPart editor = page.findEditor(input);
-		// if (editor != null) {
-		// page.bringToTop(editor);
-		// int line;
-		// if (element instanceof ISourceModelElement) {
-		// line = ((ISourceModelElement) element)
-		// .getElementStartLine();
-		// } else {
-		// line = ((BeansConfig) element)
-		// .getElementStartLine();
-		// }
-		// SpringUIUtils.revealInEditor(editor, line);
-		// }
-		// }
-		// }
-		// }
 	}
 
 	/**
@@ -79,6 +55,14 @@ public class BeansNavigatorLinkHelper implements ILinkHelper, ILinkHelperExtensi
 	public IStructuredSelection findSelection(IEditorInput input) {
 		if (input instanceof IFileEditorInput) {
 			IFile file = ((IFileEditorInput) input).getFile();
+
+			// Ensure that if the project is not loaded we skip this in the UI
+			IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
+			if (project instanceof ILazyInitializedModelElement
+					&& !((ILazyInitializedModelElement) project).isInitialized()) {
+				return StructuredSelection.EMPTY;
+			}
+
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
 			if (config != null) {
 				IEditorPart editor = SpringUIUtils.getActiveEditor();
@@ -113,8 +97,8 @@ public class BeansNavigatorLinkHelper implements ILinkHelper, ILinkHelperExtensi
 			int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
 			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 
-			IModelElement modelElement = BeansModelUtils.getMostSpecificModelElement(startLine,
-					endLine, resource, new NullProgressMonitor());
+			IModelElement modelElement = BeansModelUtils.getMostSpecificModelElement(startLine, endLine, resource,
+					new NullProgressMonitor());
 			if (modelElement != null) {
 				return new TreeSelection(BeansUIUtils.createTreePath(modelElement));
 			}

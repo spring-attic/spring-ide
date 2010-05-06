@@ -42,6 +42,9 @@ public class ProjectBuilderDefinitionFactory {
 				catch (CoreException e) {
 					SpringCore.log(e);
 				}
+				catch (Exception e) {
+					// ignore this
+				}
 			}
 		}
 

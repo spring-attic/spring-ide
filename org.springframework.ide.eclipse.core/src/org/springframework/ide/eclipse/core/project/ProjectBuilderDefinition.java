@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,20 +16,19 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.util.StringUtils;
 
 /**
- * Wraps contributions to the
- * <code>org.springframework.ide.eclipse.core.builders</code> extension point.
+ * Wraps contributions to the <code>org.springframework.ide.eclipse.core.builders</code> extension point.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ProjectBuilderDefinition extends
-		PersistablePreferenceObjectSupport {
-	
+public class ProjectBuilderDefinition extends PersistablePreferenceObjectSupport {
+
 	private static final Long DEFAULT_ORDER = 10L;
 
 	private static final String BUILDER_PREFIX = "builders.enable.";
@@ -57,13 +56,12 @@ public class ProjectBuilderDefinition extends
 	private String name;
 
 	private String namespaceUri;
-	
+
 	private Long order;
 
 	private IProjectBuilder projectBuilder;
 
-	public ProjectBuilderDefinition(IConfigurationElement element)
-			throws CoreException {
+	public ProjectBuilderDefinition(IConfigurationElement element) throws Exception {
 		init(element);
 	}
 
@@ -74,8 +72,7 @@ public class ProjectBuilderDefinition extends
 			}
 			// cleanup projects that use workspace properties
 			else {
-				Set<ISpringProject> projects = SpringCore.getModel()
-						.getProjects();
+				Set<ISpringProject> projects = SpringCore.getModel().getProjects();
 				for (ISpringProject sproject : projects) {
 					IProject p = sproject.getProject();
 					if (!hasProjectSpecificOptions(p)) {
@@ -128,13 +125,12 @@ public class ProjectBuilderDefinition extends
 		return order;
 	}
 
-	private void init(IConfigurationElement element) throws CoreException {
+	private void init(IConfigurationElement element) throws Exception {
 		Object builder = element.createExecutableExtension(CLASS_ATTRIBUTE);
 		if (builder instanceof IProjectBuilder) {
 			projectBuilder = (IProjectBuilder) builder;
 		}
-		this.namespaceUri = element.getDeclaringExtension()
-				.getNamespaceIdentifier();
+		this.namespaceUri = element.getDeclaringExtension().getNamespaceIdentifier();
 		this.id = element.getAttribute(ID_ATTRIBUTE);
 		this.name = element.getAttribute(NAME_ATTRIBUTE);
 		this.description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
@@ -146,13 +142,16 @@ public class ProjectBuilderDefinition extends
 		else {
 			this.order = DEFAULT_ORDER;
 		}
-		String enabledByDefault = element
-				.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
+		String enabledByDefault = element.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
 		if (enabledByDefault != null) {
 			setEnabledByDefault(Boolean.valueOf(enabledByDefault));
 		}
 		else {
 			setEnabledByDefault(true);
+		}
+
+		if (projectBuilder instanceof InitializingBean) {
+			((InitializingBean) projectBuilder).afterPropertiesSet();
 		}
 	}
 
