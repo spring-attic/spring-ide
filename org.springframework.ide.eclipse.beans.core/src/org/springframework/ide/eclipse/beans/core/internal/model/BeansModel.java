@@ -567,6 +567,10 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				finally {
 					r.unlock();
 				}
+				
+				if (project == null) {
+					return;
+				}
 
 				// Before removing the config from it's project keep a copy for
 				// notifying the listeners
