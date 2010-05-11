@@ -122,7 +122,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 					}
 				}
 				// If not process the value directly
-				else {
+				else if (member.getValue() != null) {
 					processStringValue(member, builder, member.getValue().toString());
 				}
 
