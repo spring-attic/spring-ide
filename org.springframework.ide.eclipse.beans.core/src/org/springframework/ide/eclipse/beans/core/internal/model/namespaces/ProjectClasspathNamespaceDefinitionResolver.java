@@ -133,7 +133,12 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 			for (Object xsd : schemaMappings.keySet()) {
 				String key = xsd.toString();
 				
-				String namespaceUri = getTargetNamespace(cls.getResource(schemaMappings.getProperty(key)));
+				URL url = cls.getResource(schemaMappings.getProperty(key));
+				if (url == null) {
+					continue;
+				}
+				
+				String namespaceUri = getTargetNamespace(url);
 				String icon = toolingMappings.get(namespaceUri + "@icon");
 				String prefix = toolingMappings.get(namespaceUri + "@prefix");
 				String name = toolingMappings.get(namespaceUri + "@name");
