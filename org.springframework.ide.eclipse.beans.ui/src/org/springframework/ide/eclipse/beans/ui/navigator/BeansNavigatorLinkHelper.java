@@ -88,6 +88,13 @@ public class BeansNavigatorLinkHelper implements ILinkHelper, ILinkHelperExtensi
 			IStructuredDocument document = element.getStructuredDocument();
 			IFile resource = SpringUIUtils.getFile(document);
 
+			// Ensure that if the project is not loaded we skip this in the UI
+			IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
+			if (project instanceof ILazyInitializedModelElement
+					&& !((ILazyInitializedModelElement) project).isInitialized()) {
+				return StructuredSelection.EMPTY;
+			}
+			
 			// Make sure that the file is actually a beans config
 			if (!BeansCoreUtils.isBeansConfig(resource)) {
 				return null;
