@@ -98,7 +98,8 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 				if (getter == null) {
 					context.error(property, "NO_GETTER", "No getter found for nested property '" + nestedPropertyName
 							+ "' in class '" + className + "'", new ValidationProblemAttribute("CLASS", className),
-							new ValidationProblemAttribute("PROPERTY", nestedPropertyName));
+							new ValidationProblemAttribute("PROPERTY", nestedPropertyName),
+							new ValidationProblemAttribute("BEAN_NAME", ValidationRuleUtils.getBeanName(property)));
 				}
 				else {
 
@@ -121,12 +122,14 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 				if (!Introspector.isValidPropertyName(propertyName)) {
 					context.error(property, "INVALID_PROPERTY_NAME", "Invalid property name '" + propertyName
 							+ "' - not JavaBean compliant", new ValidationProblemAttribute("CLASS", className),
-							new ValidationProblemAttribute("PROPERTY", propertyName));
+							new ValidationProblemAttribute("PROPERTY", propertyName),
+							new ValidationProblemAttribute("BEAN_NAME", ValidationRuleUtils.getBeanName(property)));
 				}
 				else if (!Introspector.hasWritableProperty(type, propertyName)) {
 					context.error(property, "NO_SETTER", "No setter found for property '" + propertyName
 							+ "' in class '" + className + "'", new ValidationProblemAttribute("CLASS", className),
-							new ValidationProblemAttribute("PROPERTY", propertyName));
+							new ValidationProblemAttribute("PROPERTY", propertyName),
+							new ValidationProblemAttribute("BEAN_NAME", ValidationRuleUtils.getBeanName(property)));
 				}
 
 				// TODO If mapped property then check type of setter's argument

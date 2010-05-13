@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanV
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.util.StringUtils;
@@ -58,14 +59,17 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 		if (className != null && !SpringCoreUtils.hasPlaceHolder(className) && !ignorableClasses.contains(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), className);
 			try {
+				IModelSourceLocation sourceLocation = bean.getElementSourceLocation();
 				if (type != null && type.isInterface()
-						&& !(bean.getElementSourceLocation() instanceof JavaModelSourceLocation)) {
+						&& !(sourceLocation instanceof JavaModelSourceLocation)) {
 					context.warning(bean, "CLASS_NOT_CLASS", "Class '" + className + "' is an interface",
-							new ValidationProblemAttribute("CLASS", className));
+							new ValidationProblemAttribute("CLASS", className), 
+							new ValidationProblemAttribute("BEAN_NAME", bean.getElementName()));
 				}
 				else if (type == null) {
 					context.error(bean, "CLASS_NOT_FOUND", "Class '" + className + "' not found",
-							new ValidationProblemAttribute("CLASS", className));
+							new ValidationProblemAttribute("CLASS", className), 
+							new ValidationProblemAttribute("BEAN_NAME", bean.getElementName()));
 				}
 			}
 			catch (JavaModelException e) {

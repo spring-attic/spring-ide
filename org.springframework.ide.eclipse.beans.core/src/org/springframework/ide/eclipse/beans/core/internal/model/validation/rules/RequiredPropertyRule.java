@@ -102,7 +102,8 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 			if (missingProperties.size() > 0) {
 				String msg = buildExceptionMessage(missingProperties, bean.getElementName());
 				context.error(bean, "REQUIRED_PROPERTY_MISSING", msg, new ValidationProblemAttribute("CLASS", type
-						.getFullyQualifiedName()), new ValidationProblemAttribute("MISSING_PROPERTIES",
+						.getFullyQualifiedName()), new ValidationProblemAttribute("BEAN_NAME", bean.getElementName()), 
+						new ValidationProblemAttribute("MISSING_PROPERTIES",
 						missingProperties));
 			}
 		}

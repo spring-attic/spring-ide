@@ -170,4 +170,16 @@ public final class ValidationRuleUtils {
 		}
 		return type;
 	}
+	
+	public static String getBeanName(IModelElement element) {
+		if (element instanceof IBean) {
+			return element.getElementName();
+		}
+		if (element != null) {
+			return getBeanName(element.getElementParent());
+		}
+		return null;
+	}
+
+
 }

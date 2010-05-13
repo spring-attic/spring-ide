@@ -53,17 +53,20 @@ public abstract class AbstractBeanMethodValidationRule extends AbstractBeanValid
 								+ (argCount != -1 ? "with " + argCount + " arguments " : "")
 								+ "not found in factory bean class '" + className + "'",
 								new ValidationProblemAttribute("CLASS", className), new ValidationProblemAttribute(
-										"METHOD", methodName));
+										"METHOD", methodName),
+										new ValidationProblemAttribute("BEAN_NAME", bean.getElementName()));
 					}
 					else if (methodType == MethodType.INIT) {
 						context.error(bean, "UNDEFINED_INIT_METHOD", "Init-method '" + methodName
 								+ "' not found in bean class '" + className + "'", new ValidationProblemAttribute(
-								"CLASS", className), new ValidationProblemAttribute("METHOD", methodName));
+								"CLASS", className), new ValidationProblemAttribute("METHOD", methodName),
+								new ValidationProblemAttribute("BEAN_NAME", bean.getElementName()));
 					}
 					else if (methodType == MethodType.DESTROY) {
 						context.error(bean, "UNDEFINED_DESTROY_METHOD", "Destroy-method '" + methodName
 								+ "' not found in bean class '" + className + "'", new ValidationProblemAttribute(
-								"CLASS", className), new ValidationProblemAttribute("METHOD", methodName));
+								"CLASS", className), new ValidationProblemAttribute("METHOD", methodName),
+								new ValidationProblemAttribute("BEAN_NAME", bean.getElementName()));
 					}
 				}
 
