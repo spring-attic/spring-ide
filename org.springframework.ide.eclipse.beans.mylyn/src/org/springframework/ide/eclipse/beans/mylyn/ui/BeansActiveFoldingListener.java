@@ -25,7 +25,6 @@ import org.eclipse.mylyn.context.core.ContextCore;
 import org.eclipse.mylyn.context.core.IInteractionContext;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
-import org.eclipse.mylyn.internal.context.ui.ContextUiPlugin;
 import org.eclipse.mylyn.internal.java.ui.JavaUiBridgePlugin;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -109,7 +108,7 @@ public class BeansActiveFoldingListener extends AbstractContextListener {
 
 	public void dispose() {
 		ContextCorePlugin.getContextManager().removeListener(this);
-		ContextUiPlugin.getDefault().getPluginPreferences().removePropertyChangeListener(
+		JavaUiBridgePlugin.getDefault().getPluginPreferences().removePropertyChangeListener(
 				PREFERENCE_LISTENER);
 	}
 
