@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -298,6 +299,17 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 					IPackageFragment packageFragment = root.getPackageFragment(packageName);
 					if (storage == null && packageFragment != null && packageFragment.exists()) {
 						storage = contains(packageFragment.getNonJavaResources(), fileName);
+					}
+					
+					// Check the root folder in case no package exists 
+					if (storage == null) {
+						IResource rootResource = root.getUnderlyingResource();
+						if (rootResource instanceof IFolder) {
+							IFile file = ((IFolder) rootResource).getFile(path);
+							if (file.exists()) {
+								storage = file;
+							}
+						}
 					}
 
 					// Found the resource in the package fragment root? -> construct usable Resource
