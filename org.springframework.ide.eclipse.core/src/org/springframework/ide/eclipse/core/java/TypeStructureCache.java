@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
  * Object that caches instances of {@link TypeStructure}. Furthermore this implementation is able to answer if a given
@@ -65,8 +66,6 @@ import org.springframework.ide.eclipse.core.SpringCore;
 public class TypeStructureCache implements ITypeStructureCache {
 
 	private static final char[][] EMPTY_CHAR_ARRAY = new char[0][];
-
-	private static final String FILE_SCHEME = "file";
 
 	private IElementChangedListener changedListener = null;
 
@@ -280,7 +279,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 
 			if (uri != null) {
 				String scheme = uri.getScheme();
-				if (FILE_SCHEME.equalsIgnoreCase(scheme)) {
+				if (SpringCoreUtils.FILE_SCHEME.equalsIgnoreCase(scheme)) {
 					return new File(uri);
 				}
 				else {

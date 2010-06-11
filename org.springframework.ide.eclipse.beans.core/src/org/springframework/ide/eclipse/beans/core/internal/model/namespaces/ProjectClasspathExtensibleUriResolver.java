@@ -30,6 +30,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -114,7 +115,7 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 
 						// Workspace jar or resource
 						if (root.getResource() != null) {
-							URI jarUri = root.getResource().getRawLocationURI();
+							URI jarUri = SpringCoreUtils.getResourceURI(root.getResource());
 							path = jarUri.toString();
 						}
 						// Workspace external jar

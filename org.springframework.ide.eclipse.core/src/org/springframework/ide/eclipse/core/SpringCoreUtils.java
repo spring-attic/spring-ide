@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -28,6 +29,7 @@ import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -72,6 +74,11 @@ import org.xml.sax.SAXException;
  * @author Christian Dupuis
  */
 public final class SpringCoreUtils {
+	
+	/** URL file schema */
+	public static final String FILE_SCHEME = "file";
+
+	public static final String SOURCE_CONTROL_SCHEME = "sourcecontrol";
 
 	public static final String PLACEHOLDER_PREFIX = "${";
 
@@ -439,6 +446,34 @@ public final class SpringCoreUtils {
 	public static IPath getProjectLocation(IProject project) {
 		return (project.getRawLocation() != null ? project.getRawLocation() : project.getLocation());
 	}
+	
+	public static URI getResourceURI(IResource resource) {
+		if (resource != null) {
+			URI uri = resource.getRawLocationURI();
+			if (uri == null) {
+				uri = resource.getLocationURI();
+			}
+			if (uri != null) {
+				String scheme = uri.getScheme();
+				if (FILE_SCHEME.equalsIgnoreCase(scheme)) {
+					return uri;
+				}
+				else if (SOURCE_CONTROL_SCHEME.equals(scheme)) {
+					// special case of Rational Team Concert
+					IPath path = resource.getLocation();
+					File file = path.toFile();
+					if (file.exists()) {
+						return file.toURI();
+					}
+				}
+				else {
+					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
+					return variableManager.resolveURI(uri);
+				}
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Triggers a build of the given {@link IProject} instance.
@@ -595,11 +630,8 @@ public final class SpringCoreUtils {
 
 	public static Document parseDocument(IFile deploymentDescriptor) {
 		try {
-			if (deploymentDescriptor.getLocationURI() != null) {
-				return getDocumentBuilder().parse(new File(deploymentDescriptor.getLocationURI()));
-			}
-			else if (deploymentDescriptor.getRawLocationURI() != null) {
-				return getDocumentBuilder().parse(new File(deploymentDescriptor.getRawLocationURI()));
+			if (getResourceURI(deploymentDescriptor) != null) {
+				return getDocumentBuilder().parse(new File(getResourceURI(deploymentDescriptor)));
 			}
 			return getDocumentBuilder().parse(new InputSource(deploymentDescriptor.getContents()));
 		}
