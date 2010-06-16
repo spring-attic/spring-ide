@@ -73,3 +73,5 @@ Import-Package: org.apache.xerces.dom,
  org.w3c.dom,
  org.xml.sax
 DynamicImport-Package: *
+Bundle-ClassPath: .,
+ lib/xbean-classloader-1.0.0.jar

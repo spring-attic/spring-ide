@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.xbean.classloader.NonLockingJarFileClassLoader;
 import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -51,8 +52,8 @@ class ProjectClassLoaderCache {
 	private static boolean DEBUG_CLASSLOADER = SpringCore.isDebug(DEBUG_OPTION);
 
 	private static final String FILE_SCHEME = "file";
-	
-	private static ClassLoader PARENT_CLASS_LOADER = null; 
+
+	private static ClassLoader PARENT_CLASS_LOADER = null;
 
 	private static ClassLoader addClassLoaderToCache(IProject project, List<URL> urls, ClassLoader parentClassLoader) {
 		synchronized (CLASSLOADER_CACHE) {
@@ -270,7 +271,11 @@ class ProjectClassLoaderCache {
 			List<URL> paths = new ArrayList<URL>();
 			Enumeration<String> libs = SpringCore.getDefault().getBundle().getEntryPaths("/lib/");
 			while (libs.hasMoreElements()) {
-				paths.add(SpringCore.getDefault().getBundle().getEntry(libs.nextElement()));
+				String lib = libs.nextElement();
+				// Don't add the 
+				if (!lib.contains("xbean-classloader")) {
+					paths.add(SpringCore.getDefault().getBundle().getEntry(lib));
+				}
 			}
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.apache.commons.logging"));
@@ -298,7 +303,7 @@ class ProjectClassLoaderCache {
 
 		private URL[] directories;
 
-		private URLClassLoader jarClassLoader;
+		private ClassLoader jarClassLoader;
 
 		private long lastAccess;
 
@@ -337,14 +342,10 @@ class ProjectClassLoaderCache {
 		}
 
 		public ClassLoader getClassLoader() {
-			// if (useParentClassLoader) {
-			// return new URLClassLoader(urls, this.getClass().getClassLoader());
-			// }
-			// else {
-			// return new URLClassLoader(urls);
-			// }
 			ClassLoader parent = getJarClassLoader();
-			return new URLClassLoader(directories, parent);
+			return new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project.getName()),
+					directories, parent);
+			// return new URLClassLoader(directories, parent);
 		}
 
 		public long getLastAccess() {
@@ -379,10 +380,16 @@ class ProjectClassLoaderCache {
 				}
 				if (parentClassLoader != null) {
 					// We use the parent class loader of the org.springframework.ide.eclipse.beans.core bundle
-					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
+					jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project
+							.getName()), (URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
+					// jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
+					// parentClassLoader);
 				}
 				else {
-					jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]), PARENT_CLASS_LOADER);
+					jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project
+							.getName()), (URL[]) jars.toArray(new URL[jars.size()]), PARENT_CLASS_LOADER);
+					// jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
+					// PARENT_CLASS_LOADER);
 				}
 				directories = dirs.toArray(new URL[dirs.size()]);
 			}
