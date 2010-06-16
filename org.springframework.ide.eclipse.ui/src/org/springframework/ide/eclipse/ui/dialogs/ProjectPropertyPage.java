@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,8 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
 
 /**
- * Provides an {@link PropertyPage} that allows to manage the enablement of {@link IProjectBuilder}s
- * and {@link IValidator}s for the underlying {@link IProject}.
+ * Provides an {@link PropertyPage} that allows to manage the enablement of {@link IProjectBuilder}s and
+ * {@link IValidator}s for the underlying {@link IProject}.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -44,6 +44,8 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 	private ProjectValidatorPropertyTab validatorTab = null;
 
 	private Button useChangeDetectionForJavaFiles;
+
+	private Button useNonLockingClassLoader;
 
 	public ProjectPropertyPage() {
 		noDefaultAndApplyButton();
@@ -65,20 +67,28 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 		builderItem.setText(SpringUIMessages.ProjectBuilderPropertyPage_title);
 
 		if (!isProjectPreferencePage()) {
-			
+
 			Label options = new Label(composite, SWT.WRAP);
 			options.setText("Options:");
 			options.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			
+
 			useChangeDetectionForJavaFiles = new Button(composite, SWT.CHECK);
 			useChangeDetectionForJavaFiles
 					.setText(SpringUIMessages.ProjectBuilderPropertyPage_IncrementalCompileMessage);
-			useChangeDetectionForJavaFiles.setSelection(SpringCore.getDefault()
-					.getPluginPreferences().getBoolean(
-							SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES));
-			
+			useChangeDetectionForJavaFiles.setSelection(SpringCore.getDefault().getPluginPreferences().getBoolean(
+					SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES));
+
 			Label note = new Label(composite, SWT.WRAP);
 			note.setText(SpringUIMessages.ProjectBuilderPropertyPage_IncrementalCompileNote);
+			note.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			useNonLockingClassLoader = new Button(composite, SWT.CHECK);
+			useNonLockingClassLoader.setText(SpringUIMessages.ProjectBuilderPropertyPage_NonLockingClassLoaderMessage);
+			useNonLockingClassLoader.setSelection(SpringCore.getDefault().getPluginPreferences().getBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER));
+			
+			note = new Label(composite, SWT.WRAP);
+			note.setText(SpringUIMessages.ProjectBuilderPropertyPage_NonLockingClassLoaderNote);
 			note.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
 
@@ -96,26 +106,26 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 	}
 
 	protected boolean hasProjectSpecificOptions(IProject project) {
-		return SpringCorePreferences.getProjectPreferences(project).getBoolean(
-				SpringCore.PROJECT_PROPERTY_ID, false);
+		return SpringCorePreferences.getProjectPreferences(project).getBoolean(SpringCore.PROJECT_PROPERTY_ID, false);
 	}
 
 	public boolean performOk() {
 
 		if (isProjectPreferencePage()) {
 			if (useProjectSettings()) {
-				SpringCorePreferences.getProjectPreferences(getProject()).putBoolean(
-						SpringCore.PROJECT_PROPERTY_ID, true);
+				SpringCorePreferences.getProjectPreferences(getProject()).putBoolean(SpringCore.PROJECT_PROPERTY_ID,
+						true);
 			}
 			else {
-				SpringCorePreferences.getProjectPreferences(getProject()).putBoolean(
-						SpringCore.PROJECT_PROPERTY_ID, false);
+				SpringCorePreferences.getProjectPreferences(getProject()).putBoolean(SpringCore.PROJECT_PROPERTY_ID,
+						false);
 			}
 		}
 		else {
-			SpringCore.getDefault().getPluginPreferences().setValue(
-					SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES,
+			SpringCore.getDefault().getPluginPreferences().setValue(SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES,
 					useChangeDetectionForJavaFiles.getSelection());
+			SpringCore.getDefault().getPluginPreferences().setValue(SpringCore.USE_NON_LOCKING_CLASSLOADER,
+					useNonLockingClassLoader.getSelection());
 		}
 
 		this.builderTab.performOk();

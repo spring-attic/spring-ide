@@ -28,6 +28,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -41,6 +43,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @author Christian Dupuis
  * @since 2.2.5
  */
+@SuppressWarnings("deprecation")
 class ProjectClassLoaderCache {
 
 	private static final int CACHE_SIZE = 12;
@@ -54,6 +57,8 @@ class ProjectClassLoaderCache {
 	private static final String FILE_SCHEME = "file";
 
 	private static ClassLoader PARENT_CLASS_LOADER = null;
+
+	private static IPropertyChangeListener PROPERTY_CHANGE_LISTENER;
 
 	private static ClassLoader addClassLoaderToCache(IProject project, List<URL> urls, ClassLoader parentClassLoader) {
 		synchronized (CLASSLOADER_CACHE) {
@@ -96,8 +101,7 @@ class ProjectClassLoaderCache {
 
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
-		// add project to local cache to prevent adding its classpaths
-		// multiple times
+		// add project to local cache to prevent adding its classpaths multiple times
 		if (resolvedProjects.contains(project)) {
 			return;
 		}
@@ -261,10 +265,14 @@ class ProjectClassLoaderCache {
 		}
 	}
 
+	private static boolean useNonLockingClassLoader() {
+		return SpringCore.getDefault().getPluginPreferences().getBoolean(SpringCore.USE_NON_LOCKING_CLASSLOADER);
+	}
+
 	/**
 	 * Returns a {@link ClassLoader} for the given project.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked" })
 	protected synchronized static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
 		// Setup the root class loader to be used when no explicit parent class loader is given
 		if (parentClassLoader == null && PARENT_CLASS_LOADER == null) {
@@ -272,7 +280,7 @@ class ProjectClassLoaderCache {
 			Enumeration<String> libs = SpringCore.getDefault().getBundle().getEntryPaths("/lib/");
 			while (libs.hasMoreElements()) {
 				String lib = libs.nextElement();
-				// Don't add the 
+				// Don't add the non locking classloader jar
 				if (!lib.contains("xbean-classloader")) {
 					paths.add(SpringCore.getDefault().getBundle().getEntry(lib));
 				}
@@ -282,6 +290,12 @@ class ProjectClassLoaderCache {
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aopalliance"));
 			PARENT_CLASS_LOADER = new URLClassLoader(paths.toArray(new URL[paths.size()]));
+		}
+
+		// register the listener
+		if (PROPERTY_CHANGE_LISTENER == null) {
+			PROPERTY_CHANGE_LISTENER = new EnablementPropertyChangeListener();
+			SpringCore.getDefault().getPluginPreferences().addPropertyChangeListener(PROPERTY_CHANGE_LISTENER);
 		}
 
 		ClassLoader classLoader = findClassLoaderInCache(project, parentClassLoader);
@@ -343,9 +357,13 @@ class ProjectClassLoaderCache {
 
 		public ClassLoader getClassLoader() {
 			ClassLoader parent = getJarClassLoader();
-			return new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project.getName()),
-					directories, parent);
-			// return new URLClassLoader(directories, parent);
+			if (useNonLockingClassLoader()) {
+				return new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project.getName()),
+						directories, parent);
+			}
+			else {
+				return new URLClassLoader(directories, parent);
+			}
 		}
 
 		public long getLastAccess() {
@@ -380,16 +398,24 @@ class ProjectClassLoaderCache {
 				}
 				if (parentClassLoader != null) {
 					// We use the parent class loader of the org.springframework.ide.eclipse.beans.core bundle
-					jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project
-							.getName()), (URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
-					// jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
-					// parentClassLoader);
+					if (useNonLockingClassLoader()) {
+						jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project
+								.getName()), (URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
+					}
+					else {
+						jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
+								parentClassLoader);
+					}
 				}
 				else {
-					jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project
-							.getName()), (URL[]) jars.toArray(new URL[jars.size()]), PARENT_CLASS_LOADER);
-					// jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
-					// PARENT_CLASS_LOADER);
+					if (useNonLockingClassLoader()) {
+						jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project
+								.getName()), (URL[]) jars.toArray(new URL[jars.size()]), PARENT_CLASS_LOADER);
+					}
+					else {
+						jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
+								PARENT_CLASS_LOADER);
+					}
 				}
 				directories = dirs.toArray(new URL[dirs.size()]);
 			}
@@ -405,6 +431,24 @@ class ProjectClassLoaderCache {
 				return true;
 			}
 			return false;
+		}
+	}
+
+	/**
+	 * {@link IPropertyChangeListener} to clear the cache whenever the setting is changed.
+	 * @since 2.3.3
+	 */
+	private static class EnablementPropertyChangeListener implements IPropertyChangeListener {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void propertyChange(PropertyChangeEvent event) {
+			if (SpringCore.USE_NON_LOCKING_CLASSLOADER.equals(event.getProperty())) {
+				synchronized (CLASSLOADER_CACHE) {
+					CLASSLOADER_CACHE.clear();
+				}
+			}
 		}
 	}
 

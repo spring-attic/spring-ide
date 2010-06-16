@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,7 @@ import org.springframework.ide.eclipse.core.java.TypeStructureCache;
 import org.springframework.ide.eclipse.core.model.ISpringModel;
 
 /**
- * Central access point for the Spring IDE core plug-in (id
- * <code>"org.springframework.ide.eclipse.core"</code>).
+ * Central access point for the Spring IDE core plug-in (id <code>"org.springframework.ide.eclipse.core"</code>).
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -46,9 +45,8 @@ public class SpringCore extends Plugin {
 	public static final String BUILDER_ID = PLUGIN_ID + ".springbuilder";
 
 	/**
-	 * The identifier for the Spring nature (value
-	 * <code>"org.springframework.ide.eclipse.core.springnature"</code>). The presence of this
-	 * nature on a project indicates that it is Spring-capable.
+	 * The identifier for the Spring nature (value <code>"org.springframework.ide.eclipse.core.springnature"</code>).
+	 * The presence of this nature on a project indicates that it is Spring-capable.
 	 * 
 	 * @see org.eclipse.core.resources.IProject#hasNature(java.lang.String)
 	 */
@@ -66,8 +64,10 @@ public class SpringCore extends Plugin {
 	public static final String PROJECT_PROPERTY_ID = "enable.project.preferences";
 
 	/** Temporally setting to enable or disable the calculation of java structure changes and state */
-	public static final String USE_CHANGE_DETECTION_IN_JAVA_FILES = PLUGIN_ID
-			+ ".useChangeDetectionForJavaFiles";
+	public static final String USE_CHANGE_DETECTION_IN_JAVA_FILES = PLUGIN_ID + ".useChangeDetectionForJavaFiles";
+
+	/** Temporally setting to enable or disable the use of XBean's non-locking classloader infrastructure */
+	public static final String USE_NON_LOCKING_CLASSLOADER = PLUGIN_ID + ".useNonLockingClassLoader";
 
 	/** The shared instance */
 	private static SpringCore plugin;
@@ -77,7 +77,7 @@ public class SpringCore extends Plugin {
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
-	
+
 	private static TypeStructureCache typeStructureCache;
 
 	/**
@@ -104,6 +104,7 @@ public class SpringCore extends Plugin {
 		typeStructureCache.startup();
 		// install default for incremtal compilation
 		plugin.getPluginPreferences().setDefault(USE_CHANGE_DETECTION_IN_JAVA_FILES, true);
+		plugin.getPluginPreferences().setDefault(USE_NON_LOCKING_CLASSLOADER, false);
 	}
 
 	@Override
@@ -126,7 +127,7 @@ public class SpringCore extends Plugin {
 	public static final ISpringModel getModel() {
 		return model;
 	}
-	
+
 	public static final ITypeStructureCache getTypeStructureCache() {
 		return typeStructureCache;
 	}
@@ -186,8 +187,7 @@ public class SpringCore extends Plugin {
 	}
 
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(
-				createErrorStatus(getResourceString("Plugin.internal_error"), exception));
+		getDefault().getLog().log(createErrorStatus(getResourceString("Plugin.internal_error"), exception));
 	}
 
 	/**
