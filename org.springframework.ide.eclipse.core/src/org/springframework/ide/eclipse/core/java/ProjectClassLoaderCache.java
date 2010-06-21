@@ -205,7 +205,7 @@ class ProjectClassLoaderCache {
 			for (int i = CLASSLOADER_CACHE.size() - 1; i >= 0; i--) {
 				ClassLoaderCacheEntry entry = (ClassLoaderCacheEntry) CLASSLOADER_CACHE.get(i);
 				IProject curr = entry.getProject();
-				if (!curr.exists() || !curr.isAccessible() || !curr.isOpen()) {
+				if (curr == null || !curr.exists() || !curr.isAccessible() || !curr.isOpen()) {
 					removeClassLoaderEntryFromCache(entry);
 					if (DEBUG_CLASSLOADER) {
 						System.out.println(String.format("> removing classloader for '%s' : total %s", entry
@@ -290,6 +290,10 @@ class ProjectClassLoaderCache {
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aopalliance"));
 			PARENT_CLASS_LOADER = new URLClassLoader(paths.toArray(new URL[paths.size()]));
+		}
+		
+		if (project == null) {
+			return PARENT_CLASS_LOADER;
 		}
 
 		// register the listener

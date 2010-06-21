@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,7 +135,8 @@ public class AopReferenceModelMarkerUtils {
 	public static void deleteProblemMarkers(IResource resource) {
 		if (resource != null && resource.isAccessible()) {
 			try {
-				resource.deleteMarkers(AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
+				
+				resource.getProject().deleteMarkers(AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
 
 				IProject project = resource.getProject();
 				String resourceName = resource.getFullPath().toString();

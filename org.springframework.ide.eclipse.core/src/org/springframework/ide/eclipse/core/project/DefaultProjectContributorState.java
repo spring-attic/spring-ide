@@ -31,7 +31,15 @@ public class DefaultProjectContributorState implements IProjectContributorState 
 
 	@SuppressWarnings("unchecked")
 	public <T> T get(Class<T> clazz) {
-		return (T) managedObjects.get(clazz);
+		if (managedObjects.containsKey(clazz)) {
+			return (T) managedObjects.get(clazz);
+		}
+		for (Map.Entry<Class, Object> entry : managedObjects.entrySet()) {
+			if (clazz.isAssignableFrom(entry.getKey())) {
+				return (T) entry.getValue();
+			}
+		}
+		return null;
 	}
 
 	public boolean hold(Object obj) {

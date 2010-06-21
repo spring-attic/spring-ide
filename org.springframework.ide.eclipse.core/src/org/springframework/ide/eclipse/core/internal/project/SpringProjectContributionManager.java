@@ -152,7 +152,8 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			List<ValidatorDefinition> validatorDefinitions) {
 
 		IProjectContributorState context = new DefaultProjectContributorState();
-
+		context.hold(project);
+		
 		for (ProjectBuilderDefinition builderDefinition : builderDefinitions) {
 			if (builderDefinition.isEnabled(project)
 					&& builderDefinition.getProjectBuilder() instanceof IProjectContributorStateAware) {
