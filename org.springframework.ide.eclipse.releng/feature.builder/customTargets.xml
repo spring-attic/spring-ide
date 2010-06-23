@@ -312,8 +312,8 @@
 		
 		<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main" fork="true" classpathref="eclipse.classpath"
 			failonerror="true" maxmemory="256m" dir="${buildDirectory}">
-			<arg line="-application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator" />
-			<arg line="-updateSite ${updateSiteStagingLocation} -site file://${updateSiteStagingLocation}/site.xml -metadataRepository file://${updateSiteStagingLocation} -metadataRepositoryName 'Spring IDE Update Site' -artifactRepository file://${updateSiteStagingLocation} -artifactRepositoryName 'Spring IDE Artifacts' -compress -reusePack200Files -noDefaultIUs" />
+			<arg line="-application org.eclipse.equinox.p2.publisher.UpdateSitePublisher" />
+			<arg line="-source ${updateSiteStagingLocation} -metadataRepository file://${updateSiteStagingLocation} -artifactRepository file://${updateSiteStagingLocation} -repositoryName 'SpringSource IDE for Eclipse 3.5, 3.6' -compress -reusePackedFiles -publishArtifacts" />
 		</java>
 		
 	</target>

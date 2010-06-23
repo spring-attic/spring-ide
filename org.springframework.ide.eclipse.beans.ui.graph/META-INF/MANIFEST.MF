@@ -38,7 +38,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.views.contentoutline,
  org.eclipse.ui.views.properties,
  org.osgi.framework,
- org.springframework.beans.factory.config;version="[3.0.2.RELEASE, 3.1.0)",
+ org.springframework.beans.factory.config;version="[3.0.3.RELEASE, 3.1.0)",
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.internal.model,
  org.springframework.ide.eclipse.beans.core.model,
@@ -52,7 +52,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.core.model.xml,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.ui.navigator.actions,
- org.springframework.util;version="[3.0.2.RELEASE, 3.1.0)"
+ org.springframework.util;version="[3.0.3.RELEASE, 3.1.0)"
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Export-Package: org.springframework.ide.eclipse.beans.ui.graph,
