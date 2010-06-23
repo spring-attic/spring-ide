@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="org.springframework.ide.eclipse.aop.core">
+
+	<property name="spring.version" value="3.0.3.RELEASE" />
+
+	<target name="jar" depends="jarjar.init" description="Creates a JAR file containing the output of a compilation of the source tree.">
+		<delete file="org.springframework.aop-repackaged-${spring.version}.jar" />
+		<jarjar destfile="org.springframework.aop-repackaged-${spring.version}.jar" index="true" filesetmanifest="merge">
+			<zipfileset src="../org.springframework.asm-${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<zipfileset src="../org.springframework.aop-${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<zipfileset src="../org.springframework.beans-${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<zipfileset src="../org.springframework.core-${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<rule pattern="org.springframework.**" result="org.springframework.ide.eclipse.springframework.@1" />
+		</jarjar>
+	</target>
+
+	<target name="jarjar.init">
+		<path id="jarjar.classpath">
+			<fileset dir=".">
+				<include name="jarjar-1.0.jar" />
+			</fileset>
+		</path>
+		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="jarjar.classpath" />
+	</target>
+
+</project>
+
