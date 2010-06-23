@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 ################################################################################
-# Copyright (c) 2005, 2008 Spring IDE Developers
+# Copyright (c) 2005, 2010 Spring IDE Developers
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -17,18 +17,20 @@ STAGINGLOCATION=$WORKSPACE/updatesite/
 TEST_STAGINGLOCATION=$WORKSPACE/testupdatesite/
 ECLIPSELOCATION=$WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar
 
-if [ -z "$ECLIPSE_DISTRO_URL" ]; then
-	ECLIPSE_DISTRO_URL=http://download.springsource.com/release/ECLIPSE/galileo/SR2/eclipse-jee-galileo-SR2-linux-gtk.tar.gz
- 	#ECLIPSE_DISTRO_URL=http://download.springsource.com/release/ECLIPSE/galileo/SR2/eclipse-jee-galileo-SR2-macosx-cocoa-x86_64.tar.gz
-	#ECLIPSE_DISTRO_URL=http://build.eclipse.org/technology/epp/epp_build/34/download/20080623-1700/20080623-1700_eclipse-jee-ganymede-macosx.carbon.ppc.tar.gz
-	#ECLIPSE_DISTRO_URL=http://www.mirrorservice.org/sites/download.eclipse.org/eclipseMirror/technology/epp/downloads/release/ganymede/SR2/eclipse-jee-ganymede-SR2-linux-gtk.tar.gz
+OS=`uname -a`
+
+if [[ $OS == *Darwin* ]]
+then
+	ECLIPSE_DISTRO_URL=http://download.springsource.com/release/ECLIPSE/helios/R/eclipse-jee-helios-macosx-cocoa-x86_64.tar.gz
+else
+	ECLIPSE_DISTRO_URL=http://download.springsource.com/release/ECLIPSE/helios/R/eclipse-jee-helios-linux-gtk.tar.gz
 fi
 
 ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/downloads/drops/R-3.3.1.1-200710231652/eclipse-Automated-Tests-3.3.1.1.zip
 
 MYLYN_UPDATE_SITE_URL=http://eclipse.unixheads.org/eclipse/tools/mylyn/update/e3.4/
-AJDT_UPDATE_SITE_URL=http://eclipse.unixheads.org/eclipse/tools/ajdt/35/dev/update
+AJDT_UPDATE_SITE_URL=http://eclipse.unixheads.org/eclipse/tools/ajdt/36/dev/update
 
 #-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y
 
@@ -41,21 +43,6 @@ build() {
     then
         exit 1
     fi
-}
-
-# Run the pack20 on the update site jars
-pack() {
-	ECLIPSELOCATION=`ls $WORKSPACE/eclipse/plugins/org.eclipse.equinox.launcher_*`
-    $JAVA_HOME/bin/java -Xmx256m -jar $ECLIPSELOCATION -application org.eclipse.update.core.siteOptimizer -jarProcessor -verbose -processAll -repack -pack -outputDir $STAGINGLOCATION $STAGINGLOCATION  
-    if [ $? -ne 0 ]
-    then
-        exit 1
-    fi
-}
-
-# Run p2 metadata generation
-p2() {
-	$JAVA_HOME/bin/java -jar org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator -updateSite $STAGINGLOCATION -site file://$STAGINGLOCATION/site.xml -metadataRepository file://$STAGINGLOCATION -metadataRepositoryName "Spring IDE Update Site" -artifactRepository file://$STAGINGLOCATION -artifactRepositoryName "Spring IDE Artifacts" -compress -reusePack200Files -noDefaultIUs -vmargs -Xmx256m
 }
 
 # Install given feature into downloaded Eclipse
