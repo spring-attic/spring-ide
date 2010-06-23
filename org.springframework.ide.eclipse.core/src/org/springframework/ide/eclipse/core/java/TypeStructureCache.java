@@ -569,11 +569,14 @@ public class TypeStructureCache implements ITypeStructureCache {
 
 		private void guessClassName(IJavaElement cu, StringBuilder sb) {
 			if (cu instanceof IPackageFragment) {
-				sb.insert(0, cu.getElementName() + ".");
+				if (cu.getElementName().length() > 0) {
+					sb.insert(0, cu.getElementName() + ".");
+				}
 			}
 			else if (cu != null) {
 				if (cu instanceof ICompilationUnit) {
-					String name = cu.getElementName().substring(0, cu.getElementName().length() - 5);
+					int ix = cu.getElementName().lastIndexOf('.');
+					String name = cu.getElementName().substring(0, ix);
 					sb.insert(0, name);
 				}
 				else {
