@@ -16,10 +16,12 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.aop.core.Activator;
+import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AopReferenceModelBuilderJob;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
@@ -33,17 +35,15 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorStateAwar
  * @author Christian Dupuis
  * @since 2.0
  */
-public class AopReferenceModelProjectBuilder implements IProjectBuilder,
-		IProjectContributorStateAware {
+public class AopReferenceModelProjectBuilder implements IProjectBuilder, IProjectContributorStateAware {
 
 	private IProjectContributorState context = null;
 
 	/**
-	 * Returns a {@link Set} of {@link IResource} instances that need to be rebuild in the context
-	 * of the current <code>resource</code> and <code>kind</code>
+	 * Returns a {@link Set} of {@link IResource} instances that need to be rebuild in the context of the current
+	 * <code>resource</code> and <code>kind</code>
 	 */
-	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind)
-			throws CoreException {
+	public Set<IResource> getAffectedResources(IResource resource, int kind, int deltaKind) throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
 			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind, deltaKind, resource, context));
@@ -52,15 +52,18 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder,
 	}
 
 	/**
-	 * Starts creation of AOP reference model by passing the Set of affectedResources on to a new
-	 * instance of {@link AopReferenceModelBuilderJob}.
+	 * Starts creation of AOP reference model by passing the Set of affectedResources on to a new instance of
+	 * {@link AopReferenceModelBuilderJob}.
 	 */
-	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor)
-			throws CoreException {
-		monitor.subTask(Activator
-				.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
+	public void build(Set<IResource> affectedResources, int kind, IProgressMonitor monitor) throws CoreException {
+		monitor.subTask(Activator.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
 		if (affectedResources.size() > 0) {
-			Job job = new AopReferenceModelBuilderJob(context.get(IProject.class), AopReferenceModelUtils
+			IProject project = context.get(IProject.class);
+			if (kind == IncrementalProjectBuilder.CLEAN_BUILD || kind == IncrementalProjectBuilder.FULL_BUILD) {
+				AopReferenceModelMarkerUtils.deleteProblemMarkers(project);
+				((AopReferenceModel) Activator.getModel()).removeProject(JdtUtils.getJavaProject(project));
+			}
+			Job job = new AopReferenceModelBuilderJob(project, AopReferenceModelUtils
 					.getAffectedFilesFromBeansConfig(affectedResources), affectedResources);
 			job.schedule();
 		}

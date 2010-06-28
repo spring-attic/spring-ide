@@ -61,9 +61,7 @@ public class AopProject implements IAopProject {
 		try {
 			w.lock();
 			for (IAopReference reference : this.references) {
-				if (resource != null
-						&& (resource.equals(reference.getDefinition().getResource()) || resource.equals(reference
-								.getResource()))) {
+				if (resource != null && resource.equals(reference.getDefinition().getResource())) {
 					toRemove.add(reference);
 				}
 			}

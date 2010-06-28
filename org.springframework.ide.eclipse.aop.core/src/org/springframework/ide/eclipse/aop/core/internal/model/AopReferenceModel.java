@@ -149,8 +149,8 @@ public class AopReferenceModel implements IAopReferenceModel {
 			if (jp.equals(project)) {
 				projects.remove(jp);
 				fireModelChanged();
+				break;
 			}
-			break;
 		}
 	}
 
