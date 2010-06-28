@@ -29,6 +29,7 @@ import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolverExtens
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -56,18 +57,19 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 
 		// Resolve using the classpath
 		if (systemId != null
-				&& BeansCoreUtils.isBeansConfig(file)
+				&& SpringCoreUtils.hasNature(file, SpringCore.NATURE_ID)
 				&& SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
-						.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false)) {
-//			long start = System.currentTimeMillis();
+						.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false)
+				&& BeansCoreUtils.isBeansConfig(file)) {
+			// long start = System.currentTimeMillis();
 			String result = null;
 			try {
 				result = resolveOnClasspath(file, systemId);
 				return result;
 			}
 			finally {
-//				System.out.println(String.format("-- resolve of '%s' took '%s'ms -> result '%s'", publicId, (System
-//						.currentTimeMillis() - start), result));
+				// System.out.println(String.format("-- resolve of '%s' took '%s'ms -> result '%s'", publicId, (System
+				// .currentTimeMillis() - start), result));
 			}
 		}
 		return null;
@@ -94,51 +96,54 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 			}
 
 			IJavaProject javaProject = JdtUtils.getJavaProject(file.getProject());
-			try {
-				for (IPackageFragmentRoot root : javaProject.getAllPackageFragmentRoots()) {
-					boolean found = false;
+			if (javaProject != null) {
 
-					// Look in the root of the package fragment root
-					if ("".equals(packageName) && root.exists()) {
-						found = containsSchema(root.getNonJavaResources(), fileName);
-					}
+				try {
+					for (IPackageFragmentRoot root : javaProject.getAllPackageFragmentRoots()) {
+						boolean found = false;
 
-					// Check the package
-					IPackageFragment packageFragment = root.getPackageFragment(packageName);
-					if (!found && packageFragment != null && packageFragment.exists()) {
-						found = containsSchema(packageFragment.getNonJavaResources(), fileName);
-					}
-
-					// Found the XSD in the package fragment root? -> construct usable URI
-					if (found) {
-						String path = "";
-
-						// Workspace jar or resource
-						if (root.getResource() != null) {
-							URI jarUri = SpringCoreUtils.getResourceURI(root.getResource());
-							path = jarUri.toString();
-						}
-						// Workspace external jar
-						else {
-							File jarFile = root.getPath().toFile();
-							path = jarFile.toURI().toString();
+						// Look in the root of the package fragment root
+						if ("".equals(packageName) && root.exists()) {
+							found = containsSchema(root.getNonJavaResources(), fileName);
 						}
 
-						// If the path points to a jar -> add jar: URI prefix and append ! as separator
-						if (path.endsWith(".jar")) {
-							path = "jar:" + path + "!";
+						// Check the package
+						IPackageFragment packageFragment = root.getPackageFragment(packageName);
+						if (!found && packageFragment != null && packageFragment.exists()) {
+							found = containsSchema(packageFragment.getNonJavaResources(), fileName);
 						}
 
-						// Make sure that all paths start with '/'
-						if (xsdPath.startsWith("/")) {
-							return path + xsdPath;
+						// Found the XSD in the package fragment root? -> construct usable URI
+						if (found) {
+							String path = "";
+
+							// Workspace jar or resource
+							if (root.getResource() != null) {
+								URI jarUri = SpringCoreUtils.getResourceURI(root.getResource());
+								path = jarUri.toString();
+							}
+							// Workspace external jar
+							else {
+								File jarFile = root.getPath().toFile();
+								path = jarFile.toURI().toString();
+							}
+
+							// If the path points to a jar -> add jar: URI prefix and append ! as separator
+							if (path.endsWith(".jar")) {
+								path = "jar:" + path + "!";
+							}
+
+							// Make sure that all paths start with '/'
+							if (xsdPath.startsWith("/")) {
+								return path + xsdPath;
+							}
+							return path + "/" + xsdPath;
 						}
-						return path + "/" + xsdPath;
 					}
 				}
-			}
-			catch (JavaModelException e) {
-				// The implementation is called too often to log
+				catch (JavaModelException e) {
+					// The implementation is called too often to log
+				}
 			}
 		}
 
