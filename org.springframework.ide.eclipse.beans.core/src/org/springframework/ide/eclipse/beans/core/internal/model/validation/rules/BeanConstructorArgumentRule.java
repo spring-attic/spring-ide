@@ -158,6 +158,8 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 
 		private static final String AUTOWIRED_NAME = Type.getDescriptor(Autowired.class);
 
+		private static final String INJECT_NAME = "Ljavax/inject/Inject;";
+
 		private boolean isConstructorAutowired = false;
 
 		@Override
@@ -167,6 +169,9 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 					@Override
 					public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 						if (AUTOWIRED_NAME.equals(desc)) {
+							isConstructorAutowired = true;
+						}
+						else if (INJECT_NAME.equals(desc)) {
 							isConstructorAutowired = true;
 						}
 						return new EmptyVisitor();
