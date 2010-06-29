@@ -455,43 +455,36 @@
             label="%propertyKeywords.label"/>
     </extension>
 	
-	<extension point="org.eclipse.ui.actionSets">
-		<actionSet label="%beansInplaceNavigation.label"
-			description="beansInplaceNavigation.content" visible="true"
-			id="org.springframework.ide.eclipse.beans.ui.ActionSet">
-			<action
-				definitionId="org.springframework.ide.eclipse.beans.ui.inplace.show"
-				label="%beansViewInplace.label"
-				class="org.springframework.ide.eclipse.beans.ui.inplace.OpenBeansInplaceOutlineDialogAction"
-				menubarPath="navigate/showIn" id="openInplace">
-				<!--<enablement>
-					<or>
-						<objectClass name="org.w3c.dom.Node" />
-						<objectClass
-							name="org.eclipse.jface.text.TextSelection" />
-					</or>
-				</enablement>-->
-			</action>
-		</actionSet>
+	<extension point="org.eclipse.ui.menus">
+	    <menuContribution locationURI="menu:navigate?after=showIn">
+	       <command
+	             commandId="org.springframework.ide.eclipse.beans.ui.inplace.show"
+	             label="%beansViewInplace.label"
+	             style="push">
+	          <visibleWhen>
+	          	<with variable="activeContexts">
+		            <iterate operator="or">
+		               <equals
+		                     value="org.eclipse.wst.sse.ui.structuredTextEditorScope"/>
+		            </iterate>
+	         	</with>
+	          </visibleWhen>
+	       </command>
+	    </menuContribution>
 	</extension>
-
+	
 	<extension point="org.eclipse.ui.commands">
-		<command name="%beansViewInplace.label"
-			description="%beansViewInplace.content"
-			categoryId="org.eclipse.ui.category.navigate"
-			id="org.springframework.ide.eclipse.beans.ui.inplace.show">
+		<command
+        categoryId="org.eclipse.ui.category.navigate"
+        defaultHandler="org.springframework.ide.eclipse.beans.ui.inplace.OpenBeansInplaceOutlineDialogHandler"
+        description="%beansViewInplace.content"
+        id="org.springframework.ide.eclipse.beans.ui.inplace.show"
+        name="%beansViewInplace.label">
 		</command>
 	</extension>
 
 	<extension point="org.eclipse.ui.bindings">
-		<key sequence="CTRL+O"
-			commandId="org.springframework.ide.eclipse.beans.ui.inplace.show"
-			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
-			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
-		<key platform="carbon" sequence="CTRL+O" commandId=""
-			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
-			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
-		<key platform="carbon" sequence="COMMAND+O"
+		<key sequence="M1+M2+O"
 			commandId="org.springframework.ide.eclipse.beans.ui.inplace.show"
 			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
 			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
