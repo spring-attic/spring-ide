@@ -88,7 +88,7 @@ public class NamespaceUtils {
 						String uri = config.getAttribute("uri");
 						if (uri != null && config.getAttribute("namespaceHandler") != null) {
 							try {
-								String handlerClassName = config.getAttribute("class");
+								String handlerClassName = config.getAttribute("namespaceHandler");
 								String provider = config.getAttribute("provider");
 								if (!StringUtils.hasLength(provider)) {
 									provider = extension.getContributor().getName();

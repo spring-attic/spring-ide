@@ -511,7 +511,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPersistableElement.class) {
