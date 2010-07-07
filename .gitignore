@@ -1,7 +1,6 @@
 bin/
 org.eclipse.releng.basebuilder/
 build/
-eclipse/
 eclipse-base.tar.gz
 updatesite/
 jarjar/

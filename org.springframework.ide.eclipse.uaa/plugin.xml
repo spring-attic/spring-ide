@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.3"?>
+<!--
+/*******************************************************************************
+ * Copyright (c) 2005, 2010 Spring IDE Developers
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Spring IDE Developers - initial API and implementation
+ *******************************************************************************/
+ -->
+<plugin>
+   <extension-point id="product" name="User Agent Analysis Product" schema="schema/product.exsd"/>
+
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.springframework.ide.eclipse.internal.uaa.Startup"></startup>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ecf.provider.filetransfer.retrieveFileTransferProtocolFactory">
+      <retrieveFileTransferProtocolFactory
+            class="org.springframework.ide.eclipse.internal.uaa.filetransfer.UserAgentAwareHttpClientRetrieveFileTransfer"
+            priority="0"
+            protocol="http">
+      </retrieveFileTransferProtocolFactory>
+      <retrieveFileTransferProtocolFactory
+            class="org.springframework.ide.eclipse.internal.uaa.filetransfer.UserAgentAwareHttpClientRetrieveFileTransfer"
+            priority="0"
+            protocol="https">
+      </retrieveFileTransferProtocolFactory>
+   </extension>
+   
+   <extension
+         point="org.springframework.ide.eclipse.core.listeners">
+      <listener
+            class="org.springframework.ide.eclipse.internal.uaa.monitor.ProjectContributionUsageMonitor">
+      </listener>
+   </extension>
+   
+   	<extension point="org.eclipse.ui.preferencePages">
+	 	<page id="org.springframework.ide.eclipse.uaa.preferencePage"
+  	      	name="User Agent Analysis"
+	      	class="org.springframework.ide.eclipse.internal.uaa.preferences.UaaPreferencePage"
+	      	category="org.springframework.ide.eclipse.ui.preferencePage">
+   		</page>
+	</extension>
+
+   <extension point="org.springframework.ide.eclipse.uaa.product">
+		<product id="org.springframework.ide.eclipse">
+			<feature id="org.springframework.ide.eclipse.ajdt.feature">
+				<plugin id="org.springframework.ide.eclipse.ajdt.ui.xref" />
+				<plugin id="org.springframework.ide.eclipse.ajdt.ui.visualiser" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.aop.feature">
+				<plugin id="org.springframework.ide.eclipse.aop.core" />
+				<plugin id="org.springframework.ide.eclipse.aop.ui" />
+				<plugin id="org.springframework.ide.eclipse.aop.ui.matcher" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.autowire.feature">
+				<plugin id="org.springframework.ide.eclipse.beans.core.autowire" />
+				<plugin id="org.springframework.ide.eclipse.beans.ui.autowire" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.batch.feature">
+				<plugin id="org.springframework.ide.eclipse.batch" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.feature">
+				<plugin id="org.springframework.ide.eclipse" />
+				<plugin id="org.springframework.ide.eclipse.core" />
+				<plugin id="org.springframework.ide.eclipse.doc" />
+				<plugin id="org.springframework.ide.eclipse.ui" />
+				<plugin id="org.springframework.ide.eclipse.beans.core" />
+				<plugin id="org.springframework.ide.eclipse.beans.core.metadata" />
+				<plugin id="org.springframework.ide.eclipse.beans.ui" />
+				<plugin id="org.springframework.ide.eclipse.beans.ui.graph" />
+				<plugin id="org.springframework.ide.eclipse.beans.ui.editor" />
+				<plugin id="org.springframework.ide.eclipse.beans.ui.search" />
+				<plugin id="org.springframework.ide.eclipse.beans.ui.refactoring" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.integration.feature">
+				<plugin id="org.springframework.ide.eclipse.integration" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.mylyn.feature">
+				<plugin id="org.springframework.ide.eclipse.webflow.mylyn" />
+				<plugin id="org.springframework.ide.eclipse.beans.mylyn" />
+				<plugin id="org.springframework.ide.eclipse.aop.mylyn" />
+				<plugin id="org.springframework.ide.eclipse.mylyn" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.osgi.feature">
+				<plugin id="org.springframework.ide.eclipse.osgi" />
+				<plugin id="org.springframework.ide.eclipse.osgi.targetdefinition" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.security.feature">
+				<plugin id="org.springframework.ide.eclipse.security" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.tests.feature">
+				<plugin id="org.springframework.ide.eclipse.beans.core.tests" />
+			</feature>
+			<feature id="org.springframework.ide.eclipse.webflow.feature">
+				<plugin id="org.springframework.ide.eclipse.webflow.core" />
+				<plugin id="org.springframework.ide.eclipse.webflow.ui" />
+				<plugin id="org.springframework.ide.eclipse.webflow.ui.editor" />
+				<plugin id="org.springframework.ide.eclipse.webflow.ui.graph" />
+			</feature>
+		</product>
+	</extension>
+   
+</plugin>
