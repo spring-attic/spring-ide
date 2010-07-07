@@ -56,10 +56,14 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		GridLayout layout = new GridLayout();
 		entryTable.setLayout(layout);
-
-		Label label = new Label(entryTable, SWT.NONE);
-		label.setText("Use this preference page to specify the configuration parameters for\nthe Spring support.");
-
+		Label label = new Label(entryTable, SWT.NONE | SWT.WRAP);
+		label.setText("Use this preference page to specify the configuration parameters for the Spring support.");
+		label.setFont(parent.getFont());
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		gd.widthHint = 300;
+		label.setLayoutData(gd);
+		
 		Composite timeoutComposite = new Composite(entryTable, SWT.NONE);
 		timeoutComposite.setLayout(new GridLayout());
 
@@ -68,7 +72,7 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		Group timeoutGroup = new Group(timeoutComposite, SWT.NONE);
 		timeoutGroup.setText("Loading Spring configuration files");
 		layout = new GridLayout();
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
 		timeoutGroup.setLayout(layout);
 		timeoutGroup.setLayoutData(gd);
 		Composite timoutComposite1 = new Composite(timeoutGroup, SWT.NONE);

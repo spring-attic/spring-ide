@@ -60,7 +60,7 @@ public class ProjectBuilderDefinition extends PersistablePreferenceObjectSupport
 	private Long order;
 
 	private IProjectBuilder projectBuilder;
-
+	
 	public ProjectBuilderDefinition(IConfigurationElement element) throws Exception {
 		init(element);
 	}

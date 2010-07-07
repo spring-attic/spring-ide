@@ -47,8 +47,13 @@ public class AopPreferencePage extends PreferencePage implements
 		GridLayout layout = new GridLayout();
 		entryTable.setLayout(layout);
 
-		Label label = new Label(entryTable, SWT.NONE);
-		label.setText("Use this preference page to specify whether the AOP Reference model should\nbe saved to file on workbench close");
+		Label label = new Label(entryTable, SWT.NONE | SWT.WRAP);
+		label.setText("Use this preference page to specify whether the AOP Reference model should be saved to file on workbench close.");
+		label.setFont(parent.getFont());
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		gd.widthHint = 300;
+		label.setLayoutData(gd);
 
 		Composite colorComposite = new Composite(entryTable, SWT.NONE);
 		colorComposite.setLayout(new GridLayout());
