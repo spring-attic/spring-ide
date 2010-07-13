@@ -163,14 +163,16 @@ class ProjectClassLoaderCache {
 
 	private static void addUri(List<URL> paths, URI uri) throws MalformedURLException {
 		File file = new File(uri);
-		if (file.exists()) {
+		// If we keep the following check, non-existing output folders will never be used for the lifetime of
+		// a classloader. this causes issues with clean projects with not-yet existing output folders.
+//		if (file.exists()) {
 			if (file.isDirectory()) {
 				paths.add(new URL(uri.toString() + File.separator));
 			}
 			else {
 				paths.add(uri.toURL());
 			}
-		}
+//		}
 	}
 
 	private static void covertPathToUrl(IProject project, List<URL> paths, IPath path) throws MalformedURLException {

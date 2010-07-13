@@ -70,7 +70,7 @@ public class UaaManager {
 
 	private void init() {
 		IExtensionPoint point = Platform.getExtensionRegistry()
-				.getExtensionPoint("com.springsource.sts.update.product");
+				.getExtensionPoint("org.springframework.ide.eclipse.uaa.product");
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
