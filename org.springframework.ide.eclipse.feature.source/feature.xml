@@ -122,7 +122,7 @@
          unpack="false"/>-->
          
    <plugin
-         id="com.springsource.edu.emory.mathcs.backport.source"
+         id="edu.emory.mathcs.backport.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -136,7 +136,7 @@
          unpack="false"/> 
 
    <plugin
-         id="com.springsource.javax.annotation.source"
+         id="javax.annotation.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -150,28 +150,14 @@
          unpack="false"/>
 
    <plugin
-         id="com.springsource.javax.xml.stream.source"
+         id="org.apache.commons.collections.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
          
    <plugin
-         id="com.springsource.org.aopalliance.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-         
-   <plugin
-         id="com.springsource.org.apache.commons.collections.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-         
-   <plugin
-         id="com.springsource.org.apache.commons.logging.source"
+         id="org.apache.commons.logging.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
