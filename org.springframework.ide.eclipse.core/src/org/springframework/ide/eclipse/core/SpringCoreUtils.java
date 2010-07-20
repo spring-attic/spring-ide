@@ -631,7 +631,7 @@ public final class SpringCoreUtils {
 	public static Document parseDocument(IFile deploymentDescriptor) {
 		try {
 			if (getResourceURI(deploymentDescriptor) != null) {
-				return getDocumentBuilder().parse(new File(getResourceURI(deploymentDescriptor)));
+				return parseDocument(getResourceURI(deploymentDescriptor));
 			}
 			return getDocumentBuilder().parse(new InputSource(deploymentDescriptor.getContents()));
 		}
@@ -642,6 +642,18 @@ public final class SpringCoreUtils {
 			throw new RuntimeException(e);
 		}
 		catch (CoreException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static Document parseDocument(URI deploymentDescriptor) {
+		try {
+			return getDocumentBuilder().parse(deploymentDescriptor.toString());
+		}
+		catch (SAXException e) {
+			throw new RuntimeException(e);
+		}
+		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}

@@ -28,8 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolverExtension;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -49,31 +48,78 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 	 * {@inheritDoc}
 	 */
 	public String resolve(IFile file, String baseLocation, String publicId, String systemId) {
-
 		// systemId is already resolved; so don't touch
 		if (systemId != null && systemId.startsWith("jar:")) {
 			return null;
 		}
+		
+		// file and systemId can't be null
+		if (file == null || systemId == null) {
+			return null;
+		}
+
+		// resolve the project first
+		IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
+		if (project == null) {
+			return null;
+		}
 
 		// Resolve using the classpath
-		if (systemId != null
-				&& SpringCoreUtils.hasNature(file, SpringCore.NATURE_ID)
-				&& SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
+		if (SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
 						.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false)
-				&& BeansCoreUtils.isBeansConfig(file)) {
-			// long start = System.currentTimeMillis();
-			String result = null;
-			try {
-				result = resolveOnClasspath(file, systemId);
-				return result;
-			}
-			finally {
-				// System.out.println(String.format("-- resolve of '%s' took '%s'ms -> result '%s'", publicId, (System
-				// .currentTimeMillis() - start), result));
-			}
+				&& checkFileExtension(file, project)) {
+			return resolveOnClasspath(file, systemId);
 		}
 		return null;
+	}
 
+	/**
+	 * Check that the file has a valid file extension.
+	 */
+	private boolean checkFileExtension(IFile file, IBeansProject project) {
+		if (project.getConfigSuffixes() != null) {
+			for (String extension : project.getConfigSuffixes()) {
+				if (file.getName().endsWith(extension)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Verify if the <code>resources</code> array contains a file matching <code>fileName</code>.
+	 */
+	private boolean containsSchema(Object[] resources, String fileName) {
+		for (Object resource : resources) {
+			if (resource instanceof IResource) {
+				if (((IResource) resource).getName().equals(fileName)) {
+					return true;
+				}
+			}
+			else if (resource instanceof IJarEntryResource) {
+				if (((IJarEntryResource) resource).getName().equals(fileName)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Loads all schema mappings from all <code>spring.schemas</code> files on the project classpath.
+	 */
+	private Map<String, String> getSchemaMappings(IProject project) {
+		Map<String, String> handlerMappings = new ConcurrentHashMap<String, String>();
+		try {
+			Properties mappings = PropertiesLoaderUtils.loadAllProperties(DEFAULT_SCHEMA_MAPPINGS_LOCATION, JdtUtils
+					.getClassLoader(project, null));
+			CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
+		}
+		catch (IOException ex) {
+			// We can ignore this as we simply don't find the xsd file then.
+		}
+		return handlerMappings;
 	}
 
 	/**
@@ -148,41 +194,6 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		}
 
 		return null;
-	}
-
-	/**
-	 * Verify if the <code>resources</code> array contains a file matching <code>fileName</code>.
-	 */
-	private boolean containsSchema(Object[] resources, String fileName) {
-		for (Object resource : resources) {
-			if (resource instanceof IResource) {
-				if (((IResource) resource).getName().equals(fileName)) {
-					return true;
-				}
-			}
-			else if (resource instanceof IJarEntryResource) {
-				if (((IJarEntryResource) resource).getName().equals(fileName)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Loads all schema mappings from all <code>spring.schemas</code> files on the project classpath.
-	 */
-	private Map<String, String> getSchemaMappings(IProject project) {
-		Map<String, String> handlerMappings = new ConcurrentHashMap<String, String>();
-		try {
-			Properties mappings = PropertiesLoaderUtils.loadAllProperties(DEFAULT_SCHEMA_MAPPINGS_LOCATION, JdtUtils
-					.getClassLoader(project, null));
-			CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
-		}
-		catch (IOException ex) {
-			// We can ignore this as we simply don't find the xsd file then.
-		}
-		return handlerMappings;
 	}
 
 }
