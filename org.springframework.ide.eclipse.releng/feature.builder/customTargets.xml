@@ -202,6 +202,7 @@
 		<move todir="${updateSiteStagingLocation}/plugins" includeemptydirs="false">
 		    <fileset dir="${updateSiteStagingLocation}/plugins">
 		      <include name="com.springsource.*.jar"/>
+		      <include name="org.springframework.*.jar"/>
 			  <exclude name="org.springframework.ide.eclipse*" />
 		    </fileset>
 			<mapper type="regexp" from="([a-z.A-Z]*)\-?(.*)$$" to="\1_\2"/>
