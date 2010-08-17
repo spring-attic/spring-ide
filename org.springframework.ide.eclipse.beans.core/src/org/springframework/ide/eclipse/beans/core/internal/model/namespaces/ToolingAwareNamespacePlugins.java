@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionList
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.osgi.util.OsgiBundleUtils;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -129,44 +130,47 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 					String prefix = null;
 					String name = null;
 
-					// Add catalog entry to XML catalog
-					addCatalogEntry(bundle, key, uri, catalogEntries, ICatalogEntry.ENTRY_TYPE_URI);
+					if (StringUtils.hasText(namespaceUri)) {
 
-					Enumeration<URL> tooling = bundle.findEntries(META_INF, SPRING_TOOLING, false);
-					if (tooling != null) {
-						while (tooling.hasMoreElements()) {
-							Properties toolingProps = loadProperties(tooling.nextElement());
+						// Add catalog entry to XML catalog
+						addCatalogEntry(bundle, key, uri, catalogEntries, ICatalogEntry.ENTRY_TYPE_URI);
 
-							icon = toolingProps.getProperty(namespaceUri + "@icon");
-							prefix = toolingProps.getProperty(namespaceUri + "@prefix");
-							name = toolingProps.getProperty(namespaceUri + "@name");
+						Enumeration<URL> tooling = bundle.findEntries(META_INF, SPRING_TOOLING, false);
+						if (tooling != null) {
+							while (tooling.hasMoreElements()) {
+								Properties toolingProps = loadProperties(tooling.nextElement());
+
+								icon = toolingProps.getProperty(namespaceUri + "@icon");
+								prefix = toolingProps.getProperty(namespaceUri + "@prefix");
+								name = toolingProps.getProperty(namespaceUri + "@name");
+							}
 						}
-					}
 
-					if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
-						namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
-						namespaceDefinitionRegistry.get(namespaceUri).addUri(props.getProperty(key));
-					}
-					else {
-						NamespaceDefinition namespaceDefinition = new NamespaceDefinition(props);
-						namespaceDefinition.setName(name);
-						namespaceDefinition.setPrefix(prefix);
-						namespaceDefinition.setIconPath(icon);
-						namespaceDefinition.addSchemaLocation(key);
-						namespaceDefinition.setBundle(bundle);
-						namespaceDefinition.setNamespaceUri(namespaceUri);
-						namespaceDefinition.addUri(props.getProperty(key));
-						registerNamespaceDefinition(namespaceUri, namespaceDefinition);
-						namespaceDefinitions.add(namespaceDefinition);
+						if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
+							namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
+							namespaceDefinitionRegistry.get(namespaceUri).addUri(props.getProperty(key));
+						}
+						else {
+							NamespaceDefinition namespaceDefinition = new NamespaceDefinition(props);
+							namespaceDefinition.setName(name);
+							namespaceDefinition.setPrefix(prefix);
+							namespaceDefinition.setIconPath(icon);
+							namespaceDefinition.addSchemaLocation(key);
+							namespaceDefinition.setBundle(bundle);
+							namespaceDefinition.setNamespaceUri(namespaceUri);
+							namespaceDefinition.addUri(props.getProperty(key));
+							registerNamespaceDefinition(namespaceUri, namespaceDefinition);
+							namespaceDefinitions.add(namespaceDefinition);
+						}
 					}
 				}
 			}
 
 			// Add catalog entry to namespace uri
 			for (NamespaceDefinition definition : namespaceDefinitions) {
-				addCatalogEntry(definition.getBundle(), definition.getNamespaceUri(), "platform:/plugin/"
-						+ bundle.getSymbolicName() + "/" + definition.getDefaultUri(), catalogEntries,
-						ICatalogEntry.ENTRY_TYPE_PUBLIC);
+				addCatalogEntry(definition.getBundle(), definition.getNamespaceUri(),
+						"platform:/plugin/" + bundle.getSymbolicName() + "/" + definition.getDefaultUri(),
+						catalogEntries, ICatalogEntry.ENTRY_TYPE_PUBLIC);
 			}
 		}
 	}
@@ -216,8 +220,8 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 		ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
 		if (catalogElement instanceof ICatalogEntry) {
 			ICatalogEntry entry = (ICatalogEntry) catalogElement;
-			String resolvePath = CatalogContributorRegistryReader.resolvePath(CatalogContributorRegistryReader
-					.getPlatformURL(bundle.getSymbolicName()), uri);
+			String resolvePath = CatalogContributorRegistryReader.resolvePath(
+					CatalogContributorRegistryReader.getPlatformURL(bundle.getSymbolicName()), uri);
 			entry.setKey(key);
 			entry.setURI(resolvePath);
 			systemCatalog.addCatalogElement(catalogElement);
@@ -229,6 +233,11 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	 * Returns the target namespace URI of the XSD identified by the given <code>url</code>.
 	 */
 	private String getTargetNamespace(URL url) {
+		// safe guard for invalid Spring namespaces
+		if (url == null) {
+			return null;
+		}
+
 		try {
 			DocumentBuilder docBuilder = SpringCoreUtils.getDocumentBuilder();
 			Document doc = docBuilder.parse(url.openStream());
