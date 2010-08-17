@@ -99,9 +99,15 @@ public class PartUsageMonitor {
 	public void stopMonitoring() {
 		final IWorkbench workbench = PlatformUI.getWorkbench();
 		unhookListeners(workbench);
-		perspectiveToBundleIdMapper.dispose();
-		viewToBundleIdMapper.dispose();
-		editorToBundleIdMapper.dispose();
+		if (perspectiveToBundleIdMapper != null) {
+			perspectiveToBundleIdMapper.dispose();
+		}
+		if (viewToBundleIdMapper != null) {
+			viewToBundleIdMapper.dispose();
+		}
+		if (editorToBundleIdMapper != null) {
+			editorToBundleIdMapper.dispose();
+		}
 	}
 
 	private void hookListener(IWorkbenchWindow window) {

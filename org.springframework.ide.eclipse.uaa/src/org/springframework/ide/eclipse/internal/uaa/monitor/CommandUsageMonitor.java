@@ -53,9 +53,12 @@ public class CommandUsageMonitor {
 
 	public void stopMonitoring() {
 		ICommandService commandService = getCommandService();
-		if (commandService != null)
+		if (commandService != null) {
 			commandService.removeExecutionListener(executionListener);
-		commandToBundleIdMapper.dispose();
+		}
+		if (commandToBundleIdMapper != null) {
+			commandToBundleIdMapper.dispose();
+		}
 	}
 
 	private ICommandService getCommandService() {
