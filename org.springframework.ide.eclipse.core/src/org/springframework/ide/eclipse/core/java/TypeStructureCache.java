@@ -274,17 +274,19 @@ public class TypeStructureCache implements ITypeStructureCache {
 
 	private static File convertPathToFile(IProject project, IPath path) throws MalformedURLException {
 		if (path != null && project != null && path.removeFirstSegments(1) != null) {
+			IResource resource = project.findMember(path.removeFirstSegments(1));
+			if (resource != null) {
+				URI uri = resource.getRawLocationURI();
 
-			URI uri = project.findMember(path.removeFirstSegments(1)).getRawLocationURI();
-
-			if (uri != null) {
-				String scheme = uri.getScheme();
-				if (SpringCoreUtils.FILE_SCHEME.equalsIgnoreCase(scheme)) {
-					return new File(uri);
-				}
-				else {
-					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
-					return new File(variableManager.resolveURI(uri));
+				if (uri != null) {
+					String scheme = uri.getScheme();
+					if (SpringCoreUtils.FILE_SCHEME.equalsIgnoreCase(scheme)) {
+						return new File(uri);
+					}
+					else {
+						IPathVariableManager variableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
+						return new File(variableManager.resolveURI(uri));
+					}
 				}
 			}
 		}
@@ -319,7 +321,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 				return true;
 			}
 		}
-		
+
 		// tag bits; standard annotations like @Deprecated
 		if (reader.getTagBits() != existingType.getTagBits()) {
 			return true;
@@ -344,7 +346,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 			}
 			return true;
 		}
-		
+
 		// fields
 		IBinaryField[] newFields = reader.getFields();
 		if (newFields == null) {
@@ -482,8 +484,8 @@ public class TypeStructureCache implements ITypeStructureCache {
 		}
 		else if (newValue instanceof ClassSignature) {
 			if (existingValue instanceof ClassSignature) {
-				if (!CharOperation.equals(((ClassSignature) newValue).getTypeName(), ((ClassSignature) existingValue)
-						.getTypeName())) {
+				if (!CharOperation.equals(((ClassSignature) newValue).getTypeName(),
+						((ClassSignature) existingValue).getTypeName())) {
 					return false;
 				}
 			}
