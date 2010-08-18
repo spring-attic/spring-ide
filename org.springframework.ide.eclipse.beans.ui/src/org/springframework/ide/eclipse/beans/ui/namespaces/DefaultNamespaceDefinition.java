@@ -37,14 +37,14 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings( { "deprecation", "restriction" })
+@SuppressWarnings({ "deprecation", "restriction" })
 public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
 	private static final Pattern VERSION_PATTERN = Pattern.compile(".*-([0-9,.]*)\\.xsd");
 
 	private final String defaultLocation;
 
-	private final Image image;
+	private final IImageAccessor imageAccessor;
 
 	private Set<String> locations = new HashSet<String>();
 
@@ -54,12 +54,21 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
 	private Properties uriMapping = new Properties();
 
-	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation, Image image) {
-		this(prefix, uri, defaultLocation, new Properties(), image);
+	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation, IImageAccessor imageAccessor) {
+		this(prefix, uri, defaultLocation, new Properties(), imageAccessor);
+	}
+
+	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation, final Image image) {
+		this(prefix, uri,defaultLocation, new IImageAccessor() {
+			
+			public Image getImage() {
+				return image;
+			}
+		});
 	}
 
 	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation,
-			Properties namespaceDefinition, Image image) {
+			Properties namespaceDefinition, IImageAccessor imageAccessor) {
 		if (prefix != null) {
 			this.defaultPrefix = prefix;
 		}
@@ -70,8 +79,9 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 		this.uri = uri;
 		this.defaultLocation = defaultLocation;
 		this.uriMapping = namespaceDefinition;
-		this.image = image;
+		this.imageAccessor = imageAccessor;
 	}
+
 
 	public void addSchemaLocation(String location) {
 		locations.add(location);
@@ -133,12 +143,12 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 	 * {@inheritDoc}
 	 */
 	public Image getNamespaceImage() {
-		if (image != null) {
-			return image;
+		if (imageAccessor != null) {
+			return imageAccessor.getImage();
 		}
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -154,7 +164,7 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 		if (hasProjectSpecificOptions(resource)) {
 			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(resource.getProject(),
 					BeansCorePlugin.PLUGIN_ID);
-			prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID + getNamespaceURI(), ""); 
+			prefix = prefs.getString(BeansCorePlugin.NAMESPACE_PREFIX_PREFERENCE_ID + getNamespaceURI(), "");
 		}
 		else {
 			Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();

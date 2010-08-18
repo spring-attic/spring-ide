@@ -135,8 +135,8 @@ public class NamespaceUtils {
 			final INamespaceDefinitionTemplate definitionTemplate) {
 		if (definitionTemplate != null) {
 
-			Job namespaceDefinitionJob = new Job((project != null ? String
-					.format("Loading namespaces for project '%s'", project.getName()) : "Loading namespaces")) {
+			Job namespaceDefinitionJob = new Job((project != null ? String.format(
+					"Loading namespaces for project '%s'", project.getName()) : "Loading namespaces")) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -180,20 +180,20 @@ public class NamespaceUtils {
 					if (!StringUtils.hasText(schemaLocation) && namespaceDefinition != null) {
 						schemaLocation = namespaceDefinition.getDefaultSchemaLocation();
 					}
-					Image image = null;
+					IImageAccessor image = null;
 					if (config.getAttribute("icon") != null) {
 						String ns = config.getDeclaringExtension().getNamespaceIdentifier();
 						String icon = config.getAttribute("icon");
-						image = getImage(ns, icon);
+						image = new DefaultImageAccessor(ns, icon);
 					}
 					else if (namespaceDefinition != null) {
-						image = getImage(namespaceDefinition);
+						image = new NamespaceDefinitionImageAccessor(namespaceDefinition);
 					}
 
 					DefaultNamespaceDefinition def = null;
 					if (namespaceDefinition != null) {
-						def = new DefaultNamespaceDefinition(prefix, uri, schemaLocation, namespaceDefinition
-								.getUriMapping(), image);
+						def = new DefaultNamespaceDefinition(prefix, uri, schemaLocation,
+								namespaceDefinition.getUriMapping(), image);
 					}
 					else {
 						def = new DefaultNamespaceDefinition(prefix, uri, schemaLocation, new Properties(), image);
@@ -214,10 +214,9 @@ public class NamespaceUtils {
 		}
 
 		for (org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition : detectedNamespaceDefinitions) {
-			Image image = getImage(namespaceDefinition);
 			DefaultNamespaceDefinition def = new DefaultNamespaceDefinition(namespaceDefinition.getPrefix(),
 					namespaceDefinition.getNamespaceUri(), namespaceDefinition.getDefaultSchemaLocation(),
-					namespaceDefinition.getUriMapping(), image);
+					namespaceDefinition.getUriMapping(), new NamespaceDefinitionImageAccessor(namespaceDefinition));
 			def.getSchemaLocations().addAll(namespaceDefinition.getSchemaLocations());
 			namespaceDefinitions.add(def);
 		}
@@ -263,27 +262,26 @@ public class NamespaceUtils {
 							schemaLocation = namespaceDefinition.getDefaultSchemaLocation();
 						}
 						String uri = config.getAttribute("uri");
-						Image image = null;
+						IImageAccessor image = null;
 						if (config.getAttribute("icon") != null) {
 							String ns = config.getDeclaringExtension().getNamespaceIdentifier();
 							String icon = config.getAttribute("icon");
-							image = getImage(ns, icon);
+							image = new DefaultImageAccessor(ns, icon);
 						}
 						else if (namespaceDefinition != null) {
-							image = getImage(namespaceDefinition);
+							image = new NamespaceDefinitionImageAccessor(namespaceDefinition);
 						}
-						return new DefaultNamespaceDefinition(prefix, uri, schemaLocation, namespaceDefinition
-								.getUriMapping(), image);
+						return new DefaultNamespaceDefinition(prefix, uri, schemaLocation,
+								namespaceDefinition.getUriMapping(), image);
 					}
 				}
 			}
 		}
 
 		if (namespaceDefinition != null) {
-			Image image = getImage(namespaceDefinition);
-			return new DefaultNamespaceDefinition(namespaceDefinition.getPrefix(), namespaceDefinition
-					.getNamespaceUri(), namespaceDefinition.getDefaultSchemaLocation(), namespaceDefinition
-					.getUriMapping(), image);
+			return new DefaultNamespaceDefinition(namespaceDefinition.getPrefix(),
+					namespaceDefinition.getNamespaceUri(), namespaceDefinition.getDefaultSchemaLocation(),
+					namespaceDefinition.getUriMapping(), new NamespaceDefinitionImageAccessor(namespaceDefinition));
 		}
 		return null;
 	}
@@ -301,15 +299,15 @@ public class NamespaceUtils {
 					if (is != null) {
 						try {
 							ImageDescriptor imageDescriptor = ImageDescriptor.createFromImageData(new ImageData(is));
-							BeansUIPlugin.getDefault().getImageRegistry().put(namespaceDefinition.getIconPath(),
-									imageDescriptor);
+							BeansUIPlugin.getDefault().getImageRegistry()
+									.put(namespaceDefinition.getIconPath(), imageDescriptor);
 							image = BeansUIPlugin.getDefault().getImageRegistry()
 									.get(namespaceDefinition.getIconPath());
 						}
 						catch (Exception e) {
 							BeansUIPlugin.log(String.format(
-									"Error creating image resource for namespace definition '%s'", namespaceDefinition
-											.getNamespaceUri()), e);
+									"Error creating image resource for namespace definition '%s'",
+									namespaceDefinition.getNamespaceUri()), e);
 							return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
 						}
 						finally {
@@ -323,8 +321,11 @@ public class NamespaceUtils {
 						}
 					}
 					else {
-						BeansUIPlugin.getDefault().getImageRegistry().put(namespaceDefinition.getIconPath(),
-								BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD));
+						BeansUIPlugin
+								.getDefault()
+								.getImageRegistry()
+								.put(namespaceDefinition.getIconPath(),
+										BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD));
 						image = BeansUIPlugin.getDefault().getImageRegistry().get(namespaceDefinition.getIconPath());
 					}
 				}
@@ -361,4 +362,45 @@ public class NamespaceUtils {
 		void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions, IProject project);
 
 	}
+
+	private static class DefaultImageAccessor extends DisplayThreadImageAccessor {
+
+		private final String ns;
+
+		private final String icon;
+
+		public DefaultImageAccessor(String ns, String icon) {
+			this.ns = ns;
+			this.icon = icon;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected Image createImage() {
+			return NamespaceUtils.getImage(ns, icon);
+		}
+	}
+
+	private static class NamespaceDefinitionImageAccessor extends DisplayThreadImageAccessor {
+
+		private final org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition definition;
+
+		private Image image;
+
+		public NamespaceDefinitionImageAccessor(
+				org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition definition) {
+			this.definition = definition;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected Image createImage() {
+			return NamespaceUtils.getImage(definition);
+		}
+	}
+	
 }
