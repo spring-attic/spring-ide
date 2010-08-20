@@ -66,7 +66,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	private Map<String, NamespaceDefinition> namespaceDefinitionRegistry = null;
 
 	private final IProject project;
-	
+
 	private EnablementPropertyChangeListener propertyChangeListener;
 
 	private final INamespaceDefinitionResolver resolver;
@@ -100,7 +100,6 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	public INamespaceDefinition resolveNamespaceDefinition(String namespaceUri) {
 		return namespaceDefinitionRegistry.get(namespaceUri);
 	}
-	
 
 	/**
 	 * Load all {@link NamespaceDefinition}s from the project classpath. Also handle extraction of icon file.
@@ -132,34 +131,38 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 
 			for (Object xsd : schemaMappings.keySet()) {
 				String key = xsd.toString();
-				
+
 				URL url = cls.getResource(schemaMappings.getProperty(key));
 				if (url == null) {
 					continue;
 				}
-				
+
 				String namespaceUri = getTargetNamespace(url);
-				String icon = toolingMappings.get(namespaceUri + "@icon");
-				String prefix = toolingMappings.get(namespaceUri + "@prefix");
-				String name = toolingMappings.get(namespaceUri + "@name");
+				
+				if (StringUtils.hasText(namespaceUri)) {
+				
+					String icon = toolingMappings.get(namespaceUri + "@icon");
+					String prefix = toolingMappings.get(namespaceUri + "@prefix");
+					String name = toolingMappings.get(namespaceUri + "@name");
 
-				if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
-					namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
-					namespaceDefinitionRegistry.get(namespaceUri).addUri(schemaMappings.getProperty(key));
-				}
-				else {
-					File iconFile = extractIcon(namespaceUri, icon, cls);
+					if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
+						namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
+						namespaceDefinitionRegistry.get(namespaceUri).addUri(schemaMappings.getProperty(key));
+					}
+					else {
+						File iconFile = extractIcon(namespaceUri, icon, cls);
 
-					NamespaceDefinition namespaceDefinition = new ExternalImageNamespaceDefinition(schemaMappings,
-							iconFile);
-					namespaceDefinition.setName(name);
-					namespaceDefinition.setPrefix(prefix);
-					namespaceDefinition.setIconPath(icon);
-					namespaceDefinition.addSchemaLocation(key);
-					namespaceDefinition.setNamespaceUri(namespaceUri);
-					namespaceDefinition.addUri(schemaMappings.getProperty(key));
+						NamespaceDefinition namespaceDefinition = new ExternalImageNamespaceDefinition(schemaMappings,
+								iconFile);
+						namespaceDefinition.setName(name);
+						namespaceDefinition.setPrefix(prefix);
+						namespaceDefinition.setIconPath(icon);
+						namespaceDefinition.addSchemaLocation(key);
+						namespaceDefinition.setNamespaceUri(namespaceUri);
+						namespaceDefinition.addUri(schemaMappings.getProperty(key));
 
-					namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
+						namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
+					}
 				}
 			}
 		}
@@ -193,7 +196,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 				else {
 					iconFile = new File(iconDir, Integer.toString(namespaceUri.hashCode()));
 				}
-				
+
 				if (iconFile.exists()) {
 					return iconFile;
 				}
@@ -202,8 +205,8 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 				return iconFile;
 			}
 			catch (Exception e) {
-				BeansCorePlugin.log(String.format("Error extracting icon file '%s' for namespace '%s'", icon,
-						namespaceUri), e);
+				BeansCorePlugin.log(
+						String.format("Error extracting icon file '%s' for namespace '%s'", icon, namespaceUri), e);
 				return null;
 			}
 		}
@@ -255,7 +258,8 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	 * classpath property.
 	 * @since 2.3.3
 	 */
-	private class EnablementPropertyChangeListener implements IPropertyChangeListener, IPreferenceChangeListener, INamespaceDefinitionListener {
+	private class EnablementPropertyChangeListener implements IPropertyChangeListener, IPreferenceChangeListener,
+			INamespaceDefinitionListener {
 
 		private static final String KEY = BeansCorePlugin.PLUGIN_ID + "."
 				+ BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID;
@@ -279,7 +283,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 				init();
 			}
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -311,7 +315,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 			super(uriMapping);
 			this.iconFile = iconFile;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
