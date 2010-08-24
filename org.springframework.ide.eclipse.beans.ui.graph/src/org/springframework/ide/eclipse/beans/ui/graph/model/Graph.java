@@ -37,8 +37,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Font;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
@@ -133,7 +134,7 @@ public class Graph implements IAdaptable {
 		return graph.nodes;
 	}
 
-	@SuppressWarnings( { "unchecked", "deprecation" })
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public void layout(Font font) {
 
 		// Iterate through all graph nodes (beans) to calculate label width
@@ -176,11 +177,13 @@ public class Graph implements IAdaptable {
 		try {
 			new DirectedGraphLayout().visit(graph);
 
-			// Re-invert edges inverted while breaking cycles
-			for (int i = 0; i < graph.edges.size(); i++) {
-				Edge e = graph.edges.getEdge(i);
-				if (e.isFeedback()) {
-					e.invert();
+			// Re-invert edges inverted while breaking cycles; this only seems to be required on earlier GEF versions
+			if (!SpringCoreUtils.isEclipseSameOrNewer(3, 6)) {
+				for (int i = 0; i < graph.edges.size(); i++) {
+					Edge e = graph.edges.getEdge(i);
+					if (e.isFeedback()) {
+						e.invert();
+					}
 				}
 			}
 
@@ -266,16 +269,16 @@ public class Graph implements IAdaptable {
 			// error message
 			graph = new DirectedGraph();
 			input.setHasError(true);
-			MessageDialog.openError(BeansGraphPlugin.getActiveWorkbenchWindow().getShell(), BeansGraphPlugin
-					.getResourceString(ERROR_TITLE), e.getMessage());
+			MessageDialog.openError(BeansGraphPlugin.getActiveWorkbenchWindow().getShell(),
+					BeansGraphPlugin.getResourceString(ERROR_TITLE), e.getMessage());
 
 		}
 	}
 
 	@SuppressWarnings("deprecation")
 	protected void extendGraphContent() {
-		if (BeansUIPlugin.getDefault().getPluginPreferences().getBoolean(
-				BeansUIPlugin.SHOULD_SHOW_EXTENDED_CONTENT_PREFERENCE_ID)) {
+		if (BeansUIPlugin.getDefault().getPluginPreferences()
+				.getBoolean(BeansUIPlugin.SHOULD_SHOW_EXTENDED_CONTENT_PREFERENCE_ID)) {
 			IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
 					GRAPH_CONTENT_EXTENDER_EXTENSION_POINT);
 			if (point != null) {
@@ -340,8 +343,8 @@ public class Graph implements IAdaptable {
 	@SuppressWarnings("deprecation")
 	private boolean shouldAddBean(IBean bean) {
 		return !bean.isInfrastructure()
-				|| (bean.isInfrastructure() && BeansUIPlugin.getDefault().getPluginPreferences().getBoolean(
-						BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID));
+				|| (bean.isInfrastructure() && BeansUIPlugin.getDefault().getPluginPreferences()
+						.getBoolean(BeansUIPlugin.SHOULD_SHOW_INFRASTRUCTURE_BEANS_PREFERENCE_ID));
 	}
 
 	private void addBeansFromComponents(Set<IBean> beans, Set<IBeansComponent> components) {
