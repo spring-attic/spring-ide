@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,19 +30,16 @@ import org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader
 /**
  * Default implementation of the {@link BeanDefinitionRegistry} interface: a full-fledged bean factory based on bean
  * definitions.
- * 
  * <p>
  * Typical usage is registering all bean definitions first (possibly read from a bean definition file), before accessing
  * beans. Bean definition lookup is therefore an inexpensive operation in a local bean definition table.
- * 
  * <p>
  * Can be used as a standalone bean factory, or as a superclass for custom bean factories. Note that readers for
  * specific bean definition formats are typically implemented separately rather than as bean factory subclasses.
- * 
  * <p>
  * <b>Creation of bean instances is not supported!!!</b>
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory implements BeanDefinitionRegistry {
 	/**
