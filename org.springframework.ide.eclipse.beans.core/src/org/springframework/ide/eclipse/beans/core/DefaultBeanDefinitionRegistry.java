@@ -174,7 +174,10 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory implement
 	}
 
 	public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-		throw new BeanCreationException(beanName, "Not implemented");
+		if (beanDefinitionMap.containsKey(beanName)) {
+			beanDefinitionMap.remove(beanName);
+			beanDefinitionNames.remove(beanName);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
