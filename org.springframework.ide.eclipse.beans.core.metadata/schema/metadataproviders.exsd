@@ -2,9 +2,9 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.springframework.ide.eclipse.beans.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appinfo>
-         <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="metadataproviders" name="Metadata Proivders"/>
-      </appinfo>
+      <appInfo>
+         <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="metadataproviders" name="Metadata Providers"/>
+      </appInfo>
       <documentation>
          &lt;p&gt;
 This extension point is used to add meta data providers
@@ -12,6 +12,11 @@ This extension point is used to add meta data providers
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="metadataProvider" minOccurs="0" maxOccurs="unbounded"/>
@@ -48,9 +53,9 @@ This extension point is used to add meta data providers
                <documentation>
                   an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider&lt;/samp&gt;
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java" basedOn=":org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -63,27 +68,27 @@ This extension point is used to add meta data providers
                <documentation>
                   an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider&lt;/samp&gt;
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java" basedOn=":org.springframework.ide.eclipse.beans.core.model.metadata.IAnnotationBeanMetadataProvider"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="since"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          2.0.5
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="examples"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;pre&gt;
     &lt;extension
@@ -97,9 +102,9 @@ This extension point is used to add meta data providers
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="apiInfo"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;p&gt;
 Each meta data provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.metadata.IBeanMetadataProvider&lt;/samp&gt;.
@@ -108,20 +113,19 @@ Each annotation meta data provider must supply a public, no-argument constructor
       </documentation>
    </annotation>
 
-
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="implementation"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;p&gt;
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="copyright"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;pre&gt;
 Copyright (c) 2005, 2008 Spring IDE Developers
