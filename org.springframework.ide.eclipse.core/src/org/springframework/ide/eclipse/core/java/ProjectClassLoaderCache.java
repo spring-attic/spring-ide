@@ -289,7 +289,6 @@ class ProjectClassLoaderCache {
 			}
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
-			paths.addAll(JdtUtils.getBundleClassPath("org.apache.commons.logging"));
 			paths.addAll(JdtUtils.getBundleClassPath("org.aopalliance"));
 			PARENT_CLASS_LOADER = new URLClassLoader(paths.toArray(new URL[paths.size()]));
 		}
