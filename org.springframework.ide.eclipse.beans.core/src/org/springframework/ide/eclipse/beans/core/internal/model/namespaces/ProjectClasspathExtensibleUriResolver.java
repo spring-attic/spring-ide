@@ -29,7 +29,7 @@ import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolverExtens
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.CollectionUtils;
@@ -52,7 +52,7 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		if (systemId != null && systemId.startsWith("jar:")) {
 			return null;
 		}
-		
+
 		// file and systemId can't be null
 		if (file == null || systemId == null) {
 			return null;
@@ -65,9 +65,7 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		}
 
 		// Resolve using the classpath
-		if (SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
-						.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false)
-				&& checkFileExtension(file, project)) {
+		if (NamespaceUtils.useNamespacesFromClasspath(file.getProject()) && checkFileExtension(file, project)) {
 			return resolveOnClasspath(file, systemId);
 		}
 		return null;
@@ -112,8 +110,8 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 	private Map<String, String> getSchemaMappings(IProject project) {
 		Map<String, String> handlerMappings = new ConcurrentHashMap<String, String>();
 		try {
-			Properties mappings = PropertiesLoaderUtils.loadAllProperties(DEFAULT_SCHEMA_MAPPINGS_LOCATION, JdtUtils
-					.getClassLoader(project, null));
+			Properties mappings = PropertiesLoaderUtils.loadAllProperties(DEFAULT_SCHEMA_MAPPINGS_LOCATION,
+					JdtUtils.getClassLoader(project, null));
 			CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
 		}
 		catch (IOException ex) {

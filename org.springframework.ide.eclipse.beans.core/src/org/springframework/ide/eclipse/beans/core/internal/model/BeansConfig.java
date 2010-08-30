@@ -95,7 +95,6 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.EclipsePathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
@@ -337,8 +336,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 					// Set up classloader to use for NamespaceHandler and XSD loading
 					ClassLoader cl = BeansCorePlugin.getClassLoader();
-					if (SpringCorePreferences.getProjectPreferences(file.getProject(), BeansCorePlugin.PLUGIN_ID)
-							.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false)) {
+					if (NamespaceUtils.useNamespacesFromClasspath(file.getProject())) {
 						cl = JdtUtils.getClassLoader(file.getProject(), cl);
 					}
 
