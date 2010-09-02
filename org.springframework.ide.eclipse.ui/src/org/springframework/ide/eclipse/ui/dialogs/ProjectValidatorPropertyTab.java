@@ -178,6 +178,8 @@ public class ProjectValidatorPropertyTab {
 		}
 	};
 
+	private Object[] checkedElements;
+
 	public ProjectValidatorPropertyTab(Shell shell, IProject project) {
 		this.validatorDefinitions = ValidatorDefinitionFactory.getValidatorDefinitions();
 		this.validationRuleDefinitions = new HashMap<ValidatorDefinition, List<ValidationRuleDefinition>>();
@@ -283,10 +285,11 @@ public class ProjectValidatorPropertyTab {
 				}
 			}
 		});
-
+		
 		validatorViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				handleCheckStateChange(event);
+				checkedElements = validatorViewer.getCheckedElements();
 			}
 		});
 
@@ -439,7 +442,7 @@ public class ProjectValidatorPropertyTab {
 	}
 
 	public boolean performOk() {
-		final List checkElements = Arrays.asList(this.validatorViewer.getCheckedElements());
+		final List checkElements = Arrays.asList(checkedElements);
 
 		WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
 
