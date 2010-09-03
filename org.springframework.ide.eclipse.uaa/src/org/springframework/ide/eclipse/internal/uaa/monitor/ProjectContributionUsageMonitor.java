@@ -21,7 +21,8 @@ import org.springframework.ide.eclipse.core.project.IProjectContributionEventLis
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectContributionEventListenerAdapter;
-import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
+import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 
 /**
  * {@link IProjectContributionEventListener} implementation that captures executions of {@link IProjectBuilder}s and
@@ -29,7 +30,9 @@ import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
  * @author Christian Dupuis
  * @since 2.5.0
  */
-public class ProjectContributionUsageMonitor extends ProjectContributionEventListenerAdapter {
+public class ProjectContributionUsageMonitor extends ProjectContributionEventListenerAdapter implements IUsageMonitor {
+
+	private UaaManager manager;
 
 	/**
 	 * {@inheritDoc}
@@ -37,19 +40,36 @@ public class ProjectContributionUsageMonitor extends ProjectContributionEventLis
 	@Override
 	public void finish(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
 			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
-		// Report usage of IProjectBuilders; only for those that are enabled for the project
-		for (ProjectBuilderDefinition builderDefinition : builderDefinitions) {
-			if (builderDefinition.isEnabled(project)) {
-				UaaPlugin.getDefault().registerFeatureUse(builderDefinition.getNamespaceUri());
+		if (manager != null) {
+			
+			// Report usage of IProjectBuilders; only for those that are enabled for the project
+			for (ProjectBuilderDefinition builderDefinition : builderDefinitions) {
+				if (builderDefinition.isEnabled(project)) {
+					manager.registerFeatureUse(builderDefinition.getNamespaceUri());
+				}
+			}
+
+			// Report usage of IValidators; only for those that are enabled for the project
+			for (ValidatorDefinition validatorDefinition : validatorDefinitions) {
+				if (validatorDefinition.isEnabled(project)) {
+					manager.registerFeatureUse(validatorDefinition.getNamespaceUri());
+				}
 			}
 		}
-		
-		// Report usage of IValidators; only for those that are enabled for the project
-		for (ValidatorDefinition validatorDefinition : validatorDefinitions) {
-			if (validatorDefinition.isEnabled(project)) {
-				UaaPlugin.getDefault().registerFeatureUse(validatorDefinition.getNamespaceUri());
-			}
-		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void startMonitoring(UaaManager manager) {
+		this.manager = manager;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void stopMonitoring() {
+		// Intentionally left empty
 	}
 
 }

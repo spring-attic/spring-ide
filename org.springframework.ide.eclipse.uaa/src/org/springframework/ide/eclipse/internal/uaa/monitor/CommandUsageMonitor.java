@@ -16,22 +16,29 @@ import org.eclipse.core.commands.IExecutionListener;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
-import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
+import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 
 /**
  * Helper class that captures executions of Eclipse commands.
  * @author Christian Dupuis
  * @since 2.5.0
  */
-public class CommandUsageMonitor {
+public class CommandUsageMonitor implements IUsageMonitor {
 
 	private static final String COMMANDS_EXTENSION_POINT = "org.eclipse.ui.commands"; //$NON-NLS-1$
 
 	private ExtensionIdToBundleMapper commandToBundleIdMapper;
 
 	private IExecutionListener executionListener;
+	
+	private volatile UaaManager manager;
 
-	public void startMonitoring() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void startMonitoring(UaaManager manager) {
+		this.manager = manager;
 		commandToBundleIdMapper = new ExtensionIdToBundleMapper(COMMANDS_EXTENSION_POINT);
 		executionListener = new IExecutionListener() {
 			public void notHandled(String commandId, NotHandledException exception) {
@@ -45,12 +52,14 @@ public class CommandUsageMonitor {
 			}
 
 			public void preExecute(String commandId, ExecutionEvent event) {
-
 			}
 		};
 		getCommandService().addExecutionListener(executionListener);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void stopMonitoring() {
 		ICommandService commandService = getCommandService();
 		if (commandService != null) {
@@ -66,7 +75,9 @@ public class CommandUsageMonitor {
 	}
 
 	private void recordEvent(String commandId) {
-		UaaPlugin.getDefault().registerFeatureUse(commandToBundleIdMapper.getBundleId(commandId));
+		if (manager != null && commandId != null) {
+			manager.registerFeatureUse(commandToBundleIdMapper.getBundleId(commandId));
+		}
 	}
 
 }

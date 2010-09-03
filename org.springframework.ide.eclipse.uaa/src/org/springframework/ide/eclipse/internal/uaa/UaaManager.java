@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.internal.uaa.monitor;
+package org.springframework.ide.eclipse.internal.uaa;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,20 +57,37 @@ public class UaaManager {
 	}
 
 	public void registerFeatureUse(String plugin) {
-		for (ProductDescriptor productDescriptor : productDescriptors) {
-			if (productDescriptor.registerFeatureUseIfMatch(plugin, service)) {
-				return;
+		if (plugin != null) {
+			for (ProductDescriptor productDescriptor : productDescriptors) {
+				if (productDescriptor.registerFeatureUseIfMatch(plugin, service)) {
+					return;
+				}
 			}
 		}
 	}
-	
+
+	public void registerProductUse(String productId, String versionString) {
+		if (productId != null && versionString != null) {
+			Version version = Version.parseVersion(versionString);
+			Product.Builder product = Product.newBuilder();
+			product.setName(productId);
+			product.setMajorVersion(version.getMajor());
+			product.setMinorVersion(version.getMinor());
+			product.setPatchVersion(version.getMicro());
+			// b.setReleaseQualifier(version.getQualifier());
+			setReleaseCategory(version, product);
+
+			service.registerProductUsage(product.build());
+		}
+	}
+
 	public void setPrivacyLevel(int level) {
 		service.setPrivacyLevel(PrivacyLevel.valueOf(level));
 	}
 
 	private void init() {
-		IExtensionPoint point = Platform.getExtensionRegistry()
-				.getExtensionPoint("org.springframework.ide.eclipse.uaa.product");
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
+				"org.springframework.ide.eclipse.uaa.product");
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
@@ -79,6 +96,34 @@ public class UaaManager {
 			}
 		}
 		productDescriptors.add(new ProductDescriptor());
+	}
+
+	private static void setReleaseCategory(Version version, Product.Builder b) {
+		String qualifier = version.getQualifier();
+		if (qualifier.contains("SR")) {
+			b.setReleaseCategory(ReleaseCategory.SECURITY);
+		}
+		else if (qualifier.contains("RELEASE")) {
+			b.setReleaseCategory(ReleaseCategory.RELEASE);
+		}
+		else if (qualifier.contains("M")) {
+			b.setReleaseCategory(ReleaseCategory.MILESTONE);
+		}
+		else if (qualifier.contains("RC")) {
+			b.setReleaseCategory(ReleaseCategory.MILESTONE);
+		}
+		else if (qualifier.contains("CI")) {
+			b.setReleaseCategory(ReleaseCategory.ALPHA);
+		}
+		else if (qualifier.contains("BUILD")) {
+			b.setReleaseCategory(ReleaseCategory.ALPHA);
+		}
+		else if (qualifier.contains("qualifier")) {
+			b.setReleaseCategory(ReleaseCategory.ALPHA);
+		}
+		else {
+			b.setReleaseCategory(ReleaseCategory.RELEASE);
+		}
 	}
 
 	private static class ExtensionProductDescriptor extends ProductDescriptor {
@@ -109,7 +154,7 @@ public class UaaManager {
 			this.plugins = new HashMap<String, String>();
 			this.feature = element.getAttribute("id");
 			String rootPlugin = element.getNamespaceIdentifier();
-			
+
 			for (IConfigurationElement featureElement : element.getChildren("feature")) {
 				String feature = featureElement.getAttribute("id");
 				for (IConfigurationElement pluginElement : featureElement.getChildren("plugin")) {
@@ -127,32 +172,7 @@ public class UaaManager {
 			b.setPatchVersion(version.getMicro());
 			// b.setReleaseQualifier(version.getQualifier());
 			b.setSourceControlIdentifier(version.toString());
-
-			String qualifier = version.getQualifier();
-			if (qualifier.contains("SR")) {
-				b.setReleaseCategory(ReleaseCategory.SECURITY);
-			}
-			else if (qualifier.contains("RELEASE")) {
-				b.setReleaseCategory(ReleaseCategory.RELEASE);
-			}
-			else if (qualifier.contains("M")) {
-				b.setReleaseCategory(ReleaseCategory.MILESTONE);
-			}
-			else if (qualifier.contains("RC")) {
-				b.setReleaseCategory(ReleaseCategory.MILESTONE);
-			}
-			else if (qualifier.contains("CI")) {
-				b.setReleaseCategory(ReleaseCategory.ALPHA);
-			}
-			else if (qualifier.contains("BUILD")) {
-				b.setReleaseCategory(ReleaseCategory.ALPHA);
-			}
-			else if (qualifier.contains("qualifier")) {
-				b.setReleaseCategory(ReleaseCategory.ALPHA);
-			}
-			else {
-				b.setReleaseCategory(ReleaseCategory.RELEASE);
-			}
+			setReleaseCategory(version, b);
 
 			this.product = b.build();
 		}
@@ -161,27 +181,33 @@ public class UaaManager {
 	private static class ProductDescriptor {
 
 		protected Product product;
-		
+
 		protected boolean registered = false;
-		
+
 		public ProductDescriptor() {
 			init();
 		}
-		
+
 		public synchronized boolean registerFeatureUseIfMatch(String usedPlugin, UaaService service) {
+			// Due to privacy considerations only org.eclipse plugins will get recorded
 			if (usedPlugin.startsWith("org.eclipse")) {
 				if (!this.registered) {
 					service.registerProductUsage(product);
-					service.registerFeatureUsage(product, String.format("platform: %s.%s.%s", Platform.getOS(), Platform.getWS(),
-							Platform.getOSArch()));
+					service.registerFeatureUsage(
+							product,
+							String.format("platform: %s.%s.%s", Platform.getOS(), Platform.getWS(),
+									Platform.getOSArch()));
 					if (System.getProperty("eclipse.buildId") != null) {
-						service.registerFeatureUsage(product, String.format("build.id: %s",	System.getProperty("eclipse.buildId")));
+						service.registerFeatureUsage(product,
+								String.format("build.id: %s", System.getProperty("eclipse.buildId")));
 					}
 					if (System.getProperty("eclipse.product") != null) {
-						service.registerFeatureUsage(product, String.format("eclipse.product: %s",	System.getProperty("eclipse.product")));
+						service.registerFeatureUsage(product,
+								String.format("eclipse.product: %s", System.getProperty("eclipse.product")));
 					}
 					if (System.getProperty("eclipse.application") != null) {
-						service.registerFeatureUsage(product, String.format("eclipse.application: %s",	System.getProperty("eclipse.application")));
+						service.registerFeatureUsage(product,
+								String.format("eclipse.application: %s", System.getProperty("eclipse.application")));
 					}
 					this.registered = true;
 				}
@@ -203,7 +229,7 @@ public class UaaManager {
 			// b.setReleaseQualifier(version.getQualifier());
 			b.setSourceControlIdentifier(version.toString());
 			b.setReleaseCategory(ReleaseCategory.RELEASE);
-			
+
 			this.product = b.build();
 		}
 

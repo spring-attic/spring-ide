@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,8 +22,9 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.internal.uaa.monitor.CommandUsageMonitor;
+import org.springframework.ide.eclipse.internal.uaa.monitor.LibraryUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.PartUsageMonitor;
-import org.springframework.ide.eclipse.internal.uaa.monitor.UaaManager;
+import org.springframework.ide.eclipse.internal.uaa.monitor.ProjectContributionUsageMonitor;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
 /**
@@ -42,10 +46,8 @@ public class UaaPlugin extends AbstractUIPlugin {
 
 	private static UaaPlugin plugin;
 
-	private CommandUsageMonitor commandUsageMonitor;
-
-	private PartUsageMonitor partUsageMonitor;
-
+	private List<IUsageMonitor> monitors = new ArrayList<IUsageMonitor>();
+	
 	private UaaManager usageMonitorManager;
 
 	public int getPrivacyLevel() {
@@ -63,12 +65,6 @@ public class UaaPlugin extends AbstractUIPlugin {
 		return DefaultHttpParams.getDefaultParams().getParameter(HttpClientParams.USER_AGENT).toString();
 	}
 	
-	public void registerFeatureUse(String feature) {
-		if (feature != null && this.usageMonitorManager != null) {
-			this.usageMonitorManager.registerFeatureUse(feature);
-		}
-	}
-
 	public void setPrivacyLevel(int level) {
 		this.usageMonitorManager.setPrivacyLevel(level);
 	}
@@ -76,29 +72,31 @@ public class UaaPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-
-		UIJob job = new UIJob("Spring UAA Starter") { //$NON-NLS-1$
+		
+		monitors.clear();
+		monitors.add(new PartUsageMonitor());
+		monitors.add(new CommandUsageMonitor());
+		monitors.add(new LibraryUsageMonitor());
+		monitors.add(new ProjectContributionUsageMonitor());
+		
+		UIJob job = new UIJob("Initializing Spring UAA") { //$NON-NLS-1$
 
 			public IStatus runInUIThread(IProgressMonitor progressMonitor) {
 				usageMonitorManager = new UaaManager();
-				partUsageMonitor = new PartUsageMonitor();
-				commandUsageMonitor = new CommandUsageMonitor();
-				partUsageMonitor.startMonitoring();
-				commandUsageMonitor.startMonitoring();
+				for (IUsageMonitor monitor : monitors) {
+					monitor.startMonitoring(usageMonitorManager);
+				}
 				return Status.OK_STATUS;
 			}
 		};
 		job.setSystem(true);
-		job.schedule(1000);
+		job.schedule(2500);
 	}
 	
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
-		if (partUsageMonitor != null) {
-			partUsageMonitor.stopMonitoring();
-		}
-		if (commandUsageMonitor != null) {
-			commandUsageMonitor.stopMonitoring();
+		for (IUsageMonitor monitor : monitors) {
+			monitor.stopMonitoring();
 		}
 		super.stop(context);
 	}

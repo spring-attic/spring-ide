@@ -21,14 +21,15 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
+import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 
 /**
  * Helper class that captures open and activate events for Eclipse Views, Editors and Perspectives.
  * @author Christian Dupuis
  * @since 2.5.0
  */
-public class PartUsageMonitor {
+public class PartUsageMonitor implements IUsageMonitor {
 
 	private static final String EDITORS_EXTENSION_POINT = "org.eclipse.ui.editors"; //$NON-NLS-1$
 
@@ -37,6 +38,8 @@ public class PartUsageMonitor {
 	private static final String VIEWS_EXTENSION_POINT = "org.eclipse.ui.views"; //$NON-NLS-1$
 
 	private ExtensionIdToBundleMapper editorToBundleIdMapper;
+
+	private UaaManager manager;
 
 	private IPageListener pageListener = new IPageListener() {
 		public void pageActivated(IWorkbenchPage page) {
@@ -88,7 +91,11 @@ public class PartUsageMonitor {
 
 	private ExtensionIdToBundleMapper viewToBundleIdMapper;
 
-	public void startMonitoring() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void startMonitoring(UaaManager manager) {
+		this.manager = manager;
 		perspectiveToBundleIdMapper = new ExtensionIdToBundleMapper(PERSPECTIVES_EXTENSION_POINT);
 		viewToBundleIdMapper = new ExtensionIdToBundleMapper(VIEWS_EXTENSION_POINT);
 		editorToBundleIdMapper = new ExtensionIdToBundleMapper(EDITORS_EXTENSION_POINT);
@@ -96,6 +103,9 @@ public class PartUsageMonitor {
 		hookListeners(workbench);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void stopMonitoring() {
 		final IWorkbench workbench = PlatformUI.getWorkbench();
 		unhookListeners(workbench);
@@ -134,12 +144,20 @@ public class PartUsageMonitor {
 		page.addPartListener(partListener);
 	}
 
-	private void recordEvent(IWorkbenchPart part) {
-		if (part.getSite() instanceof IViewSite) {
-			UaaPlugin.getDefault().registerFeatureUse(viewToBundleIdMapper.getBundleId(part.getSite().getId()));
+	private void recordEvent(IPerspectiveDescriptor perspective) {
+		if (manager != null) {
+			manager.registerFeatureUse(perspectiveToBundleIdMapper.getBundleId(perspective.getId()));
 		}
-		else if (part.getSite() instanceof IEditorSite) {
-			UaaPlugin.getDefault().registerFeatureUse(editorToBundleIdMapper.getBundleId(part.getSite().getId()));
+	}
+
+	private void recordEvent(IWorkbenchPart part) {
+		if (manager != null) {
+			if (part.getSite() instanceof IViewSite) {
+				manager.registerFeatureUse(viewToBundleIdMapper.getBundleId(part.getSite().getId()));
+			}
+			else if (part.getSite() instanceof IEditorSite) {
+				manager.registerFeatureUse(editorToBundleIdMapper.getBundleId(part.getSite().getId()));
+			}
 		}
 	}
 
@@ -164,10 +182,6 @@ public class PartUsageMonitor {
 		for (IWorkbenchPage page : window.getPages()) {
 			unhookListeners(page);
 		}
-	}
-
-	protected void recordEvent(IPerspectiveDescriptor perspective) {
-		UaaPlugin.getDefault().registerFeatureUse(perspectiveToBundleIdMapper.getBundleId(perspective.getId()));
 	}
 
 }
