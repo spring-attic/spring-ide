@@ -518,6 +518,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		else if (adapter == IResource.class) {
 			return getElementResource();
 		}
+		else if (adapter == Resource.class) {
+			return resource;
+		}
 		return super.getAdapter(adapter);
 	}
 

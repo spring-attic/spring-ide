@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector, I
 	/**
 	 * {@inheritDoc}
 	 */
-	public final IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
+	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
 		if (region == null || textViewer == null) {
 			return null;
 		}
@@ -58,9 +58,9 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector, I
 						IRegion hyperlinkRegion = HyperlinkUtils.getHyperlinkRegion(currentAttr);
 
 						if (canShowMultipleHyperlinks) {
-							IHyperlink[] hyperlinks = createHyperlinks(currentAttr.getName(), currentAttr
-									.getNodeValue(), currentNode, currentNode.getParentNode(), document, textViewer,
-									hyperlinkRegion, region);
+							IHyperlink[] hyperlinks = createHyperlinks(currentAttr.getName(),
+									currentAttr.getNodeValue(), currentNode, currentNode.getParentNode(), document,
+									textViewer, hyperlinkRegion, region);
 							if (hyperlinks != null && hyperlinks.length > 0) {
 								return hyperlinks;
 							}
@@ -102,7 +102,7 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector, I
 		}
 		return null;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

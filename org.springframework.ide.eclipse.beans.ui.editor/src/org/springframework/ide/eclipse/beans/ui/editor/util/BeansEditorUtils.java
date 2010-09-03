@@ -404,6 +404,12 @@ public class BeansEditorUtils {
 		}
 		return null;
 	}
+	
+	public static final boolean isElementAtOffset(Node node, int offset) {
+		IndexedRegion region = ((IndexedRegion) node);
+		int nameLength = node.getNodeName().length();
+		return (region.getStartOffset() + nameLength) >= offset && region.getStartOffset() <= offset;
+	}
 
 	/**
 	 * /** Returns the closest IndexedRegion for the offset and viewer allowing for differences between viewer offsets
