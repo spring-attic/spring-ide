@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Display;
  * <p>
  * {@link #createImage()} is only called once and only from within the Display thread.
  * @author Christian Dupuis
- * @since 2.3.3
+ * @since 2.5.0
  */
 public abstract class DisplayThreadImageAccessor implements IImageAccessor {
 	

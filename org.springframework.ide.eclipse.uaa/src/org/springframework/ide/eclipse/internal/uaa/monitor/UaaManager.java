@@ -32,7 +32,7 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product.ReleaseCategory
  * <p>
  * This implementation primarily serves as wrapper around the {@link UaaService}.
  * @author Christian Dupuis
- * @since 2.3.3
+ * @since 2.5.0
  */
 public class UaaManager {
 

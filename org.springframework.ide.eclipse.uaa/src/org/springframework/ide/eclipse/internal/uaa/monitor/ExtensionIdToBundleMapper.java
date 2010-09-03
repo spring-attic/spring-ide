@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.Platform;
 /**
  * Helper class that captures executions of Eclipse commands.
  * @author Christian Dupuis
- * @since 2.3.3
+ * @since 2.5.0
  */
 public class ExtensionIdToBundleMapper {
 

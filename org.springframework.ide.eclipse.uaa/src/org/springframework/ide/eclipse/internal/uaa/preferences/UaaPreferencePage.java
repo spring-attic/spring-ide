@@ -31,7 +31,7 @@ import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
 /**
  * {@link PreferencePage} to configure the UAA.
  * @author Christian Dupuis
- * @since 2.3.3
+ * @since 2.5.0
  */
 public class UaaPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 

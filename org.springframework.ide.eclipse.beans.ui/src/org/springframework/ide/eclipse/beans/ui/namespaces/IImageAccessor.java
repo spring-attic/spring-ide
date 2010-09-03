@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 /**
  * Implementations of this interface can load {@link Image} instances.
  * @author Christian Dupuis
- * @since 2.3.3
+ * @since 2.5.0
  */
 public interface IImageAccessor {
 	

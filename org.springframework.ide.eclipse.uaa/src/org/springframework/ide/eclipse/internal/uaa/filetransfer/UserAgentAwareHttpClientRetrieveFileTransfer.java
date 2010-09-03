@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
  * ECF {@link IRetrieveFileTransferFactory} implementation that adds a "User-Agent" header when requesting resources
  * <code>springide.org</code>, <code>springsource.org</code> and <code>springsource.com</code>.
  * @author Christian Dupuis
- * @since 2.3.3
+ * @since 2.5.0
  */
 public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFileTransferFactory {
 

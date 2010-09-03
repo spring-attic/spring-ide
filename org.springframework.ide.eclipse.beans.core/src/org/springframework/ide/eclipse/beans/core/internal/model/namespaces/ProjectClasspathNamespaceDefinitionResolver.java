@@ -256,7 +256,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 	/**
 	 * {@link IPropertyChangeListener} and {@link IPreferenceChangeListener} implementation that detects changes to the
 	 * classpath property.
-	 * @since 2.3.3
+	 * @since 2.5.0
 	 */
 	private class EnablementPropertyChangeListener implements IPropertyChangeListener, IPreferenceChangeListener,
 			INamespaceDefinitionListener {
@@ -305,7 +305,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 
 	/**
 	 * Extension to {@link NamespaceDefinition} that handles loading of referenced namespace icons from extracted files.
-	 * @since 2.3.3
+	 * @since 2.5.0
 	 */
 	private class ExternalImageNamespaceDefinition extends NamespaceDefinition {
 

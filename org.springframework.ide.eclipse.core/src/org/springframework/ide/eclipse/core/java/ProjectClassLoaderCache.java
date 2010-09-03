@@ -441,7 +441,7 @@ class ProjectClassLoaderCache {
 
 	/**
 	 * {@link IPropertyChangeListener} to clear the cache whenever the setting is changed.
-	 * @since 2.3.3
+	 * @since 2.5.0
 	 */
 	private static class EnablementPropertyChangeListener implements IPropertyChangeListener {
 

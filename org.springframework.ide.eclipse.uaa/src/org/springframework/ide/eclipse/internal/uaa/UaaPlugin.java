@@ -26,7 +26,7 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 /**
  * Plug-in entry point for the UAA Plugin.
  * @author Christian Dupuis
- * @since 2.3.3
+ * @since 2.5.0
  */
 public class UaaPlugin extends AbstractUIPlugin {
 
