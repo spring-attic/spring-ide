@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,8 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -58,6 +60,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -74,30 +77,48 @@ import org.xml.sax.SAXException;
  * @author Christian Dupuis
  */
 public final class SpringCoreUtils {
-	
-	/** URL file schema */
-	public static final String FILE_SCHEME = "file";
 
-	public static final String SOURCE_CONTROL_SCHEME = "sourcecontrol";
+	/**
+	 * File name of OSGi bundle manifests
+	 * @since 2.0.5
+	 */
+	public static String BUNDLE_MANIFEST_FILE = "MANIFEST.MF";
 
-	public static final String PLACEHOLDER_PREFIX = "${";
+	/**
+	 * Folder name of OSGi bundle manifests directories
+	 * @since 2.0.5
+	 */
+	public static String BUNDLE_MANIFEST_FOLDER = "META-INF";
 
 	/** New placeholder string for Spring 3 EL support */
 	public static final String EL_PLACEHOLDER_PREFIX = "#{";
 
+	/** URL file schema */
+	public static final String FILE_SCHEME = "file";
+
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
+	public static final String PLACEHOLDER_PREFIX = "${";
+
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
-	private static final String SOURCE_PATH = "source-path";
+	public static final String SOURCE_CONTROL_SCHEME = "sourcecontrol";
 
 	private static final String DEPLOY_PATH = "deploy-path";
 
-	private static final String XPATH_EXPRESSION = "//project-modules/wb-module/wb-resource";
+	private static boolean DOCUMENT_BUILDER_ERROR = false;
 
 	private static final Object DOCUMENT_BUILDER_LOCK = new Object();
 
 	private static XPathExpression EXPRESSION;
 
-	private static boolean DOCUMENT_BUILDER_ERROR = false;
+	private static boolean SAX_PARSER_ERROR = false;
+
+	private static final Object SAX_PARSER_LOCK = new Object();
+
+	private static final String SOURCE_PATH = "source-path";
+
+	private static final String XPATH_EXPRESSION = "//project-modules/wb-module/wb-resource";
 
 	static {
 		try {
@@ -107,150 +128,6 @@ public final class SpringCoreUtils {
 		}
 		catch (XPathExpressionException e) {
 			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Folder name of OSGi bundle manifests directories
-	 * @since 2.0.5
-	 */
-	public static String BUNDLE_MANIFEST_FOLDER = "META-INF";
-
-	/**
-	 * File name of OSGi bundle manifests
-	 * @since 2.0.5
-	 */
-	public static String BUNDLE_MANIFEST_FILE = "MANIFEST.MF";
-
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
-
-	/**
-	 * Returns <code>true</code> if given text contains a placeholder, e.g. <code>${beansRef}</code> .
-	 */
-	public static boolean hasPlaceHolder(String text) {
-		if (text == null || !StringUtils.hasText(text)) {
-			return false;
-		}
-		int pos = text.indexOf(PLACEHOLDER_PREFIX);
-		int elPos = text.indexOf(EL_PLACEHOLDER_PREFIX);
-		return ((pos != -1 || elPos != -1) && text.indexOf(PLACEHOLDER_SUFFIX, pos) != -1);
-	}
-
-	/**
-	 * Returns the specified adapter for the given object or <code>null</code> if adapter is not supported.
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T getAdapter(Object object, Class<T> adapter) {
-		if (object != null && adapter != null) {
-			if (adapter.isAssignableFrom(object.getClass())) {
-				return (T) object;
-			}
-			if (object instanceof IAdaptable) {
-				return (T) ((IAdaptable) object).getAdapter(adapter);
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Returns a list of all projects with the Spring project nature.
-	 */
-	public static Set<IProject> getSpringProjects() {
-		Set<IProject> projects = new LinkedHashSet<IProject>();
-		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if (isSpringProject(project)) {
-				projects.add(project);
-			}
-		}
-		return projects;
-	}
-
-	/**
-	 * Creates specified simple project.
-	 */
-	public static IProject createProject(String projectName, IProjectDescription description, IProgressMonitor monitor)
-			throws CoreException {
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject project = root.getProject(projectName);
-		if (!project.exists()) {
-			if (description == null) {
-				project.create(monitor);
-			}
-			else {
-				project.create(description, monitor);
-			}
-		}
-		else {
-			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-		}
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		if (!project.isOpen()) {
-			project.open(monitor);
-		}
-		return project;
-	}
-
-	/**
-	 * Creates given folder and (if necessary) all of it's parents.
-	 */
-	public static void createFolder(IFolder folder, IProgressMonitor monitor) throws CoreException {
-		if (!folder.exists()) {
-			IContainer parent = folder.getParent();
-			if (parent instanceof IFolder) {
-				createFolder((IFolder) parent, monitor);
-			}
-			folder.create(true, true, monitor);
-		}
-	}
-
-	/**
-	 * Adds given nature as first nature to specified project.
-	 */
-	public static void addProjectNature(IProject project, String nature, IProgressMonitor monitor) throws CoreException {
-		if (project != null && nature != null) {
-			if (!project.hasNature(nature)) {
-				IProjectDescription desc = project.getDescription();
-				String[] oldNatures = desc.getNatureIds();
-				String[] newNatures = new String[oldNatures.length + 1];
-				newNatures[0] = nature;
-				if (oldNatures.length > 0) {
-					System.arraycopy(oldNatures, 0, newNatures, 1, oldNatures.length);
-				}
-				desc.setNatureIds(newNatures);
-				project.setDescription(desc, monitor);
-			}
-		}
-	}
-
-	/**
-	 * Removes given nature from specified project.
-	 */
-	public static void removeProjectNature(IProject project, String nature, IProgressMonitor monitor)
-			throws CoreException {
-		if (project != null && nature != null) {
-			if (project.exists() && project.hasNature(nature)) {
-
-				// first remove all problem markers (including the
-				// inherited ones) from Spring beans project
-				if (nature.equals(SpringCore.NATURE_ID)) {
-					project.deleteMarkers(SpringCore.MARKER_ID, true, IResource.DEPTH_INFINITE);
-				}
-
-				// now remove project nature
-				IProjectDescription desc = project.getDescription();
-				String[] oldNatures = desc.getNatureIds();
-				String[] newNatures = new String[oldNatures.length - 1];
-				int newIndex = oldNatures.length - 2;
-				for (int i = oldNatures.length - 1; i >= 0; i--) {
-					if (!oldNatures[i].equals(nature)) {
-						newNatures[newIndex--] = oldNatures[i];
-					}
-				}
-				desc.setNatureIds(newNatures);
-				project.setDescription(desc, monitor);
-			}
 		}
 	}
 
@@ -270,28 +147,6 @@ public final class SpringCoreUtils {
 			// Commit the spec change into the project
 			addProjectBuilderCommand(desc, command);
 			project.setDescription(desc, monitor);
-		}
-	}
-
-	/**
-	 * Removes given builder from specified project.
-	 */
-	public static void removeProjectBuilder(IProject project, String builderID, IProgressMonitor monitor)
-			throws CoreException {
-		if (project != null && builderID != null) {
-			IProjectDescription desc = project.getDescription();
-			ICommand[] commands = desc.getBuildSpec();
-			for (int i = commands.length - 1; i >= 0; i--) {
-				if (commands[i].getBuilderName().equals(builderID)) {
-					ICommand[] newCommands = new ICommand[commands.length - 1];
-					System.arraycopy(commands, 0, newCommands, 0, i);
-					System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
-					// Commit the spec change into the project
-					desc.setBuildSpec(newCommands);
-					project.setDescription(desc, monitor);
-					break;
-				}
-			}
 		}
 	}
 
@@ -324,6 +179,217 @@ public final class SpringCoreUtils {
 	}
 
 	/**
+	 * Adds given nature as first nature to specified project.
+	 */
+	public static void addProjectNature(IProject project, String nature, IProgressMonitor monitor) throws CoreException {
+		if (project != null && nature != null) {
+			if (!project.hasNature(nature)) {
+				IProjectDescription desc = project.getDescription();
+				String[] oldNatures = desc.getNatureIds();
+				String[] newNatures = new String[oldNatures.length + 1];
+				newNatures[0] = nature;
+				if (oldNatures.length > 0) {
+					System.arraycopy(oldNatures, 0, newNatures, 1, oldNatures.length);
+				}
+				desc.setNatureIds(newNatures);
+				project.setDescription(desc, monitor);
+			}
+		}
+	}
+
+	/**
+	 * Triggers a build of the given {@link IProject} instance.
+	 * @param project the project to build
+	 */
+	public static void buildProject(IProject project) {
+		if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
+			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace().getRuleFactory().buildRule(),
+					new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD });
+		}
+	}
+
+	/**
+	 * Creates given folder and (if necessary) all of it's parents.
+	 */
+	public static void createFolder(IFolder folder, IProgressMonitor monitor) throws CoreException {
+		if (!folder.exists()) {
+			IContainer parent = folder.getParent();
+			if (parent instanceof IFolder) {
+				createFolder((IFolder) parent, monitor);
+			}
+			folder.create(true, true, monitor);
+		}
+	}
+
+	/**
+	 * Creates specified simple project.
+	 */
+	public static IProject createProject(String projectName, IProjectDescription description, IProgressMonitor monitor)
+			throws CoreException {
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		IProject project = root.getProject(projectName);
+		if (!project.exists()) {
+			if (description == null) {
+				project.create(monitor);
+			}
+			else {
+				project.create(description, monitor);
+			}
+		}
+		else {
+			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		if (!project.isOpen()) {
+			project.open(monitor);
+		}
+		return project;
+	}
+
+	/**
+	 * Finds the first line separator used by the given text.
+	 * @return </code>"\n"</code> or </code>"\r"</code> or </code>"\r\n"</code>, or <code>null</code> if none found
+	 * @since 2.2.2
+	 */
+	public static String findLineSeparator(char[] text) {
+		// find the first line separator
+		int length = text.length;
+		if (length > 0) {
+			char nextChar = text[0];
+			for (int i = 0; i < length; i++) {
+				char currentChar = nextChar;
+				nextChar = i < length - 1 ? text[i + 1] : ' ';
+				switch (currentChar) {
+				case '\n':
+					return "\n"; //$NON-NLS-1$
+				case '\r':
+					return nextChar == '\n' ? "\r\n" : "\r"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+		}
+		// not found
+		return null;
+	}
+
+	/**
+	 * Returns the specified adapter for the given object or <code>null</code> if adapter is not supported.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getAdapter(Object object, Class<T> adapter) {
+		if (object != null && adapter != null) {
+			if (adapter.isAssignableFrom(object.getClass())) {
+				return (T) object;
+			}
+			if (object instanceof IAdaptable) {
+				return (T) ((IAdaptable) object).getAdapter(adapter);
+			}
+		}
+		return null;
+	}
+
+	public static IFile getDeploymentDescriptor(IProject project) {
+		if (SpringCoreUtils.hasProjectFacet(project, "jst.web")) {
+			IFile settingsFile = project.getFile(".settings/org.eclipse.wst.common.component");
+			if (settingsFile.exists()) {
+				try {
+					NodeList nodes = (NodeList) EXPRESSION
+							.evaluate(parseDocument(settingsFile), XPathConstants.NODESET);
+					for (int i = 0; i < nodes.getLength(); i++) {
+						Element element = (Element) nodes.item(i);
+						if ("/".equals(element.getAttribute(DEPLOY_PATH))) {
+							String path = element.getAttribute(SOURCE_PATH);
+							if (path != null) {
+								IFile deploymentDescriptor = project.getFile(new Path(path).append("WEB-INF").append(
+										"web.xml"));
+								if (deploymentDescriptor.exists()) {
+									return deploymentDescriptor;
+								}
+							}
+						}
+					}
+				}
+				catch (Exception e) {
+					SpringCore.log(new Status(IStatus.WARNING, SpringCore.PLUGIN_ID, 1, e.getMessage(), e));
+				}
+			}
+		}
+		return null;
+	}
+
+	public static DocumentBuilder getDocumentBuilder() {
+		if (!DOCUMENT_BUILDER_ERROR) {
+			try {
+				// this might fail on IBM J9; therefore trying only once and then falling back to
+				// OSGi service reference as it should be
+				DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
+				return xmlFact.newDocumentBuilder();
+			}
+			catch (Exception e) {
+				SpringCore.log(new Status(IStatus.INFO, SpringCore.PLUGIN_ID,
+						"Error creating DocumentBuilderFactory. Switching to OSGi service reference."));
+				DOCUMENT_BUILDER_ERROR = true;
+			}
+		}
+
+		BundleContext bundleContext = SpringCore.getDefault().getBundle().getBundleContext();
+		ServiceReference reference = bundleContext.getServiceReference(DocumentBuilderFactory.class.getName());
+		if (reference != null) {
+			try {
+				synchronized (DOCUMENT_BUILDER_LOCK) {
+					return ((DocumentBuilderFactory) bundleContext.getService(reference)).newDocumentBuilder();
+				}
+			}
+			catch (Exception e) {
+				SpringCore.log(e);
+			}
+			finally {
+				bundleContext.ungetService(reference);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the line separator found in the given text. If it is null, or not found return the line delimiter for the
+	 * given project. If the project is null, returns the line separator for the workspace. If still null, return the
+	 * system line separator.
+	 * @since 2.2.2
+	 */
+	public static String getLineSeparator(String text, IProject project) {
+		String lineSeparator = null;
+
+		// line delimiter in given text
+		if (text != null && text.length() != 0) {
+			lineSeparator = findLineSeparator(text.toCharArray());
+			if (lineSeparator != null)
+				return lineSeparator;
+		}
+
+		// line delimiter in project preference
+		IScopeContext[] scopeContext;
+		if (project != null) {
+			scopeContext = new IScopeContext[] { new ProjectScope(project) };
+			lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME,
+					Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+			if (lineSeparator != null)
+				return lineSeparator;
+		}
+
+		// line delimiter in workspace preference
+		scopeContext = new IScopeContext[] { new InstanceScope() };
+		lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR,
+				null, scopeContext);
+		if (lineSeparator != null)
+			return lineSeparator;
+
+		// system line delimiter
+		return LINE_SEPARATOR;
+	}
+
+	/**
 	 * Returns specified builder from given project description.
 	 */
 	public static ICommand getProjectBuilderCommand(IProjectDescription description, String builderID)
@@ -337,11 +403,84 @@ public final class SpringCoreUtils {
 		return null;
 	}
 
+	public static IPath getProjectLocation(IProject project) {
+		return (project.getRawLocation() != null ? project.getRawLocation() : project.getLocation());
+	}
+
+	public static URI getResourceURI(IResource resource) {
+		if (resource != null) {
+			URI uri = resource.getRawLocationURI();
+			if (uri == null) {
+				uri = resource.getLocationURI();
+			}
+			if (uri != null) {
+				String scheme = uri.getScheme();
+				if (FILE_SCHEME.equalsIgnoreCase(scheme)) {
+					return uri;
+				}
+				else if (SOURCE_CONTROL_SCHEME.equals(scheme)) {
+					// special case of Rational Team Concert
+					IPath path = resource.getLocation();
+					File file = path.toFile();
+					if (file.exists()) {
+						return file.toURI();
+					}
+				}
+				else {
+					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
+					return variableManager.resolveURI(uri);
+				}
+			}
+		}
+		return null;
+	}
+
+	public static SAXParser getSaxParser() {
+		if (!SAX_PARSER_ERROR) {
+			try {
+				SAXParserFactory factory = SAXParserFactory.newInstance();
+				factory.setNamespaceAware(true);
+				SAXParser parser = factory.newSAXParser();
+				return parser;
+			}
+			catch (Exception e) {
+				SpringCore.log(new Status(IStatus.INFO, SpringCore.PLUGIN_ID,
+						"Error creating SaxParserFactory. Switching to OSGI service reference."));
+				SAX_PARSER_ERROR = true;
+			}
+		}
+
+		BundleContext bundleContext = SpringCore.getDefault().getBundle().getBundleContext();
+		ServiceReference reference = bundleContext.getServiceReference(SAXParserFactory.class.getName());
+		if (reference != null) {
+			try {
+				synchronized (SAX_PARSER_LOCK) {
+					SAXParserFactory factory = (SAXParserFactory) bundleContext.getService(reference);
+					return factory.newSAXParser();
+				}
+			}
+			catch (Exception e) {
+				SpringCore.log(e);
+			}
+			finally {
+				bundleContext.ungetService(reference);
+			}
+		}
+
+		return null;
+	}
+
 	/**
-	 * Returns true if given resource's project is a Spring project.
+	 * Returns a list of all projects with the Spring project nature.
 	 */
-	public static boolean isSpringProject(IResource resource) {
-		return hasNature(resource, SpringCore.NATURE_ID);
+	public static Set<IProject> getSpringProjects() {
+		Set<IProject> projects = new LinkedHashSet<IProject>();
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+			if (isSpringProject(project)) {
+				projects.add(project);
+			}
+		}
+		return projects;
 	}
 
 	/**
@@ -357,6 +496,31 @@ public final class SpringCoreUtils {
 				catch (CoreException e) {
 					SpringCore.log(e);
 				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if given text contains a placeholder, e.g. <code>${beansRef}</code> .
+	 */
+	public static boolean hasPlaceHolder(String text) {
+		if (text == null || !StringUtils.hasText(text)) {
+			return false;
+		}
+		int pos = text.indexOf(PLACEHOLDER_PREFIX);
+		int elPos = text.indexOf(EL_PLACEHOLDER_PREFIX);
+		return ((pos != -1 || elPos != -1) && text.indexOf(PLACEHOLDER_SUFFIX, pos) != -1);
+	}
+
+	public static boolean hasProjectFacet(IResource resource, String facetId) {
+		if (resource != null && resource.isAccessible()) {
+			try {
+				return JdtUtils.isJavaProject(resource)
+						&& FacetedProjectFramework.hasProjectFacet(resource.getProject(), facetId);
+			}
+			catch (CoreException e) {
+				// TODO CD handle exception
 			}
 		}
 		return false;
@@ -387,14 +551,6 @@ public final class SpringCoreUtils {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Returns true if Eclipse's runtime bundle has the same or a newer than given version.
-	 */
-	public static boolean isVersionSameOrNewer(String versionString, int majorVersion, int minorVersion,
-			int microVersion) {
-		return new Version(versionString).compareTo(new Version(majorVersion, minorVersion, microVersion)) >= 0;
 	}
 
 	/**
@@ -443,47 +599,119 @@ public final class SpringCoreUtils {
 		return false;
 	}
 
-	public static IPath getProjectLocation(IProject project) {
-		return (project.getRawLocation() != null ? project.getRawLocation() : project.getLocation());
-	}
-	
-	public static URI getResourceURI(IResource resource) {
-		if (resource != null) {
-			URI uri = resource.getRawLocationURI();
-			if (uri == null) {
-				uri = resource.getLocationURI();
-			}
-			if (uri != null) {
-				String scheme = uri.getScheme();
-				if (FILE_SCHEME.equalsIgnoreCase(scheme)) {
-					return uri;
-				}
-				else if (SOURCE_CONTROL_SCHEME.equals(scheme)) {
-					// special case of Rational Team Concert
-					IPath path = resource.getLocation();
-					File file = path.toFile();
-					if (file.exists()) {
-						return file.toURI();
-					}
-				}
-				else {
-					IPathVariableManager variableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
-					return variableManager.resolveURI(uri);
-				}
-			}
-		}
-		return null;
+	/**
+	 * Returns true if given resource's project is a Spring project.
+	 */
+	public static boolean isSpringProject(IResource resource) {
+		return hasNature(resource, SpringCore.NATURE_ID);
 	}
 
 	/**
-	 * Triggers a build of the given {@link IProject} instance.
-	 * @param project the project to build
+	 * Returns true if Eclipse's runtime bundle has the same or a newer than given version.
 	 */
-	public static void buildProject(IProject project) {
-		if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
-			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace().getRuleFactory().buildRule(),
-					new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD });
+	public static boolean isVersionSameOrNewer(String versionString, int majorVersion, int minorVersion,
+			int microVersion) {
+		return new Version(versionString).compareTo(new Version(majorVersion, minorVersion, microVersion)) >= 0;
+	}
+
+	public static Document parseDocument(IFile deploymentDescriptor) {
+		try {
+			if (getResourceURI(deploymentDescriptor) != null) {
+				return parseDocument(getResourceURI(deploymentDescriptor));
+			}
+			return getDocumentBuilder().parse(new InputSource(deploymentDescriptor.getContents()));
 		}
+		catch (SAXException e) {
+			throw new RuntimeException(e);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		catch (CoreException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static Document parseDocument(URI deploymentDescriptor) {
+		try {
+			return getDocumentBuilder().parse(deploymentDescriptor.toString());
+		}
+		catch (SAXException e) {
+			throw new RuntimeException(e);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Removes given builder from specified project.
+	 */
+	public static void removeProjectBuilder(IProject project, String builderID, IProgressMonitor monitor)
+			throws CoreException {
+		if (project != null && builderID != null) {
+			IProjectDescription desc = project.getDescription();
+			ICommand[] commands = desc.getBuildSpec();
+			for (int i = commands.length - 1; i >= 0; i--) {
+				if (commands[i].getBuilderName().equals(builderID)) {
+					ICommand[] newCommands = new ICommand[commands.length - 1];
+					System.arraycopy(commands, 0, newCommands, 0, i);
+					System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
+					// Commit the spec change into the project
+					desc.setBuildSpec(newCommands);
+					project.setDescription(desc, monitor);
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Removes given nature from specified project.
+	 */
+	public static void removeProjectNature(IProject project, String nature, IProgressMonitor monitor)
+			throws CoreException {
+		if (project != null && nature != null) {
+			if (project.exists() && project.hasNature(nature)) {
+
+				// first remove all problem markers (including the
+				// inherited ones) from Spring beans project
+				if (nature.equals(SpringCore.NATURE_ID)) {
+					project.deleteMarkers(SpringCore.MARKER_ID, true, IResource.DEPTH_INFINITE);
+				}
+
+				// now remove project nature
+				IProjectDescription desc = project.getDescription();
+				String[] oldNatures = desc.getNatureIds();
+				String[] newNatures = new String[oldNatures.length - 1];
+				int newIndex = oldNatures.length - 2;
+				for (int i = oldNatures.length - 1; i >= 0; i--) {
+					if (!oldNatures[i].equals(nature)) {
+						newNatures[newIndex--] = oldNatures[i];
+					}
+				}
+				desc.setNatureIds(newNatures);
+				project.setDescription(desc, monitor);
+			}
+		}
+	}
+
+	/**
+	 * Verify that file can safely be modified; eventually checkout the file from source code control.
+	 * @return <code>true</code> if resource can be modified
+	 * @since 2.2.9
+	 */
+	public static boolean validateEdit(IFile... files) {
+		for (IFile file : files) {
+			if (!file.exists()) {
+				return false;
+			}
+		}
+		IStatus status = ResourcesPlugin.getWorkspace().validateEdit(files, IWorkspace.VALIDATE_PROMPT);
+		if (status.isOK()) {
+			return true;
+		}
+		return false;
 	}
 
 	private static void scheduleBuildInBackground(final IProject project, ISchedulingRule rule,
@@ -523,190 +751,4 @@ public final class SpringCoreUtils {
 		// job.setSystem(true);
 		job.schedule();
 	}
-
-	public static boolean hasProjectFacet(IResource resource, String facetId) {
-		if (resource != null && resource.isAccessible()) {
-			try {
-				return JdtUtils.isJavaProject(resource)
-						&& FacetedProjectFramework.hasProjectFacet(resource.getProject(), facetId);
-			}
-			catch (CoreException e) {
-				// TODO CD handle exception
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the line separator found in the given text. If it is null, or not found return the line delimiter for the
-	 * given project. If the project is null, returns the line separator for the workspace. If still null, return the
-	 * system line separator.
-	 * @since 2.2.2
-	 */
-	public static String getLineSeparator(String text, IProject project) {
-		String lineSeparator = null;
-
-		// line delimiter in given text
-		if (text != null && text.length() != 0) {
-			lineSeparator = findLineSeparator(text.toCharArray());
-			if (lineSeparator != null)
-				return lineSeparator;
-		}
-
-		// line delimiter in project preference
-		IScopeContext[] scopeContext;
-		if (project != null) {
-			scopeContext = new IScopeContext[] { new ProjectScope(project) };
-			lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME,
-					Platform.PREF_LINE_SEPARATOR, null, scopeContext);
-			if (lineSeparator != null)
-				return lineSeparator;
-		}
-
-		// line delimiter in workspace preference
-		scopeContext = new IScopeContext[] { new InstanceScope() };
-		lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR,
-				null, scopeContext);
-		if (lineSeparator != null)
-			return lineSeparator;
-
-		// system line delimiter
-		return LINE_SEPARATOR;
-	}
-
-	/**
-	 * Finds the first line separator used by the given text.
-	 * @return </code>"\n"</code> or </code>"\r"</code> or </code>"\r\n"</code>, or <code>null</code> if none found
-	 * @since 2.2.2
-	 */
-	public static String findLineSeparator(char[] text) {
-		// find the first line separator
-		int length = text.length;
-		if (length > 0) {
-			char nextChar = text[0];
-			for (int i = 0; i < length; i++) {
-				char currentChar = nextChar;
-				nextChar = i < length - 1 ? text[i + 1] : ' ';
-				switch (currentChar) {
-				case '\n':
-					return "\n"; //$NON-NLS-1$
-				case '\r':
-					return nextChar == '\n' ? "\r\n" : "\r"; //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-		}
-		// not found
-		return null;
-	}
-
-	public static IFile getDeploymentDescriptor(IProject project) {
-		if (SpringCoreUtils.hasProjectFacet(project, "jst.web")) {
-			IFile settingsFile = project.getFile(".settings/org.eclipse.wst.common.component");
-			if (settingsFile.exists()) {
-				try {
-					NodeList nodes = (NodeList) EXPRESSION
-							.evaluate(parseDocument(settingsFile), XPathConstants.NODESET);
-					for (int i = 0; i < nodes.getLength(); i++) {
-						Element element = (Element) nodes.item(i);
-						if ("/".equals(element.getAttribute(DEPLOY_PATH))) {
-							String path = element.getAttribute(SOURCE_PATH);
-							if (path != null) {
-								IFile deploymentDescriptor = project.getFile(new Path(path).append("WEB-INF").append(
-										"web.xml"));
-								if (deploymentDescriptor.exists()) {
-									return deploymentDescriptor;
-								}
-							}
-						}
-					}
-				}
-				catch (Exception e) {
-					SpringCore.log(new Status(IStatus.WARNING, SpringCore.PLUGIN_ID, 1, e.getMessage(), e));
-				}
-			}
-		}
-		return null;
-	}
-
-	public static Document parseDocument(IFile deploymentDescriptor) {
-		try {
-			if (getResourceURI(deploymentDescriptor) != null) {
-				return parseDocument(getResourceURI(deploymentDescriptor));
-			}
-			return getDocumentBuilder().parse(new InputSource(deploymentDescriptor.getContents()));
-		}
-		catch (SAXException e) {
-			throw new RuntimeException(e);
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		catch (CoreException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static Document parseDocument(URI deploymentDescriptor) {
-		try {
-			return getDocumentBuilder().parse(deploymentDescriptor.toString());
-		}
-		catch (SAXException e) {
-			throw new RuntimeException(e);
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static DocumentBuilder getDocumentBuilder() {
-		if (!DOCUMENT_BUILDER_ERROR) {
-			try {
-				// this might fail on IBM J9; therefore trying only once and then falling back to
-				// OSGi service reference as it should be
-				DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
-				return xmlFact.newDocumentBuilder();
-			}
-			catch (Exception e) {
-				SpringCore.log(new Status(IStatus.INFO, SpringCore.PLUGIN_ID,
-						"Error creating DocumentBuilderFactory. Switching to OSGi service reference."));
-				DOCUMENT_BUILDER_ERROR = true;
-			}
-		}
-
-		ServiceReference reference = SpringCore.getDefault().getBundle().getBundleContext().getServiceReference(
-				DocumentBuilderFactory.class.getName());
-		if (reference != null) {
-			try {
-				synchronized (DOCUMENT_BUILDER_LOCK) {
-					return ((DocumentBuilderFactory) SpringCore.getDefault().getBundle().getBundleContext().getService(
-							reference)).newDocumentBuilder();
-				}
-			}
-			catch (Exception e) {
-				SpringCore.log(e);
-			}
-			SpringCore.getDefault().getBundle().getBundleContext().ungetService(reference);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Verify that file can safely be modified; eventually checkout the file from source code control.
-	 * @return <code>true</code> if resource can be modified
-	 * @since 2.2.9
-	 */
-	public static boolean validateEdit(IFile... files) {
-		for (IFile file : files) {
-			if (!file.exists()) {
-				return false;
-			}
-		}
-		IStatus status = ResourcesPlugin.getWorkspace().validateEdit(files, IWorkspace.VALIDATE_PROMPT);
-		if (status.isOK()) {
-			return true;
-		}
-		return false;
-	}
-
 }

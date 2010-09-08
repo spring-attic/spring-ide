@@ -16,9 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -28,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -59,14 +58,10 @@ public class BeansProjectDescriptionReader {
 			try {
 				is = new BufferedInputStream(new FileInputStream(rawFile));
 				BeansProjectDescriptionHandler handler = new BeansProjectDescriptionHandler(project);
+				
 				try {
-					SAXParserFactory factory = SAXParserFactory.newInstance();
-					factory.setNamespaceAware(true);
-					SAXParser parser = factory.newSAXParser();
+					SAXParser parser = SpringCoreUtils.getSaxParser();
 					parser.parse(new InputSource(is), handler);
-				}
-				catch (ParserConfigurationException e) {
-					handler.log(IStatus.ERROR, e);
 				}
 				catch (SAXException e) {
 					handler.log(IStatus.ERROR, e);
@@ -74,6 +69,7 @@ public class BeansProjectDescriptionReader {
 				catch (IOException e) {
 					handler.log(IStatus.ERROR, e);
 				}
+				
 				IStatus status = handler.getStatus();
 				switch (status.getSeverity()) {
 				case IStatus.ERROR:
@@ -103,4 +99,6 @@ public class BeansProjectDescriptionReader {
 		// Add default config extension to project
 		project.addConfigSuffix(IBeansProject.DEFAULT_CONFIG_SUFFIX);
 	}
+	
+
 }
