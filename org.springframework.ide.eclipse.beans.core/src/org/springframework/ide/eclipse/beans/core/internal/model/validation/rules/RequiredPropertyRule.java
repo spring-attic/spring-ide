@@ -24,7 +24,6 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -138,8 +137,6 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 	 * ASM based visitor that checks the precedence of an {@link Required} annotation on <b>any</b> property setter.
 	 */
 	private static class RequiredAnnotationMetadata extends AnnotationMetadataReadingVisitor {
-
-		public static final String REQUIRED_NAME = Type.getDescriptor(Required.class);
 
 		private Set<String> requiredAnnotationTypes = new HashSet<String>();
 

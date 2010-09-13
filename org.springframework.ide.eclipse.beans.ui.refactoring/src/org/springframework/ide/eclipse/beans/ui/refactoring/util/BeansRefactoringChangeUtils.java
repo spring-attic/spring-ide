@@ -37,6 +37,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -87,7 +88,7 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	@SuppressWarnings( { "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	private static Set<TextEdit> createMethodTextEdits(Node node, IJavaElement element, String newName, IFile file) {
 		if (node == null) {
 			return null;
@@ -311,7 +312,7 @@ public class BeansRefactoringChangeUtils {
 			}
 			IDOMDocument document = ((DOMModelImpl) model).getDocument();
 			MultiTextEdit multiEdit = new MultiTextEdit();
-			NodeList nodes = document.getElementsByTagName("bean");
+			NodeList nodes = document.getChildNodes();
 			for (int j = 0; j < affectedElements.length; j++) {
 
 				IJavaElement je = affectedElements[j];
@@ -319,10 +320,8 @@ public class BeansRefactoringChangeUtils {
 				// check that the element we are about to change is on the file's classpath
 				if (jp == null || (jp != null && jp.isOnClasspath(je))) {
 					for (int i = 0; i < nodes.getLength(); i++) {
-						TextEdit edit = createTextEdit(nodes.item(i), je, newNames[j]);
-						if (edit != null) {
-							multiEdit.addChild(edit);
-						}
+						Node n = nodes.item(i);
+						recursiveCreateTextEdit(newNames[j], multiEdit, je, n);
 					}
 				}
 			}
@@ -330,7 +329,7 @@ public class BeansRefactoringChangeUtils {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
 				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup("Rename Bean class", e));
+					change.addTextEditGroup(new TextEditGroup("Rename class name", e));
 				}
 				return change;
 			}
@@ -345,22 +344,35 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	private static TextEdit createTextEdit(Node node, IJavaElement element, String newName) {
+	private static void recursiveCreateTextEdit(String newName, MultiTextEdit multiEdit, IJavaElement je, Node n) {
+		createTextEdit(n, je, newName, multiEdit);
+		NodeList children = n.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			recursiveCreateTextEdit(newName, multiEdit, je, children.item(i));
+		}
+	}
+
+	private static void createTextEdit(Node node, IJavaElement element, String newName, MultiTextEdit multiEdit) {
 		if (node == null) {
-			return null;
+			return;
 		}
 
 		String oldName = (element instanceof IType) ? ((IType) element).getFullyQualifiedName('$') : element
 				.getElementName();
-		String value = BeansEditorUtils.getAttribute(node, "class");
-		if (oldName.equals(value) || isGoodMatch(value, oldName, element instanceof IPackageFragment)) {
-			AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem("class");
-			int offset = attr.getValueRegionStartOffset() + 1;
-			if (offset >= 0) {
-				return new ReplaceEdit(offset, oldName.length(), newName);
+
+		NamedNodeMap attributes = node.getAttributes();
+		if (attributes != null) {
+			for (int i = 0; i < attributes.getLength(); i++) {
+				String attribute = attributes.item(i).getNodeValue();
+				if (oldName.equals(attribute) || isGoodMatch(attribute, oldName, element instanceof IPackageFragment)) {
+					AttrImpl attr = (AttrImpl) attributes.getNamedItem(attributes.item(i).getNodeName());
+					int offset = attr.getValueRegionStartOffset() + 1;
+					if (offset >= 0) {
+						multiEdit.addChild(new ReplaceEdit(offset, oldName.length(), newName));
+					}
+				}
 			}
 		}
-		return null;
 	}
 
 	private static boolean isGoodMatch(String value, String oldName, boolean isPackage) {
