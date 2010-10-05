@@ -28,9 +28,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
 /**
- * Helper methods to load external contributed
- * {@link IBeanMetadataContentProvider} and {@link IBeanMetadataLabelProvider}
- * for linking in third-party contributed bean meta data.
+ * Helper methods to load external contributed {@link IBeanMetadataContentProvider} and
+ * {@link IBeanMetadataLabelProvider} for linking in third-party contributed bean meta data.
  * @author Christian Dupuis
  * @since 2.0.5
  */
@@ -42,24 +41,31 @@ public class BeanMetadataUtils {
 
 	private static final String METADATA_PROVIDERS_ELEMENT = "metadataProviders";
 
-	public static final String META_DATA_PROVIDERS_EXTENSION_POINT = BeansUIPlugin.PLUGIN_ID
-			+ ".metadataproviders";
+	private static final String PRIORITY_ATTRIBUTE = "priority";
+
+	public static final String META_DATA_PROVIDERS_EXTENSION_POINT = BeansUIPlugin.PLUGIN_ID + ".metadataproviders";
 
 	public static IBeanMetadataContentProvider getContenProvider(IBeanMetadata metaDataReference) {
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
-				META_DATA_PROVIDERS_EXTENSION_POINT);
+		IBeanMetadataContentProvider contentProvider = null;
+		int priority = -1;
+
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(META_DATA_PROVIDERS_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					if (METADATA_PROVIDERS_ELEMENT.equals(config.getName())
 							&& config.getAttribute(CONTENT_PROVIDER_ATTRIBUTE) != null) {
 						try {
-							Object handler = config
-									.createExecutableExtension(CONTENT_PROVIDER_ATTRIBUTE);
-							if (handler instanceof IBeanMetadataContentProvider) {
-								IBeanMetadataContentProvider provider = (IBeanMetadataContentProvider) handler;
-								if (provider.supports(metaDataReference)) {
-									return provider;
+
+							int handlerPriority = Integer.valueOf(config.getAttribute(PRIORITY_ATTRIBUTE));
+							if (handlerPriority > priority) {
+								Object handler = config.createExecutableExtension(CONTENT_PROVIDER_ATTRIBUTE);
+								if (handler instanceof IBeanMetadataContentProvider) {
+									IBeanMetadataContentProvider provider = (IBeanMetadataContentProvider) handler;
+									if (provider.supports(metaDataReference)) {
+										contentProvider = provider;
+										priority = handlerPriority;
+									}
 								}
 							}
 						}
@@ -70,25 +76,30 @@ public class BeanMetadataUtils {
 				}
 			}
 		}
-		return null;
+		return contentProvider;
 	}
 
-	public static IBeanMetadataLabelProvider getLabelProvider(
-			BeanMetadataReference metaDataReference) {
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
-				META_DATA_PROVIDERS_EXTENSION_POINT);
+	public static IBeanMetadataLabelProvider getLabelProvider(BeanMetadataReference metaDataReference) {
+		IBeanMetadataLabelProvider labelProvider = null;
+		int priority = -1;
+
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(META_DATA_PROVIDERS_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					if (METADATA_PROVIDERS_ELEMENT.equals(config.getName())
 							&& config.getAttribute(LABEL_PROVIDER_ATTRIBUTE) != null) {
 						try {
-							Object handler = config
-									.createExecutableExtension(LABEL_PROVIDER_ATTRIBUTE);
-							if (handler instanceof IBeanMetadataLabelProvider) {
-								IBeanMetadataLabelProvider provider = (IBeanMetadataLabelProvider) handler;
-								if (provider.supports(metaDataReference)) {
-									return provider;
+							int handlerPriority = Integer.valueOf(config.getAttribute(PRIORITY_ATTRIBUTE));
+							if (handlerPriority > priority) {
+
+								Object handler = config.createExecutableExtension(LABEL_PROVIDER_ATTRIBUTE);
+								if (handler instanceof IBeanMetadataLabelProvider) {
+									IBeanMetadataLabelProvider provider = (IBeanMetadataLabelProvider) handler;
+									if (provider.supports(metaDataReference)) {
+										labelProvider = provider;
+										priority = handlerPriority;
+									}
 								}
 							}
 						}
@@ -99,24 +110,30 @@ public class BeanMetadataUtils {
 				}
 			}
 		}
-		return null;
+		return labelProvider;
 	}
 
 	public static IBeanMetadataLabelProvider getLabelProvider(IBeanMetadata metaData) {
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(
-				META_DATA_PROVIDERS_EXTENSION_POINT);
+		IBeanMetadataLabelProvider labelProvider = null;
+		int priority = -1;
+
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(META_DATA_PROVIDERS_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					if (METADATA_PROVIDERS_ELEMENT.equals(config.getName())
 							&& config.getAttribute(LABEL_PROVIDER_ATTRIBUTE) != null) {
 						try {
-							Object handler = config
-									.createExecutableExtension(LABEL_PROVIDER_ATTRIBUTE);
-							if (handler instanceof IBeanMetadataLabelProvider) {
-								IBeanMetadataLabelProvider provider = (IBeanMetadataLabelProvider) handler;
-								if (provider.supports(metaData)) {
-									return provider;
+							int handlerPriority = Integer.valueOf(config.getAttribute(PRIORITY_ATTRIBUTE));
+							if (handlerPriority > priority) {
+
+								Object handler = config.createExecutableExtension(LABEL_PROVIDER_ATTRIBUTE);
+								if (handler instanceof IBeanMetadataLabelProvider) {
+									IBeanMetadataLabelProvider provider = (IBeanMetadataLabelProvider) handler;
+									if (provider.supports(metaData)) {
+										labelProvider = provider;
+										priority = handlerPriority;
+									}
 								}
 							}
 						}
@@ -127,7 +144,7 @@ public class BeanMetadataUtils {
 				}
 			}
 		}
-		return null;
+		return labelProvider;
 	}
 
 	public static Collection<? extends Object> getProjectChildren(IBeansProject project) {
@@ -149,12 +166,12 @@ public class BeanMetadataUtils {
 		return metaDataMapping.values();
 	}
 
-	private static void addMetaDataForBean(IBeansProject project,
-			Map<String, BeanMetadataReference> metaDataMapping, IBean bean) {
+	private static void addMetaDataForBean(IBeansProject project, Map<String, BeanMetadataReference> metaDataMapping,
+			IBean bean) {
 		for (IBeanMetadata metaData : BeansMetadataPlugin.getMetadataModel().getBeanMetadata(bean)) {
 			if (!metaDataMapping.containsKey(metaData.getKey())) {
-				metaDataMapping.put(metaData.getKey(), getContenProvider(metaData)
-						.getBeanMetadataReference(metaData, project));
+				metaDataMapping.put(metaData.getKey(),
+						getContenProvider(metaData).getBeanMetadataReference(metaData, project));
 			}
 			metaDataMapping.get(metaData.getKey()).addChild(metaData);
 		}

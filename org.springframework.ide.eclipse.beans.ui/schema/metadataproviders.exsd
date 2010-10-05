@@ -2,9 +2,9 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.springframework.ide.eclipse.beans.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appinfo>
+      <appInfo>
          <meta.schema plugin="org.springframework.ide.eclipse.beans.ui" id="metadataproviders" name="Metadata Providers"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;p&gt;
 This extension point is used to add content providers and label providers for Spring meta data providers.
@@ -12,6 +12,11 @@ This extension point is used to add content providers and label providers for Sp
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="metadataProviders" minOccurs="0" maxOccurs="unbounded"/>
@@ -42,9 +47,9 @@ This extension point is used to add content providers and label providers for Sp
 
    <element name="metadataProviders">
       <annotation>
-         <appinfo>
+         <appInfo>
             <meta.element labelAttribute="uri"/>
-         </appinfo>
+         </appInfo>
       </annotation>
       <complexType>
          <attribute name="labelProvider" type="string">
@@ -52,9 +57,9 @@ This extension point is used to add content providers and label providers for Sp
                <documentation>
                   an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataLabelProvider&lt;/samp&gt;
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java" basedOn=":org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataLabelProvider"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="contentProvider" type="string">
@@ -62,27 +67,34 @@ This extension point is used to add content providers and label providers for Sp
                <documentation>
                   an optional instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataContentProvider&lt;/samp&gt;
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java" basedOn=":org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataContentProvider"/>
-               </appinfo>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="priority" type="string" use="default" value="10">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="since"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          2.0.5
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="examples"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;pre&gt;
 &lt;
@@ -91,29 +103,28 @@ This extension point is used to add content providers and label providers for Sp
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="apiInfo"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;p&gt;
 Each provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataContentProvider&lt;/samp&gt; or &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataLabelProvider&lt;/samp&gt;.
       </documentation>
    </annotation>
 
-
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="implementation"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;p&gt;
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="copyright"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          &lt;pre&gt;
 Copyright (c) 2005, 2008 Spring IDE Developers
