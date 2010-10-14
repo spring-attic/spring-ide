@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.uaa;singleton:=true
-Bundle-Version: 2.5.0.qualifier
+Bundle-Version: 2.3.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.internal.uaa.UaaPlugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
@@ -14,7 +14,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ecf.filetransfer,
  org.eclipse.ecf,
  org.springframework.ide.eclipse.core,
- org.eclipse.jdt.core
+ org.eclipse.jdt.core,
+ org.eclipse.equinox.p2.core,
+ org.eclipse.equinox.p2.engine,
+ org.eclipse.equinox.p2.metadata,
+ org.eclipse.equinox.p2.director
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Eclipse-LazyStart: true
