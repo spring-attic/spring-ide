@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,33 +18,31 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * This class provides labels for the beans core model's
- * {@link ISourceModelElement elements} in the namespace
+ * This class provides labels for the beans core model's {@link ISourceModelElement elements} in the namespace
  * <code>"http://www.springframework.org/schema/beans"</code>.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public final class BeansNamespaceLabels extends BeansUILabels {
 
-	public static String getElementLabel(ISourceModelElement element,
-			int flags) {
+	public static String getElementLabel(ISourceModelElement element, int flags) {
 		StringBuffer buf = new StringBuffer(60);
 		appendElementLabel(element, flags, buf);
 		return buf.toString();
 	}
 
-	public static void appendElementLabel(ISourceModelElement element,
-			int flags, StringBuffer buf) {
+	public static void appendElementLabel(ISourceModelElement element, int flags, StringBuffer buf) {
 		if (isFlagged(flags, PREPEND_PATH)) {
 			BeansModelLabels.appendElementPathLabel(element, flags, buf);
 			buf.append(CONCAT_STRING);
 		}
 		if (element instanceof IBean) {
 			appendBeanLabel((IBean) element, buf);
-		} else if (element instanceof ISourceModelElement) {
-			BeansModelLabels.appendElementLabel(element,
-					buf);
-		} else {
+		}
+		else if (element instanceof ISourceModelElement) {
+			BeansModelLabels.appendElementLabel(element, buf);
+		}
+		else if (element != null) {
 			buf.append(element.getElementName());
 		}
 		if (isFlagged(flags, APPEND_PATH)) {
@@ -65,15 +63,15 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 				buf.append(bean.getElementName()).append(' ');
 				if (bean.getAliases() != null && bean.getAliases().length > 0) {
 					buf.append('\'');
-					buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
-							LIST_DELIMITER_STRING));
+					buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(), LIST_DELIMITER_STRING));
 					buf.append("' ");
 				}
 			}
 		}
 		if (bean.getClassName() != null) {
 			buf.append('[').append(bean.getClassName()).append(']');
-		} else if (bean.getParentName() != null) {
+		}
+		else if (bean.getParentName() != null) {
 			buf.append('<').append(bean.getParentName()).append('>');
 		}
 	}
