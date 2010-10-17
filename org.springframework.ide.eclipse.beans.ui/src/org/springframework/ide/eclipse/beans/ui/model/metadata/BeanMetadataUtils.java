@@ -56,9 +56,9 @@ public class BeanMetadataUtils {
 					if (METADATA_PROVIDERS_ELEMENT.equals(config.getName())
 							&& config.getAttribute(CONTENT_PROVIDER_ATTRIBUTE) != null) {
 						try {
-
-							int handlerPriority = Integer.valueOf(config.getAttribute(PRIORITY_ATTRIBUTE));
+							int handlerPriority = getPriority(config);
 							if (handlerPriority > priority) {
+								
 								Object handler = config.createExecutableExtension(CONTENT_PROVIDER_ATTRIBUTE);
 								if (handler instanceof IBeanMetadataContentProvider) {
 									IBeanMetadataContentProvider provider = (IBeanMetadataContentProvider) handler;
@@ -90,7 +90,7 @@ public class BeanMetadataUtils {
 					if (METADATA_PROVIDERS_ELEMENT.equals(config.getName())
 							&& config.getAttribute(LABEL_PROVIDER_ATTRIBUTE) != null) {
 						try {
-							int handlerPriority = Integer.valueOf(config.getAttribute(PRIORITY_ATTRIBUTE));
+							int handlerPriority = getPriority(config);
 							if (handlerPriority > priority) {
 
 								Object handler = config.createExecutableExtension(LABEL_PROVIDER_ATTRIBUTE);
@@ -124,7 +124,7 @@ public class BeanMetadataUtils {
 					if (METADATA_PROVIDERS_ELEMENT.equals(config.getName())
 							&& config.getAttribute(LABEL_PROVIDER_ATTRIBUTE) != null) {
 						try {
-							int handlerPriority = Integer.valueOf(config.getAttribute(PRIORITY_ATTRIBUTE));
+							int handlerPriority = getPriority(config);
 							if (handlerPriority > priority) {
 
 								Object handler = config.createExecutableExtension(LABEL_PROVIDER_ATTRIBUTE);
@@ -175,6 +175,14 @@ public class BeanMetadataUtils {
 			}
 			metaDataMapping.get(metaData.getKey()).addChild(metaData);
 		}
+	}
+	
+	private static int getPriority(IConfigurationElement config) {
+		int handlerPriority = 10; // DEFAULT_PRIORITY = 10
+		if (config.getAttribute(PRIORITY_ATTRIBUTE) != null) {
+			handlerPriority = Integer.valueOf(config.getAttribute(PRIORITY_ATTRIBUTE));
+		}
+		return handlerPriority;
 	}
 
 }
