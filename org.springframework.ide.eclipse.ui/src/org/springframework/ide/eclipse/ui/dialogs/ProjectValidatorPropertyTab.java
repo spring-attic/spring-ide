@@ -442,7 +442,7 @@ public class ProjectValidatorPropertyTab {
 	}
 
 	public boolean performOk() {
-		final List checkElements = Arrays.asList(checkedElements);
+		final List checkElements = checkedElements != null ? Arrays.asList(checkedElements) : Collections.emptyList();
 
 		WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
 
