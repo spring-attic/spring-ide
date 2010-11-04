@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.security.feature.source"
       label="%featureName"
-      version="2.5.0.qualifier"
+      version="2.5.1.qualifier"
       provider-name="%featureProvider">
    
    <description>
