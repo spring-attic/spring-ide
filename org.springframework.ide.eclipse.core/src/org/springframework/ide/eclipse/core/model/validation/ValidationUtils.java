@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.core.model.validation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,6 +99,14 @@ public final class ValidationUtils {
 					// Marker can only handle value of type String, Integer or Boolean
 					if (value instanceof String || value instanceof Integer || value instanceof Boolean) {
 						attributes.put(attribute.getKey(), value);
+					} else if (value instanceof List<?>) {
+						int counter = 1;
+						for(Object v: (List<?>) value) {
+							if (v instanceof String || value instanceof Integer || value instanceof Boolean) {
+								attributes.put(attribute.getKey() + counter, v);
+								counter++;
+							}
+						}
 					}
 				}
 
