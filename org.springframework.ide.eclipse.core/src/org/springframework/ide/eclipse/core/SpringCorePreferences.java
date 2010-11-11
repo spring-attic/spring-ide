@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,10 @@ public class SpringCorePreferences {
 	}
 	
 	public void putString(String key, String value) {
-		try {
+		if (key == null || value == null) {
+			return;
+		}
+		try { 
 			this.preferences.put(propertyNamespace + key, value);
 			this.preferences.flush();
 		}
@@ -56,6 +59,9 @@ public class SpringCorePreferences {
 	}
 
 	public void putBoolean(String key, boolean value) {
+		if (key == null) {
+			return;
+		}
 		try {
 			this.preferences.putBoolean(propertyNamespace + key, value);
 			this.preferences.flush();
