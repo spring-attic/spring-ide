@@ -82,6 +82,15 @@ public class DelegatingHyperlinkDetector implements IHyperlinkDetector {
 					hyperlinks.addAll(Arrays.asList(detectedHyperlinks));
 				}
 			}
+			if (detectors.length == 0) {
+				// install an empty NamespaceHandlerSupport to get the NamespaceHandler resolution working
+				NamespaceHyperlinkDetectorSupport detector = new NamespaceHyperlinkDetectorSupport();
+				IHyperlink[] detectedHyperlinks = detector.detectHyperlinks(textViewer, region,
+						canShowMultipleHyperlinks);
+				if (detectedHyperlinks != null) {
+					hyperlinks.addAll(Arrays.asList(detectedHyperlinks));
+				}
+			}
 		}
 	}
 
