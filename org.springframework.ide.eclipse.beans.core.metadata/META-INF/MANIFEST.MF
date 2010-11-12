@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.core.metadata;singleton:=true
-Bundle-Version: 2.5.1.qualifier
+Bundle-Version: 2.5.2.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin
 Bundle-Vendor: %providerName
 Import-Package: org.eclipse.core.resources,
