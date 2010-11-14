@@ -29,6 +29,10 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.events.IFacetedProjectEvent;
+import org.eclipse.wst.common.project.facet.core.events.IFacetedProjectListener;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
@@ -48,11 +52,10 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This model manages instances of {@link IBeansProject}s. It's populated from Eclipse's current
- * workspace and receives {@link IResourceChangeEvent}s for workspaces changes.
+ * This model manages instances of {@link IBeansProject}s. It's populated from Eclipse's current workspace and receives
+ * {@link IResourceChangeEvent}s for workspaces changes.
  * <p>
- * The single instance of {@link IBeansModel} is available from the static method
- * {@link BeansCorePlugin#getModel()}.
+ * The single instance of {@link IBeansModel} is available from the static method {@link BeansCorePlugin#getModel()}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -74,6 +77,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	private volatile Map<IProject, IBeansProject> projects = new HashMap<IProject, IBeansProject>();
 
 	private IResourceChangeListener workspaceListener;
+
+	private IFacetedProjectListener facetedProjectListener;
 
 	public BeansModel() {
 		super(null, IBeansModel.ELEMENT_NAME);
@@ -112,9 +117,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			for (IProject project : SpringCoreUtils.getSpringProjects()) {
 				BeansProject beansProject = new BeansProject(BeansModel.this, project);
 
-				// eargly populate the internal structure of the beans project 
+				// eargly populate the internal structure of the beans project
 				beansProject.accept(new IModelElementVisitor() {
-					
+
 					public boolean visit(IModelElement element, IProgressMonitor monitor) {
 						return element instanceof IBeansProject;
 					}
@@ -132,8 +137,11 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new BeansResourceChangeListener(new ResourceChangeEventHandler());
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.addResourceChangeListener(workspaceListener,
-				BeansResourceChangeListener.LISTENER_FLAGS);
+		workspace.addResourceChangeListener(workspaceListener, BeansResourceChangeListener.LISTENER_FLAGS);
+
+		facetedProjectListener = new FacetProjectFrameworkListener();
+		FacetedProjectFramework.addListener(facetedProjectListener, IFacetedProjectEvent.Type.POST_INSTALL,
+				IFacetedProjectEvent.Type.POST_UNINSTALL);
 
 	}
 
@@ -150,6 +158,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(workspaceListener);
 		workspaceListener = null;
+
+		FacetedProjectFramework.removeListener(facetedProjectListener);
+		facetedProjectListener = null;
 
 		try {
 			w.lock();
@@ -362,8 +373,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void springNatureAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature added to project '" + project.getName()
-							+ "'");
+					System.out.println("Spring beans nature added to project '" + project.getName() + "'");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
 				try {
@@ -383,8 +393,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void springNatureRemoved(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature removed from project '"
-							+ project.getName() + "'");
+					System.out.println("Spring beans nature removed from project '" + project.getName() + "'");
 				}
 				IBeansProject proj = null;
 				try {
@@ -478,8 +487,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				buildProject(file, true);
 			}
 			// Special handling for META-INF/MANIFEST.MF files on PDE
-			else if (eventType == IResourceChangeEvent.PRE_BUILD
-					&& SpringCoreUtils.isManifest(file)) {
+			else if (eventType == IResourceChangeEvent.PRE_BUILD && SpringCoreUtils.isManifest(file)) {
 				if (DEBUG) {
 					System.out.println("Project manifest '" + file.getFullPath() + "' changed");
 				}
@@ -567,7 +575,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				finally {
 					r.unlock();
 				}
-				
+
 				if (project == null) {
 					return;
 				}
@@ -604,6 +612,27 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Watched resource '" + file.getFullPath() + "' changed");
 				}
 				buildProject(file, false);
+			}
+		}
+	}
+
+	/**
+	 * Internal {@link IFacetedProjectListener} that captures changes to project facets.
+	 * @since 2.5.2
+	 */
+	private class FacetProjectFrameworkListener implements IFacetedProjectListener {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void handleEvent(IFacetedProjectEvent event) {
+			IFacetedProject fProject = event.getProject();
+			if (SpringCoreUtils.isSpringProject(fProject.getProject())) {
+				if (DEBUG) {
+					System.out.println(String.format("Project facet on '%s' changed. Triggering re-build.", fProject
+							.getProject().getName()));
+				}
+				buildProject(fProject.getProject(), false);
 			}
 		}
 
