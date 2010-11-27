@@ -416,6 +416,8 @@ public class ProjectValidatorPropertyTab {
 					Object item = items.get(i);
 					updateParentState(item);
 				}
+				
+				checkedElements = validatorViewer.getCheckedElements();
 			}
 		});
 	}
