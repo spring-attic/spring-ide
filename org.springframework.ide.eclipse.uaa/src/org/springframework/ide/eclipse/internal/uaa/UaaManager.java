@@ -25,7 +25,6 @@ import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.internal.UaaServiceImpl;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
-import org.springframework.uaa.client.protobuf.UaaClient.Product.ReleaseCategory;
 
 /**
  * Helper class that coordinates with the Spring UAA service implementation.
@@ -74,9 +73,9 @@ public class UaaManager {
 			product.setMajorVersion(version.getMajor());
 			product.setMinorVersion(version.getMinor());
 			product.setPatchVersion(version.getMicro());
-			// b.setReleaseQualifier(version.getQualifier());
-			setReleaseCategory(version, product);
-
+			product.setReleaseQualifier(version.getQualifier());
+			// product.setSourceControlIdentifier();
+			
 			service.registerProductUsage(product.build());
 		}
 	}
@@ -96,34 +95,6 @@ public class UaaManager {
 			}
 		}
 		productDescriptors.add(new ProductDescriptor());
-	}
-
-	private static void setReleaseCategory(Version version, Product.Builder b) {
-		String qualifier = version.getQualifier();
-		if (qualifier.contains("SR")) {
-			b.setReleaseCategory(ReleaseCategory.SECURITY);
-		}
-		else if (qualifier.contains("RELEASE")) {
-			b.setReleaseCategory(ReleaseCategory.RELEASE);
-		}
-		else if (qualifier.contains("M")) {
-			b.setReleaseCategory(ReleaseCategory.MILESTONE);
-		}
-		else if (qualifier.contains("RC")) {
-			b.setReleaseCategory(ReleaseCategory.MILESTONE);
-		}
-		else if (qualifier.contains("CI")) {
-			b.setReleaseCategory(ReleaseCategory.ALPHA);
-		}
-		else if (qualifier.contains("BUILD")) {
-			b.setReleaseCategory(ReleaseCategory.ALPHA);
-		}
-		else if (qualifier.contains("qualifier")) {
-			b.setReleaseCategory(ReleaseCategory.ALPHA);
-		}
-		else {
-			b.setReleaseCategory(ReleaseCategory.RELEASE);
-		}
 	}
 
 	private static class ExtensionProductDescriptor extends ProductDescriptor {
@@ -170,9 +141,8 @@ public class UaaManager {
 			b.setMajorVersion(version.getMajor());
 			b.setMinorVersion(version.getMinor());
 			b.setPatchVersion(version.getMicro());
-			// b.setReleaseQualifier(version.getQualifier());
-			b.setSourceControlIdentifier(version.toString());
-			setReleaseCategory(version, b);
+			b.setReleaseQualifier(version.getQualifier());
+			// b.setSourceControlIdentifier();
 
 			this.product = b.build();
 		}
@@ -226,9 +196,7 @@ public class UaaManager {
 			b.setMajorVersion(version.getMajor());
 			b.setMinorVersion(version.getMinor());
 			b.setPatchVersion(version.getMicro());
-			// b.setReleaseQualifier(version.getQualifier());
-			b.setSourceControlIdentifier(version.toString());
-			b.setReleaseCategory(ReleaseCategory.RELEASE);
+			b.setReleaseQualifier(version.getQualifier());
 
 			this.product = b.build();
 		}

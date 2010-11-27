@@ -104,7 +104,9 @@ public class SpringCore extends Plugin {
 		typeStructureCache.startup();
 		// install default for incremtal compilation
 		plugin.getPluginPreferences().setDefault(USE_CHANGE_DETECTION_IN_JAVA_FILES, true);
-		plugin.getPluginPreferences().setDefault(USE_NON_LOCKING_CLASSLOADER, false);
+		// make non-locking classloaders the default on windows
+		plugin.getPluginPreferences().setDefault(USE_NON_LOCKING_CLASSLOADER,
+				Platform.OS_WIN32.equals(Platform.getOS()));
 	}
 
 	@Override

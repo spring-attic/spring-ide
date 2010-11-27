@@ -114,7 +114,11 @@ public class UaaPlugin extends AbstractUIPlugin {
 				IProvisioningAgent agent = (IProvisioningAgent) context.getService(ref);
 
 				IProfile profile = getProfileRegistry(agent).getProfile(IProfileRegistry.SELF);
-
+				
+				if (profile == null) {
+					return Status.CANCEL_STATUS;
+				}
+				
 				ArrayList<IInstallableUnit> iusWithUpdates = new ArrayList<IInstallableUnit>();
 				ProvisioningContext provisioningContext = new ProvisioningContext(agent);
 				provisioningContext.setMetadataRepositories(new URI[] { URI
