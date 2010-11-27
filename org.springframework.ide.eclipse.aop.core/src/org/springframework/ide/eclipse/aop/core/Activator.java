@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.aop.core;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -66,7 +67,7 @@ public class Activator extends AbstractUIPlugin {
 		// add default value
 		getPreferenceStore().setDefault(PERSIST_AOP_MODEL_PREFERENCE, true);
 
-		Job modelJob = new Job("Initializing Aop Model") {
+		Job modelJob = new Job("Initializing Spring Aop Model") {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -75,7 +76,7 @@ public class Activator extends AbstractUIPlugin {
 				return Status.OK_STATUS;
 			}
 		};
-//		modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		modelJob.setSystem(true);
 		modelJob.setPriority(Job.INTERACTIVE);
 		modelJob.schedule();
