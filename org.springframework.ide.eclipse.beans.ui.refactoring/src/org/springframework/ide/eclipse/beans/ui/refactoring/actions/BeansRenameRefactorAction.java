@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameBeanIdRefactoring;
 import org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameBeanIdRefactoringWizard;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
 /**
@@ -100,12 +101,24 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 			ITextSelection textSelection = getCurrentSelection();
 			if (textSelection.isEmpty())
 				return;
+
 			Object obj = ((IStructuredSelection) textSelection)
 					.getFirstElement();
-			if (obj instanceof Element) {
-				Element node = (Element) obj;
-				String attributeName = getSelectedAttributeName(textSelection);
-				
+			
+			Element node = null;
+			String attributeName = null;
+			
+			if (obj instanceof Attr) {
+				Attr attribute = (Attr) obj;
+				node = attribute.getOwnerElement();
+				attributeName = attribute.getName();
+			}
+			else if (obj instanceof Element) {
+				node = (Element) obj;
+				attributeName = getSelectedAttributeName(textSelection);
+			}
+			
+			if (node != null && attributeName != null) {
 				// start Spring IDE's own bean id refactoring
 				if ("bean".equals(node.getLocalName())
 						&& "id".equals(attributeName)) {

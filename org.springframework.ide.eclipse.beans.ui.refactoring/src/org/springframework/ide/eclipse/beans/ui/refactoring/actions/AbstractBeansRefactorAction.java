@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.beans.ui.actions.AbstractBeansConfigEdito
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -86,10 +87,21 @@ public abstract class AbstractBeansRefactorAction extends
 		if (textSelection instanceof IStructuredSelection) {
 			Object obj = ((IStructuredSelection) textSelection)
 					.getFirstElement();
-			if (obj instanceof Element) {
-				Element node = (Element) obj;
-				String attributeName = getSelectedAttributeName(textSelection);
-				 
+			
+			Element node = null;
+			String attributeName = null;
+			
+			if (obj instanceof Attr) {
+				Attr attribute = (Attr) obj;
+				node = attribute.getOwnerElement();
+				attributeName = attribute.getName();
+			}
+			else if (obj instanceof Element) {
+				node = (Element) obj;
+				attributeName = getSelectedAttributeName(textSelection);
+			}
+			
+			if (node != null && attributeName != null) {
 				// check if bean class is selected
 				String className = BeansEditorUtils.getAttribute(node, "class");
 				String propertyName = BeansEditorUtils.getAttribute(node,
