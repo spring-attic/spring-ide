@@ -63,6 +63,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.core.model,
  org.springframework.util;version="[3.0.5.RELEASE,3.1.0)",
  org.w3c.dom
-lipse-LazyStart: true
+Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
+Export-Package: org.springframework.ide.eclipse.beans.ui.refactoring.actions
