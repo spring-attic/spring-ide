@@ -40,13 +40,11 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -716,7 +714,7 @@ public final class SpringCoreUtils {
 
 	private static void scheduleBuildInBackground(final IProject project, ISchedulingRule rule,
 			final Object[] jobFamilies) {
-		Job job = new WorkspaceJob("Building workspace") {
+		Job job = new Job("Building workspace") {
 
 			@Override
 			public boolean belongsTo(Object family) {
@@ -732,14 +730,14 @@ public final class SpringCoreUtils {
 			}
 
 			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) {
+			public IStatus run(IProgressMonitor monitor) {
 				try {
 					project.build(IncrementalProjectBuilder.FULL_BUILD, SpringCore.BUILDER_ID, Collections.emptyMap(),
 							monitor);
 					return Status.OK_STATUS;
 				}
 				catch (CoreException e) {
-					return new MultiStatus(SpringCore.PLUGIN_ID, 1, "Error during build of project ["
+					return new Status(Status.ERROR, SpringCore.PLUGIN_ID, 1, "Error during build of project ["
 							+ project.getName() + "]", e);
 				}
 			}
@@ -748,7 +746,6 @@ public final class SpringCoreUtils {
 			job.setRule(rule);
 		}
 		job.setPriority(Job.BUILD);
-		// job.setSystem(true);
 		job.schedule();
 	}
 }
