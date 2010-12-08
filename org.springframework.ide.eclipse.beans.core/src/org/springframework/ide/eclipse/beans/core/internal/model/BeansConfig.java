@@ -138,6 +138,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	/** The resource that is currently being processed or null if non is processed */
 	private transient IResource currentResource = null;
 
+	/** The resource that is currently being processed or null if non is processed; just a different type then the above */
+	private transient EncodedResource currentEncodedResource;
+
 	/** {@link IBeansConfigPostProcessor}s that are detected in this configs beans and component map */
 	private volatile Set<IBeansConfigPostProcessor> ownPostProcessors = new HashSet<IBeansConfigPostProcessor>();
 
@@ -148,7 +151,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * {@link IBeansConfigPostProcessor}s that have been contributed by external {@link IBeansConfig} from other
 	 * {@link IBeansConfigSet}
 	 */
-	private volatile Map<IBeansConfigPostProcessor, Set<IBeansConfig>> externalPostProcessors = new ConcurrentHashMap<IBeansConfigPostProcessor, Set<IBeansConfig>>();
+	private volatile Map<IBeansConfigPostProcessor, Set<IBeansConfig>> externalPostProcessors = 
+		new ConcurrentHashMap<IBeansConfigPostProcessor, Set<IBeansConfig>>();
 
 	/** {@link Resource} implementation to be passed to Spring core for reading */
 	private volatile Resource resource;
@@ -299,8 +303,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			// as it could otherwise create a runtime deadlock
 			ResourceLoader resourceLoader = null;
 			if (((IBeansProject) getElementParent()).isImportsEnabled()) {
-				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject(), JdtUtils
-						.getClassLoader(file.getProject(), BeansCorePlugin.getClassLoader()));
+				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject(),
+						JdtUtils.getClassLoader(file.getProject(), BeansCorePlugin.getClassLoader()));
 			}
 			else {
 				resourceLoader = new ClassResourceFilteringPatternResolver(file.getProject(), JdtUtils.getClassLoader(
@@ -343,15 +347,16 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
 					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(new BeansDtdResolver(),
 							new PluggableSchemaResolver(cl));
+					final DocumentAccessor documentAccessor = new DocumentAccessor();
 					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file.getProject());
 					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(this,
-							resource, sourceExtractor);
+							resource, sourceExtractor, documentAccessor);
 
 					problemReporter = new BeansConfigProblemReporter();
 					beanNameGenerator = new UniqueBeanNameGenerator(this);
 
-					final DocumentAccessor documentAccessor = new DocumentAccessor();
 					final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry) {
+
 						@Override
 						public int loadBeanDefinitions(EncodedResource encodedResource)
 								throws BeanDefinitionStoreException {
@@ -361,7 +366,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 							if (encodedResource != null && encodedResource.getResource() instanceof IAdaptable) {
 								currentResource = (IResource) ((IAdaptable) encodedResource.getResource())
 										.getAdapter(IResource.class);
-
+								currentEncodedResource = encodedResource;
 							}
 
 							try {
@@ -371,6 +376,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 							finally {
 								// Reset currently processed resource before leaving
 								currentResource = null;
+								currentEncodedResource = null;
 							}
 						}
 
@@ -431,8 +437,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						try {
 							FutureTask<Integer> task = new FutureTask<Integer>(loadBeanDefinitionOperation);
 							BeansCorePlugin.getExecutorService().submit(task);
-							count = task.get(BeansCorePlugin.getDefault().getPreferenceStore().getInt(
-									BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID), TimeUnit.SECONDS);
+							count = task.get(
+									BeansCorePlugin.getDefault().getPreferenceStore()
+											.getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID),
+									TimeUnit.SECONDS);
 
 							// if we recored an exception use this instead of stupid concurrent exception
 							if (throwables.size() > 0) {
@@ -443,8 +451,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, "Loading of resource '"
 									+ resource.getFile().getAbsolutePath()
 									+ "' took more than "
-									+ BeansCorePlugin.getDefault().getPreferenceStore().getInt(
-											BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID) + "sec", file, 1));
+									+ BeansCorePlugin.getDefault().getPreferenceStore()
+											.getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID) + "sec",
+									file, 1));
 						}
 					}
 					catch (Throwable e) {
@@ -740,7 +749,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 		private SourceExtractor sourceExtractor;
 
-		public BeansConfigReaderEventListener(IBeansConfig config, Resource resource, SourceExtractor sourceExtractor) {
+		private DocumentAccessor documentAccessor;
+
+		public BeansConfigReaderEventListener(IBeansConfig config, Resource resource, SourceExtractor sourceExtractor,
+				DocumentAccessor documentAccessor) {
 			this.config = config;
 			this.resource = resource;
 			this.elementProviders = NamespaceUtils.getElementProviders();
@@ -749,6 +761,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			this.aliasDefinitionsCache = new HashMap<Resource, Set<AliasDefinition>>();
 			this.defaultDefinitionsCache = new HashMap<Resource, DocumentDefaultsDefinition>();
 			this.sourceExtractor = sourceExtractor;
+			this.documentAccessor = documentAccessor;
 		}
 
 		/**
@@ -796,6 +809,18 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		 */
 		public void componentRegistered(ComponentDefinition componentDefinition) {
 			Object source = componentDefinition.getSource();
+
+			// make sure to attach a default source location
+			if (source == null && currentEncodedResource != null && currentEncodedResource.getResource() != null) {
+				source = sourceExtractor.extractSource(documentAccessor.getCurrentElement(),
+						currentEncodedResource.getResource());
+				for (BeanDefinition beanDefinition : componentDefinition.getBeanDefinitions()) {
+					if (beanDefinition.getSource() == null && beanDefinition instanceof AbstractBeanDefinition) {
+						((AbstractBeanDefinition) beanDefinition).setSource(source);
+						((AbstractBeanDefinition) beanDefinition).setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+					}
+				}
+			}
 
 			// make sure nested BeanDefinitions have all the source extraction applied
 			addSourceToNestedBeanDefinitions(componentDefinition);

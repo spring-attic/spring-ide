@@ -14,15 +14,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.ToolAnnotationBasedNamespaceHandler;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor.SchemaLocations;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils.NamespaceHandlerDescriptor;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * This {@link NamespaceHandlerResolver} provides a {@link NamespaceHandler} for a given namespace URI. Depending on
@@ -82,7 +87,7 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 			namespaceHandler = super.resolve(namespaceUri);
 
 			if (namespaceHandler != null) {
-				return namespaceHandler;
+				return decorateNamespaceHandler(namespaceHandler);
 			}
 
 			SchemaLocations schemaLocations = EMPTY_SCHEMA_LOCATIONS;
@@ -96,7 +101,7 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 				namespaceHandler = namespaceHandlers.get(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(
 						namespaceUri, schemaLocation));
 				if (namespaceHandler != null) {
-					return namespaceHandler;
+					return decorateNamespaceHandler(namespaceHandler);
 				}
 			}
 
@@ -104,7 +109,7 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 			namespaceHandler = namespaceHandlers.get(NamespaceHandlerDescriptor.createNamespaceHandlerDescriptor(
 					namespaceUri, null));
 			if (namespaceHandler != null) {
-				return namespaceHandler;
+				return decorateNamespaceHandler(namespaceHandler);
 			}
 
 			// Then check the contributed NamespaceHandlerResolver.
@@ -112,7 +117,7 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 				try {
 					namespaceHandler = resolver.resolve(namespaceUri);
 					if (namespaceHandler != null) {
-						return namespaceHandler;
+						return decorateNamespaceHandler(namespaceHandler);
 					}
 				}
 				catch (Exception e) {
@@ -125,12 +130,69 @@ public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerR
 			return toolAnnotationNamespaceHandler;
 		}
 		finally {
-			
+
 			// Add to cache for subsequent faster access
 			if (namespaceHandler != null) {
+				if (!(namespaceHandler instanceof ElementTrackingNamespaceHandler)) {
+					namespaceHandler = decorateNamespaceHandler(namespaceHandler);
+				}
 				resolvedNamespaceHandlers.put(namespaceUri, namespaceHandler);
 			}
 		}
 	}
 
+	/**
+	 * Decorate the given {@link NamespaceHandler} with an {@link ElementTrackingNamespaceHandler}.
+	 */
+	private NamespaceHandler decorateNamespaceHandler(NamespaceHandler namespaceHandler) {
+		return new ElementTrackingNamespaceHandler(namespaceHandler);
+	}
+
+	/**
+	 * {@link NamespaceHandler} that wraps another instance and keeps track of the current {@link Element} being parsed
+	 * or decorated.
+	 * @since 2.5.2
+	 */
+	class ElementTrackingNamespaceHandler implements NamespaceHandler {
+
+		private final NamespaceHandler namespaceHandler;
+
+		public ElementTrackingNamespaceHandler(NamespaceHandler namespaceHandler) {
+			this.namespaceHandler = namespaceHandler;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void init() {
+			namespaceHandler.init();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
+			try {
+				documentAccessor.pushElement(element);
+				return namespaceHandler.parse(element, parserContext);
+			}
+			finally {
+				documentAccessor.popElement();
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext) {
+			try {
+				documentAccessor.pushElement(source);
+				return namespaceHandler.decorate(source, definition, parserContext);
+			}
+			finally {
+				documentAccessor.popElement();
+			}
+		}
+	}
+	
 }

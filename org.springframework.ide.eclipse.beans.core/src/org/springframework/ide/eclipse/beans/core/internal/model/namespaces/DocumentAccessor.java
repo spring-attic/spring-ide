@@ -16,6 +16,7 @@ import java.util.Stack;
 
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * Utility that manages an internal stack of {@link Document}.
@@ -26,16 +27,34 @@ public class DocumentAccessor {
 
 	private Stack<Document> documents = new Stack<Document>();
 	
+	private Stack<Node> elements = new Stack<Node>();
+	
 	private Map<Document, SchemaLocations> schemaLocations = new HashMap<Document, SchemaLocations>(); 
 
 	/** Push a new document onto the internal stack structure */
 	public void pushDocument(Document doc) {
 		documents.push(doc);
 	}
+	
+	/** Push a new element onto the internal stack structure */
+	public void pushElement(Node element) {
+		elements.push(element);
+	}
 
-	/** Returns the current document; meaning the first element in the stack */
+	/** Returns the current document; meaning the first document in the stack */
 	public Document getCurrentDocument() {
-		return documents.peek();
+		if (!documents.isEmpty()) {
+			return documents.peek();
+		}
+		return null;
+	}
+	
+	/** Returns the current element; meaning the first element in the stack */
+	public Node getCurrentElement() {
+		if (!elements.isEmpty()) {
+			return elements.peek();
+		}
+		return null;
 	}
 	
 	/** Returns the current values of the schemaLocation attribute */
@@ -52,9 +71,20 @@ public class DocumentAccessor {
 		return this.schemaLocations.get(doc);
 	}
 
-	/** Removes the first element from the stack */
+	/** Removes the first document from the stack */
 	public Document popDocument() {
-		return documents.pop();
+		if (!documents.isEmpty()) {
+			return documents.pop();
+		}
+		return null;
+	}
+	
+	/** Removes the first element from the stack */
+	public Node popElement() {
+		if (!elements.isEmpty()) {
+			return elements.pop();
+		}
+		return null;
 	}
 	
 	/**
