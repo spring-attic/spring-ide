@@ -22,9 +22,10 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
+import org.springframework.scripting.ScriptFactory;
 
 /**
  * Validates a given {@link IBean}'s factory bean and factory method.
@@ -136,7 +137,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 			// Skip factory-method validation for factory beans which are
 			// Spring factory beans as well and for those aspectOf methods
 			if (type != null && !ValidationRuleUtils.ASPECT_OF_METHOD_NAME.equals(methodName)
-					&& !JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())) {
+					&& !JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())
+					&& !JdtUtils.doesImplement(context.getRootElementResource(), type, ScriptFactory.class.getName())) {
 				validateMethod(bean, type, MethodType.FACTORY, methodName, argCount, statics, context);
 			}
 		}
