@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.actions;
+package org.springframework.ide.eclipse.beans.ui.refactoring.actions;
 
 import java.util.ArrayList;
 import java.util.List;

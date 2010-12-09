@@ -50,5 +50,33 @@
 			</describer>
 		</content-type>
 	</extension>
+	
+		<extension point="org.eclipse.ui.popupMenus">
+		<viewerContribution
+			targetID="org.springframework.ide.eclipse.beans.mylyn.beansConfig.source.EditorContext"
+			id="org.springframework.ide.eclipse.beans.ui.editor.actions.context">
+			<menu label="%refactorMenu.label" path="sourcePopupMenuId"
+				id="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu">
+			</menu>
+			<action
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction"
+				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.refactorBeanClassAction"
+				label="%renameBeanElement.label"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
+			</action>
+			<action
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansMoveRefactorAction"
+				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.moveBeanClassAction"
+				label="%moveBeanElement.label"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
+			</action>
+			<action
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RefactorPropertyElementAction"
+				id="org.springframework.ide.eclipse.beans.ui.editor.actions.refactorPropertyElementAction"
+				label="%refactorPropertyElement.label"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
+			</action>
+		</viewerContribution>
+	</extension>
 
 </plugin>

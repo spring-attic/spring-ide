@@ -106,17 +106,23 @@
 			</menu>
 			<action
 				id="org.springframework.ide.eclipse.beans.ui.refactoring.refactorBeanClassAction"
-				label="%renameJavaElement.label"
+				label="%renameBeanElement.label"
 				definitionId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
 				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
 				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction">
 			</action>
 			<action
 				id="org.springframework.ide.eclipse.beans.ui.refactoring.moveBeanClassAction"
-				label="%moveJavaElement.label"
+				label="%moveBeanElement.label"
 				definitionId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.moveBeanClassAction"
 				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
 				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansMoveRefactorAction">
+			</action>
+			<action
+				id="org.springframework.ide.eclipse.beans.ui.editor.actions.refactorPropertyElementAction"
+				label="%refactorPropertyElement.label"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RefactorPropertyElementAction">
 			</action>
 		</editorContribution>
 	</extension>
@@ -125,19 +131,25 @@
 		<viewerContribution
 			targetID="org.springframework.ide.eclipse.beans.ui.editor.beansConfig.source.EditorContext"
 			id="org.springframework.ide.eclipse.beans.ui.editor.actions.context">
-			<menu label="%refactorMenu.label" path="additions"
+			<menu label="%refactorMenu.label" path="sourcePopupMenuId"
 				id="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu">
 			</menu>
 			<action
 				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction"
 				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.refactorBeanClassAction"
-				label="%renameJavaElement.label"
+				label="%renameBeanElement.label"
 				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
 			</action>
 			<action
 				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansMoveRefactorAction"
 				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.moveBeanClassAction"
-				label="%moveJavaElement.label"
+				label="%moveBeanElement.label"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
+			</action>
+			<action
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RefactorPropertyElementAction"
+				id="org.springframework.ide.eclipse.beans.ui.editor.actions.refactorPropertyElementAction"
+				label="%refactorPropertyElement.label"
 				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
 			</action>
 		</viewerContribution>
