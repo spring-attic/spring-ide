@@ -38,7 +38,7 @@ public abstract class BeansModelUpdater {
 
 	static {
 		UPDATES = new ArrayList<IBeansModelUpdate>();
-		UPDATES.add(new UpdateFor203());
+//		UPDATES.add(new UpdateFor203());
 	}
 	
 	/**

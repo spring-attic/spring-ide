@@ -46,7 +46,6 @@ import org.springframework.osgi.util.OsgiBundleUtils;
 /**
  * Central access point for the Spring Framework Core plug-in (id
  * <code>"org.springframework.ide.eclipse.beans.core"</code>).
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */

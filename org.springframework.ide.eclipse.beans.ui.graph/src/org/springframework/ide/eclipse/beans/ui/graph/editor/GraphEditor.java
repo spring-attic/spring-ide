@@ -26,9 +26,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
@@ -220,12 +220,8 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	@Override
 	public void setInput(IEditorInput input) {
 		super.setInput(input);
-		if (input instanceof GraphEditorInput) {
-			GraphEditorInput beansInput = (GraphEditorInput) input;
-			beansInput.init();
-			setPartName(beansInput.getName());
-			setContentDescription(beansInput.getToolTipText());
-		}
+		setPartName(input.getName());
+		setContentDescription(input.getToolTipText());
 	}
 
 	protected void closeEditor() {
@@ -248,7 +244,14 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 						if (getEditorInput() instanceof GraphEditorInput && getGraphicalViewer() != null
 								&& getGraphicalViewer().getControl() != null) {
 
-							GraphEditorInput input = (GraphEditorInput) getEditorInput();
+							if (!BeansCorePlugin.getModel().isInitialized()) {
+								schedule(2500);
+								return Status.OK_STATUS;
+							}
+							
+							
+							final GraphEditorInput input = (GraphEditorInput) getEditorInput();
+							input.init();
 
 							final Graph graph = new Graph(input);
 							graph.init();
@@ -257,6 +260,9 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 
 								public void run() {
 									if (getGraphicalViewer() != null && getGraphicalViewer().getControl() != null) {
+										setPartName(input.getName());
+										setContentDescription(input.getToolTipText());
+
 										graph.layout(getGraphicalViewer().getControl().getFont());
 										getGraphicalViewer().setContents(graph);
 									}
@@ -285,7 +291,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 * Called to configure the graphical viewer before it receives its contents. This is where the root editpart should
 	 * be configured.
 	 */
-	@SuppressWarnings( { "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	protected void configureGraphicalViewer() {
 		ScalableRootEditPart root = new ScalableRootEditPart();
 
@@ -661,9 +667,9 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 					}
 				}
 				catch (CoreException e) {
-					ErrorDialog.openError(getSite().getShell(), BeansGraphPlugin
-							.getResourceString("Editor.SaveError.title"), BeansGraphPlugin
-							.getResourceString("Editor.SaveError.text"), e.getStatus());
+					ErrorDialog.openError(getSite().getShell(),
+							BeansGraphPlugin.getResourceString("Editor.SaveError.title"),
+							BeansGraphPlugin.getResourceString("Editor.SaveError.text"), e.getStatus());
 				}
 			}
 		};

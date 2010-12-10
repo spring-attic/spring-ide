@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,18 +13,14 @@ package org.springframework.ide.eclipse.beans.ui.graph.editor;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * Factory for saving and restoring a <code>GraphEditorInput</code>. The
- * stored representation of a <code>GraphEditorInput</code> remembers the the
- * IDs oth the element and the context.
+ * Factory for saving and restoring a <code>GraphEditorInput</code>. The stored representation of a
+ * <code>GraphEditorInput</code> remembers the the IDs oth the element and the context.
  * <p>
- * The workbench will automatically create instances of this class as required.
- * It is not intended to be instantiated or subclassed by the client.
+ * The workbench will automatically create instances of this class as required. It is not intended to be instantiated or
+ * subclassed by the client.
  * </p>
  * 
  * @see org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput
@@ -33,11 +29,11 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 public class GraphEditorInputFactory implements IElementFactory {
 
 	/**
-	 * Factory id. The workbench plug-in registers a factory by this name with
-	 * the "org.eclipse.ui.elementFactories" extension point.
+	 * Factory id. The workbench plug-in registers a factory by this name with the "org.eclipse.ui.elementFactories"
+	 * extension point.
 	 */
-	private static final String ID_FACTORY = BeansGraphPlugin.PLUGIN_ID
-			+ ".editor.inputfactory";
+	private static final String ID_FACTORY = BeansGraphPlugin.PLUGIN_ID + ".editor.inputfactory";
+
 	/**
 	 * Tag for the ID of the element.
 	 */
@@ -52,16 +48,7 @@ public class GraphEditorInputFactory implements IElementFactory {
 		String elementId = memento.getString(TAG_ELEMENT);
 		String contextId = memento.getString(TAG_CONTEXT);
 		if (elementId != null && contextId != null) {
-			IBeansModel model = BeansCorePlugin.getModel();
-			IModelElement element = model.getElement(elementId);
-			if (element != null) {
-				IModelElement context = model.getElement(contextId);
-				if (context != null) {
-					return new GraphEditorInput(elementId, contextId);
-				} else {
-					return new GraphEditorInput(elementId);
-				}
-			}
+			return new GraphEditorInput(elementId, contextId);
 		}
 		return null;
 	}
@@ -78,8 +65,8 @@ public class GraphEditorInputFactory implements IElementFactory {
 	/**
 	 * Saves the state of the given graph editor input into the given memento.
 	 * 
-	 * @param memento  the storage area for element state
-	 * @param input  the graph editor input
+	 * @param memento the storage area for element state
+	 * @param input the graph editor input
 	 */
 	public static void saveState(IMemento memento, GraphEditorInput input) {
 		memento.putString(TAG_ELEMENT, input.getElementId());

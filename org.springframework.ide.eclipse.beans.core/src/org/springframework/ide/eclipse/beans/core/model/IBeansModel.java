@@ -15,6 +15,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -29,7 +30,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public interface IBeansModel extends IBeansModelElement, IModel {
+public interface IBeansModel extends IBeansModelElement, IModel, ILazyInitializedModelElement {
 
 	String ELEMENT_NAME = "BeansModel";
 

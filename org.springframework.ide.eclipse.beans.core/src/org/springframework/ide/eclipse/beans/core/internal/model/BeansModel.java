@@ -70,6 +70,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	private final Lock r = rwl.readLock();
 
 	private final Lock w = rwl.writeLock();
+	
+	protected volatile boolean modelPopulated = false;
 
 	/**
 	 * The table of Spring Beans projects
@@ -117,7 +119,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			for (IProject project : SpringCoreUtils.getSpringProjects()) {
 				BeansProject beansProject = new BeansProject(BeansModel.this, project);
 
-				// eargly populate the internal structure of the beans project
+				// Eagerly populate the internal structure of the beans project
 				beansProject.accept(new IModelElementVisitor() {
 
 					public boolean visit(IModelElement element, IProgressMonitor monitor) {
@@ -131,6 +133,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			BeansModelUpdater.updateModel(projects.values());
 		}
 		finally {
+			modelPopulated = true;
 			w.unlock();
 		}
 
@@ -338,6 +341,19 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			r.unlock();
 		}
 		return text.toString();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isInitialized() {
+		try {
+			r.lock();
+			return modelPopulated;
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	private void buildProject(IResource resource, boolean build) {
