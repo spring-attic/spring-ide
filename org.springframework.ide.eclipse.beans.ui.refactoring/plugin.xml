@@ -100,7 +100,7 @@
 		<editorContribution
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.actions"
 			targetID="org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart">
-			<menu label="%refactorMenu.label" path="additions"
+			<menu label="%refactorMenu.label" path="sourceMenuId"
 				id="org.springframework.ide.eclipse.beans.ui.refactoring.menu">
 				<groupMarker name="sourceGroup"></groupMarker>
 			</menu>
