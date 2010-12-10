@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JarEntryResource;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.IDocument;
@@ -40,6 +42,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.internal.Workbench;
 import org.eclipse.wst.sse.core.StructuredModelManager;
@@ -71,6 +74,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -280,8 +284,8 @@ public class BeansEditorUtils {
 					for (int i = 0; i < types.size(); i++) {
 						IType type = (IType) types.get(i);
 						try {
-							IMethod getMethod = Introspector.getReadableProperty(type, (String) propertyPath
-									.get(counter));
+							IMethod getMethod = Introspector.getReadableProperty(type,
+									(String) propertyPath.get(counter));
 							returnType = JdtUtils.getJavaTypeForMethodReturnType(getMethod, type);
 							methods.add(getMethod);
 						}
@@ -324,8 +328,8 @@ public class BeansEditorUtils {
 						IType type = (IType) types.get(i);
 						String propertyPath = (String) propertyPathElements.get(counter);
 						try {
-							IMethod getMethod = Introspector.getReadableProperty(type, PropertyAccessorUtils
-									.getPropertyName(propertyPath));
+							IMethod getMethod = Introspector.getReadableProperty(type,
+									PropertyAccessorUtils.getPropertyName(propertyPath));
 							returnType = JdtUtils.getJavaTypeForMethodReturnType(getMethod, type);
 						}
 						catch (JavaModelException e) {
@@ -345,8 +349,8 @@ public class BeansEditorUtils {
 					IType type = (IType) types.get(i);
 					String propertyPath = (String) propertyPathElements.get(counter);
 					try {
-						method = Introspector.getWritableProperty(type, PropertyAccessorUtils
-								.getPropertyName(propertyPath));
+						method = Introspector.getWritableProperty(type,
+								PropertyAccessorUtils.getPropertyName(propertyPath));
 					}
 					catch (JavaModelException e) {
 					}
@@ -404,7 +408,7 @@ public class BeansEditorUtils {
 		}
 		return null;
 	}
-	
+
 	public static final boolean isElementAtOffset(Node node, int offset) {
 		IndexedRegion region = ((IndexedRegion) node);
 		int nameLength = node.getNodeName().length();
@@ -671,8 +675,8 @@ public class BeansEditorUtils {
 				while (iterator.hasNext()) {
 					IBean bean = iterator.next();
 					if (parentId.equals(bean.getElementName())) {
-						getClassNamesOfBeans(file, document, bean.getElementName(), BeansModelUtils.getBeanClass(bean,
-								null), bean.getParentName(), classNames, beans);
+						getClassNamesOfBeans(file, document, bean.getElementName(),
+								BeansModelUtils.getBeanClass(bean, null), bean.getParentName(), classNames, beans);
 						break;
 					}
 				}
@@ -736,12 +740,26 @@ public class BeansEditorUtils {
 				}
 			}
 		}
-
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		if (baselocation != null) {
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IPath filePath = new Path(baselocation);
-			if (filePath.segmentCount() > 0) {
-				resource = root.getFile(filePath);
+			IPath path = new Path(baselocation);
+			if (path.segmentCount() > 1) {
+				resource = root.getFile(path);
+			}
+			else {
+				// This is a fallback for XML stored in a jar or zip files
+				IEditorPart editor = SpringUIUtils.getActiveEditor();
+				IEditorInput input = editor.getEditorInput();
+				if (input instanceof IFileEditorInput) {
+					resource = ((IFileEditorInput) input).getFile();
+				}
+				else if (input instanceof ZipEntryEditorInput) {
+					resource = (IFile) ((ZipEntryEditorInput) input).getAdapter(IFile.class);
+				}
+				else if (input instanceof JarEntryEditorInput) {
+					resource = (IFile) ((JarEntryResource) ((JarEntryEditorInput) input).getStorage())
+							.getPackageFragmentRoot().getResource();
+				}
 			}
 		}
 		return resource;
