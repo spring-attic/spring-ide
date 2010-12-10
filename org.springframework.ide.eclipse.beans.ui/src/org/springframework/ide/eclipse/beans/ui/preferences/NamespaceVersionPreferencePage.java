@@ -207,12 +207,12 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 	public Composite createPreferenceContent(Composite parent) {
 
 		boolean versionClasspath = true;
-		boolean useClasspath = false;
+		boolean useClasspath = true;
 		if (isProjectPreferencePage()) {
 			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
 					BeansCorePlugin.PLUGIN_ID);
 			versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
-			useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false);
+			useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, true);
 		}
 		else {
 			Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
@@ -233,7 +233,7 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		versionCheckbox.setSelection(versionClasspath);
 
 		classpathCheckbox = new Button(composite, SWT.CHECK);
-		classpathCheckbox.setText("Load NamespaceHandlers and XSDs from project's classpath [experimental]");
+		classpathCheckbox.setText("Load NamespaceHandlers and XSDs from project's classpath");
 		classpathCheckbox.setSelection(useClasspath);
 		classpathCheckbox.addSelectionListener(new SelectionAdapter() {
 			
