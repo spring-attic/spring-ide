@@ -27,6 +27,7 @@ import org.eclipse.wst.xml.core.internal.document.TextImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.format.FormatProcessorXML;
 import org.springframework.ide.eclipse.beans.ui.actions.AbstractBeansConfigEditorAction;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -47,11 +48,17 @@ public class RefactorPropertyElementAction extends
 		if (model != null) {
 			IndexedRegion region = model.getIndexedRegion(textSelection
 					.getOffset());
+			
+			Element elem = null;
 			if (region instanceof Element) {
-				Element elem = (Element) region;
-
+				elem = (Element) region;
+			}
+			else if (region instanceof Attr) {
+				elem = ((Attr) region).getOwnerElement();
+			}
+			
+			if (elem != null) {
 				if (elem.getOwnerDocument() instanceof IDOMDocument) {
-
 					if ("property".equals(elem.getTagName())
 							|| "constructor-arg".equals(elem.getTagName())) {
 						processNode(model, elem);
@@ -202,8 +209,16 @@ public class RefactorPropertyElementAction extends
 				IStructuredSelection structSelection = (IStructuredSelection) selection;
 
 				Object obj = structSelection.getFirstElement();
+				
+				Element elem = null;
 				if (obj instanceof Element) {
-					Element elem = (Element) obj;
+					elem = (Element) obj;
+				}
+				else if (obj instanceof Attr) {
+					elem = ((Attr) obj).getOwnerElement();
+				}
+				
+				if (elem != null) {
 					if ("property".equals(elem.getTagName())
 							|| "constructor-arg".equals(elem.getTagName())) {
 						NodeList children = elem.getChildNodes();
