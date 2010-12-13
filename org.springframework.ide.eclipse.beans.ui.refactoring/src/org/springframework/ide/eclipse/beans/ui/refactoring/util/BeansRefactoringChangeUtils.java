@@ -276,6 +276,7 @@ public class BeansRefactoringChangeUtils {
 		createRenameBeanRefTextEditForAttribute("ref", node, beanId, newBeanId, multiEdit);
 		createRenameBeanRefTextEditForAttribute("key-ref", node, beanId, newBeanId, multiEdit);
 		createRenameBeanRefTextEditForAttribute("value-ref", node, beanId, newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("p:", "-ref", node, beanId, newBeanId, multiEdit);
 
 		NodeList nodes = node.getChildNodes();
 		if (nodes != null && nodes.getLength() > 0) {
@@ -284,6 +285,29 @@ public class BeansRefactoringChangeUtils {
 			}
 		}
 
+	}
+
+	private static void createRenameBeanRefTextEditForAttribute(String attributeNameStart, String attributeNameEnd, Node node,
+			String beanId, String newBeanId, MultiTextEdit multiEdit) {
+		if (!node.hasAttributes()) return;
+		
+		NamedNodeMap attributes = node.getAttributes();
+		int attributeCount = attributes.getLength();
+		
+		for (int i = 0; i < attributeCount; i++) {
+			Node attribute = attributes.item(i);
+			String attributeName = attribute.getNodeName();
+			if (attributeName != null && attributeName.startsWith(attributeNameStart)
+						&& attributeName.endsWith(attributeNameEnd)) {
+				String beanRef = attribute.getNodeValue();
+				if (beanRef != null && beanRef.equals(beanId)) {
+					int offset = ((AttrImpl) attribute).getValueRegionStartOffset() + 1;
+					if (offset >= 0) {
+						multiEdit.addChild(new ReplaceEdit(offset, beanRef.length(), newBeanId));
+					}
+				}
+			}
+		}
 	}
 
 	private static void createRenameBeanRefTextEditForAttribute(String attributeName, Node node, String beanId,
