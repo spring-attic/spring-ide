@@ -159,11 +159,15 @@
 		<command
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
 			name="Rename Bean Java Elements"
-			categoryId="org.eclipse.jdt.ui.category.refactoring" />
+			categoryId="org.eclipse.jdt.ui.category.refactoring"/>
 		<command
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.commands.moveBeanClassAction"
 			name="Move Bean Class"
-			categoryId="org.eclipse.jdt.ui.category.refactoring" />
+			categoryId="org.eclipse.jdt.ui.category.refactoring"/>
+		<command
+			id="org.springframework.ide.eclipse.beans.ui.editor.actions.refactorPropertyElementAction"
+			name="Refactor Property Element"
+			categoryId="org.eclipse.jdt.ui.category.refactoring"/>
 	</extension>
 
 	<extension point="org.eclipse.ui.bindings">
