@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.internal.uaa.monitor.ServerUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.preferences.UaaDialog;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.uaa.client.DetectedProducts;
-import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
 /**
  * Plug-in entry point for the UAA Plugin.
@@ -43,18 +42,6 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 @SuppressWarnings("restriction")
 public class UaaPlugin extends AbstractUIPlugin {
 
-	public static final int FULL_DATA = PrivacyLevel.ENABLE_UAA.getNumber();
-
-	public static final int LIMITED_DATA = PrivacyLevel.LIMITED_DATA.getNumber();
-
-	public static final int NO_DATA = PrivacyLevel.DISABLE_UAA.getNumber();
-
-	public static final int DECLINE_TOU = PrivacyLevel.DECLINE_TOU.getNumber();
-
-	public static final int UNDECIDED_TOU = PrivacyLevel.UNDECIDED_TOU.getNumber();
-
-	public static final int DEFAULT_PRIVACY_LEVEL = UNDECIDED_TOU;
-
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.uaa"; //$NON-NLS-1$
 
 	private static UaaPlugin plugin;
@@ -63,6 +50,9 @@ public class UaaPlugin extends AbstractUIPlugin {
 
 	private UaaManager usageMonitorManager;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void start(final BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
@@ -110,14 +100,14 @@ public class UaaPlugin extends AbstractUIPlugin {
 					}
 				}
 
-				if (usageMonitorManager.getPrivacyLevel() == UNDECIDED_TOU) {
+				if (usageMonitorManager.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
 					UaaDialog dialog = UaaDialog.createDialog(SpringUIUtils.getStandardDisplay().getActiveShell());
 					int resultCode = dialog.open();
 					if (resultCode == Window.OK) {
-						usageMonitorManager.setPrivacyLevel(DEFAULT_PRIVACY_LEVEL);
+						usageMonitorManager.setPrivacyLevel(IUaa.DEFAULT_PRIVACY_LEVEL);
 					}
 					else if (resultCode == 1000) {
-						usageMonitorManager.setPrivacyLevel(DECLINE_TOU);
+						usageMonitorManager.setPrivacyLevel(IUaa.DECLINE_TOU);
 					}
 				}
 
@@ -128,6 +118,9 @@ public class UaaPlugin extends AbstractUIPlugin {
 		startupJob.schedule(5000);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		usageMonitorManager.stop();

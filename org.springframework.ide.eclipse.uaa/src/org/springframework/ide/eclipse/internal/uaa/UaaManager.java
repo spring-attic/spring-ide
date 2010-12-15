@@ -58,6 +58,9 @@ public class UaaManager implements IUaa {
 
 	private final Lock w = rwl.writeLock();
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean canOpenUrl(URL url) {
 		if (UrlHelper.isVMwareDomain(url)) {
 			return canOpenVMwareUrls();
@@ -65,6 +68,9 @@ public class UaaManager implements IUaa {
 		return true;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean canOpenVMwareUrls() {
 		try {
 			r.lock();
@@ -75,6 +81,9 @@ public class UaaManager implements IUaa {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void clear() {
 		try {
 			w.lock();
@@ -85,6 +94,9 @@ public class UaaManager implements IUaa {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public int getPrivacyLevel() {
 		try {
 			r.lock();
@@ -95,7 +107,10 @@ public class UaaManager implements IUaa {
 		}
 	}
 
-	public String getUserAgentContents(String userAgent) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getUsageDataFromUserAgentHeader(String userAgent) {
 		try {
 			r.lock();
 			return service.toString(service.fromHttpUserAgentHeaderValue(userAgent));
@@ -105,6 +120,9 @@ public class UaaManager implements IUaa {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getUserAgentHeader() {
 		try {
 			r.lock();
@@ -115,10 +133,16 @@ public class UaaManager implements IUaa {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void registerFeatureUse(String plugin) {
 		registerFeatureUse(plugin, null);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void registerFeatureUse(final String plugin, final String json) {
 		if (plugin != null) {
 			executorService.execute(new Runnable() {
@@ -140,10 +164,16 @@ public class UaaManager implements IUaa {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void registerProductUse(String productId, String version) {
 		registerProductUse(productId, version, null);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void registerProductUse(final String productId, String version, final String projectId) {
 		if (version == null) {
 			version = "0.0.0.RELEASE";
@@ -189,6 +219,9 @@ public class UaaManager implements IUaa {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setPrivacyLevel(int level) {
 		try {
 			w.lock();
@@ -231,12 +264,21 @@ public class UaaManager implements IUaa {
 		productDescriptors.add(new ProductDescriptor());
 	}
 
-	private static class CachingUaaServiceImpl extends UaaServiceImpl {
-
+	/**
+	 * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported products and features
+	 * until it can be flushed into UAA's internal storage.  
+	 */
+	private class CachingUaaServiceImpl extends UaaServiceImpl {
+		
+		/** Internal cache of reported features */
 		private List<ReportedFeature> features = new ArrayList<ReportedFeature>();
 
+		/** Internal cache of reported products */
 		private List<ReportedProduct> products = new ArrayList<ReportedProduct>();
 
+		/**
+		 * Flushes the internal cache into the UAA backend store.
+		 */
 		public void flush() {
 			if (products.size() == 0 && features.size() == 0) {
 				return;
@@ -256,6 +298,9 @@ public class UaaManager implements IUaa {
 			features.clear();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void registerFeatureUsage(Product product, String featureName) {
 			if (canRegister()) {
@@ -267,6 +312,9 @@ public class UaaManager implements IUaa {
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void registerFeatureUsage(Product product, String featureName, byte[] featureData) {
 			if (canRegister()) {
@@ -278,6 +326,9 @@ public class UaaManager implements IUaa {
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void registerProductUsage(Product product) {
 			if (canRegister()) {
@@ -289,6 +340,9 @@ public class UaaManager implements IUaa {
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void registerProductUsage(Product product, byte[] productData) {
 			if (canRegister()) {
@@ -300,6 +354,9 @@ public class UaaManager implements IUaa {
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void registerProductUsage(Product product, byte[] productData, String projectId) {
 			if (canRegister()) {
@@ -311,6 +368,9 @@ public class UaaManager implements IUaa {
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void registerProductUsage(Product product, String projectId) {
 			if (canRegister()) {
@@ -331,7 +391,7 @@ public class UaaManager implements IUaa {
 		}
 
 		private boolean canRegister() {
-			return getPrivacyLevel() != PrivacyLevel.DECLINE_TOU && getPrivacyLevel() != PrivacyLevel.UNDECIDED_TOU;
+			return canOpenVMwareUrls();
 		}
 
 		private class ReportedFeature {

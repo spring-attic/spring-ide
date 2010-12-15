@@ -23,7 +23,7 @@ public interface IUsageMonitor {
 	/**
 	 * Called to notify that monitoring should begin now.
 	 */
-	void startMonitoring(UaaManager manager);
+	void startMonitoring(IUaa manager);
 
 	/**
 	 * Called to notify that monitoring should be stopped.

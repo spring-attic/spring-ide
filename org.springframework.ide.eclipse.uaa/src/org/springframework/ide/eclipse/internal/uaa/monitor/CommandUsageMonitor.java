@@ -16,8 +16,8 @@ import org.eclipse.core.commands.IExecutionListener;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
-import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 
 /**
  * Helper class that captures executions of Eclipse commands.
@@ -32,12 +32,12 @@ public class CommandUsageMonitor implements IUsageMonitor {
 
 	private IExecutionListener executionListener;
 	
-	private volatile UaaManager manager;
+	private IUaa manager;
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void startMonitoring(UaaManager manager) {
+	public void startMonitoring(IUaa manager) {
 		this.manager = manager;
 		commandToBundleIdMapper = new ExtensionIdToBundleMapper(COMMANDS_EXTENSION_POINT);
 		executionListener = new IExecutionListener() {

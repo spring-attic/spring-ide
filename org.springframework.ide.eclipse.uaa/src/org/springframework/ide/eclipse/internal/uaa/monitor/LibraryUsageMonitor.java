@@ -41,8 +41,8 @@ import org.eclipse.jdt.internal.core.JarEntryDirectory;
 import org.osgi.framework.Constants;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
-import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 import org.springframework.uaa.client.DetectedProducts;
 import org.springframework.uaa.client.DetectedProducts.ProductInfo;
 
@@ -83,7 +83,7 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 		}
 	};
 	
-	private volatile UaaManager manager;
+	private IUaa manager;
 	
 	private Map<String, ProductMatch> matches = new ConcurrentHashMap<String, ProductMatch>();
 	private Set<String> noMatches = new CopyOnWriteArraySet<String>();
@@ -147,7 +147,7 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void startMonitoring(UaaManager manager) {
+	public void startMonitoring(IUaa manager) {
 		this.manager = manager;
 
 		Job startup = new Job("Initializing classpath usage monitoring") {

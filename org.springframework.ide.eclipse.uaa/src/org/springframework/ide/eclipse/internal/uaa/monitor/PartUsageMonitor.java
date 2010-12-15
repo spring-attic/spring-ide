@@ -21,8 +21,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
-import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 
 /**
  * Helper class that captures open and activate events for Eclipse Views, Editors and Perspectives.
@@ -39,7 +39,7 @@ public class PartUsageMonitor implements IUsageMonitor {
 
 	private ExtensionIdToBundleMapper editorToBundleIdMapper;
 
-	private UaaManager manager;
+	private IUaa manager;
 
 	private IPageListener pageListener = new IPageListener() {
 		public void pageActivated(IWorkbenchPage page) {
@@ -94,7 +94,7 @@ public class PartUsageMonitor implements IUsageMonitor {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void startMonitoring(UaaManager manager) {
+	public void startMonitoring(IUaa manager) {
 		this.manager = manager;
 		perspectiveToBundleIdMapper = new ExtensionIdToBundleMapper(PERSPECTIVES_EXTENSION_POINT);
 		viewToBundleIdMapper = new ExtensionIdToBundleMapper(VIEWS_EXTENSION_POINT);

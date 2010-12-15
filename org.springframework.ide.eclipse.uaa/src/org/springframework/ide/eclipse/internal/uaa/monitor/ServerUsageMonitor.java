@@ -16,6 +16,7 @@ import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.json.simple.JSONObject;
+import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 
@@ -34,12 +35,12 @@ public class ServerUsageMonitor implements IUsageMonitor {
 
 	private ExtensionIdToBundleMapper serverToBundleIdMapper;
 
-	private volatile UaaManager manager;
+	private IUaa manager;
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void startMonitoring(UaaManager manager) {
+	public void startMonitoring(IUaa manager) {
 		this.manager = manager;
 
 		serverToBundleIdMapper = new ExtensionIdToBundleMapper(SERVERS_EXTENSION_POINT);

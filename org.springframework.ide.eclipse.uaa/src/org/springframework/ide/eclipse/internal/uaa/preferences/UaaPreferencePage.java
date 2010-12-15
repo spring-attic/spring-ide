@@ -141,16 +141,16 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		});
 
 		int level = uaa.getPrivacyLevel();
-		if (level == UaaPlugin.FULL_DATA) {
+		if (level == IUaa.FULL_DATA) {
 			fullButton.setSelection(true);
 		}
-		else if (level == UaaPlugin.LIMITED_DATA) {
+		else if (level == IUaa.LIMITED_DATA) {
 			limitedButton.setSelection(true);
 		}
-		else if (level == UaaPlugin.NO_DATA) {
+		else if (level == IUaa.NO_DATA) {
 			disabledButton.setSelection(true);
 		}
-		else if (level == UaaPlugin.DECLINE_TOU) {
+		else if (level == IUaa.DECLINE_TOU) {
 			declineButton.setSelection(true);
 		}
 
@@ -158,7 +158,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		heading.setText("Decoded information:");
 
 		decodedUserAgentText = new Text(colorComposite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
-		decodedUserAgentText.setText(uaa.getUserAgentContents(uaa.getUserAgentHeader()));
+		decodedUserAgentText.setText(uaa.getUsageDataFromUserAgentHeader(uaa.getUserAgentHeader()));
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 150;
 		data.widthHint = 500;
@@ -219,7 +219,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 
 	protected void handleDecode() {
 		try {
-			decodedUserAgentText.setText(uaa.getUserAgentContents(encodedUserAgentText.getText()));
+			decodedUserAgentText.setText(uaa.getUsageDataFromUserAgentHeader(encodedUserAgentText.getText()));
 		}
 		catch (Exception e) {
 			decodedUserAgentText.setText("<could not decode Spring UAA header>");
@@ -227,27 +227,27 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 	}
 
 	protected void performDefaults() {
-		uaa.setPrivacyLevel(UaaPlugin.DEFAULT_PRIVACY_LEVEL);
-		limitedButton.setSelection(true);
+		uaa.setPrivacyLevel(IUaa.DEFAULT_PRIVACY_LEVEL);
+		limitedButton.setSelection(false);
 		disabledButton.setSelection(false);
-		fullButton.setSelection(false);
+		fullButton.setSelection(true);
 		declineButton.setSelection(false);
 	}
 
 	protected void selectionUpdated() {
 		if (disabledButton.getSelection()) {
-			uaa.setPrivacyLevel(UaaPlugin.NO_DATA);
+			uaa.setPrivacyLevel(IUaa.NO_DATA);
 		}
 		else if (limitedButton.getSelection()) {
-			uaa.setPrivacyLevel(UaaPlugin.LIMITED_DATA);
+			uaa.setPrivacyLevel(IUaa.LIMITED_DATA);
 		}
 		else if (fullButton.getSelection()) {
-			uaa.setPrivacyLevel(UaaPlugin.FULL_DATA);
+			uaa.setPrivacyLevel(IUaa.FULL_DATA);
 		}
 		else if (declineButton.getSelection()) {
-			uaa.setPrivacyLevel(UaaPlugin.DECLINE_TOU);
+			uaa.setPrivacyLevel(IUaa.DECLINE_TOU);
 		}
-		decodedUserAgentText.setText(uaa.getUserAgentContents(uaa.getUserAgentHeader()));
+		decodedUserAgentText.setText(uaa.getUsageDataFromUserAgentHeader(uaa.getUserAgentHeader()));
 		encodedUserAgentText.setText(uaa.getUserAgentHeader());
 		decodeButton.setEnabled(false);
 	}

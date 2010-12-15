@@ -94,7 +94,7 @@ public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFi
 			// If we get to here throw exception
 			throw new IOException(
 					String.format(
-							"Spring UAA prevented access to VMware-controlled domain '%s'. More info at http://www.springsource.org/uaa/faq",
+							"Spring UAA prevented access to VMware domain '%s'. More information at http://www.springsource.org/uaa/faq",
 							url.getHost()));
 		}
 	}

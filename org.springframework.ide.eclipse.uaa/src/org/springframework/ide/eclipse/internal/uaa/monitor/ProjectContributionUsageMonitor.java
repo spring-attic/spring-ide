@@ -21,8 +21,8 @@ import org.springframework.ide.eclipse.core.project.IProjectContributionEventLis
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectContributionEventListenerAdapter;
+import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
-import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 
 /**
  * {@link IProjectContributionEventListener} implementation that captures executions of {@link IProjectBuilder}s and
@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.internal.uaa.UaaManager;
  */
 public class ProjectContributionUsageMonitor extends ProjectContributionEventListenerAdapter implements IUsageMonitor {
 
-	private UaaManager manager;
+	private IUaa manager;
 
 	/**
 	 * {@inheritDoc}
@@ -61,7 +61,7 @@ public class ProjectContributionUsageMonitor extends ProjectContributionEventLis
 	/**
 	 * {@inheritDoc}
 	 */
-	public void startMonitoring(UaaManager manager) {
+	public void startMonitoring(IUaa manager) {
 		this.manager = manager;
 	}
 
