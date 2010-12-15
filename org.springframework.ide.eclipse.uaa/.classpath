@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/json_simple-1.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.springframework.roo.wrapping.protobuf-java-lite-2.3.0.0001.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/org.springframework.uaa.client-1.0.0.M1.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.uaa.client-1.0.0.M4.jar" sourcepath="/Users/cdupuis/Development/Java/work/spring-uaa/git/client/src/main/java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

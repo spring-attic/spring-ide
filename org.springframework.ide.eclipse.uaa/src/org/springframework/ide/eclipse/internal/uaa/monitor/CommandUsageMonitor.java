@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 /**
  * Helper class that captures executions of Eclipse commands.
  * @author Christian Dupuis
- * @since 2.5.0
+ * @since 2.5.2
  */
 public class CommandUsageMonitor implements IUsageMonitor {
 

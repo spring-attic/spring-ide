@@ -23,15 +23,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link PreferencePage} to configure the UAA.
  * @author Christian Dupuis
- * @since 2.5.0
+ * @since 2.5.2
  */
 public class UaaPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -46,6 +49,10 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 	private Button fullButton;
 
 	private Button limitedButton;
+
+	private IUaa uaa = UaaPlugin.getUAA();
+
+	private Button declineButton;
 
 	public void init(IWorkbench workbench) {
 	}
@@ -93,16 +100,16 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		colorComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		label = new Label(colorComposite2, SWT.NONE | SWT.WRAP);
-		label.setText("Select a privacy level to preview the data UAA would transfer.");
+		label.setText("Select a privacy level:");
 		label.setFont(parent.getFont());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 270;
 		label.setLayoutData(gd);
-		
-		disabledButton = new Button(colorComposite2, SWT.RADIO);
-		disabledButton.setText("Send nothing (opt out)");
-		disabledButton.addSelectionListener(new SelectionAdapter() {
+
+		fullButton = new Button(colorComposite2, SWT.RADIO);
+		fullButton.setText("Send enhanced anonymous information (recommended)");
+		fullButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectionUpdated();
@@ -116,16 +123,24 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 				selectionUpdated();
 			}
 		});
-		fullButton = new Button(colorComposite2, SWT.RADIO);
-		fullButton.setText("Send enhanced anonymous information (recommended)");
-		fullButton.addSelectionListener(new SelectionAdapter() {
+		disabledButton = new Button(colorComposite2, SWT.RADIO);
+		disabledButton.setText("Send nothing");
+		disabledButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				selectionUpdated();
+			}
+		});
+		declineButton = new Button(colorComposite2, SWT.RADIO);
+		declineButton.setText("Decline terms of use (this will disable all features that require access to VMware domains)");
+		declineButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectionUpdated();
 			}
 		});
 
-		int level = UaaPlugin.getDefault().getPrivacyLevel();
+		int level = uaa.getPrivacyLevel();
 		if (level == UaaPlugin.FULL_DATA) {
 			fullButton.setSelection(true);
 		}
@@ -135,30 +150,32 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		else if (level == UaaPlugin.NO_DATA) {
 			disabledButton.setSelection(true);
 		}
+		else if (level == UaaPlugin.DECLINE_TOU) {
+			declineButton.setSelection(true);
+		}
 
 		Label heading = new Label(colorComposite, SWT.NONE | SWT.WRAP);
 		heading.setText("Decoded information:");
 
 		decodedUserAgentText = new Text(colorComposite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
-		decodedUserAgentText.setText(UaaPlugin.getDefault().getUserAgentContents(
-				UaaPlugin.getDefault().getUserAgentHeader()));
+		decodedUserAgentText.setText(uaa.getUserAgentContents(uaa.getUserAgentHeader()));
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 150;
 		data.widthHint = 500;
 		decodedUserAgentText.setLayoutData(data);
-//		decodedUserAgentText.setFont(JFaceResources.getTextFont());
+		// decodedUserAgentText.setFont(JFaceResources.getTextFont());
 		decodedUserAgentText.setEditable(false);
 
 		heading = new Label(colorComposite, SWT.NONE | SWT.WRAP);
 		heading.setText("Encoded information:");
 
 		encodedUserAgentText = new Text(colorComposite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
-		encodedUserAgentText.setText(UaaPlugin.getDefault().getUserAgentHeader());
+		encodedUserAgentText.setText(uaa.getUserAgentHeader());
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 50;
 		data.widthHint = 500;
 		encodedUserAgentText.setLayoutData(data);
-//		encodedUserAgentText.setFont(JFaceResources.getTextFont());
+		// encodedUserAgentText.setFont(JFaceResources.getTextFont());
 		encodedUserAgentText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -178,46 +195,60 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			}
 		});
 
-		label = new Label(entryTable, SWT.NONE | SWT.WRAP);
-		label.setText("Note: the User Agent Analysis feature will record certain usage events which you can review in the 'Encoded information' text box. The collected information will be presented via a HTTP User-Agent header when accessing content on Spring-related domains such as springide.org, springsource.org and springsource.com.");
-		label.setFont(parent.getFont());
-		gd = new GridData(GridData.FILL_BOTH);
+		Link link = new Link(entryTable, SWT.NONE | SWT.WRAP);
+		link.setText("Note: the User Agent Analysis feature will record certain usage events which you can review in the 'Encoded information' text box. The collected information will be presented via a HTTP User-Agent header when accessing content on VMware domains such as springide.org, springsource.org and springsource.com.\n\nMore information can be obtained from the Spring UAA <a href=\"tou\">Terms of Use</a> and <a href=\"faq\">FAQ</a>.");
+		link.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if ("tou".equals(e.text)) {
+					SpringUIUtils.openUrl("http://www.springsource.org/uaa/terms_of_use");
+				}
+				else if ("faq".equals(e.text)) {
+					SpringUIUtils.openUrl("http://www.springsource.org/uaa/faq");
+				}
+			}
+		});
+		link.setFont(parent.getFont());
+		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 300;
-		label.setLayoutData(gd);
+		link.setLayoutData(gd);
 
 		return entryTable;
 	}
 
 	protected void handleDecode() {
 		try {
-			decodedUserAgentText.setText(UaaPlugin.getDefault().getUserAgentContents(encodedUserAgentText.getText()));
+			decodedUserAgentText.setText(uaa.getUserAgentContents(encodedUserAgentText.getText()));
 		}
 		catch (Exception e) {
-			decodedUserAgentText.setText("could not decode uaa string");
+			decodedUserAgentText.setText("<could not decode Spring UAA header>");
 		}
 	}
 
 	protected void performDefaults() {
-		UaaPlugin.getDefault().setPrivacyLevel(UaaPlugin.DEFAULT_PRIVACY_LEVEL);
+		uaa.setPrivacyLevel(UaaPlugin.DEFAULT_PRIVACY_LEVEL);
 		limitedButton.setSelection(true);
 		disabledButton.setSelection(false);
 		fullButton.setSelection(false);
+		declineButton.setSelection(false);
 	}
 
 	protected void selectionUpdated() {
 		if (disabledButton.getSelection()) {
-			UaaPlugin.getDefault().setPrivacyLevel(UaaPlugin.NO_DATA);
+			uaa.setPrivacyLevel(UaaPlugin.NO_DATA);
 		}
 		else if (limitedButton.getSelection()) {
-			UaaPlugin.getDefault().setPrivacyLevel(UaaPlugin.LIMITED_DATA);
+			uaa.setPrivacyLevel(UaaPlugin.LIMITED_DATA);
 		}
 		else if (fullButton.getSelection()) {
-			UaaPlugin.getDefault().setPrivacyLevel(UaaPlugin.FULL_DATA);
+			uaa.setPrivacyLevel(UaaPlugin.FULL_DATA);
 		}
-		decodedUserAgentText.setText(UaaPlugin.getDefault().getUserAgentContents(
-				UaaPlugin.getDefault().getUserAgentHeader()));
-		encodedUserAgentText.setText(UaaPlugin.getDefault().getUserAgentHeader());
+		else if (declineButton.getSelection()) {
+			uaa.setPrivacyLevel(UaaPlugin.DECLINE_TOU);
+		}
+		decodedUserAgentText.setText(uaa.getUserAgentContents(uaa.getUserAgentHeader()));
+		encodedUserAgentText.setText(uaa.getUserAgentHeader());
 		decodeButton.setEnabled(false);
 	}
 

@@ -12,6 +12,12 @@ package org.springframework.ide.eclipse.internal.uaa.monitor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -27,14 +33,18 @@ import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryDirectory;
 import org.osgi.framework.Constants;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.UaaManager;
+import org.springframework.uaa.client.DetectedProducts;
+import org.springframework.uaa.client.DetectedProducts.ProductInfo;
 
 /**
  * {@link IUsageMonitor} implementation that captures libraries used in Eclipse projects.
@@ -42,7 +52,7 @@ import org.springframework.ide.eclipse.internal.uaa.UaaManager;
  * Note: only libraries that specify <code>org.springframework.*</code> as <code>Bundle-SymbolicName</code> are being
  * considered.
  * @author Christian Dupuis
- * @since 2.5.0
+ * @since 2.5.2
  */
 @SuppressWarnings("restriction")
 public class LibraryUsageMonitor implements IUsageMonitor {
@@ -72,8 +82,67 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 			}
 		}
 	};
-
+	
 	private volatile UaaManager manager;
+	
+	private Map<String, ProductMatch> matches = new ConcurrentHashMap<String, ProductMatch>();
+	private Set<String> noMatches = new CopyOnWriteArraySet<String>();
+
+	public void readPackageFragmentRoot(IJavaProject source, IPackageFragmentRoot entry) throws JavaModelException {
+		String project = source.getProject().getName();
+		
+		if (matches.containsKey(entry.getElementName())) {
+			ProductMatch match = matches.get(entry.getElementName());
+			ProductInfo info = match.getInfo();
+			recordEvent(entry, info.getGroupId(), info.getArtifactId(), match.getVersion(), project);
+			return;
+		}
+		else if (noMatches.contains(entry.getElementName())) {
+			return;
+		}
+		
+		String version = null;
+		for (Object nonJavaResource : entry.getNonJavaResources()) {
+			if (nonJavaResource instanceof JarEntryDirectory) {
+				JarEntryDirectory directory = ((JarEntryDirectory) nonJavaResource);
+				if (directory != null && "META-INF".equals(directory.getName())) {
+					for (IJarEntryResource jarEntryResource : directory.getChildren()) {
+						if ("maven".equals(jarEntryResource.getName())) {
+							if (readMaven(jarEntryResource, entry, project)) {
+								return;
+							}
+						}
+						else if ("MANIFEST.MF".equals(jarEntryResource.getName())) {
+							version = readManifest(jarEntryResource, entry, project);
+						}
+					}
+				}
+			}
+		}
+		
+		if (version != null) {
+			for (ProductInfo info : getProducts()) {
+				String typeName = info.getTypeName();
+				String packageName = "";
+				if (typeName != null) {
+					int i = typeName.lastIndexOf('.');
+					if (i > 0) {
+						packageName = typeName.substring(0, i);
+						typeName = typeName.substring(i + 1);
+					}
+					IPackageFragment packageFragment = entry.getPackageFragment(packageName);
+					if (packageFragment.exists()) {
+						if (packageFragment.getClassFile(typeName + ".class").exists()) {
+							recordEvent(entry, info.getGroupId(), info.getArtifactId(), version, source.getProject()
+									.getName());
+							return;
+						}
+					}
+				}
+			}
+		}
+		noMatches.add(entry.getElementName());
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -85,9 +154,10 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				
 				// Before we start get all projects and record libraries
 				for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-					if (JdtUtils.isJavaProject(project)) {
+					if (JdtUtils.isJavaProject(project) && project.isOpen() && project.isAccessible()) {
 						projectClasspathChanged(JdtUtils.getJavaProject(project));
 					}
 				}
@@ -112,26 +182,16 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 		try {
 			IPackageFragmentRoot[] classpath = source.getPackageFragmentRoots();
 			for (IPackageFragmentRoot entry : classpath) {
-				for (Object nonJavaResource : entry.getNonJavaResources()) {
-					if (nonJavaResource instanceof JarEntryDirectory) {
-						JarEntryDirectory directory = ((JarEntryDirectory) nonJavaResource);
-						if (directory != null && "META-INF".equals(directory.getName())) {
-							for (IJarEntryResource jarEntryResource : directory.getChildren()) {
-								if ("MANIFEST.MF".equals(jarEntryResource.getName())) {
-									readManifest(jarEntryResource);
-								}
-							}
-						}
-					}
-				}
+				readPackageFragmentRoot(source, entry);
 			}
 		}
-		catch (JavaModelException e) {
-			// TODO CD report exception
+		catch (Exception e) {
+			// intentionally only onto the console
+			e.printStackTrace();
 		}
 	}
 
-	private void readManifest(IJarEntryResource jarEntryResource) {
+	private String readManifest(IJarEntryResource jarEntryResource, IPackageFragmentRoot entry, String projectId) {
 		InputStream is = null;
 		try {
 			Manifest manifest = new Manifest();
@@ -139,9 +199,10 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 			manifest.read(is);
 			Attributes attr = manifest.getMainAttributes();
 			if (attr != null) {
-				String symbolicName = attr.getValue(Constants.BUNDLE_SYMBOLICNAME);
 				String version = attr.getValue(Constants.BUNDLE_VERSION);
-				recordEvent(symbolicName, version);
+				if (version != null) {
+					return version;
+				}
 			}
 		}
 		catch (Exception e) {
@@ -156,12 +217,78 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 				}
 			}
 		}
+		return null;
 	}
 
-	private void recordEvent(String symbolicName, String version) {
-		// Due to privacy considerations we only record libraries from us
-		if (manager != null && symbolicName != null && symbolicName.startsWith("org.springframework")) {
-			manager.registerProductUse(symbolicName, version);
+	private boolean readMaven(IJarEntryResource jarEntryResource, IPackageFragmentRoot root, String name) {
+		if (jarEntryResource.getName().equals("pom.properties")) {
+			InputStream is = null;
+			try {
+				Properties pom = new Properties();
+				is = jarEntryResource.getContents();
+				pom.load(is);
+				String version = pom.getProperty("version");
+				String groupId = pom.getProperty("groupId");
+				String artifactId = pom.getProperty("artifactId");
+				if (version != null && groupId != null && artifactId != null) {
+					recordEvent(root, groupId, artifactId, version, name);
+					return true;
+				}
+			}
+			catch (Exception e) {
+			}
+			finally {
+				if (is != null) {
+					try {
+						is.close();
+					}
+					catch (IOException e) {
+					}
+				}
+			}
+		}
+		else {
+			for (IJarEntryResource resource : jarEntryResource.getChildren()) {
+				if (readMaven(resource, root, name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private void recordEvent(IPackageFragmentRoot packageFragment, String groupId, String artifactId, String version,
+			String name) {
+		for (ProductInfo info : getProducts()) {
+			if (info.getArtifactId().equals(artifactId) && info.getGroupId().equals(groupId)) {
+				manager.registerProductUse(info.getProductName(), version, name);
+				matches.put(packageFragment.getElementName(), new ProductMatch(info, version));
+				return;
+			}
+		}
+		noMatches.add(packageFragment.getElementName());
+	}
+
+	private List<ProductInfo> getProducts() {
+		DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
+		return DetectedProducts.getProducts();
+	}
+	
+	private static class ProductMatch {
+		private final ProductInfo info;
+		private final String version;
+		
+		public ProductMatch(ProductInfo info, String version) {
+			this.info = info;
+			this.version = version;
+		}
+
+		public ProductInfo getInfo() {
+			return info;
+		}
+
+		public String getVersion() {
+			return version;
 		}
 	}
 

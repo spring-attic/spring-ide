@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 /**
  * Helper class that captures open and activate events for Eclipse Views, Editors and Perspectives.
  * @author Christian Dupuis
- * @since 2.5.0
+ * @since 2.5.2
  */
 public class PartUsageMonitor implements IUsageMonitor {
 

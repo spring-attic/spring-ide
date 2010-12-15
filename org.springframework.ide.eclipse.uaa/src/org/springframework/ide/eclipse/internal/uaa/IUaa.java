@@ -10,26 +10,26 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa;
 
+import java.net.URL;
+
 /**
- * Implementations of this interface represent monitors that capture usage data within Eclipse.
- * <p>
- * Note: product and feature usage should be reported against the {@link UaaManager} instance provided with to the
- * {@link #startMonitoring(UaaManager)} method.
  * @author Christian Dupuis
  * @since 2.5.2
  */
-public interface IUsageMonitor {
+public interface IUaa {
 
-	/**
-	 * Called to notify that monitoring should begin now.
-	 */
-	void startMonitoring(UaaManager manager);
+	boolean canOpenUrl(URL url);
 
-	/**
-	 * Called to notify that monitoring should be stopped.
-	 * <p>
-	 * All registered listeners and other resources <b>must</b> be clean when this method is being called.
-	 */
-	void stopMonitoring();
+	boolean canOpenVMwareUrls();
+	
+	void clear();
+	
+	int getPrivacyLevel();
 
+	String getUserAgentContents(String userAgentHeader);
+	
+	String getUserAgentHeader();
+	
+	void setPrivacyLevel(int level);
+	
 }

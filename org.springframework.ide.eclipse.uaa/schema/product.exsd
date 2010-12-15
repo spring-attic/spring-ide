@@ -2,9 +2,9 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="com.springsource.sts.update" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
+      <appinfo>
          <meta.schema plugin="com.springsource.sts.update" id="product" name="Product Contribution"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 This extension-point is used to specify one or more content provider that are used to handle Working Sets with the Spring Explorer
@@ -13,9 +13,9 @@ This extension-point is used to specify one or more content provider that are us
 
    <element name="extension">
       <annotation>
-         <appInfo>
+         <appinfo>
             <meta.element />
-         </appInfo>
+         </appinfo>
       </annotation>
       <complexType>
          <sequence>
@@ -40,9 +40,9 @@ This extension-point is used to specify one or more content provider that are us
                <documentation>
                   an optional name
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute translatable="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -58,9 +58,23 @@ This extension-point is used to specify one or more content provider that are us
                <documentation>
                   
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="identifier"/>
-               </appInfo>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="source-control-identifier" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="root-plugin" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>
@@ -73,9 +87,9 @@ This extension-point is used to specify one or more content provider that are us
                <documentation>
                   
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="identifier"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -91,27 +105,27 @@ This extension-point is used to specify one or more content provider that are us
                <documentation>
                   
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="identifier"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="since"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          2.0
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt;
 &lt;extension
@@ -129,9 +143,9 @@ This extension-point is used to specify one or more content provider that are us
 
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="implementation"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;p&gt;
 This plugin itself does not have any predefined content contributions
@@ -139,9 +153,9 @@ This plugin itself does not have any predefined content contributions
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="copyright"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt;
 Copyright (c) 2005, 2007 Spring IDE Developers

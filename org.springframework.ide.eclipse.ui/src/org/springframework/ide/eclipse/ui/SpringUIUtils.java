@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Calendar;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -61,7 +64,12 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.internal.browser.WebBrowserPreference;
+import org.eclipse.ui.internal.browser.WorkbenchBrowserSupport;
 import org.eclipse.ui.internal.dialogs.PropertyDialog;
 import org.eclipse.ui.internal.dialogs.PropertyPageContributorManager;
 import org.eclipse.ui.internal.dialogs.PropertyPageManager;
@@ -493,4 +501,54 @@ public final class SpringUIUtils {
 		}
 		return false;
 	}
+	
+	public static void openUrl(String location) {
+		openUrl(location, 0);
+	}
+
+	private static void openUrl(String location, int customFlags) {
+		try {
+			URL url = null;
+
+			if (location != null) {
+				url = new URL(location);
+			}
+			if (WebBrowserPreference.getBrowserChoice() == WebBrowserPreference.EXTERNAL) {
+				try {
+					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench()
+							.getBrowserSupport();
+					support.getExternalBrowser().openURL(url);
+				}
+				catch (Exception e) {
+				}
+			}
+			else {
+				IWebBrowser browser = null;
+				int flags = customFlags;
+				if (WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()) {
+					flags |= IWorkbenchBrowserSupport.AS_EDITOR
+							| IWorkbenchBrowserSupport.LOCATION_BAR
+							| IWorkbenchBrowserSupport.NAVIGATION_BAR;
+				}
+				else {
+					flags |= IWorkbenchBrowserSupport.AS_EXTERNAL
+							| IWorkbenchBrowserSupport.LOCATION_BAR
+							| IWorkbenchBrowserSupport.NAVIGATION_BAR;
+				}
+
+				String generatedId = SpringUIPlugin.PLUGIN_ID + "-"
+						+ Calendar.getInstance().getTimeInMillis();
+				browser = WorkbenchBrowserSupport.getInstance().createBrowser(flags, generatedId,
+						null, null);
+				browser.openURL(url);
+			}
+		}
+		catch (PartInitException e) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Browser init error",
+					"Browser could not be initiated");
+		}
+		catch (MalformedURLException e) {
+		}
+	}
+
 }

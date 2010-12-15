@@ -19,11 +19,10 @@ import org.eclipse.core.runtime.IRegistryChangeEvent;
 import org.eclipse.core.runtime.IRegistryChangeListener;
 import org.eclipse.core.runtime.Platform;
 
-
 /**
  * Helper class that captures executions of Eclipse commands.
  * @author Christian Dupuis
- * @since 2.5.0
+ * @since 2.5.2
  */
 public class ExtensionIdToBundleMapper {
 

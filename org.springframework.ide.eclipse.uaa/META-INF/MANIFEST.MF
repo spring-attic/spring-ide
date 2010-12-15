@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.uaa;singleton:=true
-Bundle-Version: 2.3.0.qualifier
+Bundle-Version: 2.5.2.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.internal.uaa.UaaPlugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
@@ -15,14 +15,18 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ecf,
  org.springframework.ide.eclipse.core,
  org.eclipse.jdt.core,
- org.eclipse.equinox.p2.core,
- org.eclipse.equinox.p2.engine,
- org.eclipse.equinox.p2.metadata,
- org.eclipse.equinox.p2.director
+ org.eclipse.equinox.p2.repository,
+ org.eclipse.wst.server.core,
+ org.springframework.ide.eclipse.ui
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Eclipse-LazyStart: true
 Bundle-ClassPath: lib/org.springframework.roo.wrapping.protobuf-java-lite-2.3.0.0001.jar,
- lib/org.springframework.uaa.client-1.0.0.M1.jar,
+ lib/org.springframework.uaa.client-1.0.0.M4.jar,
+ lib/json_simple-1.1.jar,
  .
 Bundle-Localization: plugin
+Export-Package: org.springframework.ide.eclipse.internal.uaa,
+ org.springframework.ide.eclipse.internal.uaa.filetransfer,
+ org.springframework.ide.eclipse.internal.uaa.monitor,
+ org.springframework.ide.eclipse.internal.uaa.preferences

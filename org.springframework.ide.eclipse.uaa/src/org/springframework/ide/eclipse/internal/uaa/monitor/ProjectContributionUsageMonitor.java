@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.internal.uaa.UaaManager;
  * {@link IProjectContributionEventListener} implementation that captures executions of {@link IProjectBuilder}s and
  * {@link IValidator}s.
  * @author Christian Dupuis
- * @since 2.5.0
+ * @since 2.5.2
  */
 public class ProjectContributionUsageMonitor extends ProjectContributionEventListenerAdapter implements IUsageMonitor {
 

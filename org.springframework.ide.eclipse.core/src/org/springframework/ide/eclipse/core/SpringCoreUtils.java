@@ -317,12 +317,21 @@ public final class SpringCoreUtils {
 	}
 
 	public static DocumentBuilder getDocumentBuilder() {
+		try {
+			return getDocumentBuilderFactory().newDocumentBuilder();
+		}
+		catch (Exception e) {
+			SpringCore.log(e);
+		}
+		return null;
+	}
+
+	public static DocumentBuilderFactory getDocumentBuilderFactory() {
 		if (!DOCUMENT_BUILDER_ERROR) {
 			try {
 				// this might fail on IBM J9; therefore trying only once and then falling back to
 				// OSGi service reference as it should be
-				DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
-				return xmlFact.newDocumentBuilder();
+				return DocumentBuilderFactory.newInstance();
 			}
 			catch (Exception e) {
 				SpringCore.log(new Status(IStatus.INFO, SpringCore.PLUGIN_ID,
@@ -336,7 +345,7 @@ public final class SpringCoreUtils {
 		if (reference != null) {
 			try {
 				synchronized (DOCUMENT_BUILDER_LOCK) {
-					return ((DocumentBuilderFactory) bundleContext.getService(reference)).newDocumentBuilder();
+					return (DocumentBuilderFactory) bundleContext.getService(reference);
 				}
 			}
 			catch (Exception e) {

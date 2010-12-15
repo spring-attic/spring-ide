@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.internal.uaa.filetransfer;
 
 import java.io.IOException;
+import java.net.URL;
 
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -23,13 +24,15 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.eclipse.ecf.filetransfer.service.IRetrieveFileTransfer;
 import org.eclipse.ecf.filetransfer.service.IRetrieveFileTransferFactory;
 import org.eclipse.ecf.provider.filetransfer.httpclient.HttpClientRetrieveFileTransfer;
+import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
+import org.springframework.uaa.client.UrlHelper;
 
 /**
  * ECF {@link IRetrieveFileTransferFactory} implementation that adds a "User-Agent" header when requesting resources
  * <code>springide.org</code>, <code>springsource.org</code> and <code>springsource.com</code>.
  * @author Christian Dupuis
- * @since 2.5.0
+ * @since 2.5.2
  */
 public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFileTransferFactory {
 
@@ -50,7 +53,7 @@ public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFi
 		@Override
 		public int executeMethod(HostConfiguration originalHostConfig, HttpMethod method, HttpState state)
 				throws IOException, HttpException {
-			// Check the url to see if we want to communicate home
+
 			HostConfiguration hostconfig = originalHostConfig;
 			HostConfiguration defaulthostconfig = getHostConfiguration();
 			if (hostconfig == null) {
@@ -58,19 +61,41 @@ public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFi
 			}
 			URI uri = method.getURI();
 			if (hostconfig == defaulthostconfig || uri.isAbsoluteURI()) {
-				// make a deep copy of the host defaults
+				// Make a deep copy of the host defaults
 				hostconfig = (HostConfiguration) hostconfig.clone();
 				if (uri.isAbsoluteURI()) {
 					hostconfig.setHost(uri);
 				}
 			}
 
-			String url = hostconfig.getHostURL();
-			if (url.endsWith("springsource.org") || url.endsWith("springsource.com") || url.endsWith("springide.org")) {
-				getParams().setParameter(HttpClientParams.USER_AGENT, UaaPlugin.getDefault().getUserAgentHeader());
-			}
+			URL url = new URL(hostconfig.getHostURL());
+			IUaa uaa = UaaPlugin.getUAA();
 
-			return super.executeMethod(originalHostConfig, method, state);
+			// Check if we are allowed to open the VMware domain by privacy level of UAA
+			if (uaa.canOpenUrl(url)) {
+
+				boolean useUaaHeader = false;
+				// Add UAA header to VMware controlled domains only
+				if (UrlHelper.isUaaEnabledHost(url)) {
+					getParams().setParameter(HttpClientParams.USER_AGENT, uaa.getUserAgentHeader());
+					useUaaHeader = true;
+				}
+
+				int responseCode = super.executeMethod(originalHostConfig, method, state);
+
+				// Clear UAA internal caches to prevent growing
+				if (useUaaHeader && responseCode == 200) {
+					uaa.clear();
+				}
+
+				return responseCode;
+			}
+			
+			// If we get to here throw exception
+			throw new IOException(
+					String.format(
+							"Spring UAA prevented access to VMware-controlled domain '%s'. More info at http://www.springsource.org/uaa/faq",
+							url.getHost()));
 		}
 	}
 
