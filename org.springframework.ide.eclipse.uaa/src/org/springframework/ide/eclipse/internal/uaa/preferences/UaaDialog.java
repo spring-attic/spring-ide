@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.uaa.UaaPlugin;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**

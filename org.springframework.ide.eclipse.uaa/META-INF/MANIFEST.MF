@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.uaa;singleton:=true
 Bundle-Version: 2.5.2.qualifier
-Bundle-Activator: org.springframework.ide.eclipse.internal.uaa.UaaPlugin
+Bundle-Activator: org.springframework.ide.eclipse.uaa.UaaPlugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -26,7 +26,4 @@ Bundle-ClassPath: lib/org.springframework.roo.wrapping.protobuf-java-lite-2.3.0.
  lib/json_simple-1.1.jar,
  .
 Bundle-Localization: plugin
-Export-Package: org.springframework.ide.eclipse.internal.uaa,
- org.springframework.ide.eclipse.internal.uaa.filetransfer,
- org.springframework.ide.eclipse.internal.uaa.monitor,
- org.springframework.ide.eclipse.internal.uaa.preferences
+Export-Package: org.springframework.ide.eclipse.uaa

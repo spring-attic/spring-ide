@@ -27,8 +27,8 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.springframework.ide.eclipse.internal.uaa.IUaa;
-import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.uaa.IUaa;
+import org.springframework.ide.eclipse.uaa.UaaPlugin;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**

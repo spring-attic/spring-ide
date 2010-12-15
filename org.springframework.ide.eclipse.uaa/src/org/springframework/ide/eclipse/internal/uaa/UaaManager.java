@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Platform;
 import org.json.simple.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
+import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.UrlHelper;
 import org.springframework.uaa.client.VersionHelper;

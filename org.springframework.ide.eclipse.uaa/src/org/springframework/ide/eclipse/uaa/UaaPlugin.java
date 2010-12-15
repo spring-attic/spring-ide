@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.internal.uaa;
+package org.springframework.ide.eclipse.uaa;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +25,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
+import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 import org.springframework.ide.eclipse.internal.uaa.monitor.CommandUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.LibraryUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.PartUsageMonitor;

@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.internal.uaa;
+package org.springframework.ide.eclipse.uaa;
 
 import java.net.URL;
 

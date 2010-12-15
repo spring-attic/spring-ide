@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa;
 
+import org.springframework.ide.eclipse.uaa.IUaa;
+
 /**
  * Implementations of this interface represent monitors that capture usage data within Eclipse.
  * <p>

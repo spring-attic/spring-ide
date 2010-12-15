@@ -16,9 +16,9 @@ import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.json.simple.JSONObject;
-import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.UaaManager;
+import org.springframework.ide.eclipse.uaa.IUaa;
 
 /**
  * {@link IUsageMonitor} that tracks usages of WTP server instances.

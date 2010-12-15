@@ -21,8 +21,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
+import org.springframework.ide.eclipse.uaa.IUaa;
 
 /**
  * Helper class that captures open and activate events for Eclipse Views, Editors and Perspectives.

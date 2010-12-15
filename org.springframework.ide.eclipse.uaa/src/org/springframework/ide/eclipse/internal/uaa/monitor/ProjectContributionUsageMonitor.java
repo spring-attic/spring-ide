@@ -21,8 +21,8 @@ import org.springframework.ide.eclipse.core.project.IProjectContributionEventLis
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectContributionEventListenerAdapter;
-import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
+import org.springframework.ide.eclipse.uaa.IUaa;
 
 /**
  * {@link IProjectContributionEventListener} implementation that captures executions of {@link IProjectBuilder}s and

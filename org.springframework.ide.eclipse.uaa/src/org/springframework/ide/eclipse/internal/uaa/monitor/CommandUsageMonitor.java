@@ -16,8 +16,8 @@ import org.eclipse.core.commands.IExecutionListener;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
-import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
+import org.springframework.ide.eclipse.uaa.IUaa;
 
 /**
  * Helper class that captures executions of Eclipse commands.

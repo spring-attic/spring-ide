@@ -24,8 +24,8 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.eclipse.ecf.filetransfer.service.IRetrieveFileTransfer;
 import org.eclipse.ecf.filetransfer.service.IRetrieveFileTransferFactory;
 import org.eclipse.ecf.provider.filetransfer.httpclient.HttpClientRetrieveFileTransfer;
-import org.springframework.ide.eclipse.internal.uaa.IUaa;
-import org.springframework.ide.eclipse.internal.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.uaa.IUaa;
+import org.springframework.ide.eclipse.uaa.UaaPlugin;
 import org.springframework.uaa.client.UrlHelper;
 
 /**

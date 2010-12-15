@@ -41,8 +41,8 @@ import org.eclipse.jdt.internal.core.JarEntryDirectory;
 import org.osgi.framework.Constants;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.internal.uaa.IUaa;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
+import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.uaa.client.DetectedProducts;
 import org.springframework.uaa.client.DetectedProducts.ProductInfo;
 
