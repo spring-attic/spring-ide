@@ -33,6 +33,7 @@ import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
+import org.eclipse.wst.xml.core.internal.document.TextImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -384,6 +385,7 @@ public class BeansRefactoringChangeUtils {
 		String oldName = (element instanceof IType) ? ((IType) element).getFullyQualifiedName('$') : element
 				.getElementName();
 
+		// creating replace edits for attributes
 		NamedNodeMap attributes = node.getAttributes();
 		if (attributes != null) {
 			for (int i = 0; i < attributes.getLength(); i++) {
@@ -391,6 +393,19 @@ public class BeansRefactoringChangeUtils {
 				if (oldName.equals(attribute) || isGoodMatch(attribute, oldName, element instanceof IPackageFragment)) {
 					AttrImpl attr = (AttrImpl) attributes.getNamedItem(attributes.item(i).getNodeName());
 					int offset = attr.getValueRegionStartOffset() + 1;
+					if (offset >= 0) {
+						multiEdit.addChild(new ReplaceEdit(offset, oldName.length(), newName));
+					}
+				}
+			}
+		}
+		
+		// creating replace edits for value strings
+		if (node instanceof TextImpl) {
+			String value = node.getNodeValue();
+			if (value != null) {
+				if (oldName.equals(value) || isGoodMatch(value, oldName, element instanceof IPackageFragment)) {
+					int offset = ((TextImpl)node).getStartOffset();
 					if (offset >= 0) {
 						multiEdit.addChild(new ReplaceEdit(offset, oldName.length(), newName));
 					}
