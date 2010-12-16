@@ -260,9 +260,14 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		else if (declineButton.getSelection()) {
 			uaa.setPrivacyLevel(IUaa.DECLINE_TOU);
 		}
+		if (undecidedButton != null) {
+			undecidedButton.setEnabled(false);
+		}
+		
 		decodedUserAgentText.setText(uaa.getUsageDataFromUserAgentHeader(uaa.getUserAgentHeader()));
 		encodedUserAgentText.setText(uaa.getUserAgentHeader());
 		decodeButton.setEnabled(false);
+		
 	}
 
 }
