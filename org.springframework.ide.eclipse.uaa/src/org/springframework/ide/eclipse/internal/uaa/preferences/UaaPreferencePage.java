@@ -54,6 +54,8 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 
 	private Button declineButton;
 
+	private Button undecidedButton;
+
 	public void init(IWorkbench workbench) {
 	}
 
@@ -132,14 +134,25 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			}
 		});
 		declineButton = new Button(colorComposite2, SWT.RADIO);
-		declineButton.setText("Decline terms of use (this will disable all features that require access to VMware domains)");
+		declineButton
+				.setText("Decline terms of use (this will disable all features that require access to VMware domains)");
 		declineButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectionUpdated();
 			}
 		});
-
+		if (uaa.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
+			undecidedButton = new Button(colorComposite2, SWT.RADIO);
+			undecidedButton.setText("Undecided");
+			undecidedButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					selectionUpdated();
+				}
+			});
+			undecidedButton.setSelection(true);
+		}
 		int level = uaa.getPrivacyLevel();
 		if (level == IUaa.FULL_DATA) {
 			fullButton.setSelection(true);
