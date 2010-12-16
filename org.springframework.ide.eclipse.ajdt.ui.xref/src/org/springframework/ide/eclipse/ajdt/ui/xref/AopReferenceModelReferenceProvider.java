@@ -22,11 +22,12 @@ import java.util.Set;
 
 import org.eclipse.contribution.xref.core.IXReference;
 import org.eclipse.contribution.xref.core.IXReferenceProvider;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
+import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 
 /**
  * @author Christian Dupuis
@@ -113,12 +114,12 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 	 * @see org.eclipse.contribution.xref.core.IXReferenceProvider#getXReferences(java.lang.Object)
 	 */
 	@SuppressWarnings("unchecked")
-	public Collection<XRef> getXReferences(Object o, List checkedRelNames) {
+	public Collection<IXReference> getXReferences(Object o, List checkedRelNames) {
 		if (!(o instanceof IJavaElement))
 			return Collections.EMPTY_SET;
 
 		IJavaElement je = (IJavaElement) o;
-		List<XRef> xrefs = new ArrayList<XRef>();
+		List<IXReference> xrefs = new ArrayList<IXReference>();
 
 		IAopReferenceModel model = org.springframework.ide.eclipse.aop.core.Activator
 				.getModel();
@@ -139,7 +140,7 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 					}
 					else {
 						ref = new XRef("advises",
-								new HashSet<AopReferenceModelNode>());
+								new HashSet<IAdaptable>());
 						refsDeclaredOn.put(reference.getSource(), ref);
 						xrefs.add(ref);
 					}
@@ -158,7 +159,7 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 					}
 					else {
 						ref = new XRef("advised by",
-								new HashSet<AopReferenceModelNode>());
+								new HashSet<IAdaptable>());
 						refsAspectDeclarations.put(reference.getTarget(), ref);
 						xrefs.add(ref);
 					}
@@ -179,7 +180,7 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 					}
 					else {
 						ref = new XRef("declared on",
-								new HashSet<AopReferenceModelNode>());
+								new HashSet<IAdaptable>());
 						refsAdvises.put(reference.getSource(), ref);
 						xrefs.add(ref);
 					}
@@ -198,7 +199,7 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 					}
 					else {
 						ref = new XRef("aspect declarations",
-								new HashSet<AopReferenceModelNode>());
+								new HashSet<IAdaptable>());
 						refsAdvised.put(reference.getTarget(), ref);
 						xrefs.add(ref);
 					}
@@ -224,9 +225,9 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 
 		private String name;
 
-		private Set<AopReferenceModelNode> associates;
+		private Set<IAdaptable> associates;
 
-		public XRef(String name, Set<AopReferenceModelNode> associates) {
+		public XRef(String name, Set<IAdaptable> associates) {
 			this.name = name;
 			this.associates = associates;
 		}
@@ -235,11 +236,11 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 			return name;
 		}
 
-		public Iterator<AopReferenceModelNode> getAssociates() {
+		public Iterator<IAdaptable> getAssociates() {
 			return associates.iterator();
 		}
 
-		public Set<AopReferenceModelNode> getAssociatesList() {
+		public Set<IAdaptable> getAssociatesList() {
 			return associates;
 		}
 	}
