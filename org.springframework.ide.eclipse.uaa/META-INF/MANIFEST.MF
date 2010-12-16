@@ -21,8 +21,8 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Eclipse-LazyStart: true
-Bundle-ClassPath: lib/org.springframework.roo.wrapping.protobuf-java-lite-2.3.0.0001.jar,
- lib/org.springframework.uaa.client-1.0.0.M4.jar,
+Bundle-ClassPath: lib/org.springframework.uaa.client-1.0.0.RELEASE.jar,
+ lib/org.springframework.roo.wrapping.protobuf-java-lite-2.3.0.0001.jar,
  lib/json_simple-1.1.jar,
  .
 Bundle-Localization: plugin
