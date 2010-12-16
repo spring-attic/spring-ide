@@ -30,9 +30,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JarEntryResource;
+import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -743,7 +744,7 @@ public class BeansEditorUtils {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		if (baselocation != null) {
 			IPath path = new Path(baselocation);
-			if (path.segmentCount() > 1) {
+			if (root.exists(path) && path.segmentCount() > 1) {
 				resource = root.getFile(path);
 			}
 			else {
@@ -757,8 +758,9 @@ public class BeansEditorUtils {
 					resource = (IFile) ((ZipEntryEditorInput) input).getAdapter(IFile.class);
 				}
 				else if (input instanceof JarEntryEditorInput) {
-					resource = (IFile) ((JarEntryResource) ((JarEntryEditorInput) input).getStorage())
-							.getPackageFragmentRoot().getResource();
+					JarEntryFile jarFile = (JarEntryFile) ((JarEntryEditorInput) input).getStorage();
+					IPackageFragmentRoot jarPackageFragmentRoot = jarFile.getPackageFragmentRoot();
+					resource = jarPackageFragmentRoot.getJavaProject().getProject().getFile(".project");
 				}
 			}
 		}

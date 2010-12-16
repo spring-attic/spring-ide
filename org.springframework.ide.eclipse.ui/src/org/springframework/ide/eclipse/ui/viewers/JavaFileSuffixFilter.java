@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,36 +14,37 @@ import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JarEntryDirectory;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
- * Viewer filter for file selection dialogs. The filter is not case sensitive.
- * Java fragments and folders are only shown if, searched recursively, contain at
- * least one file name ends with one of specified file suffixes.
+ * Viewer filter for file selection dialogs. The filter is not case sensitive. Java fragments and folders are only shown
+ * if, searched recursively, contain at least one file name ends with one of specified file suffixes.
  * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
+@SuppressWarnings("restriction")
 public class JavaFileSuffixFilter extends FileSuffixFilter {
 
 	/**
 	 * Creates new instance of filter.
 	 * 
-	 * @param allowedFileExtensions list of file extension the filter has to
-	 *			recognize or <code>null</code> if all files are allowed 
+	 * @param allowedFileExtensions list of file extension the filter has to recognize or <code>null</code> if all files
+	 * are allowed
 	 */
 	public JavaFileSuffixFilter(String[] allowedFileExtensions) {
 		super(allowedFileExtensions);
 	}
 
 	public JavaFileSuffixFilter(Collection<String> allowedFileExtensions) {
-		super(allowedFileExtensions.toArray(new String[allowedFileExtensions
-				.size()]));
+		super(allowedFileExtensions.toArray(new String[allowedFileExtensions.size()]));
 	}
 
 	public JavaFileSuffixFilter() {
@@ -67,11 +68,13 @@ public class JavaFileSuffixFilter extends FileSuffixFilter {
 						return true;
 					}
 				}
-			} catch (JavaModelException e) {
+			}
+			catch (JavaModelException e) {
 				SpringUIPlugin.log(e.getStatus());
 			}
 			return false;
-		} else if (element instanceof IPackageFragment) {
+		}
+		else if (element instanceof IPackageFragment) {
 			IPackageFragment fragment = (IPackageFragment) element;
 			try {
 				for (IJavaElement child : fragment.getChildren()) {
@@ -86,11 +89,21 @@ public class JavaFileSuffixFilter extends FileSuffixFilter {
 						return true;
 					}
 				}
-			} catch (JavaModelException e) {
+			}
+			catch (JavaModelException e) {
 				SpringUIPlugin.log(e.getStatus());
 			}
 			return false;
-		} else if (element instanceof IStorage && !(element instanceof IFile)) {
+		}
+		else if (element instanceof JarEntryDirectory) {
+			for (IJarEntryResource child : ((JarEntryDirectory) element).getChildren()) {
+				// recursive! Only show containers that contain a configs
+				if (select(viewer, parent, child)) {
+					return true;
+				}
+			}
+		}
+		else if (element instanceof IStorage && !(element instanceof IFile)) {
 			return hasAllowedFileSuffix(((IStorage) element).getFullPath());
 		}
 		return super.select(viewer, parent, element);

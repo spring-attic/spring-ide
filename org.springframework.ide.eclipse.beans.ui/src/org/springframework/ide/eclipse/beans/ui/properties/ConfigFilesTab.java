@@ -625,6 +625,11 @@ public class ConfigFilesTab {
 
 		@Override
 		protected boolean selectFile(IFile element) {
+			
+			if ("pom.xml".equals(element.getName())) {
+				return false;
+			}
+			
 			IBeansProject project = BeansCorePlugin.getModel().getProject(element.getProject());
 			if (project != null) {
 				IBeansConfig beansConfig = project.getConfig(element);
@@ -635,6 +640,12 @@ public class ConfigFilesTab {
 	}
 
 	private class LabelProvider extends JavaElementLabelProvider implements IColorProvider {
+		
+		public LabelProvider() {
+			super(JavaElementLabelProvider.SHOW_BASICS
+					| JavaElementLabelProvider.SHOW_OVERLAY_ICONS
+					| JavaElementLabelProvider.SHOW_SMALL_ICONS);
+		}
 
 		@Override
 		public String getText(Object element) {

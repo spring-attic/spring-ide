@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
- * Viewer filter for file selection dialogs. The filter is not case sensitive.
- * Folders are only shown if, searched recursively, contain at least one file
- * which has one of the specified file suffixes.
+ * Viewer filter for file selection dialogs. The filter is not case sensitive. Folders are only shown if, searched
+ * recursively, contain at least one file which has one of the specified file suffixes.
  * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
@@ -36,16 +35,15 @@ public class FileSuffixFilter extends ViewerFilter {
 	/**
 	 * Creates new instance of filter.
 	 * 
-	 * @param allowedFileSuffixes list of file suffixes the filter has to
-	 * recognize or <code>null</code> if all files are allowed
+	 * @param allowedFileSuffixes list of file suffixes the filter has to recognize or <code>null</code> if all files
+	 * are allowed
 	 */
 	public FileSuffixFilter(String[] allowedFileSuffixes) {
 		this.allowedFileSuffixes = allowedFileSuffixes;
 	}
 
 	public FileSuffixFilter(Collection<String> allowedFileSuffixes) {
-		this(allowedFileSuffixes
-				.toArray(new String[allowedFileSuffixes.size()]));
+		this(allowedFileSuffixes.toArray(new String[allowedFileSuffixes.size()]));
 	}
 
 	public FileSuffixFilter() {
@@ -55,15 +53,16 @@ public class FileSuffixFilter extends ViewerFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IFile) {
-			return hasAllowedFileSuffix(((IFile) element).getFullPath())
-					&& selectFile((IFile) element);
+			return hasAllowedFileSuffix(((IFile) element).getFullPath()) && selectFile((IFile) element);
 		}
 		else if (element instanceof IContainer) { // IProject, IFolder
 			try {
-				for (IResource resource : ((IContainer) element).members()) {
-					// recursive! Only show containers that contain a configs
-					if (select(viewer, parent, resource)) {
-						return true;
+				if (!".settings".equals(((IContainer) element).getName())) {
+					for (IResource resource : ((IContainer) element).members()) {
+						// recursive! Only show containers that contain a configs
+						if (select(viewer, parent, resource)) {
+							return true;
+						}
 					}
 				}
 			}
@@ -75,8 +74,7 @@ public class FileSuffixFilter extends ViewerFilter {
 	}
 
 	/**
-	 * Template method to be overridden by subclasses to post process file
-	 * selecting.
+	 * Template method to be overridden by subclasses to post process file selecting.
 	 */
 	protected boolean selectFile(IFile element) {
 		return true;
