@@ -144,7 +144,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		});
 		if (uaa.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
 			undecidedButton = new Button(colorComposite2, SWT.RADIO);
-			undecidedButton.setText("Undecided");
+			undecidedButton.setText("Undecided on terms of use");
 			undecidedButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
