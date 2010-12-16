@@ -242,7 +242,9 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 	 * {@inheritDoc}
 	 */
 	public void stopMonitoring() {
-		JavaCore.removeElementChangedListener(changedListener);
+		if (changedListener != null) {
+			JavaCore.removeElementChangedListener(changedListener);
+		}
 	}
 
 	private void projectClasspathChanged(IJavaProject source) {

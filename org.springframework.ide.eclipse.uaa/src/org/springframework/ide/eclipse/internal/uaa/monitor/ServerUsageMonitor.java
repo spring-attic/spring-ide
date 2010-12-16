@@ -60,10 +60,14 @@ public class ServerUsageMonitor implements IUsageMonitor {
 	 * {@inheritDoc}
 	 */
 	public void stopMonitoring() {
-		ServerCore.removeServerLifecycleListener(serverLifecycleListener);
+		if (serverLifecycleListener != null) {
+			ServerCore.removeServerLifecycleListener(serverLifecycleListener);
+		}
 
-		for (IServer server : ServerCore.getServers()) {
-			server.removeServerListener(serverListener);
+		if (serverListener != null) {
+			for (IServer server : ServerCore.getServers()) {
+				server.removeServerListener(serverListener);
+			}
 		}
 	}
 

@@ -266,11 +266,11 @@ public class UaaManager implements IUaa {
 	}
 
 	/**
-	 * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported products and features
-	 * until it can be flushed into UAA's internal storage.  
+	 * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported products and features until it can be
+	 * flushed into UAA's internal storage.
 	 */
 	private class CachingUaaServiceImpl extends UaaServiceImpl {
-		
+
 		/** Internal cache of reported features */
 		private List<ReportedFeature> features = new ArrayList<ReportedFeature>();
 
@@ -453,7 +453,13 @@ public class UaaManager implements IUaa {
 
 		private Map<String, String> plugins;
 
+		private String rootPlugin;
+
 		protected Product product;
+
+		private String productId;
+
+		private String sourceCodeIdentifier;
 
 		public ExtensionProductDescriptor(IConfigurationElement element) {
 			init(element);
@@ -461,6 +467,13 @@ public class UaaManager implements IUaa {
 
 		public boolean registerFeatureUseIfMatch(String usedPlugin, String featureJson) {
 			if (plugins.containsKey(usedPlugin)) {
+				// If we initially faild to create the product that is probably because it wasn't installed when the
+				// workbench started; but now it is so try again
+				if (product == null) {
+					buildProduct();
+				}
+
+				// Check if the product is already registered; if not register it before we capture feature usage
 				if (!this.registered) {
 					service.registerProductUsage(product);
 					this.registered = true;
@@ -482,37 +495,44 @@ public class UaaManager implements IUaa {
 		}
 
 		private void init(IConfigurationElement element) {
-			this.plugins = new HashMap<String, String>();
-			String productId = element.getAttribute("id");
-			String sourceCodeIdentifier = element.getAttribute("source-control-identifier");
+			productId = element.getAttribute("id");
+			sourceCodeIdentifier = element.getAttribute("source-control-identifier");
 
-			String rootPlugin = element.getNamespaceIdentifier();
+			rootPlugin = element.getNamespaceIdentifier();
 			if (element.getAttribute("root-plugin") != null) {
 				rootPlugin = element.getAttribute("root-plugin");
 			}
 
+			plugins = new HashMap<String, String>();
 			for (IConfigurationElement featureElement : element.getChildren("feature")) {
 				String feature = featureElement.getAttribute("id");
 				for (IConfigurationElement pluginElement : featureElement.getChildren("plugin")) {
 					plugins.put(pluginElement.getAttribute("id"), feature);
 				}
 			}
+			
+			// Try to create the product; we'll try again later if this one fails
+			buildProduct();
+		}
 
+		private void buildProduct() {
 			Bundle bundle = Platform.getBundle(rootPlugin);
-			Version version = bundle.getVersion();
+			if (bundle != null) {
+				Version version = bundle.getVersion();
 
-			Product.Builder b = Product.newBuilder();
-			b.setName(productId);
-			b.setMajorVersion(version.getMajor());
-			b.setMinorVersion(version.getMinor());
-			b.setPatchVersion(version.getMicro());
-			b.setReleaseQualifier(version.getQualifier());
+				Product.Builder b = Product.newBuilder();
+				b.setName(productId);
+				b.setMajorVersion(version.getMajor());
+				b.setMinorVersion(version.getMinor());
+				b.setPatchVersion(version.getMicro());
+				b.setReleaseQualifier(version.getQualifier());
 
-			if (sourceCodeIdentifier != null && sourceCodeIdentifier.length() > 0) {
-				b.setSourceControlIdentifier(sourceCodeIdentifier);
+				if (sourceCodeIdentifier != null && sourceCodeIdentifier.length() > 0) {
+					b.setSourceControlIdentifier(sourceCodeIdentifier);
+				}
+
+				product = b.build();
 			}
-
-			this.product = b.build();
 		}
 	}
 
