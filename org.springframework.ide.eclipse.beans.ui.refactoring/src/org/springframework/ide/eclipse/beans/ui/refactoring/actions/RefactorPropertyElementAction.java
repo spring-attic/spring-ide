@@ -203,53 +203,53 @@ public class RefactorPropertyElementAction extends
 	 */
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
-		boolean enabled = false;
-		if (selection != null) {
-			if (selection instanceof IStructuredSelection) {
-				IStructuredSelection structSelection = (IStructuredSelection) selection;
-
-				Object obj = structSelection.getFirstElement();
-				
-				Element elem = null;
-				if (obj instanceof Element) {
-					elem = (Element) obj;
-				}
-				else if (obj instanceof Attr) {
-					elem = ((Attr) obj).getOwnerElement();
-				}
-				
-				if (elem != null) {
-					if ("property".equals(elem.getTagName())
-							|| "constructor-arg".equals(elem.getTagName())) {
-						NodeList children = elem.getChildNodes();
-
-						for (int i = 0; i < children.getLength(); i++) {
-							Node child = children.item(i);
-							if (child != null) {
-								if ("value".equals(child.getNodeName())
-										|| "ref".equals(child.getNodeName())) {
-									enabled = true;
-								}
-							}
-							else {
-								enabled = true;
-							}
-						}
-
-						if (children.getLength() == 0) {
-							enabled = true;
-						}
-					}
-					else if (("ref".equals(elem.getTagName()) || "value"
-							.equals(elem.getTagName()))
-							&& ("property".equals(elem.getParentNode()
-									.getNodeName()) || "constructor-arg"
-									.equals(elem.getParentNode().getNodeName()))) {
-						enabled = true;
-					}
-				}
-			}
-		}
-		action.setEnabled(enabled);
+//		boolean enabled = false;
+//		if (selection != null) {
+//			if (selection instanceof IStructuredSelection) {
+//				IStructuredSelection structSelection = (IStructuredSelection) selection;
+//
+//				Object obj = structSelection.getFirstElement();
+//				
+//				Element elem = null;
+//				if (obj instanceof Element) {
+//					elem = (Element) obj;
+//				}
+//				else if (obj instanceof Attr) {
+//					elem = ((Attr) obj).getOwnerElement();
+//				}
+//				
+//				if (elem != null) {
+//					if ("property".equals(elem.getTagName())
+//							|| "constructor-arg".equals(elem.getTagName())) {
+//						NodeList children = elem.getChildNodes();
+//
+//						for (int i = 0; i < children.getLength(); i++) {
+//							Node child = children.item(i);
+//							if (child != null) {
+//								if ("value".equals(child.getNodeName())
+//										|| "ref".equals(child.getNodeName())) {
+//									enabled = true;
+//								}
+//							}
+//							else {
+//								enabled = true;
+//							}
+//						}
+//
+//						if (children.getLength() == 0) {
+//							enabled = true;
+//						}
+//					}
+//					else if (("ref".equals(elem.getTagName()) || "value"
+//							.equals(elem.getTagName()))
+//							&& ("property".equals(elem.getParentNode()
+//									.getNodeName()) || "constructor-arg"
+//									.equals(elem.getParentNode().getNodeName()))) {
+//						enabled = true;
+//					}
+//				}
+//			}
+//		}
+//		action.setEnabled(enabled);
 	}
 }
