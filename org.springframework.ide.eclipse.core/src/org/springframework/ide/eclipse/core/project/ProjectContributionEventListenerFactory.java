@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,26 +28,29 @@ public class ProjectContributionEventListenerFactory {
 
 	public static final String LISTENERS_EXTENSION_POINT = SpringCore.PLUGIN_ID + ".listeners";
 
-	public static List<IProjectContributionEventListener> getProjectContributionEventListeners() {
-		List<IProjectContributionEventListener> listenerDefinitions = new ArrayList<IProjectContributionEventListener>();
-		for (IExtension extension : Platform.getExtensionRegistry().getExtensionPoint(LISTENERS_EXTENSION_POINT)
-				.getExtensions()) {
-			for (IConfigurationElement element : extension.getConfigurationElements()) {
-				try {
-					Object listener = element.createExecutableExtension("class");
-					if (listener instanceof IProjectContributionEventListener) {
-						listenerDefinitions.add((IProjectContributionEventListener) listener);
+	public static List<IProjectContributionEventListener> listenerDefinitions;
+
+	public synchronized static List<IProjectContributionEventListener> getProjectContributionEventListeners() {
+		if (listenerDefinitions == null) {
+			listenerDefinitions = new ArrayList<IProjectContributionEventListener>();
+			for (IExtension extension : Platform.getExtensionRegistry().getExtensionPoint(LISTENERS_EXTENSION_POINT)
+					.getExtensions()) {
+				for (IConfigurationElement element : extension.getConfigurationElements()) {
+					try {
+						Object listener = element.createExecutableExtension("class");
+						if (listener instanceof IProjectContributionEventListener) {
+							listenerDefinitions.add((IProjectContributionEventListener) listener);
+						}
+					}
+					catch (CoreException e) {
+						SpringCore.log(e);
 					}
 				}
-				catch (CoreException e) {
-					SpringCore.log(e);
-				}
 			}
-		}
 
-		// Sort depending on the defined order
-		OrderComparator.sort(listenerDefinitions);
-		
+			// Sort depending on the defined order
+			OrderComparator.sort(listenerDefinitions);
+		}
 		return listenerDefinitions;
 	}
 }

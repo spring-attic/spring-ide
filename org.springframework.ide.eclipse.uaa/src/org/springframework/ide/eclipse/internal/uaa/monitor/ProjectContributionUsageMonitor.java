@@ -10,19 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.monitor;
 
-import java.util.List;
+import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.core.project.IProjectContributionEventListener;
-import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectContributionEventListenerAdapter;
-import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.uaa.IUaa;
+import org.springframework.ide.eclipse.uaa.UaaPlugin;
 
 /**
  * {@link IProjectContributionEventListener} implementation that captures executions of {@link IProjectBuilder}s and
@@ -30,7 +29,7 @@ import org.springframework.ide.eclipse.uaa.IUaa;
  * @author Christian Dupuis
  * @since 2.5.2
  */
-public class ProjectContributionUsageMonitor extends ProjectContributionEventListenerAdapter implements IUsageMonitor {
+public class ProjectContributionUsageMonitor extends ProjectContributionEventListenerAdapter {
 
 	private IUaa manager;
 
@@ -38,38 +37,30 @@ public class ProjectContributionUsageMonitor extends ProjectContributionEventLis
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void finish(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
-			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
-		if (manager != null) {
-			
-			// Report usage of IProjectBuilders; only for those that are enabled for the project
-			for (ProjectBuilderDefinition builderDefinition : builderDefinitions) {
-				if (builderDefinition.isEnabled(project)) {
-					manager.registerFeatureUse(builderDefinition.getNamespaceUri());
-				}
-			}
-
-			// Report usage of IValidators; only for those that are enabled for the project
-			for (ValidatorDefinition validatorDefinition : validatorDefinitions) {
-				if (validatorDefinition.isEnabled(project)) {
-					manager.registerFeatureUse(validatorDefinition.getNamespaceUri());
-				}
-			}
+	public void finishProjectBuilder(ProjectBuilderDefinition contributor, Set<IResource> affectedResources,
+			IProgressMonitor monitor) {
+		// Capture usage of a project builder only it really ran (affectResources > 0)
+		if (affectedResources != null && affectedResources.size() > 0) {
+			getUaa().registerFeatureUse(contributor.getNamespaceUri());
 		}
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
-	public void startMonitoring(IUaa manager) {
-		this.manager = manager;
+	@Override
+	public void finishValidator(ValidatorDefinition contributor, Set<IResource> affectedResources,
+			IProgressMonitor monitor) {
+		// Capture usage of a validator only it really ran (affectResources > 0)
+		if (affectedResources != null && affectedResources.size() > 0) {
+			getUaa().registerFeatureUse(contributor.getNamespaceUri());
+		}
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stopMonitoring() {
-		// Intentionally left empty
+	
+	private synchronized IUaa getUaa() {
+		if (manager == null) {
+			manager = UaaPlugin.getUAA();
+		}
+		return manager;
 	}
-
 }

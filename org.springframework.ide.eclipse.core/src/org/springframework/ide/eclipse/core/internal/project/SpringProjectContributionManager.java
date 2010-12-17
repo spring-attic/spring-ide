@@ -183,8 +183,10 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 			execute(new SafeExecutableWithMonitor() {
 
+				@SuppressWarnings("deprecation")
 				public void execute(IProgressMonitor subMonitor) throws Exception {
 					listener.startContributor(builderDefinition.getProjectBuilder(), affectedResources, subMonitor);
+					listener.startProjectBuilder(builderDefinition, affectedResources, subMonitor);
 				}
 			}, monitor);
 
@@ -201,8 +203,10 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			
 			execute(new SafeExecutableWithMonitor() {
 				
+				@SuppressWarnings("deprecation")
 				public void execute(IProgressMonitor subMonitor) throws Exception {
 					listener.finishContributor(builderDefinition.getProjectBuilder(), affectedResources, subMonitor);
+					listener.finishProjectBuilder(builderDefinition, affectedResources, subMonitor);
 				}
 			}, monitor);
 			
@@ -219,8 +223,10 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 			execute(new SafeExecutableWithMonitor() {
 
+				@SuppressWarnings("deprecation")
 				public void execute(IProgressMonitor subMonitor) throws Exception {
 					listener.startContributor(validatorDefinition.getValidator(), affectedResources, subMonitor);
+					listener.startValidator(validatorDefinition, affectedResources, subMonitor);
 				}
 			}, monitor);
 
@@ -237,8 +243,10 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			
 			execute(new SafeExecutableWithMonitor() {
 				
+				@SuppressWarnings("deprecation")
 				public void execute(IProgressMonitor subMonitor) throws Exception {
 					listener.finishContributor(validatorDefinition.getValidator(), affectedResources, subMonitor);
+					listener.finishValidator(validatorDefinition, affectedResources, subMonitor);
 				}
 			}, monitor);
 			

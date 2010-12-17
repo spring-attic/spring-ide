@@ -480,14 +480,14 @@ public class UaaManager implements IUaa {
 				}
 				if (featureJson != null) {
 					try {
-						service.registerFeatureUsage(product, plugins.get(usedPlugin), featureJson.getBytes("UTF-8"));
+						service.registerFeatureUsage(product, usedPlugin, featureJson.getBytes("UTF-8"));
 					}
 					catch (UnsupportedEncodingException e) {
 						// cannot happen
 					}
 				}
 				else {
-					service.registerFeatureUsage(product, plugins.get(usedPlugin));
+					service.registerFeatureUsage(product, usedPlugin);
 				}
 				return true;
 			}

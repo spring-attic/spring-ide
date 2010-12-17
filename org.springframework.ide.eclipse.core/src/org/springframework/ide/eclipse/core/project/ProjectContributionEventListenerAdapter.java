@@ -64,6 +64,22 @@ public class ProjectContributionEventListenerAdapter implements IProjectContribu
 	/**
 	 * {@inheritDoc}
 	 */
+	public void finishProjectBuilder(ProjectBuilderDefinition contributor, Set<IResource> affectedResources,
+			IProgressMonitor monitor) {
+		// nothing to do
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void finishValidator(ValidatorDefinition contributor, Set<IResource> affectedResources,
+			IProgressMonitor monitor) {
+		// nothing to do
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void start(int kind, IResourceDelta delta,
 			List<ProjectBuilderDefinition> builderDefinitions,
 			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state,
@@ -93,6 +109,22 @@ public class ProjectContributionEventListenerAdapter implements IProjectContribu
 	public void startContributor(IProjectContributor contributor, Set<IResource> affectedResources,
 			IProgressMonitor monitor) {
 		startContributor(contributor, affectedResources);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void startProjectBuilder(ProjectBuilderDefinition contributor, Set<IResource> affectedResources,
+			IProgressMonitor monitor) {
+		// nothing to do
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void startValidator(ValidatorDefinition contributor, Set<IResource> affectedResources,
+			IProgressMonitor monitor) {
+		// nothing to do
 	}
 
 }
