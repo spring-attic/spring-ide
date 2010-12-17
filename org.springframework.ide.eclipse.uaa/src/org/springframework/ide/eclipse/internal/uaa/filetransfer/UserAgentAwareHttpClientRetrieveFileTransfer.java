@@ -21,6 +21,7 @@ import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.params.HttpClientParams;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ecf.filetransfer.service.IRetrieveFileTransfer;
 import org.eclipse.ecf.filetransfer.service.IRetrieveFileTransferFactory;
 import org.eclipse.ecf.provider.filetransfer.httpclient.HttpClientRetrieveFileTransfer;
@@ -35,6 +36,12 @@ import org.springframework.uaa.client.UrlHelper;
  * @since 2.5.2
  */
 public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFileTransferFactory {
+
+	public static final String SETUP_UAA_REQUIRED = "At this time you have not authorized %s to download resources from any VMware domain including '%s'. Some %s features are therefore unavailable. Please "
+			+ "consult the Spring UAA preferences at 'Preferences -> Spring -> User Agent Analysis' for further information.";
+
+	public static final String PLATFORM_NAME = Platform.getBundle("com.springsource.sts") != null ? "SpringSource Tool Suite"
+			: "Spring IDE";
 
 	/**
 	 * {@inheritDoc}
@@ -90,12 +97,9 @@ public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFi
 
 				return responseCode;
 			}
-			
+
 			// If we get to here throw exception
-			throw new IOException(
-					String.format(
-							"Spring UAA prevented access to VMware domain '%s'. More information at http://www.springsource.org/uaa/faq",
-							url.getHost()));
+			throw new IOException(String.format(SETUP_UAA_REQUIRED, PLATFORM_NAME, url.getHost(), PLATFORM_NAME));
 		}
 	}
 

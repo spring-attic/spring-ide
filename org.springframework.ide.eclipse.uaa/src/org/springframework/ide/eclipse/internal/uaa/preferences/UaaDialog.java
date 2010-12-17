@@ -51,6 +51,9 @@ public class UaaDialog extends TitleAreaDialog {
 			+ "You can change the UAA privacy level and review collected usage data from the <a href=\"prefs\">User Agent Analysis</a> perferences.\n\n";
 	
 	private Image image = UaaPlugin.imageDescriptorFromPlugin(UaaPlugin.PLUGIN_ID, "icons/full/wizban/uaa_wiz.png").createImage();
+	
+	public static final String PLATFORM_NAME = Platform.getBundle("com.springsource.sts") != null ? "SpringSource Tool Suite"
+			: "Spring IDE";
 
 	public static UaaDialog createDialog(Shell shell) {
 		return new UaaDialog(shell);
@@ -102,13 +105,8 @@ public class UaaDialog extends TitleAreaDialog {
 		composite.setLayout(new GridLayout(1, false));
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).applyTo(composite);
 
-		String name = "Spring IDE";
-		if ("SpringSource Tool Suite".equals(Platform.getProduct().getName())) {
-			name = Platform.getProduct().getName();
-		}
-
 		Link link = new Link(composite, SWT.NONE | SWT.WRAP);
-		link.setText(MESSAGE.replace("%name%", name));
+		link.setText(MESSAGE.replace("%name%", PLATFORM_NAME));
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
