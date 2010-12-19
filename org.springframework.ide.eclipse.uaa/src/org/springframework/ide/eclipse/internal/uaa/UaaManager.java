@@ -51,13 +51,13 @@ public class UaaManager implements IUaa {
 
 	private List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
 
-	private final CachingUaaServiceImpl service = new CachingUaaServiceImpl();
-
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
 	private final Lock r = rwl.readLock();
 
 	private final Lock w = rwl.writeLock();
+
+	private final CachingUaaServiceImpl service = new CachingUaaServiceImpl();
 
 	/**
 	 * {@inheritDoc}
@@ -453,45 +453,14 @@ public class UaaManager implements IUaa {
 
 		private Map<String, String> plugins;
 
-		private String rootPlugin;
-
-		protected Product product;
-
 		private String productId;
+
+		private String rootPlugin;
 
 		private String sourceCodeIdentifier;
 
 		public ExtensionProductDescriptor(IConfigurationElement element) {
 			init(element);
-		}
-
-		public boolean registerFeatureUseIfMatch(String usedPlugin, String featureJson) {
-			if (plugins.containsKey(usedPlugin)) {
-				// If we initially faild to create the product that is probably because it wasn't installed when the
-				// workbench started; but now it is so try again
-				if (product == null) {
-					buildProduct();
-				}
-
-				// Check if the product is already registered; if not register it before we capture feature usage
-				if (!this.registered) {
-					service.registerProductUsage(product);
-					this.registered = true;
-				}
-				if (featureJson != null) {
-					try {
-						service.registerFeatureUsage(product, usedPlugin, featureJson.getBytes("UTF-8"));
-					}
-					catch (UnsupportedEncodingException e) {
-						// cannot happen
-					}
-				}
-				else {
-					service.registerFeatureUsage(product, usedPlugin);
-				}
-				return true;
-			}
-			return false;
 		}
 
 		private void init(IConfigurationElement element) {
@@ -510,30 +479,29 @@ public class UaaManager implements IUaa {
 					plugins.put(pluginElement.getAttribute("id"), feature);
 				}
 			}
-			
+
 			// Try to create the product; we'll try again later if this one fails
-			buildProduct();
+			buildProduct(rootPlugin, productId, sourceCodeIdentifier);
 		}
 
-		private void buildProduct() {
-			Bundle bundle = Platform.getBundle(rootPlugin);
-			if (bundle != null) {
-				Version version = bundle.getVersion();
+		protected boolean canRegister(String usedPlugin) {
+			return plugins.containsKey(usedPlugin);
+		}
 
-				Product.Builder b = Product.newBuilder();
-				b.setName(productId);
-				b.setMajorVersion(version.getMajor());
-				b.setMinorVersion(version.getMinor());
-				b.setPatchVersion(version.getMicro());
-				b.setReleaseQualifier(version.getQualifier());
-
-				if (sourceCodeIdentifier != null && sourceCodeIdentifier.length() > 0) {
-					b.setSourceControlIdentifier(sourceCodeIdentifier);
-				}
-
-				product = b.build();
+		protected void registerProductIfRequired() {
+			// If we initially failed to create the product that is probably because it wasn't installed when the
+			// workbench started; but now it is so try again
+			if (product == null) {
+				buildProduct(rootPlugin, productId, sourceCodeIdentifier);
+			}
+			
+			// Check if the product is already registered; if not register it before we capture feature usage
+			if (!registered) {
+				service.registerProductUsage(product);
+				registered = true;
 			}
 		}
+
 	}
 
 	private class ProductDescriptor {
@@ -546,63 +514,85 @@ public class UaaManager implements IUaa {
 			init();
 		}
 
-		@SuppressWarnings("unchecked")
-		public boolean registerFeatureUseIfMatch(String usedPlugin, String featureJson) {
-			// Due to privacy considerations only org.eclipse plugins will get recorded
-			if (usedPlugin.startsWith("org.eclipse")) {
-				if (!this.registered) {
-					JSONObject json = new JSONObject();
-					json.put("platform",
-							String.format("%s.%s.%s", Platform.getOS(), Platform.getWS(), Platform.getOSArch()));
+		public final boolean registerFeatureUseIfMatch(String usedPlugin, String featureJson) {
+			if (canRegister(usedPlugin)) {
 
-					if (System.getProperty("eclipse.buildId") != null) {
-						json.put("build.id", System.getProperty("eclipse.buildId"));
-					}
-					if (System.getProperty("eclipse.product") != null) {
-						json.put("product", System.getProperty("eclipse.product"));
-					}
-					if (System.getProperty("eclipse.application") != null) {
-						json.put("application", System.getProperty("eclipse.application"));
-					}
-
-					try {
-						service.registerProductUsage(product, json.toJSONString().getBytes("UTF-8"));
-					}
-					catch (UnsupportedEncodingException e) {
-						// cannot happen
-					}
-					this.registered = true;
-				}
-
-				if (featureJson != null) {
-					try {
-						service.registerFeatureUsage(product, usedPlugin, featureJson.getBytes("UTF-8"));
-					}
-					catch (UnsupportedEncodingException e) {
-						// cannot happen
-					}
-				}
-				else {
-					service.registerFeatureUsage(product, usedPlugin);
-				}
+				registerProductIfRequired();
+				registerFeature(usedPlugin, featureJson);
 
 				return true;
 			}
 			return false;
 		}
-
+		
 		private void init() {
-			Bundle bundle = Platform.getBundle(Platform.PI_RUNTIME);
-			Version version = bundle.getVersion();
+			buildProduct(Platform.PI_RUNTIME, "Eclipse", null);
+		}
 
-			Product.Builder b = Product.newBuilder();
-			b.setName("Eclipse");
-			b.setMajorVersion(version.getMajor());
-			b.setMinorVersion(version.getMinor());
-			b.setPatchVersion(version.getMicro());
-			b.setReleaseQualifier(version.getQualifier());
+		protected void buildProduct(String symbolicName, String name, String sourceCodeIdentifier) {
+			Bundle bundle = Platform.getBundle(symbolicName);
+			if (bundle != null) {
+				Version version = bundle.getVersion();
 
-			this.product = b.build();
+				Product.Builder b = Product.newBuilder();
+				b.setName(name);
+				b.setMajorVersion(version.getMajor());
+				b.setMinorVersion(version.getMinor());
+				b.setPatchVersion(version.getMicro());
+				b.setReleaseQualifier(version.getQualifier());
+
+				if (sourceCodeIdentifier != null && sourceCodeIdentifier.length() > 0) {
+					b.setSourceControlIdentifier(sourceCodeIdentifier);
+				}
+				
+				product = b.build();
+			}
+		}
+
+		protected boolean canRegister(String usedPlugin) {
+			// Due to privacy considerations only org.eclipse plugins will get recorded
+			return usedPlugin.startsWith("org.eclipse");
+		}
+
+		protected void registerFeature(String usedPlugin, String featureJson) {
+			if (featureJson != null) {
+				try {
+					service.registerFeatureUsage(product, usedPlugin, featureJson.getBytes("UTF-8"));
+				}
+				catch (UnsupportedEncodingException e) {
+					// Cannot happen
+				}
+			}
+			else {
+				service.registerFeatureUsage(product, usedPlugin);
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		protected void registerProductIfRequired() {
+			if (!this.registered) {
+				JSONObject json = new JSONObject();
+				json.put("platform",
+						String.format("%s.%s.%s", Platform.getOS(), Platform.getWS(), Platform.getOSArch()));
+
+				if (System.getProperty("eclipse.buildId") != null) {
+					json.put("build.id", System.getProperty("eclipse.buildId"));
+				}
+				if (System.getProperty("eclipse.product") != null) {
+					json.put("product", System.getProperty("eclipse.product"));
+				}
+				if (System.getProperty("eclipse.application") != null) {
+					json.put("application", System.getProperty("eclipse.application"));
+				}
+
+				try {
+					service.registerProductUsage(product, json.toJSONString().getBytes("UTF-8"));
+				}
+				catch (UnsupportedEncodingException e) {
+					// cannot happen
+				}
+				this.registered = true;
+			}
 		}
 	}
 
