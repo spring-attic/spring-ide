@@ -7,13 +7,17 @@
  * 
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
- *******************************************************************************/ 
+ *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.monitor;
 
+import java.util.Collections;
+
+import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IExecutionListener;
 import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
@@ -31,7 +35,7 @@ public class CommandUsageMonitor implements IUsageMonitor {
 	private ExtensionIdToBundleMapper commandToBundleIdMapper;
 
 	private IExecutionListener executionListener;
-	
+
 	private IUaa manager;
 
 	/**
@@ -76,8 +80,14 @@ public class CommandUsageMonitor implements IUsageMonitor {
 
 	private void recordEvent(String commandId) {
 		if (manager != null && commandId != null) {
-			manager.registerFeatureUse(commandToBundleIdMapper.getBundleId(commandId));
+			Command command = getCommandService().getCommand(commandId);
+			try {
+				manager.registerFeatureUse(commandToBundleIdMapper.getBundleId(commandId),
+						Collections.singletonMap("command", command.getName()));
+			}
+			catch (NotDefinedException e) {
+				manager.registerFeatureUse(commandToBundleIdMapper.getBundleId(commandId));
+			}
 		}
 	}
-
 }

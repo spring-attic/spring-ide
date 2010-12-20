@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.monitor;
 
+import java.util.Collections;
+
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPageListener;
 import org.eclipse.ui.IPartListener;
@@ -146,17 +148,20 @@ public class PartUsageMonitor implements IUsageMonitor {
 
 	private void recordEvent(IPerspectiveDescriptor perspective) {
 		if (manager != null) {
-			manager.registerFeatureUse(perspectiveToBundleIdMapper.getBundleId(perspective.getId()));
+			manager.registerFeatureUse(perspectiveToBundleIdMapper.getBundleId(perspective.getId()),
+					Collections.singletonMap("perspective", perspective.getLabel()));
 		}
 	}
 
 	private void recordEvent(IWorkbenchPart part) {
 		if (manager != null) {
 			if (part.getSite() instanceof IViewSite) {
-				manager.registerFeatureUse(viewToBundleIdMapper.getBundleId(part.getSite().getId()));
+				manager.registerFeatureUse(viewToBundleIdMapper.getBundleId(part.getSite().getId()),
+						Collections.singletonMap("view", part.getTitle()));
 			}
 			else if (part.getSite() instanceof IEditorSite) {
-				manager.registerFeatureUse(editorToBundleIdMapper.getBundleId(part.getSite().getId()));
+				manager.registerFeatureUse(editorToBundleIdMapper.getBundleId(part.getSite().getId()),
+						Collections.singletonMap("editor", part.getTitle()));
 			}
 		}
 	}

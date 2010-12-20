@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.monitor;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
@@ -41,10 +42,11 @@ public class ProjectContributionUsageMonitor extends ProjectContributionEventLis
 			IProgressMonitor monitor) {
 		// Capture usage of a project builder only it really ran (affectResources > 0)
 		if (affectedResources != null && affectedResources.size() > 0) {
-			getUaa().registerFeatureUse(contributor.getNamespaceUri());
+			getUaa().registerFeatureUse(contributor.getNamespaceUri(),
+					Collections.singletonMap("name", contributor.getName()));
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -53,10 +55,11 @@ public class ProjectContributionUsageMonitor extends ProjectContributionEventLis
 			IProgressMonitor monitor) {
 		// Capture usage of a validator only it really ran (affectResources > 0)
 		if (affectedResources != null && affectedResources.size() > 0) {
-			getUaa().registerFeatureUse(contributor.getNamespaceUri());
+			getUaa().registerFeatureUse(contributor.getNamespaceUri(),
+					Collections.singletonMap("name", contributor.getName()));
 		}
 	}
-	
+
 	private synchronized IUaa getUaa() {
 		if (manager == null) {
 			manager = UaaPlugin.getUAA();

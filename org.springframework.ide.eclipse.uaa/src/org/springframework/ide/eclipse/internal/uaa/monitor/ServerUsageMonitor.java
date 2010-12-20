@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.monitor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerLifecycleListener;
 import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerEvent;
-import org.json.simple.JSONObject;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 import org.springframework.ide.eclipse.uaa.IUaa;
@@ -77,13 +79,12 @@ public class ServerUsageMonitor implements IUsageMonitor {
 	 */
 	private class ServerMonitor implements IServerListener {
 
-		@SuppressWarnings("unchecked")
 		public void serverChanged(ServerEvent event) {
 			IServer server = event.getServer();
-			JSONObject json = new JSONObject();
-			json.put("runtime", server.getRuntime().getId());
-			manager.registerFeatureUse(serverToBundleIdMapper.getBundleId(event.getServer().getServerType().getId()),
-					json.toJSONString());
+			Map<String, String> featureData = new HashMap<String, String>();
+			featureData.put("runtime", server.getRuntime().getId());
+			manager.registerFeatureUse(serverToBundleIdMapper.getBundleId(event.getServer().getServerType().getName()),
+					featureData);
 		}
 	}
 

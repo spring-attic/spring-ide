@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.uaa;
 
 import java.net.URL;
+import java.util.Map;
 
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
@@ -47,7 +48,7 @@ public interface IUaa {
 	/**
 	 * Registers usage of the given feature identified by <code>plugin</code> and <code>json</code>.
 	 */
-	void registerFeatureUse(String plugin, String json);
+	void registerFeatureUse(String plugin, Map<String, String> featureData);
 
 	/**
 	 * Registers usage of a given project identified by <code>productId</code> and <code>version</code>.

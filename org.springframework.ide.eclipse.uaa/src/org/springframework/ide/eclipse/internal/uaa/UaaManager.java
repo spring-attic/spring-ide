@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.uaa.IUaa;
@@ -33,8 +34,11 @@ import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.UrlHelper;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.UaaServiceImpl;
+import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
+import org.springframework.uaa.client.protobuf.UaaClient.ProductUse;
+import org.springframework.uaa.client.protobuf.UaaClient.UserAgent;
 
 /**
  * Helper class that coordinates with the Spring UAA service implementation.
@@ -45,11 +49,13 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
  */
 public class UaaManager implements IUaa {
 
+	private static final String EMPTY_VERSION = "0.0.0.RELEASE";
+
 	private static final String UAA_PRODUCT_EXTENSION_POINT = "org.springframework.ide.eclipse.uaa.product";
 
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
 
-	private List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
+	private final List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -144,7 +150,7 @@ public class UaaManager implements IUaa {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void registerFeatureUse(final String plugin, final String json) {
+	public void registerFeatureUse(final String plugin, final Map<String, String> featureData) {
 		if (plugin != null) {
 			executorService.execute(new Runnable() {
 
@@ -152,7 +158,7 @@ public class UaaManager implements IUaa {
 					try {
 						w.lock();
 						for (ProductDescriptor productDescriptor : productDescriptors) {
-							if (productDescriptor.registerFeatureUseIfMatch(plugin, json)) {
+							if (productDescriptor.registerFeatureUseIfMatch(plugin, featureData)) {
 								return;
 							}
 						}
@@ -177,7 +183,7 @@ public class UaaManager implements IUaa {
 	 */
 	public void registerProductUse(final String productId, String version, final String projectId) {
 		if (version == null) {
-			version = "0.0.0.RELEASE";
+			version = EMPTY_VERSION;
 		}
 
 		final String versionString = version;
@@ -382,7 +388,7 @@ public class UaaManager implements IUaa {
 				cacheProduct(product, null, projectId);
 			}
 		}
-
+		
 		private void cacheFeature(Product product, String featureName, byte[] featureData) {
 			features.add(new ReportedFeature(featureName, product, featureData));
 		}
@@ -489,12 +495,12 @@ public class UaaManager implements IUaa {
 		}
 
 		protected void registerProductIfRequired() {
-			// If we initially failed to create the product that is probably because it wasn't installed when the
+			// If we initially failed to create the product it was probably because it wasn't installed when the
 			// workbench started; but now it is so try again
 			if (product == null) {
 				buildProduct(rootPlugin, productId, sourceCodeIdentifier);
 			}
-			
+
 			// Check if the product is already registered; if not register it before we capture feature usage
 			if (!registered) {
 				service.registerProductUsage(product);
@@ -514,17 +520,17 @@ public class UaaManager implements IUaa {
 			init();
 		}
 
-		public final boolean registerFeatureUseIfMatch(String usedPlugin, String featureJson) {
+		public final boolean registerFeatureUseIfMatch(String usedPlugin, Map<String, String> featureData) {
 			if (canRegister(usedPlugin)) {
 
 				registerProductIfRequired();
-				registerFeature(usedPlugin, featureJson);
+				registerFeature(usedPlugin, featureData);
 
 				return true;
 			}
 			return false;
 		}
-		
+
 		private void init() {
 			buildProduct(Platform.PI_RUNTIME, "Eclipse", null);
 		}
@@ -544,7 +550,7 @@ public class UaaManager implements IUaa {
 				if (sourceCodeIdentifier != null && sourceCodeIdentifier.length() > 0) {
 					b.setSourceControlIdentifier(sourceCodeIdentifier);
 				}
-				
+
 				product = b.build();
 			}
 		}
@@ -554,18 +560,97 @@ public class UaaManager implements IUaa {
 			return usedPlugin.startsWith("org.eclipse");
 		}
 
-		protected void registerFeature(String usedPlugin, String featureJson) {
-			if (featureJson != null) {
-				try {
-					service.registerFeatureUsage(product, usedPlugin, featureJson.getBytes("UTF-8"));
+		protected void registerFeature(String usedPlugin, Map<String, String> featureData) {
+			// Get existing feature data and merge with new data
+			JSONObject json = mergeFeatureData(usedPlugin, featureData);
+
+			// Add plug-in version number to the featureJson
+//			Bundle bundle = Platform.getBundle(usedPlugin);
+//			if (bundle != null) {
+//				String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+//				if (version != null) {
+//					json.put("version", version);
+//				}
+//			}
+
+			try {
+				if (json.size() > 0) {
+					service.registerFeatureUsage(product, usedPlugin, json.toJSONString().getBytes("UTF-8"));
 				}
-				catch (UnsupportedEncodingException e) {
-					// Cannot happen
+				else {
+					service.registerFeatureUsage(product, usedPlugin);
 				}
 			}
-			else {
-				service.registerFeatureUsage(product, usedPlugin);
+			catch (UnsupportedEncodingException e) {
+				// Cannot happen
 			}
+		}
+		
+		@SuppressWarnings("unchecked")
+		private JSONObject mergeFeatureData(String usedPlugin, Map<String, String> featureData) {
+			JSONObject existingFeatureData = new JSONObject();
+			
+			// Quick sanity check to prevent doing too much in case no new feature data has been presented
+			if (featureData == null || featureData.size() == 0) {
+				return existingFeatureData;
+			}
+			
+			// Load existing feature data from backend store
+			String existingFeatureDataString = getRegisteredFeatureData(usedPlugin);
+			if (existingFeatureDataString != null) {
+				Object existingJson = JSONValue.parse(existingFeatureDataString);
+				if (existingJson instanceof JSONObject) {
+					existingFeatureData.putAll(((JSONObject) existingJson));
+				}
+			}
+			
+			// Merge feature data: merge those values whose keys already exist
+			featureData = new HashMap<String, String>(featureData);
+			for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
+				if (featureData.containsKey(existingEntry.getKey())) {
+					Object existingValue = existingEntry.getValue();
+					if (existingValue instanceof List) {
+						List<String> existingValues = (List<String>) existingValue;
+						String newValue = featureData.get(existingEntry.getKey());
+						if (!existingValues.contains(newValue)) {
+							existingValues.add(newValue);
+						}
+					}
+					else {
+						List<String> value = new ArrayList<String>();
+						value.add((String) existingValue);
+						value.add(featureData.get(existingEntry.getKey()));
+						existingFeatureData.put(existingEntry.getKey(), value);
+					}
+					featureData.remove(existingEntry.getKey());
+				}
+			}
+			
+			// Merge the remaining new values
+			existingFeatureData.putAll(featureData);
+			
+			return existingFeatureData;
+		}
+
+		private String getRegisteredFeatureData(String usedPlugin) {
+			try {
+				UserAgent userAgent = service.fromHttpUserAgentHeaderValue(getUserAgentHeader());
+				for (int i = 0; i < userAgent.getProductUseCount(); i++) {
+					ProductUse p = userAgent.getProductUse(i);
+					if (p.getProduct().getName().equals(product.getName())) {
+						for (int j = 0; j < p.getFeatureUseCount(); j++) {
+							FeatureUse f = p.getFeatureUse(j);
+							if (f.getName().equals(usedPlugin) && !f.getFeatureData().isEmpty()) {
+								return f.getFeatureData().toStringUtf8();
+							}
+						}
+					}
+				}
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -576,7 +661,7 @@ public class UaaManager implements IUaa {
 						String.format("%s.%s.%s", Platform.getOS(), Platform.getWS(), Platform.getOSArch()));
 
 				if (System.getProperty("eclipse.buildId") != null) {
-					json.put("build.id", System.getProperty("eclipse.buildId"));
+					json.put("buildId", System.getProperty("eclipse.buildId"));
 				}
 				if (System.getProperty("eclipse.product") != null) {
 					json.put("product", System.getProperty("eclipse.product"));
