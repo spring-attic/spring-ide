@@ -388,7 +388,7 @@ public class UaaManager implements IUaa {
 				cacheProduct(product, null, projectId);
 			}
 		}
-		
+
 		private void cacheFeature(Product product, String featureName, byte[] featureData) {
 			features.add(new ReportedFeature(featureName, product, featureData));
 		}
@@ -565,13 +565,13 @@ public class UaaManager implements IUaa {
 			JSONObject json = mergeFeatureData(usedPlugin, featureData);
 
 			// Add plug-in version number to the featureJson
-//			Bundle bundle = Platform.getBundle(usedPlugin);
-//			if (bundle != null) {
-//				String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
-//				if (version != null) {
-//					json.put("version", version);
-//				}
-//			}
+			// Bundle bundle = Platform.getBundle(usedPlugin);
+			// if (bundle != null) {
+			// String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+			// if (version != null) {
+			// json.put("version", version);
+			// }
+			// }
 
 			try {
 				if (json.size() > 0) {
@@ -585,16 +585,16 @@ public class UaaManager implements IUaa {
 				// Cannot happen
 			}
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		private JSONObject mergeFeatureData(String usedPlugin, Map<String, String> featureData) {
 			JSONObject existingFeatureData = new JSONObject();
-			
+
 			// Quick sanity check to prevent doing too much in case no new feature data has been presented
 			if (featureData == null || featureData.size() == 0) {
 				return existingFeatureData;
 			}
-			
+
 			// Load existing feature data from backend store
 			String existingFeatureDataString = getRegisteredFeatureData(usedPlugin);
 			if (existingFeatureDataString != null) {
@@ -603,7 +603,7 @@ public class UaaManager implements IUaa {
 					existingFeatureData.putAll(((JSONObject) existingJson));
 				}
 			}
-			
+
 			// Merge feature data: merge those values whose keys already exist
 			featureData = new HashMap<String, String>(featureData);
 			for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
@@ -625,10 +625,10 @@ public class UaaManager implements IUaa {
 					featureData.remove(existingEntry.getKey());
 				}
 			}
-			
+
 			// Merge the remaining new values
 			existingFeatureData.putAll(featureData);
-			
+
 			return existingFeatureData;
 		}
 
