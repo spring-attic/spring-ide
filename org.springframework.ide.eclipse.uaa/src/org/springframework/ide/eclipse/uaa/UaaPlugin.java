@@ -103,6 +103,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 				return Status.OK_STATUS;
 			}
 		};
+		startupJob.setSystem(true);
 		startupJob.schedule(1000);
 
 		if (usageMonitorManager.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
