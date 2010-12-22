@@ -24,12 +24,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.uaa.IUaa;
+import org.springframework.ide.eclipse.uaa.UaaPlugin;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.UrlHelper;
 import org.springframework.uaa.client.VersionHelper;
@@ -635,48 +638,50 @@ public class UaaManager implements IUaa {
 		private String getRegisteredFeatureData(String usedPlugin) {
 			try {
 				UserAgent userAgent = service.fromHttpUserAgentHeaderValue(getUserAgentHeader());
-				for (int i = 0; i < userAgent.getProductUseCount(); i++) {
-					ProductUse p = userAgent.getProductUse(i);
-					if (p.getProduct().getName().equals(product.getName())) {
-						for (int j = 0; j < p.getFeatureUseCount(); j++) {
-							FeatureUse f = p.getFeatureUse(j);
-							if (f.getName().equals(usedPlugin) && !f.getFeatureData().isEmpty()) {
-								return f.getFeatureData().toStringUtf8();
+				if (userAgent != null) {
+					for (int i = 0; i < userAgent.getProductUseCount(); i++) {
+						ProductUse p = userAgent.getProductUse(i);
+						if (p.getProduct().getName().equals(product.getName())) {
+							for (int j = 0; j < p.getFeatureUseCount(); j++) {
+								FeatureUse f = p.getFeatureUse(j);
+								if (f.getName().equals(usedPlugin) && !f.getFeatureData().isEmpty()) {
+									return f.getFeatureData().toStringUtf8();
+								}
 							}
 						}
 					}
 				}
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				UaaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+					"Error retrieving user agent header from UAA", e));
 			}
 			return null;
 		}
 
-		@SuppressWarnings("unchecked")
 		protected void registerProductIfRequired() {
-			if (!this.registered) {
-				JSONObject json = new JSONObject();
-				json.put("platform",
+			if (!registered) {
+				Map<String, String> productData = new HashMap<String, String>();
+				productData.put("platform",
 						String.format("%s.%s.%s", Platform.getOS(), Platform.getWS(), Platform.getOSArch()));
 
 				if (System.getProperty("eclipse.buildId") != null) {
-					json.put("buildId", System.getProperty("eclipse.buildId"));
+					productData.put("buildId", System.getProperty("eclipse.buildId"));
 				}
 				if (System.getProperty("eclipse.product") != null) {
-					json.put("product", System.getProperty("eclipse.product"));
+					productData.put("product", System.getProperty("eclipse.product"));
 				}
 				if (System.getProperty("eclipse.application") != null) {
-					json.put("application", System.getProperty("eclipse.application"));
+					productData.put("application", System.getProperty("eclipse.application"));
 				}
 
 				try {
-					service.registerProductUsage(product, json.toJSONString().getBytes("UTF-8"));
+					service.registerProductUsage(product, JSONObject.toJSONString(productData).getBytes("UTF-8"));
 				}
 				catch (UnsupportedEncodingException e) {
 					// cannot happen
 				}
-				this.registered = true;
+				registered = true;
 			}
 		}
 	}

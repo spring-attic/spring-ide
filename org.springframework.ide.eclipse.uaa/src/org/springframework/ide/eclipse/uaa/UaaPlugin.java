@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.p2.repository.RepositoryTransport;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -65,9 +66,9 @@ public class UaaPlugin extends AbstractUIPlugin {
 		monitors.add(new LibraryUsageMonitor());
 		monitors.add(new ServerUsageMonitor());
 
-		UIJob startupJob = new UIJob("Initializing Spring UAA") { //$NON-NLS-1$
+		Job startupJob = new Job("Initializing Spring UAA") { //$NON-NLS-1$
 
-			public IStatus runInUIThread(IProgressMonitor progressMonitor) {
+			public IStatus run(IProgressMonitor progressMonitor) {
 				usageMonitorManager.start();
 
 				for (IUsageMonitor monitor : monitors) {
@@ -99,8 +100,17 @@ public class UaaPlugin extends AbstractUIPlugin {
 						}
 					}
 				}
+				return Status.OK_STATUS;
+			}
+		};
+		startupJob.schedule(1000);
 
-				if (usageMonitorManager.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
+		if (usageMonitorManager.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
+			
+			UIJob dialogJob = new UIJob("Download consent required") {
+
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
 					UaaDialog dialog = UaaDialog.createDialog(SpringUIUtils.getStandardDisplay().getActiveShell());
 					int resultCode = dialog.open();
 					if (resultCode == Window.OK) {
@@ -109,13 +119,12 @@ public class UaaPlugin extends AbstractUIPlugin {
 					else if (resultCode == 1000) {
 						usageMonitorManager.setPrivacyLevel(IUaa.DECLINE_TOU);
 					}
-				}
 
-				return Status.OK_STATUS;
-			}
-		};
-		startupJob.setSystem(true);
-		startupJob.schedule(5000);
+					return Status.OK_STATUS;
+				}
+			};
+			dialogJob.schedule(5000);
+		}
 	}
 
 	/**
