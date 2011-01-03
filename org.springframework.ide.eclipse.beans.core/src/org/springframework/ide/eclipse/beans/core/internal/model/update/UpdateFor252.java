@@ -10,34 +10,46 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.update;
 
-import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.update.IBeansModelUpdate;
-import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
- * For version prior to 2.0.3 Spring IDE used to create different {@link IMarker} instances.
- * <p>
- * If this {@link IBeansModelUpdate} is not installed on a project, the error marker will probably hang around for ever.
+ * For version prior to 2.5.2 Spring IDE stored project information in .springBeans.
  * @author Christian Dupuis
- * @since 2.0.3
+ * @since 2.5.2
  */
-public class UpdateFor203 implements IBeansModelUpdate {
+public class UpdateFor252 implements IBeansModelUpdate {
 
 	public String getName() {
-		return "Updating Spring model 2.0.3 version";
+		return "Updating Spring model to 2.5.2 version";
 	}
 
 	public boolean requiresUpdate(IBeansProject beansProject) {
-		return !SpringCoreUtils.isVersionSameOrNewer(((BeansProject) beansProject).getVersion(), 2, 0, 3);
+		return beansProject.getProject().getFile(IBeansProject.DESCRIPTION_FILE_OLD).exists();
 	}
 
 	public void updateProject(IBeansProject beansProject) {
-		MarkerUtils.deleteMarkers(beansProject.getProject(), BeansCorePlugin.PLUGIN_ID + ".problemmarker");
-		((BeansProject) beansProject).saveDescription();
+		IFile oldFile = beansProject.getProject().getFile(IBeansProject.DESCRIPTION_FILE_OLD);
+		IFile newFile = beansProject.getProject().getFile(IBeansProject.DESCRIPTION_FILE);
+		if (oldFile.exists() && !newFile.exists()) {
+			// Save the new project description into the new location
+			((BeansProject) beansProject).saveDescription();
+			// Delete the old file
+			try {
+				if (SpringCoreUtils.validateEdit(oldFile)) {
+					oldFile.delete(true, new NullProgressMonitor());
+				}
+			}
+			catch (CoreException e) {
+				BeansCorePlugin.log("Problem deleting old '.springBeans'", e);
+			}
+		}
 	}
 
 }

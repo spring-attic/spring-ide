@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model.project;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 
 import javax.xml.parsers.SAXParser;
@@ -38,47 +39,55 @@ public class WebflowProjectDescriptionReader {
 	 */
 	public static WebflowProjectDescription read(IWebflowProject project) {
 		IFile file = project.getProject().getFile(new Path(IWebflowProject.DESCRIPTION_FILE));
-		if (file.isAccessible()) {
-			BufferedInputStream is = null;
+		File rawFile = file.getLocation().toFile();
+
+		if (!rawFile.exists()) {
+			file = project.getProject().getFile(new Path(IWebflowProject.DESCRIPTION_FILE_OLD));
+			rawFile = file.getLocation().toFile();
+			if (!rawFile.exists()) {
+				return new WebflowProjectDescription(project);
+			}
+		}
+
+		BufferedInputStream is = null;
+		try {
+			// Force resource refresh in case resource is not in sync
+			is = new BufferedInputStream(file.getContents(true));
+			WebflowProjectDescriptionHandler handler = new WebflowProjectDescriptionHandler(project);
 			try {
-				// Force resource refresh in case resource is not in sync
-				is = new BufferedInputStream(file.getContents(true));
-				WebflowProjectDescriptionHandler handler = new WebflowProjectDescriptionHandler(project);
+				SAXParser parser = SpringCoreUtils.getSaxParser();
+				parser.parse(new InputSource(is), handler);
+			}
+			catch (SAXException e) {
+				handler.log(IStatus.WARNING, e);
+			}
+			catch (IOException e) {
+				handler.log(IStatus.WARNING, e);
+			}
+			IStatus status = handler.getStatus();
+			switch (status.getSeverity()) {
+			case IStatus.ERROR:
+				Activator.log(status);
+				return null;
+
+			case IStatus.WARNING:
+			case IStatus.INFO:
+				Activator.log(status);
+
+			case IStatus.OK:
+			default:
+				return handler.getDescription();
+			}
+		}
+		catch (CoreException e) {
+			Activator.log(e.getStatus());
+		}
+		finally {
+			if (is != null) {
 				try {
-					SAXParser parser = SpringCoreUtils.getSaxParser();
-					parser.parse(new InputSource(is), handler);
-				}
-				catch (SAXException e) {
-					handler.log(IStatus.WARNING, e);
+					is.close();
 				}
 				catch (IOException e) {
-					handler.log(IStatus.WARNING, e);
-				}
-				IStatus status = handler.getStatus();
-				switch (status.getSeverity()) {
-				case IStatus.ERROR:
-					Activator.log(status);
-					return null;
-
-				case IStatus.WARNING:
-				case IStatus.INFO:
-					Activator.log(status);
-
-				case IStatus.OK:
-				default:
-					return handler.getDescription();
-				}
-			}
-			catch (CoreException e) {
-				Activator.log(e.getStatus());
-			}
-			finally {
-				if (is != null) {
-					try {
-						is.close();
-					}
-					catch (IOException e) {
-					}
 				}
 			}
 		}

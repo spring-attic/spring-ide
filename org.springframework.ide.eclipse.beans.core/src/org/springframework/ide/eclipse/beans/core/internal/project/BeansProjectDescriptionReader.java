@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,58 +47,68 @@ public class BeansProjectDescriptionReader {
 	public static void read(BeansProject project) {
 		IFile file = ((IProject) project.getElementResource()).getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		File rawFile = file.getLocation().toFile();
-
+		
 		if (rawFile.exists()) {
-
-			if (DEBUG) {
-				System.out.println("Reading project description from " + file.getLocation().toString());
-			}
-
-			BufferedInputStream is = null;
-			try {
-				is = new BufferedInputStream(new FileInputStream(rawFile));
-				BeansProjectDescriptionHandler handler = new BeansProjectDescriptionHandler(project);
-				
-				try {
-					SAXParser parser = SpringCoreUtils.getSaxParser();
-					parser.parse(new InputSource(is), handler);
-				}
-				catch (SAXException e) {
-					handler.log(IStatus.ERROR, e);
-				}
-				catch (IOException e) {
-					handler.log(IStatus.ERROR, e);
-				}
-				
-				IStatus status = handler.getStatus();
-				switch (status.getSeverity()) {
-				case IStatus.ERROR:
-					BeansCorePlugin.log(status);
-					break;
-
-				case IStatus.WARNING:
-				case IStatus.INFO:
-					BeansCorePlugin.log(status);
-				}
-			}
-			catch (FileNotFoundException e) {
-				BeansCorePlugin.log(e);
-			}
-			finally {
-				if (is != null) {
-					try {
-						is.close();
-					}
-					catch (IOException e) {
-						// ignore
-					}
-				}
-			}
+			readDescriptionFromFile(project, file, rawFile);
 		}
-
+		else {
+			file = ((IProject) project.getElementResource()).getFile(new Path(IBeansProject.DESCRIPTION_FILE_OLD));
+			rawFile = file.getLocation().toFile();
+			if (rawFile.exists()) {
+				readDescriptionFromFile(project, file, rawFile);
+			}	
+		}
+		
 		// Add default config extension to project
 		project.addConfigSuffix(IBeansProject.DEFAULT_CONFIG_SUFFIX);
 	}
-	
+
+	private static void readDescriptionFromFile(BeansProject project, IFile file, File rawFile) {
+
+		if (DEBUG) {
+			System.out.println("Reading project description from " + file.getLocation().toString());
+		}
+
+		BufferedInputStream is = null;
+		try {
+			is = new BufferedInputStream(new FileInputStream(rawFile));
+			BeansProjectDescriptionHandler handler = new BeansProjectDescriptionHandler(project);
+
+			try {
+				SAXParser parser = SpringCoreUtils.getSaxParser();
+				parser.parse(new InputSource(is), handler);
+			}
+			catch (SAXException e) {
+				handler.log(IStatus.ERROR, e);
+			}
+			catch (IOException e) {
+				handler.log(IStatus.ERROR, e);
+			}
+
+			IStatus status = handler.getStatus();
+			switch (status.getSeverity()) {
+			case IStatus.ERROR:
+				BeansCorePlugin.log(status);
+				break;
+
+			case IStatus.WARNING:
+			case IStatus.INFO:
+				BeansCorePlugin.log(status);
+			}
+		}
+		catch (FileNotFoundException e) {
+			BeansCorePlugin.log(e);
+		}
+		finally {
+			if (is != null) {
+				try {
+					is.close();
+				}
+				catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+	}
 
 }

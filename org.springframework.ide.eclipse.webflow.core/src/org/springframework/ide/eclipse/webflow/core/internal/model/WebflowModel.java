@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,13 +37,13 @@ import org.springframework.ide.eclipse.core.internal.model.resources.SpringResou
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.internal.model.resources.WebflowResourceChangeListener;
+import org.springframework.ide.eclipse.webflow.core.internal.model.update.WebflowModelUpdater;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
-public class WebflowModel extends AbstractModelElement implements
-		IWebflowModel, IResourceChangeListener {
+public class WebflowModel extends AbstractModelElement implements IWebflowModel, IResourceChangeListener {
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -60,8 +60,7 @@ public class WebflowModel extends AbstractModelElement implements
 	public boolean hasProject(IProject project) {
 		try {
 			r.lock();
-			if (project != null && project.isAccessible()
-					&& projects.containsKey(project)
+			if (project != null && project.isAccessible() && projects.containsKey(project)
 					&& SpringCoreUtils.isSpringProject(project)) {
 				return true;
 			}
@@ -86,8 +85,7 @@ public class WebflowModel extends AbstractModelElement implements
 	}
 
 	public IWebflowProject getProject(String name) {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
-				name);
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 		return getProject(project);
 	}
 
@@ -113,37 +111,24 @@ public class WebflowModel extends AbstractModelElement implements
 
 	public void startup() {
 		initialize();
-		//initializeModel();
-		
+		// initializeModel();
+
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(this);
-		
-		// Add a ResourceChangeListener to the Eclipse Workspace
-		workspaceListener = new WebflowResourceChangeListener(
-				new WebflowResourceChangeEvents());
-		workspace.addResourceChangeListener(workspaceListener,
-				SpringResourceChangeListener.LISTENER_FLAGS);
-	}
-	
-	/*
-	private void initializeModel() {
-		Job job = new Job("Initializing Spring Web Flow Model") {
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor,
-						IProgressMonitor.UNKNOWN);
-				TrueModelElementVisitor visitor = new TrueModelElementVisitor();
-				accept(visitor, subMonitor);
-				subMonitor.done();
-				return Status.OK_STATUS;
-			}
-		};
-		job.setSystem(true);
-		job.setPriority(Job.SHORT); // process asap
-		job.schedule();
+		// Add a ResourceChangeListener to the Eclipse Workspace
+		workspaceListener = new WebflowResourceChangeListener(new WebflowResourceChangeEvents());
+		workspace.addResourceChangeListener(workspaceListener, SpringResourceChangeListener.LISTENER_FLAGS);
 	}
-	*/
+
+	/*
+	 * private void initializeModel() { Job job = new Job("Initializing Spring Web Flow Model") {
+	 * 
+	 * @Override protected IStatus run(IProgressMonitor monitor) { SubProgressMonitor subMonitor = new
+	 * SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN); TrueModelElementVisitor visitor = new
+	 * TrueModelElementVisitor(); accept(visitor, subMonitor); subMonitor.done(); return Status.OK_STATUS; } };
+	 * job.setSystem(true); job.setPriority(Job.SHORT); // process asap job.schedule(); }
+	 */
 
 	public void shutdown() {
 		initialize();
@@ -167,10 +152,12 @@ public class WebflowModel extends AbstractModelElement implements
 				Iterator iter = projects.iterator();
 				while (iter.hasNext()) {
 					IProject project = (IProject) iter.next();
-					this.projects.put(project,
-							new WebflowProject(project, this));
+					this.projects.put(project, new WebflowProject(project, this));
 				}
 			}
+
+			// Schedule model update
+			WebflowModelUpdater.updateModel(getProjects());
 		}
 		finally {
 			w.unlock();
@@ -179,8 +166,7 @@ public class WebflowModel extends AbstractModelElement implements
 
 	private static List<IProject> getBeansProjects() {
 		List<IProject> springProjects = new ArrayList<IProject>();
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
-				.getProjects();
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
 			IProject project = projects[i];
 			if (SpringCoreUtils.isSpringProject(project)) {
@@ -227,10 +213,8 @@ public class WebflowModel extends AbstractModelElement implements
 				if (resource instanceof IFile) {
 					IFile file = (IFile) resource;
 					IWebflowProject wfProject = getProject(file.getProject());
-					if (wfProject != null
-							&& wfProject.getConfig((IFile) resource) != null) {
-						IWebflowConfig config = wfProject
-								.getConfig((IFile) resource);
+					if (wfProject != null && wfProject.getConfig((IFile) resource) != null) {
+						IWebflowConfig config = wfProject.getConfig((IFile) resource);
 						List<IWebflowConfig> configs = wfProject.getConfigs();
 						configs.remove(config);
 						wfProject.setConfigs(configs);

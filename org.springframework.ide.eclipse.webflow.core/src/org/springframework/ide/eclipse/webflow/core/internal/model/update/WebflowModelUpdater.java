@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.update;
+package org.springframework.ide.eclipse.webflow.core.internal.model.update;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,32 +18,32 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.update.IBeansModelUpdate;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
+import org.springframework.ide.eclipse.webflow.core.model.update.IWebflowModelUpdate;
 
 /**
- * Utility class that applies {@link IBeansModelUpdate} implementations to the {@link IBeansModel}.
+ * Utility class that applies {@link IWebflowModelUpdate} implementations to the {@link IWebflowModel}.
  * <p>
  * Note: Spring IDE does not expose an extension point for contributing model updates.
  * @author Christian Dupuis
- * @since 2.0.3
+ * @since 2.5.2
  */
-public abstract class BeansModelUpdater {
+public abstract class WebflowModelUpdater {
 
-	private static final List<IBeansModelUpdate> UPDATES;
+	private static final List<IWebflowModelUpdate> UPDATES;
 
 	static {
-		UPDATES = new ArrayList<IBeansModelUpdate>();
-		UPDATES.add(new UpdateFor203());
+		UPDATES = new ArrayList<IWebflowModelUpdate>();
 		UPDATES.add(new UpdateFor252());
 	}
 
 	/**
-	 * Updates the complete list of {@link IBeansProject}.
+	 * Updates the complete list of {@link IWebflowProject}.
 	 */
-	public static void updateModel(Collection<IBeansProject> projects) {
-		for (IBeansProject project : projects) {
+	public static void updateModel(Collection<IWebflowProject> projects) {
+		for (IWebflowProject project : projects) {
 			updateProject(project);
 		}
 	}
@@ -51,8 +51,8 @@ public abstract class BeansModelUpdater {
 	/**
 	 * Updates a single {@link IBeansProject}.
 	 */
-	public static void updateProject(IBeansProject project) {
-		for (IBeansModelUpdate update : UPDATES) {
+	public static void updateProject(IWebflowProject project) {
+		for (IWebflowModelUpdate update : UPDATES) {
 			// Do dummy access to the model object to load the model
 			project.getConfigs();
 			if (update.requiresUpdate(project)) {
@@ -66,11 +66,11 @@ public abstract class BeansModelUpdater {
 
 	private static class UpdateJob extends Job {
 
-		private final IBeansProject project;
+		private final IWebflowProject project;
 
-		private final IBeansModelUpdate update;
+		private final IWebflowModelUpdate update;
 
-		public UpdateJob(IBeansProject project, IBeansModelUpdate update) {
+		public UpdateJob(IWebflowProject project, IWebflowModelUpdate update) {
 			super("Updating Spring Project '" + project.getElementName() + "' with update '" + update.getName() + "'");
 			this.project = project;
 			this.update = update;

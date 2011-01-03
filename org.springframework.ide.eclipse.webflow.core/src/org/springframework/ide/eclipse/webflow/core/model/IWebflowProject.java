@@ -15,10 +15,13 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.webflow.core.Activator;
 
 public interface IWebflowProject extends IModelElement {
 
-	String DESCRIPTION_FILE = ".springWebflow";
+	String DESCRIPTION_FILE = ".settings/" + Activator.PLUGIN_ID + ".xml";
+
+	String DESCRIPTION_FILE_OLD = ".springWebflow";
 
 	List<IWebflowConfig> getConfigs();
 

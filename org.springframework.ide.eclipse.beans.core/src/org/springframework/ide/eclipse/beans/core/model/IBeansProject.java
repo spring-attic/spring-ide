@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -26,7 +27,10 @@ public interface IBeansProject extends IBeansModelElement,
 		IResourceModelElement, IBeanClassAware {
 
 	/** File name of the Spring Beans project description */
-	String DESCRIPTION_FILE = ".springBeans";
+	String DESCRIPTION_FILE = ".settings/" + BeansCorePlugin.PLUGIN_ID + ".xml";
+
+	/** File name of the Spring Beans project description pre 2.5.2 */
+	String DESCRIPTION_FILE_OLD = ".springBeans";
 
 	/** Default file extension for beans config files */
 	String DEFAULT_CONFIG_SUFFIX = "xml";
