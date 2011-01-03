@@ -36,7 +36,7 @@ public abstract class WebflowModelUpdater {
 
 	static {
 		UPDATES = new ArrayList<IWebflowModelUpdate>();
-		UPDATES.add(new UpdateFor252());
+//		UPDATES.add(new UpdateFor252());
 	}
 
 	/**
