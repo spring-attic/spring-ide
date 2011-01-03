@@ -322,7 +322,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					eventListener.onReadStart(this);
 				}
 
-				if (file != null) {
+				if (file != null && file.exists()) {
 
 					modificationTimestamp = file.getModificationStamp();
 					if (isArchived) {

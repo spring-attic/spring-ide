@@ -46,17 +46,19 @@ public class BeansProjectDescriptionReader {
 	 */
 	public static void read(BeansProject project) {
 		IFile file = ((IProject) project.getElementResource()).getFile(new Path(IBeansProject.DESCRIPTION_FILE));
-		File rawFile = file.getLocation().toFile();
-		
-		if (rawFile.exists()) {
-			readDescriptionFromFile(project, file, rawFile);
-		}
-		else {
-			file = ((IProject) project.getElementResource()).getFile(new Path(IBeansProject.DESCRIPTION_FILE_OLD));
+		File rawFile = null;
+		if (file != null && file.getLocation() != null) {
 			rawFile = file.getLocation().toFile();
-			if (rawFile.exists()) {
-				readDescriptionFromFile(project, file, rawFile);
-			}	
+		}
+		if (!(rawFile != null && rawFile.exists() && rawFile.canRead())) {
+			file = ((IProject) project.getElementResource()).getFile(new Path(IBeansProject.DESCRIPTION_FILE_OLD));
+			if (file != null && file.getLocation() != null) {
+				rawFile = file.getLocation().toFile();
+			}
+		}
+		
+		if (rawFile.exists() && rawFile.canRead()) {
+			readDescriptionFromFile(project, file, rawFile);
 		}
 		
 		// Add default config extension to project

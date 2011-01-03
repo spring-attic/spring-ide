@@ -61,6 +61,8 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	/** preference key to suppress missing namespace handler warnings */
 	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
 
+	public static final boolean IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT = false;
+
 	/** preference key to load namespace handler from classpath */
 	public static final String LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID = "loadNamespaceHandlerFromClasspath";
 

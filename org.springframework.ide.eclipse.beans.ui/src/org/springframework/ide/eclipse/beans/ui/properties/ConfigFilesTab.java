@@ -87,7 +87,7 @@ import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-@SuppressWarnings( { "deprecation", "restriction" })
+@SuppressWarnings({ "deprecation", "restriction" })
 public class ConfigFilesTab {
 
 	private static final String PREFIX = "ConfigurationPropertyPage." + "tabConfigFiles.";
@@ -238,11 +238,12 @@ public class ConfigFilesTab {
 		});
 
 		// Create ignore missing namespace handler checkbox
-		ignoreMissingNamespaceHandlerText = SpringUIUtils.createCheckBox(composite, BeansUIPlugin
-				.getResourceString(IGNORE_MISSING_NAMESPACEHANDLER_LABEL));
+		ignoreMissingNamespaceHandlerText = SpringUIUtils.createCheckBox(composite,
+				BeansUIPlugin.getResourceString(IGNORE_MISSING_NAMESPACEHANDLER_LABEL));
 		ignoreMissingNamespaceHandlerText.setSelection(SpringCorePreferences.getProjectPreferences(
 				project.getProject(), BeansCorePlugin.PLUGIN_ID).getBoolean(
-				BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY, false));
+				BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
+				BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT));
 		ignoreMissingNamespaceHandlerText.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -625,11 +626,11 @@ public class ConfigFilesTab {
 
 		@Override
 		protected boolean selectFile(IFile element) {
-			
+
 			if ("pom.xml".equals(element.getName())) {
 				return false;
 			}
-			
+
 			IBeansProject project = BeansCorePlugin.getModel().getProject(element.getProject());
 			if (project != null) {
 				IBeansConfig beansConfig = project.getConfig(element);
@@ -640,10 +641,9 @@ public class ConfigFilesTab {
 	}
 
 	private class LabelProvider extends JavaElementLabelProvider implements IColorProvider {
-		
+
 		public LabelProvider() {
-			super(JavaElementLabelProvider.SHOW_BASICS
-					| JavaElementLabelProvider.SHOW_OVERLAY_ICONS
+			super(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS
 					| JavaElementLabelProvider.SHOW_SMALL_ICONS);
 		}
 

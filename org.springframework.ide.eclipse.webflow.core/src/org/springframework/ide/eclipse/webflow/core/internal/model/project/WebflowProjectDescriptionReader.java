@@ -12,12 +12,13 @@ package org.springframework.ide.eclipse.webflow.core.internal.model.project;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.xml.parsers.SAXParser;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -39,55 +40,58 @@ public class WebflowProjectDescriptionReader {
 	 */
 	public static WebflowProjectDescription read(IWebflowProject project) {
 		IFile file = project.getProject().getFile(new Path(IWebflowProject.DESCRIPTION_FILE));
-		File rawFile = file.getLocation().toFile();
-
-		if (!rawFile.exists()) {
-			file = project.getProject().getFile(new Path(IWebflowProject.DESCRIPTION_FILE_OLD));
+		File rawFile = null;
+		if (file != null && file.getLocation() != null) {
 			rawFile = file.getLocation().toFile();
-			if (!rawFile.exists()) {
-				return new WebflowProjectDescription(project);
+		}
+		if (!(rawFile != null && rawFile.exists() && rawFile.canRead())) {
+			file = project.getProject().getFile(new Path(IWebflowProject.DESCRIPTION_FILE_OLD));
+			if (file != null && file.getLocation() != null) {
+				rawFile = file.getLocation().toFile();
 			}
 		}
 
-		BufferedInputStream is = null;
-		try {
-			// Force resource refresh in case resource is not in sync
-			is = new BufferedInputStream(file.getContents(true));
-			WebflowProjectDescriptionHandler handler = new WebflowProjectDescriptionHandler(project);
+		if (rawFile.exists() && rawFile.canRead()) {
+			BufferedInputStream is = null;
 			try {
-				SAXParser parser = SpringCoreUtils.getSaxParser();
-				parser.parse(new InputSource(is), handler);
-			}
-			catch (SAXException e) {
-				handler.log(IStatus.WARNING, e);
-			}
-			catch (IOException e) {
-				handler.log(IStatus.WARNING, e);
-			}
-			IStatus status = handler.getStatus();
-			switch (status.getSeverity()) {
-			case IStatus.ERROR:
-				Activator.log(status);
-				return null;
-
-			case IStatus.WARNING:
-			case IStatus.INFO:
-				Activator.log(status);
-
-			case IStatus.OK:
-			default:
-				return handler.getDescription();
-			}
-		}
-		catch (CoreException e) {
-			Activator.log(e.getStatus());
-		}
-		finally {
-			if (is != null) {
+				// Force resource refresh in case resource is not in sync
+				is = new BufferedInputStream(new FileInputStream(rawFile));
+				WebflowProjectDescriptionHandler handler = new WebflowProjectDescriptionHandler(project);
 				try {
-					is.close();
+					SAXParser parser = SpringCoreUtils.getSaxParser();
+					parser.parse(new InputSource(is), handler);
+				}
+				catch (SAXException e) {
+					handler.log(IStatus.WARNING, e);
 				}
 				catch (IOException e) {
+					handler.log(IStatus.WARNING, e);
+				}
+				IStatus status = handler.getStatus();
+				switch (status.getSeverity()) {
+				case IStatus.ERROR:
+					Activator.log(status);
+					return null;
+
+				case IStatus.WARNING:
+				case IStatus.INFO:
+					Activator.log(status);
+
+				case IStatus.OK:
+				default:
+					return handler.getDescription();
+				}
+			}
+			catch (FileNotFoundException e) {
+				Activator.log(e);
+			}
+			finally {
+				if (is != null) {
+					try {
+						is.close();
+					}
+					catch (IOException e) {
+					}
 				}
 			}
 		}

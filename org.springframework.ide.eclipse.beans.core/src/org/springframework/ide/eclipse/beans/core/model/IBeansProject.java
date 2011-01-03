@@ -27,7 +27,7 @@ public interface IBeansProject extends IBeansModelElement,
 		IResourceModelElement, IBeanClassAware {
 
 	/** File name of the Spring Beans project description */
-	String DESCRIPTION_FILE = ".settings/" + BeansCorePlugin.PLUGIN_ID + ".xml";
+	String DESCRIPTION_FILE = ".settings/" + BeansCorePlugin.PLUGIN_ID;
 
 	/** File name of the Spring Beans project description pre 2.5.2 */
 	String DESCRIPTION_FILE_OLD = ".springBeans";

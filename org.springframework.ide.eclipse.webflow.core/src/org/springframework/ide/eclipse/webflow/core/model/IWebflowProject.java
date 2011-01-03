@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.webflow.core.Activator;
 
 public interface IWebflowProject extends IModelElement {
 
-	String DESCRIPTION_FILE = ".settings/" + Activator.PLUGIN_ID + ".xml";
+	String DESCRIPTION_FILE = ".settings/" + Activator.PLUGIN_ID;
 
 	String DESCRIPTION_FILE_OLD = ".springWebflow";
 

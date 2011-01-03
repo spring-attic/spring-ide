@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -130,8 +130,10 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
 		// Send update event
 		if (configs.size() > 0) {
-			((BeansModel) BeansCorePlugin.getModel()).notifyListeners(BeansCorePlugin.getModel().getProject(project),
-					Type.CHANGED);
+			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(project);
+			if (beansProject != null) {
+				((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansProject, Type.CHANGED);
+			}
 		}
 	}
 
