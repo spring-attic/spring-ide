@@ -99,6 +99,8 @@ public class BeansRefactoringChangeUtils {
 		if (element instanceof IMethod) {
 			if (element.getElementName().startsWith("set")) {
 				String methodName = StringUtils.uncapitalize(element.getElementName().substring(3));
+				
+				// change those child notes that are property childs and refer to the changed method name
 				NodeList nodes = node.getChildNodes();
 				for (int i = 0; i < nodes.getLength(); i++) {
 					Node child = nodes.item(i);
@@ -116,6 +118,28 @@ public class BeansRefactoringChangeUtils {
 						}
 					}
 				}
+				
+				// p-namespace references to the properties that belong to the changed method
+				if (node.hasAttributes()) {
+					String attributeNameStart = "p:";
+					String optionalAttributeNameEnd = "-ref";
+					
+					NamedNodeMap attributes = node.getAttributes();
+					int attributeCount = attributes.getLength();
+					
+					for (int i = 0; i < attributeCount; i++) {
+						AttrImpl attribute = (AttrImpl) attributes.item(i);
+						String attributeName = attribute.getNodeName();
+						if (attributeName != null && attributeName.startsWith(attributeNameStart)) {
+							if (attributeName.equals(attributeNameStart + methodName)
+									|| attributeName.equals(attributeNameStart + methodName + optionalAttributeNameEnd)) {
+								int offset = attribute.getNameRegionStartOffset() + attributeNameStart.length();
+								result.add(new ReplaceEdit(offset, methodName.length(), newName));
+							}
+						}
+					}
+				}
+
 			}
 			else {
 				TextEdit edit = null;
