@@ -48,7 +48,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings( { "unchecked", "restriction" })
+@SuppressWarnings( { "restriction" })
 public abstract class AbstractBeansRefactorAction extends
 		AbstractBeansConfigEditorAction {
 
@@ -122,7 +122,7 @@ public abstract class AbstractBeansRefactorAction extends
 
 					if (types != null && types.size() > 0) {
 						je = types.get(0).getField(propertyName);
-						if (je == null) {
+						if (je == null || !je.exists()) {
 							List<String> path = new ArrayList<String>();
 							path.add(propertyName);
 							je = BeansEditorUtils
