@@ -73,4 +73,5 @@ Import-Package: org.eclipse.core.commands.common,
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.eclipse.beans.ui.refactoring.actions
+Export-Package: org.springframework.ide.eclipse.beans.ui.refactoring.actions,
+ org.springframework.ide.eclipse.beans.ui.refactoring.util
