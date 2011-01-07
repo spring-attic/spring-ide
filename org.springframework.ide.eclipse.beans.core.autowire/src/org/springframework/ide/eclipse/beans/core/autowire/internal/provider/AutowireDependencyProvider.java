@@ -69,6 +69,7 @@ import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -81,6 +82,12 @@ import org.springframework.util.StringUtils;
  * @since 2.2.7
  */
 public class AutowireDependencyProvider implements IAutowireDependencyResolver {
+	
+	public static final String TOO_MANY_MATCHING_BEANS = "TOO_MANY_MATCHING_BEANS";
+	
+	public static final String REQUIRED_NO_MATCH = "REQUIRED_NO_MATCH";
+	
+	public static final String AUTOWIRE_PROBLEM_TYPE = "AUTOWIRE_PROBLEM";
 
 	private Set<IBean> beans;
 
@@ -508,7 +515,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
 					problemReporter.error("Unsatisfied 'required' dependency of type [" + type
-							+ "]. Expected at least 1 matching bean", descriptor);
+							+ "]. Expected at least 1 matching bean", descriptor, new ValidationProblemAttribute(AUTOWIRE_PROBLEM_TYPE, REQUIRED_NO_MATCH));
 					throw new AutowireResolutionException();
 				}
 				return;
@@ -517,7 +524,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 				String primaryBeanName = determinePrimaryCandidate(matchingBeans, descriptor);
 				if (primaryBeanName == null) {
 					problemReporter.error("Expected single matching bean but found " + matchingBeans.size() + ": "
-							+ matchingBeans.keySet(), descriptor);
+							+ matchingBeans.keySet(), descriptor, new ValidationProblemAttribute(AUTOWIRE_PROBLEM_TYPE, TOO_MANY_MATCHING_BEANS));
 					throw new AutowireResolutionException();
 				}
 				if (autowiredBeanNames != null) {
@@ -600,31 +607,39 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 
 	private class AutowireProblemReporter implements IInjectionMetadataProviderProblemReporter {
 
-		public void error(String message, Member member) {
+		public void error(String message, Member member, ValidationProblemAttribute... attributes) {
 			try {
 				IJavaElement source = AutowireUtils.getJavaElement(project.getProject(), member, -1);
 				if (source != null && source.getUnderlyingResource() != null) {
+					ValidationProblemAttribute[] newAttributes = new ValidationProblemAttribute[attributes.length + 1];
+					for(int i=0; i<attributes.length; i++) {
+						newAttributes[i] = attributes[i];
+					}
+					newAttributes[attributes.length] = new ValidationProblemAttribute("JAVA_HANDLE", source.getHandleIdentifier());
+					
 					// By convention autowire problems will only get reported as warnings (for now?)
 					problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, message, source
-							.getUnderlyingResource(), JdtUtils.getLineNumber(source)));
+							.getUnderlyingResource(), JdtUtils.getLineNumber(source), 
+							newAttributes));
 				}
 			}
 			catch (JavaModelException e) {
 			}
 		}
 
-		public void error(String message, DependencyDescriptor descriptor) {
+		public void error(String message, DependencyDescriptor descriptor, ValidationProblemAttribute... attributes) {
 			if (descriptor.getField() != null) {
-				error(message, descriptor.getField());
+				error(message, descriptor.getField(), attributes);
 			}
 			else if (descriptor.getMethodParameter() != null && descriptor.getMethodParameter().getMethod() != null) {
-				error(message, descriptor.getMethodParameter().getMethod());
+				error(message, descriptor.getMethodParameter().getMethod(), attributes);
 			}
 			else if (descriptor.getMethodParameter() != null
 					&& descriptor.getMethodParameter().getConstructor() != null) {
-				error(message, descriptor.getMethodParameter().getConstructor());
+				error(message, descriptor.getMethodParameter().getConstructor(), attributes);
 			}
 		}
+
 
 	}
 }

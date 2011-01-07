@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.autowire.internal.provider;
 import java.lang.reflect.Member;
 
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 
 /**
  * Package-level no op implementation of {@link IInjectionMetadataProviderProblemReporter}.
@@ -21,10 +22,10 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  */
 class PassThroughProblemReporter implements IInjectionMetadataProviderProblemReporter {
 
-	public void error(String message, Member member) {
+	public void error(String message, Member member, ValidationProblemAttribute... attributes) {
 	}
 
-	public void error(String message, DependencyDescriptor descriptor) {
+	public void error(String message, DependencyDescriptor descriptor, ValidationProblemAttribute... attributes) {
 	}
 
 }

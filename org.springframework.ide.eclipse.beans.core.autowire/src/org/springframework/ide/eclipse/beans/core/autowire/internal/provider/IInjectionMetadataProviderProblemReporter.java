@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.autowire.internal.provider;
 import java.lang.reflect.Member;
 
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 
 /**
  * Problem reporter SPI for {@link IInjectionMetadataProvider} to report errors during resolution of
@@ -26,10 +27,10 @@ public interface IInjectionMetadataProviderProblemReporter {
 	/**
 	 * Report an error with the given <code>message</code> on the given {@link Member}. 
 	 */
-	void error(String message, Member member);
+	void error(String message, Member member, ValidationProblemAttribute... attributes);
 
 	/**
 	 * Report an error with the given <code>message</code> on the given {@link DependencyDescriptor}. 
 	 */
-	void error(String message, DependencyDescriptor descriptor);
+	void error(String message, DependencyDescriptor descriptor, ValidationProblemAttribute... attributes);
 }
