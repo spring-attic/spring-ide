@@ -126,7 +126,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			}
 		});
 		disabledButton = new Button(colorComposite2, SWT.RADIO);
-		disabledButton.setText("Send nothing");
+		disabledButton.setText("Send nothing (disable UAA but enable access to VMware domains)");
 		disabledButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -135,7 +135,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		});
 		declineButton = new Button(colorComposite2, SWT.RADIO);
 		declineButton
-				.setText("Decline terms of use (this will disable all features that require access to VMware domains)");
+				.setText("Reject terms of use (disable UAA and all features that require access to VMware domains)");
 		declineButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
