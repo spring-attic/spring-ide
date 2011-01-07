@@ -17,7 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.p2.repository.RepositoryTransport;
@@ -71,8 +73,18 @@ public class UaaPlugin extends AbstractUIPlugin {
 			public IStatus run(IProgressMonitor progressMonitor) {
 				usageMonitorManager.start();
 
-				for (IUsageMonitor monitor : monitors) {
-					monitor.startMonitoring(usageMonitorManager);
+				for (final IUsageMonitor monitor : monitors) {
+					SafeRunner.run(new ISafeRunnable() {
+
+						public void handleException(Throwable e) {
+							UaaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+									"Error occured starting Spring UAA usage monitor", e));
+						}
+
+						public void run() throws Exception {
+							monitor.startMonitoring(usageMonitorManager);
+						}
+					});
 				}
 
 				URL url = DetectedProducts.PRODUCT_URL;
@@ -107,7 +119,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 		startupJob.schedule(1000);
 
 		if (usageMonitorManager.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
-			
+
 			UIJob dialogJob = new UIJob("Download consent required") {
 
 				@Override
@@ -134,8 +146,18 @@ public class UaaPlugin extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		usageMonitorManager.stop();
-		for (IUsageMonitor monitor : monitors) {
-			monitor.stopMonitoring();
+		for (final IUsageMonitor monitor : monitors) {
+			SafeRunner.run(new ISafeRunnable() {
+
+				public void handleException(Throwable e) {
+					UaaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+							"Error occured stopping Spring UAA usage monitor", e));
+				}
+
+				public void run() throws Exception {
+					monitor.stopMonitoring();
+				}
+			});
 		}
 		super.stop(context);
 	}
