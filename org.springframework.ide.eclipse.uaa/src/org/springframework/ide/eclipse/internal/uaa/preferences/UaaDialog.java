@@ -40,7 +40,7 @@ public class UaaDialog extends TitleAreaDialog {
 
 	private static final String TITLE = "Spring User Agent Analysis (UAA)";
 
-	private static final String MESSAGE = "%name% needs to download resources from VMware domains to improve your experience. We include anonymous usage information as part of these downloads.\n"
+	private static final String MESSAGE = "%name% wants to download resources from VMware domains to improve your experience. We include anonymous usage information as part of these downloads.\n"
 			+ "\n"
 			+ "The Spring team gathers anonymous usage information to improve your Spring experience, not for marketing purposes. We also use this information to help guide our roadmap, prioritizing the features most valued by the community and enabling us to optimize the compatibility of technologies frequently used together.\n"
 			+ "\n"
@@ -48,7 +48,7 @@ public class UaaDialog extends TitleAreaDialog {
 			+ "\n"
 			+ "To consent to the Terms of Use, please click 'Accept'. If you do not click 'Accept' to indicate your consent, %name% features that require internet access will not be available and anonymous data collection will remain disabled.\n"
 			+ "\n"
-			+ "You can change the UAA privacy level and review collected usage data from the <a href=\"prefs\">User Agent Analysis</a> perferences.\n\n";
+			+ "If you can't accept the Terms of Use at this time but would still like to use all features of %name% please open the <a href=\"prefs\">User Agent Analysis</a> perferences and select the 'Send nothing' privay level. This will enable all features without sending usage data to the Spring team.";
 	
 	private Image image = UaaPlugin.imageDescriptorFromPlugin(UaaPlugin.PLUGIN_ID, "icons/full/wizban/uaa_wiz.png").createImage();
 	
