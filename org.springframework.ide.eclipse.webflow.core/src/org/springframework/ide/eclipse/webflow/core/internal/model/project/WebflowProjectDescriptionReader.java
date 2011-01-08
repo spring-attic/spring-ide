@@ -51,7 +51,7 @@ public class WebflowProjectDescriptionReader {
 			}
 		}
 
-		if (rawFile.exists() && rawFile.canRead()) {
+		if (rawFile != null && rawFile.exists() && rawFile.canRead()) {
 			BufferedInputStream is = null;
 			try {
 				// Force resource refresh in case resource is not in sync

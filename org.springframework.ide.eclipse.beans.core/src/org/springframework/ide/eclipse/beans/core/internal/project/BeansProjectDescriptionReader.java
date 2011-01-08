@@ -57,7 +57,7 @@ public class BeansProjectDescriptionReader {
 			}
 		}
 		
-		if (rawFile.exists() && rawFile.canRead()) {
+		if (rawFile != null && rawFile.exists() && rawFile.canRead()) {
 			readDescriptionFromFile(project, file, rawFile);
 		}
 		
