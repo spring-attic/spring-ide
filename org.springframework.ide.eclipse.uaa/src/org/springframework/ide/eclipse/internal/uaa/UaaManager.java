@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.internal.uaa;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +33,6 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
 import org.springframework.uaa.client.UaaService;
-import org.springframework.uaa.client.UrlHelper;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.UaaServiceImpl;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
@@ -71,17 +69,7 @@ public class UaaManager implements IUaa {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean canOpenUrl(URL url) {
-		if (UrlHelper.isVMwareDomain(url)) {
-			return canOpenVMwareUrls();
-		}
-		return true;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canOpenVMwareUrls() {
+	private boolean hasUserDecided() {
 		try {
 			r.lock();
 			return !(service.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU || service.getPrivacyLevel() == PrivacyLevel.DECLINE_TOU);
@@ -401,7 +389,7 @@ public class UaaManager implements IUaa {
 		}
 
 		private boolean canRegister() {
-			return canOpenVMwareUrls();
+			return hasUserDecided();
 		}
 
 		private class ReportedFeature {

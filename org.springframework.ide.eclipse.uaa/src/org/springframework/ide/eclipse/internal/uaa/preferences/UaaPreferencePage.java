@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,7 +110,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		label.setLayoutData(gd);
 
 		fullButton = new Button(colorComposite2, SWT.RADIO);
-		fullButton.setText("Send enhanced anonymous information (recommended)");
+		fullButton.setText("Send enhanced anonymous information (accept Terms of Use)");
 		fullButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -118,7 +118,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			}
 		});
 		limitedButton = new Button(colorComposite2, SWT.RADIO);
-		limitedButton.setText("Send minimal anonymous information");
+		limitedButton.setText("Send minimal anonymous information (accept Terms of Use)");
 		limitedButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -126,7 +126,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			}
 		});
 		disabledButton = new Button(colorComposite2, SWT.RADIO);
-		disabledButton.setText("Send nothing (disable UAA but enable access to VMware domains)");
+		disabledButton.setText("Send nothing (accept Terms of Use)");
 		disabledButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -134,8 +134,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			}
 		});
 		declineButton = new Button(colorComposite2, SWT.RADIO);
-		declineButton
-				.setText("Reject terms of use (disable UAA and all features that require access to VMware domains)");
+		declineButton.setText("Disable UAA (reject Terms of Use)");
 		declineButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -144,7 +143,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		});
 		if (uaa.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
 			undecidedButton = new Button(colorComposite2, SWT.RADIO);
-			undecidedButton.setText("Undecided on terms of use");
+			undecidedButton.setText("Undecided on Terms of Use");
 			undecidedButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {

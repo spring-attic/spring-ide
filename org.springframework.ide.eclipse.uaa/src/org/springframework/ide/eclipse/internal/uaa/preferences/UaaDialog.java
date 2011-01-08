@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,9 +46,9 @@ public class UaaDialog extends TitleAreaDialog {
 			+ "\n"
 			+ "Please see the Spring User Agent Analysis (UAA) <a href=\"tou\">Terms of Use</a> for more information on what information is collected and how such information is used. There is also an <a href=\"faq\">FAQ</a> for your convenience.\n"
 			+ "\n"
-			+ "To consent to the Terms of Use, please click 'Accept'. If you do not click 'Accept' to indicate your consent, %name% features that require internet access will not be available and anonymous data collection will remain disabled.\n"
+			+ "To consent to the Terms of Use, please click 'Accept'. If you do not click 'Accept' to indicate your consent anonymous data collection will remain disabled.\n"
 			+ "\n"
-			+ "If you can't accept the Terms of Use at this time but would still like to use all features of %name% please open the <a href=\"prefs\">User Agent Analysis</a> perferences and select the 'Send nothing' privay level. This will enable all features without sending usage data to the Spring team.";
+			+ "You can review usage data captured by UAA in the <a href=\"prefs\">User Agent Analysis</a> perferences.";
 	
 	private Image image = UaaPlugin.imageDescriptorFromPlugin(UaaPlugin.PLUGIN_ID, "icons/full/wizban/uaa_wiz.png").createImage();
 	

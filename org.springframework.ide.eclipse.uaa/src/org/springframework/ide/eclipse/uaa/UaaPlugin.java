@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,8 +77,11 @@ public class UaaPlugin extends AbstractUIPlugin {
 					SafeRunner.run(new ISafeRunnable() {
 
 						public void handleException(Throwable e) {
-							UaaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-									"Error occured starting Spring UAA usage monitor", e));
+							UaaPlugin
+									.getDefault()
+									.getLog()
+									.log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+											"Error occured starting Spring UAA usage monitor", e));
 						}
 
 						public void run() throws Exception {
@@ -91,11 +94,9 @@ public class UaaPlugin extends AbstractUIPlugin {
 				RepositoryTransport transport = RepositoryTransport.getInstance();
 				InputStream is = null;
 				try {
-					if (usageMonitorManager.canOpenUrl(url)) {
-						is = transport.stream(url.toURI(), progressMonitor);
-						DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
-						DetectedProducts.setProducts(is);
-					}
+					is = transport.stream(url.toURI(), progressMonitor);
+					DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
+					DetectedProducts.setProducts(is);
 				}
 				catch (Exception e) {
 					plugin.getLog().log(
@@ -150,8 +151,11 @@ public class UaaPlugin extends AbstractUIPlugin {
 			SafeRunner.run(new ISafeRunnable() {
 
 				public void handleException(Throwable e) {
-					UaaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-							"Error occured stopping Spring UAA usage monitor", e));
+					UaaPlugin
+							.getDefault()
+							.getLog()
+							.log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+									"Error occured stopping Spring UAA usage monitor", e));
 				}
 
 				public void run() throws Exception {

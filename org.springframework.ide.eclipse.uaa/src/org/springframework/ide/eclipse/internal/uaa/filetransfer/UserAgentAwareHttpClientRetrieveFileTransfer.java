@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.params.HttpClientParams;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.ecf.filetransfer.service.IRetrieveFileTransfer;
 import org.eclipse.ecf.filetransfer.service.IRetrieveFileTransferFactory;
 import org.eclipse.ecf.provider.filetransfer.httpclient.HttpClientRetrieveFileTransfer;
@@ -36,12 +35,6 @@ import org.springframework.uaa.client.UrlHelper;
  * @since 2.5.2
  */
 public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFileTransferFactory {
-
-	public static final String SETUP_UAA_REQUIRED = "At this time you have not authorized %s to download resources from any VMware domain including '%s'. Some %s features are therefore unavailable. Please "
-			+ "consult the Spring UAA preferences at 'Preferences -> Spring -> User Agent Analysis' for further information.";
-
-	public static final String PLATFORM_NAME = Platform.getBundle("com.springsource.sts") != null ? "SpringSource Tool Suite"
-			: "Spring IDE";
 
 	/**
 	 * {@inheritDoc}
@@ -78,28 +71,22 @@ public class UserAgentAwareHttpClientRetrieveFileTransfer implements IRetrieveFi
 			URL url = new URL(hostconfig.getHostURL());
 			IUaa uaa = UaaPlugin.getUAA();
 
-			// Check if we are allowed to open the VMware domain by privacy level of UAA
-			if (uaa.canOpenUrl(url)) {
-
-				boolean useUaaHeader = false;
-				// Add UAA header to VMware controlled domains only
-				if (UrlHelper.isUaaEnabledHost(url)) {
-					getParams().setParameter(HttpClientParams.USER_AGENT, uaa.getUserAgentHeader());
-					useUaaHeader = true;
-				}
-
-				int responseCode = super.executeMethod(originalHostConfig, method, state);
-
-				// Clear UAA internal caches to prevent growing
-				if (useUaaHeader && responseCode == 200) {
-					uaa.clear();
-				}
-
-				return responseCode;
+			boolean useUaaHeader = false;
+			// Add UAA header to VMware controlled domains only
+			if (UrlHelper.isUaaEnabledHost(url)) {
+				getParams().setParameter(HttpClientParams.USER_AGENT, uaa.getUserAgentHeader());
+				useUaaHeader = true;
 			}
 
-			// If we get to here throw exception
-			throw new IOException(String.format(SETUP_UAA_REQUIRED, PLATFORM_NAME, url.getHost(), PLATFORM_NAME));
+			int responseCode = super.executeMethod(originalHostConfig, method, state);
+
+			// Clear UAA internal caches to prevent growing
+			if (useUaaHeader && responseCode == 200) {
+				uaa.clear();
+			}
+
+			return responseCode;
+
 		}
 	}
 
