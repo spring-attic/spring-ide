@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,10 +23,18 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.xbean.classloader.NonLockingJarFileClassLoader;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
@@ -36,6 +44,7 @@ import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
@@ -48,17 +57,19 @@ class ProjectClassLoaderCache {
 
 	private static final int CACHE_SIZE = 12;
 
-	private static List<ClassLoaderCacheEntry> CLASSLOADER_CACHE = new ArrayList<ClassLoaderCacheEntry>(CACHE_SIZE);
+	private static final List<ClassLoaderCacheEntry> CLASSLOADER_CACHE = new ArrayList<ClassLoaderCacheEntry>(CACHE_SIZE);
 
 	private static final String DEBUG_OPTION = SpringCore.PLUGIN_ID + "/java/classloader/debug";
 
-	private static boolean DEBUG_CLASSLOADER = SpringCore.isDebug(DEBUG_OPTION);
+	private static final boolean DEBUG_CLASSLOADER = SpringCore.isDebug(DEBUG_OPTION);
 
 	private static final String FILE_SCHEME = "file";
 
-	private static ClassLoader PARENT_CLASS_LOADER = null;
+	private static ClassLoader cachedParentClassLoader = null;
 
-	private static IPropertyChangeListener PROPERTY_CHANGE_LISTENER;
+	private static IPropertyChangeListener propertyChangeListener = null;
+
+	private static IResourceChangeListener resourceChangeListener = null;
 
 	private static ClassLoader addClassLoaderToCache(IProject project, List<URL> urls, ClassLoader parentClassLoader) {
 		synchronized (CLASSLOADER_CACHE) {
@@ -165,14 +176,14 @@ class ProjectClassLoaderCache {
 		File file = new File(uri);
 		// If we keep the following check, non-existing output folders will never be used for the lifetime of
 		// a classloader. this causes issues with clean projects with not-yet existing output folders.
-//		if (file.exists()) {
-			if (file.isDirectory()) {
-				paths.add(new URL(uri.toString() + File.separator));
-			}
-			else {
-				paths.add(uri.toURL());
-			}
-//		}
+		// if (file.exists()) {
+		if (file.isDirectory()) {
+			paths.add(new URL(uri.toString() + File.separator));
+		}
+		else {
+			paths.add(uri.toURL());
+		}
+		// }
 	}
 
 	private static void covertPathToUrl(IProject project, List<URL> paths, IPath path) throws MalformedURLException {
@@ -210,8 +221,8 @@ class ProjectClassLoaderCache {
 				if (curr == null || !curr.exists() || !curr.isAccessible() || !curr.isOpen()) {
 					removeClassLoaderEntryFromCache(entry);
 					if (DEBUG_CLASSLOADER) {
-						System.out.println(String.format("> removing classloader for '%s' : total %s", entry
-								.getProject(), CLASSLOADER_CACHE.size()));
+						System.out.println(String.format("> removing classloader for '%s' : total %s",
+								entry.getProject(), CLASSLOADER_CACHE.size()));
 					}
 				}
 				else {
@@ -244,6 +255,24 @@ class ProjectClassLoaderCache {
 		return paths;
 	}
 
+	/**
+	 * Registers internal listeners that listen to changes relevant to clear out stale cache entries.
+	 */
+	private static void registerListenersIfRequired() {
+		if (propertyChangeListener == null) {
+			propertyChangeListener = new EnablementPropertyChangeListener();
+			SpringCore.getDefault().getPluginPreferences().addPropertyChangeListener(propertyChangeListener);
+		}
+		if (resourceChangeListener == null) {
+			resourceChangeListener = new SourceAndOutputLocationResourceChangeListener();
+			ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener);
+		}
+	}
+
+	/**
+	 * Removes the given {@link ClassLoaderCacheEntry} from the internal cache.
+	 * @param entry the entry to remove
+	 */
 	private static void removeClassLoaderEntryFromCache(ClassLoaderCacheEntry entry) {
 		synchronized (CLASSLOADER_CACHE) {
 			if (DEBUG_CLASSLOADER) {
@@ -252,6 +281,25 @@ class ProjectClassLoaderCache {
 			}
 			entry.dispose();
 			CLASSLOADER_CACHE.remove(entry);
+		}
+	}
+
+	/**
+	 * Removes any cached {@link ClassLoaderCacheEntry} for the given {@link IProject}.
+	 * @param project the project to remove {@link ClassLoaderCacheEntry} for
+	 */
+	private static void removeClassLoaderEntryFromCache(IProject project) {
+		synchronized (CLASSLOADER_CACHE) {
+			if (DEBUG_CLASSLOADER) {
+				System.out.println(String.format("> removing classloader for '%s' : total %s", project.getName(),
+						CLASSLOADER_CACHE.size()));
+			}
+			for (ClassLoaderCacheEntry entry : new ArrayList<ClassLoaderCacheEntry>(CLASSLOADER_CACHE)) {
+				if (project.equals(entry.getProject())) {
+					entry.dispose();
+					CLASSLOADER_CACHE.remove(entry);
+				}
+			}
 		}
 	}
 
@@ -265,7 +313,7 @@ class ProjectClassLoaderCache {
 	@SuppressWarnings({ "unchecked" })
 	protected synchronized static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
 		// Setup the root class loader to be used when no explicit parent class loader is given
-		if (parentClassLoader == null && PARENT_CLASS_LOADER == null) {
+		if (parentClassLoader == null && cachedParentClassLoader == null) {
 			List<URL> paths = new ArrayList<URL>();
 			Enumeration<String> libs = SpringCore.getDefault().getBundle().getEntryPaths("/lib/");
 			while (libs.hasMoreElements()) {
@@ -278,18 +326,14 @@ class ProjectClassLoaderCache {
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
 			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
 			paths.addAll(JdtUtils.getBundleClassPath("org.aopalliance"));
-			PARENT_CLASS_LOADER = new URLClassLoader(paths.toArray(new URL[paths.size()]));
-		}
-		
-		if (project == null) {
-			return PARENT_CLASS_LOADER;
+			cachedParentClassLoader = new URLClassLoader(paths.toArray(new URL[paths.size()]));
 		}
 
-		// register the listener
-		if (PROPERTY_CHANGE_LISTENER == null) {
-			PROPERTY_CHANGE_LISTENER = new EnablementPropertyChangeListener();
-			SpringCore.getDefault().getPluginPreferences().addPropertyChangeListener(PROPERTY_CHANGE_LISTENER);
+		if (project == null) {
+			return cachedParentClassLoader;
 		}
+
+		registerListenersIfRequired();
 
 		ClassLoader classLoader = findClassLoaderInCache(project, parentClassLoader);
 		if (classLoader == null) {
@@ -306,7 +350,7 @@ class ProjectClassLoaderCache {
 	/**
 	 * Internal cache entry
 	 */
-	private static class ClassLoaderCacheEntry implements IElementChangedListener {
+	static class ClassLoaderCacheEntry implements IElementChangedListener {
 
 		private URL[] directories;
 
@@ -314,11 +358,11 @@ class ProjectClassLoaderCache {
 
 		private long lastAccess;
 
+		private ClassLoader parentClassLoader;
+
 		private IProject project;
 
 		private URL[] urls;
-
-		private ClassLoader parentClassLoader;
 
 		public ClassLoaderCacheEntry(IProject project, List<URL> urls, ClassLoader parentClassLoader) {
 			this.project = project;
@@ -392,8 +436,8 @@ class ProjectClassLoaderCache {
 				if (parentClassLoader != null) {
 					// We use the parent class loader of the org.springframework.ide.eclipse.beans.core bundle
 					if (useNonLockingClassLoader()) {
-						jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project
-								.getName()), (URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
+						jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'",
+								project.getName()), (URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
 					}
 					else {
 						jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
@@ -402,12 +446,12 @@ class ProjectClassLoaderCache {
 				}
 				else {
 					if (useNonLockingClassLoader()) {
-						jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project
-								.getName()), (URL[]) jars.toArray(new URL[jars.size()]), PARENT_CLASS_LOADER);
+						jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'",
+								project.getName()), (URL[]) jars.toArray(new URL[jars.size()]), cachedParentClassLoader);
 					}
 					else {
 						jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
-								PARENT_CLASS_LOADER);
+								cachedParentClassLoader);
 					}
 				}
 				directories = dirs.toArray(new URL[dirs.size()]);
@@ -431,7 +475,7 @@ class ProjectClassLoaderCache {
 	 * {@link IPropertyChangeListener} to clear the cache whenever the setting is changed.
 	 * @since 2.5.0
 	 */
-	private static class EnablementPropertyChangeListener implements IPropertyChangeListener {
+	static class EnablementPropertyChangeListener implements IPropertyChangeListener {
 
 		/**
 		 * {@inheritDoc}
@@ -441,6 +485,109 @@ class ProjectClassLoaderCache {
 				synchronized (CLASSLOADER_CACHE) {
 					CLASSLOADER_CACHE.clear();
 				}
+			}
+		}
+	}
+
+	/**
+	 * {@link IResourceChangeListener} to clear the cache whenever new source or output folders are being added.
+	 * @since 2.5.2
+	 */
+	static class SourceAndOutputLocationResourceChangeListener implements IResourceChangeListener {
+
+		private static final int VISITOR_FLAGS = IResourceDelta.ADDED | IResourceDelta.CHANGED;
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void resourceChanged(IResourceChangeEvent event) {
+			if (event.getSource() instanceof IWorkspace) {
+				int eventType = event.getType();
+				switch (eventType) {
+				case IResourceChangeEvent.POST_CHANGE:
+					IResourceDelta delta = event.getDelta();
+					if (delta != null) {
+						try {
+							delta.accept(getVisitor(), VISITOR_FLAGS);
+						}
+						catch (CoreException e) {
+							SpringCore.log("Error while traversing resource change delta", e);
+						}
+					}
+					break;
+				}
+			}
+			else if (event.getSource() instanceof IProject) {
+				int eventType = event.getType();
+				switch (eventType) {
+				case IResourceChangeEvent.POST_CHANGE:
+					IResourceDelta delta = event.getDelta();
+					if (delta != null) {
+						try {
+							delta.accept(getVisitor(), VISITOR_FLAGS);
+						}
+						catch (CoreException e) {
+							SpringCore.log("Error while traversing resource change delta", e);
+						}
+					}
+					break;
+				}
+			}
+
+		}
+
+		protected IResourceDeltaVisitor getVisitor() {
+			return new SourceAndOutputLocationResourceVisitor();
+		}
+
+		/**
+		 * Internal resource delta visitor.
+		 */
+		protected class SourceAndOutputLocationResourceVisitor implements IResourceDeltaVisitor {
+
+			public final boolean visit(IResourceDelta delta) throws CoreException {
+				IResource resource = delta.getResource();
+				switch (delta.getKind()) {
+				case IResourceDelta.ADDED:
+					return resourceAdded(resource);
+				}
+				return true;
+			}
+
+			protected boolean resourceAdded(IResource resource) {
+				if (resource instanceof IFolder && JdtUtils.isJavaProject(resource)) {
+					try {
+						IJavaProject javaProject = JdtUtils.getJavaProject(resource);
+						// Safe guard once again
+						if (javaProject == null) {
+							return false;
+						}
+
+						// Check the default output location
+						if (javaProject.getOutputLocation() != null
+								&& javaProject.getOutputLocation().equals(resource.getFullPath())) {
+							removeClassLoaderEntryFromCache(resource.getProject());
+							return false;
+						}
+
+						// Check any source and output folder location
+						for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+							if (resource.getFullPath() != null && resource.getFullPath().equals(entry.getPath())) {
+								removeClassLoaderEntryFromCache(resource.getProject());
+								return false;
+							}
+							else if (resource.getFullPath() != null
+									&& resource.getFullPath().equals(entry.getOutputLocation())) {
+								removeClassLoaderEntryFromCache(resource.getProject());
+								return false;
+							}
+						}
+					}
+					catch (JavaModelException e) {
+						SpringCore.log("Error traversing resource change delta", e);
+					}
+				}
+				return true;
 			}
 		}
 	}
