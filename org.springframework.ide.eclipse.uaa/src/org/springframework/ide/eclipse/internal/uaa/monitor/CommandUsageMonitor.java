@@ -79,7 +79,7 @@ public class CommandUsageMonitor implements IUsageMonitor {
 	}
 
 	private void recordEvent(String commandId) {
-		if (manager != null && commandId != null) {
+		if (getCommandService() != null && manager != null && commandId != null) {
 			Command command = getCommandService().getCommand(commandId);
 			try {
 				manager.registerFeatureUse(commandToBundleIdMapper.getBundleId(commandId),
