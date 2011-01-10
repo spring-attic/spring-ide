@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.Activator;
  * time the <code>BeansTemplateCompletionProcessor</code> is asked for content
  * assist proposals, the <code>BeansContentAssistProcessor</code> has already
  * set the context type for templates.
+ * @author Christian Dupuis
+ * @author Torsten Juergeleit
  */
 public class BeansTemplateCompletionProcessor extends
 		TemplateCompletionProcessor {

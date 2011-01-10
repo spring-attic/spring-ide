@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2007 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -28,29 +28,28 @@ import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
  * graphics. This involves creating JFace image descriptors describing
  * how to create/find the image should it be needed.
  * The image is not actually allocated until requested.
- *
  * Prefix conventions
- *		Wizard Banners			WIZBAN_
- *		Preference Banners		PREF_BAN_
- *		Property Page Banners	PROPBAN_
- *		Color toolbar			CTOOL_
- *		Enable toolbar			ETOOL_
- *		Disable toolbar			DTOOL_
- *		Local enabled toolbar	ELCL_
- *		Local Disable toolbar	DLCL_
- *		Object large			OBJL_
- *		Object small			OBJS_
- *		View 					VIEW_
- *		Product images			PROD_
- *		Misc images				MISC_
- *
+ * Wizard Banners			WIZBAN_
+ * Preference Banners		PREF_BAN_
+ * Property Page Banners	PROPBAN_
+ * Color toolbar			CTOOL_
+ * Enable toolbar			ETOOL_
+ * Disable toolbar			DTOOL_
+ * Local enabled toolbar	ELCL_
+ * Local Disable toolbar	DLCL_
+ * Object large			OBJL_
+ * Object small			OBJS_
+ * View 					VIEW_
+ * Product images			PROD_
+ * Misc images				MISC_
  * Where are the images?
- *		The images (typically gifs) are found in the same location as this
- *		plugin class. This may mean the same package directory as the
- *		package holding this class. The images are declared using
- *		<code>this.getClass()</code> to ensure they are looked up via
- *		this plugin class.
- *
+ * The images (typically gifs) are found in the same location as this
+ * plugin class. This may mean the same package directory as the
+ * package holding this class. The images are declared using
+ * <code>this.getClass()</code> to ensure they are looked up via
+ * this plugin class.
+ * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @see org.eclipse.jface.resource.ImageRegistry
  */
 public class WebflowUIImages {

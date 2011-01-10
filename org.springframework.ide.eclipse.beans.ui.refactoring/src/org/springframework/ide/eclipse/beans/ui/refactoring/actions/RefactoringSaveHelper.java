@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2007, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -47,8 +47,7 @@ import org.eclipse.ui.dialogs.ListDialog;
 /**
  * For compatibility reasons ported to 3.2 from the 3.3 code base.
  * <p>
- * TODO CD remove {@link RefactoringSaveHelper} and {@link RefactoringStarter}
- * as soon as Spring IDE only runs on Eclipse 3.3.
+ * TODO CD remove {@link RefactoringSaveHelper} and {@link RefactoringStarter}as soon as Spring IDE only runs on Eclipse 3.3.
  * @author Christian Dupuis
  * @since 2.0
  */

@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -40,7 +40,6 @@ import org.springframework.util.ReflectionUtils;
  * {@link IInjectionMetadataProvider} implementation that autowires annotated fields, setter methods and arbitrary
  * config methods. Such members to be injected are detected through a Java 5 annotation: by default, Spring's
  * {@link Autowired} annotation.
- * 
  * <p>
  * Only one constructor (at max) of any given bean class may carry this annotation with the 'required' parameter set to
  * <code>true</code>, indicating <i>the</i> constructor to autowire when used as a Spring bean. If multiple
@@ -48,24 +47,20 @@ import org.springframework.util.ReflectionUtils;
  * constructor with the greatest number of dependencies that can be satisfied by matching beans in the Spring container
  * will be chosen. If none of the candidates can be satisfied, then a default constructor (if present) will be used. An
  * annotated constructor does not have to be public.
- * 
  * <p>
  * Fields are injected right after construction of a bean, before any config methods are invoked. Such a config field
  * does not have to be public.
- * 
  * <p>
  * Config methods may have an arbitrary name and any number of arguments; each of those arguments will be autowired with
  * a matching bean in the Spring container. Bean property setter methods are effectively just a special case of such a
  * general config method. Such config methods do not have to be public.
- * 
  * <p>
  * Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
- * 
  * <p>
  * Note: A default AutowiredAnnotationBeanPostProcessor will be registered by the "context:annotation-config" and
  * "context:component-scan" XML tags. Remove or turn off the default annotation configuration there if you intend to
  * specify a custom AutowiredAnnotationBeanPostProcessor bean definition.
- * 
+ * @author Christian Dupuis
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5

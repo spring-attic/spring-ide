@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2009, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -33,11 +33,9 @@ import org.w3c.dom.NodeList;
 
 /**
  * {@link IAspectDefinitionBuilder} that takes a
- * 
  * <pre>
  * tx:annotation-config
  * </pre>
- * 
  * element and converts this into AOP references.
  * @author Christian Dupuis
  * @since 2.2.7

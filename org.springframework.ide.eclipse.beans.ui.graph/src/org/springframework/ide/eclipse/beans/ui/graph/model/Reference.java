@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2004, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -19,10 +19,10 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 /**
  * This edge connect two beans. Optionally a node (constructor argument or property) describing the
  * origin of this edge can be attached.
- * @see org.springframework.ide.eclipse.beans.ui.graph.model.Bean
- * @see org.eclipse.draw2d.graph.Node
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @see org.springframework.ide.eclipse.beans.ui.graph.model.Bean
+ * @see org.eclipse.draw2d.graph.Node
  */
 public class Reference extends Edge implements IAdaptable {
 

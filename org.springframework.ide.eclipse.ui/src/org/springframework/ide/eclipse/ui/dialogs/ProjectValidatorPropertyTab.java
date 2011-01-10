@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -65,6 +65,8 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  * UI component that enables the use to enable and disable {@link IValidator}s and {@link IValidationRule}s on a per
  * project basis.
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
+ * @author Terry Hon
  * @since 2.0
  */
 public class ProjectValidatorPropertyTab {

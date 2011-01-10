@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 /**
  * Utility class provides methods to trigger content assist for package and class content assist requests.
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @since 1.3.6
  */
 @SuppressWarnings("restriction")

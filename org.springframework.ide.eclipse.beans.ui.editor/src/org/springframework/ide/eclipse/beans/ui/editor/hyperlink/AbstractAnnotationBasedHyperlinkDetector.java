@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2008, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -25,8 +25,7 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
 /**
- * Abstract {@link IAnnotationBasedHyperlinkDetector} super class that handles resolving the {@link ToolAnnotationData}
- * and then delegates to {@link #createHyperlink} for producing the {@link IHyperlink} instances.
+ * Abstract {@link IAnnotationBasedHyperlinkDetector} super class that handles resolving the {@link ToolAnnotationData}and then delegates to {@link #createHyperlink} for producing the {@link IHyperlink} instances.
  * @author Christian Dupuis
  * @since 2.0.3
  */

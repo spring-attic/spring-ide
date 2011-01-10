@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2008, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -36,12 +36,12 @@ import org.w3c.dom.Node;
  * <li>a namespace handler provided by the Spring framework</li>
  * <li>a namespace handler contributed via the extension point
  * <code>org.springframework.ide.eclipse.beans.core.namespaces</code></li>
- * <li>a namespace handler resolved by a NemespaceHandlerResolver published as OSGi service</li> *
+ * <li>a namespace handler resolved by a NemespaceHandlerResolver published as OSGi service</li> 
  * <li>a {@link ToolAnnotationBasedNamespaceHandler}</li>
  * </ol>
  * *
- * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @since 2.0.3
  */
 public class DelegatingNamespaceHandlerResolver extends DefaultNamespaceHandlerResolver {

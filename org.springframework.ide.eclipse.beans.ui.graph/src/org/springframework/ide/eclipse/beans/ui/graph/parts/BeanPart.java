@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2004, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -34,6 +34,10 @@ import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * @author Torsten Juergeleit
+ * @author Christian Dupuis
+ */
 public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart {
 
 	public Bean getBean() {

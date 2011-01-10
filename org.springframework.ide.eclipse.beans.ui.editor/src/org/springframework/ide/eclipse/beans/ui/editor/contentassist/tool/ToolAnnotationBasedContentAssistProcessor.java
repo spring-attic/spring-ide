@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2008, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -35,24 +35,20 @@ import org.w3c.dom.Node;
  * namespace annotations.
  * <p>
  * Adding the following annotation will trigger a bean reference content assist search:
- * 
  * <pre>
  * &lt;tool:annotation kind=“ref”&gt;
- *    &lt;tool:expected-type type=“org.springframework.aop.Pointcut”/&gt;
+ * &lt;tool:expected-type type=“org.springframework.aop.Pointcut”/&gt;
  * &lt;/tool:annotation&gt;
  * </pre>
- * 
  * <p>
  * The following will launch the class, package and interface content assist. Depending on the assignable-to value that
  * proposals might be further narrowed to those implementing the interface specified:
- * 
  * <pre>
  * &lt;tool:annotation&gt;
- *    &lt;tool:expected-type type=“java.lang.Class”/&gt;
- *    &lt;tool:assignable-to type=“java.util.List”/&gt;
+ * &lt;tool:expected-type type=“java.lang.Class”/&gt;
+ * &lt;tool:assignable-to type=“java.util.List”/&gt;
  * &lt;/tool:annotation&gt;
  * </pre>
- * 
  * @author Christian Dupuis
  * @since 2.0.3
  */

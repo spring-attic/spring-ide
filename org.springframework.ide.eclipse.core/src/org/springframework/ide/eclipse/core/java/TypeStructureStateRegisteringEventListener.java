@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2008, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -35,11 +35,10 @@ import org.springframework.ide.eclipse.core.project.ProjectContributionEventList
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link IProjectContributionEventListener} implementation that manages the lifecycle of the {@link TypeStructureCache}
- * .
+ * {@link IProjectContributionEventListener} implementation that manages the lifecycle of the {@link TypeStructureCache}.
  * @author Christian Dupuis
  * @since 2.2.0
- * @see #updateTypeStructures(int, IProject, IResourceDelta)
+ * @see #updateTypeStructures(int,IProject,IResourceDelta)
  */
 public class TypeStructureStateRegisteringEventListener extends ProjectContributionEventListenerAdapter implements Ordered {
 

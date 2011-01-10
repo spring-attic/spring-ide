@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2008, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -21,8 +21,7 @@ import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectContributionEventListenerAdapter;
 
 /**
- * {@link IProjectContributionEventListener} implementation that prepares and registers a {@link BeansTypeHierachyState}
- * to make complex class -> bean dependency calculations accessible for subsequent requests.
+ * {@link IProjectContributionEventListener} implementation that prepares and registers a {@link BeansTypeHierachyState}to make complex class -> bean dependency calculations accessible for subsequent requests.
  * @author Christian Dupuis
  * @since 2.2.0
  */

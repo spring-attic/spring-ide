@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2006, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -24,6 +24,7 @@ import org.xml.sax.SAXNotSupportedException;
 /**
  * A {@link DocumentLoader} implementation which loads {@link Document documents} using Apache's Xerces XML parser.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @auhtor Christian Dupuis
  */
 public class XercesDocumentLoader implements DocumentLoader {

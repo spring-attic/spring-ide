@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -12,6 +12,10 @@ package org.springframework.ide.eclipse.beans.ui.editor.templates;
 
 import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 
+/**
+ * @author Christian Dupuis
+ * @author Torsten Juergeleit
+ */
 public interface BeansTemplateContextTypeIds {
 
 	public static final String PREFIX = Activator.PLUGIN_ID

@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -22,9 +22,9 @@ import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
  * The workbench will automatically create instances of this class as required. It is not intended to be instantiated or
  * subclassed by the client.
  * </p>
- * 
- * @see org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
+ * @see org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput
  */
 public class GraphEditorInputFactory implements IElementFactory {
 

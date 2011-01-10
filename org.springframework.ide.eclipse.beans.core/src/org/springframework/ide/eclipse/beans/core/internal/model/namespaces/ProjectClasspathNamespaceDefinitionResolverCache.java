@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -21,7 +21,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-
+
+/**
+ * @author Christian Dupuis
+ */
 public class ProjectClasspathNamespaceDefinitionResolverCache {
 
 	private static final int CACHE_SIZE = 12;

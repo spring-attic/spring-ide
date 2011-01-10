@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2004, 2007 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -21,16 +21,15 @@ import org.xml.sax.InputSource;
 /**
  * EntityResolver implementation for the Spring beans DTD,
  * to load the DTD from the Spring class path (or JAR file).
- *
  * <p>Fetches "spring-beans-2.0.dtd" from the class path resource
  * "/org/springframework/beans/factory/xml/spring-beans-2.0.dtd",
  * no matter whether specified as some local URL that includes "spring-beans"
  * in the DTD name or as
  * "http://www.springframework.org/dtd/spring-beans-2.0.dtd".
- *
+ * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
- * @author Torsten Juergeleit
  */
 public class BeansDtdResolver implements EntityResolver {
 

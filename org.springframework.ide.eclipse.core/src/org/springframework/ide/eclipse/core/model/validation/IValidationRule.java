@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -20,23 +20,19 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * <p>
  * A {@link IValidationRule} implementation can be configured by using the
  * following syntax from within the <code>plugin.xml</code>:
- * 
  * <pre>
  * &lt;rule id=&quot;methodOverride&quot;
- *      class=&quot;FooRule&quot;
- *      name=&quot;Foo Rule&quot;
- *      description=&quot;Bar&quot; &gt;
- *      &lt;property name=&quot;threshold&quot; value=&quot;50&quot; /&gt;
- *  &lt;/rule&gt;
+ * class=&quot;FooRule&quot;
+ * name=&quot;Foo Rule&quot;
+ * description=&quot;Bar&quot; &gt;
+ * &lt;property name=&quot;threshold&quot; value=&quot;50&quot; /&gt;
+ * &lt;/rule&gt;
  * </pre>
- * 
  * This requires the implementation class to have the following setter method:
- * 
  * <pre>
  * public void setThreshold(int threshold) {
  * }
  * </pre>
- * 
  * Type conversions are being handled automatically by underlying Spring
  * BeanWrapper implementation.
  * @author Torsten Juergeleit

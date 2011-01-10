@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2004, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -30,10 +30,11 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * This editor input is used to specify the list of {@link IBean}s which should be displayed in the beans graph editor.
- * Therefore a source model model element ({@link IBean}>, {@link IBeanConfig} or {@link IBeanConfigSet}) has to be
+ * Therefore a source model model element (
+ * {@link IBean}>, {@link IBeanConfig} or {@link IBeanConfigSet}) has to be
  * specified. For a given bean it's parent bean (for child beans only), constructor argument values and property values
- * are checked. {@link IBean} look-up is done from the specified context ({@link IBeanConfig} or {@link IBeanConfigSet}
- * ). This list of beans is accessible via {@link #getBeans()}. This context used for bean look-up is accessible via
+ * are checked. {@link IBean} look-up is done from the specified context (
+ * {@link IBeanConfig} or {@link IBeanConfigSet}). This list of beans is accessible via {@link #getBeans()}. This context used for bean look-up is accessible via
  * {@link #getContext()}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis

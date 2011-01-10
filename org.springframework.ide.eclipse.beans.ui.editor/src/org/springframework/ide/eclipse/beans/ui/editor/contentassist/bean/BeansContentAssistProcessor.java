@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -44,8 +44,9 @@ import org.w3c.dom.Node;
 
 /**
  * {@link INamespaceContentAssistProcessor} implementation responsible for the standard <code>bean:*</code> namespace.
- * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
+ * @author Terry Hon
  */
 @SuppressWarnings("restriction")
 public class BeansContentAssistProcessor extends NamespaceContentAssistProcessorSupport {

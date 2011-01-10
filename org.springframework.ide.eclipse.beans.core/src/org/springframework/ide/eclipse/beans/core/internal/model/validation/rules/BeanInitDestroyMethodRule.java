@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
 
 /**
  * Validates a given {@link IBean}'s init and destroy method. Skips factory beans.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0

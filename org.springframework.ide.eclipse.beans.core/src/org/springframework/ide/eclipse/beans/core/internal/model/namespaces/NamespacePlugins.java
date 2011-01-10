@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2009, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -30,16 +30,13 @@ import org.xml.sax.SAXException;
 
 /**
  * Spring schema handler/resolver for OSGi environments.
- * 
  * Besides delegation this class also does type filtering to avoid wiring the wrong bundle if multiple versions of the
  * same library (which support the same schema) are available.
- * 
  * Additionally, lazy handlers are supported so that they are checked (and thus loaded) only if no previous handler has
  * been able to satisfy the request.
- * 
+ * @author Christian Dupuis
  * @author Hal Hildebrand
  * @author Costin Leau
- * @author Christian Dupuis
  */
 public class NamespacePlugins implements NamespaceHandlerResolver, EntityResolver, DisposableBean {
 

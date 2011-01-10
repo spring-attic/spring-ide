@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2008, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -23,8 +23,8 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryType;
  * Implementation that can hold structural information about Java class files.
  * <p>
  * Used to check if class files have changes since the last build.
- * @author Andy Clement
  * @author Christian Dupuis
+ * @author Andy Clement
  * @since 2.2.0
  */
 @SuppressWarnings("restriction")

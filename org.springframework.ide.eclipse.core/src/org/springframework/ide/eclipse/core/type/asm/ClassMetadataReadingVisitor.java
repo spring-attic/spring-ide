@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2007 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -19,11 +19,11 @@ import org.springframework.util.ClassUtils;
  * ASM class visitor which looks only for the class name and implemented types,
  * exposing them through the
  * {@link org.springframework.ide.eclipse.core.type.ClassMetadata} interface.
+ * @author Christian Dupuis
  * @author Rod Johnson
  * @author Costin Leau
  * @author Mark Fisher
  * @author Ramnivas Laddad
- * @author Christian Dupuis
  * @since 2.0.2
  * @see AnnotationMetadataReadingVisitor
  */

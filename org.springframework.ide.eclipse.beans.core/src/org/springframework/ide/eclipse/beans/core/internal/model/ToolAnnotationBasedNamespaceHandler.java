@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2008, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -50,29 +50,24 @@ import org.w3c.dom.NodeList;
  * {@link NamespaceHandler} that creates {@link BeanDefinition}s based on Spring's tool namespace.
  * <p>
  * The following annotation is currently supported:
- * 
  * <pre>
  * &lt;xsd:element name=&quot;foobar&quot;&gt;
- *     &lt;xsd:annotation&gt;
- *         &lt;xsd:appinfo&gt;
- *             &lt;tool:annotation&gt;
- *                 &lt;tool:exports type=&quot;com.foo.Bar&quot;/&gt;
- *             &lt;/tool:annotation&gt;
- *         &lt;/xsd:appinfo&gt;
- *     &lt;/xsd:annotation&gt;
- *     ...
- *  &lt;/xsd:element&gt;
+ * &lt;xsd:annotation&gt;
+ * &lt;xsd:appinfo&gt;
+ * &lt;tool:annotation&gt;
+ * &lt;tool:exports type=&quot;com.foo.Bar&quot;/&gt;
+ * &lt;/tool:annotation&gt;
+ * &lt;/xsd:appinfo&gt;
+ * &lt;/xsd:annotation&gt;
+ * ...
+ * &lt;/xsd:element&gt;
  * </pre>
- * 
  * Using the above XSD definition in the following form
- * 
  * <pre>
  * &lt;foobar id=&quot;foobeanchen&quot; /&gt;
  * </pre>
- * 
  * would create a BeanDefinition with bean class <code>com.foo.Bar</code> and id
  * <code>foobeanchen</code>.
- * 
  * @author Christian Dupuis
  * @since 2.0.3
  */

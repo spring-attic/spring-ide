@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2004, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -60,6 +60,7 @@ import org.springframework.util.ObjectUtils;
  * <p>
  * The information can be persisted by calling the method {@link #saveDescription()}.
  * @author Torsten Juergeleit
+ * @author Dave Watkins
  * @author Christian Dupuis
  */
 public class BeansProject extends AbstractResourceModelElement implements IBeansProject, ILazyInitializedModelElement {

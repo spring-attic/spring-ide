@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -19,8 +19,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
- * This {@link ILabelProvider}Êdelegates to the {@link BeansModelLabelProvider}
- * and uses the {@link IBeansConfig}'s name.
+ * This {@link ILabelProvider}Êdelegates to the {@link BeansModelLabelProvider}and uses the {@link IBeansConfig}'s name.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0

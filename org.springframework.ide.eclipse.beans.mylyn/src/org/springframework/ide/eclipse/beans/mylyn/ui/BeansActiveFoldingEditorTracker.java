@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -26,8 +26,7 @@ import org.springframework.ide.eclipse.beans.mylyn.core.BeansContextStructureBri
  * {@link AbstractEditorTracker} extension that registers
  * {@link BeansActiveFoldingListener} for every open {@link IBeansConfig}.
  * <p>
- * {@link #editorShouldBeRegistered(XMLMultiPageEditorPart)} determines if a 
- * {@link IFileEditorInput} is actually a {@link IBeansConfig}.
+ * {@link #editorShouldBeRegistered(XMLMultiPageEditorPart)} determines if a {@link IFileEditorInput} is actually a {@link IBeansConfig}.
  * @author Christian Dupuis
  * @since 2.0
  */

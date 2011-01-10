@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -12,16 +12,16 @@ package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-/** 
+/**
  * This interface is implemented by objects that visit model element trees.
  * <p> 
  * Usage:
  * <pre>
  * class Visitor implements IModelElementVisitor {
- *    public boolean visit(IModelElement element, IProgressMonitor) {
- *       // your code here
- *       return true;
- *    }
+ * public boolean visit(IModelElement element, IProgressMonitor) {
+ * // your code here
+ * return true;
+ * }
  * }
  * IModelElement root = ...;
  * root.accept(new Visitor(), monitor);
@@ -30,9 +30,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * <p>
  * Clients may implement this interface.
  * </p>
- *
- * @see IModelElement#accept(IModelElementVisitor, IProgressMonitor)
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
+ * @see IModelElement#accept(IModelElementVisitor,IProgressMonitor)
  */
 public interface IModelElementVisitor {
 

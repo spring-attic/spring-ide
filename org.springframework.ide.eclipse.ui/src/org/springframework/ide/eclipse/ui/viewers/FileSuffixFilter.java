@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2004, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -24,7 +24,6 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 /**
  * Viewer filter for file selection dialogs. The filter is not case sensitive. Folders are only shown if, searched
  * recursively, contain at least one file which has one of the specified file suffixes.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */

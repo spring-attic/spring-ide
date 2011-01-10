@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -20,15 +20,13 @@ import org.eclipse.jdt.core.IMethod;
  * <p>
  * E.g. this class is useful to combine two {@link FlagsMethodFilter} in order
  * to filter methods that are either public or protected:
- * 
  * <pre>
- * 		OrMethodFilter filter = new OrMethodFilter();
- * 		filter.addMethodFilter(new FlagsMethodFilter(FlagsMethodFilter.PUBLIC, 
- * 			0));
- * 		filter.addMethodFilter(new FlagsMethodFilter(FlagsMethodFilter.PROTECTED,
- * 			0));
+ * OrMethodFilter filter = new OrMethodFilter();
+ * filter.addMethodFilter(new FlagsMethodFilter(FlagsMethodFilter.PUBLIC, 
+ * 0));
+ * filter.addMethodFilter(new FlagsMethodFilter(FlagsMethodFilter.PROTECTED,
+ * 0));
  * </pre>
- * 
  * @author Christian Dupuis
  * @since 2.0.2
  */

@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2009, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -48,14 +48,12 @@ import org.springframework.util.StringUtils;
  * {@link IInjectionMetadataProvider} implementation that supports common Java annotations out of the box, in particular
  * the JSR-250 annotations in the <code>javax.annotation</code> package. These common Java annotations are supported in
  * many Java EE 5 technologies (e.g. JSF 1.2), as well as in Java 6's JAX-WS.
- * 
  * <p>
  * The central element is the {@link javax.annotation.Resource} annotation for annotation-driven injection of named
  * beans, by default from the containing Spring BeanFactory, with only <code>mappedName</code> references resolved in
  * JNDI. The {@link #setAlwaysUseJndiLookup "alwaysUseJndiLookup" flag} enforces JNDI lookups equivalent to standard
  * Java EE 5 resource injection for <code>name</code> references and default names as well. The target beans can be
  * simple POJOs, with no special requirements other than the type having to match.
- * 
  * <p>
  * The JAX-WS {@link javax.xml.ws.WebServiceRef} annotation is supported too, analogous to
  * {@link javax.annotation.Resource} but with the capability of creating specific JAX-WS service endpoints. This may
@@ -63,42 +61,34 @@ import org.springframework.util.StringUtils;
  * Finally, this post-processor also supports the EJB 3 {@link javax.ejb.EJB} annotation, analogous to
  * {@link javax.annotation.Resource} as well, with the capability to specify both a local bean name and a global JNDI
  * name for fallback retrieval. The target beans can be plain POJOs as well as EJB 3 Session Beans in this case.
- * 
  * <p>
  * The common annotations supported by this post-processor are available in Java 6 (JDK 1.6) as well as in Java EE 5
  * (which provides a standalone jar for its common annotations as well, allowing for use in any Java 5 based
  * application). Hence, this post-processor works out of the box on JDK 1.6, and requires the JSR-250 API jar (and
  * optionally the JAX-WS API jar and/or the EJB 3 API jar) to be added to the classpath on JDK 1.5 (when running outside
  * of Java EE 5).
- * 
  * <p>
  * For default usage, resolving resource names as Spring bean names, simply define the following in your application
  * context:
- * 
  * <pre class="code">
  * &lt;bean class=&quot;org.springframework.context.annotation.CommonAnnotationBeanPostProcessor&quot;/&gt;
  * </pre>
- * 
  * For direct JNDI access, resolving resource names as JNDI resource references within the Java EE application's
  * "java:comp/env/" namespace, use the following:
- * 
  * <pre class="code">
  * &lt;bean class=&quot;org.springframework.context.annotation.CommonAnnotationBeanPostProcessor&quot;&gt;
- *   &lt;property name=&quot;alwaysUseJndiLookup&quot; value=&quot;true&quot;/&gt;
+ * &lt;property name=&quot;alwaysUseJndiLookup&quot; value=&quot;true&quot;/&gt;
  * &lt;/bean&gt;
  * </pre>
- * 
  * <code>mappedName</code> references will always be resolved in JNDI, allowing for global JNDI names (including "java:"
  * prefix) as well. The "alwaysUseJndiLookup" flag just affects <code>name</code> references and default names (inferred
  * from the field name / property name).
- * 
  * <p>
  * <b>NOTE:</b> A default CommonAnnotationBeanPostProcessor will be registered by the "context:annotation-config" and
  * "context:component-scan" XML tags. Remove or turn off the default annotation configuration there if you intend to
  * specify a custom CommonAnnotationBeanPostProcessor bean definition!
- * 
- * @author Juergen Hoeller
  * @author Christian Dupuis
+ * @author Juergen Hoeller
  * @since 2.2.7
  */
 @SuppressWarnings("unchecked")

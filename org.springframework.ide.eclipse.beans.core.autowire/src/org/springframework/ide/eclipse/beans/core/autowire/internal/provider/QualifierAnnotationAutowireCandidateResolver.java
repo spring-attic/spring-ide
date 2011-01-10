@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2009 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -35,9 +35,8 @@ import org.springframework.util.ObjectUtils;
  * {@link AutowireCandidateResolver} implementation that matches bean definition qualifiers
  * against {@link Qualifier qualifier annotations} on the field or parameter to be autowired.
  * Also supports suggested expression values through a {@link Value value} annotation.
- *
  * <p>Also supports JSR-330's {@link javax.inject.Qualifier} annotation, if available.
- *
+ * @author Christian Dupuis
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5

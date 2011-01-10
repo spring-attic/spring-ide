@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2009, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -74,11 +74,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link IAutowireDependencyResolver} capable of processing Spring's {@link Autowired}, {@link EJB}, {@link Resource}
- * annotations.
+ * {@link IAutowireDependencyResolver} capable of processing Spring's {@link Autowired}, {@link EJB}, {@link Resource}annotations.
  * <p>
  * This class is the entry point into autowiring resolution within Spring IDE.
  * @author Christian Dupuis
+ * @author Terry Hon
  * @since 2.2.7
  */
 public class AutowireDependencyProvider implements IAutowireDependencyResolver {

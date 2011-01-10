@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * This class defines the project nature with the corresponding incremental
  * builders for Spring projects.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class SpringProjectNature implements IProjectNature {
 

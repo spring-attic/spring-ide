@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2004, 2007 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -44,6 +44,9 @@ import org.eclipse.jdt.launching.JavaRuntime;
  * This is a modified version of the TestProject class written by Erich Gamma
  * and Kent Beck and described in their book
  * "Contributing to Eclipse: Principles, Patterns, and Plug-Ins"
+ * @author Loren Rosen
+ * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class TestProject {
 
