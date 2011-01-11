@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,9 +62,7 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 
 		public void elementChanged(ElementChangedEvent event) {
 			for (IJavaElementDelta delta : event.getDelta().getAffectedChildren()) {
-				if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
-						|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0
-						|| (delta.getFlags() & IJavaElementDelta.F_OPENED) != 0) {
+				if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0) {
 					final IJavaElement source = delta.getElement();
 					if (source instanceof IJavaProject) {
 						Job update = new Job(String.format("Recording usage data for '%s'", source.getElementName())) {

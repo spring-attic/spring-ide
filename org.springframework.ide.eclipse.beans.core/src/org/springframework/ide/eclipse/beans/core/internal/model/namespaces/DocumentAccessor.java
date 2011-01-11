@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 Spring IDE Developers
+ * Copyright (c) 2009, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,15 +29,21 @@ public class DocumentAccessor {
 	
 	private Stack<Node> elements = new Stack<Node>();
 	
+	private Node lastElement = null;
+	
+	private Document lastDocument = null;
+	
 	private Map<Document, SchemaLocations> schemaLocations = new HashMap<Document, SchemaLocations>(); 
 
 	/** Push a new document onto the internal stack structure */
 	public void pushDocument(Document doc) {
+		lastDocument = doc;
 		documents.push(doc);
 	}
 	
 	/** Push a new element onto the internal stack structure */
 	public void pushElement(Node element) {
+		lastElement = element;
 		elements.push(element);
 	}
 
@@ -49,12 +55,22 @@ public class DocumentAccessor {
 		return null;
 	}
 	
+	/** Retuns the last procssed document */
+	public Document getLastDocument() {
+		return lastDocument;
+	}
+	
 	/** Returns the current element; meaning the first element in the stack */
 	public Node getCurrentElement() {
 		if (!elements.isEmpty()) {
 			return elements.peek();
 		}
 		return null;
+	}
+	
+	/** Returns the last processed element */
+	public Node getLastElement() {
+		return lastElement;
 	}
 	
 	/** Returns the current values of the schemaLocation attribute */

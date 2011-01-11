@@ -137,10 +137,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
 	/** The resource that is currently being processed or null if non is processed */
-	private transient IResource currentResource = null;
+	private volatile IResource currentResource = null;
 
 	/** The resource that is currently being processed or null if non is processed; just a different type then the above */
-	private transient EncodedResource currentEncodedResource;
+	private volatile EncodedResource currentEncodedResource;
 
 	/** {@link IBeansConfigPostProcessor}s that are detected in this configs beans and component map */
 	private volatile Set<IBeansConfigPostProcessor> ownPostProcessors = new HashSet<IBeansConfigPostProcessor>();
@@ -152,8 +152,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * {@link IBeansConfigPostProcessor}s that have been contributed by external {@link IBeansConfig} from other
 	 * {@link IBeansConfigSet}
 	 */
-	private volatile Map<IBeansConfigPostProcessor, Set<IBeansConfig>> externalPostProcessors = 
-		new ConcurrentHashMap<IBeansConfigPostProcessor, Set<IBeansConfig>>();
+	private volatile Map<IBeansConfigPostProcessor, Set<IBeansConfig>> externalPostProcessors = new ConcurrentHashMap<IBeansConfigPostProcessor, Set<IBeansConfig>>();
 
 	/** {@link Resource} implementation to be passed to Spring core for reading */
 	private volatile Resource resource;
@@ -407,10 +406,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setDocumentReaderClass(ToolingFriendlyBeanDefinitionDocumentReader.class);
 					reader.setBeanNameGenerator(beanNameGenerator);
 
+					final Map<Throwable, Integer> throwables = new HashMap<Throwable, Integer>();
 					try {
-
-						final Set<Throwable> throwables = new HashSet<Throwable>();
-
 						Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
 
 							public Integer call() {
@@ -428,7 +425,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 								}
 								catch (Exception e) {
 									// Record the exception to throw it later
-									throwables.add(e);
+									throwables.put(e, LineNumberPreservingDOMParser.getStartLineNumber(documentAccessor
+											.getLastElement()));
 								}
 								return 0;
 							}
@@ -445,7 +443,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 							// if we recored an exception use this instead of stupid concurrent exception
 							if (throwables.size() > 0) {
-								throw throwables.iterator().next();
+								throw throwables.keySet().iterator().next();
 							}
 						}
 						catch (TimeoutException e) {
@@ -458,11 +456,29 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						}
 					}
 					catch (Throwable e) {
+						int line = -1;
+						if (throwables.containsKey(e)) {
+							line = throwables.get(e);
+						}
 						// Skip SAXParseExceptions because they're already handled by the SAX ErrorHandler
-						if (!(e.getCause() instanceof SAXParseException)
+						if (e instanceof BeanDefinitionStoreException) {
+							if (e.getCause() != null) {
+								problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, String.format(
+										"Error occured processing XML '%s'. See Error Log for more details", e.getCause().getMessage()), file, line));
+								BeansCorePlugin.log(new Status(IStatus.INFO, BeansCorePlugin.PLUGIN_ID, String.format(
+										"Error occured processing '%s'", file.getFullPath()), e.getCause()));
+							}
+							else {
+								problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(), file, line));
+								BeansCorePlugin.log(new Status(IStatus.INFO, BeansCorePlugin.PLUGIN_ID, String.format(
+										"Error occured processing '%s'", file.getFullPath()), e));
+							}
+						}
+						else if (!(e.getCause() instanceof SAXParseException)
 								&& !(e instanceof BeanDefinitionParsingException)) {
-							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(), file, -1));
-							BeansCorePlugin.log(e);
+							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e.getMessage(), file, line));
+							BeansCorePlugin.log(new Status(IStatus.INFO, BeansCorePlugin.PLUGIN_ID, String.format(
+									"Error occured processing '%s'", file.getFullPath()), e));
 						}
 					}
 				}
