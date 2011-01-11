@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * Validation helper methods.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0
  */
 public final class ValidationUtils {

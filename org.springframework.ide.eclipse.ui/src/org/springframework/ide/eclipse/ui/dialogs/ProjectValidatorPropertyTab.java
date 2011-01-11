@@ -66,7 +66,7 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  * project basis.
  * @author Christian Dupuis
  * @author Torsten Juergeleit
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0
  */
 public class ProjectValidatorPropertyTab {

@@ -46,7 +46,7 @@ import org.w3c.dom.Node;
  * {@link INamespaceContentAssistProcessor} implementation responsible for the standard <code>bean:*</code> namespace.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  */
 @SuppressWarnings("restriction")
 public class BeansContentAssistProcessor extends NamespaceContentAssistProcessorSupport {

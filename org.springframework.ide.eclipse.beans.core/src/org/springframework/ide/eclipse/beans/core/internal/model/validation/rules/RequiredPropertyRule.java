@@ -45,7 +45,7 @@ import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 /**
  * Validates a given {@link IBean}'s if all {@link Required} annotated properties are configured.
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0.1
  */
 public class RequiredPropertyRule extends AbstractBeanValidationRule {

@@ -18,7 +18,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAt
 /**
  * Package-level no op implementation of {@link IInjectionMetadataProviderProblemReporter}.
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.2.7
  */
 class PassThroughProblemReporter implements IInjectionMetadataProviderProblemReporter {

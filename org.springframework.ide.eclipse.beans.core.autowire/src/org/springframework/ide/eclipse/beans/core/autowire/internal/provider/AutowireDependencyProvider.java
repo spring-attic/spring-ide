@@ -78,7 +78,7 @@ import org.springframework.util.StringUtils;
  * <p>
  * This class is the entry point into autowiring resolution within Spring IDE.
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.2.7
  */
 public class AutowireDependencyProvider implements IAutowireDependencyResolver {

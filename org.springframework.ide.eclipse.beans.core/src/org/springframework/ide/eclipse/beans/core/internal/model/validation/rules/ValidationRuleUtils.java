@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * Helpers for validation rules.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0
  */
 public final class ValidationRuleUtils {

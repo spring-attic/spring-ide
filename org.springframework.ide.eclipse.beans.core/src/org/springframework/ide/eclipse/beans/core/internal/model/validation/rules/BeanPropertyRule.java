@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * Validates a given {@link IBeanProperty}'s accessor methods in bean class.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0
  */
 public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRule implements

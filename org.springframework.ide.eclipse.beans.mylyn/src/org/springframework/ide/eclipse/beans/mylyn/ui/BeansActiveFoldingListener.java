@@ -45,7 +45,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * {@link IInteractionContextListener} that handles collapsing and expanding of XML nodes in the
  * {@link XMLMultiPageEditorPart}.
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0.1
  */
 @SuppressWarnings( { "restriction", "deprecation" })

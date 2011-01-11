@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAt
  * Base class for valdating a given {@link IBean}'s methods.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0
  */
 public abstract class AbstractBeanMethodValidationRule extends AbstractBeanValidationRule {

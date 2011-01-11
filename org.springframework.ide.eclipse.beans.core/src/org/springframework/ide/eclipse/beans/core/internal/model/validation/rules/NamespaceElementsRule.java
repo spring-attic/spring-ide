@@ -52,7 +52,7 @@ import org.w3c.dom.NodeList;
  * <li>osgi:interfaces value</li>
  * </ul>
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.2.7
  */
 public class NamespaceElementsRule extends AbstractXmlValidationRule {

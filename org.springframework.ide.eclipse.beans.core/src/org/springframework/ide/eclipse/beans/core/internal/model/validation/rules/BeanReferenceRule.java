@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  * references for infrastructure beans.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0
  */
 public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IBeansValidationContext> {

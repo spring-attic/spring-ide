@@ -46,7 +46,7 @@ import org.w3c.dom.NodeList;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @author Martin Lippert
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0
  */
 @SuppressWarnings("restriction")

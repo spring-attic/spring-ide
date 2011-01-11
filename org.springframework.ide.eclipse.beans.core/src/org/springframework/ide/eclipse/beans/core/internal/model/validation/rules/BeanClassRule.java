@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * Note: this implementation also skips class names from the Spring DM framework.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Terry Hon
+ * @author Terry Denney
  * @since 2.0
  */
 public class BeanClassRule extends AbstractBeanValidationRule {

@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * {@link IContentAssistCalculator} implementation that calculates proposals for constructor arg names.
- * @author Terry Hon
+ * @author Terry Denney
  * @author Christian Dupuis
  * @since 2.0.2
  */
