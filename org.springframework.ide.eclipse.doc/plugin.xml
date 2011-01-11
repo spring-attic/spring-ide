@@ -15,7 +15,7 @@
 <plugin
    id="org.springframework.ide.eclipse.doc"
    name="%pluginName"
-   version="2.5.2.qualifier"
+   version="2.6.0.qualifier"
    provider-name="%providerName">
 
    <runtime>
