@@ -29,8 +29,8 @@ fi
 ECLIPSE_TEMP_NAME=eclipse-base.tar.gz
 ECLIPSE_TEST_DISTRO_URL=http://gulus.usherbrooke.ca/pub/appl/eclipse/eclipse/downloads/drops/R-3.3.1.1-200710231652/eclipse-Automated-Tests-3.3.1.1.zip
 
-MYLYN_UPDATE_SITE_URL=http://eclipse.unixheads.org/eclipse/tools/mylyn/update/e3.4/
-AJDT_UPDATE_SITE_URL=http://eclipse.unixheads.org/eclipse/tools/ajdt/36/dev/update
+MYLYN_UPDATE_SITE_URL=http://download.eclipse.org/tools/mylyn/update/e3.4/
+AJDT_UPDATE_SITE_URL=http://download.eclipse.org/tools/ajdt/36/dev/update
 
 #-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y
 
