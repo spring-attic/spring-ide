@@ -277,51 +277,40 @@ public class ConfigSetDialog extends Dialog {
 	private List<IBeansConfig> createConfigList() {
 
 		// Create new list with all config files from this config set
-		List<IBeansConfig> configs = new ArrayList<IBeansConfig>(configSet
-				.getConfigs());
+		List<IBeansConfig> configs = new ArrayList<IBeansConfig>(configSet.getConfigs());
 
-		// Add missing configs from project
-		for (IBeansConfig config : project.getConfigs()) {
-			if (!configSet.hasConfig(config.getElementName())) {
-				configs.add(new BeansConfig(project, config.getElementName(), Type.MANUAL));
-			}
-		}
-		// Add all configs from referenced projects
-		addConfigsFromReferencedProjects(project, configs, new HashSet<IProject>());
+		// Add additional configs from the selected and referenced projects
+		addConfigsFromReferencedProjects(project, configs, new HashSet<IProject>(), false);
 
 		return configs;
 	}
 
-	private void addConfigsFromReferencedProjects(IBeansProject project, List<IBeansConfig> configs, Set<IProject> projects) {
-		if (projects.contains(project.getProject())) {
+	private void addConfigsFromReferencedProjects(IBeansProject beansProject, List<IBeansConfig> configs, Set<IProject> projects, boolean addProjectPath) {
+		if (beansProject == null || projects.contains(beansProject.getProject())) {
 			return;
 		}
-		else {
-			projects.add(project.getProject());
-		}
+		
+		projects.add(beansProject.getProject());
 		IBeansModel model = BeansCorePlugin.getModel();
 		try {
-			for (IProject proj : project.getProject().getProject()
-					.getReferencedProjects()) {
-				IBeansProject bproj = model.getProject(proj);
-				if (bproj != null) {
-					for (IBeansConfig config : bproj.getConfigs()) {
-						String projectPath = ModelUtils.getResourcePath(config
-								.getElementParent());
-						if (projectPath != null) {
+			for (IBeansConfig config : beansProject.getConfigs()) {
+				String projectPath = ModelUtils.getResourcePath(config.getElementParent());
+				if (projectPath != null) {
 
-							// Create the full qualified path of the config
-							// (with support for configs stored in JAR files)  
-							String name = projectPath + "/"
-									+ config.getElementName();
-							if (!configSet.hasConfig(name)) {
-								configs.add(new BeansConfig(project, name, Type.MANUAL));
-							}
-						}
+					// Create the full qualified path of the config
+					// (with support for configs stored in JAR files)
+					// as long as its not the initiating project
+					String name = addProjectPath ? projectPath + "/" + config.getElementName() : config.getElementName();
+					if (!configSet.hasConfig(name)) {
+						configs.add(new BeansConfig(beansProject, name, Type.MANUAL));
 					}
-					// Recursively add configurations to project
-					addConfigsFromReferencedProjects(bproj, configs, projects);
 				}
+			}
+			
+			// Recursively add configurations to project
+			for (IProject proj : beansProject.getProject().getProject().getReferencedProjects()) {
+				IBeansProject referencedProj = model.getProject(proj);
+				addConfigsFromReferencedProjects(referencedProj, configs, projects, true);
 			}
 		} catch (CoreException e) {
 			// We can't do anything here
