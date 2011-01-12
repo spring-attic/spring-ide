@@ -12,9 +12,10 @@ package org.springframework.ide.eclipse.uaa;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -62,7 +63,6 @@ public class UaaPlugin extends AbstractUIPlugin {
 		plugin = this;
 		usageMonitorManager = new UaaManager();
 
-		monitors.clear();
 		monitors.add(new PartUsageMonitor());
 		monitors.add(new CommandUsageMonitor());
 		monitors.add(new LibraryUsageMonitor());
@@ -77,11 +77,8 @@ public class UaaPlugin extends AbstractUIPlugin {
 					SafeRunner.run(new ISafeRunnable() {
 
 						public void handleException(Throwable e) {
-							UaaPlugin
-									.getDefault()
-									.getLog()
-									.log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-											"Error occured starting Spring UAA usage monitor", e));
+							plugin.getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+								"Error occured starting Spring UAA usage monitor", e));
 						}
 
 						public void run() throws Exception {
@@ -90,34 +87,16 @@ public class UaaPlugin extends AbstractUIPlugin {
 					});
 				}
 
-				URL url = DetectedProducts.PRODUCT_URL;
-				RepositoryTransport transport = RepositoryTransport.getInstance();
-				InputStream is = null;
-				try {
-					is = transport.stream(url.toURI(), progressMonitor);
-					DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
-					DetectedProducts.setProducts(is);
-				}
-				catch (Exception e) {
-					plugin.getLog().log(
-							new Status(IStatus.ERROR, UaaPlugin.PLUGIN_ID,
-									"Error downloading Spring UAA detected products", e));
-				}
-				finally {
-					if (is != null) {
-						try {
-							is.close();
-						}
-						catch (IOException e) {
-							// Ignore
-						}
-					}
-				}
+				// Create the download job for DetectedProducts.xml
+				DetectedProductsJob detectedProductsJob = new DetectedProductsJob();
+				// Run it directly once as this jobs schedules itself after each run
+				detectedProductsJob.run(progressMonitor);
+
 				return Status.OK_STATUS;
 			}
 		};
 		startupJob.setSystem(true);
-		startupJob.schedule(1000);
+		startupJob.schedule(2000);
 
 		if (usageMonitorManager.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
 
@@ -151,11 +130,8 @@ public class UaaPlugin extends AbstractUIPlugin {
 			SafeRunner.run(new ISafeRunnable() {
 
 				public void handleException(Throwable e) {
-					UaaPlugin
-							.getDefault()
-							.getLog()
-							.log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-									"Error occured stopping Spring UAA usage monitor", e));
+					plugin.getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+						"Error occured stopping Spring UAA usage monitor", e));
 				}
 
 				public void run() throws Exception {
@@ -172,6 +148,87 @@ public class UaaPlugin extends AbstractUIPlugin {
 
 	public static UaaPlugin getDefault() {
 		return plugin;
+	}
+
+	/**
+	 * {@link Job} implementation that downloads the DetectedProducts.xml file.
+	 */
+	private static class DetectedProductsJob extends Job {
+
+		private static final long TIMEOUT = 3600000; // 1000ms * 60s * 60m
+		private static final int WAIT_TIME = 60; // 60s
+
+		private static final int MAX_ERRORS = 5;
+		private volatile int errorCount = 0;
+
+		public DetectedProductsJob() {
+			super("Initializing Spring UAA detected products");
+		}
+
+		@Override
+		protected IStatus run(final IProgressMonitor monitor) {
+			final CountDownLatch resultLatch = new CountDownLatch(1);
+
+			// Create the download runnable to keep track of used time
+			Runnable downloadRunnable = new Runnable() {
+
+				public void run() {
+					InputStream is = null;
+					try {
+						
+						// Check that we are allowed to update Spring UAA
+						int privacyLevel = UaaPlugin.getUAA().getPrivacyLevel();
+						if (privacyLevel == IUaa.DECLINE_TOU || privacyLevel == IUaa.UNDECIDED_TOU) {
+							return;
+						}
+						
+						RepositoryTransport transport = RepositoryTransport.getInstance();
+						is = transport.stream(DetectedProducts.PRODUCT_URL.toURI(), monitor);
+						DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
+						DetectedProducts.setProducts(is);
+					}
+					catch (Exception e) {
+						errorCount++;
+						plugin.getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+							"Error updating Spring UAA detected products", e));
+					}
+					finally {
+						if (is != null) {
+							try {
+								is.close();
+							}
+							catch (IOException e) {
+								// Ignore
+							}
+						}
+						resultLatch.countDown();
+					}
+				}
+			};
+
+			// Start the download job
+			new Thread(downloadRunnable).start();
+
+			try {
+				// If the latch counted down to zero we assume successful network connection; at
+				// least we assume that we don't get a stale connection in case of mis-configured proxies
+				// which would lead most likely to a timeout
+				if (resultLatch.await(WAIT_TIME, TimeUnit.SECONDS)) {
+					// Schedule again for later but only until we reach the max error count
+					if (errorCount < MAX_ERRORS) {
+						schedule(TIMEOUT);
+						return Status.OK_STATUS;
+					}
+				}
+			}
+			catch (InterruptedException e) {
+				// Ignore
+			}
+
+			plugin.getLog().log(new Status(IStatus.INFO, UaaPlugin.PLUGIN_ID,
+				"Due to potential network connectivity issues Spring UAA will not continue to update its detected products during this session"));
+			return Status.CANCEL_STATUS;
+		}
 	}
 
 }
