@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 Spring IDE Developers
+ * Copyright (c) 2004, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.springframework.util.ObjectUtils;
  * The single instance of {@link IBeansModel} is available from the static method {@link BeansCorePlugin#getModel()}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
 
