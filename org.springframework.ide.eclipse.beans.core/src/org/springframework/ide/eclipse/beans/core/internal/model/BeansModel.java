@@ -118,15 +118,16 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			projects.clear();
 			for (IProject project : SpringCoreUtils.getSpringProjects()) {
 				BeansProject beansProject = new BeansProject(BeansModel.this, project);
-
-				// Eagerly populate the internal structure of the beans project
-				beansProject.accept(new IModelElementVisitor() {
-
+				addProject(beansProject);
+			}
+			
+			// Eagerly populate the internal structure of the beans projects
+			for (IBeansProject beanProject : projects.values()) {
+				beanProject.accept(new IModelElementVisitor() {
 					public boolean visit(IModelElement element, IProgressMonitor monitor) {
 						return element instanceof IBeansProject;
 					}
 				}, new NullProgressMonitor());
-				addProject(beansProject);
 			}
 
 			// Check for update actions
