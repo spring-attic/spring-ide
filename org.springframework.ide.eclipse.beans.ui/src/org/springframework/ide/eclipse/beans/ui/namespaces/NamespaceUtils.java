@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Spring IDE Developers
+ * Copyright (c) 2006, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,10 @@ public class NamespaceUtils {
 	public static final String TOOLS_NAMESPACE_URI = "http://www.springframework.org/schema/tool";
 
 	private static final Object IMAGE_REGISTRY_LOCK = new Object();
+
+	private static final INamespaceDefinition P_NAMESPACE_DEFINITION = new DefaultNamespaceDefinition("p",
+			"http://www.springframework.org/schema/p", null, new DefaultImageAccessor(BeansUIPlugin.PLUGIN_ID,
+					"/icons/full/obj16/property_obj.gif"));
 
 	/**
 	 * Returns the namespace URI for the given {@link ISourceModelElement} or
@@ -221,6 +225,16 @@ public class NamespaceUtils {
 			namespaceDefinitions.add(def);
 		}
 
+		// Remove the tool namespace as we don't want to surface on the UI
+		for (INamespaceDefinition definition : new ArrayList<INamespaceDefinition>(namespaceDefinitions)) {
+			if (TOOLS_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
+				namespaceDefinitions.remove(definition);
+				
+				// Add in p-Namespace if we found the default namespace
+				namespaceDefinitions.add(P_NAMESPACE_DEFINITION);
+			}
+		}
+		
 		Collections.sort(namespaceDefinitions, new Comparator<INamespaceDefinition>() {
 			public int compare(INamespaceDefinition o1, INamespaceDefinition o2) {
 				if (o1 != null && o1.getDefaultNamespacePrefix() != null && o2 != null
@@ -230,13 +244,6 @@ public class NamespaceUtils {
 				return 0;
 			}
 		});
-
-		// Remove the tool namespace as we don't want to surface on the UI
-		for (INamespaceDefinition definition : new ArrayList<INamespaceDefinition>(namespaceDefinitions)) {
-			if (TOOLS_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
-				namespaceDefinitions.remove(definition);
-			}
-		}
 
 		return namespaceDefinitions;
 	}
@@ -373,7 +380,7 @@ public class NamespaceUtils {
 			this.ns = ns;
 			this.icon = icon;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -393,7 +400,7 @@ public class NamespaceUtils {
 				org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition definition) {
 			this.definition = definition;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -402,5 +409,5 @@ public class NamespaceUtils {
 			return NamespaceUtils.getImage(definition);
 		}
 	}
-	
+
 }

@@ -59,7 +59,7 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 	}
 
 	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation, final Image image) {
-		this(prefix, uri,defaultLocation, new IImageAccessor() {
+		this(prefix, uri, defaultLocation, new IImageAccessor() {
 			
 			public Image getImage() {
 				return image;
