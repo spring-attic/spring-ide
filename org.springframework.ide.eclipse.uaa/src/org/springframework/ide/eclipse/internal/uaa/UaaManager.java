@@ -599,19 +599,21 @@ public class UaaManager implements IUaa {
 			featureData = new HashMap<String, String>(featureData);
 			for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
 				if (featureData.containsKey(existingEntry.getKey())) {
+					String newValue = featureData.get(existingEntry.getKey());
 					Object existingValue = existingEntry.getValue();
-					if (existingValue instanceof List) {
-						List<String> existingValues = (List<String>) existingValue;
-						String newValue = featureData.get(existingEntry.getKey());
-						if (!existingValues.contains(newValue)) {
-							existingValues.add(newValue);
+					if (!newValue.equals(existingValue)) {
+						if (existingValue instanceof List) {
+							List<String> existingValues = (List<String>) existingValue;
+							if (!existingValues.contains(newValue)) {
+								existingValues.add(newValue);
+							}
 						}
-					}
-					else {
-						List<String> value = new ArrayList<String>();
-						value.add((String) existingValue);
-						value.add(featureData.get(existingEntry.getKey()));
-						existingFeatureData.put(existingEntry.getKey(), value);
+						else {
+							List<String> value = new ArrayList<String>();
+							value.add((String) existingValue);
+							value.add(featureData.get(existingEntry.getKey()));
+							existingFeatureData.put(existingEntry.getKey(), value);
+						}
 					}
 					featureData.remove(existingEntry.getKey());
 				}
@@ -641,8 +643,11 @@ public class UaaManager implements IUaa {
 				}
 			}
 			catch (Exception e) {
-				UaaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-					"Error retrieving user agent header from UAA", e));
+				UaaPlugin
+						.getDefault()
+						.getLog()
+						.log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+								"Error retrieving user agent header from UAA", e));
 			}
 			return null;
 		}
