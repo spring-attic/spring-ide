@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,14 @@
 package org.springframework.ide.eclipse.beans.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -31,6 +35,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
@@ -71,8 +76,47 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 
 	private class XsdConfigContentProvider implements IStructuredContentProvider {
 
+		private List<INamespaceDefinition> namespaceDefinitionList = new ArrayList<INamespaceDefinition>();
+
+		private boolean loading = false;
+
+		private IProject activeProject = null;
+
 		public Object[] getElements(Object obj) {
-			return NamespaceUtils.getNamespaceDefinitions().toArray();
+			IProject project = null;
+			if (filePath != null && filePath.segmentCount() > 0) {
+				String projectName = filePath.segment(0);
+				project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+			}
+
+			if ((activeProject == null && project != null) || (activeProject != null && !activeProject.equals(project))) {
+				namespaceDefinitionList = new ArrayList<INamespaceDefinition>();
+				loading = false;
+			}
+
+			if (namespaceDefinitionList.size() == 0 && !loading) {
+				activeProject = project;
+				NamespaceUtils.getNamespaceDefinitions(project, new NamespaceUtils.INamespaceDefinitionTemplate() {
+
+					public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions,
+							final IProject project) {
+						if (project == null || (project != null && project.equals(activeProject))) {
+							namespaceDefinitionList.addAll(Arrays.asList(namespaceDefinitions));
+
+							Display.getDefault().asyncExec(new Runnable() {
+
+								public void run() {
+									if (!xsdViewer.getControl().isDisposed()) {
+										xsdViewer.setInput(this);
+									}
+								}
+							});
+						}
+						loading = false;
+					}
+				});
+			}
+			return namespaceDefinitionList.toArray();
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -111,6 +155,8 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 	private Map<INamespaceDefinition, String> selectedVersion = new HashMap<INamespaceDefinition, String>();
 
 	private INamespaceDefinition selectedNamespaceDefinition;
+
+	private IPath filePath;
 
 	protected NamespaceSelectionWizardPage(String pageName) {
 		super(pageName);
@@ -228,5 +274,12 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 
 	public Map<INamespaceDefinition, String> getSchemaVersions() {
 		return selectedVersion;
+	}
+
+	public void setFilePath(IPath filePath) {
+		this.filePath = filePath;
+		if (xsdViewer != null) {
+			xsdViewer.setInput(this);
+		}
 	}
 }

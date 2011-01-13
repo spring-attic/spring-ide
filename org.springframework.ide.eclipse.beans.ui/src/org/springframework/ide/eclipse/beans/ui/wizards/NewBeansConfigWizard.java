@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Spring IDE Developers
+ * Copyright (c) 2006, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -77,8 +78,8 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		mainPage = new NewBeansConfigFilePage("beansNewConfigPage", selection);
 		xsdPage = new NamespaceSelectionWizardPage("xsdPage");
+		mainPage = new NewBeansConfigFilePage("beansNewConfigPage", selection, xsdPage);
 		linkPage = new LinkToBeansConfigSetWizardPage("beansLinkConfigPage");
 		addPage(mainPage);
 		addPage(xsdPage);
@@ -161,5 +162,10 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 
 	private BeansProject getProject(IResource file) {
 		return (BeansProject) BeansCorePlugin.getModel().getProject(file.getProject());
+	}
+	
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+		return super.getNextPage(page);
 	}
 }

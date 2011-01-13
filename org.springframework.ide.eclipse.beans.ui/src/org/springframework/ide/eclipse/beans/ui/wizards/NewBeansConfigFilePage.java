@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,11 +53,14 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 	private List<INamespaceDefinition> xmlSchemaDefinitions;
 
 	private Button addNature;
+	
+	private NamespaceSelectionWizardPage namepacePage;
 
-	public NewBeansConfigFilePage(String pageName, IStructuredSelection selection) {
+	public NewBeansConfigFilePage(String pageName, IStructuredSelection selection, NamespaceSelectionWizardPage namepacePage) {
 		super(pageName, selection);
 		setTitle(BeansWizardsMessages.NewConfig_title);
 		setDescription(BeansWizardsMessages.NewConfig_fileDescription);
+		this.namepacePage = namepacePage;
 	}
 
 	protected InputStream createXMLDocument() throws Exception {
@@ -193,5 +196,14 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 				validatePage();
 			}
 		}); 
+	}
+	
+	@Override
+	public boolean isPageComplete() {
+		if (super.isPageComplete()) {
+			namepacePage.setFilePath(getContainerFullPath());
+			return true;
+		}
+		return false;
 	}
 }
