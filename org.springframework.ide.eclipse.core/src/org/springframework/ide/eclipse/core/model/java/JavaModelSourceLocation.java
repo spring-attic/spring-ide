@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.core.model.java;
 
 import java.io.Serializable;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -51,8 +53,25 @@ public class JavaModelSourceLocation implements Serializable, IModelSourceLocati
 
 	public Resource getResource() {
 		try {
-			return new FileResource(JavaCore.create(handleIdentifier, DefaultWorkingCopyOwner.PRIMARY)
-					.getUnderlyingResource().getFullPath().toString());
+			IJavaElement element = JavaCore.create(handleIdentifier, DefaultWorkingCopyOwner.PRIMARY);
+			if (element != null) {
+				IResource resource = element.getUnderlyingResource();
+				if (resource != null) {
+					return new FileResource(resource.getFullPath().toString());
+				}
+				resource = element.getCorrespondingResource();
+				if (resource != null) {
+					return new FileResource(resource.getFullPath().toString());
+				}
+				resource = element.getResource();
+				if (resource != null) {
+					return new FileResource(resource.getFullPath().toString());
+				}
+				IPath path = element.getPath();
+				if (path != null && path.toFile().exists()) {
+					return new FileResource(path.toString());
+				}
+			}
 		}
 		catch (JavaModelException e) {
 		}
