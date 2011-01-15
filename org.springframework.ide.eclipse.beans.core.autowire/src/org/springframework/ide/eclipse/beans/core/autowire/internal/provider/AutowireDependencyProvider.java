@@ -88,6 +88,10 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 	public static final String REQUIRED_NO_MATCH = "REQUIRED_NO_MATCH";
 	
 	public static final String AUTOWIRE_PROBLEM_TYPE = "AUTOWIRE_PROBLEM";
+	
+	public static final String MATCHING_BEAN_NAME = "MATCHING_BEAN_NAME";
+	
+	public static final String BEAN_TYPE = "BEAN_TYPE";
 
 	private Set<IBean> beans;
 
@@ -523,8 +527,17 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			if (matchingBeans.size() > 1) {
 				String primaryBeanName = determinePrimaryCandidate(matchingBeans, descriptor);
 				if (primaryBeanName == null) {
+					Set<String> matchingBeanNames = matchingBeans.keySet();
+					ValidationProblemAttribute[] attributes = new ValidationProblemAttribute[matchingBeanNames.size() + 2];
+					attributes[0] = new ValidationProblemAttribute(AUTOWIRE_PROBLEM_TYPE, TOO_MANY_MATCHING_BEANS);
+					attributes[1] = new ValidationProblemAttribute(BEAN_TYPE, type.getName());
+					int counter = 2;
+					for(String matchingBeanName: matchingBeanNames) {
+						attributes[counter] = new ValidationProblemAttribute(MATCHING_BEAN_NAME + counter, matchingBeanName);
+						counter++;
+					}
 					problemReporter.error("Expected single matching bean but found " + matchingBeans.size() + ": "
-							+ matchingBeans.keySet(), descriptor, new ValidationProblemAttribute(AUTOWIRE_PROBLEM_TYPE, TOO_MANY_MATCHING_BEANS));
+							+ matchingBeanNames, descriptor, attributes);
 					throw new AutowireResolutionException();
 				}
 				if (autowiredBeanNames != null) {
