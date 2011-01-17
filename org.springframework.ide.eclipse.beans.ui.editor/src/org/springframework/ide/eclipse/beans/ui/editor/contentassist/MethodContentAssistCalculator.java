@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * <p>
  * This implementation uses a customizable {@link IMethodFilter} to filter for appropriate methods.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.2
  */
 @SuppressWarnings("restriction")
@@ -90,7 +91,7 @@ public abstract class MethodContentAssistCalculator implements IContentAssistCal
 			String[] parameterNames = method.getParameterNames();
 			String[] parameterTypes = JdtUtils.getParameterTypesString(method);
 			String returnType = JdtUtils.getReturnTypeString(method, true);
-			String methodName = method.getElementName();
+			String methodName = JdtUtils.getMethodName(method);
 
 			String replaceText = methodName;
 
@@ -126,7 +127,7 @@ public abstract class MethodContentAssistCalculator implements IContentAssistCal
 			}
 
 			// add class name
-			buf.append(method.getParent().getElementName());
+			buf.append(JdtUtils.getParentName(method));
 
 			String displayText = buf.toString();
 			Image image = Activator.getDefault().getJavaElementLabelProvider().getImageLabel(

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
 /**
  * Unit test for {@link Introspector}.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.3
  */
 public class IntrospectorTest extends BeansCoreTestCase {
@@ -42,6 +43,21 @@ public class IntrospectorTest extends BeansCoreTestCase {
 		assertTrue(Introspector.hasWritableProperty(foo, "foochen"));
 		methods = Introspector.findAllNoParameterMethods(foo, "getBar");
 		assertTrue(!methods.isEmpty() && methods.toArray().length == 1);
+		
+		Set<IMethod> allMethods = Introspector.getAllMethods(foo);
+		boolean containsSetFoochen = false;
+		boolean containsSetBar = false;
+		for (IMethod method : allMethods) {
+			if (method.getElementName().contains("setBar")) {
+				containsSetBar = true;
+			}
+			if (method.getElementName().contains("setFoochen")) {
+				containsSetFoochen = true;
+			}
+		}
+		
+		assertTrue(containsSetBar);
+		assertTrue(containsSetFoochen);
 	}
 
 	public void testDoesExtend() throws CoreException, IOException {

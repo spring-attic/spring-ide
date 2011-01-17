@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @author Pierre-Antoine Gregoire
+ * @author Martin Lippert
  */
 public final class Introspector {
 
@@ -167,13 +168,6 @@ public final class Introspector {
 				checkMethod(type, methodPrefix, argCount, publics, statics, ignoreCase, allMethods, method);
 			}
 
-			// Add intertype declared methods
-			if (JdtUtils.isAjdtProject(type.getResource())) {
-				for (IMethod method : AjdtUtils.getDeclaredMethods(type)) {
-					checkMethod(type, methodPrefix, argCount, publics, statics, ignoreCase, allMethods, method);
-				}
-			}
-
 			type = getSuperType(type);
 		}
 		return new HashSet<IMethod>(allMethods.values());
@@ -190,19 +184,21 @@ public final class Introspector {
 						.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
 				&& (statics == Static.DONT_CARE || (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
 						.isStatic(flags))) && (argCount == -1 || method.getNumberOfParameters() == argCount)
-				&& checkMethodName(method, type, methodPrefix, ignoreCase)) {
+				&& checkMethodNamePrefix(method, type, methodPrefix, ignoreCase)) {
 			allMethods.put(key, method);
 		}
 	}
 
-	private static boolean checkMethodName(IMethod method, IType type, String methodPrefix, boolean ignoreCase) {
-		String methodName = method.getElementName();
-		int index = methodName.lastIndexOf('.');
-		if (index > 0) {
-			methodName = methodName.substring(index + 1);
-		}
+	private static boolean checkMethodNamePrefix(IMethod method, IType type, String methodPrefix, boolean ignoreCase) {
+		String methodName = JdtUtils.getMethodName(method);
 		return ((!ignoreCase && methodName.startsWith(methodPrefix)))
 				|| (ignoreCase && methodName.toLowerCase().startsWith(methodPrefix.toLowerCase()));
+	}
+
+	private static boolean checkMethodName(IMethod method, IType type, String methodName, boolean ignoreCase) {
+		String realMethodName = JdtUtils.getMethodName(method);
+		return ((!ignoreCase && realMethodName.equals(methodName)))
+				|| (ignoreCase && realMethodName.toLowerCase().startsWith(methodName.toLowerCase()));
 	}
 
 	/**
@@ -261,29 +257,8 @@ public final class Introspector {
 					&& (statics == Static.DONT_CARE || (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
 							.isStatic(flags)))
 					&& (argCount == -1 || method.getNumberOfParameters() == argCount)
-					&& methodName.equals(method.getElementName())) {
+					&& checkMethodName(method, type, methodName, false)) {
 				return method;
-			}
-		}
-
-		// Add intertype declared methods
-		if (JdtUtils.isAjdtProject(type.getResource())) {
-			for (IMethod method : AjdtUtils.getDeclaredMethods(type)) {
-				int flags = method.getFlags();
-				if ((publics == Public.DONT_CARE
-						|| (publics == Public.YES && (Flags.isPublic(flags) || Flags.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
-						.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
-						&& (statics == Static.DONT_CARE || (statics == Static.YES && Flags.isStatic(flags)) || (statics == Static.NO && !Flags
-								.isStatic(flags))) && (argCount == -1 || method.getNumberOfParameters() == argCount)) {
-					String elementName = method.getElementName();
-					int index = elementName.lastIndexOf('.');
-					if (index > 0) {
-						elementName = elementName.substring(index + 1);
-					}
-					if (elementName.equals(methodName)) {
-						return method;
-					}
-				}
 			}
 		}
 
@@ -586,7 +561,23 @@ public final class Introspector {
 			return new IMethod[0];
 		}
 		if (type.isStructureKnown()) {
-			return type.getMethods();
+			IMethod[] methods = type.getMethods();
+			
+			if (JdtUtils.isAjdtProject(type.getResource())) {
+				Set<IMethod> itdMethods = AjdtUtils.getDeclaredMethods(type);
+				if (itdMethods.size() > 0) {
+					int i = methods.length;
+					IMethod[] allMethods = new IMethod[methods.length + itdMethods.size()];
+					System.arraycopy(methods, 0, allMethods, 0, methods.length);
+					for (IMethod method : itdMethods) {
+						allMethods[i++] = method;
+					}
+					
+					methods = allMethods;
+				}
+			}
+
+			return methods;
 		}
 		return new IMethod[0];
 	}

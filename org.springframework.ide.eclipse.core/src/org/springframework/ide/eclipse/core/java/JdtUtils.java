@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility class that provides several helper methods for working with Eclipse's JDT.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 public class JdtUtils {
@@ -690,6 +691,28 @@ public class JdtUtils {
 			replaceText = java.beans.Introspector.decapitalize(replaceText);
 		}
 		return replaceText;
+	}
+	
+	public static String getParentName(IMethod method) {
+		// Special support Ajdt intertype declarations
+		String methodName = method.getElementName();
+		int index = methodName.lastIndexOf('.');
+		if (index > 0) {
+			return methodName.substring(0, index);
+		}
+		else {
+			return method.getParent().getElementName();
+		}
+	}
+
+	public static String getMethodName(IMethod method) {
+		// Special support Ajdt intertype declarations
+		String methodName = method.getElementName();
+		int index = methodName.lastIndexOf('.');
+		if (index > 0) {
+			methodName = methodName.substring(index + 1);
+		}
+		return methodName;
 	}
 
 	/**

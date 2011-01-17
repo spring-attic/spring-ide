@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 /**
  * {@link IContentAssistCalculator} implementation that calculates proposals for property names.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.2
  */
 @SuppressWarnings("restriction")
@@ -112,15 +113,18 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 			String[] parameterNames = method.getParameterNames();
 			String[] parameterTypes = JdtUtils.getParameterTypesString(method);
 			String propertyName = JdtUtils.getPropertyNameFromMethodName(method);
+			
+			String methodParentName = JdtUtils.getParentName(method);
+			String methodName = JdtUtils.getMethodName(method);
 
 			String replaceText = prefix + propertyName;
 
 			StringBuilder buf = new StringBuilder();
 			buf.append(propertyName);
 			buf.append(" - ");
-			buf.append(method.getParent().getElementName());
+			buf.append(methodParentName);
 			buf.append('.');
-			buf.append(method.getElementName());
+			buf.append(methodName);
 			buf.append('(');
 			if (parameterTypes != null && parameterNames != null && parameterTypes.length > 0
 					&& parameterNames.length > 0) {
