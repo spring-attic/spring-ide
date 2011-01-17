@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,23 +18,23 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 /**
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Martin Lippert
  * @since 2.0
  */
-public class RenameBeanIdRefactoringContribution extends
-		RefactoringContribution {
+public class RenameIdRefactoringContribution extends RefactoringContribution {
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project,
 			String description, String comment, Map arguments, int flags) {
-		return new RenameBeanIdRefactoringDescriptor(project, description,
+		return new RenameIdRefactoringDescriptor(project, description,
 				comment, arguments);
 	}
 
 	@Override
 	public Map retrieveArgumentMap(RefactoringDescriptor descriptor) {
-		if (descriptor instanceof RenameBeanIdRefactoringDescriptor)
-			return ((RenameBeanIdRefactoringDescriptor) descriptor)
+		if (descriptor instanceof RenameIdRefactoringDescriptor)
+			return ((RenameIdRefactoringDescriptor) descriptor)
 					.getArguments();
 		return super.retrieveArgumentMap(descriptor);
 	}

@@ -36,6 +36,7 @@ import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.document.TextImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameIdType;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.NamedNodeMap;
@@ -183,7 +184,7 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	public static Change createRenameBeanIdChange(IFile file, String oldBeanId, String newBeanId,
+	public static Change createRenameBeanIdChange(IFile file, RenameIdType descriptor, String oldBeanId, String newBeanId,
 			boolean updateReferences, IProgressMonitor monitor) throws CoreException {
 		IStructuredModel model = null;
 		try {
@@ -194,7 +195,7 @@ public class BeansRefactoringChangeUtils {
 			}
 			IDOMDocument document = ((DOMModelImpl) model).getDocument();
 			MultiTextEdit multiEdit = new MultiTextEdit();
-			NodeList nodes = document.getElementsByTagName("bean");
+			NodeList nodes = document.getElementsByTagName(descriptor.getElementName());
 			for (int i = 0; i < nodes.getLength(); i++) {
 				TextEdit edit = createRenameBeanIdTextEdit(nodes.item(i), oldBeanId, newBeanId);
 				if (edit != null) {
@@ -209,14 +210,14 @@ public class BeansRefactoringChangeUtils {
 
 			TextFileChange refChanges = null;
 			if (updateReferences) {
-				refChanges = createRenameBeanRefsChange(file, oldBeanId, newBeanId, monitor);
+				refChanges = createRenameBeanRefsChange(file, descriptor, oldBeanId, newBeanId, monitor);
 			}
 
 			if (multiEdit.hasChildren()) {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
 				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup("Rename Bean id", e));
+					change.addTextEditGroup(new TextEditGroup("Rename " + descriptor.getType() + " id", e));
 				}
 				if (refChanges != null) {
 					MultiTextEdit edit = (MultiTextEdit) refChanges.getEdit();
@@ -224,7 +225,7 @@ public class BeansRefactoringChangeUtils {
 						for (TextEdit e : edit.getChildren()) {
 							edit.removeChild(e);
 							multiEdit.addChild(e);
-							change.addTextEditGroup(new TextEditGroup("Rename Bean reference", e));
+							change.addTextEditGroup(new TextEditGroup("Rename " + descriptor.getType() + " reference", e));
 						}
 					}
 				}
@@ -257,8 +258,14 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	public static TextFileChange createRenameBeanRefsChange(IFile file, String oldBeanId, String newBeanId,
-			IProgressMonitor monitor) throws CoreException {
+	public static TextFileChange createRenameBeanRefsChange(IFile file,
+			String oldBeanId, String newBeanId, IProgressMonitor monitor) throws CoreException {
+		RenameIdType descriptor = RenameIdType.BEAN;
+		return createRenameBeanRefsChange(file, descriptor, oldBeanId, newBeanId, monitor);
+	}
+
+	public static TextFileChange createRenameBeanRefsChange(IFile file, RenameIdType descriptor,
+			String oldBeanId, String newBeanId, IProgressMonitor monitor) throws CoreException {
 		IStructuredModel model = null;
 		try {
 			model = StructuredModelManager.getModelManager().getModelForRead(file);
@@ -271,14 +278,14 @@ public class BeansRefactoringChangeUtils {
 			MultiTextEdit multiEdit = new MultiTextEdit();
 			NodeList nodes = document.getDocumentElement().getChildNodes();
 			for (int i = 0; i < nodes.getLength(); i++) {
-				createRenameBeanRefsTextEdit(nodes.item(i), oldBeanId, newBeanId, multiEdit);
+				createRenameBeanRefsTextEdit(nodes.item(i), descriptor, oldBeanId, newBeanId, multiEdit);
 			}
 			
 			if (multiEdit.hasChildren()) {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
 				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup("Rename Bean reference", e));
+					change.addTextEditGroup(new TextEditGroup("Rename " + descriptor.getType() + " reference", e));
 				}
 				return change;
 			}
@@ -293,24 +300,40 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
-	private static void createRenameBeanRefsTextEdit(Node node, String oldBeanId, String newBeanId, MultiTextEdit multiEdit) {
+	private static void createRenameBeanRefsTextEdit(Node node, RenameIdType descriptor, String oldBeanId,
+			String newBeanId, MultiTextEdit multiEdit) {
 		if (node == null) {
 			return;
 		}
 		
-		createRenameBeanRefTextEditForAttribute("depends-on", node, oldBeanId, newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("bean", node, oldBeanId, newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("local", node, oldBeanId, newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("parent", node, oldBeanId, newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("ref", node, oldBeanId, newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("key-ref", node, oldBeanId, newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("value-ref", node, oldBeanId, newBeanId, multiEdit);
-		createRenameBeanRefTextEditForAttribute("p:", "-ref", node, oldBeanId, newBeanId, multiEdit);
+		String[] attributeNames = descriptor.getReferenceAttributeNames();
+		for (String attributeName : attributeNames) {
+			createRenameBeanRefTextEditForAttribute(attributeName, node, oldBeanId, newBeanId, multiEdit);
+		}
+		
+		String[] attributeNameStarts = descriptor.getReferenceAttributeStarts();
+		String[] attributeNameEnds = descriptor.getReferenceAttributeEnds();
+		if (attributeNameStarts != null && attributeNameEnds != null && attributeNameStarts.length == attributeNameEnds.length) {
+			for(int i = 0; i < attributeNameStarts.length; i++) {
+				String attributeStart = attributeNameStarts[i];
+				String attributeEnd = attributeNameEnds[i];
+				createRenameBeanRefTextEditForAttribute(attributeStart, attributeEnd, node, oldBeanId, newBeanId, multiEdit);
+			}
+		}
+
+//		createRenameBeanRefTextEditForAttribute("depends-on", node, oldBeanId, newBeanId, multiEdit);
+//		createRenameBeanRefTextEditForAttribute("bean", node, oldBeanId, newBeanId, multiEdit);
+//		createRenameBeanRefTextEditForAttribute("local", node, oldBeanId, newBeanId, multiEdit);
+//		createRenameBeanRefTextEditForAttribute("parent", node, oldBeanId, newBeanId, multiEdit);
+//		createRenameBeanRefTextEditForAttribute("ref", node, oldBeanId, newBeanId, multiEdit);
+//		createRenameBeanRefTextEditForAttribute("key-ref", node, oldBeanId, newBeanId, multiEdit);
+//		createRenameBeanRefTextEditForAttribute("value-ref", node, oldBeanId, newBeanId, multiEdit);
+//		createRenameBeanRefTextEditForAttribute("p:", "-ref", node, oldBeanId, newBeanId, multiEdit);
 
 		NodeList nodes = node.getChildNodes();
 		if (nodes != null && nodes.getLength() > 0) {
 			for (int i = 0; i < nodes.getLength(); i++) {
-				createRenameBeanRefsTextEdit(nodes.item(i), oldBeanId, newBeanId, multiEdit);
+				createRenameBeanRefsTextEdit(nodes.item(i), descriptor, oldBeanId, newBeanId, multiEdit);
 			}
 		}
 	}

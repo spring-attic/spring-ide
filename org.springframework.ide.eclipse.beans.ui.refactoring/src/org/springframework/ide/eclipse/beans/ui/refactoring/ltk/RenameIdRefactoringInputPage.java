@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,19 +28,21 @@ import org.eclipse.swt.widgets.Text;
 /**
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Martin Lippert
  * @since 2.0
  */
-public class RenameBeanIdRefactoringInputPage extends UserInputWizardPage {
+public class RenameIdRefactoringInputPage extends UserInputWizardPage {
 
 	private Text nameField;
 
-	public RenameBeanIdRefactoringInputPage(String name) {
+	public RenameIdRefactoringInputPage(String name) {
 		super(name);
 	}
 
 	public void createControl(Composite parent) {
-		Composite result = new Composite(parent, SWT.NONE);
+		final RenameIdRefactoring refactoring = getRenameIdRefactoring();
 
+		Composite result = new Composite(parent, SWT.NONE);
 		setControl(result);
 
 		GridLayout layout = new GridLayout();
@@ -48,7 +50,7 @@ public class RenameBeanIdRefactoringInputPage extends UserInputWizardPage {
 		result.setLayout(layout);
 
 		Label label = new Label(result, SWT.NONE);
-		label.setText("&Bean id:");
+		label.setText("&" + refactoring.getType().getType() + " id:");
 
 		nameField = createNameField(result);
 
@@ -62,7 +64,6 @@ public class RenameBeanIdRefactoringInputPage extends UserInputWizardPage {
 		data.verticalIndent = 2;
 		referenceButton.setLayoutData(data);
 
-		final RenameBeanIdRefactoring refactoring = getRenameBeanIdRefactoring();
 		nameField.setText(refactoring.getBeanId());
 
 		nameField.addModifyListener(new ModifyListener() {
@@ -95,13 +96,13 @@ public class RenameBeanIdRefactoringInputPage extends UserInputWizardPage {
 		return field;
 	}
 
-	private RenameBeanIdRefactoring getRenameBeanIdRefactoring() {
-		return (RenameBeanIdRefactoring) getRefactoring();
+	private RenameIdRefactoring getRenameIdRefactoring() {
+		return (RenameIdRefactoring) getRefactoring();
 	}
 
 	void handleInputChanged() {
 		RefactoringStatus status = new RefactoringStatus();
-		RenameBeanIdRefactoring refactoring = getRenameBeanIdRefactoring();
+		RenameIdRefactoring refactoring = getRenameIdRefactoring();
 		status.merge(refactoring.setBeanId(nameField.getText()));
 
 		setPageComplete(!status.hasError());

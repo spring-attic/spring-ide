@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,17 +22,18 @@ import org.springframework.ide.eclipse.beans.ui.refactoring.Activator;
 /**
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Martin Lippert
  * @since 2.0
  */
-public class RenameBeanIdRefactoringDescriptor extends RefactoringDescriptor {
+public class RenameIdRefactoringDescriptor extends RefactoringDescriptor {
 
 	public static final String REFACTORING_ID = Activator.PLUGIN_ID
-			+ ".ltk.renameBeanIdRefactoring";
+			+ ".ltk.renameIdRefactoring";
 
 	private final Map<String, String> arguments;
 
-	public RenameBeanIdRefactoringDescriptor(String project,
-			String description, String comment, Map<String, String> arguments) {
+	public RenameIdRefactoringDescriptor(String project, String description,
+			String comment, Map<String, String> arguments) {
 		super(REFACTORING_ID, project, description, comment,
 				RefactoringDescriptor.STRUCTURAL_CHANGE
 						| RefactoringDescriptor.MULTI_CHANGE);
@@ -42,7 +43,7 @@ public class RenameBeanIdRefactoringDescriptor extends RefactoringDescriptor {
 	@Override
 	public Refactoring createRefactoring(RefactoringStatus status)
 			throws CoreException {
-		RenameBeanIdRefactoring refactoring = new RenameBeanIdRefactoring();
+		RenameIdRefactoring refactoring = new RenameIdRefactoring();
 		status.merge(refactoring.initialize(arguments));
 		return refactoring;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,13 +35,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameBeanIdRefactoring;
-import org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameBeanIdRefactoringWizard;
+import org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameIdRefactoring;
+import org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameIdRefactoringWizard;
+import org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameIdType;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
 /**
  * Starts refactoring actions for Java Elements like class names and properties
+ * 
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @author Martin Lippert
@@ -105,36 +107,47 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 
 			Object obj = ((IStructuredSelection) textSelection)
 					.getFirstElement();
-			
+
 			Element node = null;
 			String attributeName = null;
-			
+
 			if (obj instanceof Attr) {
 				Attr attribute = (Attr) obj;
 				node = attribute.getOwnerElement();
 				attributeName = attribute.getName();
-			}
-			else if (obj instanceof Element) {
+			} else if (obj instanceof Element) {
 				node = (Element) obj;
 				attributeName = getSelectedAttributeName(textSelection);
 			}
-			
+
 			if (node != null && attributeName != null) {
 				// start Spring IDE's own bean id refactoring
+				RenameIdType idType = null;
+
 				if ("bean".equals(node.getLocalName())
 						&& "id".equals(attributeName)) {
-					RenameBeanIdRefactoring refactoring = new RenameBeanIdRefactoring();
+					idType = RenameIdType.BEAN;
+				} else if ("tx:advice".equals(node.getNodeName())
+						&& "id".equals(attributeName)) {
+					idType = RenameIdType.ADVICE;
+				} else if ("aop:pointcut".equals(node.getNodeName())
+						&& "id".equals(attributeName)) {
+					idType = RenameIdType.POINTCUT;
+				}
+
+				if (idType != null) {
+					RenameIdRefactoring refactoring = new RenameIdRefactoring();
+					refactoring.setType(idType);
 					refactoring.setNode((IDOMNode) node);
 					refactoring.setBeanId(BeansEditorUtils.getAttribute(node,
 							"id"));
 					refactoring.setFile(getConfigFile());
 					refactoring.setOffset(textSelection.getOffset());
-					RenameBeanIdRefactoringWizard wizard = new RenameBeanIdRefactoringWizard(
-							refactoring, "Rename Bean id");
+					RenameIdRefactoringWizard wizard = new RenameIdRefactoringWizard(
+							refactoring, "Rename " + idType.getType() + " id");
 					run(wizard, BeansUIPlugin.getActiveWorkbenchShell(),
-							"Rename Bean id");
-				}
-				else {
+							"Rename " + idType.getType() + " id");
+				} else {
 					processAction(document, textSelection);
 				}
 			}
@@ -144,13 +157,13 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 	@Override
 	protected void run(IJavaElement element) throws CoreException {
 		if (!isRenameAvailable(element)
-				|| !ActionUtil.isProcessable(BeansUIPlugin
-						.getActiveWorkbenchShell(), element)) {
+				|| !ActionUtil.isProcessable(
+						BeansUIPlugin.getActiveWorkbenchShell(), element)) {
 			return;
 		}
 		// XXX workaround bug 31998
-		if (ActionUtil.mustDisableJavaModelAction(BeansUIPlugin
-				.getActiveWorkbenchShell(), element)) {
+		if (ActionUtil.mustDisableJavaModelAction(
+				BeansUIPlugin.getActiveWorkbenchShell(), element)) {
 			return;
 		}
 		RefactoringExecutionStarter.startRenameRefactoring(element,
@@ -162,8 +175,7 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 			RefactoringWizardOpenOperation operation = new RefactoringWizardOpenOperation(
 					wizard);
 			operation.run(parent, dialogTitle);
-		}
-		catch (InterruptedException exception) {
+		} catch (InterruptedException exception) {
 			// Do nothing
 		}
 	}

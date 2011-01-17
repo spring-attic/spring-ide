@@ -2,7 +2,7 @@
 <?eclipse version="3.0"?>
 <!--
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,8 @@
 	<extension
          point="org.eclipse.ltk.core.refactoring.refactoringContributions">
       <contribution
-            class="org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameBeanIdRefactoringContribution"
-            id="org.springframework.ide.eclipse.beans.ui.refactoring.ltk.renameBeanIdRefactoring"/>
+            class="org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameIdRefactoringContribution"
+            id="org.springframework.ide.eclipse.beans.ui.refactoring.ltk.renameIdRefactoring"/>
    </extension>
 
 	<extension
