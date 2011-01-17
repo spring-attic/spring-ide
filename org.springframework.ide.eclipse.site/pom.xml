@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+	<groupId>org.springframework.ide.eclipse</groupId>
+	<artifactId>org.springframework.ide.eclipse.parent</artifactId>
+	<version>2.6.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  
+  <artifactId>org.springframework.ide.eclipse.site</artifactId>
+  <packaging>eclipse-update-site</packaging>
+  
+<build>
+  <plugins>
+		<plugin>
+		         <groupId>org.apache.maven.plugins</groupId>
+		         <artifactId>maven-antrun-plugin</artifactId>
+		         <version>1.6</version>
+		         <executions>
+		           <execution>
+		             <id>process-update-site</id>
+		             <phase>install</phase>
+		             <configuration>
+		               <target>
+			
+							<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+							<path id="eclipse.classpath">
+								<fileset dir="${user.home}/.m2/repository/org/sonatype/tycho/tycho-p2-runtime">
+					    			<include name="*/eclipse/plugins/org.eclipse.equinox.launcher_*.jar"/>
+								</fileset>
+							</path>
+							
+							<path id="jarprocessor.classpath">
+								<fileset dir="${user.home}/.m2/repository/org/sonatype/tycho/tycho-p2-runtime">
+					    			<include name="*/eclipse/plugins/org.eclipse.equinox.p2.jarprocessor_*.jar"/>
+								</fileset>
+							</path>
+													
+							<if>
+								<equals arg1="${p2.sign}" arg2="true" />
+								<then>
+									
+									
+									<delete file="${project.build.directory}/site/content.jar" />
+									<delete file="${project.build.directory}/site/artifacts.jar" />
+							
+							<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.internal.p2.jarprocessor.Main" fork="true" classpathref="jarprocessor.classpath"
+								failonerror="true" maxmemory="256m" dir="${project.build.directory}/site">
+								<arg line="-verbose -processAll -repack -pack -sign ../../sign.sh -outputDir ${project.build.directory}/site ${project.build.directory}/site" />
+							</java>
+							
+							<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main" fork="true" classpathref="eclipse.classpath"
+								failonerror="true" maxmemory="256m" dir="${project.build.directory}/site">
+								<arg line="-application org.eclipse.equinox.p2.publisher.UpdateSitePublisher" />
+								<arg line="-source ${project.build.directory}/site -metadataRepository file://${project.build.directory}/site -artifactRepository file://${project.build.directory}/site -repositoryName 'Spring IDE for Eclipse 3.5, 3.6' -compress -reusePackedFiles -publishArtifacts" />
+							</java>
+							</then>
+							</if>
+		               </target>
+		             </configuration>
+		             <goals>
+		               <goal>run</goal>
+		             </goals>
+		           </execution>
+					<execution>
+						<id>upload-dist</id>
+						<phase>deploy</phase>
+						<configuration>
+							<target>
+
+								<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+								<taskdef resource="org/springframework/build/aws/ant/antlib.xml" />
+
+								<property name="site.target.dir" value="${project.build.directory}" />
+
+								<mkdir dir="${site.target.dir}/tmp" />
+								<unzip dest="${site.target.dir}/tmp">
+									<patternset>
+										<include name="META-INF/MANIFEST.MF" />
+									</patternset>
+									<fileset dir="${site.target.dir}/site">
+										<include name="plugins/org.springframework.ide.eclipse_*.jar" />
+									</fileset>
+								</unzip>
+
+								<loadfile property="dist.full.version" failOnError="true"
+									srcFile="${site.target.dir}/tmp/META-INF/MANIFEST.MF">
+									<filterchain>
+										<linecontains>
+											<contains value="Bundle-Version: " />
+										</linecontains>
+										<striplinebreaks />
+										<tokenfilter>
+											<filetokenizer />
+											<replaceregex pattern="Bundle-Version: ([0-9.a-zA-Z-]*)"
+												flags="s" replace="\1" />
+										</tokenfilter>
+									</filterchain>
+								</loadfile>
+
+								<property name="dist.file.name"
+									value="${dist.project}-${dist.full.version}-updatesite.zip" />
+								<property name="dist.path" value="${dist.type}/${dist.key}/nightly" />
+								<property name="dist.full.path" value="${site.target.dir}/site/${dist.file.name}" />
+
+								<delete file="${dist.full.path}" />
+								<zip zipfile="${dist.full.path}" filesonly="true">
+									<zipfileset dir="${site.target.dir}/site">
+										<exclude name="*.zip" />
+										<exclude name="**/*.gz" />
+									</zipfileset>
+								</zip>
+								<checksum file="${dist.full.path}" algorithm="SHA1"
+									fileext=".sha1" />
+								<checksum file="${dist.full.path}" algorithm="MD5"
+									fileext=".md5" />
+
+								<s3 accessKey="${dist.accessKey}" secretKey="${dist.secretKey}">
+
+									<delete bucketName="${dist.bucket}">
+										<fileset dir="${dist.path}">
+											<include name="site.xml" />
+											<include name="content.jar" />
+											<include name="artifacts.jar" />
+											<include name="plugins/**" />
+											<include name="features/**" />
+										</fileset>
+									</delete>
+
+									<upload bucketName="${dist.bucket}" toDir="${dist.path}"
+										publicRead="true">
+										<fileset dir="${site.target.dir}/site">
+											<include name="**/*" />
+											<include name="**" />
+											<exclude name="*.zip" />
+										</fileset>
+									</upload>
+
+									<upload bucketName="${dist.bucket}" file="${dist.full.path}"
+										toFile="${dist.path}/${dist.file.name}" publicRead="true">
+										<metadata name="project.name" value="${dist.name}" />
+										<metadata name="release.type" value="${dist.type}" />
+										<metadata name="bundle.version" value="${dist.full.version}" />
+										<metadata name="package.file.name" value="${dist.file.name}" />
+									</upload>
+
+								</s3>
+
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				 <dependencies>
+					<dependency>
+						<groupId>ant-contrib</groupId>
+						<artifactId>ant-contrib</artifactId>
+						<version>20020829</version>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework.build</groupId>
+							<artifactId>org.springframework.build.aws.ant</artifactId>
+							<version>3.0.5.RELEASE</version>
+						</dependency>
+						<dependency>
+							<groupId>net.java.dev.jets3t</groupId>
+							<artifactId>jets3t</artifactId>
+							<version>0.7.2</version>
+						</dependency>
+						<dependency>
+							<groupId>ant-contrib</groupId>
+							<artifactId>ant-contrib</artifactId>
+							<version>20020829</version>
+						</dependency>
+					</dependencies>
+		       </plugin>
+  </plugins>
+</build>
+</project>

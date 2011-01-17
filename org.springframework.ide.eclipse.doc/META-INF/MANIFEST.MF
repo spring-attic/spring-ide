@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-Vendor: %providerName
+Bundle-Version: 2.6.0.qualifier
+Bundle-Localization: plugin
+Bundle-Name: %pluginName
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.springframework.ide.eclipse.doc;singleton:=true
+
