@@ -60,24 +60,11 @@ public class UaaManager implements IUaa {
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
+	private final CachingUaaServiceImpl service = new CachingUaaServiceImpl();
+
 	private final Lock r = rwl.readLock();
 
 	private final Lock w = rwl.writeLock();
-
-	private final CachingUaaServiceImpl service = new CachingUaaServiceImpl();
-
-	/**
-	 * {@inheritDoc}
-	 */
-	private boolean hasUserDecided() {
-		try {
-			r.lock();
-			return !(service.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU || service.getPrivacyLevel() == PrivacyLevel.DECLINE_TOU);
-		}
-		finally {
-			r.unlock();
-		}
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -199,6 +186,7 @@ public class UaaManager implements IUaa {
 							product = productBuilder.build();
 						}
 						catch (IllegalArgumentException e) {
+							// As a fallback we use the Spring UAA way of producing products
 							product = VersionHelper.getProduct(productId, versionString);
 						}
 
@@ -215,6 +203,31 @@ public class UaaManager implements IUaa {
 				}
 			});
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void registerProjectUsageForProduct(final String feature, final String projectId, final Map<String, String> featureData) {
+		if (feature != null) {
+			executorService.execute(new Runnable() {
+
+				public void run() {
+					try {
+						w.lock();
+						for (ProductDescriptor productDescriptor : productDescriptors) {
+							if (productDescriptor.registerProjectUsage(feature, projectId, featureData)) {
+								return;
+							}
+						}
+					}
+					finally {
+						w.unlock();
+					}
+				}
+			});
+		}
+
 	}
 
 	/**
@@ -241,6 +254,19 @@ public class UaaManager implements IUaa {
 		}
 		finally {
 			w.unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	private boolean hasUserDecided() {
+		try {
+			r.lock();
+			return !(service.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU || service.getPrivacyLevel() == PrivacyLevel.DECLINE_TOU);
+		}
+		finally {
+			r.unlock();
 		}
 	}
 
@@ -510,11 +536,23 @@ public class UaaManager implements IUaa {
 		public ProductDescriptor() {
 			init();
 		}
+		
+		public final boolean registerProjectUsage(String usedPlugin, String project, Map<String, String> featureData) {
+			if (canRegister(usedPlugin) && project != null) {
+				
+				registerProductIfRequired(project);
+				registerFeatureUse(usedPlugin, featureData);
+				service.registerProductUsage(product, project);
+				
+				return true;
+			}
+			return false;
+		}
 
 		public final boolean registerFeatureUseIfMatch(String usedPlugin, Map<String, String> featureData) {
 			if (canRegister(usedPlugin)) {
 
-				registerProductIfRequired();
+				registerProductIfRequired(null);
 				registerFeature(usedPlugin, featureData);
 
 				return true;
@@ -522,8 +560,83 @@ public class UaaManager implements IUaa {
 			return false;
 		}
 
+		private String getRegisteredFeatureData(String usedPlugin) {
+			try {
+				UserAgent userAgent = service.fromHttpUserAgentHeaderValue(getUserAgentHeader());
+				if (userAgent != null) {
+					for (int i = 0; i < userAgent.getProductUseCount(); i++) {
+						ProductUse p = userAgent.getProductUse(i);
+						if (p.getProduct().getName().equals(product.getName())) {
+							for (int j = 0; j < p.getFeatureUseCount(); j++) {
+								FeatureUse f = p.getFeatureUse(j);
+								if (f.getName().equals(usedPlugin) && !f.getFeatureData().isEmpty()) {
+									return f.getFeatureData().toStringUtf8();
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception e) {
+				UaaPlugin
+						.getDefault()
+						.getLog()
+						.log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+								"Error retrieving user agent header from UAA", e));
+			}
+			return null;
+		}
+
 		private void init() {
 			buildProduct(Platform.PI_RUNTIME, "Eclipse", null);
+		}
+
+		@SuppressWarnings("unchecked")
+		private JSONObject mergeFeatureData(String usedPlugin, Map<String, String> featureData) {
+			JSONObject existingFeatureData = new JSONObject();
+
+			// Quick sanity check to prevent doing too much in case no new feature data has been presented
+			if (featureData == null || featureData.size() == 0) {
+				return existingFeatureData;
+			}
+
+			// Load existing feature data from backend store
+			String existingFeatureDataString = getRegisteredFeatureData(usedPlugin);
+			if (existingFeatureDataString != null) {
+				Object existingJson = JSONValue.parse(existingFeatureDataString);
+				if (existingJson instanceof JSONObject) {
+					existingFeatureData.putAll(((JSONObject) existingJson));
+				}
+			}
+
+			// Merge feature data: merge those values whose keys already exist
+			featureData = new HashMap<String, String>(featureData);
+			for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
+				if (featureData.containsKey(existingEntry.getKey())) {
+					String newValue = featureData.get(existingEntry.getKey());
+					Object existingValue = existingEntry.getValue();
+					if (!newValue.equals(existingValue)) {
+						if (existingValue instanceof List) {
+							List<String> existingValues = (List<String>) existingValue;
+							if (!existingValues.contains(newValue)) {
+								existingValues.add(newValue);
+							}
+						}
+						else {
+							List<String> value = new ArrayList<String>();
+							value.add((String) existingValue);
+							value.add(featureData.get(existingEntry.getKey()));
+							existingFeatureData.put(existingEntry.getKey(), value);
+						}
+					}
+					featureData.remove(existingEntry.getKey());
+				}
+			}
+
+			// Merge the remaining new values
+			existingFeatureData.putAll(featureData);
+
+			return existingFeatureData;
 		}
 
 		protected void buildProduct(String symbolicName, String name, String sourceCodeIdentifier) {
@@ -577,82 +690,7 @@ public class UaaManager implements IUaa {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
-		private JSONObject mergeFeatureData(String usedPlugin, Map<String, String> featureData) {
-			JSONObject existingFeatureData = new JSONObject();
-
-			// Quick sanity check to prevent doing too much in case no new feature data has been presented
-			if (featureData == null || featureData.size() == 0) {
-				return existingFeatureData;
-			}
-
-			// Load existing feature data from backend store
-			String existingFeatureDataString = getRegisteredFeatureData(usedPlugin);
-			if (existingFeatureDataString != null) {
-				Object existingJson = JSONValue.parse(existingFeatureDataString);
-				if (existingJson instanceof JSONObject) {
-					existingFeatureData.putAll(((JSONObject) existingJson));
-				}
-			}
-
-			// Merge feature data: merge those values whose keys already exist
-			featureData = new HashMap<String, String>(featureData);
-			for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
-				if (featureData.containsKey(existingEntry.getKey())) {
-					String newValue = featureData.get(existingEntry.getKey());
-					Object existingValue = existingEntry.getValue();
-					if (!newValue.equals(existingValue)) {
-						if (existingValue instanceof List) {
-							List<String> existingValues = (List<String>) existingValue;
-							if (!existingValues.contains(newValue)) {
-								existingValues.add(newValue);
-							}
-						}
-						else {
-							List<String> value = new ArrayList<String>();
-							value.add((String) existingValue);
-							value.add(featureData.get(existingEntry.getKey()));
-							existingFeatureData.put(existingEntry.getKey(), value);
-						}
-					}
-					featureData.remove(existingEntry.getKey());
-				}
-			}
-
-			// Merge the remaining new values
-			existingFeatureData.putAll(featureData);
-
-			return existingFeatureData;
-		}
-
-		private String getRegisteredFeatureData(String usedPlugin) {
-			try {
-				UserAgent userAgent = service.fromHttpUserAgentHeaderValue(getUserAgentHeader());
-				if (userAgent != null) {
-					for (int i = 0; i < userAgent.getProductUseCount(); i++) {
-						ProductUse p = userAgent.getProductUse(i);
-						if (p.getProduct().getName().equals(product.getName())) {
-							for (int j = 0; j < p.getFeatureUseCount(); j++) {
-								FeatureUse f = p.getFeatureUse(j);
-								if (f.getName().equals(usedPlugin) && !f.getFeatureData().isEmpty()) {
-									return f.getFeatureData().toStringUtf8();
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (Exception e) {
-				UaaPlugin
-						.getDefault()
-						.getLog()
-						.log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-								"Error retrieving user agent header from UAA", e));
-			}
-			return null;
-		}
-
-		protected void registerProductIfRequired() {
+		protected void registerProductIfRequired(String project) {
 			if (!registered) {
 				Map<String, String> productData = new HashMap<String, String>();
 				productData.put("platform",
@@ -669,7 +707,12 @@ public class UaaManager implements IUaa {
 				}
 
 				try {
-					service.registerProductUsage(product, JSONObject.toJSONString(productData).getBytes("UTF-8"));
+					if (project != null) {
+						service.registerProductUsage(product, JSONObject.toJSONString(productData).getBytes("UTF-8"), project);
+					}
+					else {
+						service.registerProductUsage(product, JSONObject.toJSONString(productData).getBytes("UTF-8"));
+					}
 				}
 				catch (UnsupportedEncodingException e) {
 					// cannot happen

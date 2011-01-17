@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 import org.springframework.ide.eclipse.internal.uaa.monitor.CommandUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.LibraryUsageMonitor;
+import org.springframework.ide.eclipse.internal.uaa.monitor.NatureUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.PartUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.ServerUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.preferences.UaaDialog;
@@ -67,6 +68,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 		monitors.add(new CommandUsageMonitor());
 		monitors.add(new LibraryUsageMonitor());
 		monitors.add(new ServerUsageMonitor());
+		monitors.add(new NatureUsageMonitor());
 
 		Job startupJob = new Job("Initializing Spring UAA") { //$NON-NLS-1$
 
@@ -162,7 +164,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 		private volatile int errorCount = 0;
 
 		public DetectedProductsJob() {
-			super("Initializing Spring UAA detected products");
+			super("Initializing Spring UAA");
 		}
 
 		@Override
@@ -189,8 +191,8 @@ public class UaaPlugin extends AbstractUIPlugin {
 					}
 					catch (Exception e) {
 						errorCount++;
-						plugin.getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-							"Error updating Spring UAA detected products", e));
+						plugin.getLog().log(new Status(IStatus.INFO, UaaPlugin.PLUGIN_ID,
+							"Network connectivity issue occured in Spring UAA", e));
 					}
 					finally {
 						if (is != null) {

@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.internal.uaa.monitor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -20,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -41,6 +45,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryDirectory;
 import org.osgi.framework.Constants;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.uaa.IUaa;
@@ -57,6 +62,18 @@ import org.springframework.uaa.client.DetectedProducts.ProductInfo;
  */
 @SuppressWarnings("restriction")
 public class LibraryUsageMonitor implements IUsageMonitor {
+
+	private static final String IMPLEMENTATION_VERSION = "Implementation-Version";
+
+	private static final String M2_REPO = "M2_REPO";
+
+	private static final String MANIFEST_FILE_NAME = "MANIFEST.MF";
+
+	private static final String META_INF_DIRECTORY_NAME = "META-INF";
+
+	private static final String SPECIFICATION_VERSION = "Specification-Version";
+
+	private static final Pattern VERSION_PATTERN = Pattern.compile(".*[-_]([0-9])(\\.[_\\-A-Za-z0-9.]*)?\\.jar");
 
 	private IElementChangedListener changedListener = new IElementChangedListener() {
 
@@ -87,127 +104,6 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 	private Map<String, ProductMatch> matches = new ConcurrentHashMap<String, ProductMatch>();
 
 	private Set<String> noMatches = new CopyOnWriteArraySet<String>();
-
-	@SuppressWarnings("deprecation")
-	public void readPackageFragmentRoot(IJavaProject source, IPackageFragmentRoot entry) throws JavaModelException {
-		// Quick assertion that we only check JARs
-		if (entry.getKind() != IPackageFragmentRoot.K_BINARY && !entry.isArchive()) {
-			return;
-		}
-
-		String project = source.getProject().getName();
-
-		// Check for previous matches or misses
-		if (matches.containsKey(entry.getElementName())) {
-			ProductMatch match = matches.get(entry.getElementName());
-			ProductInfo info = match.getInfo();
-			recordEvent(entry, info.getGroupId(), info.getArtifactId(), match.getVersion(), project);
-			return;
-		}
-		else if (noMatches.contains(entry.getElementName())) {
-			return;
-		}
-
-		String groupId = null;
-		String artifactId = null;
-		String version = null;
-
-		JarEntryDirectory metaInfDirectory = getJarEntryDirectory(entry);
-
-		// Step 1: Check META-INF/maven
-		if (metaInfDirectory != null) {
-			for (IJarEntryResource jarEntryResource : metaInfDirectory.getChildren()) {
-				if ("maven".equals(jarEntryResource.getName())) {
-					Product product = readMaven(jarEntryResource, entry);
-					if (product != null) {
-						groupId = product.getGroupId();
-						artifactId = product.getArtifactId();
-						version = product.getVersion();
-						break;
-					}
-				}
-			}
-		}
-
-		// Step 2: Check path if it follows the Maven convention of groupId/artifactId/version
-		if (artifactId == null || groupId == null) {
-			IPath jarPath = entry.getPath();
-
-			IPath m2RepoPath = JavaCore.getClasspathVariable("M2_REPO");
-			if (m2RepoPath == null) {
-				m2RepoPath = ResourcesPlugin.getWorkspace().getPathVariableManager().getValue("M2_REPO");
-			}
-			if (m2RepoPath != null && m2RepoPath.isPrefixOf(jarPath)) {
-				jarPath = jarPath.removeFirstSegments(m2RepoPath.segmentCount());
-				int segments = jarPath.segmentCount();
-				for (int i = 0; i < segments - 1; i++) {
-					if (i == 0) {
-						groupId = jarPath.segment(i);
-					}
-					else if (i > 0 && i < segments - 3) {
-						groupId += "." + jarPath.segment(i);
-					}
-					else if (i == segments - 3) {
-						artifactId = jarPath.segment(i);
-					}
-					else if (i == segments - 2) {
-						version = jarPath.segment(i);
-					}
-				}
-			}
-		}
-
-		// Step 3: Check for typeName match
-		if (artifactId == null || groupId == null) {
-			for (ProductInfo info : getProducts()) {
-				String typeName = info.getTypeName();
-				String packageName = "";
-				if (typeName != null) {
-					int i = typeName.lastIndexOf('.');
-					if (i > 0) {
-						packageName = typeName.substring(0, i);
-						typeName = typeName.substring(i + 1);
-					}
-					IPackageFragment packageFragment = entry.getPackageFragment(packageName);
-					if (packageFragment.exists()) {
-						if (packageFragment.getClassFile(typeName + ".class").exists()) {
-							artifactId = info.getArtifactId();
-							groupId = info.getGroupId();
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		// Step 4: Obtain version from MANIFEST.MF
-		if (metaInfDirectory != null && version == null) {
-			for (IJarEntryResource jarEntryResource : metaInfDirectory.getChildren()) {
-				if ("MANIFEST.MF".equals(jarEntryResource.getName())) {
-					version = readManifest(jarEntryResource, entry);
-				}
-			}
-		}
-
-		// Step 5: Report found product
-		recordEvent(entry, groupId, artifactId, version, project);
-	}
-
-	private JarEntryDirectory getJarEntryDirectory(IPackageFragmentRoot entry) {
-		try {
-			for (Object nonJavaResource : entry.getNonJavaResources()) {
-				if (nonJavaResource instanceof JarEntryDirectory) {
-					JarEntryDirectory directory = ((JarEntryDirectory) nonJavaResource);
-					if (directory != null && "META-INF".equals(directory.getName())) {
-						return directory;
-					}
-				}
-			}
-		}
-		catch (JavaModelException e) {
-		}
-		return null;
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -245,31 +141,122 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 		}
 	}
 
+	private JarEntryDirectory getJarEntryDirectory(IPackageFragmentRoot entry) {
+		try {
+			for (Object nonJavaResource : entry.getNonJavaResources()) {
+				if (nonJavaResource instanceof JarEntryDirectory) {
+					JarEntryDirectory directory = ((JarEntryDirectory) nonJavaResource);
+					if (directory != null && META_INF_DIRECTORY_NAME.equals(directory.getName())) {
+						return directory;
+					}
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	private List<ProductInfo> getProducts() {
+		DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
+		return DetectedProducts.getProducts();
+	}
+
 	private void projectClasspathChanged(IJavaProject source) {
+		IProject project = source.getProject();
+		List<ProductMatch> productMatches = new ArrayList<ProductMatch>();
 		try {
 			IPackageFragmentRoot[] classpath = source.getPackageFragmentRoots();
 			for (IPackageFragmentRoot entry : classpath) {
-				readPackageFragmentRoot(source, entry);
+				// Obtain the ProductMatch from the classpath entry
+				ProductMatch productMatch = readPackageFragmentRoot(source, entry);
+				
+				if (productMatch != null) {
+
+					// We only want the highest version per product; therefore check if one has
+					// already been registered and compare the versions
+					int ix = productMatches.indexOf(productMatch);
+					if (ix >= 0) {
+						String newVersion = productMatch.getVersion();
+						String oldVersion = productMatches.get(ix).getVersion();
+						if (newVersion.compareTo(oldVersion) > 0) {
+							productMatches.remove(ix);
+							productMatches.add(productMatch);
+						}
+					}
+					else {
+						productMatches.add(productMatch);
+					}
+				}
+				
 			}
 		}
 		catch (Exception e) {
-			// intentionally only onto the console
+			// Intentionally only onto the console
 			e.printStackTrace();
+		}
+		finally {
+			for (ProductMatch productMatch : productMatches) {
+				recordEvent(productMatch, project.getName());
+			}
 		}
 	}
 
 	private String readManifest(IJarEntryResource jarEntryResource, IPackageFragmentRoot entry) {
 		InputStream is = null;
 		try {
+			String fileName = "";
+			if (entry.getPath() != null) {
+				fileName = entry.getPath().lastSegment();
+			}
+
 			Manifest manifest = new Manifest();
 			is = jarEntryResource.getContents();
 			manifest.read(is);
-			Attributes attr = manifest.getMainAttributes();
-			if (attr != null) {
-				String version = attr.getValue(Constants.BUNDLE_VERSION);
-				if (version != null) {
-					return version;
+
+			String bundleVersion = null;
+			String implementationVersion = null;
+			String specificationVersion = null;
+
+			Attributes attributes = manifest.getMainAttributes();
+			if (attributes != null) {
+				bundleVersion = attributes.getValue(Constants.BUNDLE_VERSION);
+				implementationVersion = attributes.getValue(IMPLEMENTATION_VERSION);
+				specificationVersion = attributes.getValue(SPECIFICATION_VERSION);
+			}
+
+			Map<String, Attributes> map = manifest.getEntries();
+			for (Iterator<String> it = map.keySet().iterator(); it.hasNext();) {
+				String entryName = it.next();
+				Attributes attrs = map.get(entryName);
+				for (Iterator<?> it2 = attrs.keySet().iterator(); it2.hasNext();) {
+					Attributes.Name attrName = (Attributes.Name) it2.next();
+					if (attrName.toString().equals(Constants.BUNDLE_VERSION)) {
+						bundleVersion = attrs.getValue(attrName);
+					}
+					else if (attrName.toString().equals(IMPLEMENTATION_VERSION)) {
+						implementationVersion = attrs.getValue(attrName);
+					}
+					else if (attrName.toString().equals(SPECIFICATION_VERSION)) {
+						implementationVersion = attrs.getValue(attrName);
+					}
 				}
+			}
+
+			if (bundleVersion != null) {
+				return bundleVersion;
+			}
+			if (fileName.contains(implementationVersion)) {
+				return implementationVersion;
+			}
+			if (fileName.contains(specificationVersion)) {
+				return specificationVersion;
+			}
+			if (implementationVersion != null) {
+				return implementationVersion;
+			}
+			if (specificationVersion != null) {
+				return specificationVersion;
 			}
 		}
 		catch (Exception e) {
@@ -308,6 +295,7 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 						is.close();
 					}
 					catch (IOException e) {
+						// Ignore
 					}
 				}
 			}
@@ -323,46 +311,157 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 		return null;
 	}
 
-	private void recordEvent(IPackageFragmentRoot packageFragment, String groupId, String artifactId, String version,
-			String name) {
-		if (groupId != null && artifactId != null) {
-			for (ProductInfo info : getProducts()) {
-				if (info.getArtifactId().equals(artifactId) && info.getGroupId().equals(groupId)) {
-					manager.registerProductUse(info.getProductName(), version, name);
-					matches.put(packageFragment.getElementName(), new ProductMatch(info, version));
-					return;
+	@SuppressWarnings("deprecation")
+	private ProductMatch readPackageFragmentRoot(IJavaProject source, IPackageFragmentRoot entry)
+			throws JavaModelException {
+		// Quick assertion that we only check JARs that exist
+		if (!entry.exists() || !entry.isArchive()) {
+			return null;
+		}
+
+		// Check for previous matches or misses
+		if (matches.containsKey(entry.getElementName())) {
+			ProductMatch match = matches.get(entry.getElementName());
+			return match;
+		}
+		else if (noMatches.contains(entry.getElementName())) {
+			return null;
+		}
+
+		String groupId = null;
+		String artifactId = null;
+		String version = null;
+		ProductInfo productInfo = null;
+
+		JarEntryDirectory metaInfDirectory = getJarEntryDirectory(entry);
+
+		// Step 1: Check META-INF/maven
+		if (metaInfDirectory != null) {
+			for (IJarEntryResource jarEntryResource : metaInfDirectory.getChildren()) {
+				if ("maven".equals(jarEntryResource.getName())) {
+					Product product = readMaven(jarEntryResource, entry);
+					if (product != null) {
+						groupId = product.getGroupId();
+						artifactId = product.getArtifactId();
+						version = product.getVersion();
+						break;
+					}
 				}
 			}
 		}
-		noMatches.add(packageFragment.getElementName());
-	}
 
-	private List<ProductInfo> getProducts() {
-		DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
-		return DetectedProducts.getProducts();
-	}
+		// Step 2: Check path if it follows the Maven convention of groupId/artifactId/version
+		if (artifactId == null || groupId == null) {
+			IPath jarPath = entry.getPath();
 
-	private static class ProductMatch {
-
-		private final ProductInfo info;
-
-		private final String version;
-
-		public ProductMatch(ProductInfo info, String version) {
-			this.info = info;
-			this.version = version;
+			IPath m2RepoPath = JavaCore.getClasspathVariable(M2_REPO);
+			if (m2RepoPath == null) {
+				m2RepoPath = ResourcesPlugin.getWorkspace().getPathVariableManager().getValue(M2_REPO);
+			}
+			if (m2RepoPath != null && m2RepoPath.isPrefixOf(jarPath)) {
+				jarPath = jarPath.removeFirstSegments(m2RepoPath.segmentCount());
+				int segments = jarPath.segmentCount();
+				for (int i = 0; i < segments - 1; i++) {
+					if (i == 0) {
+						groupId = jarPath.segment(i);
+					}
+					else if (i > 0 && i < segments - 3) {
+						groupId += "." + jarPath.segment(i);
+					}
+					else if (i == segments - 3) {
+						artifactId = jarPath.segment(i);
+					}
+					else if (i == segments - 2) {
+						version = jarPath.segment(i);
+					}
+				}
+			}
 		}
 
-		public ProductInfo getInfo() {
-			return info;
+		// Step 3: Check for typeName match
+		if (artifactId == null || groupId == null) {
+			for (ProductInfo info : getProducts()) {
+				String typeName = info.getTypeName();
+				String packageName = "";
+				if (typeName != null) {
+					int i = typeName.lastIndexOf('.');
+					if (i > 0) {
+						packageName = typeName.substring(0, i);
+						typeName = typeName.substring(i + 1);
+					}
+					IPackageFragment packageFragment = entry.getPackageFragment(packageName);
+					if (packageFragment.exists()) {
+						if (packageFragment.getClassFile(typeName + ClassUtils.CLASS_FILE_SUFFIX).exists()) {
+							artifactId = info.getArtifactId();
+							groupId = info.getGroupId();
+							productInfo = info;
+							break;
+						}
+					}
+				}
+			}
 		}
 
-		public String getVersion() {
-			return version;
+		// Step 4: Obtain version from MANIFEST.MF
+		if (groupId != null && artifactId != null && metaInfDirectory != null && version == null) {
+			for (IJarEntryResource jarEntryResource : metaInfDirectory.getChildren()) {
+				if (MANIFEST_FILE_NAME.equals(jarEntryResource.getName())) {
+					version = readManifest(jarEntryResource, entry);
+				}
+			}
+		}
+
+		// Step 5: Obtain version from file name
+		if (groupId != null && artifactId != null && version == null && entry.getPath() != null) {
+			String fileName = entry.getPath().lastSegment();
+
+			// Use regular expression to match any version number
+			Matcher matcher = VERSION_PATTERN.matcher(fileName);
+			if (matcher.matches()) {
+				StringBuilder builder = new StringBuilder();
+				for (int i = 1; i <= matcher.groupCount(); i++) {
+					builder.append(matcher.group(i));
+				}
+				version = builder.toString();
+			}
+		}
+
+		// Step 6: Construct the ProductMatch
+		ProductMatch productMatch = null;
+		if (productInfo == null) {
+			for (ProductInfo info : getProducts()) {
+				if (info.getArtifactId().equals(artifactId) && info.getGroupId().equals(groupId)) {
+					productInfo = info;
+					productMatch = new ProductMatch(info, version);
+					break;
+				}
+			}
+		}
+		else {
+			productMatch = new ProductMatch(productInfo, version);
+		}
+
+		// Step 7: Store ProductMatch for faster access in subsequent runs
+		if (productMatch != null) {
+			matches.put(entry.getElementName(), productMatch);
+			return productMatch;
+		}
+		else {
+			noMatches.add(entry.getElementName());
+			return null;
 		}
 	}
 
-	private static class Product {
+	private void recordEvent(ProductMatch productMatch, String projectName) {
+		if (productMatch != null && productMatch.getInfo() != null && productMatch.getVersion() != null) {
+			ProductInfo info = productMatch.getInfo();
+			if (info != null) {
+				manager.registerProductUse(info.getProductName(), productMatch.getVersion(), projectName);
+			}
+		}
+	}
+
+	private class Product {
 
 		private final String artifactId;
 
@@ -389,4 +488,38 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 		}
 	}
 
+	private class ProductMatch {
+
+		private final ProductInfo info;
+
+		private final String version;
+
+		public ProductMatch(ProductInfo info, String version) {
+			this.info = info;
+			this.version = version;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			// Don't add the version field to the equals method
+			if (other instanceof ProductMatch) {
+				return info.equals(((ProductMatch) other).info);
+			}
+			return false;
+		}
+
+		public ProductInfo getInfo() {
+			return info;
+		}
+
+		public String getVersion() {
+			return version;
+		}
+
+		@Override
+		public int hashCode() {
+			// Don't add the version field to the hashcode method
+			return info.hashCode();
+		}
+	}
 }

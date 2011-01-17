@@ -44,7 +44,7 @@ public class ExtensionIdToBundleMapper {
 		}
 	};
 
-	private Map<String, String> map;
+	protected Map<String, String> map;
 
 	public ExtensionIdToBundleMapper(String extensionPointId) {
 		this.extensionPointId = extensionPointId;
@@ -63,15 +63,20 @@ public class ExtensionIdToBundleMapper {
 	/**
 	 * This method walks through the commands registered via the extension registry and creates the {@link #map}.
 	 */
-	private synchronized void updateCommandToBundleMappings() {
-		if (map != null)
+	protected synchronized void updateCommandToBundleMappings() {
+		if (map != null) {
 			return;
+		}
 		map = new HashMap<String, String>();
 		IConfigurationElement[] elements = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(extensionPointId);
 		for (IConfigurationElement element : elements) {
-			map.put(element.getAttribute("id"), element.getContributor().getName()); //$NON-NLS-1$
+			map.put(extractId(element), element.getContributor().getName()); //$NON-NLS-1$
 		}
+	}
+
+	protected String extractId(IConfigurationElement element) {
+		return element.getAttribute("id");
 	}
 
 	protected synchronized String getBundleId(String extensionId) {

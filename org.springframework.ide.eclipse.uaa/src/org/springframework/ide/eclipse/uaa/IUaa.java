@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.uaa;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
@@ -20,6 +21,8 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
  * @since 2.5.2
  */
 public interface IUaa {
+	
+	Map<String, String> EMPTY_DATA = Collections.emptyMap();
 
 	/** Declined terms of use; no data will be recorded and send */
 	int DECLINE_TOU = PrivacyLevel.DECLINE_TOU.getNumber();
@@ -59,6 +62,8 @@ public interface IUaa {
 	 * <code>projectId</code>.
 	 */
 	void registerProductUse(String productId, String version, String projectId);
+	
+	void registerProjectUsageForProduct(String featureId, String projectId, Map<String, String> featureData);
 
 	/**
 	 * Clears out any stored usage data.
