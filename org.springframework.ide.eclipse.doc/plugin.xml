@@ -12,14 +12,7 @@
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
  -->
-<plugin
-   id="org.springframework.ide.eclipse.doc"
-   name="%pluginName"
-   version="2.6.0.qualifier"
-   provider-name="%providerName">
-
-   <runtime>
-   </runtime>
+<plugin>
 
    <extension
          point="org.eclipse.help.toc">

@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  */
 public class ClassUtils {
 
-	private static final String CLASS_FILE_SUFFIX = ".class";
+	public static final String CLASS_FILE_SUFFIX = ".class";
 
 	public static String getClassFileName(String className) {
 		className = StringUtils.replace(className, ".", "/");
