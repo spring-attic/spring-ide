@@ -6,11 +6,11 @@
 	<target name="jar" depends="jarjar.init" description="Creates a JAR file containing the output of a compilation of the source tree.">
 		<delete file="org.springframework.aop-repackaged-${spring.version}.jar" />
 		<jarjar destfile="org.springframework.aop-repackaged-${spring.version}.jar" index="true" filesetmanifest="merge">
-			<zipfileset src="../org.apache.commons.logging_1.1.1.v201005080502.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
-			<zipfileset src="../org.springframework.asm-${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
-			<zipfileset src="../org.springframework.aop-${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
-			<zipfileset src="../org.springframework.beans-${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
-			<zipfileset src="../org.springframework.core-${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<zipfileset src="../repo/plugins/org.apache.commons.logging_1.1.1.v201005080502.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<zipfileset src="../repo/plugins/org.springframework.asm_${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<zipfileset src="../repo/plugins/org.springframework.aop_${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<zipfileset src="../repo/plugins/org.springframework.beans_${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
+			<zipfileset src="../repo/plugins/org.springframework.core_${spring.version}.jar" excludes="META-INF/**,**/*.html,**/package-info.class"/>
 			<rule pattern="org.springframework.**" result="org.springframework.ide.eclipse.springframework.@1" />
 			<rule pattern="org.apache.commons.logging.**" result="org.springframework.ide.eclipse.apache.commons.logging.@1" />
 		</jarjar>
