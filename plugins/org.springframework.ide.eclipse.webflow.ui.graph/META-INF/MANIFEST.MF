@@ -6,7 +6,7 @@ Bundle-Version: 2.6.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.webflow.ui.graph.Activator
 Bundle-Vendor: %providerName
 Bundle-ClassPath: .,
- ognl.jar
+ lib/ognl.jar
 Bundle-Localization: plugin
 Import-Package: org.eclipse.core.commands.common,
  org.eclipse.core.resources,
