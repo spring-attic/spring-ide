@@ -55,6 +55,8 @@ public class UaaPlugin extends AbstractUIPlugin {
 	private List<IUsageMonitor> monitors = new ArrayList<IUsageMonitor>();
 
 	private UaaManager usageMonitorManager;
+	
+	private DetectedProductsJob detectedProductsJob;
 
 	/**
 	 * {@inheritDoc}
@@ -79,8 +81,9 @@ public class UaaPlugin extends AbstractUIPlugin {
 					SafeRunner.run(new ISafeRunnable() {
 
 						public void handleException(Throwable e) {
-							plugin.getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-								"Error occured starting Spring UAA usage monitor", e));
+							plugin.getLog().log(
+									new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+											"Error occured starting Spring UAA usage monitor", e));
 						}
 
 						public void run() throws Exception {
@@ -90,7 +93,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 				}
 
 				// Create the download job for DetectedProducts.xml
-				DetectedProductsJob detectedProductsJob = new DetectedProductsJob();
+				detectedProductsJob = new DetectedProductsJob();
 				// Run it directly once as this jobs schedules itself after each run
 				detectedProductsJob.run(progressMonitor);
 
@@ -132,8 +135,9 @@ public class UaaPlugin extends AbstractUIPlugin {
 			SafeRunner.run(new ISafeRunnable() {
 
 				public void handleException(Throwable e) {
-					plugin.getLog().log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-						"Error occured stopping Spring UAA usage monitor", e));
+					plugin.getLog().log(
+							new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
+									"Error occured stopping Spring UAA usage monitor", e));
 				}
 
 				public void run() throws Exception {
@@ -141,6 +145,11 @@ public class UaaPlugin extends AbstractUIPlugin {
 				}
 			});
 		}
+		
+		if (detectedProductsJob != null) {
+			detectedProductsJob.cancel();
+		}
+		
 		super.stop(context);
 	}
 
@@ -157,10 +166,12 @@ public class UaaPlugin extends AbstractUIPlugin {
 	 */
 	private static class DetectedProductsJob extends Job {
 
-		private static final long TIMEOUT = 3600000; // 1000ms * 60s * 60m
-		private static final int WAIT_TIME = 60; // 60s
+		private static final long TIME_OUT = 3600000; // 1000ms * 60s * 60m
+
+		private static final int WAIT_TIME = 120; // 120s
 
 		private static final int MAX_ERRORS = 5;
+
 		private volatile int errorCount = 0;
 
 		public DetectedProductsJob() {
@@ -177,13 +188,13 @@ public class UaaPlugin extends AbstractUIPlugin {
 				public void run() {
 					InputStream is = null;
 					try {
-						
+
 						// Check that we are allowed to update Spring UAA
 						int privacyLevel = UaaPlugin.getUAA().getPrivacyLevel();
 						if (privacyLevel == IUaa.DECLINE_TOU || privacyLevel == IUaa.UNDECIDED_TOU) {
 							return;
 						}
-						
+
 						RepositoryTransport transport = RepositoryTransport.getInstance();
 						is = transport.stream(DetectedProducts.PRODUCT_URL.toURI(), monitor);
 						DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
@@ -191,8 +202,9 @@ public class UaaPlugin extends AbstractUIPlugin {
 					}
 					catch (Exception e) {
 						errorCount++;
-						plugin.getLog().log(new Status(IStatus.INFO, UaaPlugin.PLUGIN_ID,
-							"Network connectivity issue occured in Spring UAA", e));
+						plugin.getLog().log(
+								new Status(IStatus.INFO, UaaPlugin.PLUGIN_ID,
+										"Network connectivity issue occured in Spring UAA", e));
 					}
 					finally {
 						if (is != null) {
@@ -217,8 +229,8 @@ public class UaaPlugin extends AbstractUIPlugin {
 				// which would lead most likely to a timeout
 				if (resultLatch.await(WAIT_TIME, TimeUnit.SECONDS)) {
 					// Schedule again for later but only until we reach the max error count
-					if (errorCount < MAX_ERRORS) {
-						schedule(TIMEOUT);
+					if (errorCount < MAX_ERRORS && !monitor.isCanceled()) {
+						schedule(TIME_OUT);
 						return Status.OK_STATUS;
 					}
 				}
@@ -226,9 +238,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 			catch (InterruptedException e) {
 				// Ignore
 			}
-
-			plugin.getLog().log(new Status(IStatus.INFO, UaaPlugin.PLUGIN_ID,
-				"Due to potential network connectivity issues Spring UAA will not continue to update its detected products during this session"));
+			
 			return Status.CANCEL_STATUS;
 		}
 	}
