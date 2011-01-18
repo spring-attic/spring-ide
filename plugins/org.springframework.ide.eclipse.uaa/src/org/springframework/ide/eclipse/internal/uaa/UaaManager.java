@@ -511,7 +511,7 @@ public class UaaManager implements IUaa {
 			return plugins.containsKey(usedPlugin);
 		}
 
-		protected void registerProductIfRequired() {
+		protected void registerProductIfRequired(String project) {
 			// If we initially failed to create the product it was probably because it wasn't installed when the
 			// workbench started; but now it is so try again
 			if (product == null) {
@@ -520,7 +520,12 @@ public class UaaManager implements IUaa {
 
 			// Check if the product is already registered; if not register it before we capture feature usage
 			if (!registered) {
-				service.registerProductUsage(product);
+				if (project != null) {
+					service.registerProductUsage(product, project);
+				}
+				else {
+					service.registerProductUsage(product);
+				}
 				registered = true;
 			}
 		}
