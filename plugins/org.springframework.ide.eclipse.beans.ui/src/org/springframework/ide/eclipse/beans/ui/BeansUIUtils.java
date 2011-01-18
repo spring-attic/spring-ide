@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 Spring IDE Developers
+ * Copyright (c) 2004, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ import org.w3c.dom.Element;
  * Some helper methods.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public final class BeansUIUtils {
 
@@ -79,7 +80,7 @@ public final class BeansUIUtils {
 				IFile file = ((IFileEditorInput) input).getFile();
 				IBeansProject project = BeansCorePlugin.getModel().getProject(
 						file.getProject());
-				if (project != null && project.hasConfig(file)) {
+				if (project != null && project.getConfig(file, true) != null) {
 					return file;
 				}
 			}
