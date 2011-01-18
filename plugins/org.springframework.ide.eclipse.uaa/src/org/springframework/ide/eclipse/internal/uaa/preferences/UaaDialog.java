@@ -48,7 +48,7 @@ public class UaaDialog extends TitleAreaDialog {
 			+ "\n"
 			+ "To consent to the Terms of Use, please click 'Accept'. If you do not click 'Accept' to indicate your consent anonymous data collection will remain disabled.\n"
 			+ "\n"
-			+ "You can review usage data captured by UAA in the <a href=\"prefs\">User Agent Analysis</a> perferences.";
+			+ "You can review usage data captured by UAA in the <a href=\"prefs\">User Agent Analysis</a> preferences.";
 	
 	private Image image = UaaPlugin.imageDescriptorFromPlugin(UaaPlugin.PLUGIN_ID, "icons/full/wizban/uaa_wiz.png").createImage();
 	
