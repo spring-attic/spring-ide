@@ -27,7 +27,7 @@
 							<target>
 
 								<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
-							
+
 								<path id="eclipse.classpath">
 									<fileset
 										dir="${user.home}/.m2/repository/org/sonatype/tycho/tycho-p2-runtime">
@@ -70,7 +70,7 @@
 										</java>
 									</then>
 								</if>
-								
+
 							</target>
 						</configuration>
 						<goals>
@@ -193,9 +193,9 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			
+
 		</plugins>
-		
+
 	</build>
-	
+
 </project>
