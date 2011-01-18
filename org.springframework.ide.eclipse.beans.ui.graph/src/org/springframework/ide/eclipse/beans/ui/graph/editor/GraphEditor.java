@@ -189,13 +189,13 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			}
 
 			if (refresh) {
-				// Display display = getSite().getShell().getDisplay();
-				// display.asyncExec(new Runnable() {
-				// public void run() {
-				setInput(beansInput);
-				initializeGraphicalViewer();
-				// }
-				// });
+				Display display = getSite().getShell().getDisplay();
+				display.asyncExec(new Runnable() {
+					public void run() {
+						setInput(beansInput);
+						initializeGraphicalViewer();
+					}
+				});
 			}
 		}
 
