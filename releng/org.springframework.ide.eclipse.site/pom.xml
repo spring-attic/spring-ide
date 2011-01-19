@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.ide.eclipse</groupId>
@@ -29,18 +28,14 @@
 								<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
 
 								<path id="eclipse.classpath">
-									<fileset
-										dir="${user.home}/.m2/repository/org/sonatype/tycho/tycho-p2-runtime">
-										<include
-											name="*/eclipse/plugins/org.eclipse.equinox.launcher_*.jar" />
+									<fileset dir="${settings.localRepository}/org/sonatype/tycho/tycho-p2-runtime">
+										<include name="*/eclipse/plugins/org.eclipse.equinox.launcher_*.jar" />
 									</fileset>
 								</path>
 
 								<path id="jarprocessor.classpath">
-									<fileset
-										dir="${user.home}/.m2/repository/org/sonatype/tycho/tycho-p2-runtime">
-										<include
-											name="*/eclipse/plugins/org.eclipse.equinox.p2.jarprocessor_*.jar" />
+									<fileset dir="${settings.localRepository}/org/sonatype/tycho/tycho-p2-runtime">
+										<include name="*/eclipse/plugins/org.eclipse.equinox.p2.jarprocessor_*.jar" />
 									</fileset>
 								</path>
 
@@ -51,24 +46,33 @@
 										<delete file="${project.build.directory}/site/content.jar" />
 										<delete file="${project.build.directory}/site/artifacts.jar" />
 
-										<java jvm="${java.home}/bin/java"
-											classname="org.eclipse.equinox.internal.p2.jarprocessor.Main"
-											fork="true" classpathref="jarprocessor.classpath"
-											failonerror="true" maxmemory="256m"
+										<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.internal.p2.jarprocessor.Main"
+											fork="true" classpathref="jarprocessor.classpath" failonerror="true" maxmemory="256m"
 											dir="${project.build.directory}/site">
-											<arg
-												line="-verbose -processAll -repack -pack -sign ../../sign.sh -outputDir ${project.build.directory}/site ${project.build.directory}/site" />
+											<arg line="-verbose -processAll -repack -pack -sign ../../sign.sh" />
+											<arg line="-outputDir ${project.build.directory}/site ${project.build.directory}/site" />
 										</java>
 
-										<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main"
-											fork="true" classpathref="eclipse.classpath" failonerror="true"
-											maxmemory="256m" dir="${project.build.directory}/site">
-											<arg
-												line="-application org.eclipse.equinox.p2.publisher.UpdateSitePublisher" />
-											<arg
-												line="-source ${project.build.directory}/site -metadataRepository file://${project.build.directory}/site -artifactRepository file://${project.build.directory}/site -repositoryName 'Spring IDE for Eclipse 3.5, 3.6' -compress -reusePackedFiles -publishArtifacts" />
+										<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main" fork="true"
+											classpathref="eclipse.classpath" failonerror="true" maxmemory="256m"
+											dir="${project.build.directory}/site">
+											<arg line="-application org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher" />
+											<arg line="-source ${project.build.directory}/site -metadataRepository file://${project.build.directory}/site" />
+											<arg line="-artifactRepository file://${project.build.directory}/site -metadataRepositoryName 'Spring IDE for Eclipse 3.5, 3.6'" />
+											<arg line="-artifactRepositoryName 'Spring IDE for Eclipse 3.5, 3.6' -compress -reusePackedFiles -reusePack200Files -publishArtifacts" />
 										</java>
+
+										<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main" fork="true"
+											classpathref="eclipse.classpath" failonerror="true" maxmemory="256m"
+											dir="${project.build.directory}/site">
+											<arg line="-application org.eclipse.equinox.p2.publisher.CategoryPublisher" />
+											<arg line="-metadataRepository file://${project.build.directory}/site" />
+											<arg line="-categoryDefinition file://${basedir}/category.xml" />
+											<arg line="-compress -categoryQualifier" />
+										</java>
+
 									</then>
+
 								</if>
 
 							</target>
@@ -107,17 +111,14 @@
 										<striplinebreaks />
 										<tokenfilter>
 											<filetokenizer />
-											<replaceregex pattern="Bundle-Version: ([0-9.a-zA-Z-]*)"
-												flags="s" replace="\1" />
+											<replaceregex pattern="Bundle-Version: ([0-9.a-zA-Z-]*)" flags="s" replace="\1" />
 										</tokenfilter>
 									</filterchain>
 								</loadfile>
 
-								<property name="dist.file.name"
-									value="${dist.project}-${dist.full.version}-updatesite.zip" />
+								<property name="dist.file.name" value="${dist.project}-${dist.full.version}-updatesite.zip" />
 								<property name="dist.path" value="${dist.type}/${dist.key}/nightly" />
-								<property name="dist.full.path"
-									value="${site.target.dir}/site/${dist.file.name}" />
+								<property name="dist.full.path" value="${site.target.dir}/site/${dist.file.name}" />
 
 								<delete file="${dist.full.path}" />
 								<zip zipfile="${dist.full.path}" filesonly="true">
@@ -126,10 +127,8 @@
 										<exclude name="**/*.gz" />
 									</zipfileset>
 								</zip>
-								<checksum file="${dist.full.path}" algorithm="SHA1"
-									fileext=".sha1" />
-								<checksum file="${dist.full.path}" algorithm="MD5"
-									fileext=".md5" />
+								<checksum file="${dist.full.path}" algorithm="SHA1" fileext=".sha1" />
+								<checksum file="${dist.full.path}" algorithm="MD5" fileext=".md5" />
 
 								<s3 accessKey="${dist.accessKey}" secretKey="${dist.secretKey}">
 
@@ -143,8 +142,7 @@
 										</fileset>
 									</delete>
 
-									<upload bucketName="${dist.bucket}" toDir="${dist.path}"
-										publicRead="true">
+									<upload bucketName="${dist.bucket}" toDir="${dist.path}" publicRead="true">
 										<fileset dir="${site.target.dir}/site">
 											<include name="**/*" />
 											<include name="**" />
@@ -152,14 +150,13 @@
 										</fileset>
 									</upload>
 
-									<upload bucketName="${dist.bucket}" file="${dist.full.path}"
-										toFile="${dist.path}/${dist.file.name}" publicRead="true">
+									<upload bucketName="${dist.bucket}" file="${dist.full.path}" toFile="${dist.path}/${dist.file.name}"
+										publicRead="true">
 										<metadata name="project.name" value="${dist.name}" />
 										<metadata name="release.type" value="${dist.type}" />
 										<metadata name="bundle.version" value="${dist.full.version}" />
 										<metadata name="package.file.name" value="${dist.file.name}" />
 									</upload>
-
 								</s3>
 
 							</target>
@@ -169,13 +166,7 @@
 						</goals>
 					</execution>
 				</executions>
-
 				<dependencies>
-					<dependency>
-						<groupId>ant-contrib</groupId>
-						<artifactId>ant-contrib</artifactId>
-						<version>20020829</version>
-					</dependency>
 					<dependency>
 						<groupId>org.springframework.build</groupId>
 						<artifactId>org.springframework.build.aws.ant</artifactId>
@@ -193,9 +184,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-
 		</plugins>
-
 	</build>
 
 </project>
