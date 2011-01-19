@@ -54,7 +54,7 @@ public class UaaManager implements IUaa {
 
 	private static final String UAA_PRODUCT_EXTENSION_POINT = "org.springframework.ide.eclipse.uaa.product";
 
-	private final ExecutorService executorService = Executors.newCachedThreadPool();
+	private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
 	private final List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
 
@@ -141,6 +141,9 @@ public class UaaManager implements IUaa {
 							}
 						}
 					}
+					catch (IllegalArgumentException e) {
+						// Ignore as it may sporadically come up from the preferences API 
+					}
 					finally {
 						w.unlock();
 					}
@@ -221,13 +224,15 @@ public class UaaManager implements IUaa {
 							}
 						}
 					}
+					catch (IllegalArgumentException e) {
+						// Ignore as it may sporadically come up from the preferences API 
+					}
 					finally {
 						w.unlock();
 					}
 				}
 			});
 		}
-
 	}
 
 	/**
