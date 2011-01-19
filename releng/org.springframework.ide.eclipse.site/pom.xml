@@ -58,8 +58,8 @@
 											dir="${project.build.directory}/site">
 											<arg line="-application org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher" />
 											<arg line="-source ${project.build.directory}/site -metadataRepository file://${project.build.directory}/site" />
-											<arg line="-artifactRepository file://${project.build.directory}/site -metadataRepositoryName 'Spring IDE for Eclipse 3.5, 3.6'" />
-											<arg line="-artifactRepositoryName 'Spring IDE for Eclipse 3.5, 3.6' -compress -reusePackedFiles -reusePack200Files -publishArtifacts" />
+											<arg line="-artifactRepository file://${project.build.directory}/site -metadataRepositoryName '${dist.name} Update Site'" />
+											<arg line="-artifactRepositoryName '${dist.name} Update Site' -compress -reusePackedFiles -reusePack200Files -publishArtifacts" />
 										</java>
 
 										<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.launcher.Main" fork="true"
