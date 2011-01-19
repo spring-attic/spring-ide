@@ -33,10 +33,6 @@
 	<!-- ===================================================================== -->
 	<target name="getMapFiles" depends="checkLocalMaps" unless="skipMaps">
 
-		<svn javahl="false" username="${svn.username}" password="${svn.password}">
-			<export srcurl="${mapsRepo}" destpath="${buildDirectory}/maps" force="true" />
-		</svn>
-
 	</target>
 
 	<target name="checkLocalMaps">
@@ -81,7 +77,7 @@
 	<target name="postSetup" if="skipFetch">
 		<antcall target="getBaseComponents" />
 		<copy todir="${buildDirectory}/plugins">
-			<fileset dir="${builder}/../../">
+			<fileset dir="${builder}/../../plugins">
 				<include name="**/org.*/**"/>
 				<exclude name="**/.svn/**"/>
 				<exclude name="**/bin/**"/>
@@ -92,12 +88,12 @@
 			</fileset>
 		</copy>
 		<copy todir="${buildDirectory}/plugins">
-			<fileset dir="${builder}/../../required-bundles">
+			<fileset dir="${builder}/../../bundles/repo/plugins">
 				<include name="**.jar"/>
 			</fileset>
 		</copy>
 		<copy todir="${buildDirectory}/features">
-			<fileset dir="${builder}/../../">
+			<fileset dir="${builder}/../../features">
 				<include name="**/*.feature/**" />
 				<include name="**/*.feature.source/**" />
 			</fileset>
