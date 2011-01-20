@@ -157,7 +157,7 @@ public class PartUsageMonitor implements IUsageMonitor {
 		if (manager != null) {
 			if (part.getSite() instanceof IViewSite) {
 				manager.registerFeatureUse(viewToBundleIdMapper.getBundleId(part.getSite().getId()),
-						Collections.singletonMap("view", part.getTitle()));
+						Collections.singletonMap("view", part.getSite().getRegisteredName()));
 			}
 			else if (part.getSite() instanceof IEditorSite) {
 				manager.registerFeatureUse(editorToBundleIdMapper.getBundleId(part.getSite().getId()),
