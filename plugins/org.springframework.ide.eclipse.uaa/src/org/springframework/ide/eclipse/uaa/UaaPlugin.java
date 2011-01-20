@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.UaaManager;
 import org.springframework.ide.eclipse.internal.uaa.monitor.CommandUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.LibraryUsageMonitor;
-import org.springframework.ide.eclipse.internal.uaa.monitor.NatureUsageMonitor;
+import org.springframework.ide.eclipse.internal.uaa.monitor.NatureAndBuilderUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.PartUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.ServerUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.preferences.UaaDialog;
@@ -70,7 +70,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 		monitors.add(new CommandUsageMonitor());
 		monitors.add(new LibraryUsageMonitor());
 		monitors.add(new ServerUsageMonitor());
-		monitors.add(new NatureUsageMonitor());
+		monitors.add(new NatureAndBuilderUsageMonitor());
 
 		Job startupJob = new Job("Initializing Spring UAA") { //$NON-NLS-1$
 

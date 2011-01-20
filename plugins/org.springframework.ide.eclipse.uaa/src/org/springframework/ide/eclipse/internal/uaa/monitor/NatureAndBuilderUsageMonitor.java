@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.internal.uaa.monitor;
 import java.util.Collections;
 import java.util.HashMap;
 
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNatureDescriptor;
@@ -36,20 +37,26 @@ import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.uaa.IUaa;
 
 /**
+ * {@link IUsageMonitor} that records usage data for project nature and builder definitions.
  * @author Christian Dupuis
  * @since 2.6.0
  */
-public class NatureUsageMonitor implements IUsageMonitor {
+public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 
 	private IUaa manager;
 
-	private ExtensionIdToBundleMapper bundleMapper;
+	private ExtensionIdToBundleMapper natureBundleMapper;
+
+	private ExtensionIdToBundleMapper builderBundleMapper;
 
 	private IResourceChangeListener resourceChangeListener;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void startMonitoring(IUaa manager) {
 		this.manager = manager;
-		this.bundleMapper = new ExtensionIdToBundleMapper(ResourcesPlugin.PI_RESOURCES + "."
+		this.natureBundleMapper = new ExtensionIdToBundleMapper(ResourcesPlugin.PI_RESOURCES + "."
 				+ ResourcesPlugin.PT_NATURES) {
 
 			protected synchronized void updateCommandToBundleMappings() {
@@ -59,6 +66,23 @@ public class NatureUsageMonitor implements IUsageMonitor {
 				map = new HashMap<String, String>();
 				IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(ResourcesPlugin.PI_RESOURCES,
 						ResourcesPlugin.PT_NATURES);
+				for (IExtension extension : point.getExtensions()) {
+					map.put(extension.getUniqueIdentifier(), extension.getNamespaceIdentifier());
+				}
+			};
+
+		};
+
+		this.builderBundleMapper = new ExtensionIdToBundleMapper(ResourcesPlugin.PI_RESOURCES + "."
+				+ ResourcesPlugin.PT_BUILDERS) {
+
+			protected synchronized void updateCommandToBundleMappings() {
+				if (map != null) {
+					return;
+				}
+				map = new HashMap<String, String>();
+				IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(ResourcesPlugin.PI_RESOURCES,
+						ResourcesPlugin.PT_BUILDERS);
 				for (IExtension extension : point.getExtensions()) {
 					map.put(extension.getUniqueIdentifier(), extension.getNamespaceIdentifier());
 				}
@@ -89,20 +113,33 @@ public class NatureUsageMonitor implements IUsageMonitor {
 		startup.schedule(3000);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void stopMonitoring() {
-		if (bundleMapper != null) {
-			bundleMapper.dispose();
+		if (natureBundleMapper != null) {
+			natureBundleMapper.dispose();
+		}
+		if (builderBundleMapper != null) {
+			builderBundleMapper.dispose();
 		}
 		if (resourceChangeListener != null) {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		}
 	}
 
+	/**
+	 * Record usage data to a given project. 
+	 */
 	private void projectChanged(IProject project) {
 		if (project != null && project.isAccessible() && project.isOpen()) {
 			try {
 				for (String natureId : project.getDescription().getNatureIds()) {
-					recordEvent(natureId, bundleMapper.getBundleId(natureId), project.getName());
+					recordNatureEvent(natureId, natureBundleMapper.getBundleId(natureId), project.getName());
+				}
+				for (ICommand command : project.getDescription().getBuildSpec()) {
+					recordBuilderEvent(command.getBuilderName(),
+							builderBundleMapper.getBundleId(command.getBuilderName()), project.getName());
 				}
 			}
 			catch (CoreException e) {
@@ -112,7 +149,10 @@ public class NatureUsageMonitor implements IUsageMonitor {
 		}
 	}
 
-	private void recordEvent(String natureId, String bundleId, String project) {
+	/**
+	 * Records the usage of a certain nature in a given project. 
+	 */
+	private void recordNatureEvent(String natureId, String bundleId, String project) {
 		IProjectNatureDescriptor desc = ResourcesPlugin.getWorkspace().getNatureDescriptor(natureId);
 		if (desc != null && bundleId != null && project != null) {
 			String label = desc.getLabel();
@@ -127,6 +167,26 @@ public class NatureUsageMonitor implements IUsageMonitor {
 		}
 	}
 
+	/**
+	 * Records the usage of a certain builder in a given project. 
+	 */
+	private void recordBuilderEvent(String builderId, String bundleId, String project) {
+		IExtension extension = Platform.getExtensionRegistry().getExtension(ResourcesPlugin.PI_RESOURCES,
+				ResourcesPlugin.PT_BUILDERS, builderId);
+		if (builderId != null && bundleId != null) {
+			String label = extension.getLabel();
+			if (label != null) {
+				manager.registerProjectUsageForProduct(bundleId, project, Collections.singletonMap("builder", label));
+			}
+			else {
+				manager.registerProjectUsageForProduct(bundleId, project, IUaa.EMPTY_DATA);
+			}
+		}
+	}
+
+	/**
+	 * {@link IResourceChangeListener} that listens to changes of a project's <code>pom.xml</code>. 
+	 */
 	class DotProjectResourceChangeListener implements IResourceChangeListener {
 
 		private static final int VISITOR_FLAGS = IResourceDelta.ADDED | IResourceDelta.CHANGED;
