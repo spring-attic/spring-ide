@@ -58,6 +58,16 @@
 	</distributionManagement>
 
 	<properties>
+		<p2.qualifier>SNAPSHOT</p2.qualifier>
+		<p2.sign>false</p2.sign>
+		<p2.repository.name>Spring IDE</p2.repository.name>
+		
+		<dist.name>Spring IDE</dist.name>
+		<dist.project>spring-ide</dist.project>
+		<dist.key>IDE</dist.key>
+		<dist.type>snapshot</dist.type>
+		<dist.bucket>dist.springframework.org</dist.bucket>
+
 		<tycho-version>0.10.0</tycho-version>
 		<maven.test.skip>true</maven.test.skip>
 		<maven.test.error.ignore>true</maven.test.error.ignore>
@@ -65,15 +75,6 @@
 		<maven.compiler.source>1.5</maven.compiler.source>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<encoding>UTF-8</encoding>
-
-		<p2.qualifier>SNAPSHOT</p2.qualifier>
-		<p2.sign>false</p2.sign>
-
-		<dist.name>Spring IDE</dist.name>
-		<dist.project>spring-ide</dist.project>
-		<dist.key>IDE</dist.key>
-		<dist.type>snapshot</dist.type>
-		<dist.bucket>dist.springframework.org</dist.bucket>
 	</properties>
 
 	<modules>
@@ -158,6 +159,9 @@
 	<profiles>
 		<profile>
 			<id>e34</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 3.4</p2.repository.name>
+			</properties>
 			<repositories>
 				<repository>
 					<id>platform-e34</id>
@@ -178,6 +182,9 @@
 		</profile>
 		<profile>
 			<id>e35</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 3.5</p2.repository.name>
+			</properties>
 			<repositories>
 				<repository>
 					<id>platform-e35</id>
@@ -198,6 +205,12 @@
 		</profile>
 		<profile>
 			<id>e36</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 3.6</p2.repository.name>
+			</properties>
 			<repositories>
 				<repository>
 					<id>platform-e36</id>
