@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.p2.repository.RepositoryTransport;
 import org.eclipse.jface.window.Window;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
@@ -55,7 +56,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 	private List<IUsageMonitor> monitors = new ArrayList<IUsageMonitor>();
 
 	private UaaManager usageMonitorManager;
-	
+
 	private DetectedProductsJob detectedProductsJob;
 
 	/**
@@ -75,33 +76,36 @@ public class UaaPlugin extends AbstractUIPlugin {
 		Job startupJob = new Job("Initializing Spring UAA") { //$NON-NLS-1$
 
 			public IStatus run(IProgressMonitor progressMonitor) {
-				usageMonitorManager.start();
 
-				for (final IUsageMonitor monitor : monitors) {
-					SafeRunner.run(new ISafeRunnable() {
-
-						public void handleException(Throwable e) {
-							plugin.getLog().log(
-									new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-											"Error occured starting Spring UAA usage monitor", e));
-						}
-
-						public void run() throws Exception {
-							monitor.startMonitoring(usageMonitorManager);
-						}
-					});
+				// Make sure that Platform is already started; if it is not re-schedule to retry later
+				if (!PlatformUI.isWorkbenchRunning()) {
+					schedule(5000);
 				}
+				else {
+					usageMonitorManager.start();
 
-				// Create the download job for DetectedProducts.xml
-				detectedProductsJob = new DetectedProductsJob();
-				// Run it directly once as this jobs schedules itself after each run
-				detectedProductsJob.run(progressMonitor);
+					for (final IUsageMonitor monitor : monitors) {
+						SafeRunner.run(new ISafeRunnable() {
 
+							public void handleException(Throwable e) {
+							}
+
+							public void run() throws Exception {
+								monitor.startMonitoring(usageMonitorManager);
+							}
+						});
+					}
+
+					// Create the download job for DetectedProducts.xml
+					detectedProductsJob = new DetectedProductsJob();
+					// Run it directly once as this jobs schedules itself after each run
+					detectedProductsJob.run(progressMonitor);
+				}
 				return Status.OK_STATUS;
 			}
 		};
 		startupJob.setSystem(true);
-		startupJob.schedule(2000);
+		startupJob.schedule();
 
 		if (usageMonitorManager.getPrivacyLevel() == IUaa.UNDECIDED_TOU) {
 
@@ -135,9 +139,6 @@ public class UaaPlugin extends AbstractUIPlugin {
 			SafeRunner.run(new ISafeRunnable() {
 
 				public void handleException(Throwable e) {
-					plugin.getLog().log(
-							new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-									"Error occured stopping Spring UAA usage monitor", e));
 				}
 
 				public void run() throws Exception {
@@ -145,11 +146,11 @@ public class UaaPlugin extends AbstractUIPlugin {
 				}
 			});
 		}
-		
+
 		if (detectedProductsJob != null) {
 			detectedProductsJob.cancel();
 		}
-		
+
 		super.stop(context);
 	}
 
@@ -238,7 +239,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 			catch (InterruptedException e) {
 				// Ignore
 			}
-			
+
 			return Status.CANCEL_STATUS;
 		}
 	}
