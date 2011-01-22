@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 Spring IDE Developers
+ * Copyright (c) 2006 - 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,14 +13,14 @@ package org.springframework.ide.eclipse.beans.ui.wizards;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -33,119 +33,93 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  */
-public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
+@SuppressWarnings({ "deprecation", "restriction" })
+public class NewSpringProjectCreationPage extends WizardPage {
 
-	private Button isJavaButton;
-	private Text sourceDirText;
-	private Label sourceDirLabel;
-	private Text outputDirText;
-	private Label outputDirLabel;
-	private Text suffixesText;
-	
+	private static final String CONFIG_PROPERTY_PREFIX = "ConfigurationPropertyPage."
+			+ "tabConfigFiles.";
+
+	private static final String ENABLE_IMPORT_LABEL = CONFIG_PROPERTY_PREFIX
+			+ "enableImports.label";
+
+	private static final String IGNORE_MISSING_NAMESPACEHANDLER_LABEL = CONFIG_PROPERTY_PREFIX
+			+ "ignoreMissingNamespaceHandler.label";
+
+	private Button classpathCheckbox;
+
+	private Button enableImportButton;
+
 	private Button enableProjectFacetsButton;
+
+	private Button ignoreMissingNamespaceHandlerButton;
+
+	private Text suffixesText;
+
+	private SelectionButtonDialogField useProjectSettingsButton;
+
+	private Button versionCheckbox;
 
 	public NewSpringProjectCreationPage(String pageName) {
 		super(pageName);
 	}
 
-	public boolean isJavaProject() {
-		return isJavaButton.getSelection();
+	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
+
+		Composite composite = new Composite(parent, SWT.NULL);
+		composite.setFont(parent.getFont());
+		composite.setLayout(initGridLayout(new GridLayout(), true));
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		createConfigFileGroup(composite);
+		createNamespaceSettingsGroup(composite);
+		createFacetsGroup(composite);
+		setPageComplete(validatePage());
+
+		// Show description on opening
+		setErrorMessage(null);
+		setMessage(null);
+		setControl(composite);
+		Dialog.applyDialogFont(composite);
+	}
+
+	public boolean enableImports() {
+		return enableImportButton.getSelection();
 	}
 
 	public boolean enableProjectFacets() {
 		return enableProjectFacetsButton.getSelection();
 	}
 
-	public String getSourceDirectory() {
-		return sourceDirText.getText();
-	}
-
-	public String getOutputDirectory() {
-		return outputDirText.getText();
-	}
-
 	public Set<String> getConfigSuffixes() {
 		return StringUtils.commaDelimitedListToSet(suffixesText.getText());
 	}
 
-	@Override
-	public void createControl(Composite parent) {
-		super.createControl(parent);
-		Composite control = (Composite)getControl();
-		GridLayout layout = new GridLayout();
-		layout.verticalSpacing = 10;
-		control.setLayout(layout);
-
-		createProjectTypeGroup(control);
-
-		Dialog.applyDialogFont(control);
-		setControl(control);
+	public boolean ignoreMissingNamespaceHandlers() {
+		return ignoreMissingNamespaceHandlerButton.getSelection();
 	}
 
-	private void createProjectTypeGroup(Composite container) {
-		Group springGroup = new Group(container, SWT.NONE);
-		springGroup.setText(BeansWizardsMessages.NewProjectPage_springSettings);
-		GridLayout dirLayout = new GridLayout();
-		dirLayout.numColumns = 1;
-		springGroup.setLayout(dirLayout);
-		springGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	public boolean loadHandlerFromClasspath() {
+		return classpathCheckbox.getSelection();
+	}
 
-		suffixesText = SpringUIUtils.createTextField(springGroup,
-				BeansWizardsMessages.NewProjectPage_suffixes);
-		suffixesText.setText(IBeansProject.DEFAULT_CONFIG_SUFFIX);
-		suffixesText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				setPageComplete(validatePage());
-			}
-		});
+	public boolean useHighestXsdVersion() {
+		return versionCheckbox.getSelection();
+	}
 
-		Group javaGroup = new Group(container, SWT.NONE);
-		javaGroup.setText(BeansWizardsMessages.NewProjectPage_javaSettings);
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		javaGroup.setLayout(layout);
-		javaGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		isJavaButton = createButton(javaGroup, SWT.CHECK, 2, 0);
-		isJavaButton.setText(BeansWizardsMessages.NewProjectPage_java);
-		isJavaButton.setSelection(true);
-		isJavaButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				boolean enabled = isJavaButton.getSelection();
-				sourceDirLabel.setEnabled(enabled);
-				sourceDirText.setEnabled(enabled);
-				outputDirLabel.setEnabled(enabled);
-				outputDirText.setEnabled(enabled);
-				setPageComplete(validatePage());
-			}
-		});
-
-		sourceDirLabel = createLabel(javaGroup,
-				BeansWizardsMessages.NewProjectPage_source);
-		sourceDirText = createText(javaGroup);
-		IPreferenceStore store = PreferenceConstants.getPreferenceStore();
-		sourceDirText.setText(store
-				.getString(PreferenceConstants.SRCBIN_SRCNAME));
-
-		outputDirLabel = createLabel(javaGroup,
-				BeansWizardsMessages.NewProjectPage_output);
-		outputDirText = createText(javaGroup);
-		outputDirText.setText(store
-				.getString(PreferenceConstants.SRCBIN_BINNAME));
-		
-		enableProjectFacetsButton = createButton(container, SWT.CHECK, 2, 0);
-		enableProjectFacetsButton.setText(BeansWizardsMessages.NewProjectPage_enableProjectFacets);
-		enableProjectFacetsButton.setSelection(false);
+	public boolean useProjectSettings() {
+		return useProjectSettingsButton.isSelected();
 	}
 
 	private Button createButton(Composite container, int style, int span,
@@ -158,58 +132,147 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 		return button;
 	}
 
-	private Label createLabel(Composite container, String text) {
-		Label label = new Label(container, SWT.NONE);
-		label.setText(text);
-		GridData gd = new GridData();
-		gd.horizontalIndent = 30;
-		label.setLayoutData(gd);
-		return label;
-	}
+	private void createConfigFileGroup(Composite container) {
+		Group springGroup = new Group(container, SWT.NONE);
+		springGroup
+				.setText(BeansWizardsMessages.NewProjectPage_configFileSettings);
+		springGroup.setLayout(initGridLayout(new GridLayout(), true));
+		springGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-	private Text createText(Composite container) {
-		Text text = new Text(container, SWT.BORDER | SWT.SINGLE);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.widthHint = 300;
-		text.setLayoutData(gd);
-		text.addModifyListener(new ModifyListener() {
+		// Create enable import checkbox
+		enableImportButton = SpringUIUtils.createCheckBox(springGroup,
+				BeansUIPlugin.getResourceString(ENABLE_IMPORT_LABEL));
+		enableImportButton.setSelection(IBeansProject.DEFAULT_IMPORTS_ENABLED);
+		enableImportButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setPageComplete(validatePage());
+			}
+		});
+
+		// Create ignore missing namespace handler checkbox
+		ignoreMissingNamespaceHandlerButton = SpringUIUtils
+				.createCheckBox(
+						springGroup,
+						BeansUIPlugin
+								.getResourceString(IGNORE_MISSING_NAMESPACEHANDLER_LABEL));
+		ignoreMissingNamespaceHandlerButton
+				.setSelection(BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT);
+		ignoreMissingNamespaceHandlerButton
+				.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						setPageComplete(validatePage());
+					}
+				});
+
+		// Create suffix text field
+		suffixesText = SpringUIUtils.createTextField(springGroup,
+				BeansWizardsMessages.NewProjectPage_suffixes);
+		suffixesText.setText(IBeansProject.DEFAULT_CONFIG_SUFFIX);
+		suffixesText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				setPageComplete(validatePage());
 			}
 		});
-		return text;
 	}
 
-	@Override
-	protected boolean validatePage() {
-		if (!super.validatePage()) {
+	private void createFacetsGroup(Composite container) {
+		Group facetsGroup = new Group(container, SWT.NONE);
+		facetsGroup.setText(BeansWizardsMessages.NewProjectPage_facetsSettings);
+		facetsGroup.setLayout(initGridLayout(new GridLayout(), true));
+		facetsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		Label description = new Label(facetsGroup, SWT.NONE);
+		description
+				.setText(BeansWizardsMessages.NewProjectPage_projectFacetsDescription);
+
+		enableProjectFacetsButton = createButton(facetsGroup, SWT.CHECK, 1, 0);
+		enableProjectFacetsButton
+				.setText(BeansWizardsMessages.NewProjectPage_enableProjectFacets);
+		enableProjectFacetsButton.setSelection(false);
+	}
+
+	private void createNamespaceSettingsGroup(Composite container) {
+		Group namespacesGroup = new Group(container, SWT.NONE);
+		namespacesGroup
+				.setText(BeansWizardsMessages.NewProjectPage_namespacesSettings);
+		namespacesGroup.setLayout(initGridLayout(new GridLayout(), true));
+		namespacesGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		IDialogFieldListener listener = new IDialogFieldListener() {
+			public void dialogFieldChanged(DialogField field) {
+				enableProjectSpecificSettings(((SelectionButtonDialogField) field)
+						.isSelected());
+			}
+		};
+
+		useProjectSettingsButton = new SelectionButtonDialogField(SWT.CHECK);
+		useProjectSettingsButton.setDialogFieldListener(listener);
+		useProjectSettingsButton
+				.setLabelText(BeansWizardsMessages.NewProjectPage_enableProjectSettings);
+		useProjectSettingsButton.doFillIntoGrid(namespacesGroup, 1);
+		LayoutUtil.setHorizontalGrabbing(useProjectSettingsButton
+				.getSelectionButton(null));
+
+		LayoutUtil.setHorizontalSpan(
+				useProjectSettingsButton.getSelectionButton(null), 2);
+
+		Label horizontalLine = new Label(namespacesGroup, SWT.SEPARATOR
+				| SWT.HORIZONTAL);
+		horizontalLine.setLayoutData(new GridData(GridData.FILL, GridData.FILL,
+				true, false));
+		horizontalLine.setFont(namespacesGroup.getFont());
+
+		Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
+		boolean versionClasspath = prefs
+				.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
+		boolean useClasspath = prefs
+				.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
+
+		versionCheckbox = createButton(namespacesGroup, SWT.CHECK, 1,
+				convertHorizontalDLUsToPixels(5));
+		versionCheckbox
+				.setText(BeansWizardsMessages.NewProjectPage_highestXsdVersion);
+		versionCheckbox.setSelection(versionClasspath);
+
+		classpathCheckbox = createButton(namespacesGroup, SWT.CHECK, 1,
+				convertHorizontalDLUsToPixels(5));
+		classpathCheckbox
+				.setText(BeansWizardsMessages.NewProjectPage_loadXsdsFromClasspath);
+		classpathCheckbox.setSelection(useClasspath);
+
+		enableProjectSpecificSettings(false);
+	}
+
+	private void enableProjectSpecificSettings(
+			boolean useProjectSpecificSettings) {
+		versionCheckbox.setEnabled(useProjectSpecificSettings);
+		classpathCheckbox.setEnabled(useProjectSpecificSettings);
+	}
+
+	// Copied from NewJavaProjectWizardPageOne so that our margins will match
+	private GridLayout initGridLayout(GridLayout layout, boolean margins) {
+		layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		layout.verticalSpacing = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+		if (margins) {
+			layout.marginWidth = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+			layout.marginHeight = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+		} else {
+			layout.marginWidth = 0;
+			layout.marginHeight = 0;
+		}
+		return layout;
+	}
+
+	private boolean isValidSuffix(String suffix) {
+		if (suffix.length() == 0) {
 			return false;
 		}
+		return true;
+	}
 
-		if (isJavaButton.getSelection()) {
-			IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			IProject dummy = workspace.getRoot().getProject("project");
-			IStatus status;
-			if (sourceDirText != null &&
-					sourceDirText.getText().length() != 0) {
-				status = workspace.validatePath(dummy.getFullPath().append(
-						sourceDirText.getText()).toString(), IResource.FOLDER);
-				if (!status.isOK()) {
-					setErrorMessage(status.getMessage());
-					return false;
-				}
-			}
-			if (outputDirText != null &&
-					outputDirText.getText().length() != 0) {
-				status = workspace.validatePath(dummy.getFullPath().append(
-						outputDirText.getText()).toString(), IResource.FOLDER);
-				if (!status.isOK()) {
-					setErrorMessage(status.getMessage());
-					return false;
-				}
-			}
-		}
-
+	protected boolean validatePage() {
 		String suffixes = suffixesText.getText().trim();
 		if (suffixes.length() == 0) {
 			setErrorMessage(BeansWizardsMessages.NewProjectPage_noSuffixes);
@@ -223,13 +286,9 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 				return false;
 			}
 		}
+		setErrorMessage(null);
+		setMessage(null);
 		return true;
 	}
 
-	private boolean isValidSuffix(String suffix) {
-		if (suffix.length() == 0) {
-			return false;
-		}
-		return true;
-	}
 }
