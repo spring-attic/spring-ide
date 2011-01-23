@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,9 +25,9 @@ import org.springframework.util.ObjectUtils;
 /**
  * Java implementation of {@link IModelSourceLocation} interface that takes all relevant information in the constructor.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class JavaModelSourceLocation implements Serializable, IModelSourceLocation {
 
 	private static final long serialVersionUID = -1689438887512112705L;

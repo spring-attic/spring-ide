@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
 /**
  * Utility class that tries to locate {@link IType} instances from the AJDT type Hierarchy.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 @SuppressWarnings("deprecation")
