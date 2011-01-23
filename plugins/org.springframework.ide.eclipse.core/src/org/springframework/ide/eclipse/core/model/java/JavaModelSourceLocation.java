@@ -15,9 +15,7 @@ import java.io.Serializable;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -40,7 +38,7 @@ public class JavaModelSourceLocation implements Serializable, IModelSourceLocati
 
 	public JavaModelSourceLocation(IJavaElement type) throws JavaModelException {
 		this.handleIdentifier = type.getHandleIdentifier();
-		this.lineNumber = JdtUtils.getLineNumber(JavaCore.create(handleIdentifier, DefaultWorkingCopyOwner.PRIMARY));
+		this.lineNumber = JdtUtils.getLineNumber(JdtUtils.getByHandle(handleIdentifier));
 	}
 
 	public int getEndLine() {
@@ -53,7 +51,7 @@ public class JavaModelSourceLocation implements Serializable, IModelSourceLocati
 
 	public Resource getResource() {
 		try {
-			IJavaElement element = JavaCore.create(handleIdentifier, DefaultWorkingCopyOwner.PRIMARY);
+			IJavaElement element = JdtUtils.getByHandle(handleIdentifier);
 			if (element != null) {
 				IResource resource = element.getUnderlyingResource();
 				if (resource != null) {

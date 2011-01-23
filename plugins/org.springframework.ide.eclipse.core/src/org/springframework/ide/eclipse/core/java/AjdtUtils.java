@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.ajdt.core.AspectJCore;
 import org.eclipse.ajdt.core.javaelements.AJCompilationUnit;
 import org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager;
 import org.eclipse.ajdt.core.javaelements.IAspectJElement;
@@ -25,6 +26,7 @@ import org.eclipse.ajdt.core.model.AJRelationshipManager;
 import org.eclipse.ajdt.core.model.AJRelationshipType;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -42,7 +44,6 @@ public class AjdtUtils {
 
 	private static final boolean IS_JDT_WEAVING_PRESENT = isJdtWeavingPresent();
 
-	@SuppressWarnings("unchecked")
 	public static IType getAjdtType(IProject project, String className) {
 
 		if (IS_JDT_WEAVING_PRESENT && JdtWeavingTester.isJdtWeavingActive()) {
@@ -92,7 +93,11 @@ public class AjdtUtils {
 		}
 		return methods;
 	}
-
+	
+	public static IJavaElement getByHandle(String handle) {
+		return AspectJCore.create(handle);
+	}
+	
 	public static boolean isJdtWeavingPresent() {
 		try {
 			Class.forName(AJDT_CLASS);

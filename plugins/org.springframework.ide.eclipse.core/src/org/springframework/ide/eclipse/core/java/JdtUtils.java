@@ -896,4 +896,8 @@ public class JdtUtils {
 		}
 	}
 
+	public static IJavaElement getByHandle(String handle) {
+		return AjdtUtils.getByHandle(handle);
+	}
+
 }
