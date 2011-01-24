@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
@@ -44,6 +45,8 @@ import org.springframework.ide.eclipse.beans.ui.refactoring.util.BeansRefactorin
 import org.springframework.util.StringUtils;
 
 /**
+ * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @author Martin Lippert
  * @since 2.6.0
  */
@@ -118,40 +121,31 @@ public class RenameIdRefactoring extends Refactoring {
 			throws CoreException {
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
 		if (config != null) {
-			Set<IBeansConfig> resources = new HashSet<IBeansConfig>();
-			resources.add(config);
+			Set<IBeansConfig> visitedResources = new HashSet<IBeansConfig>();
+			visitedResources.add(config);
+			
+			// rename id in imported configs
 			for (IBeansImport import_ : config.getImports()) {
 				for (IBeansConfig bc : import_.getImportedBeansConfigs()) {
-					if (!resources.contains(bc) && !bc.isElementArchived()) {
-						IResource res = bc.getElementResource();
-						if (res.isAccessible() && res instanceof IFile) {
-							resources.add(bc);
-							Change refsChange = BeansRefactoringChangeUtils
-									.createRenameBeanRefsChange((IFile) bc.getElementResource(),
-											descriptor, oldBeanId, beanId, pm);
-							if (refsChange != null) {
-								compositeChange.add(refsChange);
-							}
-						}
-					}
+					addChangesForUpdateReferences(bc, descriptor,
+							compositeChange, visitedResources, pm);
 				}
 			}
+			
+			// rename id in configs that import this one
+			IBeansConfig importingBeansConfig = BeansModelUtils.getImportingBeansConfig(config);
+			if (importingBeansConfig != null) {
+				addChangesForUpdateReferences(importingBeansConfig, descriptor, compositeChange,
+						visitedResources, pm);
+			}
+			
+			// rename id in bean config sets
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
 					if (configSet.getConfigs().contains(config)) {
 						for (IBeansConfig bc : configSet.getConfigs()) {
-							if (!resources.contains(bc) && !bc.isElementArchived()) {
-								IResource res = bc.getElementResource();
-								if (res.isAccessible() && res instanceof IFile) {
-									resources.add(bc);
-									Change refsChange = BeansRefactoringChangeUtils
-											.createRenameBeanRefsChange((IFile) bc
-													.getElementResource(), descriptor, oldBeanId, beanId, pm);
-									if (refsChange != null) {
-										compositeChange.add(refsChange);
-									}
-								}
-							}
+							addChangesForUpdateReferences(bc,
+									descriptor, compositeChange, visitedResources, pm);
 						}
 					}
 				}
@@ -159,6 +153,24 @@ public class RenameIdRefactoring extends Refactoring {
 		}
 	}
 
+	private void addChangesForUpdateReferences(IBeansConfig beansConfig,
+			RenameIdType descriptor, CompositeChange compositeChange,
+			Set<IBeansConfig> visitedResources, IProgressMonitor pm)
+			throws CoreException {
+		if (!visitedResources.contains(beansConfig) && !beansConfig.isElementArchived()) {
+			IResource res = beansConfig.getElementResource();
+			if (res.isAccessible() && res instanceof IFile) {
+				visitedResources.add(beansConfig);
+				Change refsChange = BeansRefactoringChangeUtils
+						.createRenameBeanRefsChange((IFile) beansConfig.getElementResource(),
+								descriptor, oldBeanId, beanId, pm);
+				if (refsChange != null) {
+					compositeChange.add(refsChange);
+				}
+			}
+		}
+	}
+	
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException,
 			OperationCanceledException {
