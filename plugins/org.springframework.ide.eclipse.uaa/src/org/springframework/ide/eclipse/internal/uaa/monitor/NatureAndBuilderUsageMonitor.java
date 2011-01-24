@@ -163,7 +163,12 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 			else if (label.toLowerCase().endsWith("nature")) {
 				label = label.substring(0, label.length() - 6).trim();
 			}
-			manager.registerProjectUsageForProduct(bundleId, project, Collections.singletonMap("nature", label));
+			if (label != null && label.length()> 0) {
+				manager.registerProjectUsageForProduct(bundleId, project, Collections.singletonMap("nature", label));
+			}
+			else {
+				manager.registerProjectUsageForProduct(bundleId, project, IUaa.EMPTY_DATA);
+			}
 		}
 	}
 
@@ -175,7 +180,7 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 				ResourcesPlugin.PT_BUILDERS, builderId);
 		if (builderId != null && bundleId != null) {
 			String label = extension.getLabel();
-			if (label != null) {
+			if (label != null && label.length()> 0) {
 				manager.registerProjectUsageForProduct(bundleId, project, Collections.singletonMap("builder", label));
 			}
 			else {
