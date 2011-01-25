@@ -1,6 +1,5 @@
 bin/
 target/
-eclipse/
 org.eclipse.releng.basebuilder/
 build/
 eclipse-base.tar.gz

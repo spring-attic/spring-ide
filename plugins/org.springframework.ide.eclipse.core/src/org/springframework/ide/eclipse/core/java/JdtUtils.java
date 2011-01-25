@@ -64,11 +64,11 @@ import org.springframework.util.StringUtils;
  */
 public class JdtUtils {
 
-	public static final String JAVA_FILE_EXTENSION = ".java";
-
 	public static final String CLASS_FILE_EXTENSION = ".class";
 
 	public static final String GROOVY_FILE_EXTENSION = ".groovy";
+
+	public static final String JAVA_FILE_EXTENSION = ".java";
 
 	private static final String AJDT_CLASS = "org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager";
 
@@ -97,6 +97,27 @@ public class JdtUtils {
 			throw new OperationCanceledException();
 		}
 		return jproject;
+	}
+
+	/**
+	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
+	 */
+	public static boolean doesImplement(IResource resource, IType type, String className) {
+		if (resource == null || type == null || className == null) {
+			return false;
+		}
+		if (className.startsWith("java.") || className.startsWith("javax.")) {
+			try {
+				ClassLoader cls = getClassLoader(resource.getProject(), null);
+				Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
+				Class<?> interfaceClass = cls.loadClass(className);
+				return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
+			}
+			catch (Throwable e) {
+				// ignore this and fall back to JDT does implement checks
+			}
+		}
+		return doesImplementWithJdt(resource, type, className);
 	}
 
 	public static IType getAjdtType(IProject project, String className) {
@@ -187,6 +208,95 @@ public class JdtUtils {
 		}
 		return paths;
 	}
+	
+	/**
+	 * @since 2.6.0 
+	 */
+	public static IJavaElement getByHandle(String handle) {
+		if (IS_AJDT_PRESENT) {
+			return AjdtUtils.getByHandle(handle);
+		}
+		else {
+			return JavaCore.create(handle);
+		}
+	}
+
+	/**
+	 * Create a {@link ClassLoader} from the class path configuration of the given <code>project</code>.
+	 * @param project the {@link IProject}
+	 * @param useParentClassLoader true if the current OSGi class loader should be used as parent class loader for the
+	 * constructed class loader.
+	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path configuration
+	 */
+	public static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
+		return ProjectClassLoaderCache.getClassLoader(project, parentClassLoader);
+	}
+
+	public static IMethod getConstructor(IType type, Class[] parameterTypes) {
+		String[] parameterTypesAsString = getParameterTypesAsStringArray(parameterTypes);
+		return getConstructor(type, parameterTypesAsString);
+	}
+
+	public static IMethod getConstructor(IType type, String[] parameterTypes) {
+		try {
+			Set<IMethod> methods = Introspector.getAllConstructors(type);
+			for (IMethod method : methods) {
+				if (method.getParameterTypes().length == parameterTypes.length) {
+					String[] methodParameterTypes = getParameterTypesAsStringArray(method);
+					if (Arrays.deepEquals(parameterTypes, methodParameterTypes)) {
+						return method;
+					}
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	public static IField getField(IType type, String fieldName, String parameterType) {
+		try {
+			Set<IField> methods = Introspector.getAllFields(type);
+			for (IField field : methods) {
+				if (field.getElementName().equals(fieldName)) {
+					return field;
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a flat list of all interfaces and super types for the given {@link IType}.
+	 */
+	public static List<String> getFlatListOfClassAndInterfaceNames(IType parameterType, IType type) {
+		List<String> requiredTypes = new ArrayList<String>();
+		if (parameterType != null) {
+			do {
+				try {
+					requiredTypes.add(parameterType.getFullyQualifiedName());
+					String[] interfaceNames = parameterType.getSuperInterfaceNames();
+					for (String interfaceName : interfaceNames) {
+						if (interfaceName != null) {
+							if (type.isBinary()) {
+								requiredTypes.add(interfaceName);
+							}
+							String resolvedName = resolveClassName(interfaceName, type);
+							if (resolvedName != null) {
+								requiredTypes.add(resolvedName);
+							}
+						}
+					}
+					parameterType = Introspector.getSuperType(parameterType);
+				}
+				catch (JavaModelException e) {
+				}
+			} while (parameterType != null && !parameterType.getFullyQualifiedName().equals(Object.class.getName()));
+		}
+		return requiredTypes;
+	}
 
 	/**
 	 * Returns the corresponding Java project or <code>null</code> a for given project.
@@ -259,6 +369,42 @@ public class JdtUtils {
 		}
 
 		return null;
+	}
+
+	public static final IType getJavaTypeForMethodReturnType(IMethod method, IType contextType) {
+		try {
+			return JdtUtils.getJavaTypeFromSignatureClassName(method.getReturnType(), contextType);
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	public static IType getJavaTypeFromSignatureClassName(String className, IType contextType) {
+		if (contextType == null || className == null) {
+			return null;
+		}
+		try {
+			return JdtUtils.getJavaType(contextType.getJavaProject().getProject(), JdtUtils
+					.resolveClassNameBySignature(className, contextType));
+		}
+		catch (IllegalArgumentException e) {
+			// do Nothing
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static final List<IType> getJavaTypesForMethodParameterTypes(IMethod method, IType contextType) {
+		if (method == null || method.getParameterTypes() == null || method.getParameterTypes().length == 0) {
+			return Collections.EMPTY_LIST;
+		}
+		List<IType> parameterTypes = new ArrayList<IType>(method.getParameterTypes().length);
+		String[] parameterTypeNames = method.getParameterTypes();
+		for (String parameterTypeName : parameterTypeNames) {
+			parameterTypes.add(JdtUtils.getJavaTypeFromSignatureClassName(parameterTypeName, contextType));
+		}
+		return parameterTypes;
 	}
 
 	public static IClasspathEntry getJreVariableEntry() {
@@ -368,14 +514,114 @@ public class JdtUtils {
 		return null;
 	}
 
-	public static IMethod getConstructor(IType type, String[] parameterTypes) {
+	public static String getMethodName(IMethod method) {
+		// Special support Ajdt intertype declarations
+		String methodName = method.getElementName();
+		int index = methodName.lastIndexOf('.');
+		if (index > 0) {
+			methodName = methodName.substring(index + 1);
+		}
+		return methodName;
+	}
+
+	public static String[] getParameterTypesString(IMethod method) {
 		try {
-			Set<IMethod> methods = Introspector.getAllConstructors(type);
-			for (IMethod method : methods) {
-				if (method.getParameterTypes().length == parameterTypes.length) {
-					String[] methodParameterTypes = getParameterTypesAsStringArray(method);
-					if (Arrays.deepEquals(parameterTypes, methodParameterTypes)) {
-						return method;
+			String[] parameterQualifiedTypes = Signature.getParameterTypes(method.getSignature());
+			int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
+			String[] parameterPackages = new String[length];
+			for (int i = 0; i < length; i++) {
+				parameterQualifiedTypes[i] = parameterQualifiedTypes[i].replace('/', '.');
+				parameterPackages[i] = Signature.getSignatureSimpleName(parameterQualifiedTypes[i]);
+			}
+			return parameterPackages;
+		}
+		catch (IllegalArgumentException e) {
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	public static String getParentName(IMethod method) {
+		// Special support Ajdt intertype declarations
+		String methodName = method.getElementName();
+		int index = methodName.lastIndexOf('.');
+		if (index > 0) {
+			return methodName.substring(0, index);
+		}
+		else {
+			return method.getParent().getElementName();
+		}
+	}
+
+	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je, ClassLoader parentClassLoader) {
+		return new DefaultProjectClassLoaderSupport(je, parentClassLoader);
+	}
+
+	public static String getPropertyNameFromMethodName(IMethod method) {
+		// Special support Ajdt intertype declarations
+		String methodName = method.getElementName();
+		int index = methodName.lastIndexOf('.');
+		if (index > 0) {
+			methodName = methodName.substring(index + 1);
+		}
+		String replaceText = methodName.substring("set".length());
+		if (replaceText != null) {
+			replaceText = java.beans.Introspector.decapitalize(replaceText);
+		}
+		return replaceText;
+	}
+
+	public static String getReturnTypeString(IMethod method, boolean classTypesOnly) {
+		try {
+			String qualifiedReturnType = Signature.getReturnType(method.getSignature());
+			if (!classTypesOnly || qualifiedReturnType.startsWith("L") || qualifiedReturnType.startsWith("Q")) {
+				return Signature.getSignatureSimpleName(qualifiedReturnType.replace('/', '.'));
+			}
+		}
+		catch (IllegalArgumentException e) {
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	public static IResource getSourceResource(IResource classFile) {
+		try {
+			if (isJavaProject(classFile) && classFile.getName().endsWith(CLASS_FILE_EXTENSION)) {
+				IPath classFilePath = classFile.getFullPath();
+				String classFileName = null;
+
+				IJavaProject project = getJavaProject(classFile);
+				IPath defaultOutput = project.getOutputLocation();
+
+				if (defaultOutput.isPrefixOf(classFilePath)) {
+					classFileName = classFilePath.removeFirstSegments(defaultOutput.segmentCount()).toString();
+				}
+				else {
+					for (IClasspathEntry entry : project.getRawClasspath()) {
+						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							IPath output = entry.getOutputLocation();
+							if (output != null) {
+								if (classFilePath.isPrefixOf(output)) {
+									classFileName = classFilePath.removeFirstSegments(output.segmentCount()).toString();
+								}
+							}
+						}
+					}
+				}
+
+				if (classFileName != null) {
+					// Replace file extension
+					String sourceFileName = classFileName.replace(".class", ".java");
+					for (IClasspathEntry entry : project.getRawClasspath()) {
+						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							IPath path = entry.getPath().append(sourceFileName).removeFirstSegments(1);
+							IResource resource = project.getProject().findMember(path);
+							if (resource != null) {
+								return resource;
+							}
+						}
 					}
 				}
 			}
@@ -383,60 +629,6 @@ public class JdtUtils {
 		catch (JavaModelException e) {
 		}
 		return null;
-	}
-
-	public static IField getField(IType type, String fieldName, String parameterType) {
-		try {
-			Set<IField> methods = Introspector.getAllFields(type);
-			for (IField field : methods) {
-				if (field.getElementName().equals(fieldName)) {
-					return field;
-				}
-			}
-		}
-		catch (JavaModelException e) {
-		}
-		return null;
-	}
-
-	private static String[] getParameterTypesAsStringArray(Class[] parameterTypes) {
-		String[] parameterTypesAsString = new String[parameterTypes.length];
-		for (int i = 0; i < parameterTypes.length; i++) {
-			parameterTypesAsString[i] = ClassUtils.getQualifiedName(parameterTypes[i]);
-		}
-		return parameterTypesAsString;
-	}
-
-	private static String[] getParameterTypesAsStringArray(IMethod method) {
-		Set<String> typeParameterNames = new HashSet<String>();
-		try {
-			for (ITypeParameter param : method.getDeclaringType().getTypeParameters()) {
-				typeParameterNames.add(param.getElementName());
-			}
-			for (ITypeParameter param : method.getTypeParameters()) {
-				typeParameterNames.add(param.getElementName());
-			}
-		}
-		catch (JavaModelException e) {
-		}
-		String[] parameterTypesAsString = new String[method.getParameterTypes().length];
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			String parameterTypeString = Signature.getElementType(method.getParameterTypes()[i]);
-			boolean isArray = !parameterTypeString.equals(method.getParameterTypes()[i]);
-
-			String parameterType = resolveClassNameBySignature(parameterTypeString, method.getDeclaringType());
-			if (typeParameterNames.contains(parameterType)) {
-				parameterTypesAsString[i] = Object.class.getName() + (isArray ? ClassUtils.ARRAY_SUFFIX : "");
-			}
-			else {
-				parameterTypesAsString[i] = parameterType + (isArray ? ClassUtils.ARRAY_SUFFIX : "");
-			}
-		}
-		return parameterTypesAsString;
-	}
-
-	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(IProject je, ClassLoader parentClassLoader) {
-		return new DefaultProjectClassLoaderSupport(je, parentClassLoader);
 	}
 
 	public static boolean isAjdtPresent() {
@@ -611,140 +803,6 @@ public class JdtUtils {
 		return resolveClassName(className, type);
 	}
 
-	public static IType getJavaTypeFromSignatureClassName(String className, IType contextType) {
-		if (contextType == null || className == null) {
-			return null;
-		}
-		try {
-			return JdtUtils.getJavaType(contextType.getJavaProject().getProject(), JdtUtils
-					.resolveClassNameBySignature(className, contextType));
-		}
-		catch (IllegalArgumentException e) {
-			// do Nothing
-		}
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static final List<IType> getJavaTypesForMethodParameterTypes(IMethod method, IType contextType) {
-		if (method == null || method.getParameterTypes() == null || method.getParameterTypes().length == 0) {
-			return Collections.EMPTY_LIST;
-		}
-		List<IType> parameterTypes = new ArrayList<IType>(method.getParameterTypes().length);
-		String[] parameterTypeNames = method.getParameterTypes();
-		for (String parameterTypeName : parameterTypeNames) {
-			parameterTypes.add(JdtUtils.getJavaTypeFromSignatureClassName(parameterTypeName, contextType));
-		}
-		return parameterTypes;
-	}
-
-	public static final IType getJavaTypeForMethodReturnType(IMethod method, IType contextType) {
-		try {
-			return JdtUtils.getJavaTypeFromSignatureClassName(method.getReturnType(), contextType);
-		}
-		catch (JavaModelException e) {
-		}
-		return null;
-	}
-
-	public static String[] getParameterTypesString(IMethod method) {
-		try {
-			String[] parameterQualifiedTypes = Signature.getParameterTypes(method.getSignature());
-			int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
-			String[] parameterPackages = new String[length];
-			for (int i = 0; i < length; i++) {
-				parameterQualifiedTypes[i] = parameterQualifiedTypes[i].replace('/', '.');
-				parameterPackages[i] = Signature.getSignatureSimpleName(parameterQualifiedTypes[i]);
-			}
-			return parameterPackages;
-		}
-		catch (IllegalArgumentException e) {
-		}
-		catch (JavaModelException e) {
-		}
-		return null;
-	}
-
-	public static String getReturnTypeString(IMethod method, boolean classTypesOnly) {
-		try {
-			String qualifiedReturnType = Signature.getReturnType(method.getSignature());
-			if (!classTypesOnly || qualifiedReturnType.startsWith("L") || qualifiedReturnType.startsWith("Q")) {
-				return Signature.getSignatureSimpleName(qualifiedReturnType.replace('/', '.'));
-			}
-		}
-		catch (IllegalArgumentException e) {
-		}
-		catch (JavaModelException e) {
-		}
-		return null;
-	}
-
-	public static String getPropertyNameFromMethodName(IMethod method) {
-		// Special support Ajdt intertype declarations
-		String methodName = method.getElementName();
-		int index = methodName.lastIndexOf('.');
-		if (index > 0) {
-			methodName = methodName.substring(index + 1);
-		}
-		String replaceText = methodName.substring("set".length());
-		if (replaceText != null) {
-			replaceText = java.beans.Introspector.decapitalize(replaceText);
-		}
-		return replaceText;
-	}
-	
-	public static String getParentName(IMethod method) {
-		// Special support Ajdt intertype declarations
-		String methodName = method.getElementName();
-		int index = methodName.lastIndexOf('.');
-		if (index > 0) {
-			return methodName.substring(0, index);
-		}
-		else {
-			return method.getParent().getElementName();
-		}
-	}
-
-	public static String getMethodName(IMethod method) {
-		// Special support Ajdt intertype declarations
-		String methodName = method.getElementName();
-		int index = methodName.lastIndexOf('.');
-		if (index > 0) {
-			methodName = methodName.substring(index + 1);
-		}
-		return methodName;
-	}
-
-	/**
-	 * Returns a flat list of all interfaces and super types for the given {@link IType}.
-	 */
-	public static List<String> getFlatListOfClassAndInterfaceNames(IType parameterType, IType type) {
-		List<String> requiredTypes = new ArrayList<String>();
-		if (parameterType != null) {
-			do {
-				try {
-					requiredTypes.add(parameterType.getFullyQualifiedName());
-					String[] interfaceNames = parameterType.getSuperInterfaceNames();
-					for (String interfaceName : interfaceNames) {
-						if (interfaceName != null) {
-							if (type.isBinary()) {
-								requiredTypes.add(interfaceName);
-							}
-							String resolvedName = resolveClassName(interfaceName, type);
-							if (resolvedName != null) {
-								requiredTypes.add(resolvedName);
-							}
-						}
-					}
-					parameterType = Introspector.getSuperType(parameterType);
-				}
-				catch (JavaModelException e) {
-				}
-			} while (parameterType != null && !parameterType.getFullyQualifiedName().equals(Object.class.getName()));
-		}
-		return requiredTypes;
-	}
-
 	public static void visitTypeAst(IType type, ASTVisitor visitor) {
 		if (type != null && type.getCompilationUnit() != null) {
 			ASTParser parser = ASTParser.newParser(AST.JLS3);
@@ -753,83 +811,6 @@ public class JdtUtils {
 			ASTNode node = parser.createAST(new NullProgressMonitor());
 			node.accept(visitor);
 		}
-	}
-
-	public static IResource getSourceResource(IResource classFile) {
-		try {
-			if (isJavaProject(classFile) && classFile.getName().endsWith(CLASS_FILE_EXTENSION)) {
-				IPath classFilePath = classFile.getFullPath();
-				String classFileName = null;
-
-				IJavaProject project = getJavaProject(classFile);
-				IPath defaultOutput = project.getOutputLocation();
-
-				if (defaultOutput.isPrefixOf(classFilePath)) {
-					classFileName = classFilePath.removeFirstSegments(defaultOutput.segmentCount()).toString();
-				}
-				else {
-					for (IClasspathEntry entry : project.getRawClasspath()) {
-						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-							IPath output = entry.getOutputLocation();
-							if (output != null) {
-								if (classFilePath.isPrefixOf(output)) {
-									classFileName = classFilePath.removeFirstSegments(output.segmentCount()).toString();
-								}
-							}
-						}
-					}
-				}
-
-				if (classFileName != null) {
-					// Replace file extension
-					String sourceFileName = classFileName.replace(".class", ".java");
-					for (IClasspathEntry entry : project.getRawClasspath()) {
-						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-							IPath path = entry.getPath().append(sourceFileName).removeFirstSegments(1);
-							IResource resource = project.getProject().findMember(path);
-							if (resource != null) {
-								return resource;
-							}
-						}
-					}
-				}
-			}
-		}
-		catch (JavaModelException e) {
-		}
-		return null;
-	}
-
-	/**
-	 * Create a {@link ClassLoader} from the class path configuration of the given <code>project</code>.
-	 * @param project the {@link IProject}
-	 * @param useParentClassLoader true if the current OSGi class loader should be used as parent class loader for the
-	 * constructed class loader.
-	 * @return {@link ClassLoader} instance constructed from the <code>project</code>'s build path configuration
-	 */
-	public static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
-		return ProjectClassLoaderCache.getClassLoader(project, parentClassLoader);
-	}
-
-	/**
-	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
-	 */
-	public static boolean doesImplement(IResource resource, IType type, String className) {
-		if (resource == null || type == null || className == null) {
-			return false;
-		}
-		if (className.startsWith("java.") || className.startsWith("javax.")) {
-			try {
-				ClassLoader cls = getClassLoader(resource.getProject(), null);
-				Class<?> typeClass = cls.loadClass(type.getFullyQualifiedName('$'));
-				Class<?> interfaceClass = cls.loadClass(className);
-				return typeClass.equals(interfaceClass) || interfaceClass.isAssignableFrom(typeClass);
-			}
-			catch (Throwable e) {
-				// ignore this and fall back to JDT does implement checks
-			}
-		}
-		return doesImplementWithJdt(resource, type, className);
 	}
 
 	private static boolean doesImplementWithJdt(IResource resource, IType type, String className) {
@@ -853,6 +834,42 @@ public class JdtUtils {
 		return false;
 	}
 
+	private static String[] getParameterTypesAsStringArray(Class[] parameterTypes) {
+		String[] parameterTypesAsString = new String[parameterTypes.length];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypesAsString[i] = ClassUtils.getQualifiedName(parameterTypes[i]);
+		}
+		return parameterTypesAsString;
+	}
+
+	private static String[] getParameterTypesAsStringArray(IMethod method) {
+		Set<String> typeParameterNames = new HashSet<String>();
+		try {
+			for (ITypeParameter param : method.getDeclaringType().getTypeParameters()) {
+				typeParameterNames.add(param.getElementName());
+			}
+			for (ITypeParameter param : method.getTypeParameters()) {
+				typeParameterNames.add(param.getElementName());
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		String[] parameterTypesAsString = new String[method.getParameterTypes().length];
+		for (int i = 0; i < method.getParameterTypes().length; i++) {
+			String parameterTypeString = Signature.getElementType(method.getParameterTypes()[i]);
+			boolean isArray = !parameterTypeString.equals(method.getParameterTypes()[i]);
+
+			String parameterType = resolveClassNameBySignature(parameterTypeString, method.getDeclaringType());
+			if (typeParameterNames.contains(parameterType)) {
+				parameterTypesAsString[i] = Object.class.getName() + (isArray ? ClassUtils.ARRAY_SUFFIX : "");
+			}
+			else {
+				parameterTypesAsString[i] = parameterType + (isArray ? ClassUtils.ARRAY_SUFFIX : "");
+			}
+		}
+		return parameterTypesAsString;
+	}
+
 	static class DefaultProjectClassLoaderSupport implements IProjectClassLoaderSupport {
 
 		private ClassLoader classLoader;
@@ -861,15 +878,6 @@ public class JdtUtils {
 
 		public DefaultProjectClassLoaderSupport(IProject javaProject, ClassLoader parentClassLoader) {
 			setupClassLoaders(javaProject, parentClassLoader);
-		}
-
-		/**
-		 * Activates the weaving class loader as thread context classloader.
-		 * <p>
-		 * Use {@link #recoverClassLoader()} to recover the original thread context classloader
-		 */
-		private void activateWeavingClassLoader() {
-			Thread.currentThread().setContextClassLoader(weavingClassLoader);
 		}
 
 		public void executeCallback(IProjectClassLoaderAwareCallback callback) throws Throwable {
@@ -886,6 +894,15 @@ public class JdtUtils {
 			return this.weavingClassLoader;
 		}
 
+		/**
+		 * Activates the weaving class loader as thread context classloader.
+		 * <p>
+		 * Use {@link #recoverClassLoader()} to recover the original thread context classloader
+		 */
+		private void activateWeavingClassLoader() {
+			Thread.currentThread().setContextClassLoader(weavingClassLoader);
+		}
+
 		private void recoverClassLoader() {
 			Thread.currentThread().setContextClassLoader(classLoader);
 		}
@@ -894,10 +911,6 @@ public class JdtUtils {
 			classLoader = Thread.currentThread().getContextClassLoader();
 			weavingClassLoader = ProjectClassLoaderCache.getClassLoader(project, parentClassLoader);
 		}
-	}
-
-	public static IJavaElement getByHandle(String handle) {
-		return AjdtUtils.getByHandle(handle);
 	}
 
 }
