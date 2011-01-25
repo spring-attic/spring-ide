@@ -222,13 +222,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				problems.clear();
 				children = null;
 
-				// Reset all config sets which contain this config
-				for (IBeansConfigEventListener eventListener : eventListeners) {
-					eventListener.onReset(this);
-				}
 			}
 			finally {
 				w.unlock();
+			}
+
+			// Reset all config sets which contain this config
+			for (IBeansConfigEventListener eventListener : eventListeners) {
+				eventListener.onReset(this);
 			}
 		}
 	}
