@@ -113,6 +113,11 @@ public class UaaPlugin extends AbstractUIPlugin {
 
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
+					if (usageMonitorManager.getPrivacyLevel() != IUaa.UNDECIDED_TOU) {
+						// privacy level has changed in the meantime
+						return Status.OK_STATUS;
+					}
+					
 					UaaDialog dialog = UaaDialog.createDialog(SpringUIUtils.getStandardDisplay().getActiveShell());
 					int resultCode = dialog.open();
 					if (resultCode == Window.OK) {
