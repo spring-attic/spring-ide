@@ -213,11 +213,12 @@ public class JdtUtils {
 	 * @since 2.6.0 
 	 */
 	public static IJavaElement getByHandle(String handle) {
-		IJavaElement element = JavaCore.create(handle);
-		if (element == null && IS_AJDT_PRESENT) {
+		if (IS_AJDT_PRESENT) {
 			return AjdtUtils.getByHandle(handle);
 		}
-		return element;
+		else {
+			return JavaCore.create(handle);
+		}
 	}
 
 	/**
