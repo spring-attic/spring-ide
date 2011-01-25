@@ -551,7 +551,7 @@ public class UaaManager implements IUaa {
 			if (canRegister(usedPlugin) && project != null) {
 				
 				registerProductIfRequired(project);
-				registerFeatureUse(usedPlugin, featureData);
+				registerFeature(usedPlugin, featureData);
 				service.registerProductUsage(product, project);
 				
 				return true;
