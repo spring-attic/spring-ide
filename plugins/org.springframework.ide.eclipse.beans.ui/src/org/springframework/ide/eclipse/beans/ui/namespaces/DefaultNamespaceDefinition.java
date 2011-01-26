@@ -60,7 +60,7 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
 	public DefaultNamespaceDefinition(String prefix, String uri, String defaultLocation, final Image image) {
 		this(prefix, uri, defaultLocation, new IImageAccessor() {
-			
+
 			public Image getImage() {
 				return image;
 			}
@@ -81,7 +81,6 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 		this.uriMapping = namespaceDefinition;
 		this.imageAccessor = imageAccessor;
 	}
-
 
 	public void addSchemaLocation(String location) {
 		locations.add(location);
@@ -222,13 +221,14 @@ public class DefaultNamespaceDefinition implements INamespaceDefinition {
 							for (Object obj : pf.getNonJavaResources()) {
 								// Entry is coming from a JAR file on the classpath
 								if (obj instanceof JarEntryFile
-										&& ("/" + fileLocation).equals((((JarEntryFile) obj).getFullPath().toString()))) {
+										&& ("/" + fileLocation).equals((((JarEntryFile) obj).getFullPath().toString()))
+										&& locations.contains(entry.getKey())) {
 									existingLocations.add((String) entry.getKey());
 								}
 								// Entry is coming from the local project
 								else if (obj instanceof IFile
 										&& fileLocation.equals(pf.getElementName().replace('.', '/') + "/"
-												+ ((IFile) obj).getName())) {
+												+ ((IFile) obj).getName()) && locations.contains(entry.getKey())) {
 									existingLocations.add((String) entry.getKey());
 								}
 							}
