@@ -72,8 +72,11 @@ public class AjdtUtils {
 		return null;
 	}
 
-	public static boolean isTypeAjdtElement(IType type) {
-		return type instanceof IAspectJElement;
+	/**
+	 * @since 2.6.0 
+	 */
+	public static IJavaElement getByHandle(String handle) {
+		return AspectJCore.create(handle);
 	}
 
 	@SuppressWarnings( { "unchecked" })
@@ -95,10 +98,6 @@ public class AjdtUtils {
 		return methods;
 	}
 	
-	public static IJavaElement getByHandle(String handle) {
-		return AspectJCore.create(handle);
-	}
-	
 	public static boolean isJdtWeavingPresent() {
 		try {
 			Class.forName(AJDT_CLASS);
@@ -107,5 +106,9 @@ public class AjdtUtils {
 		catch (ClassNotFoundException e) {
 			return false;
 		}
+	}
+	
+	public static boolean isTypeAjdtElement(IType type) {
+		return type instanceof IAspectJElement;
 	}
 }
