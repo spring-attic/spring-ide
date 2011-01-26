@@ -135,6 +135,9 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 				((BeansModel) BeansCorePlugin.getModel()).notifyListeners(beansProject, Type.CHANGED);
 			}
 		}
+		
+		// Make sure to clear out the cache for next invocation
+		configs.clear();
 	}
 
 	/**
