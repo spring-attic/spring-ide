@@ -77,6 +77,13 @@ This extension-point is used to specify one or more content provider that are us
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="register-on-discovery" type="boolean" use="default" value="false">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

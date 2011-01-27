@@ -51,7 +51,7 @@
 	</extension>
 
    <extension point="org.springframework.ide.eclipse.uaa.product">
-		<product id="Spring IDE">
+		<product id="Spring IDE" register-on-discovery="true">
 			<feature id="org.springframework.ide.eclipse.ajdt.feature">
 				<plugin id="org.springframework.ide.eclipse.ajdt.ui.xref" />
 				<plugin id="org.springframework.ide.eclipse.ajdt.ui.visualiser" />
