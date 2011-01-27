@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.monitor;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerLifecycleListener;
@@ -81,10 +80,17 @@ public class ServerUsageMonitor implements IUsageMonitor {
 
 		public void serverChanged(ServerEvent event) {
 			IServer server = event.getServer();
-			Map<String, String> featureData = new HashMap<String, String>();
-			featureData.put("runtime", server.getRuntime().getId());
-			manager.registerFeatureUse(serverToBundleIdMapper.getBundleId(event.getServer().getServerType().getName()),
-					featureData);
+			if (server != null && server.getServerType() != null) {
+				if (server.getRuntime() != null && server.getRuntime().getRuntimeType() != null) {
+					manager.registerFeatureUse(
+							serverToBundleIdMapper.getBundleId(event.getServer().getServerType().getId()),
+							Collections.singletonMap("runtime", server.getRuntime().getRuntimeType().getId()));
+				}
+				else {
+					manager.registerFeatureUse(serverToBundleIdMapper.getBundleId(event.getServer().getServerType()
+							.getId()));
+				}
+			}
 		}
 	}
 
