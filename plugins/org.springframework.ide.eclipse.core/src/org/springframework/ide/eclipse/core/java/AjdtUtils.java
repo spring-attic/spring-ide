@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -82,9 +81,9 @@ public class AjdtUtils {
 	@SuppressWarnings( { "unchecked" })
 	public static Set<IMethod> getDeclaredMethods(IType type) throws JavaModelException {
 
-		if (IS_JDT_WEAVING_PRESENT && JdtWeavingTester.isJdtWeavingActive()) {
-			return Collections.emptySet();
-		}
+//		if (IS_JDT_WEAVING_PRESENT && JdtWeavingTester.isJdtWeavingActive()) {
+//			return Collections.emptySet();
+//		}
 
 		Set<IMethod> methods = new HashSet<IMethod>();
 		AJRelationshipType[] types = new AJRelationshipType[] { AJRelationshipManager.DECLARED_ON };
