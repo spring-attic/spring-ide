@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.beans.ui.refactoring.jdt;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,8 +24,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -37,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
  * Abstract super class for implementing {@link RenameParticipant}
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Martin Lippert
  */
 public abstract class AbstractRenameRefactoringParticipant extends RenameParticipant {
 
@@ -48,10 +46,6 @@ public abstract class AbstractRenameRefactoringParticipant extends RenamePartici
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context)
 			throws OperationCanceledException {
 		return new RefactoringStatus();
-	}
-
-	public void addElement(Object element, RefactoringArguments arguments) {
-		elements.put(element, ((RenameArguments) arguments).getNewName());
 	}
 
 	@Override
@@ -89,15 +83,6 @@ public abstract class AbstractRenameRefactoringParticipant extends RenamePartici
 	protected IJavaElement[] getAffectedElements() {
 		Set<Object> objects = elements.keySet();
 		return objects.toArray(new IJavaElement[objects.size()]);
-	}
-
-	protected String[] getNewNames() {
-		String[] result = new String[elements.size()];
-		Iterator<Object> iter = elements.values().iterator();
-		for (int i = 0; i < elements.size(); i++) {
-			result[i] = iter.next().toString();
-		}
-		return result;
 	}
 
 	@Override
