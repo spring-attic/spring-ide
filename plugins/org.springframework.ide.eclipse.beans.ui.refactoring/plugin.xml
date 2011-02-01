@@ -71,6 +71,21 @@
 	</extension>
 
 	<extension
+		point="org.eclipse.jdt.core.manipulation.changeMethodSignatureParticipants">
+		<changeMethodSignatureParticipant
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.BeansChangeMethodSignatureParticipant"
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.beanChangeMethodSignatureParticipant"
+			name="%beanMethodRenameParticipant.name">
+			<enablement>
+				<with variable="element">
+					<instanceof value="org.eclipse.jdt.core.IMethod">
+					</instanceof>
+				</with>
+			</enablement>
+		</changeMethodSignatureParticipant>
+	</extension>
+
+	<extension
 		point="org.eclipse.ltk.core.refactoring.moveParticipants">
 		<moveParticipant
 			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.BeansTypeMoveRefactoringParticipant"
@@ -196,23 +211,5 @@
 			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
 
 	</extension>
-	
- <extension
-       point="org.eclipse.jdt.core.manipulation.changeMethodSignatureParticipants">
-    <changeMethodSignatureParticipant
-			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.BeansChangeMethodSignatureParticipant"
-			id="org.springframework.ide.eclipse.beans.ui.refactoring.beanChangeMethodSignatureParticipant"
-          name="name">
-			<enablement>
-				<with variable="element">
-					<instanceof value="org.eclipse.jdt.core.IMethod">
-					</instanceof>
-				</with>
-			</enablement>
-    </changeMethodSignatureParticipant>
- </extension>
-
-
-
 
 </plugin>
