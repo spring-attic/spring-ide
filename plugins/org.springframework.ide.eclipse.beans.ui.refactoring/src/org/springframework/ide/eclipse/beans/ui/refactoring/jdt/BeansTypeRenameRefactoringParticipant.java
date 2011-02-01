@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 /**
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Martin Lippert
  * @since 2.0
  */
 public class BeansTypeRenameRefactoringParticipant extends AbstractRenameRefactoringParticipant {
@@ -59,15 +60,6 @@ public class BeansTypeRenameRefactoringParticipant extends AbstractRenameRefacto
 		}
 	}
 
-	protected String[] getOldNames() {
-		String[] result = new String[elements.size()];
-		Iterator<Object> iter = elements.keySet().iterator();
-		for (int i = 0; i < elements.size(); i++)
-			result[i] = ((IType) iter.next()).getFullyQualifiedName('$');
-		return result;
-	}
-
-	@Override
 	protected String[] getNewNames() {
 		String[] result = new String[elements.size()];
 		Iterator<Object> iter = elements.keySet().iterator();
