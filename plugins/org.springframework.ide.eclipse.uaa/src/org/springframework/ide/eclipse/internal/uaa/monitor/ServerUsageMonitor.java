@@ -74,7 +74,6 @@ public class ServerUsageMonitor implements IUsageMonitor {
 
 	/**
 	 * {@link IServerListener} that dispatches {@link ServerEvent}s to the {@link UaaManager}.
-	 * @since 2.5.2
 	 */
 	private class ServerMonitor implements IServerListener {
 
@@ -96,7 +95,6 @@ public class ServerUsageMonitor implements IUsageMonitor {
 
 	/**
 	 * {@link IServerLifecycleListener} to install and uninstall {@link IServerListener} on added and removed servers.
-	 * @since 2.5.2
 	 */
 	private class ServerLifecycleMonitor implements IServerLifecycleListener {
 

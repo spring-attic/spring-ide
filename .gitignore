@@ -1,9 +1,8 @@
 bin/
 target/
-eclipse/
 org.eclipse.releng.basebuilder/
 build/
 eclipse-base.tar.gz
 updatesite/
 jarjar/
-org.springframework.ide.eclipse.releng/eclipse/
+releng/org.springframework.ide.eclipse.releng/eclipse/

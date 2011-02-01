@@ -487,8 +487,6 @@ public class UaaManager implements IUaa {
 
 		private String sourceCodeIdentifier;
 		
-		private boolean registerOnDiscovery = false;
-
 		public ExtensionProductDescriptor(IConfigurationElement element) {
 			init(element);
 		}
@@ -496,10 +494,7 @@ public class UaaManager implements IUaa {
 		private void init(IConfigurationElement element) {
 			productId = element.getAttribute("id");
 			sourceCodeIdentifier = element.getAttribute("source-control-identifier");
-			if (element.getAttribute("register-on-discovery") != null) {
-				registerOnDiscovery = Boolean.valueOf(element.getAttribute("register-on-discovery"));
-			}
-			
+						
 			rootPlugin = element.getNamespaceIdentifier();
 			if (element.getAttribute("root-plugin") != null) {
 				rootPlugin = element.getAttribute("root-plugin");
@@ -515,11 +510,6 @@ public class UaaManager implements IUaa {
 
 			// Try to create the product; we'll try again later if this one fails
 			buildProduct(rootPlugin, productId, sourceCodeIdentifier);
-			
-			// Register the product if the extension says so
-			if (registerOnDiscovery && product != null) {
-				registerProductIfRequired(null);
-			}
 		}
 
 		protected boolean canRegister(String usedPlugin) {

@@ -92,12 +92,12 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 
 		this.resourceChangeListener = new DotProjectResourceChangeListener();
 
-		Job startup = new Job("Initializing nature usage monitoring") {
+		Job startup = new Job("Initializing nature- and builder-based usage monitoring") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				// Before we start get all projects and record libraries
+				// Before we start get all projects and record natures and builders
 				for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
 					if (project.isOpen() && project.isAccessible()) {
 						projectChanged(project);
@@ -129,7 +129,7 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 	}
 
 	/**
-	 * Record usage data to a given project. 
+	 * Record usage data to a given project.
 	 */
 	private void projectChanged(IProject project) {
 		if (project != null && project.isAccessible() && project.isOpen()) {
@@ -150,7 +150,7 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 	}
 
 	/**
-	 * Records the usage of a certain nature in a given project. 
+	 * Records the usage of a certain nature in a given project.
 	 */
 	private void recordNatureEvent(String natureId, String bundleId, String project) {
 		IProjectNatureDescriptor desc = ResourcesPlugin.getWorkspace().getNatureDescriptor(natureId);
@@ -163,7 +163,7 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 			else if (label.toLowerCase().endsWith("nature")) {
 				label = label.substring(0, label.length() - 6).trim();
 			}
-			if (label != null && label.length()> 0) {
+			if (label != null && label.length() > 0) {
 				manager.registerProjectUsageForProduct(bundleId, project, Collections.singletonMap("nature", label));
 			}
 			else {
@@ -173,14 +173,14 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 	}
 
 	/**
-	 * Records the usage of a certain builder in a given project. 
+	 * Records the usage of a certain builder in a given project.
 	 */
 	private void recordBuilderEvent(String builderId, String bundleId, String project) {
 		IExtension extension = Platform.getExtensionRegistry().getExtension(ResourcesPlugin.PI_RESOURCES,
 				ResourcesPlugin.PT_BUILDERS, builderId);
 		if (builderId != null && bundleId != null) {
 			String label = extension.getLabel();
-			if (label != null && label.length()> 0) {
+			if (label != null && label.length() > 0) {
 				manager.registerProjectUsageForProduct(bundleId, project, Collections.singletonMap("builder", label));
 			}
 			else {
@@ -190,7 +190,7 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 	}
 
 	/**
-	 * {@link IResourceChangeListener} that listens to changes of a project's <code>pom.xml</code>. 
+	 * {@link IResourceChangeListener} that listens to changes of a project's <code>.project</code> file.
 	 */
 	class DotProjectResourceChangeListener implements IResourceChangeListener {
 

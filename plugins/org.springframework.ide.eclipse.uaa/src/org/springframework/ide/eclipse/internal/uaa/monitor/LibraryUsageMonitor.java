@@ -111,7 +111,7 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 	public void startMonitoring(IUaa manager) {
 		this.manager = manager;
 
-		Job startup = new Job("Initializing classpath usage monitoring") {
+		Job startup = new Job("Initializing classpath-based usage monitoring") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
