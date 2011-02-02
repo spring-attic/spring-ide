@@ -136,13 +136,15 @@ public class BeansRefactoringChangeUtils {
 						if (attributeName != null && attributeName.startsWith(attributeNameStart)) {
 							if (attributeName.equals(attributeNameStart + methodName)
 									|| attributeName.equals(attributeNameStart + methodName + optionalAttributeNameEnd)) {
-								int offset = attribute.getNameRegionStartOffset() + attributeNameStart.length();
-								result.add(new ReplaceEdit(offset, methodName.length(), newName));
+								List<IType> types = BeansEditorUtils.getClassNamesOfBean(file, node);
+								if (types.contains(((IMethod) element).getDeclaringType())) {
+									int offset = attribute.getNameRegionStartOffset() + attributeNameStart.length();
+									result.add(new ReplaceEdit(offset, methodName.length(), newName));
+								}
 							}
 						}
 					}
 				}
-
 			}
 			else {
 				TextEdit edit = null;
