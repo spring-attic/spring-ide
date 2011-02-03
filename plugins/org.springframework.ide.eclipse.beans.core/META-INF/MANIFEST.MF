@@ -57,6 +57,9 @@ Import-Package: javax.xml.parsers,
  org.springframework.context;version="[3.0.5.RELEASE,3.1.0)",
  org.springframework.context.annotation;version="[3.0.5.RELEASE,3.1.0)",
  org.springframework.core;version="[3.0.5.RELEASE,3.1.0)",
+ org.springframework.core.annotation;version="[3.0.5.RELEASE,3.1.0)",
+ org.springframework.core.convert;version="[3.0.5.RELEASE,3.1.0)",
+ org.springframework.core.convert.support;version="[3.0.5.RELEASE,3.1.0)",
  org.springframework.core.io;version="[3.0.5.RELEASE,3.1.0)",
  org.springframework.core.io.support;version="[3.0.5.RELEASE,3.1.0)",
  org.springframework.core.type;version="[3.0.5.RELEASE,3.1.0)",
@@ -80,11 +83,12 @@ Import-Package: javax.xml.parsers,
  org.springframework.osgi.util;version="[2.0.0,2.1.0)",
  org.springframework.scripting;version="[3.0.5.RELEASE,3.1.0)",
  org.springframework.util;version="[3.0.5.RELEASE,3.1.0)",
+ org.springframework.util.xml;version="[3.0.5.RELEASE,3.1.0)",
  org.w3c.dom,
  org.xml.sax,
  org.xml.sax.helpers
-Eclipse-LazyStart: true
-Export-Package: org.springframework.ide.eclipse.beans.core,
+ipse-LazyStart: true
+ExpExport-Package: org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.internal.model,
  org.springframework.ide.eclipse.beans.core.internal.model.namespaces,
  org.springframework.ide.eclipse.beans.core.internal.model.process,
@@ -100,5 +104,5 @@ Export-Package: org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.model.update,
  org.springframework.ide.eclipse.beans.core.model.validation,
  org.springframework.ide.eclipse.beans.core.namespaces
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+dle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
