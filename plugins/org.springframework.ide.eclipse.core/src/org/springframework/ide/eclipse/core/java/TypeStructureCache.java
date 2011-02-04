@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Spring IDE Developers
+ * Copyright (c) 2008, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,7 +59,9 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * {@link IResource} which represents a class file has structural changes.
  * <p>
  * For this implementation a change of class and method level annotation is considered a structural change.
+ * 
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.2.0
  */
 @SuppressWarnings("restriction")
@@ -405,6 +407,11 @@ public class TypeStructureCache implements ITypeStructureCache {
 							if (!annotationsEqual(method.getAnnotations(), existingMs[j].getAnnotations(), flags)) {
 								return true;
 							}
+							
+							if (!parameterAnnotationsEquals(method, existingMs[j], flags)) {
+								return true;
+							}
+							
 						}
 						continue new_method_loop;
 					}
@@ -414,6 +421,33 @@ public class TypeStructureCache implements ITypeStructureCache {
 		}
 
 		return false;
+	}
+
+	private static boolean parameterAnnotationsEquals(IBinaryMethod newMethod,
+			IBinaryMethod existingMethod, int flags) {
+		
+		char[][] argumentNames = newMethod.getArgumentNames();
+		char[][] existingArgumentNames = existingMethod.getArgumentNames();
+		
+		if (argumentNames == null && existingArgumentNames == null)
+			return true;
+		
+		int argumentCount = argumentNames != null ? argumentNames.length : 0;
+		int existingArgumentCount = existingArgumentNames != null ? existingArgumentNames.length : 0;
+		
+		if (argumentCount != existingArgumentCount)
+			return false;
+		
+		for (int i = 0; i < argumentCount; i++) {
+			IBinaryAnnotation[] parameterAnnotations = newMethod.getParameterAnnotations(i);
+			IBinaryAnnotation[] existingParameterAnnotations = existingMethod.getParameterAnnotations(i);
+			
+			if (!annotationsEqual(parameterAnnotations, existingParameterAnnotations, flags)) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	private static boolean annotationsEqual(IBinaryAnnotation[] existingAnnotations,
