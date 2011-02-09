@@ -184,6 +184,8 @@ public class UaaPlugin extends AbstractUIPlugin {
 
 		public DetectedProductsJob() {
 			super("Initializing Spring UAA");
+			setSystem(true);
+			setUser(false);
 		}
 
 		@Override
