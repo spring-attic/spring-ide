@@ -68,13 +68,6 @@ public class UaaPlugin extends AbstractUIPlugin {
 		plugin = this;
 		usageMonitorManager = new UaaManager();
 
-		monitors.add(new PartUsageMonitor());
-		monitors.add(new CommandUsageMonitor());
-		monitors.add(new LibraryUsageMonitor());
-		monitors.add(new ServerUsageMonitor());
-		monitors.add(new NatureAndBuilderUsageMonitor());
-		monitors.add(new BuildSystemUsageMonitor());
-
 		Job startupJob = new Job("Initializing Spring UAA") { //$NON-NLS-1$
 
 			public IStatus run(IProgressMonitor progressMonitor) {
@@ -84,6 +77,13 @@ public class UaaPlugin extends AbstractUIPlugin {
 					schedule(5000);
 				}
 				else {
+					monitors.add(new PartUsageMonitor());
+					monitors.add(new CommandUsageMonitor());
+					monitors.add(new LibraryUsageMonitor());
+					monitors.add(new ServerUsageMonitor());
+					monitors.add(new NatureAndBuilderUsageMonitor());
+					monitors.add(new BuildSystemUsageMonitor());
+
 					usageMonitorManager.start();
 
 					for (final IUsageMonitor monitor : monitors) {
