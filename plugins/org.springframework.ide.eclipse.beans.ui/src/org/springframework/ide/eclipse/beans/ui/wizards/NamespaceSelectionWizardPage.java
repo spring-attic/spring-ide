@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.beans.ui.wizards;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +100,13 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 					public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions,
 							final IProject project) {
 						if (project == null || (project != null && project.equals(activeProject))) {
-							namespaceDefinitionList.addAll(Arrays.asList(namespaceDefinitions));
+							for (INamespaceDefinition namespaceDefinition : namespaceDefinitions) {
+								synchronized (namespaceDefinitionList) {
+									if (!namespaceDefinitionList.contains(namespaceDefinition)) {
+										namespaceDefinitionList.add(namespaceDefinition);
+									}
+								}
+							}
 
 							Display.getDefault().asyncExec(new Runnable() {
 
@@ -116,6 +121,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 					}
 				});
 			}
+
 			return namespaceDefinitionList.toArray();
 		}
 
