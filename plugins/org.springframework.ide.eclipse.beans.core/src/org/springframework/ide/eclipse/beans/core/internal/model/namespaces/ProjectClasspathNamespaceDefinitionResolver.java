@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.xml.sax.SAXException;
  * <p>
  * Note: this implementation is currently not in use
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.3.1
  * @see BeansCorePlugin#getNamespaceDefinitionResolver(IProject)
  */
