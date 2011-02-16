@@ -55,10 +55,12 @@ public class NamespaceUtils {
 
 	public static final String TOOLS_NAMESPACE_URI = "http://www.springframework.org/schema/tool";
 
+	public static final String P_NAMESPACE_URI = "http://www.springframework.org/schema/p";
+
 	private static final Object IMAGE_REGISTRY_LOCK = new Object();
 
 	private static final INamespaceDefinition P_NAMESPACE_DEFINITION = new DefaultNamespaceDefinition("p",
-			"http://www.springframework.org/schema/p", null, new DefaultImageAccessor(BeansUIPlugin.PLUGIN_ID,
+			P_NAMESPACE_URI, null, new DefaultImageAccessor(BeansUIPlugin.PLUGIN_ID,
 					"/icons/full/obj16/property_obj.gif"));
 
 	/**
@@ -225,16 +227,24 @@ public class NamespaceUtils {
 			namespaceDefinitions.add(def);
 		}
 
+		boolean foundPNamespace = false;
+		boolean foundDefaultNamespace = false;
 		// Remove the tool namespace as we don't want to surface on the UI
 		for (INamespaceDefinition definition : new ArrayList<INamespaceDefinition>(namespaceDefinitions)) {
 			if (TOOLS_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
 				namespaceDefinitions.remove(definition);
-				
-				// Add in p-Namespace if we found the default namespace
-				namespaceDefinitions.add(P_NAMESPACE_DEFINITION);
+				foundDefaultNamespace = true;
+			}
+			else if (P_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
+				foundPNamespace = true;
 			}
 		}
 		
+		if (!foundPNamespace && foundDefaultNamespace) {
+			// Add in p-Namespace if we found the default namespace
+			namespaceDefinitions.add(P_NAMESPACE_DEFINITION);
+		}
+
 		Collections.sort(namespaceDefinitions, new Comparator<INamespaceDefinition>() {
 			public int compare(INamespaceDefinition o1, INamespaceDefinition o2) {
 				if (o1 != null && o1.getDefaultNamespacePrefix() != null && o2 != null
@@ -393,8 +403,6 @@ public class NamespaceUtils {
 	private static class NamespaceDefinitionImageAccessor extends DisplayThreadImageAccessor {
 
 		private final org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition definition;
-
-		private Image image;
 
 		public NamespaceDefinitionImageAccessor(
 				org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition definition) {
