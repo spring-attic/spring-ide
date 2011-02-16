@@ -14,24 +14,6 @@
  -->
 <plugin>
 
-	<extension point="org.eclipse.wst.xml.core.catalogContributions">
-		<catalogContribution>
-			<system
-				systemId="http://www.springframework.org/schema/webflow/spring-webflow-1.0.xsd"
-				uri="xsds/spring-webflow-1.0.xsd" />
-			<system
-				systemId="http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd"
-				uri="platform:/plugin/org.springframework.webflow/org/springframework/webflow/engine/model/builder/xml/spring-webflow-2.0.xsd" />
-			<public
-	        	publicId="http://www.springframework.org/schema/webflow"
-    		    uri="platform:/plugin/org.springframework.webflow/org/springframework/webflow/engine/model/builder/xml/spring-webflow-2.0.xsd" />
-				
-			<system
-				systemId="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd"
-				uri="xsds/spring-webflow-config-1.0.xsd" />
-		</catalogContribution>
-	</extension>
-
 	<extension
 		point="org.springframework.ide.eclipse.beans.core.namespaces">
 		<namespace uri="http://www.springframework.org/schema/webflow-config" >
