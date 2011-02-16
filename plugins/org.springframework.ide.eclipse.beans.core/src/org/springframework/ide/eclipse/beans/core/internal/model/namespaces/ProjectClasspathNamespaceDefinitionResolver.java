@@ -132,7 +132,15 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 			for (Object xsd : schemaMappings.keySet()) {
 				String key = xsd.toString();
 
-				URL url = cls.getResource(schemaMappings.getProperty(key));
+				String schemaUri = schemaMappings.getProperty(key);
+				URL url = cls.getResource(schemaUri);
+
+				// fallback, if schema location starts with / and therefore fails to be found by classloader
+				if (url == null && schemaUri.startsWith("/")) {
+					schemaUri = schemaUri.substring(1);
+					url = cls.getResource(schemaUri);
+				}
+				
 				if (url == null) {
 					continue;
 				}
@@ -147,7 +155,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 
 					if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
 						namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
-						namespaceDefinitionRegistry.get(namespaceUri).addUri(schemaMappings.getProperty(key));
+						namespaceDefinitionRegistry.get(namespaceUri).addUri(schemaUri);
 					}
 					else {
 						File iconFile = extractIcon(namespaceUri, icon, cls);
@@ -159,7 +167,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 						namespaceDefinition.setIconPath(icon);
 						namespaceDefinition.addSchemaLocation(key);
 						namespaceDefinition.setNamespaceUri(namespaceUri);
-						namespaceDefinition.addUri(schemaMappings.getProperty(key));
+						namespaceDefinition.addUri(schemaUri);
 
 						namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
 					}
