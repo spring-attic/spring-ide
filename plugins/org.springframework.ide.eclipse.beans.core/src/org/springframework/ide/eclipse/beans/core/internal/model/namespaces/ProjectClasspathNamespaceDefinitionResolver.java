@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.xml.sax.SAXException;
  * <p>
  * Note: this implementation is currently not in use
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.3.1
  * @see BeansCorePlugin#getNamespaceDefinitionResolver(IProject)
  */
@@ -132,7 +133,15 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 			for (Object xsd : schemaMappings.keySet()) {
 				String key = xsd.toString();
 
-				URL url = cls.getResource(schemaMappings.getProperty(key));
+				String schemaUri = schemaMappings.getProperty(key);
+				URL url = cls.getResource(schemaUri);
+
+				// fallback, if schema location starts with / and therefore fails to be found by classloader
+				if (url == null && schemaUri.startsWith("/")) {
+					schemaUri = schemaUri.substring(1);
+					url = cls.getResource(schemaUri);
+				}
+				
 				if (url == null) {
 					continue;
 				}
@@ -147,7 +156,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 
 					if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
 						namespaceDefinitionRegistry.get(namespaceUri).addSchemaLocation(key);
-						namespaceDefinitionRegistry.get(namespaceUri).addUri(schemaMappings.getProperty(key));
+						namespaceDefinitionRegistry.get(namespaceUri).addUri(schemaUri);
 					}
 					else {
 						File iconFile = extractIcon(namespaceUri, icon, cls);
@@ -159,7 +168,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 						namespaceDefinition.setIconPath(icon);
 						namespaceDefinition.addSchemaLocation(key);
 						namespaceDefinition.setNamespaceUri(namespaceUri);
-						namespaceDefinition.addUri(schemaMappings.getProperty(key));
+						namespaceDefinition.addUri(schemaUri);
 
 						namespaceDefinitionRegistry.put(namespaceUri, namespaceDefinition);
 					}

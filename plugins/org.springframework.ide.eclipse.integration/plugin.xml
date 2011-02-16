@@ -14,22 +14,6 @@
  -->
 <plugin>
 
-	<extension point="org.eclipse.wst.xml.core.catalogContributions">
-		<catalogContribution>
-			<system
-				systemId="http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd"
-				uri="xsds/spring-oxm-1.5.xsd" />
-
-			<system
-				systemId="http://www.springframework.org/schema/flex/spring-flex-1.0.xsd"
-				uri="xsds/spring-flex-1.0.xsd" />
-				
-			<public 
-				publicId="http://www.springframework.org/schema/flex"
-				uri="xsds/spring-flex-1.0.xsd" />
-		</catalogContribution>
-	</extension>
-	
 	<extension
 		point="org.springframework.ide.eclipse.beans.core.namespaces">
 		<namespace uri="http://www.springframework.org/schema/oxm" >
