@@ -137,6 +137,11 @@ class AspectDefinitionBuilderHelper {
 			catch (CoreException e) {
 				Activator.log(e);
 			}
+			finally {
+				if (model != null) {
+					model.releaseFromRead();
+				}
+			}
 			return null;
 		}
 		
