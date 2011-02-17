@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,15 +58,15 @@ public class BeansValidationContext extends AbstractValidationContext implements
 
 	private static final char KEY_SEPARATOR_CHAR = '/';
 
-	private BeanDefinitionRegistry incompleteRegistry;
-
-	private BeanDefinitionRegistry completeRegistry;
+	private Map<String, Set<BeanDefinition>> beanLookupCache;
 
 	private ClassReaderFactory classReaderFactory;
 
-	private IProjectClassLoaderSupport projectClassLoaderSupport;
+	private BeanDefinitionRegistry completeRegistry;
 
-	private Map<String, Set<BeanDefinition>> beanLookupCache;
+	private BeanDefinitionRegistry incompleteRegistry;
+
+	private IProjectClassLoaderSupport projectClassLoaderSupport;
 
 	private final Map<AttributeDescriptor, List<ToolAnnotationData>> toolAnnotationLookupCache;
 
@@ -83,8 +83,12 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/**
 	 * {@inheritDoc}
 	 */
-	public BeanDefinitionRegistry getIncompleteRegistry() {
-		return incompleteRegistry;
+	public synchronized ClassReaderFactory getClassReaderFactory() {
+		if (this.classReaderFactory == null) {
+			this.classReaderFactory = new CachingClassReaderFactory(JdtUtils.getClassLoader(getRootElement()
+					.getElementResource().getProject(), null));
+		}
+		return this.classReaderFactory;
 	}
 
 	/**
@@ -92,6 +96,95 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	 */
 	public BeanDefinitionRegistry getCompleteRegistry() {
 		return completeRegistry;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public BeanDefinitionRegistry getIncompleteRegistry() {
+		return incompleteRegistry;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public synchronized IProjectClassLoaderSupport getProjectClassLoaderSupport() {
+		if (this.projectClassLoaderSupport == null) {
+			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(getRootElementProject(),
+					BeansCorePlugin.getClassLoader());
+		}
+		return this.projectClassLoaderSupport;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<BeanDefinition> getRegisteredBeanDefinition(String beanName, String beanClass) {
+		Assert.notNull(beanName);
+		Assert.notNull(beanClass);
+
+		String key = beanClass + KEY_SEPARATOR_CHAR + beanName;
+		if (beanLookupCache.containsKey(key)) {
+			return beanLookupCache.get(key);
+		}
+		Set<BeanDefinition> bds = ValidationRuleUtils.getBeanDefinitions(beanName, beanClass, this);
+		// as we don't use a Hashtable we can insert null values
+		beanLookupCache.put(key, bds);
+		return bds;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IProject getRootElementProject() {
+		return (getRootElement().getElementResource() != null ? getRootElement().getElementResource().getProject()
+				: null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IResource getRootElementResource() {
+		return getRootElement().getElementResource();
+	}
+
+	public synchronized List<ToolAnnotationData> getToolAnnotation(Node n, String attributeName) {
+		AttributeDescriptor descriptor = AttributeDescriptor.create(n, attributeName);
+		if (toolAnnotationLookupCache.containsKey(descriptor)) {
+			return toolAnnotationLookupCache.get(descriptor);
+		}
+
+		// Search for tool annotations
+		List<ToolAnnotationData> annotationDatas = new ArrayList<ToolAnnotationData>();
+		List<Element> appInfoElements = ToolAnnotationUtils.getApplicationInformationElements(n, attributeName);
+		for (Element elem : appInfoElements) {
+			NodeList children = elem.getChildNodes();
+			for (int j = 0; j < children.getLength(); j++) {
+				Node annotation = children.item(j);
+				if (annotation.getNodeType() == Node.ELEMENT_NODE
+						&& ToolAnnotationUtils.ANNOTATION_ELEMENT.equals(annotation.getLocalName())
+						&& ToolAnnotationUtils.TOOL_NAMESPACE_URI.equals(annotation.getNamespaceURI())) {
+					ToolAnnotationData annotationData = ToolAnnotationUtils.getToolAnnotationData(annotation);
+					if (annotationData != null) {
+						annotationDatas.add(annotationData);
+					}
+				}
+			}
+		}
+
+		// Add to internal cache
+		toolAnnotationLookupCache.put(descriptor, annotationDatas);
+
+		// / Return found annoatations
+		return annotationDatas;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isBeanRegistered(String beanName, String beanClass) {
+		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName, beanClass);
+		return bds != null && bds.size() > 0;
 	}
 
 	private BeanDefinitionRegistry createRegistry(IBeansConfig config, IResourceModelElement contextElement,
@@ -134,68 +227,6 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	/**
 	 * {@inheritDoc}
 	 */
-	public synchronized ClassReaderFactory getClassReaderFactory() {
-		if (this.classReaderFactory == null) {
-			this.classReaderFactory = new CachingClassReaderFactory(JdtUtils.getClassLoader(getRootElement()
-					.getElementResource().getProject(), null));
-		}
-		return this.classReaderFactory;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public synchronized IProjectClassLoaderSupport getProjectClassLoaderSupport() {
-		if (this.projectClassLoaderSupport == null) {
-			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(getRootElementProject(),
-					BeansCorePlugin.getClassLoader());
-		}
-		return this.projectClassLoaderSupport;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public IProject getRootElementProject() {
-		return (getRootElement().getElementResource() != null ? getRootElement().getElementResource().getProject()
-				: null);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public IResource getRootElementResource() {
-		return getRootElement().getElementResource();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Set<BeanDefinition> getRegisteredBeanDefinition(String beanName, String beanClass) {
-		Assert.notNull(beanName);
-		Assert.notNull(beanClass);
-
-		String key = beanClass + KEY_SEPARATOR_CHAR + beanName;
-		if (beanLookupCache.containsKey(key)) {
-			return beanLookupCache.get(key);
-		}
-		Set<BeanDefinition> bds = ValidationRuleUtils.getBeanDefinitions(beanName, beanClass, this);
-		// as we don't use a Hashtable we can insert null values
-		beanLookupCache.put(key, bds);
-		return bds;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean isBeanRegistered(String beanName, String beanClass) {
-		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName, beanClass);
-		return bds != null && bds.size() > 0;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Set<ValidationProblem> createProblems(IResourceModelElement element, String problemId, int severity,
 			String message, ValidationProblemAttribute... attributes) {
@@ -225,44 +256,31 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		return problems;
 	}
 
-	public synchronized List<ToolAnnotationData> getToolAnnotation(Node n, String attributeName) {
-		AttributeDescriptor descriptor = AttributeDescriptor.create(n, attributeName);
-		if (toolAnnotationLookupCache.containsKey(descriptor)) {
-			return toolAnnotationLookupCache.get(descriptor);
-		}
-
-		// Search for tool annotations
-		List<ToolAnnotationData> annotationDatas = new ArrayList<ToolAnnotationData>();
-		List<Element> appInfoElements = ToolAnnotationUtils.getApplicationInformationElements(n, attributeName);
-		for (Element elem : appInfoElements) {
-			NodeList children = elem.getChildNodes();
-			for (int j = 0; j < children.getLength(); j++) {
-				Node annotation = children.item(j);
-				if (annotation.getNodeType() == Node.ELEMENT_NODE
-						&& ToolAnnotationUtils.ANNOTATION_ELEMENT.equals(annotation.getLocalName())
-						&& ToolAnnotationUtils.TOOL_NAMESPACE_URI.equals(annotation.getNamespaceURI())) {
-					ToolAnnotationData annotationData = ToolAnnotationUtils.getToolAnnotationData(annotation);
-					if (annotationData != null) {
-						annotationDatas.add(annotationData);
-					}
-				}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected StringBuilder decorateErrorMessage(StringBuilder builder) {
+		IResourceModelElement context = getContextElement();
+		if (context != null && context.getElementResource() != null) {
+			String projectName = context.getElementResource().getProject().getName();
+			
+			// Only decorate the context if the context element is a config set as otherwise the context
+			// should be clear from the marker/problems view -> it is the file being displayed
+			if (context instanceof IBeansConfigSet) {
+				builder.append(String.format(" [config set: %s/%s]", projectName, context.getElementName()));
 			}
 		}
-
-		// Add to internal cache
-		toolAnnotationLookupCache.put(descriptor, annotationDatas);
-
-		// / Return found annoatations
-		return annotationDatas;
+		return builder;
 	}
 
 	static class AttributeDescriptor {
 
-		private final String namespaceUri;
+		private final String attributeName;
 
 		private final String localName;
 
-		private final String attributeName;
+		private final String namespaceUri;
 
 		private AttributeDescriptor(String namespaceUri, String localName, String attributeName) {
 			this.namespaceUri = namespaceUri;

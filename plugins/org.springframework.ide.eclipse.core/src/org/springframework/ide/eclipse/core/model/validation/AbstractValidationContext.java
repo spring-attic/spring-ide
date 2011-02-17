@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -187,7 +187,10 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 
 		// Get the line number from the element
 		int line = getLineNumber(element);
-
+		
+		// Allow subclasses to decorate the error message
+		message = decorateErrorMessage(new StringBuilder(message)).toString();
+		
 		// Add the element Id to the list of problem attributes
 		String elementId = element.getElementID();
 		List<ValidationProblemAttribute> attributeList = new ArrayList<ValidationProblemAttribute>(Arrays
@@ -211,6 +214,15 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 		Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>(2);
 		problems.add(createProblem(element, problemId, severity, message, attributes));
 		return problems;
+	}
+	
+	/**
+	 * Create the textual representation for the given <code>context</code> element.
+	 * @return a textual representation o
+	 * @since 2.6.0
+	 */
+	protected StringBuilder decorateErrorMessage(StringBuilder builder) {
+		return builder;
 	}
 
 	/**
