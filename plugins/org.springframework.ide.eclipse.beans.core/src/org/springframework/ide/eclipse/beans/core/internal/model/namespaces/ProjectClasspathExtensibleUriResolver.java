@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,8 +38,10 @@ import org.springframework.util.CollectionUtils;
  * {@link URIResolverExtension} resolves URIs on the project classpath using the protocol established by
  * <code>spring.schema</code> files.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.3.1
  */
+@SuppressWarnings("restriction")
 public class ProjectClasspathExtensibleUriResolver implements URIResolverExtension {
 
 	private static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
