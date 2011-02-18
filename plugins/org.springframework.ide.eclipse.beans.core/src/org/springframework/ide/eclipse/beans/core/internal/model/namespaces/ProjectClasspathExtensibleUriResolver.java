@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -45,6 +47,8 @@ import org.springframework.util.CollectionUtils;
 public class ProjectClasspathExtensibleUriResolver implements URIResolverExtension {
 
 	private static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
+	
+	private ThreadLocal<IPath> previousFile = new ThreadLocal<IPath>();
 
 	/**
 	 * {@inheritDoc}
@@ -54,20 +58,32 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		if (systemId != null && systemId.startsWith("jar:")) {
 			return null;
 		}
-
-		// file and systemId can't be null
-		if (file == null || systemId == null) {
+		
+		if (systemId == null) {
 			return null;
+		}
+		
+		if (file == null) {
+			IPath prevFile = previousFile.get();
+			if (prevFile != null) {
+				file = ResourcesPlugin.getWorkspace().getRoot().getFile(prevFile);
+			}
+			else {
+				return null;
+			}
+		}
+		else {
+			previousFile.set(file.getFullPath());
 		}
 
 		// resolve the project first
-		IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
-		if (project == null) {
+		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(file.getProject());
+		if (beansProject == null) {
 			return null;
 		}
 
 		// Resolve using the classpath
-		if (NamespaceUtils.useNamespacesFromClasspath(file.getProject()) && checkFileExtension(file, project)) {
+		if (NamespaceUtils.useNamespacesFromClasspath(file.getProject()) && checkFileExtension(file, beansProject)) {
 			return resolveOnClasspath(file, systemId);
 		}
 		return null;
