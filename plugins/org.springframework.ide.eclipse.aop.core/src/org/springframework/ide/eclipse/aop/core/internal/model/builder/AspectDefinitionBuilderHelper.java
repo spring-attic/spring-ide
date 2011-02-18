@@ -124,10 +124,17 @@ class AspectDefinitionBuilderHelper {
 
 				}
 				if (model != null) {
-					IDOMDocument document = ((IDOMModel) model).getDocument();
-					if (document != null && document.getDocumentElement() != null) {
-						cache.put(file, (IDOMModel) model);
-						return document;
+					try {
+						IDOMDocument document = ((IDOMModel) model).getDocument();
+						if (document != null && document.getDocumentElement() != null) {
+							cache.put(file, (IDOMModel) model);
+							return document;
+						}
+					} catch (RuntimeException e) {
+						if (model != null) {
+							model.releaseFromRead();
+						}
+						return null;
 					}
 				}
 			}
@@ -136,11 +143,6 @@ class AspectDefinitionBuilderHelper {
 			}
 			catch (CoreException e) {
 				Activator.log(e);
-			}
-			finally {
-				if (model != null) {
-					model.releaseFromRead();
-				}
 			}
 			return null;
 		}
