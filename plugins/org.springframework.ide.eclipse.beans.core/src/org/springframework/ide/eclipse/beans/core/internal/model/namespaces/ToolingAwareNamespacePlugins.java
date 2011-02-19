@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 Spring IDE Developers
+ * Copyright (c) 2009, 2010 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,13 +23,22 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
+import org.eclipse.wst.xml.core.internal.catalog.CatalogContributorRegistryReader;
+import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalog;
+import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalogElement;
+import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalogEntry;
+import org.eclipse.wst.xml.core.internal.catalog.provisional.INextCatalog;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.osgi.util.OsgiBundleUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -38,16 +47,21 @@ import org.xml.sax.SAXException;
  * Extension to Spring DM's {@link NamespacePlugins} class that handles registering of XSDs in Eclipse' XML Catalog and
  * builds an internal representation of {@link INamespaceDefinition}s.
  * @author Christian Dupuis
- * @author Martin Lippert
  * @since 2.2.5
  */
+@SuppressWarnings("restriction")
 public class ToolingAwareNamespacePlugins extends NamespacePlugins implements INamespaceDefinitionResolver {
+
+	private static final String XML_CORE_BUNDLE_SYMBOLICNAME = "org.eclipse.wst.xml.core";
 
 	private static final String META_INF = "META-INF/";
 
 	private static final String SPRING_SCHEMAS = "spring.schemas";
 
 	private static final String SPRING_TOOLING = "spring.tooling";
+
+	/** XML catalog entries keyed by the registering bundle */
+	private volatile Map<Bundle, Set<ICatalogElement>> catalogEntriesByBundle = new HashMap<Bundle, Set<ICatalogElement>>();
 
 	/** Namespace definitions keyed by the namespace uri */
 	private volatile Map<String, NamespaceDefinition> namespaceDefinitionRegistry = new HashMap<String, NamespaceDefinition>();
@@ -97,6 +111,8 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	@SuppressWarnings("unchecked")
 	private void addNamespaceDefinition(Bundle bundle) {
 
+		Set<ICatalogElement> catalogEntries = new HashSet<ICatalogElement>();
+		this.catalogEntriesByBundle.put(bundle, catalogEntries);
 		Set<NamespaceDefinition> namespaceDefinitions = new HashSet<NamespaceDefinition>();
 		this.namespaceDefinitionsByBundle.put(bundle, namespaceDefinitions);
 
@@ -108,12 +124,16 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 				for (Object xsd : props.keySet()) {
 
 					String key = xsd.toString();
+					String uri = "platform:/plugin/" + bundle.getSymbolicName() + "/" + props.getProperty(key);
 					String namespaceUri = getTargetNamespace(bundle.getEntry(props.getProperty(key)));
 					String icon = null;
 					String prefix = null;
 					String name = null;
 
 					if (StringUtils.hasText(namespaceUri)) {
+
+						// Add catalog entry to XML catalog
+						addCatalogEntry(bundle, key, uri, catalogEntries, ICatalogEntry.ENTRY_TYPE_URI);
 
 						Enumeration<URL> tooling = bundle.findEntries(META_INF, SPRING_TOOLING, false);
 						if (tooling != null) {
@@ -145,6 +165,13 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 					}
 				}
 			}
+
+			// Add catalog entry to namespace uri
+			for (NamespaceDefinition definition : namespaceDefinitions) {
+				addCatalogEntry(definition.getBundle(), definition.getNamespaceUri(),
+						"platform:/plugin/" + bundle.getSymbolicName() + "/" + definition.getDefaultUri(),
+						catalogEntries, ICatalogEntry.ENTRY_TYPE_PUBLIC);
+			}
 		}
 	}
 
@@ -163,6 +190,42 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 					BeansCorePlugin.log(exception);
 				}
 			});
+		}
+	}
+
+	/**
+	 * Create and add a XML catalog entry.
+	 */
+	private void addCatalogEntry(Bundle bundle, String key, String uri, Set<ICatalogElement> catalogEntries, int type) {
+		Bundle xmlBundle = Platform.getBundle(XML_CORE_BUNDLE_SYMBOLICNAME);
+		if (xmlBundle == null) {
+			// The xml bundle is not even installed
+			return;
+		}
+		if (!OsgiBundleUtils.isBundleActive(xmlBundle)) {
+			try {
+				xmlBundle.start();
+			}
+			catch (BundleException e) {
+				// we can't start the xml core bundle and therefore we can't register the catalog element
+				return;
+			}
+		}
+
+		ICatalog systemCatalog = getSystemCatalog();
+		if (systemCatalog == null) {
+			return;
+		}
+
+		ICatalogElement catalogElement = systemCatalog.createCatalogElement(type);
+		if (catalogElement instanceof ICatalogEntry) {
+			ICatalogEntry entry = (ICatalogEntry) catalogElement;
+			String resolvePath = CatalogContributorRegistryReader.resolvePath(
+					CatalogContributorRegistryReader.getPlatformURL(bundle.getSymbolicName()), uri);
+			entry.setKey(key);
+			entry.setURI(resolvePath);
+			systemCatalog.addCatalogElement(catalogElement);
+			catalogEntries.add(catalogElement);
 		}
 	}
 
@@ -190,6 +253,31 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	}
 
 	/**
+	 * Returns the Eclipse XML catalog.
+	 */
+	private ICatalog getSystemCatalog() {
+		XMLCorePlugin xmlCore = XMLCorePlugin.getDefault();
+		if (xmlCore == null) {
+			return null;
+		}
+
+		ICatalog systemCatalog = null;
+		ICatalog defaultCatalog = xmlCore.getDefaultXMLCatalog();
+
+		INextCatalog[] nextCatalogs = defaultCatalog.getNextCatalogs();
+		for (int i = 0; i < nextCatalogs.length; i++) {
+			INextCatalog catalog = nextCatalogs[i];
+			ICatalog referencedCatalog = catalog.getReferencedCatalog();
+			if (referencedCatalog != null) {
+				if (XMLCorePlugin.SYSTEM_CATALOG_ID.equals(referencedCatalog.getId())) {
+					systemCatalog = referencedCatalog;
+				}
+			}
+		}
+		return systemCatalog;
+	}
+
+	/**
 	 * Fail safe loading of a {@link Properties} from an {@link URL}. Returns an empty {@link Properties} if the an
 	 * {@link IOException} occurs.
 	 */
@@ -208,6 +296,16 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	 * Removes any registered {@link INamespaceDefinition}s and XML catalog entries.
 	 */
 	private void removeNamespaceDefinition(Bundle bundle) {
+		Bundle xmlBundle = Platform.getBundle(XML_CORE_BUNDLE_SYMBOLICNAME);
+
+		if (catalogEntriesByBundle.containsKey(bundle) && OsgiBundleUtils.isBundleActive(xmlBundle)) {
+			ICatalog systemCatalog = getSystemCatalog();
+			for (ICatalogElement element : catalogEntriesByBundle.get(bundle)) {
+				systemCatalog.removeCatalogElement(element);
+			}
+			catalogEntriesByBundle.remove(bundle);
+		}
+
 		if (namespaceDefinitionsByBundle.containsKey(bundle)) {
 			for (NamespaceDefinition definition : namespaceDefinitionsByBundle.get(bundle)) {
 				unregisterNamespaceDefinition(definition);
