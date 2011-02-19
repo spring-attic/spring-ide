@@ -148,6 +148,12 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		if (schemaMappings.containsKey(systemId)) {
 
 			String xsdPath = schemaMappings.get(systemId);
+
+			// fallback, if schema location starts with / and therefore fails to be found by classloader
+			if (xsdPath.startsWith("/")) {
+				xsdPath = xsdPath.substring(1);
+			}
+
 			String packageName = "";
 			String fileName = xsdPath;
 
@@ -156,7 +162,7 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 				packageName = xsdPath.substring(0, ix).replace('/', '.');
 				fileName = xsdPath.substring(ix + 1);
 			}
-
+			
 			IJavaProject javaProject = JdtUtils.getJavaProject(file.getProject());
 			if (javaProject != null) {
 
