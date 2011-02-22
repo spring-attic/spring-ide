@@ -259,6 +259,7 @@
 	</pluginRepositories>
 
 	<build>
+		
 		<extensions>
 			<extension>
 				<groupId>org.springframework.build.aws</groupId>
@@ -268,6 +269,52 @@
 		</extensions>
 
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1.1</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>git</executable>
+					<arguments>
+						<argument>log</argument>
+						<argument>--pretty=format:source.control.id=%H</argument>
+						<argument>-n1</argument>
+					</arguments>
+					<outputFile>${project.build.directory}/git.properties</outputFile>
+					<successCodes>
+						<successCode>0</successCode>
+						<successCode>1</successCode>
+						<successCode>127</successCode>
+						<successCode>128</successCode>
+					</successCodes>
+				</configuration>
+            </plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0-alpha-2</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>${project.build.directory}/git.properties</file>
+							</files>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.5</version>
@@ -355,6 +402,11 @@
 					<configuration>
 						<format>yyyyMMddHHmm-'${p2.qualifier}'</format>
 						<archiveSite>true</archiveSite>
+						<archive>
+							<manifestEntries>
+								<Source-Control-Identifier>${source.control.id}</Source-Control-Identifier>
+							</manifestEntries>
+						</archive>
 					</configuration>
 				</plugin>
 				<plugin>
