@@ -485,11 +485,6 @@ public class JdtUtils {
 		return getMethod(type, methodName, parameterTypesAsString);
 	}
 
-	public static IMethod getConstructor(IType type, Class[] parameterTypes) {
-		String[] parameterTypesAsString = getParameterTypesAsStringArray(parameterTypes);
-		return getConstructor(type, parameterTypesAsString);
-	}
-
 	public static IMethod getMethod(IType type, String methodName, String[] parameterTypes) {
 		int index = methodName.indexOf('(');
 		if (index >= 0) {
@@ -666,7 +661,7 @@ public class JdtUtils {
 		String classPathFileName = resource.getProject().getFullPath().append(CLASSPATH_FILENAME).toString();
 		return resource.getFullPath().toString().equals(classPathFileName);
 	}
-
+	
 	/**
 	 * Returns true if given resource's project is a Java project.
 	 */
