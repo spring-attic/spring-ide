@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.monitor;
 
+import java.io.File;
+import java.net.URI;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -60,16 +63,46 @@ public class BuildSystemUsageMonitor implements IUsageMonitor {
 				for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
 					if (project.isOpen() && project.isAccessible()) {
 						if (project.getFile("pom.xml").exists()) {
-							projectChanged(project, BuildSystemType.MAVEN);
+							projectChanged(project.getName(), BuildSystemType.MAVEN);
 						}
 						if (project.getFile("ivy.xml").exists()) {
-							projectChanged(project, BuildSystemType.IVY);
+							projectChanged(project.getName(), BuildSystemType.IVY);
 						}
 						if (project.getFile("build.gradle").exists()) {
-							projectChanged(project, BuildSystemType.GRADLE);
+							projectChanged(project.getName(), BuildSystemType.GRADLE);
 						}
 						if (project.getFile("build.xml").exists()) {
-							projectChanged(project, BuildSystemType.ANT);
+							projectChanged(project.getName(), BuildSystemType.ANT);
+						}
+						
+						// Now we should also check the parent folder for the project location on the
+						// file system to check for the same files there
+						URI uri = project.getLocationURI();
+						if (uri == null) {
+							uri = project.getRawLocationURI();
+						}
+						if (uri != null) {
+							File parent = new File(uri);
+							if (parent != null && parent.exists()) {
+								parent = parent.getParentFile();
+								
+								for (File file : parent.listFiles()) {
+									if (file.isFile()) {
+										if (file.getName().equals("pom.xml")) {
+											projectChanged(parent.getName(), BuildSystemType.MAVEN);
+										}
+										if (file.getName().equals("ivy.xml")) {
+											projectChanged(parent.getName(), BuildSystemType.IVY);
+										}
+										if (file.getName().equals("build.gradle")) {
+											projectChanged(parent.getName(), BuildSystemType.GRADLE);
+										}
+										if (file.getName().equals("build.xml")) {
+											projectChanged(parent.getName(), BuildSystemType.ANT);
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -95,9 +128,9 @@ public class BuildSystemUsageMonitor implements IUsageMonitor {
 	/**
 	 * Record usage data to a given project.
 	 */
-	private void projectChanged(IProject project, BuildSystemType type) {
-		if (type != null && project != null && project.isAccessible() && project.isOpen()) {
-			manager.registerProductUse(BuildSystemType.getName(type), null, project.getName());
+	private void projectChanged(String projectName, BuildSystemType type) {
+		if (type != null && projectName != null) {
+			manager.registerProductUse(BuildSystemType.getName(type), null, projectName);
 		}
 	}
 
@@ -170,16 +203,16 @@ public class BuildSystemUsageMonitor implements IUsageMonitor {
 			protected boolean resourceAddedOrChanged(IResource resource) {
 				if (resource instanceof IFile && resource.isAccessible()) {
 					if (resource.getName().equals("pom.xml")) {
-						projectChanged(resource.getProject(), BuildSystemType.MAVEN);
+						projectChanged(resource.getProject().getName(), BuildSystemType.MAVEN);
 					}
-					else if (resource.getName().equals("ivy.xml")) {
-						projectChanged(resource.getProject(), BuildSystemType.IVY);
+					if (resource.getName().equals("ivy.xml")) {
+						projectChanged(resource.getProject().getName(), BuildSystemType.IVY);
 					}
-					else if (resource.getName().equals("build.gradle")) {
-						projectChanged(resource.getProject(), BuildSystemType.GRADLE);
+					if (resource.getName().equals("build.gradle")) {
+						projectChanged(resource.getProject().getName(), BuildSystemType.GRADLE);
 					}
-					else if (resource.getName().equals("build.xml")) {
-						projectChanged(resource.getProject(), BuildSystemType.ANT);
+					if (resource.getName().equals("build.xml")) {
+						projectChanged(resource.getProject().getName(), BuildSystemType.ANT);
 					}
 					return false;
 				}
