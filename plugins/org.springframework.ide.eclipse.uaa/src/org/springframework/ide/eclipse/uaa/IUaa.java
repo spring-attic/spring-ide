@@ -66,11 +66,6 @@ public interface IUaa {
 	void registerProjectUsageForProduct(String featureId, String projectId, Map<String, String> featureData);
 
 	/**
-	 * Clears out any stored usage data.
-	 */
-	void clear();
-
-	/**
 	 * Returns the UAA privacy level.
 	 * @see #FULL_DATA
 	 * @see #LIMITED_DATA
@@ -81,15 +76,10 @@ public interface IUaa {
 	int getPrivacyLevel();
 
 	/**
-	 * Returns the usage data from the given encoded user-agent header.
+	 * Returns the UAA payload in a human readable form.
 	 */
-	String getUsageDataFromUserAgentHeader(String userAgentHeader);
-
-	/**
-	 * Returns the encoded user-agent header.
-	 */
-	String getUserAgentHeader();
-
+	String getReadablePayload();
+	
 	/**
 	 * Sets the privacy level.
 	 * @see #FULL_DATA

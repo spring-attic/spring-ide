@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.uaa;singleton:=true
-Bundle-Version: 2.5.2.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.uaa.UaaPlugin
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
@@ -10,22 +10,17 @@ Bundle-ActivationPolicy: lazy
 Eclipse-LazyStart: true
 Bundle-ClassPath: lib/org.springframework.uaa.client-1.0.1.BUILD-SNAPSHOT.jar,
  lib/org.springframework.roo.wrapping.protobuf-java-lite-2.3.0.0001.jar,
+ lib/org.springframework.roo.wrapping.bcpg-jdk15-1.45.0.0001.jar,
+ lib/org.springframework.roo.wrapping.bcprov-jdk15-1.45.0.0001.jar,
  lib/json_simple-1.1.jar,
  .
 Bundle-Localization: plugin
 Export-Package: org.springframework.ide.eclipse.uaa
-Import-Package: org.apache.commons.httpclient;version="[3.0.1,3.1.0]",
- org.apache.commons.httpclient.params;version="[3.0.1,3.1.0]",
- org.eclipse.core.commands,
+Import-Package: org.eclipse.core.commands,
  org.eclipse.core.commands.common,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
- org.eclipse.ecf.core.identity,
- org.eclipse.ecf.filetransfer.service,
- org.eclipse.ecf.provider.filetransfer.httpclient,
- org.eclipse.ecf.provider.filetransfer.retrieve,
- org.eclipse.equinox.internal.p2.repository,
  org.eclipse.jdt.core,
  org.eclipse.jdt.internal.core,
  org.eclipse.jface.dialogs,
@@ -50,4 +45,7 @@ Import-Package: org.apache.commons.httpclient;version="[3.0.1,3.1.0]",
  org.springframework.ide.eclipse.core.java,
  org.springframework.ide.eclipse.core.model.validation,
  org.springframework.ide.eclipse.core.project,
- org.springframework.ide.eclipse.ui
+ org.springframework.ide.eclipse.ui,
+ org.eclipse.core.net.proxy,
+ org.osgi.util.tracker
+

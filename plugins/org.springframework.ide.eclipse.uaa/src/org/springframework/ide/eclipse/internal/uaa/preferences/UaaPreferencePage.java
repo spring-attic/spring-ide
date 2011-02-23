@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.internal.uaa.preferences;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -38,13 +36,9 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  */
 public class UaaPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private Button decodeButton;
-
 	private Text decodedUserAgentText;
 
 	private Button disabledButton;
-
-	private Text encodedUserAgentText;
 
 	private Button fullButton;
 
@@ -126,7 +120,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			}
 		});
 		disabledButton = new Button(colorComposite2, SWT.RADIO);
-		disabledButton.setText("Send nothing (accept Terms of Use)");
+		disabledButton.setText("Send no usage data (accept Terms of Use)");
 		disabledButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -167,48 +161,19 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		}
 
 		Label heading = new Label(colorComposite, SWT.NONE | SWT.WRAP);
-		heading.setText("Decoded information:");
+		heading.setText("Usage information:");
 
-		decodedUserAgentText = new Text(colorComposite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
-		decodedUserAgentText.setText(uaa.getUsageDataFromUserAgentHeader(uaa.getUserAgentHeader()));
+		decodedUserAgentText = new Text(colorComposite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		decodedUserAgentText.setText(uaa.getReadablePayload());
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 150;
-		data.widthHint = 500;
+		data.widthHint = 550;
 		decodedUserAgentText.setLayoutData(data);
 		// decodedUserAgentText.setFont(JFaceResources.getTextFont());
 		decodedUserAgentText.setEditable(false);
 
-		heading = new Label(colorComposite, SWT.NONE | SWT.WRAP);
-		heading.setText("Encoded information:");
-
-		encodedUserAgentText = new Text(colorComposite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
-		encodedUserAgentText.setText(uaa.getUserAgentHeader());
-		data = new GridData(GridData.FILL_BOTH);
-		data.heightHint = 50;
-		data.widthHint = 500;
-		encodedUserAgentText.setLayoutData(data);
-		// encodedUserAgentText.setFont(JFaceResources.getTextFont());
-		encodedUserAgentText.addModifyListener(new ModifyListener() {
-
-			public void modifyText(ModifyEvent e) {
-				decodeButton.setEnabled(true);
-			}
-		});
-
-		decodeButton = new Button(colorComposite, SWT.NONE);
-		decodeButton.setText("Decode");
-		gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
-		decodeButton.setLayoutData(gd);
-		decodeButton.setEnabled(false);
-		decodeButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				handleDecode();
-			}
-		});
-
 		Link link = new Link(entryTable, SWT.NONE | SWT.WRAP);
-		link.setText("Note: the User Agent Analysis feature will record certain usage events which you can review in the 'Encoded information' text box. The collected information will be presented via a HTTP User-Agent header when accessing content on VMware domains such as springide.org, springsource.org and springsource.com.\n\nMore information can be obtained from the Spring UAA <a href=\"tou\">Terms of Use</a> and <a href=\"faq\">FAQ</a>.");
+		link.setText("Note: the User Agent Analysis feature will record certain usage events which you can review in the 'Usage information' text box. The collected information will be presented to VMware domains such as springide.org, springsource.org and springsource.com.\n\nMore information can be obtained from the Spring UAA <a href=\"tou\">Terms of Use</a> and <a href=\"faq\">FAQ</a>.");
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -227,15 +192,6 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		link.setLayoutData(gd);
 
 		return entryTable;
-	}
-
-	protected void handleDecode() {
-		try {
-			decodedUserAgentText.setText(uaa.getUsageDataFromUserAgentHeader(encodedUserAgentText.getText()));
-		}
-		catch (Exception e) {
-			decodedUserAgentText.setText("<could not decode Spring UAA header>");
-		}
 	}
 
 	protected void performDefaults() {
@@ -263,10 +219,7 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			undecidedButton.setEnabled(false);
 		}
 		
-		decodedUserAgentText.setText(uaa.getUsageDataFromUserAgentHeader(uaa.getUserAgentHeader()));
-		encodedUserAgentText.setText(uaa.getUserAgentHeader());
-		decodeButton.setEnabled(false);
-		
+		decodedUserAgentText.setText(uaa.getReadablePayload());
 	}
 
 }
