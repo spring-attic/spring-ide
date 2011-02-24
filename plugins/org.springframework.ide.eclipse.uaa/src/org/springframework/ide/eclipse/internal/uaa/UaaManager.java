@@ -45,8 +45,8 @@ import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
 import org.springframework.uaa.client.TransmissionService;
 import org.springframework.uaa.client.UaaService;
-import org.springframework.uaa.client.UrlHelper;
 import org.springframework.uaa.client.VersionHelper;
+import org.springframework.uaa.client.internal.BasicProxyService;
 import org.springframework.uaa.client.internal.JdkUrlTransmissionServiceImpl;
 import org.springframework.uaa.client.internal.TransmissionAwareUaaServiceImpl;
 import org.springframework.uaa.client.internal.UaaServiceImpl;
@@ -77,7 +77,7 @@ public class UaaManager implements IUaa {
 	private final Lock w = rwl.writeLock();
 
 	private List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
-	private CachingUaaServiceImpl service = new CachingUaaServiceImpl(new JdkUrlProxyAwareTransmissionService());
+	private CachingUaaServiceImpl service = new CachingUaaServiceImpl(new JdkUrlTransmissionServiceImpl(new EclipseProxyService()));
 
 	/**
 	 * {@inheritDoc}
@@ -235,24 +235,8 @@ public class UaaManager implements IUaa {
 			w.unlock();
 		}
 	}
-
+	
 	public void start() {
-		
-		
-		init();
-	}
-
-	public void stop() {
-		try {
-			w.lock();
-			service.flush();
-		}
-		finally {
-			w.unlock();
-		}
-	}
-
-	private void init() {
 		// Since we run in an restricted environment we need to obtain the builder factory from the OSGi service
 		// registry instead of trying to create a new one from the API
 		XmlUtils.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
@@ -273,7 +257,17 @@ public class UaaManager implements IUaa {
 			}
 		}
 	}
-	
+
+	public void stop() {
+		try {
+			w.lock();
+			service.flush();
+		}
+		finally {
+			w.unlock();
+		}
+	}
+
 	/**
 	 * Returns the id of the feature that owns the given <code>plugin</code>.  
 	 */
@@ -425,11 +419,11 @@ public class UaaManager implements IUaa {
 		}
 
 		private boolean canRegister() {
-			return UrlHelper.isUaaCommunicationsAllowed();
+			return service.isUaaTermsOfUseAccepted();
 		}
 		
 		protected UaaEnvelope getPayload() {
-			return super.createUaaEnvelop();
+			return super.createUaaEnvelope();
 		}
 		
 		private class ReportedFeature {
@@ -765,16 +759,16 @@ public class UaaManager implements IUaa {
 	}
 
 	/**
-	 * Extension to {@link JdkUrlTransmissionServiceImpl} that hooks in the Eclipse {@link IProxyService}.
+	 * Extension to {@link BasicProxyService} that hooks in the Eclipse {@link IProxyService}.
 	 * @since 2.6.0
 	 */
-	private class JdkUrlProxyAwareTransmissionService extends JdkUrlTransmissionServiceImpl {
+	private class EclipseProxyService extends BasicProxyService {
 
 		/**
 		 * {@inheritDoc}
 		 */
 		@Override
-		protected Proxy setupProxy(URL url) {
+		public Proxy setupProxy(URL url) {
 			IProxyData selectedProxy = getProxy(url);
 			if (selectedProxy != null) {
 				return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(selectedProxy.getHost(),
@@ -787,7 +781,7 @@ public class UaaManager implements IUaa {
 		 * {@inheritDoc}
 		 */
 		@Override
-		protected Authenticator setupProxyAuthentication(URL url, Proxy proxy) {
+		public Authenticator setupProxyAuthentication(URL url, Proxy proxy) {
 			final IProxyData selectedProxy = getProxy(url);
 			if (selectedProxy != null && (selectedProxy.getUserId() != null || selectedProxy.getPassword() != null)) {
 				return new Authenticator() {
