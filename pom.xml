@@ -224,7 +224,7 @@
 				<repository>
 					<id>ajdt-e36</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/tools/ajdt/36/dev/update/</url>
+					<url>http://download.eclipse.org/tools/ajdt/36/milestone/</url>
 				</repository>
 			</repositories>
 		</profile>
