@@ -12,10 +12,14 @@ package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -30,11 +34,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolverExtension;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor.SchemaLocations;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.CollectionUtils;
+import org.w3c.dom.Document;
 
 /**
  * {@link URIResolverExtension} resolves URIs on the project classpath using the protocol established by
@@ -59,10 +65,14 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 			return null;
 		}
 		
+		if (systemId == null && file != null) {
+			systemId = findSystemIdFromFile(file, publicId);
+		}
+		
 		if (systemId == null) {
 			return null;
 		}
-		
+
 		if (file == null) {
 			IPath prevFile = previousFile.get();
 			if (prevFile != null) {
@@ -84,7 +94,43 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 
 		// Resolve using the classpath
 		if (NamespaceUtils.useNamespacesFromClasspath(file.getProject()) && checkFileExtension(file, beansProject)) {
-			return resolveOnClasspath(file, systemId);
+			String resolved = resolveOnClasspath(file, systemId);
+			return resolved;
+		}
+		return null;
+	}
+
+	/**
+	 * try to extract the system-id of the given namespace from the xml file
+	 * @since 2.6.0
+	 */
+	private String findSystemIdFromFile(IFile file, String publicIc) {
+		InputStream contents = null;
+		try {
+			contents = file.getContents();
+			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+			builderFactory.setValidating(false);
+			builderFactory.setNamespaceAware(true);
+			
+			DocumentBuilder builder = builderFactory.newDocumentBuilder();
+			Document doc = builder.parse(contents);
+			
+			DocumentAccessor accessor = new DocumentAccessor();
+			accessor.pushDocument(doc);
+			SchemaLocations locations = accessor.getCurrentSchemaLocations();
+			
+			String location = locations.getSchemaLocation(publicIc);
+			return location;
+		} catch (Exception e) {
+			// do nothing, systemId cannot be identified
+		} finally {
+			if (contents != null) {
+				try {
+					contents.close();
+				} catch (IOException e) {
+					// do nothing, systemId cannot be identified
+				}
+			}
 		}
 		return null;
 	}
