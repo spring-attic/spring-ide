@@ -75,4 +75,4 @@ Import-Package: org.apache.xerces.dom,
  org.xml.sax
 DynamicImport-Package: *
 Bundle-ClassPath: .,
- lib/xbean-classloader-1.0.0.jar
+ lib/xbean-nonlocking-classloader-3.7.jar

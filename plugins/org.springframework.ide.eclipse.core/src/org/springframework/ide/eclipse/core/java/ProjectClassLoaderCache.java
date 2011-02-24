@@ -319,7 +319,7 @@ class ProjectClassLoaderCache {
 			while (libs.hasMoreElements()) {
 				String lib = libs.nextElement();
 				// Don't add the non locking classloader jar
-				if (!lib.contains("xbean-classloader")) {
+				if (!lib.contains("xbean-nonlocking-classloader")) {
 					paths.add(SpringCore.getDefault().getBundle().getEntry(lib));
 				}
 			}
