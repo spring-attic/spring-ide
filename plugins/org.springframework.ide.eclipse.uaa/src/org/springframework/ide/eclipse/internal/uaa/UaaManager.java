@@ -19,7 +19,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,15 +34,21 @@ import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
+import org.springframework.uaa.client.TransmissionAwareUaaService;
 import org.springframework.uaa.client.TransmissionService;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.VersionHelper;
@@ -58,6 +63,7 @@ import org.springframework.uaa.client.protobuf.UaaClient.ProductUse;
 import org.springframework.uaa.client.protobuf.UaaClient.UaaEnvelope;
 import org.springframework.uaa.client.protobuf.UaaClient.UserAgent;
 import org.springframework.uaa.client.util.XmlUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Helper class that coordinates with the Spring UAA service implementation.
@@ -99,7 +105,7 @@ public class UaaManager implements IUaa {
 	public String getReadablePayload() {
 		try {
 			r.lock();
-			return service.getReadablePayload();
+			return StringUtils.prettyPrintJson(service.getReadablePayload());
 		}
 		finally {
 			r.unlock();
@@ -257,6 +263,22 @@ public class UaaManager implements IUaa {
 				w.unlock();
 			}
 		}
+		
+		// After starting up and reporting the initial state we should send the data
+		Job transmissionJob = new Job("Initializing Spring UAA") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (service instanceof TransmissionAwareUaaService) {
+					((TransmissionAwareUaaService) service).requestTransmission();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		transmissionJob.setSystem(true);
+		
+		// Schedule this for one minute into the running instance
+		transmissionJob.schedule(2L * 60L * 1000L);
 	}
 
 	public void stop() {
@@ -289,9 +311,8 @@ public class UaaManager implements IUaa {
 	}
 
 	/**
-	 * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported
-	 * products and features until it can be flushed into UAA's internal
-	 * storage.
+	 * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported products and features
+	 * until it can be flushed into UAA's internal storage.
 	 */
 	private class CachingUaaServiceImpl extends TransmissionAwareUaaServiceImpl {
 
@@ -437,9 +458,17 @@ public class UaaManager implements IUaa {
 			public boolean equals(Object obj) {
 				if (obj instanceof RegistrationRecord) {
 					RegistrationRecord o = (RegistrationRecord) obj;
-					return Arrays.equals(product.toByteArray(), o.getProduct().toByteArray());
+					return ObjectUtils.nullSafeEquals(product.toByteArray(), o.getProduct().toByteArray());
 				}
 				return false;
+			}
+			
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ObjectUtils.nullSafeHashCode(product.toByteArray());
+				return result;
 			}
 		}
 		
@@ -467,8 +496,8 @@ public class UaaManager implements IUaa {
 				if (super.equals(obj)) {
 					if (obj instanceof FeatureUseRegistrationRecord) {
 						FeatureUseRegistrationRecord o = (FeatureUseRegistrationRecord) obj;
-						if (Arrays.equals(feature.toByteArray(), o.getFeatureUse().toByteArray())) {
-							if (Arrays.equals(featureData, o.getFeatureData())) {
+						if (ObjectUtils.nullSafeEquals(feature.toByteArray(), o.getFeatureUse().toByteArray())) {
+							if (ObjectUtils.nullSafeEquals(featureData, o.getFeatureData())) {
 								return true;
 							}
 						}
@@ -476,6 +505,16 @@ public class UaaManager implements IUaa {
 				}
 				return false;
 			}
+			
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = super.hashCode();
+				result = prime * result + ObjectUtils.nullSafeHashCode(feature.toByteArray());
+				result = prime * result + ObjectUtils.nullSafeHashCode(featureData);
+				return result;
+			}
+
 		}
 
 		private class ProductRegistrationRecord extends RegistrationRecord {
@@ -502,7 +541,7 @@ public class UaaManager implements IUaa {
 				if (super.equals(obj)) {
 					if (obj instanceof ProductRegistrationRecord) {
 						ProductRegistrationRecord o = (ProductRegistrationRecord) obj;
-						if (Arrays.equals(productData, o.getProductData())) {
+						if (ObjectUtils.nullSafeEquals(productData, o.getProductData())) {
 							if ((projectId == null && o.getProjectId() == null) || projectId != null && projectId.equals(o.getProjectId())) {
 								return true;
 							}
@@ -510,6 +549,15 @@ public class UaaManager implements IUaa {
 					}
 				}
 				return false;
+			}
+			
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = super.hashCode();
+				result = prime * result + ObjectUtils.nullSafeHashCode(productData);
+				result = prime * result + ObjectUtils.nullSafeHashCode(projectId);
+				return result;
 			}
 		}
 	}
@@ -848,7 +896,7 @@ public class UaaManager implements IUaa {
 		}
 		
 		/**
-		 * Select a proxy from the list of avaiable proxies. 
+		 * Select a proxy from the list of available proxies. 
 		 */
 		private IProxyData selectProxy(String protocol, IProxyData[] proxies) {
 			if (proxies == null || proxies.length == 0)
@@ -857,15 +905,15 @@ public class UaaManager implements IUaa {
 			if (proxies.length == 1) {
 				return proxies[0];
 			}
-			// If more than one proxy is available, then if http/https protocol
-			// then look for that one...if not found then use first
-			if (protocol.equalsIgnoreCase("http")) { //$NON-NLS-1$
+			// If more than one proxy is available, then if http/https protocol then look for that one...
+			// if not found then use first
+			if (protocol.equalsIgnoreCase("http")) {
 				for (int i = 0; i < proxies.length; i++) {
 					if (proxies[i].getType().equals(IProxyData.HTTP_PROXY_TYPE))
 						return proxies[i];
 				}
 			}
-			else if (protocol.equalsIgnoreCase("https")) { //$NON-NLS-1$
+			else if (protocol.equalsIgnoreCase("https")) {
 				for (int i = 0; i < proxies.length; i++) {
 					if (proxies[i].getType().equals(IProxyData.HTTPS_PROXY_TYPE))
 						return proxies[i];
