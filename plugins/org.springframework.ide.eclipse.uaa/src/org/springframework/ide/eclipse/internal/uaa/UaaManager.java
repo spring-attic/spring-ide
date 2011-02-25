@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -261,7 +262,7 @@ public class UaaManager implements IUaa {
 	public void stop() {
 		try {
 			w.lock();
-			service.flush();
+			service.flushIfPossible();
 		}
 		finally {
 			w.unlock();
@@ -294,36 +295,51 @@ public class UaaManager implements IUaa {
 	 */
 	private class CachingUaaServiceImpl extends TransmissionAwareUaaServiceImpl {
 
-		/** Internal cache of reported features */
-		private List<ReportedFeature> features = new ArrayList<ReportedFeature>();
-
-		/** Internal cache of reported products */
-		private List<ReportedProduct> products = new ArrayList<ReportedProduct>();
+		/** Internal cache of reported products and features; make this an ordered list as we want 
+		 * to maintain the correct ordering when replaying it later */
+		private List<RegistrationRecord> registrations = new ArrayList<RegistrationRecord>();
 
 		public CachingUaaServiceImpl(TransmissionService transmssionService) {
 			super(transmssionService);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setPrivacyLevel(PrivacyLevel privacyLevel) {
+			super.setPrivacyLevel(privacyLevel);
+			
+			// Since we change the privacy level we may be able to flush the internal storage
+			flushIfPossible();
 		}
 
 		/**
 		 * Flushes the internal cache into the UAA backend store.
 		 */
-		public void flush() {
-			if (products.size() == 0 && features.size() == 0) {
+		public void flushIfPossible() {
+			if (registrations.size() == 0) {
+				// Nothing to flush
 				return;
 			}
-			if (!canRegister()) {
+			
+			if (!service.isUaaTermsOfUseAccepted()) {
+				// We are not allowed to save any usage data
 				return;
 			}
 
-			for (ReportedProduct product : products) {
-				super.registerProductUsage(product.getProduct(), product.getProductData(), product.getProjectId());
+			// If we got this far we can now store reported product and feature usages into the backend store
+			for (RegistrationRecord record : registrations) {
+				if (record instanceof ProductRegistrationRecord) {
+					super.registerProductUsage(record.getProduct(), ((ProductRegistrationRecord) record).getProductData(), 
+							((ProductRegistrationRecord) record).getProjectId());
+				}
+				else if (record instanceof FeatureUseRegistrationRecord) {
+					super.registerFeatureUsage(record.getProduct(), ((FeatureUseRegistrationRecord) record).getFeatureUse(), 
+							((FeatureUseRegistrationRecord) record).getFeatureData());
+				}
 			}
-			products.clear();
-
-			for (ReportedFeature feature : features) {
-				super.registerFeatureUsage(feature.getProduct(), feature.getFeatureUse(), feature.getFeatureData());
-			}
-			features.clear();
+			registrations.clear();
 		}
 
 		/**
@@ -331,13 +347,7 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public void registerFeatureUsage(Product product, FeatureUse feature) {
-			if (canRegister()) {
-				flush();
-				super.registerFeatureUsage(product, feature);
-			}
-			else {
-				cacheFeature(product, feature, null);
-			}
+			registerFeatureUsage(product, feature, null);
 		}
 
 		/**
@@ -345,12 +355,12 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public void registerFeatureUsage(Product product, FeatureUse feature, byte[] featureData) {
-			if (canRegister()) {
-				flush();
+			if (service.isUaaTermsOfUseAccepted()) {
+				flushIfPossible();
 				super.registerFeatureUsage(product, feature, featureData);
 			}
 			else {
-				cacheFeature(product, feature, featureData);
+				cacheFeatureUseRegistrationRecord(product, feature, featureData);
 			}
 		}
 
@@ -359,13 +369,7 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public void registerProductUsage(Product product) {
-			if (canRegister()) {
-				flush();
-				super.registerProductUsage(product);
-			}
-			else {
-				cacheProduct(product, null, null);
-			}
+			registerProductUsage(product, null, null);
 		}
 
 		/**
@@ -373,27 +377,7 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public void registerProductUsage(Product product, byte[] productData) {
-			if (canRegister()) {
-				flush();
-				super.registerProductUsage(product, productData);
-			}
-			else {
-				cacheProduct(product, productData, null);
-			}
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void registerProductUsage(Product product, byte[] productData, String projectId) {
-			if (canRegister()) {
-				flush();
-				super.registerProductUsage(product, productData, projectId);
-			}
-			else {
-				cacheProduct(product, productData, projectId);
-			}
+			registerProductUsage(product, null, null);
 		}
 
 		/**
@@ -401,42 +385,72 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public void registerProductUsage(Product product, String projectId) {
-			if (canRegister()) {
-				flush();
-				super.registerProductUsage(product, projectId);
+			registerProductUsage(product, null, projectId);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void registerProductUsage(Product product, byte[] productData, String projectId) {
+			if (service.isUaaTermsOfUseAccepted()) {
+				flushIfPossible();
+				super.registerProductUsage(product, productData, projectId);
 			}
 			else {
-				cacheProduct(product, null, projectId);
+				cacheProductRegistrationRecord(product, productData, projectId);
 			}
 		}
 
-		private void cacheFeature(Product product, FeatureUse feature, byte[] featureData) {
-			features.add(new ReportedFeature(feature, product, featureData));
+		private void cacheFeatureUseRegistrationRecord(Product product, FeatureUse feature, byte[] featureData) {
+			cacheRegistractionRecord(new FeatureUseRegistrationRecord(feature, product, featureData));
 		}
 
-		private void cacheProduct(Product product, byte[] productData, String projectId) {
-			products.add(new ReportedProduct(product, projectId, productData));
-		}
-
-		private boolean canRegister() {
-			return service.isUaaTermsOfUseAccepted();
+		private void cacheProductRegistrationRecord(Product product, byte[] productData, String projectId) {
+			cacheRegistractionRecord(new ProductRegistrationRecord(product, projectId, productData));
 		}
 		
+		private void cacheRegistractionRecord(RegistrationRecord record) {
+			// Don't cache it again if we already have that record
+			if (!registrations.contains(record)) {
+				registrations.add(record);
+			}
+		}
+
 		protected UaaEnvelope getPayload() {
 			return super.createUaaEnvelope();
 		}
 		
-		private class ReportedFeature {
-
-			private final byte[] featureData;
-
-			private final FeatureUse feature;
+		private abstract class RegistrationRecord {
 			
 			private final Product product;
-
-			public ReportedFeature(FeatureUse feature, Product product, byte[] featureData) {
-				this.feature = feature;
+			
+			public RegistrationRecord(Product product) {
 				this.product = product;
+			}
+
+			public Product getProduct() {
+				return product;
+			}
+			
+			@Override
+			public boolean equals(Object obj) {
+				if (obj instanceof RegistrationRecord) {
+					RegistrationRecord o = (RegistrationRecord) obj;
+					return Arrays.equals(product.toByteArray(), o.getProduct().toByteArray());
+				}
+				return false;
+			}
+		}
+		
+		private class FeatureUseRegistrationRecord extends RegistrationRecord {
+
+			private final FeatureUse feature;
+			private final byte[] featureData;
+
+			public FeatureUseRegistrationRecord(FeatureUse feature, Product product, byte[] featureData) {
+				super(product);
+				this.feature = feature;
 				this.featureData = featureData;
 			}
 
@@ -447,27 +461,32 @@ public class UaaManager implements IUaa {
 			public FeatureUse getFeatureUse() {
 				return feature;
 			}
-
-			public Product getProduct() {
-				return product;
+			
+			@Override
+			public boolean equals(Object obj) {
+				if (super.equals(obj)) {
+					if (obj instanceof FeatureUseRegistrationRecord) {
+						FeatureUseRegistrationRecord o = (FeatureUseRegistrationRecord) obj;
+						if (Arrays.equals(feature.toByteArray(), o.getFeatureUse().toByteArray())) {
+							if (Arrays.equals(featureData, o.getFeatureData())) {
+								return true;
+							}
+						}
+					}
+				}
+				return false;
 			}
 		}
 
-		private class ReportedProduct {
-			private final Product product;
+		private class ProductRegistrationRecord extends RegistrationRecord {
 
 			private final byte[] productData;
-
 			private final String projectId;
 
-			public ReportedProduct(Product product, String projectId, byte[] productData) {
-				this.product = product;
+			public ProductRegistrationRecord(Product product, String projectId, byte[] productData) {
+				super(product);
 				this.projectId = projectId;
 				this.productData = productData;
-			}
-
-			public Product getProduct() {
-				return product;
 			}
 
 			public byte[] getProductData() {
@@ -476,6 +495,21 @@ public class UaaManager implements IUaa {
 
 			public String getProjectId() {
 				return projectId;
+			}
+			
+			@Override
+			public boolean equals(Object obj) {
+				if (super.equals(obj)) {
+					if (obj instanceof ProductRegistrationRecord) {
+						ProductRegistrationRecord o = (ProductRegistrationRecord) obj;
+						if (Arrays.equals(productData, o.getProductData())) {
+							if ((projectId == null && o.getProjectId() == null) || projectId != null && projectId.equals(o.getProjectId())) {
+								return true;
+							}
+						}
+					}
+				}
+				return false;
 			}
 		}
 	}
