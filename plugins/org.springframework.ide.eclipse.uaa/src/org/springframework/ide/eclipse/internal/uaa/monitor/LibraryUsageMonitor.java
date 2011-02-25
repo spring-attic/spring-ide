@@ -44,13 +44,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryDirectory;
 import org.osgi.framework.Constants;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.uaa.IUaa;
-import org.springframework.uaa.client.DetectedProducts;
-import org.springframework.uaa.client.DetectedProducts.ProductInfo;
+import org.springframework.uaa.client.UaaDetectedProducts.ProductInfo;
+import org.springframework.uaa.client.UaaServiceFactory;
 
 /**
  * {@link IUsageMonitor} implementation that captures libraries used in Eclipse projects.
@@ -158,8 +157,7 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 	}
 
 	private List<ProductInfo> getProducts() {
-		DetectedProducts.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
-		return DetectedProducts.getProducts();
+		return UaaServiceFactory.getUaaDetectedProducts().getDetectedProductInfos();
 	}
 
 	private void projectClasspathChanged(IJavaProject source) {
@@ -455,7 +453,7 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 	private void recordEvent(ProductMatch productMatch, String projectName) {
 		if (productMatch != null && productMatch.getInfo() != null && productMatch.getVersion() != null) {
 			ProductInfo info = productMatch.getInfo();
-			if (info != null) {
+			if (info != null && UaaServiceFactory.getUaaDetectedProducts().shouldReportUsage(info.getGroupId(), info.getArtifactId())) {
 				manager.registerProductUse(info.getProductName(), productMatch.getVersion(), projectName);
 			}
 		}

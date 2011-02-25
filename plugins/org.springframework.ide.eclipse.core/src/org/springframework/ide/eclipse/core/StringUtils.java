@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,9 @@ public final class StringUtils {
 
 	public static final char SINGLE_QUOTE = '\'';
 	public static final char DOUBLE_QUOTE = '\"';
+
+	private static final String NL = System.getProperty("line.separator"); 
+	private static final String INDENT = " ";
  
     /**
      * Returns concatenated text from given two texts delimited by given
@@ -161,5 +164,59 @@ public final class StringUtils {
 			set.add(tokens[i]);
 		}
 		return set;
+	}
+	
+	/**
+	 * Pretty prints the given un-formatted JSON string. 
+	 */
+	public static String prettyPrintJson(String json) {
+		if (json == null) {
+			return "";
+		}
+		
+		StringBuilder b = new StringBuilder();
+		char[] chars = json.toCharArray();
+
+		// keeps track of the current indent level
+		int indent = 0;
+		// Keep track of all " characters to find out if we are in the middle of a string value
+		long quoteCount = 0;
+		
+		for (int i = 0; i < chars.length; i++) {
+			char c = chars[i];
+			
+			if (c == '"') {
+				b.append(c);
+				quoteCount++;
+			}
+			// Opening { and [ should get a line break appended and increase the indent level
+			else if (c == '{' || c == '[') {
+				b.append(c).append(NL);
+				indent++;
+				indent(b, indent);
+			}
+			// Opening } and ] should get a line break prepended and decrease the indent level
+			else if (c == '}' || c == ']') {
+				b.append(NL);
+				indent--;
+				indent(b, indent);
+				b.append(c);
+			}
+			// After a , should go a line break but only if we are currently not within a string value
+			else if (c == ',' && quoteCount % 2 == 0) {
+				b.append(c).append(NL);
+				indent(b, indent);
+			}
+			else {
+				b.append(c);
+			}
+		}
+		return b.toString();
+	}
+	
+	private static void indent(StringBuilder b, int level) {
+		for (int i = 0; i < level; i++) {
+			b.append(INDENT);
+		}
 	}
 }

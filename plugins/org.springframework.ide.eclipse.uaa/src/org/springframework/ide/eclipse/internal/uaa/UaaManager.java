@@ -11,6 +11,13 @@
 package org.springframework.ide.eclipse.internal.uaa;
 
 import java.io.UnsupportedEncodingException;
+import java.net.Authenticator;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,26 +27,43 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.eclipse.core.net.proxy.IProxyData;
+import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.IBundleGroup;
+import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
+import org.springframework.uaa.client.TransmissionAwareUaaService;
+import org.springframework.uaa.client.TransmissionService;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.VersionHelper;
+import org.springframework.uaa.client.internal.BasicProxyService;
+import org.springframework.uaa.client.internal.JdkUrlTransmissionServiceImpl;
+import org.springframework.uaa.client.internal.TransmissionAwareUaaServiceImpl;
 import org.springframework.uaa.client.internal.UaaServiceImpl;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
 import org.springframework.uaa.client.protobuf.UaaClient.ProductUse;
+import org.springframework.uaa.client.protobuf.UaaClient.UaaEnvelope;
 import org.springframework.uaa.client.protobuf.UaaClient.UserAgent;
+import org.springframework.uaa.client.util.XmlUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Helper class that coordinates with the Spring UAA service implementation.
@@ -51,33 +75,16 @@ import org.springframework.uaa.client.protobuf.UaaClient.UserAgent;
 public class UaaManager implements IUaa {
 
 	private static final String EMPTY_VERSION = "0.0.0.RELEASE";
-
 	private static final String UAA_PRODUCT_EXTENSION_POINT = "org.springframework.ide.eclipse.uaa.product";
 
 	private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-	private final List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
-
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
-
-	private final CachingUaaServiceImpl service = new CachingUaaServiceImpl();
-
 	private final Lock r = rwl.readLock();
-
 	private final Lock w = rwl.writeLock();
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void clear() {
-		try {
-			w.lock();
-			service.clearIfPossible();
-		}
-		finally {
-			w.unlock();
-		}
-	}
+	private List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
+	private CachingUaaServiceImpl service = new CachingUaaServiceImpl(new JdkUrlTransmissionServiceImpl(new EclipseProxyService()));
 
 	/**
 	 * {@inheritDoc}
@@ -95,23 +102,10 @@ public class UaaManager implements IUaa {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getUsageDataFromUserAgentHeader(String userAgent) {
+	public String getReadablePayload() {
 		try {
 			r.lock();
-			return service.toString(service.fromHttpUserAgentHeaderValue(userAgent));
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getUserAgentHeader() {
-		try {
-			r.lock();
-			return service.toHttpUserAgentHeaderValue();
+			return StringUtils.prettyPrintJson(service.getReadablePayload());
 		}
 		finally {
 			r.unlock();
@@ -142,7 +136,7 @@ public class UaaManager implements IUaa {
 						}
 					}
 					catch (IllegalArgumentException e) {
-						// Ignore as it may sporadically come up from the preferences API 
+						// Ignore as it may sporadically come up from the preferences API
 					}
 					finally {
 						w.unlock();
@@ -207,11 +201,12 @@ public class UaaManager implements IUaa {
 			});
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public void registerProjectUsageForProduct(final String feature, final String projectId, final Map<String, String> featureData) {
+	public void registerProjectUsageForProduct(final String feature, final String projectId,
+			final Map<String, String> featureData) {
 		if (feature != null) {
 			executorService.execute(new Runnable() {
 
@@ -225,7 +220,7 @@ public class UaaManager implements IUaa {
 						}
 					}
 					catch (IllegalArgumentException e) {
-						// Ignore as it may sporadically come up from the preferences API 
+						// Ignore as it may sporadically come up from the preferences API
 					}
 					finally {
 						w.unlock();
@@ -247,35 +242,12 @@ public class UaaManager implements IUaa {
 			w.unlock();
 		}
 	}
-
+	
 	public void start() {
-		init();
-	}
-
-	public void stop() {
-		try {
-			w.lock();
-			service.flush();
-		}
-		finally {
-			w.unlock();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	private boolean hasUserDecided() {
-		try {
-			r.lock();
-			return !(service.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU || service.getPrivacyLevel() == PrivacyLevel.DECLINE_TOU);
-		}
-		finally {
-			r.unlock();
-		}
-	}
-
-	private void init() {
+		// Since we run in an restricted environment we need to obtain the builder factory from the OSGi service
+		// registry instead of trying to create a new one from the API
+		XmlUtils.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
+		
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(UAA_PRODUCT_EXTENSION_POINT);
 		if (point != null) {
 			try {
@@ -285,73 +257,131 @@ public class UaaManager implements IUaa {
 						productDescriptors.add(new ExtensionProductDescriptor(config));
 					}
 				}
+				productDescriptors.add(new ProductDescriptor());
 			}
 			finally {
 				w.unlock();
 			}
 		}
-		productDescriptors.add(new ProductDescriptor());
+		
+		// After starting up and reporting the initial state we should send the data
+		Job transmissionJob = new Job("Initializing Spring UAA") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (service instanceof TransmissionAwareUaaService) {
+					((TransmissionAwareUaaService) service).requestTransmission();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		transmissionJob.setSystem(true);
+		
+		// Schedule this for one minute into the running instance
+		transmissionJob.schedule(2L * 60L * 1000L);
+	}
+
+	public void stop() {
+		try {
+			w.lock();
+			service.flushIfPossible();
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	/**
-	 * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported products and features until it can be
-	 * flushed into UAA's internal storage.
+	 * Returns the id of the feature that owns the given <code>plugin</code>.  
 	 */
-	private class CachingUaaServiceImpl extends UaaServiceImpl {
+	private String getOwningEclipseFeature(String plugin) {
+		IBundleGroupProvider[] providers = Platform.getBundleGroupProviders();
+		for (IBundleGroupProvider provider : providers) {
+			for (IBundleGroup group : provider.getBundleGroups()) {
+				if (group.getIdentifier().startsWith("org.eclipse")) {
+					for (Bundle bundle : group.getBundles()) {
+						if (plugin.equals(bundle.getSymbolicName())) {
+							return group.getIdentifier();
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 
-		/** Internal cache of reported features */
-		private List<ReportedFeature> features = new ArrayList<ReportedFeature>();
+	/**
+	 * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported products and features
+	 * until it can be flushed into UAA's internal storage.
+	 */
+	private class CachingUaaServiceImpl extends TransmissionAwareUaaServiceImpl {
 
-		/** Internal cache of reported products */
-		private List<ReportedProduct> products = new ArrayList<ReportedProduct>();
+		/** Internal cache of reported products and features; make this an ordered list as we want 
+		 * to maintain the correct ordering when replaying it later */
+		private List<RegistrationRecord> registrations = new ArrayList<RegistrationRecord>();
+
+		public CachingUaaServiceImpl(TransmissionService transmssionService) {
+			super(transmssionService);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setPrivacyLevel(PrivacyLevel privacyLevel) {
+			super.setPrivacyLevel(privacyLevel);
+			
+			// Since we change the privacy level we may be able to flush the internal storage
+			flushIfPossible();
+		}
 
 		/**
 		 * Flushes the internal cache into the UAA backend store.
 		 */
-		public void flush() {
-			if (products.size() == 0 && features.size() == 0) {
+		public void flushIfPossible() {
+			if (registrations.size() == 0) {
+				// Nothing to flush
 				return;
 			}
-			if (!canRegister()) {
+			
+			if (!service.isUaaTermsOfUseAccepted()) {
+				// We are not allowed to save any usage data
 				return;
 			}
 
-			for (ReportedProduct product : products) {
-				super.registerProductUsage(product.getProduct(), product.getProductData(), product.getProjectId());
+			// If we got this far we can now store reported product and feature usages into the backend store
+			for (RegistrationRecord record : registrations) {
+				if (record instanceof ProductRegistrationRecord) {
+					super.registerProductUsage(record.getProduct(), ((ProductRegistrationRecord) record).getProductData(), 
+							((ProductRegistrationRecord) record).getProjectId());
+				}
+				else if (record instanceof FeatureUseRegistrationRecord) {
+					super.registerFeatureUsage(record.getProduct(), ((FeatureUseRegistrationRecord) record).getFeatureUse(), 
+							((FeatureUseRegistrationRecord) record).getFeatureData());
+				}
 			}
-			products.clear();
-
-			for (ReportedFeature feature : features) {
-				super.registerFeatureUsage(feature.getProduct(), feature.getFeatureName(), feature.getFeatureData());
-			}
-			features.clear();
+			registrations.clear();
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void registerFeatureUsage(Product product, String featureName) {
-			if (canRegister()) {
-				flush();
-				super.registerFeatureUsage(product, featureName);
-			}
-			else {
-				cacheFeature(product, featureName, null);
-			}
+		public void registerFeatureUsage(Product product, FeatureUse feature) {
+			registerFeatureUsage(product, feature, null);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void registerFeatureUsage(Product product, String featureName, byte[] featureData) {
-			if (canRegister()) {
-				flush();
-				super.registerFeatureUsage(product, featureName, featureData);
+		public void registerFeatureUsage(Product product, FeatureUse feature, byte[] featureData) {
+			if (service.isUaaTermsOfUseAccepted()) {
+				flushIfPossible();
+				super.registerFeatureUsage(product, feature, featureData);
 			}
 			else {
-				cacheFeature(product, featureName, featureData);
+				cacheFeatureUseRegistrationRecord(product, feature, featureData);
 			}
 		}
 
@@ -360,13 +390,7 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public void registerProductUsage(Product product) {
-			if (canRegister()) {
-				flush();
-				super.registerProductUsage(product);
-			}
-			else {
-				cacheProduct(product, null, null);
-			}
+			registerProductUsage(product, null, null);
 		}
 
 		/**
@@ -374,27 +398,7 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public void registerProductUsage(Product product, byte[] productData) {
-			if (canRegister()) {
-				flush();
-				super.registerProductUsage(product, productData);
-			}
-			else {
-				cacheProduct(product, productData, null);
-			}
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void registerProductUsage(Product product, byte[] productData, String projectId) {
-			if (canRegister()) {
-				flush();
-				super.registerProductUsage(product, productData, projectId);
-			}
-			else {
-				cacheProduct(product, productData, projectId);
-			}
+			registerProductUsage(product, null, null);
 		}
 
 		/**
@@ -402,38 +406,80 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public void registerProductUsage(Product product, String projectId) {
-			if (canRegister()) {
-				flush();
-				super.registerProductUsage(product, projectId);
+			registerProductUsage(product, null, projectId);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void registerProductUsage(Product product, byte[] productData, String projectId) {
+			if (service.isUaaTermsOfUseAccepted()) {
+				flushIfPossible();
+				super.registerProductUsage(product, productData, projectId);
 			}
 			else {
-				cacheProduct(product, null, projectId);
+				cacheProductRegistrationRecord(product, productData, projectId);
 			}
 		}
 
-		private void cacheFeature(Product product, String featureName, byte[] featureData) {
-			features.add(new ReportedFeature(featureName, product, featureData));
+		private void cacheFeatureUseRegistrationRecord(Product product, FeatureUse feature, byte[] featureData) {
+			cacheRegistractionRecord(new FeatureUseRegistrationRecord(feature, product, featureData));
 		}
 
-		private void cacheProduct(Product product, byte[] productData, String projectId) {
-			products.add(new ReportedProduct(product, projectId, productData));
+		private void cacheProductRegistrationRecord(Product product, byte[] productData, String projectId) {
+			cacheRegistractionRecord(new ProductRegistrationRecord(product, projectId, productData));
+		}
+		
+		private void cacheRegistractionRecord(RegistrationRecord record) {
+			// Don't cache it again if we already have that record
+			if (!registrations.contains(record)) {
+				registrations.add(record);
+			}
 		}
 
-		private boolean canRegister() {
-			return hasUserDecided();
+		protected UaaEnvelope getPayload() {
+			return super.createUaaEnvelope();
 		}
+		
+		private abstract class RegistrationRecord {
+			
+			private final Product product;
+			
+			public RegistrationRecord(Product product) {
+				this.product = product;
+			}
 
-		private class ReportedFeature {
+			public Product getProduct() {
+				return product;
+			}
+			
+			@Override
+			public boolean equals(Object obj) {
+				if (obj instanceof RegistrationRecord) {
+					RegistrationRecord o = (RegistrationRecord) obj;
+					return ObjectUtils.nullSafeEquals(product.toByteArray(), o.getProduct().toByteArray());
+				}
+				return false;
+			}
+			
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ObjectUtils.nullSafeHashCode(product.toByteArray());
+				return result;
+			}
+		}
+		
+		private class FeatureUseRegistrationRecord extends RegistrationRecord {
 
+			private final FeatureUse feature;
 			private final byte[] featureData;
 
-			private final String featureName;
-
-			private final Product product;
-
-			public ReportedFeature(String featureName, Product product, byte[] featureData) {
-				this.featureName = featureName;
-				this.product = product;
+			public FeatureUseRegistrationRecord(FeatureUse feature, Product product, byte[] featureData) {
+				super(product);
+				this.feature = feature;
 				this.featureData = featureData;
 			}
 
@@ -441,30 +487,45 @@ public class UaaManager implements IUaa {
 				return featureData;
 			}
 
-			public String getFeatureName() {
-				return featureName;
+			public FeatureUse getFeatureUse() {
+				return feature;
+			}
+			
+			@Override
+			public boolean equals(Object obj) {
+				if (super.equals(obj)) {
+					if (obj instanceof FeatureUseRegistrationRecord) {
+						FeatureUseRegistrationRecord o = (FeatureUseRegistrationRecord) obj;
+						if (ObjectUtils.nullSafeEquals(feature.toByteArray(), o.getFeatureUse().toByteArray())) {
+							if (ObjectUtils.nullSafeEquals(featureData, o.getFeatureData())) {
+								return true;
+							}
+						}
+					}
+				}
+				return false;
+			}
+			
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = super.hashCode();
+				result = prime * result + ObjectUtils.nullSafeHashCode(feature.toByteArray());
+				result = prime * result + ObjectUtils.nullSafeHashCode(featureData);
+				return result;
 			}
 
-			public Product getProduct() {
-				return product;
-			}
 		}
 
-		private class ReportedProduct {
-			private final Product product;
+		private class ProductRegistrationRecord extends RegistrationRecord {
 
 			private final byte[] productData;
-
 			private final String projectId;
 
-			public ReportedProduct(Product product, String projectId, byte[] productData) {
-				this.product = product;
+			public ProductRegistrationRecord(Product product, String projectId, byte[] productData) {
+				super(product);
 				this.projectId = projectId;
 				this.productData = productData;
-			}
-
-			public Product getProduct() {
-				return product;
 			}
 
 			public byte[] getProductData() {
@@ -473,6 +534,30 @@ public class UaaManager implements IUaa {
 
 			public String getProjectId() {
 				return projectId;
+			}
+			
+			@Override
+			public boolean equals(Object obj) {
+				if (super.equals(obj)) {
+					if (obj instanceof ProductRegistrationRecord) {
+						ProductRegistrationRecord o = (ProductRegistrationRecord) obj;
+						if (ObjectUtils.nullSafeEquals(productData, o.getProductData())) {
+							if ((projectId == null && o.getProjectId() == null) || projectId != null && projectId.equals(o.getProjectId())) {
+								return true;
+							}
+						}
+					}
+				}
+				return false;
+			}
+			
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = super.hashCode();
+				result = prime * result + ObjectUtils.nullSafeHashCode(productData);
+				result = prime * result + ObjectUtils.nullSafeHashCode(projectId);
+				return result;
 			}
 		}
 	}
@@ -485,16 +570,16 @@ public class UaaManager implements IUaa {
 
 		private String rootPlugin;
 
-		private String sourceCodeIdentifier;
-		
+		private String sourceControlIdentifier;
+
 		public ExtensionProductDescriptor(IConfigurationElement element) {
 			init(element);
 		}
 
 		private void init(IConfigurationElement element) {
 			productId = element.getAttribute("id");
-			sourceCodeIdentifier = element.getAttribute("source-control-identifier");
-						
+			sourceControlIdentifier = element.getAttribute("source-control-identifier");
+
 			rootPlugin = element.getNamespaceIdentifier();
 			if (element.getAttribute("root-plugin") != null) {
 				rootPlugin = element.getAttribute("root-plugin");
@@ -503,24 +588,35 @@ public class UaaManager implements IUaa {
 			plugins = new HashMap<String, String>();
 			for (IConfigurationElement featureElement : element.getChildren("feature")) {
 				String feature = featureElement.getAttribute("id");
-				for (IConfigurationElement pluginElement : featureElement.getChildren("plugin")) {
-					plugins.put(pluginElement.getAttribute("id"), feature);
+				if (feature != null) {
+					for (IConfigurationElement pluginElement : featureElement.getChildren("plugin")) {
+						String pluginId = pluginElement.getAttribute("id");
+						if (pluginId != null) {
+							// Verify that the plugin does not belong to another eclipse feature. This is 
+							// required to associate plugins patched through feature patches to the correct
+							// root feature (e.g. Groovy Eclipse patching JDT core)
+							String owningFeature = getOwningEclipseFeature(pluginId);
+							if (owningFeature == null || feature.equals(owningFeature)) {
+								plugins.put(pluginElement.getAttribute("id"), feature);
+							}
+						}
+					}
 				}
 			}
 
 			// Try to create the product; we'll try again later if this one fails
-			buildProduct(rootPlugin, productId, sourceCodeIdentifier);
+			buildProduct(rootPlugin, productId, sourceControlIdentifier);
 		}
-
+		
 		protected boolean canRegister(String usedPlugin) {
 			return plugins.containsKey(usedPlugin);
 		}
 
 		protected void registerProductIfRequired(String project) {
-			// If we initially failed to create the product it was probably because it wasn't installed when the
-			// workbench started; but now it is so try again
+			// If we initially failed to create the product it was probably because it wasn't installed
+			// when the workbench started; but now it is so try again
 			if (product == null) {
-				buildProduct(rootPlugin, productId, sourceCodeIdentifier);
+				buildProduct(rootPlugin, productId, sourceControlIdentifier);
 			}
 
 			// Check if the product is already registered; if not register it before we capture feature usage
@@ -536,7 +632,7 @@ public class UaaManager implements IUaa {
 		}
 
 	}
-
+	
 	private class ProductDescriptor {
 
 		protected Product product;
@@ -546,14 +642,14 @@ public class UaaManager implements IUaa {
 		public ProductDescriptor() {
 			init();
 		}
-		
+
 		public final boolean registerProjectUsage(String usedPlugin, String project, Map<String, String> featureData) {
 			if (canRegister(usedPlugin) && project != null) {
-				
+
 				registerProductIfRequired(project);
 				registerFeature(usedPlugin, featureData);
 				service.registerProductUsage(product, project);
-				
+
 				return true;
 			}
 			return false;
@@ -572,8 +668,9 @@ public class UaaManager implements IUaa {
 
 		private String getRegisteredFeatureData(String usedPlugin) {
 			try {
-				UserAgent userAgent = service.fromHttpUserAgentHeaderValue(getUserAgentHeader());
-				if (userAgent != null) {
+				UaaEnvelope uaaEnvelope = service.getPayload();
+				if (uaaEnvelope != null && uaaEnvelope.getUserAgent() != null) {
+					UserAgent userAgent = uaaEnvelope.getUserAgent();
 					for (int i = 0; i < userAgent.getProductUseCount(); i++) {
 						ProductUse p = userAgent.getProductUse(i);
 						if (p.getProduct().getName().equals(product.getName())) {
@@ -587,13 +684,7 @@ public class UaaManager implements IUaa {
 					}
 				}
 			}
-			catch (Exception e) {
-				UaaPlugin
-						.getDefault()
-						.getLog()
-						.log(new Status(IStatus.WARNING, UaaPlugin.PLUGIN_ID,
-								"Error retrieving user agent header from UAA", e));
-			}
+			catch (Exception e) {}
 			return null;
 		}
 
@@ -605,7 +696,8 @@ public class UaaManager implements IUaa {
 		private JSONObject mergeFeatureData(String usedPlugin, Map<String, String> featureData) {
 			JSONObject existingFeatureData = new JSONObject();
 
-			// Quick sanity check to prevent doing too much in case no new feature data has been presented
+			// Quick sanity check to prevent doing too much in case no new
+			// feature data has been presented
 			if (featureData == null || featureData.size() == 0) {
 				return existingFeatureData;
 			}
@@ -649,7 +741,7 @@ public class UaaManager implements IUaa {
 			return existingFeatureData;
 		}
 
-		protected void buildProduct(String symbolicName, String name, String sourceCodeIdentifier) {
+		protected void buildProduct(String symbolicName, String name, String sourceControlIdentifier) {
 			Bundle bundle = Platform.getBundle(symbolicName);
 			if (bundle != null) {
 				Version version = bundle.getVersion();
@@ -661,8 +753,18 @@ public class UaaManager implements IUaa {
 				b.setPatchVersion(version.getMicro());
 				b.setReleaseQualifier(version.getQualifier());
 
-				if (sourceCodeIdentifier != null && sourceCodeIdentifier.length() > 0) {
-					b.setSourceControlIdentifier(sourceCodeIdentifier);
+				if (sourceControlIdentifier != null && sourceControlIdentifier.length() > 0) {
+					b.setSourceControlIdentifier(sourceControlIdentifier);
+				}
+				else {
+					String sourceControlId = (String) bundle.getHeaders().get("Source-Control-Identifier");
+					if (sourceControlId != null && sourceControlId.length() > 0) {
+						b.setSourceControlIdentifier(sourceControlId);
+					}
+					sourceControlId = (String) bundle.getHeaders().get("Git-Commit-Hash");
+					if (sourceControlId != null && sourceControlId.length() > 0) {
+						b.setSourceControlIdentifier(sourceControlId);
+					}
 				}
 
 				product = b.build();
@@ -670,29 +772,34 @@ public class UaaManager implements IUaa {
 		}
 
 		protected boolean canRegister(String usedPlugin) {
-			// Due to privacy considerations only org.eclipse plugins will get recorded
+			// Due to privacy considerations only org.eclipse plugins and features will get recorded
 			return usedPlugin.startsWith("org.eclipse");
 		}
 
 		protected void registerFeature(String usedPlugin, Map<String, String> featureData) {
 			// Get existing feature data and merge with new data
 			JSONObject json = mergeFeatureData(usedPlugin, featureData);
-
-			// Add plug-in version number to the featureJson
-			// Bundle bundle = Platform.getBundle(usedPlugin);
-			// if (bundle != null) {
-			// String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
-			// if (version != null) {
-			// json.put("version", version);
-			// }
-			// }
+			
+			// Get the feature version from the plugin
+			String featureVersion = null;
+			Bundle bundle = Platform.getBundle(usedPlugin);
+			if (bundle != null) {
+				String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+				if (version != null) {
+					featureVersion = version.toString();
+				}
+			}
+			
+			// Obtain the FeatureUse record
+			FeatureUse feature = VersionHelper.getFeatureUse(usedPlugin, featureVersion);
 
 			try {
+				// If additional feature data was supplied or is already registered pass it to UAA
 				if (json.size() > 0) {
-					service.registerFeatureUsage(product, usedPlugin, json.toJSONString().getBytes("UTF-8"));
+					service.registerFeatureUsage(product, feature, json.toJSONString().getBytes("UTF-8"));
 				}
 				else {
-					service.registerFeatureUsage(product, usedPlugin);
+					service.registerFeatureUsage(product, feature);
 				}
 			}
 			catch (UnsupportedEncodingException e) {
@@ -702,9 +809,10 @@ public class UaaManager implements IUaa {
 
 		protected void registerProductIfRequired(String project) {
 			if (!registered) {
+				
+				// Populate a map of product data with details of the hosting Eclipse runtime
 				Map<String, String> productData = new HashMap<String, String>();
-				productData.put("platform",
-						String.format("%s.%s.%s", Platform.getOS(), Platform.getWS(), Platform.getOSArch()));
+				productData.put("platform", String.format("%s.%s.%s", Platform.getOS(), Platform.getWS(), Platform.getOSArch()));
 
 				if (System.getProperty("eclipse.buildId") != null) {
 					productData.put("buildId", System.getProperty("eclipse.buildId"));
@@ -724,11 +832,95 @@ public class UaaManager implements IUaa {
 						service.registerProductUsage(product, JSONObject.toJSONString(productData).getBytes("UTF-8"));
 					}
 				}
-				catch (UnsupportedEncodingException e) {
-					// cannot happen
+				catch (UnsupportedEncodingException e) { 
+					// cannot happen 
 				}
 				registered = true;
 			}
+		}
+	}
+
+	/**
+	 * Extension to {@link BasicProxyService} that hooks in the Eclipse {@link IProxyService}.
+	 * @since 2.6.0
+	 */
+	private class EclipseProxyService extends BasicProxyService {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public Proxy setupProxy(URL url) {
+			IProxyData selectedProxy = getProxy(url);
+			if (selectedProxy != null) {
+				return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(selectedProxy.getHost(),
+						selectedProxy.getPort()));
+			}
+			return super.setupProxy(url);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public Authenticator setupProxyAuthentication(URL url, Proxy proxy) {
+			final IProxyData selectedProxy = getProxy(url);
+			if (selectedProxy != null && (selectedProxy.getUserId() != null || selectedProxy.getPassword() != null)) {
+				return new Authenticator() {
+					@Override
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(selectedProxy.getUserId(),
+								(selectedProxy.getPassword() != null ? selectedProxy.getPassword().toCharArray() : null));
+					}
+				};
+			}
+			return super.setupProxyAuthentication(url, proxy);
+		}
+
+		/**
+		 * Resolves a proxy from the {@link IProxyService} for the given <code>url</code>. 
+		 */
+		private IProxyData getProxy(URL url) {
+			IProxyService proxyService = UaaPlugin.getDefault().getProxyService();
+			if (url != null && service != null & proxyService != null && proxyService.isProxiesEnabled()) {
+				try {
+					URI uri = url.toURI();
+					IProxyData[] proxies = proxyService.select(uri);
+					return selectProxy(uri.getScheme(), proxies);
+				}
+				catch (URISyntaxException e) {
+					// ignore this
+				}
+			}
+			return null;
+		}
+		
+		/**
+		 * Select a proxy from the list of available proxies. 
+		 */
+		private IProxyData selectProxy(String protocol, IProxyData[] proxies) {
+			if (proxies == null || proxies.length == 0)
+				return null;
+			// If only one proxy is available, then use that
+			if (proxies.length == 1) {
+				return proxies[0];
+			}
+			// If more than one proxy is available, then if http/https protocol then look for that one...
+			// if not found then use first
+			if (protocol.equalsIgnoreCase("http")) {
+				for (int i = 0; i < proxies.length; i++) {
+					if (proxies[i].getType().equals(IProxyData.HTTP_PROXY_TYPE))
+						return proxies[i];
+				}
+			}
+			else if (protocol.equalsIgnoreCase("https")) {
+				for (int i = 0; i < proxies.length; i++) {
+					if (proxies[i].getType().equals(IProxyData.HTTPS_PROXY_TYPE))
+						return proxies[i];
+				}
+			}
+			// If we haven't found it yet, then return the first one.
+			return proxies[0];
 		}
 	}
 

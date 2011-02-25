@@ -22,20 +22,6 @@
    </extension>
    
    <extension
-         point="org.eclipse.ecf.provider.filetransfer.retrieveFileTransferProtocolFactory">
-      <retrieveFileTransferProtocolFactory
-            class="org.springframework.ide.eclipse.internal.uaa.filetransfer.UserAgentAwareHttpClientRetrieveFileTransfer"
-            priority="0"
-            protocol="http">
-      </retrieveFileTransferProtocolFactory>
-      <retrieveFileTransferProtocolFactory
-            class="org.springframework.ide.eclipse.internal.uaa.filetransfer.UserAgentAwareHttpClientRetrieveFileTransfer"
-            priority="0"
-            protocol="https">
-      </retrieveFileTransferProtocolFactory>
-   </extension>
-   
-   <extension
          point="org.springframework.ide.eclipse.core.listeners">
       <listener
             class="org.springframework.ide.eclipse.internal.uaa.monitor.ProjectContributionUsageMonitor">
