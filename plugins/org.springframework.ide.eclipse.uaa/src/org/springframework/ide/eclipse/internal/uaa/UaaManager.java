@@ -133,7 +133,7 @@ public class UaaManager implements IUaa {
 						
 						// Before we trigger eventually expensive background reporting, check if this
 						// feature hasn't recently been reported; if so just skip
-						RegistrationAttempt attempt = new FeatureRegistrationAttempt(plugin, featureData);
+						RegistrationAttempt attempt = new FeatureUseRegistrationAttempt(plugin, featureData);
 						if (shouldSkipRegistrationAttempt(attempt)) {
 							return;
 						}
@@ -714,12 +714,12 @@ public class UaaManager implements IUaa {
 		}
 	}
 	
-	private static class FeatureRegistrationAttempt extends RegistrationAttempt {
+	private static class FeatureUseRegistrationAttempt extends RegistrationAttempt {
 		
 		private final String plugin;
 		private final Map<String, String> featureData;
 		
-		public FeatureRegistrationAttempt(String plugin, Map<String, String> featureData) {
+		public FeatureUseRegistrationAttempt(String plugin, Map<String, String> featureData) {
 			this.plugin = plugin;
 			this.featureData = featureData;
 		}
@@ -741,10 +741,10 @@ public class UaaManager implements IUaa {
 			if (obj == null) {
 				return false;
 			}
-			if (!(obj instanceof FeatureRegistrationAttempt)) {
+			if (!(obj instanceof FeatureUseRegistrationAttempt)) {
 				return false;
 			}
-			FeatureRegistrationAttempt other = (FeatureRegistrationAttempt) obj;
+			FeatureUseRegistrationAttempt other = (FeatureUseRegistrationAttempt) obj;
 			if (featureData == null) {
 				if (other.featureData != null) {
 					return false;
