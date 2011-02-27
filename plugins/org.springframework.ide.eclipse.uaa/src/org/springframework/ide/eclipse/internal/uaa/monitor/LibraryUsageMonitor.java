@@ -157,7 +157,8 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 	}
 
 	private List<ProductInfo> getProducts() {
-		return UaaServiceFactory.getUaaDetectedProducts().getDetectedProductInfos();
+		// Prevent concurrent modifications
+		return new ArrayList<ProductInfo>(UaaServiceFactory.getUaaDetectedProducts().getDetectedProductInfos());
 	}
 
 	private void projectClasspathChanged(IJavaProject source) {
