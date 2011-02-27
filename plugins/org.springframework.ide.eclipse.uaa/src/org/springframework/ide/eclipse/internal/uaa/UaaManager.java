@@ -182,7 +182,7 @@ public class UaaManager implements IUaa {
 						
 						// Before we trigger eventually expensive background reporting, check if this
 						// product hasn't recently been reported; if so just skip
-						RegistrationAttempt attempt = new ProductRegistrationAttempt(productId, versionString, productId);
+						RegistrationAttempt attempt = new ProductRegistrationAttempt(productId, versionString, projectId);
 						if (shouldSkipRegistrationAttempt(attempt)) {
 							return;
 						}
