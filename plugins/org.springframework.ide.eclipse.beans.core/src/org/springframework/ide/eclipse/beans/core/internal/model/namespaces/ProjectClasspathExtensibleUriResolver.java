@@ -44,7 +44,7 @@ import org.w3c.dom.Document;
 
 /**
  * {@link URIResolverExtension} resolves URIs on the project classpath using the protocol established by
- * <code>spring.schema</code> files.
+ * <code>spring.schemas</code> files.
  * @author Christian Dupuis
  * @author Martin Lippert
  * @since 2.3.1
