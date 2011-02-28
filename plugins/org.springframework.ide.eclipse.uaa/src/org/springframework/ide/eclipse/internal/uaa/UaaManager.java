@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -75,9 +77,21 @@ public class UaaManager implements IUaa {
 
 	private static final String EMPTY_VERSION = "0.0.0.RELEASE";
 	private static final String UAA_PRODUCT_EXTENSION_POINT = "org.springframework.ide.eclipse.uaa.product";
-	private static final long MIN_REPORTING_INTERVAL = 1000L * 60L * 60L * 12L; // report a unique feature only all 12h
+	private static final long MIN_REPORTING_INTERVAL = 1000L * 60L * 60L * 12L; // report a unique usage record only all 12h
 	
-	private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+	private static final String THREAD_NAME_TEMPLATE = "Reporting Thread-%s (%s/%s.%s.%s)";
+	private final AtomicInteger threadCount = new AtomicInteger(0);
+	
+	private final ExecutorService executorService = Executors.newFixedThreadPool(2, new ThreadFactory() {
+		
+		public Thread newThread(Runnable runnable) {
+			Product uaaProduct = VersionHelper.getUaa();
+			Thread reportingThread = new Thread(runnable, String.format(THREAD_NAME_TEMPLATE, threadCount.incrementAndGet(), 
+					uaaProduct.getName(), uaaProduct.getMajorVersion(), uaaProduct.getMinorVersion(), uaaProduct.getPatchVersion()));
+			reportingThread.setDaemon(true);
+			return reportingThread;
+		}
+	});
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	private final Lock r = rwl.readLock();
@@ -312,6 +326,7 @@ public class UaaManager implements IUaa {
 	public void stop() {
 		try {
 			w.lock();
+			executorService.shutdown();
 			service.flushIfPossible();
 		}
 		finally {
@@ -632,10 +647,10 @@ public class UaaManager implements IUaa {
 		 */
 		@Override
 		public Proxy setupProxy(URL url) {
-			IProxyData selectedProxy = getProxy(url);
-			if (selectedProxy != null) {
-				return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(selectedProxy.getHost(),
-						selectedProxy.getPort()));
+			IProxyData proxy = getProxy(url);
+			if (proxy != null) {
+				return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(),
+						proxy.getPort()));
 			}
 			return super.setupProxy(url);
 		}
@@ -662,7 +677,7 @@ public class UaaManager implements IUaa {
 		 * Resolves a proxy from the {@link IProxyService} for the given <code>url</code>. 
 		 */
 		private IProxyData getProxy(URL url) {
-			IProxyService proxyService = UaaPlugin.getDefault().getProxyService();
+			IProxyService proxyService = (UaaPlugin.getDefault() != null ? UaaPlugin.getDefault().getProxyService() : null);
 			if (url != null && service != null & proxyService != null && proxyService.isProxiesEnabled()) {
 				try {
 					URI uri = url.toURI();
