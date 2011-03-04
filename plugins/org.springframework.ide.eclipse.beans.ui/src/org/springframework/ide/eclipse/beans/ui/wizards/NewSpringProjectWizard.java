@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -205,8 +204,6 @@ public class NewSpringProjectWizard extends NewElementWizard implements
 				PlatformUI.getWorkbench().getWorkingSetManager()
 						.addToWorkingSets(newElement, workingSets);
 			}
-
-			BasicNewProjectResourceWizard.updatePerspective(configElement);
 			selectAndReveal(project);
 		}
 
