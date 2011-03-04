@@ -19,10 +19,9 @@ import org.eclipse.ajdt.core.javaelements.AJCompilationUnit;
 import org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager;
 import org.eclipse.ajdt.core.javaelements.IAspectJElement;
 import org.eclipse.ajdt.core.javaelements.IntertypeElement;
-import org.eclipse.ajdt.core.model.AJModel;
-import org.eclipse.ajdt.core.model.AJRelationship;
+import org.eclipse.ajdt.core.model.AJProjectModelFacade;
+import org.eclipse.ajdt.core.model.AJProjectModelFactory;
 import org.eclipse.ajdt.core.model.AJRelationshipManager;
-import org.eclipse.ajdt.core.model.AJRelationshipType;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
@@ -37,7 +36,6 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @author Martin Lippert
  * @since 2.0
  */
-@SuppressWarnings("deprecation")
 public class AjdtUtils {
 
 	private static final String AJDT_CLASS = "org.eclipse.contribution.jdt.IsWovenTester";
@@ -50,6 +48,7 @@ public class AjdtUtils {
 			return null;
 		}
 
+		// this is only be used if JDT weaving is disabled (using somewhat old AJDT API) 
 		if (project != null && className != null) {
 			try {
 				List<AJCompilationUnit> ajcus = AJCompilationUnitManager.INSTANCE.getCachedCUs(project);
@@ -78,22 +77,18 @@ public class AjdtUtils {
 		return AspectJCore.create(handle);
 	}
 
-	@SuppressWarnings( { "unchecked" })
 	public static Set<IMethod> getDeclaredMethods(IType type) throws JavaModelException {
-
-//		if (IS_JDT_WEAVING_PRESENT && JdtWeavingTester.isJdtWeavingActive()) {
-//			return Collections.emptySet();
-//		}
-
 		Set<IMethod> methods = new HashSet<IMethod>();
-		AJRelationshipType[] types = new AJRelationshipType[] { AJRelationshipManager.DECLARED_ON };
-		List<AJRelationship> rels = AJModel.getInstance().getAllRelationships(type.getResource().getProject(), types);
-		for (AJRelationship rel : rels) {
-			if (rel.getTarget().equals(type)) {
-				IntertypeElement iType = (IntertypeElement) rel.getSource();
-				methods.add(iType);
+		AJProjectModelFacade model = AJProjectModelFactory.getInstance().getModelForJavaElement(type);
+		if (model.hasModel()) {
+			List<IJavaElement> elements = model.getRelationshipsForElement(type, AJRelationshipManager.ASPECT_DECLARATIONS);
+			for (IJavaElement element : elements) {
+				if (element instanceof IntertypeElement) {
+					methods.add((IMethod) element);
+				}
 			}
 		}
+		
 		return methods;
 	}
 	
