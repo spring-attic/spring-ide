@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ConcurrentModificationException;
 
 import junit.framework.TestCase;
 
@@ -113,7 +114,21 @@ public abstract class BeansCoreTestCase extends TestCase {
 		IWorkspaceRunnable populate = new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				project.create(null);
-				project.open(null);
+				try {
+					project.open(null);
+				}
+				catch (ConcurrentModificationException e) {
+					// wait and try again to work-around
+					// ConcurrentModificationException (bug 280488)
+					try {
+						Thread.sleep(500);
+						project.open(null);
+						project.refreshLocal(IResource.DEPTH_INFINITE, null);
+					}
+					catch (InterruptedException e1) {
+						Thread.currentThread().interrupt();
+					}
+				}
 			}
 		};
 		getWorkspace().run(populate, null);
