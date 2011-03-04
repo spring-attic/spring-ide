@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 /**
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.3
  */
 public abstract class BeansCoreTestCase extends TestCase {
