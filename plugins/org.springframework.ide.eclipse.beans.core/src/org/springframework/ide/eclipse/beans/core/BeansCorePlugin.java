@@ -19,12 +19,15 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -33,6 +36,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
@@ -94,6 +98,8 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/** Internal executor service */
 	private ExecutorService executorService;
+	private AtomicInteger threadCount = new AtomicInteger(0);
+	private static final String THREAD_NAME_TEMPLATE = "Background Thread-%s (%s/%s.%s.%s)";
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
@@ -120,7 +126,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public BeansCorePlugin() {
 		plugin = this;
 		model = new BeansModel();
-		executorService = Executors.newCachedThreadPool();
+		
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
 		}
@@ -132,7 +138,20 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	@Override
 	public void start(final BundleContext context) throws Exception {
 		super.start(context);
+		
+		executorService = Executors.newCachedThreadPool(new ThreadFactory() {
+			
+			public Thread newThread(Runnable runnable) {
+				Version version = Version.parseVersion(getPluginVersion());
+				String product = ("com.springsource.sts".equals(Platform.getProduct().getId()) ? "STS" : "Spring IDE");
+				Thread reportingThread = new Thread(runnable, String.format(THREAD_NAME_TEMPLATE, threadCount.incrementAndGet(), 
+						product, version.getMajor(), version.getMinor(), version.getMicro()));
+				reportingThread.setDaemon(true);
+				return reportingThread;
+			}
+		});
 
+		
 		nsManager = new NamespaceManager(context);
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
 		getPreferenceStore().setDefault(NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
