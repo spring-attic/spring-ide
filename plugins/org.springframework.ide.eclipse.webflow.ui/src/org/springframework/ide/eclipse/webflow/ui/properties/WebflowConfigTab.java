@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.ui.properties;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,12 +22,18 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -42,6 +49,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -52,12 +60,14 @@ import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.Activator;
 import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider;
 
 /**
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  * @since 2.0
  */
 @SuppressWarnings("deprecation")
@@ -77,13 +87,17 @@ public class WebflowConfigTab {
 
 	private static final String EDIT_BUTTON = "ConfigurationPropertyPage.tabConfigFiles.editButton";
 
+	private static final String SCAN_BUTTON = "ConfigurationPropertyPage.tabConfigFiles.scanButton";
+
+	private static final String SCAN_NOTE_LABEL = "ConfigurationPropertyPage.tabConfigFiles.scan.note.label";
+
 	private IAdaptable element;
 
 	private Table configsTable;
 
 	private TableViewer configsViewer;
 
-	private Button addButton, removeButton;
+	private Button addButton, removeButton, scanButton;
 
 	private SelectionListener buttonListener = new SelectionAdapter() {
 		public void widgetSelected(SelectionEvent e) {
@@ -116,8 +130,8 @@ public class WebflowConfigTab {
 		if (project.getConfigs() != null) {
 			for (IWebflowConfig config : project.getConfigs()) {
 				this.configFiles.add(config);
-				this.configFilesToBeansConfigs.put(config, config
-						.getBeansConfigs());
+				this.configFilesToBeansConfigs.put(config,
+						config.getBeansConfigs());
 				this.configFilesToNames.put(config, config.getName());
 			}
 		}
@@ -191,12 +205,18 @@ public class WebflowConfigTab {
 		layout.marginWidth = 0;
 		buttonArea.setLayout(layout);
 		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		addButton = SpringUIUtils.createButton(buttonArea, Activator
-				.getResourceString(ADD_BUTTON), buttonListener, 0, true);
-		editButton = SpringUIUtils.createButton(buttonArea, Activator
-				.getResourceString(EDIT_BUTTON), buttonListener, 0, false);
-		removeButton = SpringUIUtils.createButton(buttonArea, Activator
-				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
+		addButton = SpringUIUtils.createButton(buttonArea,
+				Activator.getResourceString(ADD_BUTTON), buttonListener, 0,
+				true);
+		editButton = SpringUIUtils.createButton(buttonArea,
+				Activator.getResourceString(EDIT_BUTTON), buttonListener, 0,
+				false);
+		removeButton = SpringUIUtils.createButton(buttonArea,
+				Activator.getResourceString(REMOVE_BUTTON), buttonListener, 0,
+				false);
+		scanButton = SpringUIUtils.createButton(buttonArea,
+				Activator.getResourceString(SCAN_BUTTON), buttonListener, 0,
+				true);
 
 		handleTableSelectionChanged();
 
@@ -224,8 +244,7 @@ public class WebflowConfigTab {
 		if (selection.isEmpty()) {
 			removeButton.setEnabled(false);
 			editButton.setEnabled(false);
-		}
-		else {
+		} else {
 			removeButton.setEnabled(true);
 			editButton.setEnabled(true);
 		}
@@ -239,12 +258,12 @@ public class WebflowConfigTab {
 	private void handleButtonPressed(Button button) {
 		if (button == addButton) {
 			handleAddButtonPressed();
-		}
-		else if (button == removeButton) {
+		} else if (button == removeButton) {
 			handleRemoveButtonPressed();
-		}
-		else if (button == editButton) {
+		} else if (button == editButton) {
 			handleEditButtonPressed();
+		} else if (button == scanButton) {
+			handleScanButtonPressed();
 		}
 		handleTableSelectionChanged();
 		configsTable.setFocus();
@@ -265,8 +284,8 @@ public class WebflowConfigTab {
 				configs.addAll(oldConfigs);
 			}
 			WebflowConfigDialog dialog = new WebflowConfigDialog(SpringUIUtils
-					.getStandardDisplay().getActiveShell(), project
-					.getProject(), configs, names, file.getResource());
+					.getStandardDisplay().getActiveShell(),
+					project.getProject(), configs, names, file.getResource());
 			if (dialog.open() == Dialog.OK) {
 				this.configFilesToBeansConfigs.put(file, configs);
 				this.configFilesToNames.put(file, names.get(0));
@@ -300,8 +319,7 @@ public class WebflowConfigTab {
 					int j = file.getName().lastIndexOf('.');
 					if (j > 0) {
 						config.setName(file.getName().substring(0, j));
-					}
-					else {
+					} else {
 						config.setName(file.getName());
 					}
 					configFiles.add(config);
@@ -326,6 +344,51 @@ public class WebflowConfigTab {
 			}
 			configsViewer.refresh();
 			hasUserMadeChanges = true;
+		}
+	}
+
+	private void handleScanButtonPressed() {
+		ScannedFilesContentProvider contentProvider = new ScannedFilesContentProvider(
+				"xml");
+		CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(
+				SpringUIUtils.getStandardDisplay().getActiveShell(),
+				new ScannedFilesLabelProvider(), contentProvider) {
+
+			@Override
+			protected Control createDialogArea(Composite parent) {
+				Composite composite = (Composite) super
+						.createDialogArea(parent);
+				Label note = new Label(composite, SWT.WRAP);
+				note.setText(Activator.getResourceString(SCAN_NOTE_LABEL));
+				note.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				return composite;
+			}
+		};
+		dialog.setTitle(Activator.getResourceString(DIALOG_TITLE));
+		dialog.setMessage(Activator.getResourceString(DIALOG_MESSAGE));
+		dialog.addFilter(new ConfigFileFilter(new String[] { "xml" }));
+		dialog.setValidator(new FileSelectionValidator(true));
+		dialog.setInput(element);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+			Object[] selection = dialog.getResult();
+			if (selection != null && selection.length > 0) {
+				for (int i = 0; i < selection.length; i++) {
+					IFile file = (IFile) selection[i];
+					IWebflowConfig config = new WebflowConfig(project);
+					config.setResource(file);
+					int j = file.getName().lastIndexOf('.');
+					if (j > 0) {
+						config.setName(file.getName().substring(0, j));
+					} else {
+						config.setName(file.getName());
+					}
+					configFiles.add(config);
+				}
+				hasUserMadeChanges = true;
+				configsViewer.refresh();
+			}
 		}
 	}
 
@@ -357,8 +420,8 @@ public class WebflowConfigTab {
 		public static final int ROOT_DIR = 1;
 
 		public int category(Object element) {
-			return (((IWebflowConfig) element).getResource().getName().indexOf(
-					'/') == -1 ? ROOT_DIR : SUB_DIR);
+			return (((IWebflowConfig) element).getResource().getName()
+					.indexOf('/') == -1 ? ROOT_DIR : SUB_DIR);
 		}
 	}
 
@@ -389,4 +452,70 @@ public class WebflowConfigTab {
 			return !WebflowModelUtils.isWebflowConfig(element);
 		}
 	}
+
+	private class ScannedFilesLabelProvider extends JavaElementLabelProvider {
+
+		@Override
+		public String getText(Object element) {
+			if (element instanceof IFile) {
+				return ((IFile) element).getProjectRelativePath().toString();
+			}
+			return super.getText(element);
+		}
+
+	}
+
+	private final class ScannedFilesContentProvider implements
+			ITreeContentProvider {
+
+		private Object[] scannedFiles = null;
+
+		public ScannedFilesContentProvider(final String fileSuffixes) {
+			final Set<IFile> files = new LinkedHashSet<IFile>();
+			IRunnableWithProgress runnable = new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					// TODO Auto-generated method stub
+
+				}
+			};
+
+			try {
+				IRunnableContext context = new ProgressMonitorDialog(
+						SpringUIUtils.getStandardDisplay().getActiveShell());
+				context.run(true, true, runnable);
+			} catch (InvocationTargetException e) {
+			} catch (InterruptedException e) {
+			}
+			scannedFiles = files.toArray();
+		}
+
+		public void dispose() {
+			// TODO Auto-generated method stub
+
+		}
+
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			// TODO Auto-generated method stub
+
+		}
+
+		public Object[] getElements(Object inputElement) {
+			return scannedFiles;
+		}
+
+		public Object[] getChildren(Object parentElement) {
+			return IWebflowModelElement.NO_CHILDREN;
+		}
+
+		public Object getParent(Object element) {
+			return null;
+		}
+
+		public boolean hasChildren(Object element) {
+			return false;
+		}
+
+	}
+
 }
