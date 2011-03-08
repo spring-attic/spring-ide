@@ -475,8 +475,10 @@ public class WebflowConfigTab {
 			IRunnableWithProgress runnable = new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					// TODO Auto-generated method stub
-
+					WebflowConfigLocator locator = new WebflowConfigLocator(
+							fileSuffixes);
+					files.addAll(locator.locateBeansConfigs(
+							project.getProject(), monitor));
 				}
 			};
 
