@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,9 +48,9 @@ class NamespaceDefinition implements INamespaceDefinition {
 
 	private String prefix;
 
-	private Set<String> schemaLocations = new ConcurrentSkipListSet<String>();
+	private Set<String> schemaLocations = new CopyOnWriteArraySet<String>();
 
-	private Set<String> uris = new ConcurrentSkipListSet<String>();
+	private Set<String> uris = new CopyOnWriteArraySet<String>();
 
 	private Properties uriMapping = new Properties();
 
