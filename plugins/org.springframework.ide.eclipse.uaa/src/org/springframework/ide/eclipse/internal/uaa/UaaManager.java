@@ -82,7 +82,7 @@ public class UaaManager implements IUaa {
 	private static final String THREAD_NAME_TEMPLATE = "Reporting Thread-%s (%s/%s.%s.%s)";
 	private final AtomicInteger threadCount = new AtomicInteger(0);
 	
-	private final ExecutorService executorService = Executors.newFixedThreadPool(2, new ThreadFactory() {
+	private final ExecutorService executorService = Executors.newFixedThreadPool(1, new ThreadFactory() {
 		
 		public Thread newThread(Runnable runnable) {
 			Product uaaProduct = VersionHelper.getUaa();
@@ -327,7 +327,7 @@ public class UaaManager implements IUaa {
 		try {
 			w.lock();
 			executorService.shutdown();
-			service.flushIfPossible();
+			service.stop();
 		}
 		finally {
 			w.unlock();

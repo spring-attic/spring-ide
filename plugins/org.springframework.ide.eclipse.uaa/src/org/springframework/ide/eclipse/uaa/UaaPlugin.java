@@ -131,7 +131,6 @@ public class UaaPlugin extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
-		usageMonitorManager.stop();
 		for (final IUsageMonitor monitor : monitors) {
 			SafeRunner.run(new ISafeRunnable() {
 
@@ -144,6 +143,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 			});
 		}
 
+		usageMonitorManager.stop();
 		super.stop(context);
 	}
 

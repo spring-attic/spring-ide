@@ -14,13 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.uaa.client.TransmissionService;
-import org.springframework.uaa.client.internal.TransmissionAwareUaaServiceImpl;
 import org.springframework.uaa.client.internal.UaaServiceImpl;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
 import org.springframework.uaa.client.protobuf.UaaClient.UaaEnvelope;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported products and features
@@ -29,11 +27,11 @@ import org.springframework.util.ObjectUtils;
  * @author Christian Dupuis
  * @since 2.5.2.SR3
  */
-public class CachingUaaServiceExtension extends TransmissionAwareUaaServiceImpl {
+public class CachingUaaServiceExtension extends QueueingUaaServiceExtension {
 
 	/** Internal cache of reported products and features; make this an ordered list as we want 
 	 * to maintain the correct ordering when replaying it later */
-	private List<RegistrationRecord> registrations = new ArrayList<RegistrationRecord>();
+	private List<UsageRecord> usageRecords = new ArrayList<UsageRecord>();
 
 	public CachingUaaServiceExtension(TransmissionService transmssionService) {
 		super(transmssionService);
@@ -53,8 +51,8 @@ public class CachingUaaServiceExtension extends TransmissionAwareUaaServiceImpl 
 	/**
 	 * Flushes the internal cache into the UAA backend store.
 	 */
-	public void flushIfPossible() {
-		if (registrations.size() == 0) {
+	private void flushIfPossible() {
+		if (usageRecords.size() == 0) {
 			// Nothing to flush
 			return;
 		}
@@ -65,17 +63,17 @@ public class CachingUaaServiceExtension extends TransmissionAwareUaaServiceImpl 
 		}
 
 		// If we got this far we can now store reported product and feature usages into the backend store
-		for (RegistrationRecord record : registrations) {
-			if (record instanceof ProductRegistrationRecord) {
-				super.registerProductUsage(record.getProduct(), ((ProductRegistrationRecord) record).getProductData(), 
-						((ProductRegistrationRecord) record).getProjectId());
+		for (UsageRecord record : usageRecords) {
+			if (record instanceof ProductUsageRecord) {
+				super.registerProductUsage(record.getProduct(), ((ProductUsageRecord) record).getProductData(), 
+						((ProductUsageRecord) record).getProjectId());
 			}
-			else if (record instanceof FeatureUseRegistrationRecord) {
-				super.registerFeatureUsage(record.getProduct(), ((FeatureUseRegistrationRecord) record).getFeatureUse(), 
-						((FeatureUseRegistrationRecord) record).getFeatureData());
+			else if (record instanceof FeatureUseUsageRecord) {
+				super.registerFeatureUsage(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse(), 
+						((FeatureUseUsageRecord) record).getFeatureData());
 			}
 		}
-		registrations.clear();
+		usageRecords.clear();
 	}
 
 	/**
@@ -96,7 +94,7 @@ public class CachingUaaServiceExtension extends TransmissionAwareUaaServiceImpl 
 			super.registerFeatureUsage(product, feature, featureData);
 		}
 		else {
-			cacheFeatureUseRegistrationRecord(product, feature, featureData);
+			cacheFeatureUseUsageRecord(product, feature, featureData);
 		}
 	}
 
@@ -134,22 +132,22 @@ public class CachingUaaServiceExtension extends TransmissionAwareUaaServiceImpl 
 			super.registerProductUsage(product, productData, projectId);
 		}
 		else {
-			cacheProductRegistrationRecord(product, productData, projectId);
+			cacheProductUsageRecord(product, productData, projectId);
 		}
 	}
 
-	private void cacheFeatureUseRegistrationRecord(Product product, FeatureUse feature, byte[] featureData) {
-		cacheRegistractionRecord(new FeatureUseRegistrationRecord(feature, product, featureData));
+	private void cacheFeatureUseUsageRecord(Product product, FeatureUse feature, byte[] featureData) {
+		cacheUsageRecord(new FeatureUseUsageRecord(feature, product, featureData));
 	}
 
-	private void cacheProductRegistrationRecord(Product product, byte[] productData, String projectId) {
-		cacheRegistractionRecord(new ProductRegistrationRecord(product, projectId, productData));
+	private void cacheProductUsageRecord(Product product, byte[] productData, String projectId) {
+		cacheUsageRecord(new ProductUsageRecord(product, projectId, productData));
 	}
 	
-	private void cacheRegistractionRecord(RegistrationRecord record) {
+	private void cacheUsageRecord(UsageRecord record) {
 		// Don't cache it again if we already have that record
-		if (!registrations.contains(record)) {
-			registrations.add(record);
+		if (!usageRecords.contains(record)) {
+			usageRecords.add(record);
 		}
 	}
 
@@ -157,122 +155,8 @@ public class CachingUaaServiceExtension extends TransmissionAwareUaaServiceImpl 
 		return super.createUaaEnvelope();
 	}
 	
-	private abstract class RegistrationRecord {
-		
-		private final Product product;
-		
-		public RegistrationRecord(Product product) {
-			this.product = product;
-		}
-
-		public Product getProduct() {
-			return product;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof RegistrationRecord) {
-				RegistrationRecord o = (RegistrationRecord) obj;
-				return ObjectUtils.nullSafeEquals(product.toByteArray(), o.getProduct().toByteArray());
-			}
-			return false;
-		}
-		
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ObjectUtils.nullSafeHashCode(product.toByteArray());
-			return result;
-		}
-	}
-	
-	private class FeatureUseRegistrationRecord extends RegistrationRecord {
-
-		private final FeatureUse feature;
-		private final byte[] featureData;
-
-		public FeatureUseRegistrationRecord(FeatureUse feature, Product product, byte[] featureData) {
-			super(product);
-			this.feature = feature;
-			this.featureData = featureData;
-		}
-
-		public byte[] getFeatureData() {
-			return featureData;
-		}
-
-		public FeatureUse getFeatureUse() {
-			return feature;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (super.equals(obj)) {
-				if (obj instanceof FeatureUseRegistrationRecord) {
-					FeatureUseRegistrationRecord o = (FeatureUseRegistrationRecord) obj;
-					if (ObjectUtils.nullSafeEquals(feature.toByteArray(), o.getFeatureUse().toByteArray())) {
-						if (ObjectUtils.nullSafeEquals(featureData, o.getFeatureData())) {
-							return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
-		
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = super.hashCode();
-			result = prime * result + ObjectUtils.nullSafeHashCode(feature.toByteArray());
-			result = prime * result + ObjectUtils.nullSafeHashCode(featureData);
-			return result;
-		}
-
-	}
-
-	private class ProductRegistrationRecord extends RegistrationRecord {
-
-		private final byte[] productData;
-		private final String projectId;
-
-		public ProductRegistrationRecord(Product product, String projectId, byte[] productData) {
-			super(product);
-			this.projectId = projectId;
-			this.productData = productData;
-		}
-
-		public byte[] getProductData() {
-			return productData;
-		}
-
-		public String getProjectId() {
-			return projectId;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (super.equals(obj)) {
-				if (obj instanceof ProductRegistrationRecord) {
-					ProductRegistrationRecord o = (ProductRegistrationRecord) obj;
-					if (ObjectUtils.nullSafeEquals(productData, o.getProductData())) {
-						if ((projectId == null && o.getProjectId() == null) || projectId != null && projectId.equals(o.getProjectId())) {
-							return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
-		
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = super.hashCode();
-			result = prime * result + ObjectUtils.nullSafeHashCode(productData);
-			result = prime * result + ObjectUtils.nullSafeHashCode(projectId);
-			return result;
-		}
+	public void stop() {
+		flushIfPossible();
+		super.stop();
 	}
 }
