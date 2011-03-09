@@ -370,6 +370,8 @@ public class WebflowConfigTab {
 		dialog.setValidator(new FileSelectionValidator(true));
 		dialog.setInput(element);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setInitialSelections(contentProvider.getElements(project
+				.getProject()));
 
 		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			Object[] selection = dialog.getResult();
