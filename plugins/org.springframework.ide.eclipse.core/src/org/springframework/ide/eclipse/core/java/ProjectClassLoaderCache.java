@@ -50,10 +50,11 @@ import org.springframework.ide.eclipse.core.SpringCore;
 /**
  * Internal cache of classpath urls and corresponding classloaders.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.2.5
  */
 @SuppressWarnings("deprecation")
-class ProjectClassLoaderCache {
+public class ProjectClassLoaderCache {
 
 	private static final int CACHE_SIZE = 12;
 
@@ -288,7 +289,7 @@ class ProjectClassLoaderCache {
 	 * Removes any cached {@link ClassLoaderCacheEntry} for the given {@link IProject}.
 	 * @param project the project to remove {@link ClassLoaderCacheEntry} for
 	 */
-	private static void removeClassLoaderEntryFromCache(IProject project) {
+	public static void removeClassLoaderEntryFromCache(IProject project) {
 		synchronized (CLASSLOADER_CACHE) {
 			if (DEBUG_CLASSLOADER) {
 				System.out.println(String.format("> removing classloader for '%s' : total %s", project.getName(),

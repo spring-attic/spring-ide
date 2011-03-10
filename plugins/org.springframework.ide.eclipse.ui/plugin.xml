@@ -90,6 +90,13 @@
                menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
                id="org.springframework.ide.eclipse.ui.actions.cleanMarkers">
          </action>
+         <action
+               label="Reset Internal Caches"
+               class="org.springframework.ide.eclipse.ui.internal.actions.ResetInternalCacheAction"
+               enablesFor="+"
+               menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
+               id="org.springframework.ide.eclipse.ui.actions.resetCache">
+         </action>
       </objectContribution>
    </extension>
 
