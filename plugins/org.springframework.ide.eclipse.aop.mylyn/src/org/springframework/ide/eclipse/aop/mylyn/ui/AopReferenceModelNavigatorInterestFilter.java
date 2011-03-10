@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
  * Extension to the Mylyn {@link InterestFilter} that is used to filter the Spring Aop cross
  * references view.
  * @author Christian Dupuis
+ * @author Martin Lippert / Steffen Pingel
  * @since 2.0.1
  */
 public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
@@ -42,7 +43,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 					|| !containsMylynInterestFilter((StructuredViewer) viewer)) {
 				return true;
 			}
-			if (isTemporarilyUnfiltered(parent)) {
+			if (isTemporarilyUnfilteredInternal(parent)) {
 				return true;
 			}
 			else if (temporarilyUnfiltered instanceof Tree && isRootElement(object)) {
@@ -120,7 +121,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 		}
 	}
 
-	private boolean isTemporarilyUnfiltered(Object parent) {
+	private boolean isTemporarilyUnfilteredInternal(Object parent) {
 		if (parent instanceof TreePath) {
 			TreePath treePath = (TreePath) parent;
 			parent = treePath.getLastSegment();
