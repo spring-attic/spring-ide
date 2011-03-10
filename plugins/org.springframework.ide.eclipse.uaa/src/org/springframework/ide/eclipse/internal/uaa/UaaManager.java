@@ -139,18 +139,19 @@ public class UaaManager implements IUaa {
 	 */
 	public void registerFeatureUse(final String plugin, final Map<String, String> featureData) {
 		if (plugin != null) {
+			
+			// Before we trigger eventually expensive background reporting, check if this
+			// feature hasn't recently been reported; if so just skip
+			final RegistrationAttempt attempt = new FeatureUseRegistrationAttempt(plugin, featureData);
+			if (shouldSkipRegistrationAttempt(attempt)) {
+				return;
+			}
+
 			executorService.execute(new Runnable() {
 
 				public void run() {
 					try {
 						w.lock();
-						
-						// Before we trigger eventually expensive background reporting, check if this
-						// feature hasn't recently been reported; if so just skip
-						RegistrationAttempt attempt = new FeatureUseRegistrationAttempt(plugin, featureData);
-						if (shouldSkipRegistrationAttempt(attempt)) {
-							return;
-						}
 												
 						for (ProductDescriptor productDescriptor : productDescriptors) {
 							if (productDescriptor.registerFeatureUseIfMatch(plugin, featureData)) {
@@ -188,18 +189,19 @@ public class UaaManager implements IUaa {
 		final String versionString = version;
 
 		if (productId != null) {
+
+			// Before we trigger eventually expensive background reporting, check if this
+			// product hasn't recently been reported; if so just skip
+			final RegistrationAttempt attempt = new ProductRegistrationAttempt(productId, versionString, projectId);
+			if (shouldSkipRegistrationAttempt(attempt)) {
+				return;
+			}
+			
 			executorService.execute(new Runnable() {
 
 				public void run() {
 					try {
 						w.lock();
-						
-						// Before we trigger eventually expensive background reporting, check if this
-						// product hasn't recently been reported; if so just skip
-						RegistrationAttempt attempt = new ProductRegistrationAttempt(productId, versionString, projectId);
-						if (shouldSkipRegistrationAttempt(attempt)) {
-							return;
-						}
 						
 						Product product = null;
 						try {
@@ -241,18 +243,20 @@ public class UaaManager implements IUaa {
 	public void registerProjectUsageForProduct(final String feature, final String projectId,
 			final Map<String, String> featureData) {
 		if (feature != null) {
+
+			// Before we trigger eventually expensive background reporting, check if this
+			// project hasn't recently been reported; if so just skip
+			final RegistrationAttempt attempt = new ProjectUsageRegistrationAttempt(feature, projectId, featureData);
+			if (shouldSkipRegistrationAttempt(attempt)) {
+				return;
+			}
+			
 			executorService.execute(new Runnable() {
 
 				public void run() {
 					try {
 						w.lock();
 						
-						// Before we trigger eventually expensive background reporting, check if this
-						// project hasn't recently been reported; if so just skip
-						RegistrationAttempt attempt = new ProjectUsageRegistrationAttempt(feature, projectId, featureData);
-						if (shouldSkipRegistrationAttempt(attempt)) {
-							return;
-						}
 						
 						for (ProductDescriptor productDescriptor : productDescriptors) {
 							if (productDescriptor.registerProjectUsage(feature, projectId, featureData)) {
@@ -319,8 +323,8 @@ public class UaaManager implements IUaa {
 		};
 		transmissionJob.setSystem(true);
 		
-		// Schedule this for one minute into the running instance
-		transmissionJob.schedule(2L * 60L * 1000L);
+		// Schedule this for 10 minutes into the running instance
+		transmissionJob.schedule(10L * 60L * 1000L);
 	}
 
 	public void stop() {
