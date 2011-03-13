@@ -652,9 +652,11 @@ public class UaaManager implements IUaa {
 		@Override
 		public Proxy setupProxy(URL url) {
 			IProxyData proxy = getProxy(url);
-			if (proxy != null) {
-				return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(),
-						proxy.getPort()));
+			if (proxy != null && proxy.getHost() != null && proxy.getPort() >= 0 && proxy.getPort() <= 65535) {
+				try {
+					return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
+				}
+				catch (IllegalArgumentException e) {}
 			}
 			return super.setupProxy(url);
 		}
