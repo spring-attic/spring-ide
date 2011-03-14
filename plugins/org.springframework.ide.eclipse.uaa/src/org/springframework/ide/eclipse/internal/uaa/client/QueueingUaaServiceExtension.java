@@ -23,7 +23,6 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
 /**
  * Extension to the UAA {@link TransmissionAwareUaaServiceImpl} that queues product and feature use 
  * usage records for {@link #BATCH_INTERVAL}
- * 
  * @author Christian Dupuis
  * @since 2.6.0
  */
@@ -144,7 +143,7 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 		// Only process if we have reported usage records
 		if (records != null && records.length > 0) {
 			
-			// Sync changes to the backend storage into the UAA infrastucture
+			// Sync changes to the backend storage into the UAA infrastructure
 			try { P.sync();	}
 			catch (BackingStoreException e) {}
 			

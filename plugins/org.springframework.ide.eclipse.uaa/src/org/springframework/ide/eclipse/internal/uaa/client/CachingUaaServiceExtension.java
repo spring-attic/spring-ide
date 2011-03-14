@@ -23,7 +23,6 @@ import org.springframework.uaa.client.protobuf.UaaClient.UaaEnvelope;
 /**
  * Extension to Spring UAA's {@link UaaServiceImpl} that caches reported products and features
  * until it can be flushed into UAA's internal storage.
- * 
  * @author Christian Dupuis
  * @since 2.5.2.SR3
  */
