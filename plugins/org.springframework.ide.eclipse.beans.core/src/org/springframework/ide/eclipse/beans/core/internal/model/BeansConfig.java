@@ -340,18 +340,19 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					}
 
 					// Set up classloader to use for NamespaceHandler and XSD loading
-					ClassLoader cl = BeansCorePlugin.getClassLoader();
+					final ClassLoader cl;
 					if (NamespaceUtils.useNamespacesFromClasspath(file.getProject())) {
-						cl = JdtUtils.getClassLoader(file.getProject(), cl);
+						cl = JdtUtils.getClassLoader(file.getProject(),  BeansCorePlugin.getClassLoader());
+					}
+					else {
+						 cl = BeansCorePlugin.getClassLoader();
 					}
 
 					registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
-					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(new BeansDtdResolver(),
-							new PluggableSchemaResolver(cl));
+					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(new BeansDtdResolver(), new PluggableSchemaResolver(cl));
 					final DocumentAccessor documentAccessor = new DocumentAccessor();
 					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file.getProject());
-					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(this,
-							resource, sourceExtractor, documentAccessor);
+					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(this, resource, sourceExtractor, documentAccessor);
 
 					problemReporter = new BeansConfigProblemReporter();
 					beanNameGenerator = new UniqueBeanNameGenerator(this);
@@ -365,8 +366,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 							// Capture the current resource being processed to handle parsing exceptions correctly and
 							// create the validation error on the correct resource
 							if (encodedResource != null && encodedResource.getResource() instanceof IAdaptable) {
-								currentResource = (IResource) ((IAdaptable) encodedResource.getResource())
-										.getAdapter(IResource.class);
+								currentResource = (IResource) ((IAdaptable) encodedResource.getResource()).getAdapter(IResource.class);
 								currentEncodedResource = encodedResource;
 							}
 
@@ -402,8 +402,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,
-							documentAccessor));
+					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,	documentAccessor));
 					reader.setDocumentReaderClass(ToolingFriendlyBeanDefinitionDocumentReader.class);
 					reader.setBeanNameGenerator(beanNameGenerator);
 
@@ -412,6 +411,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
 
 							public Integer call() {
+								
+								// Obtain thread context classloader and override with the project classloader
+								ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
+								Thread.currentThread().setContextClassLoader(cl);
+					
 								try {
 									// Load bean definitions
 									int count = reader.loadBeanDefinitions(resource);
@@ -426,8 +430,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 								}
 								catch (Exception e) {
 									// Record the exception to throw it later
-									throwables.put(e, LineNumberPreservingDOMParser.getStartLineNumber(documentAccessor
-											.getLastElement()));
+									throwables.put(e, LineNumberPreservingDOMParser.getStartLineNumber(documentAccessor.getLastElement()));
+								}
+								finally {
+									// Reset the context classloader
+									Thread.currentThread().setContextClassLoader(threadClassLoader);
 								}
 								return 0;
 							}
@@ -437,9 +444,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						try {
 							FutureTask<Integer> task = new FutureTask<Integer>(loadBeanDefinitionOperation);
 							BeansCorePlugin.getExecutorService().submit(task);
-							count = task.get(
-									BeansCorePlugin.getDefault().getPreferenceStore()
-											.getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID),
+							count = task.get(BeansCorePlugin.getDefault().getPreferenceStore().getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID),
 									TimeUnit.SECONDS);
 
 							// if we recored an exception use this instead of stupid concurrent exception
@@ -449,8 +454,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						}
 						catch (TimeoutException e) {
 							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, "Loading of resource '"
-									+ resource.getFile().getAbsolutePath()
-									+ "' took more than "
+									+ resource.getFile().getAbsolutePath() + "' took more than "
 									+ BeansCorePlugin.getDefault().getPreferenceStore()
 											.getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID) + "sec",
 									file, 1));
