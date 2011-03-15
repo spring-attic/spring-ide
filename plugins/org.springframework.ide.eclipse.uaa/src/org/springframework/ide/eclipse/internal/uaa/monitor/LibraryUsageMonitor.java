@@ -178,7 +178,7 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 					if (ix >= 0) {
 						String newVersion = productMatch.getVersion();
 						String oldVersion = productMatches.get(ix).getVersion();
-						if (newVersion.compareTo(oldVersion) > 0) {
+						if (newVersion != null && newVersion.compareTo(oldVersion) > 0) {
 							productMatches.remove(ix);
 							productMatches.add(productMatch);
 						}
