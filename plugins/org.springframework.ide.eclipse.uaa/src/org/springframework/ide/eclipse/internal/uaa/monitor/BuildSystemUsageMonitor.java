@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.uaa.IUaa;
 
@@ -77,10 +78,7 @@ public class BuildSystemUsageMonitor implements IUsageMonitor {
 						
 						// Now we should also check the parent folder for the project location on the
 						// file system to check for the same files there
-						URI uri = project.getLocationURI();
-						if (uri == null) {
-							uri = project.getRawLocationURI();
-						}
+						URI uri = SpringCoreUtils.getResourceURI(project);
 						if (uri != null) {
 							File parent = new File(uri);
 							if (parent != null && parent.exists()) {
