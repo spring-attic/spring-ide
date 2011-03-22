@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.batch.feature"
       label="%featureName"
-      version="2.6.0.qualifier"
+      version="2.7.0.qualifier"
       provider-name="%featureProvider"
       plugin="org.springframework.ide.eclipse">
 
@@ -31,7 +31,7 @@
    </license>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.6.0"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.7.0"/>
    </requires>
 
    <plugin
