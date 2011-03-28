@@ -231,6 +231,11 @@ public class JdtUtils {
 	public static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
 		return ProjectClassLoaderCache.getClassLoader(project, parentClassLoader);
 	}
+	
+	public static void removeClassLoaderEntryFromCache(IProject project) {
+		ProjectClassLoaderCache.removeClassLoaderEntryFromCache(project);
+	}
+
 
 	public static IMethod getConstructor(IType type, Class[] parameterTypes) {
 		String[] parameterTypesAsString = getParameterTypesAsStringArray(parameterTypes);

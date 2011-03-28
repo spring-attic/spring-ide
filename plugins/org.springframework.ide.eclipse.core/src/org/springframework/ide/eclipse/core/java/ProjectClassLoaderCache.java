@@ -11,11 +11,14 @@
 package org.springframework.ide.eclipse.core.java;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -56,20 +59,16 @@ import org.springframework.ide.eclipse.core.SpringCore;
 @SuppressWarnings("deprecation")
 public class ProjectClassLoaderCache {
 
+	private static final String FILE_SCHEME = "file";
 	private static final int CACHE_SIZE = 12;
-
+	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(new ArrayList<URL>());
 	private static final List<ClassLoaderCacheEntry> CLASSLOADER_CACHE = new ArrayList<ClassLoaderCacheEntry>(CACHE_SIZE);
 
 	private static final String DEBUG_OPTION = SpringCore.PLUGIN_ID + "/java/classloader/debug";
-
 	private static final boolean DEBUG_CLASSLOADER = SpringCore.isDebug(DEBUG_OPTION);
 
-	private static final String FILE_SCHEME = "file";
-
 	private static ClassLoader cachedParentClassLoader = null;
-
 	private static IPropertyChangeListener propertyChangeListener = null;
-
 	private static IResourceChangeListener resourceChangeListener = null;
 
 	private static ClassLoader addClassLoaderToCache(IProject project, List<URL> urls, ClassLoader parentClassLoader) {
@@ -285,23 +284,8 @@ public class ProjectClassLoaderCache {
 		}
 	}
 
-	/**
-	 * Removes any cached {@link ClassLoaderCacheEntry} for the given {@link IProject}.
-	 * @param project the project to remove {@link ClassLoaderCacheEntry} for
-	 */
-	public static void removeClassLoaderEntryFromCache(IProject project) {
-		synchronized (CLASSLOADER_CACHE) {
-			if (DEBUG_CLASSLOADER) {
-				System.out.println(String.format("> removing classloader for '%s' : total %s", project.getName(),
-						CLASSLOADER_CACHE.size()));
-			}
-			for (ClassLoaderCacheEntry entry : new ArrayList<ClassLoaderCacheEntry>(CLASSLOADER_CACHE)) {
-				if (project.equals(entry.getProject())) {
-					entry.dispose();
-					CLASSLOADER_CACHE.remove(entry);
-				}
-			}
-		}
+	private static boolean shouldFilter(String name) {
+		return "commons-logging.properties".equals(name) || (name != null && name.startsWith("META-INF/services/"));
 	}
 
 	private static boolean useNonLockingClassLoader() {
@@ -347,7 +331,26 @@ public class ProjectClassLoaderCache {
 		}
 		return classLoader;
 	}
-
+	
+	/**
+	 * Removes any cached {@link ClassLoaderCacheEntry} for the given {@link IProject}.
+	 * @param project the project to remove {@link ClassLoaderCacheEntry} for
+	 */
+	protected static void removeClassLoaderEntryFromCache(IProject project) {
+		synchronized (CLASSLOADER_CACHE) {
+			if (DEBUG_CLASSLOADER) {
+				System.out.println(String.format("> removing classloader for '%s' : total %s", project.getName(),
+						CLASSLOADER_CACHE.size()));
+			}
+			for (ClassLoaderCacheEntry entry : new ArrayList<ClassLoaderCacheEntry>(CLASSLOADER_CACHE)) {
+				if (project.equals(entry.getProject())) {
+					entry.dispose();
+					CLASSLOADER_CACHE.remove(entry);
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Internal cache entry
 	 */
@@ -396,7 +399,7 @@ public class ProjectClassLoaderCache {
 		public ClassLoader getClassLoader() {
 			ClassLoader parent = getJarClassLoader();
 			if (useNonLockingClassLoader()) {
-				return new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project.getName()),
+				return new FilteringNonLockingJarFileClassLoader(String.format("ClassLoader for '%s'", project.getName()),
 						directories, parent);
 			}
 			else {
@@ -437,21 +440,21 @@ public class ProjectClassLoaderCache {
 				if (parentClassLoader != null) {
 					// We use the parent class loader of the org.springframework.ide.eclipse.beans.core bundle
 					if (useNonLockingClassLoader()) {
-						jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'",
+						jarClassLoader = new FilteringNonLockingJarFileClassLoader(String.format("ClassLoader for '%s'",
 								project.getName()), (URL[]) jars.toArray(new URL[jars.size()]), parentClassLoader);
 					}
 					else {
-						jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
+						jarClassLoader = new FilteringURLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
 								parentClassLoader);
 					}
 				}
 				else {
 					if (useNonLockingClassLoader()) {
-						jarClassLoader = new NonLockingJarFileClassLoader(String.format("ClassLoader for '%s'",
+						jarClassLoader = new FilteringNonLockingJarFileClassLoader(String.format("ClassLoader for '%s'",
 								project.getName()), (URL[]) jars.toArray(new URL[jars.size()]), cachedParentClassLoader);
 					}
 					else {
-						jarClassLoader = new URLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
+						jarClassLoader = new FilteringURLClassLoader((URL[]) jars.toArray(new URL[jars.size()]),
 								cachedParentClassLoader);
 					}
 				}
@@ -471,7 +474,7 @@ public class ProjectClassLoaderCache {
 			return false;
 		}
 	}
-
+	
 	/**
 	 * {@link IPropertyChangeListener} to clear the cache whenever the setting is changed.
 	 * @since 2.5.0
@@ -487,6 +490,92 @@ public class ProjectClassLoaderCache {
 					CLASSLOADER_CACHE.clear();
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Extension to {@link NonLockingJarFileClassLoader} that filters resource loading attempts by
+	 * calling {@link ProjectClassLoaderCache#shouldFilter(String)} before delegating to the super
+	 * implementation.
+	 * @since 2.7.0
+	 */
+	static class FilteringNonLockingJarFileClassLoader extends NonLockingJarFileClassLoader {
+
+		public FilteringNonLockingJarFileClassLoader(String name, URL[] urls, ClassLoader parent) {
+			super(name, urls, parent);
+		}
+		
+		@Override
+		public URL findResource(String resourceName) {
+			if (shouldFilter(resourceName)) return null;
+			return super.findResource(resourceName);
+		}
+		
+		@Override
+		public Enumeration<URL> findResources(String resourceName) throws IOException {
+			if (shouldFilter(resourceName)) return EMPTY_ENUMERATION;
+			return super.findResources(resourceName);
+		}
+		
+		@Override
+		public URL getResource(String name) {
+			if (shouldFilter(name)) return null;
+			return super.getResource(name);
+		}
+		
+		@Override
+		public InputStream getResourceAsStream(String name) {
+			if (shouldFilter(name)) return null;
+			return super.getResourceAsStream(name);
+		}
+		
+		@Override
+		public Enumeration<URL> getResources(String name) throws IOException {
+			if (shouldFilter(name)) return EMPTY_ENUMERATION;
+			return super.getResources(name);
+		}
+	}
+
+	/**
+	 * Extension to {@link URLClassLoader} that filters resource loading attempts by
+	 * calling {@link ProjectClassLoaderCache#shouldFilter(String)} before delegating to the super
+	 * implementation.
+	 * @since 2.7.0
+	 */
+	static class FilteringURLClassLoader extends URLClassLoader {
+		
+		public FilteringURLClassLoader(URL[] urls, ClassLoader parent) {
+			super(urls, parent);
+		}
+		
+		@Override
+		public URL findResource(String resourceName) {
+			if (shouldFilter(resourceName)) return null;
+			return super.findResource(resourceName);
+		}
+		
+		@Override
+		public Enumeration<URL> findResources(String resourceName) throws IOException {
+			if (shouldFilter(resourceName)) return EMPTY_ENUMERATION;
+			return super.findResources(resourceName);
+		}
+		
+		@Override
+		public URL getResource(String name) {
+			if (shouldFilter(name)) return null;
+			return super.getResource(name);
+		}
+		
+		@Override
+		public InputStream getResourceAsStream(String name) {
+			if (shouldFilter(name)) return null;
+			return super.getResourceAsStream(name);
+		}
+		
+		@Override
+		public Enumeration<URL> getResources(String name) throws IOException {
+			if (shouldFilter(name)) return EMPTY_ENUMERATION;
+			return super.getResources(name);
 		}
 	}
 

@@ -23,7 +23,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.java.ProjectClassLoaderCache;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * This action implementation will reset the internal classloader cache
@@ -80,7 +80,7 @@ public class ResetInternalCacheAction implements IObjectActionDelegate {
 		Iterator iter = selected.iterator();
 		while (iter.hasNext()) {
 			IProject project = (IProject) iter.next();
-			ProjectClassLoaderCache.removeClassLoaderEntryFromCache(project);
+			JdtUtils.removeClassLoaderEntryFromCache(project);
 			try {
 				project.touch(null);
 			} catch (CoreException e) {
