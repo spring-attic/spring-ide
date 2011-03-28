@@ -403,7 +403,7 @@ public class ProjectClassLoaderCache {
 						directories, parent);
 			}
 			else {
-				return new URLClassLoader(directories, parent);
+				return new FilteringURLClassLoader(directories, parent);
 			}
 		}
 
