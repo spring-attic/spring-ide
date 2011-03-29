@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URI;
@@ -30,14 +35,12 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.prefs.Preferences;
 
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.IBundleGroup;
 import org.eclipse.core.runtime.IBundleGroupProvider;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -53,6 +56,7 @@ import org.springframework.ide.eclipse.internal.uaa.client.CachingUaaServiceExte
 import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
 import org.springframework.uaa.client.TransmissionAwareUaaService;
+import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.BasicProxyService;
@@ -63,8 +67,15 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
 import org.springframework.uaa.client.protobuf.UaaClient.ProductUse;
 import org.springframework.uaa.client.protobuf.UaaClient.UaaEnvelope;
 import org.springframework.uaa.client.protobuf.UaaClient.UserAgent;
+import org.springframework.uaa.client.util.Base64;
+import org.springframework.uaa.client.util.PgpUtils;
+import org.springframework.uaa.client.util.PreferencesUtils;
+import org.springframework.uaa.client.util.StreamUtils;
 import org.springframework.uaa.client.util.StringUtils;
 import org.springframework.uaa.client.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Helper class that coordinates with the Spring UAA service implementation.
@@ -75,13 +86,30 @@ import org.springframework.uaa.client.util.XmlUtils;
  */
 public class UaaManager implements IUaa {
 
+	private static final String DETECTED_PRODUCTS_KEY = "detected_eclipse_products";
+	private static final String DETECTED_PRODUCTS_SIGNATURE_KEY = "detected_eclipse_products_signature";
+	private static final byte[] EMPTY = {};
+	private static final String EMPTY_STRING = "";
 	private static final String EMPTY_VERSION = "0.0.0.RELEASE";
-	private static final String UAA_PRODUCT_EXTENSION_POINT = "org.springframework.ide.eclipse.uaa.product";
 	private static final long MIN_REPORTING_INTERVAL = 1000L * 60L * 60L * 12L; // report a unique usage record only all 12h
+	private static final Preferences P = PreferencesUtils.getPreferencesFor(UaaManager.class);
+	
+	private static final URL SIGNATURE_URL;
+	private static final URL UAA_URL;
+	
+	static {
+		// Produce the urls safely
+		try {
+			UAA_URL = new URL("http://uaa.springsource.org/uaa-eclipse.xml");
+			SIGNATURE_URL = new URL("http://uaa.springsource.org/uaa-eclipse.xml.asc");
+		}
+		catch (MalformedURLException neverHappens) {
+			throw new IllegalStateException(neverHappens);
+		}
+	}
 	
 	private static final String THREAD_NAME_TEMPLATE = "Reporting Thread-%s (%s/%s.%s.%s)";
 	private final AtomicInteger threadCount = new AtomicInteger(0);
-	
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1, new ThreadFactory() {
 		
 		public Thread newThread(Runnable runnable) {
@@ -98,8 +126,8 @@ public class UaaManager implements IUaa {
 	private final Lock w = rwl.writeLock();
 
 	private List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
-	private CachingUaaServiceExtension service = new CachingUaaServiceExtension(new JdkUrlTransmissionServiceImpl(new EclipseProxyService()));
 	private List<RegistrationAttempt> registrationAttempts = new CopyOnWriteArrayList<RegistrationAttempt>();
+	private CachingUaaServiceExtension service = new CachingUaaServiceExtension(new JdkUrlTransmissionServiceImpl(new EclipseProxyService()));
 
 	/**
 	 * {@inheritDoc}
@@ -289,26 +317,44 @@ public class UaaManager implements IUaa {
 		}
 	}
 	
+	/**
+	 * Starts up this {@link UaaManager} instance.
+	 */
 	public void start() {
 		// Since we run in an restricted environment we need to obtain the builder factory from the OSGi service
 		// registry instead of trying to create a new one from the API
 		XmlUtils.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
 		
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(UAA_PRODUCT_EXTENSION_POINT);
-		if (point != null) {
-			try {
-				w.lock();
-				for (IExtension extension : point.getExtensions()) {
-					for (IConfigurationElement config : extension.getConfigurationElements()) {
-						productDescriptors.add(new ExtensionProductDescriptor(config));
+		try { initProductDescriptions(getDefaultDetectedProducts(), getDefaultDetectedProductsSignaturer()); }
+		catch (IOException e) {}
+		
+		// Add Transmission listener so that we can download the list of detected products periodically.
+		service.addTransmissionEventListener(new TransmissionEventListener() {
+
+			public void afterTransmission(TransmissionType type, boolean success) {
+				if (type == TransmissionType.DOWNLOAD && success) {
+					InputStream configuration = null;
+					InputStream configurationSignature = null;
+					try {
+						configuration = service.getTransmissionService().download(UAA_URL);
+						configurationSignature = service.getTransmissionService().download(SIGNATURE_URL);
+						initProductDescriptions(configuration, configurationSignature);
+					}
+					catch (IOException e) {}
+					finally {
+						
+						// Safely close the streams
+						if (configuration != null) {
+							try { configuration.close(); }
+							catch (IOException e) {}
+						}
+						if (configurationSignature != null) {
+							try { configurationSignature.close(); }
+							catch (IOException e) {}
+						}
 					}
 				}
-				productDescriptors.add(new ProductDescriptor());
-			}
-			finally {
-				w.unlock();
-			}
-		}
+			}});
 		
 		// After starting up and reporting the initial state we should send the data
 		Job transmissionJob = new Job("Initializing Spring UAA") {
@@ -322,11 +368,13 @@ public class UaaManager implements IUaa {
 			}
 		};
 		transmissionJob.setSystem(true);
-		
 		// Schedule this for 10 minutes into the running instance
 		transmissionJob.schedule(10L * 60L * 1000L);
 	}
-
+	
+	/**
+	 * Stops this {@link UaaManager} instance. Shuts down all internal resources like thread pools etc.
+	 */
 	public void stop() {
 		try {
 			w.lock();
@@ -337,7 +385,21 @@ public class UaaManager implements IUaa {
 			w.unlock();
 		}
 	}
-
+	
+	/**
+	 * Returns the default products that is being shipped with Spring IDE. 
+	 */
+	private InputStream getDefaultDetectedProducts() throws IOException {
+		return UaaManager.class.getResourceAsStream("/org/springframework/ide/eclipse/internal/uaa/uaa-eclipse.xml");
+	}
+	
+	/**
+	 * Returns the signature of default products file that is being shipped with Spring IDE. 
+	 */
+	private InputStream getDefaultDetectedProductsSignaturer() throws IOException {
+		return UaaManager.class.getResourceAsStream("/org/springframework/ide/eclipse/internal/uaa/uaa-eclipse.xml.asc");
+	}
+	
 	/**
 	 * Returns the id of the feature that owns the given <code>plugin</code>.  
 	 */
@@ -357,14 +419,210 @@ public class UaaManager implements IUaa {
 		return null;
 	}
 	
+	/**
+	 * Initializes the {@link ProductDescriptor}s based on the content of <code>inputStream</code>.
+	 * A local copy stored in Preferences API is checked and only overriden if the given <code>inputStream</code>
+	 * represents a newer version. 
+	 */
+	private boolean initProductDescriptions(InputStream inputStream, InputStream signatureStream) {
+		try {
+			
+			if (inputStream == null || signatureStream == null) return false;
+			
+			// Convert the incoming input stream into a byte[] to start with (simplifies subsequent storage etc)
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			StreamUtils.copy(inputStream, baos);
+			byte[] incoming = baos.toByteArray();
+			
+			baos = new ByteArrayOutputStream();
+			StreamUtils.copy(signatureStream, baos);
+			byte[] incomingSignature = baos.toByteArray();
+			
+			if (incoming.length == 0 || incomingSignature.length == 0) return false;
+			
+			// Retrieve the existing document from the Preference API (if any) so we can consider version upgrade issues
+			byte[] existing = Base64.decode(P.get(DETECTED_PRODUCTS_KEY, EMPTY_STRING));
+			byte[] existingSignature = Base64.decode(P.get(DETECTED_PRODUCTS_SIGNATURE_KEY, EMPTY_STRING));
+			
+			// Check signatures of both to see if need to discard a stream
+			if (!PgpUtils.validateConfigurationSignature(new ByteArrayInputStream(incoming), new ByteArrayInputStream(incomingSignature))) {
+				incoming = EMPTY;
+				incomingSignature = EMPTY;
+			}
+			if (!PgpUtils.validateConfigurationSignature(new ByteArrayInputStream(existing), new ByteArrayInputStream(existingSignature))) {
+				existing = EMPTY;
+				existingSignature = EMPTY;
+			} 
+			
+			if (existing != EMPTY && existing.length > 0 && existingSignature != EMPTY && existingSignature.length > 0) {
+				// We need to consider version differences
+				int existingVersion = getVersion(existing);
+				int incomingVersion = getVersion(incoming);
+				if (existingVersion >= incomingVersion) {
+					// We're not going to do any replacement as the new version is no better than our current version
+					// Instead we'll treat our existing version as the newest version and continue running but only if the signature is valid.
+					incoming = existing;
+					incomingSignature = existingSignature;
+				}
+			}
+			
+			if (incoming == EMPTY && incoming.length == 0) {
+				return false;
+			}
+			
+			// Parse the incoming bytes into an XML document
+			Document d = XmlUtils.parse(new ByteArrayInputStream(incoming));
+			Element docElement = d.getDocumentElement();
+	
+			// Build products list
+			List<ProductDescriptor> newProductDescriptors = new ArrayList<UaaManager.ProductDescriptor>();
+			NodeList nodeList = docElement.getElementsByTagName("product");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				newProductDescriptors.add(new ExtensionProductDescriptor((Element) nodeList.item(i)));
+			}
+			newProductDescriptors.add(new ProductDescriptor());
+			
+			try {
+				w.lock();
+				// Override the global list
+				productDescriptors = newProductDescriptors;
+			}
+			finally {
+				w.unlock();
+			}
+			
+			// Replace the existing cached version if required
+			if (incoming != existing) {
+				// We need to do a replacement, as we didn't simply parse the existing one
+				String incomingBase64 = Base64.encodeBytes(incoming, Base64.GZIP);
+				String incomingSignatureBase64 = Base64.encodeBytes(incomingSignature, Base64.GZIP);
+				P.put(DETECTED_PRODUCTS_KEY, incomingBase64);
+				P.put(DETECTED_PRODUCTS_SIGNATURE_KEY, incomingSignatureBase64);
+				P.flush();
+				return true;
+			}
+			
+			return false;
+		}
+		catch (Throwable e) {}
+		return false;
+	}
+
+	/**
+	 * Checks if a given {@link RegistrationAttempt} should be allowed.
+	 * Returns <code>true</code> if no similar {@link RegistrationAttempt} has already been queued. 
+	 */
 	private boolean shouldSkipRegistrationAttempt(RegistrationAttempt attempt) {
 		int ix = registrationAttempts.indexOf(attempt);
 		return ix >= 0 && !registrationAttempts.get(ix).shouldRegisterAgain();
 	}
 
+	/**
+	 * Looks up the version attribute from the incoming XML document's <product version='someInteger'>.
+	 * @param document to parse (required)
+	 * @return the version number (or an exception of something went wrong, eg invalid document etc)
+	 */
+	private static int getVersion(byte[] document) {
+		try { 
+			Document d = XmlUtils.parse(new ByteArrayInputStream(document));
+			Element docElement = d.getDocumentElement();
+			String ver = docElement.getAttribute("version");
+			return new Integer(ver);
+		}
+		catch (Exception e) {
+			return -1;
+		}
+	}
+
+	/**
+	 * Extension to {@link BasicProxyService} that hooks in the Eclipse {@link IProxyService}.
+	 * @since 2.6.0
+	 */
+	private class EclipseProxyService extends BasicProxyService {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public Proxy setupProxy(URL url) {
+			IProxyData proxy = getProxy(url);
+			if (proxy != null && proxy.getHost() != null && proxy.getPort() >= 0 && proxy.getPort() <= 65535) {
+				try {
+					return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
+				}
+				catch (IllegalArgumentException e) {}
+			}
+			return super.setupProxy(url);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public Authenticator setupProxyAuthentication(URL url, Proxy proxy) {
+			final IProxyData selectedProxy = getProxy(url);
+			if (selectedProxy != null && (selectedProxy.getUserId() != null || selectedProxy.getPassword() != null)) {
+				return new Authenticator() {
+					@Override
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(selectedProxy.getUserId(),
+								(selectedProxy.getPassword() != null ? selectedProxy.getPassword().toCharArray() : null));
+					}
+				};
+			}
+			return super.setupProxyAuthentication(url, proxy);
+		}
+
+		/**
+		 * Resolves a proxy from the {@link IProxyService} for the given <code>url</code>. 
+		 */
+		private IProxyData getProxy(URL url) {
+			IProxyService proxyService = (UaaPlugin.getDefault() != null ? UaaPlugin.getDefault().getProxyService() : null);
+			if (url != null && service != null & proxyService != null && proxyService.isProxiesEnabled()) {
+				try {
+					URI uri = url.toURI();
+					IProxyData[] proxies = proxyService.select(uri);
+					return selectProxy(uri.getScheme(), proxies);
+				}
+				catch (URISyntaxException e) {
+					// ignore this
+				}
+			}
+			return null;
+		}
+		
+		/**
+		 * Select a proxy from the list of available proxies. 
+		 */
+		private IProxyData selectProxy(String protocol, IProxyData[] proxies) {
+			if (proxies == null || proxies.length == 0)
+				return null;
+			// If only one proxy is available, then use that
+			if (proxies.length == 1) {
+				return proxies[0];
+			}
+			// If more than one proxy is available, then if http/https protocol then look for that one...
+			// if not found then use first
+			if (protocol.equalsIgnoreCase("http")) {
+				for (int i = 0; i < proxies.length; i++) {
+					if (proxies[i].getType().equals(IProxyData.HTTP_PROXY_TYPE))
+						return proxies[i];
+				}
+			}
+			else if (protocol.equalsIgnoreCase("https")) {
+				for (int i = 0; i < proxies.length; i++) {
+					if (proxies[i].getType().equals(IProxyData.HTTPS_PROXY_TYPE))
+						return proxies[i];
+				}
+			}
+			// If we haven't found it yet, then return the first one.
+			return proxies[0];
+		}
+	}
+	
 	private class ExtensionProductDescriptor extends ProductDescriptor {
 
-		private Map<String, String> plugins;
+		private Map<String, String> pluginsToFeatureMapping;
 
 		private String productId;
 
@@ -372,24 +630,28 @@ public class UaaManager implements IUaa {
 
 		private String sourceControlIdentifier;
 
-		public ExtensionProductDescriptor(IConfigurationElement element) {
+		public ExtensionProductDescriptor(Element element) {
 			init(element);
 		}
 
-		private void init(IConfigurationElement element) {
+		private void init(Element element) {
 			productId = element.getAttribute("id");
-			sourceControlIdentifier = element.getAttribute("source-control-identifier");
-
-			rootPlugin = element.getNamespaceIdentifier();
-			if (element.getAttribute("root-plugin") != null) {
+			if (element.getAttribute("source-control-identifier") != null && element.getAttribute("source-control-identifier").length() > 0) {
+				sourceControlIdentifier = element.getAttribute("source-control-identifier");
+			}
+			if (element.getAttribute("root-plugin") != null && element.getAttribute("root-plugin").length() > 0) {
 				rootPlugin = element.getAttribute("root-plugin");
 			}
 
-			plugins = new HashMap<String, String>();
-			for (IConfigurationElement featureElement : element.getChildren("feature")) {
+			pluginsToFeatureMapping = new HashMap<String, String>();
+			NodeList features = element.getElementsByTagName("feature");
+			for (int i = 0; i < features.getLength(); i++) {
+				Element featureElement = (Element) features.item(i);
 				String feature = featureElement.getAttribute("id");
 				if (feature != null) {
-					for (IConfigurationElement pluginElement : featureElement.getChildren("plugin")) {
+					NodeList plugins = featureElement.getElementsByTagName("plugin");
+					for (int j = 0; j < plugins.getLength(); j++) {
+						Element pluginElement = (Element) plugins.item(j);
 						String pluginId = pluginElement.getAttribute("id");
 						if (pluginId != null) {
 							// Verify that the plugin does not belong to another eclipse feature. This is 
@@ -397,7 +659,7 @@ public class UaaManager implements IUaa {
 							// root feature (e.g. Groovy Eclipse patching JDT core)
 							String owningFeature = getOwningEclipseFeature(pluginId);
 							if (owningFeature == null || feature.equals(owningFeature)) {
-								plugins.put(pluginElement.getAttribute("id"), feature);
+								pluginsToFeatureMapping.put(pluginElement.getAttribute("id"), feature);
 							}
 						}
 					}
@@ -409,7 +671,7 @@ public class UaaManager implements IUaa {
 		}
 		
 		protected boolean canRegister(String usedPlugin) {
-			return plugins.containsKey(usedPlugin);
+			return pluginsToFeatureMapping.containsKey(usedPlugin);
 		}
 
 		protected void registerProductIfRequired(String project) {
@@ -432,7 +694,59 @@ public class UaaManager implements IUaa {
 		}
 
 	}
-	
+
+	private static class FeatureUseRegistrationAttempt extends RegistrationAttempt {
+		
+		private final Map<String, String> featureData;
+		private final String plugin;
+		
+		public FeatureUseRegistrationAttempt(String plugin, Map<String, String> featureData) {
+			this.plugin = plugin;
+			this.featureData = featureData;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (!(obj instanceof FeatureUseRegistrationAttempt)) {
+				return false;
+			}
+			FeatureUseRegistrationAttempt other = (FeatureUseRegistrationAttempt) obj;
+			if (featureData == null) {
+				if (other.featureData != null) {
+					return false;
+				}
+			}
+			else if (!featureData.equals(other.featureData)) {
+				return false;
+			}
+			if (plugin == null) {
+				if (other.plugin != null) {
+					return false;
+				}
+			}
+			else if (!plugin.equals(other.plugin)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((featureData == null) ? 0 : featureData.hashCode());
+			result = prime * result + ((plugin == null) ? 0 : plugin.hashCode());
+			return result;
+		}
+
+	}
+
 	private class ProductDescriptor {
 
 		protected Product product;
@@ -443,23 +757,23 @@ public class UaaManager implements IUaa {
 			init();
 		}
 
-		public final boolean registerProjectUsage(String usedPlugin, String project, Map<String, String> featureData) {
-			if (canRegister(usedPlugin) && project != null) {
+		public final boolean registerFeatureUseIfMatch(String usedPlugin, Map<String, String> featureData) {
+			if (canRegister(usedPlugin)) {
 
-				registerProductIfRequired(project);
+				registerProductIfRequired(null);
 				registerFeature(usedPlugin, featureData);
-				service.registerProductUsage(product, project);
 
 				return true;
 			}
 			return false;
 		}
 
-		public final boolean registerFeatureUseIfMatch(String usedPlugin, Map<String, String> featureData) {
-			if (canRegister(usedPlugin)) {
+		public final boolean registerProjectUsage(String usedPlugin, String project, Map<String, String> featureData) {
+			if (canRegister(usedPlugin) && project != null) {
 
-				registerProductIfRequired(null);
+				registerProductIfRequired(project);
 				registerFeature(usedPlugin, featureData);
+				service.registerProductUsage(product, project);
 
 				return true;
 			}
@@ -639,174 +953,17 @@ public class UaaManager implements IUaa {
 			}
 		}
 	}
-
-	/**
-	 * Extension to {@link BasicProxyService} that hooks in the Eclipse {@link IProxyService}.
-	 * @since 2.6.0
-	 */
-	private class EclipseProxyService extends BasicProxyService {
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public Proxy setupProxy(URL url) {
-			IProxyData proxy = getProxy(url);
-			if (proxy != null && proxy.getHost() != null && proxy.getPort() >= 0 && proxy.getPort() <= 65535) {
-				try {
-					return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
-				}
-				catch (IllegalArgumentException e) {}
-			}
-			return super.setupProxy(url);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public Authenticator setupProxyAuthentication(URL url, Proxy proxy) {
-			final IProxyData selectedProxy = getProxy(url);
-			if (selectedProxy != null && (selectedProxy.getUserId() != null || selectedProxy.getPassword() != null)) {
-				return new Authenticator() {
-					@Override
-					protected PasswordAuthentication getPasswordAuthentication() {
-						return new PasswordAuthentication(selectedProxy.getUserId(),
-								(selectedProxy.getPassword() != null ? selectedProxy.getPassword().toCharArray() : null));
-					}
-				};
-			}
-			return super.setupProxyAuthentication(url, proxy);
-		}
-
-		/**
-		 * Resolves a proxy from the {@link IProxyService} for the given <code>url</code>. 
-		 */
-		private IProxyData getProxy(URL url) {
-			IProxyService proxyService = (UaaPlugin.getDefault() != null ? UaaPlugin.getDefault().getProxyService() : null);
-			if (url != null && service != null & proxyService != null && proxyService.isProxiesEnabled()) {
-				try {
-					URI uri = url.toURI();
-					IProxyData[] proxies = proxyService.select(uri);
-					return selectProxy(uri.getScheme(), proxies);
-				}
-				catch (URISyntaxException e) {
-					// ignore this
-				}
-			}
-			return null;
-		}
-		
-		/**
-		 * Select a proxy from the list of available proxies. 
-		 */
-		private IProxyData selectProxy(String protocol, IProxyData[] proxies) {
-			if (proxies == null || proxies.length == 0)
-				return null;
-			// If only one proxy is available, then use that
-			if (proxies.length == 1) {
-				return proxies[0];
-			}
-			// If more than one proxy is available, then if http/https protocol then look for that one...
-			// if not found then use first
-			if (protocol.equalsIgnoreCase("http")) {
-				for (int i = 0; i < proxies.length; i++) {
-					if (proxies[i].getType().equals(IProxyData.HTTP_PROXY_TYPE))
-						return proxies[i];
-				}
-			}
-			else if (protocol.equalsIgnoreCase("https")) {
-				for (int i = 0; i < proxies.length; i++) {
-					if (proxies[i].getType().equals(IProxyData.HTTPS_PROXY_TYPE))
-						return proxies[i];
-				}
-			}
-			// If we haven't found it yet, then return the first one.
-			return proxies[0];
-		}
-	}
-
-	private static abstract class RegistrationAttempt {
-		
-		private final long registrationAttemptTime = new Date().getTime();
-
-		public boolean shouldRegisterAgain() {
-			return System.currentTimeMillis() > registrationAttemptTime + MIN_REPORTING_INTERVAL;
-		}
-	}
-	
-	private static class FeatureUseRegistrationAttempt extends RegistrationAttempt {
-		
-		private final String plugin;
-		private final Map<String, String> featureData;
-		
-		public FeatureUseRegistrationAttempt(String plugin, Map<String, String> featureData) {
-			this.plugin = plugin;
-			this.featureData = featureData;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((featureData == null) ? 0 : featureData.hashCode());
-			result = prime * result + ((plugin == null) ? 0 : plugin.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (!(obj instanceof FeatureUseRegistrationAttempt)) {
-				return false;
-			}
-			FeatureUseRegistrationAttempt other = (FeatureUseRegistrationAttempt) obj;
-			if (featureData == null) {
-				if (other.featureData != null) {
-					return false;
-				}
-			}
-			else if (!featureData.equals(other.featureData)) {
-				return false;
-			}
-			if (plugin == null) {
-				if (other.plugin != null) {
-					return false;
-				}
-			}
-			else if (!plugin.equals(other.plugin)) {
-				return false;
-			}
-			return true;
-		}
-
-	}
 	
 	private static class ProductRegistrationAttempt extends RegistrationAttempt {
 		
 		private final String productId; 
-		private final String version;
 		private final String projectId;
+		private final String version;
 	
 		public ProductRegistrationAttempt(String productId, String version, String projectId) {
 			this.productId = productId;
 			this.version = version;
 			this.projectId = projectId;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((productId == null) ? 0 : productId.hashCode());
-			result = prime * result + ((projectId == null) ? 0 : projectId.hashCode());
-			result = prime * result + ((version == null) ? 0 : version.hashCode());
-			return result;
 		}
 
 		@Override
@@ -847,13 +1004,23 @@ public class UaaManager implements IUaa {
 			}
 			return true;
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((productId == null) ? 0 : productId.hashCode());
+			result = prime * result + ((projectId == null) ? 0 : projectId.hashCode());
+			result = prime * result + ((version == null) ? 0 : version.hashCode());
+			return result;
+		}
 	}
 	
 	private static class ProjectUsageRegistrationAttempt extends RegistrationAttempt {
 		
 		private final String feature;
-		private final String projectId;
 		private final Map<String, String> featureData;
+		private final String projectId;
 
 		public ProjectUsageRegistrationAttempt(String feature, String projectId, Map<String, String> featureData) {
 			this.feature = feature;
@@ -861,16 +1028,6 @@ public class UaaManager implements IUaa {
 			this.featureData = featureData;
 		}
 		
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((feature == null) ? 0 : feature.hashCode());
-			result = prime * result + ((featureData == null) ? 0 : featureData.hashCode());
-			result = prime * result + ((projectId == null) ? 0 : projectId.hashCode());
-			return result;
-		}
-
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj) {
@@ -908,6 +1065,25 @@ public class UaaManager implements IUaa {
 				return false;
 			}
 			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((feature == null) ? 0 : feature.hashCode());
+			result = prime * result + ((featureData == null) ? 0 : featureData.hashCode());
+			result = prime * result + ((projectId == null) ? 0 : projectId.hashCode());
+			return result;
+		}
+	}
+	
+	private static abstract class RegistrationAttempt {
+		
+		private final long registrationAttemptTime = new Date().getTime();
+
+		public boolean shouldRegisterAgain() {
+			return System.currentTimeMillis() > registrationAttemptTime + MIN_REPORTING_INTERVAL;
 		}
 	}
 	
