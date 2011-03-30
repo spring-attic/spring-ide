@@ -10,7 +10,7 @@
 #     Spring IDE Developers - initial API and implementation
 ################################################################################
 
-TARGET_DIR=../required-bundles
+TARGET_DIR=../../bundles
 #TARGET_DIR=/Users/cdupuis/Development/Java/work/dm-server-tools/main-branches/jersey/required-bundles
 
 echo "...source bundles"

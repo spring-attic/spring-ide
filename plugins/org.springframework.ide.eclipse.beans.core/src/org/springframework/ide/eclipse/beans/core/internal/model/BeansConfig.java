@@ -73,6 +73,7 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
@@ -1200,6 +1201,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 */
 	public static class ToolingFriendlyBeanDefinitionDocumentReader extends DefaultBeanDefinitionDocumentReader {
 
+		private Environment environment;
+
+		@Override
+		public void setEnvironment(Environment environment) {
+			super.setEnvironment(environment);
+			this.environment = environment;
+		}
+		
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1218,9 +1227,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		 * {@inheritDoc}
 		 */
 		@Override
-		protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root) {
-			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext);
-			delegate.initDefaults(root);
+		protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext, environment);
+			delegate.initDefaults(root, parentDelegate);
 			return delegate;
 		}
 
@@ -1263,8 +1272,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 		private final XmlReaderContext readerContext;
 
-		public ErrorSuppressingBeanDefinitionParserDelegate(XmlReaderContext readerContext) {
-			super(readerContext);
+		public ErrorSuppressingBeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
+			super(readerContext, environment);
 			this.readerContext = readerContext;
 		}
 
