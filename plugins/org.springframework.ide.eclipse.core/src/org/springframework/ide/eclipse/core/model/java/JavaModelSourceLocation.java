@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -67,7 +68,12 @@ public class JavaModelSourceLocation implements Serializable, IModelSourceLocati
 				}
 				IPath path = element.getPath();
 				if (path != null && path.toFile().exists()) {
-					return new FileResource(path.toString());
+					if (path.isAbsolute()) {
+						return new FileSystemResource(path.toFile());
+					}
+					else {
+						return new FileResource(path.toString());
+					}
 				}
 			}
 		}
