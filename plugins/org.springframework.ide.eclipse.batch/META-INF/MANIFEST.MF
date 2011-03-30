@@ -49,5 +49,3 @@ Export-Package: org.springframework.ide.eclipse.batch,
  org.springframework.ide.eclipse.batch.ui.editor.hyperlink.batch,
  org.springframework.ide.eclipse.batch.ui.editor.outline.batch,
  org.springframework.ide.eclipse.batch.ui.namespaces
-Bundle-ClassPath: lib/org.springframework.batch.core-2.0.1.RELEASE.jar,
- .
