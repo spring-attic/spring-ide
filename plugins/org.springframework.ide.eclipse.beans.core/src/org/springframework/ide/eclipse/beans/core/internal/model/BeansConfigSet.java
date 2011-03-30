@@ -476,7 +476,6 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPersistableElement.class) {

@@ -73,6 +73,7 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
+import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -406,7 +407,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,	documentAccessor));
 					reader.setDocumentReaderClass(ToolingFriendlyBeanDefinitionDocumentReader.class);
 					reader.setBeanNameGenerator(beanNameGenerator);
-
+					// reader.setEnvironment(new ToolingAwareEnvironment());
+					
 					final Map<Throwable, Integer> throwables = new HashMap<Throwable, Integer>();
 					try {
 						Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
@@ -893,7 +895,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		}
 
 		private void addDefaultToCache(DocumentDefaultsDefinition defaultsDefinition, Resource resource) {
-			defaultDefinitionsCache.put(resource, defaultsDefinition);
+			if (!defaultDefinitionsCache.containsKey(resource)) {
+				defaultDefinitionsCache.put(resource, defaultsDefinition);
+			}
 		}
 
 		private void addImportToCache(ImportDefinition importDefinition, Resource resource) {
@@ -1301,5 +1305,17 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			return super.parseCustomElement(ele, containingBd);
 		}
 	}
+	
+	static class ToolingAwareEnvironment extends AbstractEnvironment {
 
+		@Override
+		protected Set<String> doGetActiveProfiles() {
+			return Collections.emptySet();
+		}
+		
+		@Override
+		protected Set<String> doGetDefaultProfiles() {
+			return Collections.emptySet();
+		}
+	}
 }
