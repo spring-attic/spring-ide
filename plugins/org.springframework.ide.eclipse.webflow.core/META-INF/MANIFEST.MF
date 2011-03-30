@@ -45,9 +45,6 @@ Import-Package: javax.xml.parsers,
  org.springframework.ide.eclipse.core.model.validation,
  org.springframework.util;version="[3.1.0.M1,3.2.0)",
  org.springframework.util.xml;version="[3.1.0.M1,3.2.0)",
- org.springframework.webflow.config;version="[2.0.7.A,2.1.0)",
- org.springframework.webflow.core.collection;version="[2.0.7.A,2.1.0)",
- org.springframework.webflow.execution.factory;version="[2.0.7.A,2.1.0)",
  org.w3c.dom,
  org.xml.sax,
  org.xml.sax.helpers
@@ -60,5 +57,4 @@ Export-Package: org.springframework.ide.eclipse.webflow.core,
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/spring-binding-1.0.3.jar,
- lib/spring-webflow-1.0.3.jar,
  .

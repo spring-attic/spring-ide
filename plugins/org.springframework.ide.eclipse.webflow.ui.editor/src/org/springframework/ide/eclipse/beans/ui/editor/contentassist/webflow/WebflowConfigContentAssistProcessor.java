@@ -15,7 +15,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassConten
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassHierachyContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
-import org.springframework.webflow.engine.builder.FlowBuilder;
 
 /**
  * This {@link INamespaceContentAssistProcessor} is responsible to provide content assist support
@@ -44,7 +43,7 @@ public class WebflowConfigContentAssistProcessor extends NamespaceContentAssistP
 		registerContentAssistCalculator("flow-registry", "parent", beanRef);
 		registerContentAssistCalculator("flow-registry", "flow-builder-services", beanRef);
 		registerContentAssistCalculator("flow-builder", "class",
-				new ClassHierachyContentAssistCalculator(FlowBuilder.class.getName()));
+				new ClassHierachyContentAssistCalculator("org.springframework.webflow.engine.builder.FlowBuilder"));
 		registerContentAssistCalculator("flow-builder-services", "view-factory-creator", beanRef);
 		registerContentAssistCalculator("flow-builder-services", "expression-parser", beanRef);
 		registerContentAssistCalculator("flow-builder-services", "conversion-service", beanRef);
