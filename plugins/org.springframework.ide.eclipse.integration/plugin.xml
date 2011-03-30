@@ -15,17 +15,6 @@
 <plugin>
 
 	<extension
-		point="org.springframework.ide.eclipse.beans.core.namespaces">
-		<namespace uri="http://www.springframework.org/schema/oxm" >
-			<namespaceHandler class="org.springframework.oxm.config.OxmNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd" 
-				provider="org.springframework.oxm" />
-			<namespaceHandler class="org.springframework.oxm.v1.config.OxmNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd" />
-		</namespace>
-	</extension>
-	
-	<extension
 		point="org.springframework.ide.eclipse.beans.ui.namespaces">
 		<namespace
 			name="Spring Oxm"
