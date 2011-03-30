@@ -42,25 +42,4 @@
 			uri="http://www.springframework.org/schema/security" />
 	</extension>
 	
-	<extension
-		point="org.springframework.ide.eclipse.beans.core.namespaces">
-		<namespace uri="http://www.springframework.org/schema/security" >
-			<namespaceHandler class="org.springframework.security.v2.config.SecurityNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.xsd" />
-			<namespaceHandler class="org.springframework.security.v2.config.SecurityNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.1.xsd" />
-			<namespaceHandler class="org.springframework.security.v2.config.SecurityNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.2.xsd" />
-			<namespaceHandler class="org.springframework.security.v2.config.SecurityNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/security/spring-security-2.0.4.xsd" />
-			
-			<namespaceHandler class="org.springframework.security.config.SecurityNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/security/spring-security.xsd"
-				provider="org.springframework.security.config"/>
-			<namespaceHandler class="org.springframework.security.config.SecurityNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/security/spring-security-3.0.xsd" 
-				provider="org.springframework.security.config"/>
-		</namespace>
-	</extension>
-	
 </plugin>
