@@ -10,10 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.client;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.prefs.BackingStoreException;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.TransmissionService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.TransmissionAwareUaaServiceImpl;
@@ -37,6 +45,8 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	private final Thread queuedUsageRecordsProcessingThread;
 	private volatile boolean shouldExit = false;
 
+	private final TransmissionEventListener eventListener = new FlushingTramissionEventListener();
+
 	public QueueingUaaServiceExtension(TransmissionService transmssionService) {
 		super(transmssionService);
 
@@ -51,7 +61,8 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 		this.queuedUsageRecordsProcessingThread = new Thread(new QueuedUsageRecordRunnable(), getThreadName(THREAD_NAME_TEMPLATE));
 		this.queuedUsageRecordsProcessingThread.setDaemon(true);
 		this.queuedUsageRecordsProcessingThread.start();
-
+		
+		removeTransmissionEventListener(eventListener);
 	}
 	
 	/**
@@ -101,6 +112,7 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	 */
 	public void stop() {
 		stopQueuedUsageRecordsProcessingThread();
+		removeTransmissionEventListener(eventListener);
 	}
 
 	private void queueFeatureUseUsageRecord(Product product, FeatureUse feature, byte[] featureData) {
@@ -135,7 +147,7 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	/**
 	 * Processes the {@link UsageRecord}s stored in {@link #usageRecords}.
 	 */
-	private void processQueuedUsageRecords() {
+	private synchronized void processQueuedUsageRecords() {
 		
 		// Work on a local copy
 		UsageRecord[] records = usageRecords.toArray(new UsageRecord[0]);
@@ -150,12 +162,14 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 			// Process each usage record
 			for (UsageRecord record : records) {
 				if (record instanceof ProductUsageRecord) {
-					super.registerProductUsage(record.getProduct(), ((ProductUsageRecord) record).getProductData(), 
-							((ProductUsageRecord) record).getProjectId());
+					byte[] data = getProductUseData(record.getProduct());
+					byte[] newData = ((ProductUsageRecord) record).getProductData(); 
+					super.registerProductUsage(record.getProduct(), mergeData(data, newData), ((ProductUsageRecord) record).getProjectId());
 				}
 				else if (record instanceof FeatureUseUsageRecord) {
-					super.registerFeatureUsage(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse(), 
-							((FeatureUseUsageRecord) record).getFeatureData());
+					byte[] data = getFeatureUseData(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse());
+					byte[] newData = ((FeatureUseUsageRecord) record).getFeatureData(); 
+					super.registerFeatureUsage(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse(), mergeData(data, newData));
 				}
 				
 				// Remove processed records
@@ -165,6 +179,64 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 			// Finally flush changes back into the Preferences API
 			try { P.flush(); }
 			catch (BackingStoreException e) {}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private byte[] mergeData(byte[] existingData, byte[] data) {
+		// Quick sanity check to prevent doing too much in case no new data has been presented
+		if (data == null || data.length == 0) {
+			return existingData;
+		}
+		
+		// Load existing feature data
+		JSONObject existingFeatureData = new JSONObject();
+		if (existingData != null && existingData.length > 0) {
+			Object existingJson = JSONValue.parse(new String(existingData));
+			if (existingJson instanceof JSONObject) {
+				existingFeatureData.putAll(((JSONObject) existingJson));
+			}
+		}
+		
+		// Load new data into JSON object
+		Map<String, String> featureData = new JSONObject();
+		if (data != null && data.length > 0) {
+			Object json = JSONValue.parse(new String(data));
+			if (json instanceof JSONObject) {
+				featureData.putAll((JSONObject) json);
+			}
+		}
+
+		// Merge feature data: merge those values whose keys already exist
+		featureData = new HashMap<String, String>(featureData);
+		for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
+			if (featureData.containsKey(existingEntry.getKey())) {
+				String newValue = featureData.get(existingEntry.getKey());
+				Object existingValue = existingEntry.getValue();
+				if (!newValue.equals(existingValue)) {
+					if (existingValue instanceof List) {
+						List<String> existingValues = (List<String>) existingValue;
+						if (!existingValues.contains(newValue)) {
+							existingValues.add(newValue);
+						}
+					}
+					else {
+						List<String> value = new ArrayList<String>();
+						value.add((String) existingValue);
+						value.add(featureData.get(existingEntry.getKey()));
+						existingFeatureData.put(existingEntry.getKey(), value);
+					}
+				}
+				featureData.remove(existingEntry.getKey());
+			}
+		}
+
+		// Merge the remaining new values
+		existingFeatureData.putAll(featureData);
+
+		try { return existingFeatureData.toJSONString().getBytes("UTF-8"); }
+		catch (UnsupportedEncodingException e) {
+			return null;
 		}
 	}
 	
@@ -187,7 +259,7 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	/**
 	 * {@link Runnable} that periodically calls {@link QueueingUaaServiceExtension#processQueuedUsageRecords()}. 
 	 */
-	private class QueuedUsageRecordRunnable implements Runnable {
+	class QueuedUsageRecordRunnable implements Runnable {
 
 		/**
 		 * {@inheritDoc}
@@ -218,4 +290,16 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 		}
 	}
 	
+	class FlushingTramissionEventListener implements TransmissionEventListener {
+
+		public void beforeTransmission(TransmissionType type) {
+			if (type == TransmissionType.UPLOAD) {
+				processQueuedUsageRecords();
+			}
+		}
+
+		public void afterTransmission(TransmissionType type, boolean successful) {
+			// Intentionally left empty
+		}
+	}
 }
