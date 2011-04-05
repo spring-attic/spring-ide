@@ -47,7 +47,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -64,9 +63,6 @@ import org.springframework.uaa.client.internal.JdkUrlTransmissionServiceImpl;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
-import org.springframework.uaa.client.protobuf.UaaClient.ProductUse;
-import org.springframework.uaa.client.protobuf.UaaClient.UaaEnvelope;
-import org.springframework.uaa.client.protobuf.UaaClient.UserAgent;
 import org.springframework.uaa.client.util.Base64;
 import org.springframework.uaa.client.util.PgpUtils;
 import org.springframework.uaa.client.util.PreferencesUtils;
@@ -354,6 +350,9 @@ public class UaaManager implements IUaa {
 						}
 					}
 				}
+			}
+
+			public void beforeTransmission(TransmissionType type) {
 			}});
 		
 		// After starting up and reporting the initial state we should send the data
@@ -780,79 +779,8 @@ public class UaaManager implements IUaa {
 			return false;
 		}
 
-		private String getRegisteredFeatureData(String usedPlugin) {
-			try {
-				UaaEnvelope uaaEnvelope = service.getPayload();
-				if (uaaEnvelope != null && uaaEnvelope.getUserAgent() != null) {
-					UserAgent userAgent = uaaEnvelope.getUserAgent();
-					for (int i = 0; i < userAgent.getProductUseCount(); i++) {
-						ProductUse p = userAgent.getProductUse(i);
-						if (p.getProduct().getName().equals(product.getName())) {
-							for (int j = 0; j < p.getFeatureUseCount(); j++) {
-								FeatureUse f = p.getFeatureUse(j);
-								if (f.getName().equals(usedPlugin) && !f.getFeatureData().isEmpty()) {
-									return f.getFeatureData().toStringUtf8();
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (Exception e) {}
-			return null;
-		}
-
 		private void init() {
 			buildProduct(Platform.PI_RUNTIME, "Eclipse", null);
-		}
-
-		@SuppressWarnings("unchecked")
-		private JSONObject mergeFeatureData(String usedPlugin, Map<String, String> featureData) {
-			JSONObject existingFeatureData = new JSONObject();
-
-			// Quick sanity check to prevent doing too much in case no new
-			// feature data has been presented
-			if (featureData == null || featureData.size() == 0) {
-				return existingFeatureData;
-			}
-
-			// Load existing feature data from backend store
-			String existingFeatureDataString = getRegisteredFeatureData(usedPlugin);
-			if (existingFeatureDataString != null) {
-				Object existingJson = JSONValue.parse(existingFeatureDataString);
-				if (existingJson instanceof JSONObject) {
-					existingFeatureData.putAll(((JSONObject) existingJson));
-				}
-			}
-
-			// Merge feature data: merge those values whose keys already exist
-			featureData = new HashMap<String, String>(featureData);
-			for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
-				if (featureData.containsKey(existingEntry.getKey())) {
-					String newValue = featureData.get(existingEntry.getKey());
-					Object existingValue = existingEntry.getValue();
-					if (!newValue.equals(existingValue)) {
-						if (existingValue instanceof List) {
-							List<String> existingValues = (List<String>) existingValue;
-							if (!existingValues.contains(newValue)) {
-								existingValues.add(newValue);
-							}
-						}
-						else {
-							List<String> value = new ArrayList<String>();
-							value.add((String) existingValue);
-							value.add(featureData.get(existingEntry.getKey()));
-							existingFeatureData.put(existingEntry.getKey(), value);
-						}
-					}
-					featureData.remove(existingEntry.getKey());
-				}
-			}
-
-			// Merge the remaining new values
-			existingFeatureData.putAll(featureData);
-
-			return existingFeatureData;
 		}
 
 		protected void buildProduct(String symbolicName, String name, String sourceControlIdentifier) {
@@ -891,9 +819,6 @@ public class UaaManager implements IUaa {
 		}
 
 		protected void registerFeature(String usedPlugin, Map<String, String> featureData) {
-			// Get existing feature data and merge with new data
-			JSONObject json = mergeFeatureData(usedPlugin, featureData);
-			
 			// Get the feature version from the plugin
 			String featureVersion = null;
 			Bundle bundle = Platform.getBundle(usedPlugin);
@@ -909,8 +834,8 @@ public class UaaManager implements IUaa {
 
 			try {
 				// If additional feature data was supplied or is already registered pass it to UAA
-				if (json.size() > 0) {
-					service.registerFeatureUsage(product, feature, json.toJSONString().getBytes("UTF-8"));
+				if (featureData.size() > 0) {
+					service.registerFeatureUsage(product, feature, JSONObject.toJSONString(featureData).getBytes("UTF-8"));
 				}
 				else {
 					service.registerFeatureUsage(product, feature);
