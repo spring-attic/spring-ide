@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.internal.uaa.monitor.PartUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.ServerUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.preferences.UaaDialog;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.uaa.client.UaaService;
 
 /**
  * Plug-in entry point for the UAA Plugin.
@@ -149,6 +150,10 @@ public class UaaPlugin extends AbstractUIPlugin {
 
 	public static IUaa getUAA() {
 		return getDefault().usageMonitorManager;
+	}
+	
+	public static UaaService getUaaService() {
+		return getDefault().usageMonitorManager.getUaaService();
 	}
 
 	public static UaaPlugin getDefault() {

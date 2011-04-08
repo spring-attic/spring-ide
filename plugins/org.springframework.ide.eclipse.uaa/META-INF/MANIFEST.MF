@@ -15,7 +15,10 @@ Bundle-ClassPath: lib/org.springframework.uaa.client-1.0.2.BUILD-SNAPSHOT.jar,
  lib/json_simple-1.1.jar,
  .
 Bundle-Localization: plugin
-Export-Package: org.springframework.ide.eclipse.uaa
+Export-Package: org.springframework.ide.eclipse.uaa,
+ org.springframework.uaa.client,
+ org.springframework.uaa.client.protobuf,
+ org.springframework.uaa.client.util
 Import-Package: org.eclipse.core.commands,
  org.eclipse.core.commands.common,
  org.eclipse.core.net.proxy,
