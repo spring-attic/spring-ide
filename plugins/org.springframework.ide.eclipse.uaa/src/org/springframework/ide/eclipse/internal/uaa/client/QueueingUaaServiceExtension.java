@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.prefs.BackingStoreException;
 
 import org.springframework.uaa.client.TransmissionEventListener;
-import org.springframework.uaa.client.TransmissionEventListener.TransmissionType;
 import org.springframework.uaa.client.TransmissionService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.TransmissionAwareUaaServiceImpl;
