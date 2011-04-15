@@ -52,10 +52,10 @@ import org.json.simple.JSONValue;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.internal.uaa.client.QueueingUaaServiceExtension;
 import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.uaa.UaaUtils;
 import org.springframework.uaa.client.TransmissionAwareUaaService;
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
@@ -325,7 +325,7 @@ public class UaaManager implements IUaa {
 	public void start() {
 		// Since we run in an restricted environment we need to obtain the builder factory from the OSGi service
 		// registry instead of trying to create a new one from the API
-		XmlUtils.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
+		XmlUtils.setDocumentBuilderFactory(UaaUtils.getDocumentBuilderFactory());
 		
 		try { initProductDescriptions(getDefaultDetectedProducts(), getDefaultDetectedProductsSignaturer()); }
 		catch (IOException e) {}

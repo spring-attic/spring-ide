@@ -32,9 +32,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.uaa.IUaa;
+import org.springframework.ide.eclipse.uaa.UaaPlugin;
 
 /**
  * {@link IUsageMonitor} that records usage data for project nature and builder definitions.
@@ -210,7 +210,7 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 							delta.accept(getVisitor(), VISITOR_FLAGS);
 						}
 						catch (CoreException e) {
-							SpringCore.log("Error while traversing resource change delta", e);
+							UaaPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, UaaPlugin.PLUGIN_ID, "Error while traversing resource change delta", e));
 						}
 					}
 					break;
@@ -226,7 +226,7 @@ public class NatureAndBuilderUsageMonitor implements IUsageMonitor {
 							delta.accept(getVisitor(), VISITOR_FLAGS);
 						}
 						catch (CoreException e) {
-							SpringCore.log("Error while traversing resource change delta", e);
+							UaaPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, UaaPlugin.PLUGIN_ID, "Error while traversing resource change delta", e));
 						}
 					}
 					break;

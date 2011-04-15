@@ -10,7 +10,8 @@ Bundle-ActivationPolicy: lazy
 Eclipse-LazyStart: true
 Bundle-Localization: plugin
 Export-Package: org.springframework.ide.eclipse.uaa
-Import-Package: org.eclipse.core.commands,
+Import-Package: com.google.protobuf,
+ org.eclipse.core.commands,
  org.eclipse.core.commands.common,
  org.eclipse.core.net.proxy,
  org.eclipse.core.resources,
@@ -29,25 +30,20 @@ Import-Package: org.eclipse.core.commands,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
  org.eclipse.ui,
+ org.eclipse.ui.browser,
  org.eclipse.ui.commands,
  org.eclipse.ui.dialogs,
+ org.eclipse.ui.internal.browser,
  org.eclipse.ui.plugin,
  org.eclipse.ui.progress,
  org.eclipse.wst.server.core,
+ org.json.simple,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.springframework.ide.eclipse.core,
- org.springframework.ide.eclipse.core.internal.model.validation,
- org.springframework.ide.eclipse.core.java,
- org.springframework.ide.eclipse.core.model.validation,
- org.springframework.ide.eclipse.core.project,
- org.springframework.ide.eclipse.ui,
- org.springframework.util;version="[3.0.5.RELEASE,3.1.0)",
  org.springframework.uaa.client,
- org.springframework.uaa.client.protobuf,
  org.springframework.uaa.client.internal,
+ org.springframework.uaa.client.protobuf,
  org.springframework.uaa.client.util,
- org.json.simple,
- com.google.protobuf
+ org.springframework.util;version="[3.0.5.RELEASE,3.1.0)"
 
 

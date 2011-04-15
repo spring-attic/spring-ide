@@ -27,7 +27,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.uaa.UaaUtils;
 
 /**
  * {@link PreferencePage} to configure the UAA.
@@ -178,10 +178,10 @@ public class UaaPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if ("tou".equals(e.text)) {
-					SpringUIUtils.openUrl("http://www.springsource.org/uaa/terms_of_use");
+					UaaUtils.openUrl("http://www.springsource.org/uaa/terms_of_use");
 				}
 				else if ("faq".equals(e.text)) {
-					SpringUIUtils.openUrl("http://www.springsource.org/uaa/faq");
+					UaaUtils.openUrl("http://www.springsource.org/uaa/faq");
 				}
 			}
 		});

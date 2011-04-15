@@ -44,12 +44,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryDirectory;
 import org.osgi.framework.Constants;
-import org.springframework.ide.eclipse.core.java.ClassUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.uaa.IUaa;
+import org.springframework.ide.eclipse.uaa.UaaUtils;
 import org.springframework.uaa.client.UaaDetectedProducts.ProductInfo;
 import org.springframework.uaa.client.UaaServiceFactory;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link IUsageMonitor} implementation that captures libraries used in Eclipse projects.
@@ -117,8 +117,8 @@ public class LibraryUsageMonitor implements IUsageMonitor {
 
 				// Before we start get all projects and record libraries
 				for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-					if (JdtUtils.isJavaProject(project) && project.isOpen() && project.isAccessible()) {
-						projectClasspathChanged(JdtUtils.getJavaProject(project));
+					if (UaaUtils.isJavaProject(project) && project.isOpen() && project.isAccessible()) {
+						projectClasspathChanged(UaaUtils.getJavaProject(project));
 					}
 				}
 

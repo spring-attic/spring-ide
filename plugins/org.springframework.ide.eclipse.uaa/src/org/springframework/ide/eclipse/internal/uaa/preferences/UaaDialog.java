@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.uaa.UaaUtils;
 
 /**
  * @author Christian Dupuis
@@ -111,10 +111,10 @@ public class UaaDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if ("tou".equals(e.text)) {
-					SpringUIUtils.openUrl("http://www.springsource.org/uaa/terms_of_use");
+					UaaUtils.openUrl("http://www.springsource.org/uaa/terms_of_use");
 				}
 				else if ("faq".equals(e.text)) {
-					SpringUIUtils.openUrl("http://www.springsource.org/uaa/faq");
+					UaaUtils.openUrl("http://www.springsource.org/uaa/faq");
 				}
 				else if ("prefs".equals(e.text)) {
 					Display.getDefault().asyncExec(new Runnable() {

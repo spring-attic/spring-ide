@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.internal.uaa.monitor;
+package org.springframework.ide.eclipse.core.internal.project.uaa;
 
 import java.util.Collections;
 import java.util.Set;
@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectContributionEventListenerAdapter;
 import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link IProjectContributionEventListener} implementation that captures executions of {@link IProjectBuilder}s and
@@ -31,8 +32,9 @@ import org.springframework.ide.eclipse.uaa.UaaPlugin;
  * @since 2.5.2
  */
 public class ProjectContributionUsageMonitor extends ProjectContributionEventListenerAdapter {
-
-	private IUaa manager;
+	
+	private static final boolean UAA_AVAILABLE = ClassUtils.isPresent("org.springframework.ide.eclipse.uaa.UaaPlugin", 
+			ProjectContributionEventListenerAdapter.class.getClassLoader());
 
 	/**
 	 * {@inheritDoc}
@@ -40,11 +42,7 @@ public class ProjectContributionUsageMonitor extends ProjectContributionEventLis
 	@Override
 	public void finishProjectBuilder(ProjectBuilderDefinition contributor, Set<IResource> affectedResources,
 			IProgressMonitor monitor) {
-		// Capture usage of a project builder only it really ran (affectResources > 0)
-		if (affectedResources != null && affectedResources.size() > 0) {
-			getUaa().registerFeatureUse(contributor.getNamespaceUri(),
-					Collections.singletonMap("name", contributor.getName()));
-		}
+		if (UAA_AVAILABLE) UaaDependentProjectContributionUsageMonitor.finishProjectBuilder(contributor, affectedResources, monitor);
 	}
 
 	/**
@@ -53,17 +51,36 @@ public class ProjectContributionUsageMonitor extends ProjectContributionEventLis
 	@Override
 	public void finishValidator(ValidatorDefinition contributor, Set<IResource> affectedResources,
 			IProgressMonitor monitor) {
-		// Capture usage of a validator only it really ran (affectResources > 0)
-		if (affectedResources != null && affectedResources.size() > 0) {
-			getUaa().registerFeatureUse(contributor.getNamespaceUri(),
-					Collections.singletonMap("name", contributor.getName()));
-		}
+		if (UAA_AVAILABLE) UaaDependentProjectContributionUsageMonitor.finishValidator(contributor, affectedResources, monitor);
 	}
+	
+	private static class UaaDependentProjectContributionUsageMonitor {
 
-	private synchronized IUaa getUaa() {
-		if (manager == null) {
-			manager = UaaPlugin.getUAA();
+		private static IUaa manager;
+
+		public static void finishProjectBuilder(ProjectBuilderDefinition contributor, Set<IResource> affectedResources,
+				IProgressMonitor monitor) {
+			// Capture usage of a project builder only it really ran (affectResources > 0)
+			if (affectedResources != null && affectedResources.size() > 0) {
+				getUaa().registerFeatureUse(contributor.getNamespaceUri(),
+						Collections.singletonMap("name", contributor.getName()));
+			}
 		}
-		return manager;
+
+		public static void finishValidator(ValidatorDefinition contributor, Set<IResource> affectedResources,
+				IProgressMonitor monitor) {
+			// Capture usage of a validator only it really ran (affectResources > 0)
+			if (affectedResources != null && affectedResources.size() > 0) {
+				getUaa().registerFeatureUse(contributor.getNamespaceUri(),
+						Collections.singletonMap("name", contributor.getName()));
+			}
+		}
+
+		private static synchronized IUaa getUaa() {
+			if (manager == null) {
+				manager = UaaPlugin.getUAA();
+			}
+			return manager;
+		}
 	}
 }
