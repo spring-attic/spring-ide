@@ -30,6 +30,11 @@
       %license
    </license>
 
+   <includes
+         id="org.springframework.ide.eclipse.uaa.feature.source"
+         version="0.0.0"
+         optional="true"/>
+
    <plugin
          id="org.springframework.ide.eclipse.source"
          download-size="0"
@@ -101,39 +106,18 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.uaa.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-         
-   <!--<plugin
-         id="org.springframework.osgi.core.source"
+         id="edu.emory.mathcs.backport.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.osgi.io.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>-->
-         
-   <plugin
-         id="edu.emory.mathcs.backport.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> 
-         
-   <plugin
          id="com.springsource.org.antlr.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/> 
+         unpack="false"/>
 
    <plugin
          id="javax.annotation.source"
@@ -141,7 +125,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.springsource.javax.jms.source"
          download-size="0"
@@ -155,35 +139,35 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.apache.commons.logging.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.springsource.org.aspectj.weaver.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.springsource.org.objectweb.asm.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.springsource.org.objectweb.asm.commons.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.aop.source"
          download-size="0"
@@ -197,28 +181,28 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.beans.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.context.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.context.support.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.core.source"
          download-size="0"
@@ -232,35 +216,35 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.jdbc.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.jms.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.orm.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.oxm.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.springframework.transaction.source"
          download-size="0"

@@ -30,6 +30,11 @@
       %license
    </license>
 
+   <includes
+         id="org.springframework.ide.eclipse.uaa.feature"
+         version="0.0.0"
+         optional="true"/>
+
    <requires>
       <import feature="org.eclipse.wst.xml_ui.feature" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.3.0" match="greaterOrEqual"/>
@@ -107,13 +112,6 @@
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.refactoring"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.uaa"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -289,41 +287,6 @@
 
    <plugin
          id="org.springframework.transaction"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.uaa.client"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.roo.wrapping.bcpg-jdk15"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.roo.wrapping.bcprov-jdk15"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.roo.wrapping.json-simple"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.roo.wrapping.protobuf-java-lite"
          download-size="0"
          install-size="0"
          version="0.0.0"
