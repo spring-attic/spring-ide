@@ -29,13 +29,6 @@ Import-Package: com.google.protobuf,
  org.eclipse.swt.graphics,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
- org.eclipse.ui,
- org.eclipse.ui.browser,
- org.eclipse.ui.commands,
- org.eclipse.ui.dialogs,
- org.eclipse.ui.internal.browser,
- org.eclipse.ui.plugin,
- org.eclipse.ui.progress,
  org.eclipse.wst.server.core,
  org.json.simple,
  org.osgi.framework,
@@ -45,5 +38,7 @@ Import-Package: com.google.protobuf,
  org.springframework.uaa.client.protobuf,
  org.springframework.uaa.client.util,
  org.springframework.util;version="[3.0.5.RELEASE,3.1.0)"
+Require-Bundle: org.eclipse.ui.browser,
+ org.eclipse.ui
 
 
