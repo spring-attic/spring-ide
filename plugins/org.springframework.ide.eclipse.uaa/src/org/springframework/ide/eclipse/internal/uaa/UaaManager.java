@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,10 +51,10 @@ import org.json.simple.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
-import org.springframework.ide.eclipse.internal.uaa.client.CachingUaaServiceExtension;
+import org.springframework.ide.eclipse.internal.uaa.client.QueueingUaaServiceExtension;
 import org.springframework.ide.eclipse.uaa.IUaa;
 import org.springframework.ide.eclipse.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.uaa.UaaUtils;
 import org.springframework.uaa.client.TransmissionAwareUaaService;
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
@@ -123,8 +124,12 @@ public class UaaManager implements IUaa {
 
 	private List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
 	private List<RegistrationAttempt> registrationAttempts = new CopyOnWriteArrayList<RegistrationAttempt>();
-	private CachingUaaServiceExtension service = new CachingUaaServiceExtension(new JdkUrlTransmissionServiceImpl(new EclipseProxyService()));
-
+	private QueueingUaaServiceExtension service = new QueueingUaaServiceExtension(new JdkUrlTransmissionServiceImpl(new EclipseProxyService()));
+	
+	public UaaService getUaaService() {
+		return service;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -319,7 +324,7 @@ public class UaaManager implements IUaa {
 	public void start() {
 		// Since we run in an restricted environment we need to obtain the builder factory from the OSGi service
 		// registry instead of trying to create a new one from the API
-		XmlUtils.setDocumentBuilderFactory(SpringCoreUtils.getDocumentBuilderFactory());
+		XmlUtils.setDocumentBuilderFactory(UaaUtils.getDocumentBuilderFactory());
 		
 		try { initProductDescriptions(getDefaultDetectedProducts(), getDefaultDetectedProductsSignaturer()); }
 		catch (IOException e) {}
@@ -416,6 +421,64 @@ public class UaaManager implements IUaa {
 			}
 		}
 		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private byte[] mergeData(byte[] existingData, byte[] data) {
+		// Quick sanity check to prevent doing too much in case no new data has been presented
+		if (data == null || data.length == 0) {
+			return existingData;
+		}
+		
+		// Load existing feature data
+		JSONObject existingFeatureData = new JSONObject();
+		if (existingData != null && existingData.length > 0) {
+			Object existingJson = JSONValue.parse(new String(existingData));
+			if (existingJson instanceof JSONObject) {
+				existingFeatureData.putAll(((JSONObject) existingJson));
+			}
+		}
+		
+		// Load new data into JSON object
+		Map<String, String> featureData = new JSONObject();
+		if (data != null && data.length > 0) {
+			Object json = JSONValue.parse(new String(data));
+			if (json instanceof JSONObject) {
+				featureData.putAll((JSONObject) json);
+			}
+		}
+
+		// Merge feature data: merge those values whose keys already exist
+		featureData = new HashMap<String, String>(featureData);
+		for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
+			if (featureData.containsKey(existingEntry.getKey())) {
+				String newValue = featureData.get(existingEntry.getKey());
+				Object existingValue = existingEntry.getValue();
+				if (!newValue.equals(existingValue)) {
+					if (existingValue instanceof List) {
+						List<String> existingValues = (List<String>) existingValue;
+						if (!existingValues.contains(newValue)) {
+							existingValues.add(newValue);
+						}
+					}
+					else {
+						List<String> value = new ArrayList<String>();
+						value.add((String) existingValue);
+						value.add(featureData.get(existingEntry.getKey()));
+						existingFeatureData.put(existingEntry.getKey(), value);
+					}
+				}
+				featureData.remove(existingEntry.getKey());
+			}
+		}
+
+		// Merge the remaining new values
+		existingFeatureData.putAll(featureData);
+
+		try { return existingFeatureData.toJSONString().getBytes("UTF-8"); }
+		catch (UnsupportedEncodingException e) {
+			return null;
+		}
 	}
 	
 	/**
@@ -819,6 +882,14 @@ public class UaaManager implements IUaa {
 		}
 
 		protected void registerFeature(String usedPlugin, Map<String, String> featureData) {
+<<<<<<< HEAD
+=======
+			// Initialize new map in case null was supplied
+			if (featureData == null) {
+				featureData = Collections.emptyMap();
+			}
+			
+>>>>>>> master
 			// Get the feature version from the plugin
 			String featureVersion = null;
 			Bundle bundle = Platform.getBundle(usedPlugin);
@@ -831,18 +902,26 @@ public class UaaManager implements IUaa {
 			
 			// Obtain the FeatureUse record
 			FeatureUse feature = VersionHelper.getFeatureUse(usedPlugin, featureVersion);
-
+			
 			try {
+				// Get existing feature data to merge
+				byte[] existingData = service.getFeatureUseData(product, feature);
+				byte[] newData = JSONObject.toJSONString(featureData).getBytes("UTF-8"); 
+
 				// If additional feature data was supplied or is already registered pass it to UAA
+<<<<<<< HEAD
 				if (featureData.size() > 0) {
 					service.registerFeatureUsage(product, feature, JSONObject.toJSONString(featureData).getBytes("UTF-8"));
 				}
 				else {
 					service.registerFeatureUsage(product, feature);
 				}
+=======
+				service.registerFeatureUsage(product, feature, mergeData(existingData, newData));
+>>>>>>> master
 			}
-			catch (UnsupportedEncodingException e) {
-				// Cannot happen
+			catch (UnsupportedEncodingException e) { 
+				// Cannot happen 
 			}
 		}
 

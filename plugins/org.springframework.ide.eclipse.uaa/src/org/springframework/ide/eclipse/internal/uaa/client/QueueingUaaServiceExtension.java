@@ -19,14 +19,19 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.prefs.BackingStoreException;
 
+<<<<<<< HEAD
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+=======
+>>>>>>> master
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.TransmissionService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.TransmissionAwareUaaServiceImpl;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
+import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
+import org.springframework.uaa.client.protobuf.UaaClient.UaaEnvelope;
 
 /**
  * Extension to the UAA {@link TransmissionAwareUaaServiceImpl} that queues product and feature use 
@@ -37,15 +42,19 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
 public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl {
 
 	private static final long BATCH_INTERVAL = 1000L * 60L * 5L; // batch report all registrations every 5mins
-	private static final String THREAD_NAME_TEMPLATE = "Queueing Thread (%s/%s.%s.%s)";
+	private static final String THREAD_NAME_TEMPLATE = "Event Batch Processing (%s/%s.%s.%s)";
 	
-	/** The internal queue of {@link UsageRecord}s that will be stored until processed by {@link QueuedUsageRecordRunnable}. */
-	private final Queue<UsageRecord> usageRecords = new ConcurrentLinkedQueue<UsageRecord>();
+	private final TransmissionEventListener eventListener = new QueueFlushingTramissionEventListener();
 
-	private final Thread queuedUsageRecordsProcessingThread;
+	private final Thread queueFlushingThread;
 	private volatile boolean shouldExit = false;
 
+<<<<<<< HEAD
 	private final TransmissionEventListener eventListener = new FlushingTramissionEventListener();
+=======
+	/** The internal queue of {@link UsageRecord}s that will be stored until processed by {@link QueueFlushingRunnable}. */
+	private final Queue<UsageRecord> usageRecords = new ConcurrentLinkedQueue<UsageRecord>();
+>>>>>>> master
 
 	public QueueingUaaServiceExtension(TransmissionService transmssionService) {
 		super(transmssionService);
@@ -53,21 +62,96 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				stopQueuedUsageRecordsProcessingThread();
+				stopQueueFlushingThread();
 			}
 		});
 
 		// Start up scheduling thread
+<<<<<<< HEAD
 		this.queuedUsageRecordsProcessingThread = new Thread(new QueuedUsageRecordRunnable(), getThreadName(THREAD_NAME_TEMPLATE));
 		this.queuedUsageRecordsProcessingThread.setDaemon(true);
 		this.queuedUsageRecordsProcessingThread.start();
 		
 		removeTransmissionEventListener(eventListener);
+=======
+		this.queueFlushingThread = new Thread(new QueueFlushingRunnable(), getThreadName(THREAD_NAME_TEMPLATE));
+		this.queueFlushingThread.setDaemon(true);
+		this.queueFlushingThread.start();
+		
+		addTransmissionEventListener(eventListener);
+>>>>>>> master
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
+	public byte[] getFeatureUseData(Product product, FeatureUse featureUse) {
+		
+		// Work on a local copy
+		UsageRecord[] records = usageRecords.toArray(new UsageRecord[0]);
+		
+		// Iterate over records (newest first) and see if there is a feature registered
+		for (int j = records.length - 1; j >= 0; j = j - 1) {
+			UsageRecord record = records[j];
+			if (record instanceof FeatureUseUsageRecord) {
+				Product queuedProduct = ((FeatureUseUsageRecord) record).getProduct();
+				FeatureUse queuedFeatureUse = ((FeatureUseUsageRecord) record).getFeatureUse();
+				if (queuedProduct.getName().equals(product.getName()) 
+						&& queuedProduct.getMajorVersion() == product.getMajorVersion()
+						&& queuedProduct.getMinorVersion() == product.getMinorVersion()
+						&& queuedProduct.getPatchVersion() == product.getPatchVersion()
+						&& queuedProduct.getReleaseQualifier().equals(product.getReleaseQualifier())) {
+					
+					if (queuedFeatureUse.getName().equals(featureUse.getName()) 
+							&& queuedFeatureUse.getMajorVersion() == featureUse.getMajorVersion()
+							&& queuedFeatureUse.getMinorVersion() == featureUse.getMinorVersion()
+							&& queuedFeatureUse.getPatchVersion() == featureUse.getPatchVersion()
+							&& queuedFeatureUse.getReleaseQualifier().equals(featureUse.getReleaseQualifier())) {
+						return ((FeatureUseUsageRecord) record).getFeatureData();
+					}
+				}
+			}
+		}
+		
+		return super.getFeatureUseData(product, featureUse);
+	}
+
+	public UaaEnvelope getPayload() {
+		return createUaaEnvelope();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public byte[] getProductUseData(Product product) {
+		
+		// Work on a local copy
+		UsageRecord[] records = usageRecords.toArray(new UsageRecord[0]);
+		
+		// Iterate over records (newest first) and see if there is a product registered
+		for (int j = records.length - 1; j >= 0; j = j - 1) {
+			UsageRecord record = records[j];
+			if (record instanceof FeatureUseUsageRecord) {
+				Product queuedProduct = ((ProductUsageRecord) record).getProduct();
+				if (queuedProduct.getName().equals(product.getName()) 
+						&& queuedProduct.getMajorVersion() == product.getMajorVersion()
+						&& queuedProduct.getMinorVersion() == product.getMinorVersion()
+						&& queuedProduct.getPatchVersion() == product.getPatchVersion()
+						&& queuedProduct.getReleaseQualifier().equals(product.getReleaseQualifier())) {
+					return ((ProductUsageRecord) record).getProductData();
+				}
+			}
+		}
+
+		return super.getProductUseData(product);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void registerFeatureUsage(Product product, FeatureUse feature) {
 		registerFeatureUsage(product, feature, null);
 	}
@@ -75,6 +159,7 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void registerFeatureUsage(Product product, FeatureUse feature, byte[] featureData) {
 		queueFeatureUseUsageRecord(product, feature, featureData);
 	}
@@ -82,20 +167,23 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void registerProductUsage(Product product) {
 		registerProductUsage(product, null, null);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void registerProductUsage(Product product, byte[] productData) {
 		registerProductUsage(product, productData, null);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void registerProductUsage(Product product, byte[] productData, String project) {
 		queueProductUsageRecord(product, productData, project);
 	}
@@ -103,13 +191,15 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void registerProductUsage(Product product, String project) {
 		registerProductUsage(product, null, project);
 	}
 
 	/**
-	 * Stops this instance.
+	 * {@inheritDoc}
 	 */
+<<<<<<< HEAD
 	public void stop() {
 		stopQueuedUsageRecordsProcessingThread();
 		removeTransmissionEventListener(eventListener);
@@ -121,33 +211,44 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 
 	private void queueProductUsageRecord(Product product, byte[] productData, String projectId) {
 		queueUsageRecord(new ProductUsageRecord(product, projectId, productData));
-	}
-
-	private void queueUsageRecord(UsageRecord record) {
-		usageRecords.offer(record);
-	}
-
-	private String getThreadName(String template) {
-		Product uaaProduct = VersionHelper.getUaa();
-		return String.format(template, uaaProduct.getName(), uaaProduct.getMajorVersion(),
-				uaaProduct.getMinorVersion(), uaaProduct.getPatchVersion());
+=======
+	@Override
+	public void setPrivacyLevel(PrivacyLevel privacyLevel) {
+		super.setPrivacyLevel(privacyLevel);
+		
+		// In case we change the privacy level flush the cached records
+		processQueuedUsageRecords();
+>>>>>>> master
 	}
 
 	/**
-	 * Stop the internal queue processing job.
+	 * Stops this instance.
 	 */
-	private void stopQueuedUsageRecordsProcessingThread() {
-		shouldExit = true;
-		if (queuedUsageRecordsProcessingThread != null) {
-			queuedUsageRecordsProcessingThread.interrupt();
-		}
-		processQueuedUsageRecords();
+	public void stop() {
+		stopQueueFlushingThread();
+		removeTransmissionEventListener(eventListener);
 	}
-	
+
+	/**
+	 * Returns the nicely formatted name for the name of the thread created by this implementation 
+	 */
+	private String getThreadName(String template) {
+		Product uaaProduct = VersionHelper.getUaa();
+		return String.format(template, uaaProduct.getName(), uaaProduct.getMajorVersion(), uaaProduct.getMinorVersion(), uaaProduct.getPatchVersion());
+	}
+
 	/**
 	 * Processes the {@link UsageRecord}s stored in {@link #usageRecords}.
 	 */
 	private synchronized void processQueuedUsageRecords() {
+<<<<<<< HEAD
+=======
+
+		// Check if UAA TOU are accepted so that we can store the events
+		if (!isUaaTermsOfUseAccepted()) {
+			return;
+		}
+>>>>>>> master
 		
 		// Work on a local copy
 		UsageRecord[] records = usageRecords.toArray(new UsageRecord[0]);
@@ -162,6 +263,7 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 			// Process each usage record
 			for (UsageRecord record : records) {
 				if (record instanceof ProductUsageRecord) {
+<<<<<<< HEAD
 					byte[] data = getProductUseData(record.getProduct());
 					byte[] newData = ((ProductUsageRecord) record).getProductData(); 
 					super.registerProductUsage(record.getProduct(), mergeData(data, newData), ((ProductUsageRecord) record).getProjectId());
@@ -170,6 +272,12 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 					byte[] data = getFeatureUseData(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse());
 					byte[] newData = ((FeatureUseUsageRecord) record).getFeatureData(); 
 					super.registerFeatureUsage(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse(), mergeData(data, newData));
+=======
+					super.registerProductUsage(record.getProduct(), ((ProductUsageRecord) record).getProductData(), ((ProductUsageRecord) record).getProjectId());
+				}
+				else if (record instanceof FeatureUseUsageRecord) {
+					super.registerFeatureUsage(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse(), ((FeatureUseUsageRecord) record).getFeatureData());
+>>>>>>> master
 				}
 				
 				// Remove processed records
@@ -180,6 +288,18 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 			try { P.flush(); }
 			catch (BackingStoreException e) {}
 		}
+	}
+
+	private void queueFeatureUseUsageRecord(Product product, FeatureUse feature, byte[] featureData) {
+		queueUsageRecord(new FeatureUseUsageRecord(feature, product, featureData));
+	}
+
+	private void queueProductUsageRecord(Product product, byte[] productData, String projectId) {
+		queueUsageRecord(new ProductUsageRecord(product, projectId, productData));
+	}
+	
+	private void queueUsageRecord(UsageRecord record) {
+		usageRecords.offer(record);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -241,6 +361,17 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	}
 	
 	/**
+	 * Stop the internal queue processing job.
+	 */
+	private void stopQueueFlushingThread() {
+		shouldExit = true;
+		if (queueFlushingThread != null) {
+			queueFlushingThread.interrupt();
+		}
+		processQueuedUsageRecords();
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -255,11 +386,15 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	protected void persistChangesToStorage() {
 		// Prevent UaaServiceImpl to control sync and flush from Preferences API		
 	}
-
+	
 	/**
 	 * {@link Runnable} that periodically calls {@link QueueingUaaServiceExtension#processQueuedUsageRecords()}. 
 	 */
+<<<<<<< HEAD
 	class QueuedUsageRecordRunnable implements Runnable {
+=======
+	class QueueFlushingRunnable implements Runnable {
+>>>>>>> master
 
 		/**
 		 * {@inheritDoc}
@@ -290,16 +425,31 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 		}
 	}
 	
+<<<<<<< HEAD
 	class FlushingTramissionEventListener implements TransmissionEventListener {
+=======
+	/**
+	 * {@link TransmissionEventListener} that calls {@link QueueingUaaServiceExtension#processQueuedUsageRecords()}
+	 * on each {@link TransmissionType.UPLOAD} event so that the queue is flushed ahead of each upload. 
+	 */
+	class QueueFlushingTramissionEventListener implements TransmissionEventListener {
+
+		public void afterTransmission(TransmissionType type, boolean successful) {
+			// Intentionally left empty
+		}
+>>>>>>> master
 
 		public void beforeTransmission(TransmissionType type) {
 			if (type == TransmissionType.UPLOAD) {
 				processQueuedUsageRecords();
 			}
 		}
+<<<<<<< HEAD
 
 		public void afterTransmission(TransmissionType type, boolean successful) {
 			// Intentionally left empty
 		}
+=======
+>>>>>>> master
 	}
 }

@@ -35,7 +35,7 @@ import org.springframework.ide.eclipse.internal.uaa.monitor.NatureAndBuilderUsag
 import org.springframework.ide.eclipse.internal.uaa.monitor.PartUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.monitor.ServerUsageMonitor;
 import org.springframework.ide.eclipse.internal.uaa.preferences.UaaDialog;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.uaa.client.UaaService;
 
 /**
  * Plug-in entry point for the UAA Plugin.
@@ -110,7 +110,7 @@ public class UaaPlugin extends AbstractUIPlugin {
 						return Status.OK_STATUS;
 					}
 
-					UaaDialog dialog = UaaDialog.createDialog(SpringUIUtils.getStandardDisplay().getActiveShell());
+					UaaDialog dialog = UaaDialog.createDialog(UaaUtils.getStandardDisplay().getActiveShell());
 					int resultCode = dialog.open();
 					if (resultCode == Window.OK) {
 						usageMonitorManager.setPrivacyLevel(IUaa.DEFAULT_PRIVACY_LEVEL);
@@ -149,6 +149,10 @@ public class UaaPlugin extends AbstractUIPlugin {
 
 	public static IUaa getUAA() {
 		return getDefault().usageMonitorManager;
+	}
+	
+	public static UaaService getUaaService() {
+		return getDefault().usageMonitorManager.getUaaService();
 	}
 
 	public static UaaPlugin getDefault() {

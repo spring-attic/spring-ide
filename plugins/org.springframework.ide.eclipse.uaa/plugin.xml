@@ -19,14 +19,7 @@
             class="org.springframework.ide.eclipse.internal.uaa.Startup"></startup>
    </extension>
    
-   <extension
-         point="org.springframework.ide.eclipse.core.listeners">
-      <listener
-            class="org.springframework.ide.eclipse.internal.uaa.monitor.ProjectContributionUsageMonitor">
-      </listener>
-   </extension>
-   
-   	<extension point="org.eclipse.ui.preferencePages">
+   <extension point="org.eclipse.ui.preferencePages">
 	 	<page id="org.springframework.ide.eclipse.uaa.preferencePage"
   	      	name="User Agent Analysis"
 	      	class="org.springframework.ide.eclipse.internal.uaa.preferences.UaaPreferencePage"

@@ -28,10 +28,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.internal.uaa.IUsageMonitor;
 import org.springframework.ide.eclipse.uaa.IUaa;
+import org.springframework.ide.eclipse.uaa.UaaPlugin;
+import org.springframework.ide.eclipse.uaa.UaaUtils;
 
 /**
  * {@link IUsageMonitor} that records usage data for build systems based on common build files in the root of the
@@ -78,7 +78,7 @@ public class BuildSystemUsageMonitor implements IUsageMonitor {
 						
 						// Now we should also check the parent folder for the project location on the
 						// file system to check for the same files there
-						URI uri = SpringCoreUtils.getResourceURI(project);
+						URI uri = UaaUtils.getResourceURI(project);
 						if (uri != null) {
 							File parent = new File(uri);
 							if (parent != null && parent.exists()) {
@@ -153,7 +153,7 @@ public class BuildSystemUsageMonitor implements IUsageMonitor {
 							delta.accept(getVisitor(), VISITOR_FLAGS);
 						}
 						catch (CoreException e) {
-							SpringCore.log("Error while traversing resource change delta", e);
+							UaaPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, UaaPlugin.PLUGIN_ID, "Error while traversing resource change delta", e));
 						}
 					}
 					break;
@@ -169,7 +169,7 @@ public class BuildSystemUsageMonitor implements IUsageMonitor {
 							delta.accept(getVisitor(), VISITOR_FLAGS);
 						}
 						catch (CoreException e) {
-							SpringCore.log("Error while traversing resource change delta", e);
+							UaaPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, UaaPlugin.PLUGIN_ID, "Error while traversing resource change delta", e));
 						}
 					}
 					break;
