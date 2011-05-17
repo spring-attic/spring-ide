@@ -67,7 +67,7 @@
 		<dist.type>snapshot</dist.type>
 		<dist.bucket>dist.springframework.org</dist.bucket>
 
-		<tycho-version>0.11.0-SNAPSHOT</tycho-version>
+		<tycho-version>0.12.0</tycho-version>
 		<maven.test.skip>true</maven.test.skip>
 		<maven.test.error.ignore>true</maven.test.error.ignore>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
@@ -332,13 +332,13 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
+				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
+				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
@@ -350,15 +350,15 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<groupId>org.sonatype.tycho</groupId>
-					<artifactId>maven-osgi-compiler-plugin</artifactId>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-compiler-plugin</artifactId>
 					<version>${tycho-version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 					</configuration>
 				</plugin>
 				<plugin>
-					<groupId>org.sonatype.tycho</groupId>
+					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>target-platform-configuration</artifactId>
 					<version>${tycho-version}</version>
 					<configuration>
@@ -405,8 +405,8 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<groupId>org.sonatype.tycho</groupId>
-					<artifactId>maven-osgi-packaging-plugin</artifactId>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-packaging-plugin</artifactId>
 					<version>${tycho-version}</version>
 					<configuration>
 						<format>yyyyMMddHHmm-'${p2.qualifier}'</format>
