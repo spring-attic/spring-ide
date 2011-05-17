@@ -48,6 +48,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -882,14 +883,11 @@ public class UaaManager implements IUaa {
 		}
 
 		protected void registerFeature(String usedPlugin, Map<String, String> featureData) {
-<<<<<<< HEAD
-=======
 			// Initialize new map in case null was supplied
 			if (featureData == null) {
 				featureData = Collections.emptyMap();
 			}
 			
->>>>>>> master
 			// Get the feature version from the plugin
 			String featureVersion = null;
 			Bundle bundle = Platform.getBundle(usedPlugin);
@@ -909,16 +907,7 @@ public class UaaManager implements IUaa {
 				byte[] newData = JSONObject.toJSONString(featureData).getBytes("UTF-8"); 
 
 				// If additional feature data was supplied or is already registered pass it to UAA
-<<<<<<< HEAD
-				if (featureData.size() > 0) {
-					service.registerFeatureUsage(product, feature, JSONObject.toJSONString(featureData).getBytes("UTF-8"));
-				}
-				else {
-					service.registerFeatureUsage(product, feature);
-				}
-=======
 				service.registerFeatureUsage(product, feature, mergeData(existingData, newData));
->>>>>>> master
 			}
 			catch (UnsupportedEncodingException e) { 
 				// Cannot happen 

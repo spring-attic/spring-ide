@@ -10,20 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.internal.uaa.client;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.prefs.BackingStoreException;
 
-<<<<<<< HEAD
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-=======
->>>>>>> master
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.TransmissionService;
 import org.springframework.uaa.client.VersionHelper;
@@ -49,12 +39,8 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	private final Thread queueFlushingThread;
 	private volatile boolean shouldExit = false;
 
-<<<<<<< HEAD
-	private final TransmissionEventListener eventListener = new FlushingTramissionEventListener();
-=======
 	/** The internal queue of {@link UsageRecord}s that will be stored until processed by {@link QueueFlushingRunnable}. */
 	private final Queue<UsageRecord> usageRecords = new ConcurrentLinkedQueue<UsageRecord>();
->>>>>>> master
 
 	public QueueingUaaServiceExtension(TransmissionService transmssionService) {
 		super(transmssionService);
@@ -67,19 +53,11 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 		});
 
 		// Start up scheduling thread
-<<<<<<< HEAD
-		this.queuedUsageRecordsProcessingThread = new Thread(new QueuedUsageRecordRunnable(), getThreadName(THREAD_NAME_TEMPLATE));
-		this.queuedUsageRecordsProcessingThread.setDaemon(true);
-		this.queuedUsageRecordsProcessingThread.start();
-		
-		removeTransmissionEventListener(eventListener);
-=======
 		this.queueFlushingThread = new Thread(new QueueFlushingRunnable(), getThreadName(THREAD_NAME_TEMPLATE));
 		this.queueFlushingThread.setDaemon(true);
 		this.queueFlushingThread.start();
 		
 		addTransmissionEventListener(eventListener);
->>>>>>> master
 	}
 	
 	/**
@@ -199,26 +177,12 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	/**
 	 * {@inheritDoc}
 	 */
-<<<<<<< HEAD
-	public void stop() {
-		stopQueuedUsageRecordsProcessingThread();
-		removeTransmissionEventListener(eventListener);
-	}
-
-	private void queueFeatureUseUsageRecord(Product product, FeatureUse feature, byte[] featureData) {
-		queueUsageRecord(new FeatureUseUsageRecord(feature, product, featureData));
-	}
-
-	private void queueProductUsageRecord(Product product, byte[] productData, String projectId) {
-		queueUsageRecord(new ProductUsageRecord(product, projectId, productData));
-=======
 	@Override
 	public void setPrivacyLevel(PrivacyLevel privacyLevel) {
 		super.setPrivacyLevel(privacyLevel);
 		
 		// In case we change the privacy level flush the cached records
 		processQueuedUsageRecords();
->>>>>>> master
 	}
 
 	/**
@@ -241,14 +205,11 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	 * Processes the {@link UsageRecord}s stored in {@link #usageRecords}.
 	 */
 	private synchronized void processQueuedUsageRecords() {
-<<<<<<< HEAD
-=======
 
 		// Check if UAA TOU are accepted so that we can store the events
 		if (!isUaaTermsOfUseAccepted()) {
 			return;
 		}
->>>>>>> master
 		
 		// Work on a local copy
 		UsageRecord[] records = usageRecords.toArray(new UsageRecord[0]);
@@ -263,21 +224,10 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 			// Process each usage record
 			for (UsageRecord record : records) {
 				if (record instanceof ProductUsageRecord) {
-<<<<<<< HEAD
-					byte[] data = getProductUseData(record.getProduct());
-					byte[] newData = ((ProductUsageRecord) record).getProductData(); 
-					super.registerProductUsage(record.getProduct(), mergeData(data, newData), ((ProductUsageRecord) record).getProjectId());
-				}
-				else if (record instanceof FeatureUseUsageRecord) {
-					byte[] data = getFeatureUseData(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse());
-					byte[] newData = ((FeatureUseUsageRecord) record).getFeatureData(); 
-					super.registerFeatureUsage(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse(), mergeData(data, newData));
-=======
 					super.registerProductUsage(record.getProduct(), ((ProductUsageRecord) record).getProductData(), ((ProductUsageRecord) record).getProjectId());
 				}
 				else if (record instanceof FeatureUseUsageRecord) {
 					super.registerFeatureUsage(record.getProduct(), ((FeatureUseUsageRecord) record).getFeatureUse(), ((FeatureUseUsageRecord) record).getFeatureData());
->>>>>>> master
 				}
 				
 				// Remove processed records
@@ -300,64 +250,6 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	
 	private void queueUsageRecord(UsageRecord record) {
 		usageRecords.offer(record);
-	}
-	
-	@SuppressWarnings("unchecked")
-	private byte[] mergeData(byte[] existingData, byte[] data) {
-		// Quick sanity check to prevent doing too much in case no new data has been presented
-		if (data == null || data.length == 0) {
-			return existingData;
-		}
-		
-		// Load existing feature data
-		JSONObject existingFeatureData = new JSONObject();
-		if (existingData != null && existingData.length > 0) {
-			Object existingJson = JSONValue.parse(new String(existingData));
-			if (existingJson instanceof JSONObject) {
-				existingFeatureData.putAll(((JSONObject) existingJson));
-			}
-		}
-		
-		// Load new data into JSON object
-		Map<String, String> featureData = new JSONObject();
-		if (data != null && data.length > 0) {
-			Object json = JSONValue.parse(new String(data));
-			if (json instanceof JSONObject) {
-				featureData.putAll((JSONObject) json);
-			}
-		}
-
-		// Merge feature data: merge those values whose keys already exist
-		featureData = new HashMap<String, String>(featureData);
-		for (Map.Entry<String, Object> existingEntry : new HashMap<String, Object>(existingFeatureData).entrySet()) {
-			if (featureData.containsKey(existingEntry.getKey())) {
-				String newValue = featureData.get(existingEntry.getKey());
-				Object existingValue = existingEntry.getValue();
-				if (!newValue.equals(existingValue)) {
-					if (existingValue instanceof List) {
-						List<String> existingValues = (List<String>) existingValue;
-						if (!existingValues.contains(newValue)) {
-							existingValues.add(newValue);
-						}
-					}
-					else {
-						List<String> value = new ArrayList<String>();
-						value.add((String) existingValue);
-						value.add(featureData.get(existingEntry.getKey()));
-						existingFeatureData.put(existingEntry.getKey(), value);
-					}
-				}
-				featureData.remove(existingEntry.getKey());
-			}
-		}
-
-		// Merge the remaining new values
-		existingFeatureData.putAll(featureData);
-
-		try { return existingFeatureData.toJSONString().getBytes("UTF-8"); }
-		catch (UnsupportedEncodingException e) {
-			return null;
-		}
 	}
 	
 	/**
@@ -390,11 +282,7 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 	/**
 	 * {@link Runnable} that periodically calls {@link QueueingUaaServiceExtension#processQueuedUsageRecords()}. 
 	 */
-<<<<<<< HEAD
-	class QueuedUsageRecordRunnable implements Runnable {
-=======
 	class QueueFlushingRunnable implements Runnable {
->>>>>>> master
 
 		/**
 		 * {@inheritDoc}
@@ -425,9 +313,6 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 		}
 	}
 	
-<<<<<<< HEAD
-	class FlushingTramissionEventListener implements TransmissionEventListener {
-=======
 	/**
 	 * {@link TransmissionEventListener} that calls {@link QueueingUaaServiceExtension#processQueuedUsageRecords()}
 	 * on each {@link TransmissionType.UPLOAD} event so that the queue is flushed ahead of each upload. 
@@ -437,19 +322,11 @@ public class QueueingUaaServiceExtension extends TransmissionAwareUaaServiceImpl
 		public void afterTransmission(TransmissionType type, boolean successful) {
 			// Intentionally left empty
 		}
->>>>>>> master
 
 		public void beforeTransmission(TransmissionType type) {
 			if (type == TransmissionType.UPLOAD) {
 				processQueuedUsageRecords();
 			}
 		}
-<<<<<<< HEAD
-
-		public void afterTransmission(TransmissionType type, boolean successful) {
-			// Intentionally left empty
-		}
-=======
->>>>>>> master
 	}
 }

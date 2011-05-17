@@ -33,15 +33,6 @@ Import-Package: com.google.protobuf,
  org.json.simple,
  org.osgi.framework,
  org.osgi.util.tracker,
-<<<<<<< HEAD
- org.springframework.ide.eclipse.core,
- org.springframework.ide.eclipse.core.internal.model.validation,
- org.springframework.ide.eclipse.core.java,
- org.springframework.ide.eclipse.core.model.validation,
- org.springframework.ide.eclipse.core.project,
- org.springframework.ide.eclipse.ui,
- org.springframework.util;version="[3.1.0.M1,3.2.0)"
-=======
  org.springframework.uaa.client,
  org.springframework.uaa.client.internal,
  org.springframework.uaa.client.protobuf,
@@ -49,6 +40,5 @@ Import-Package: com.google.protobuf,
  org.springframework.util;version="[3.0.5.RELEASE,3.1.0)"
 Require-Bundle: org.eclipse.ui.browser,
  org.eclipse.ui
->>>>>>> master
 
 
