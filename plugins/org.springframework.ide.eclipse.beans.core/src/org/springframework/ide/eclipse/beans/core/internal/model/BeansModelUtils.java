@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -699,12 +699,12 @@ public abstract class BeansModelUtils {
 				}
 			}
 		}
-	
+
 		IBeansProject project = getParentOfClass(element, IBeansProject.class);
 		if (project != null) {
 			return project;
 		}
-		
+
 		throw new IllegalArgumentException("Unsupported model element " + element);
 	}
 
@@ -793,8 +793,8 @@ public abstract class BeansModelUtils {
 				valueName = value.toString();
 			}
 			if (valueName.length() > 30) {
-				name.append(valueName.substring(0, 12)).append(" .. ").append(
-						valueName.substring(valueName.length() - 13));
+				name.append(valueName.substring(0, 12)).append(" .. ")
+						.append(valueName.substring(valueName.length() - 13));
 			}
 			else {
 				name.append(valueName);
@@ -1031,8 +1031,7 @@ public abstract class BeansModelUtils {
 							if (child instanceof IBeansTypedString) {
 								IBean interceptor = getBean(((IBeansTypedString) child).getString(), context);
 								if (addBeanReference(BeanType.INTERCEPTOR, element, interceptor, context, references,
-										referencedBeans)
-										&& recursive) {
+										referencedBeans) && recursive) {
 									addBeanReferencesForBean(interceptor, context, recursive, references,
 											referencedBeans);
 								}
@@ -1150,8 +1149,7 @@ public abstract class BeansModelUtils {
 						String beanName = ((LookupOverride) methodOverride).getBeanName();
 						IBean overrideBean = getBean(beanName, context);
 						if (addBeanReference(BeanType.METHOD_OVERRIDE, bean, overrideBean, context, references,
-								referencedBeans)
-								&& recursive) {
+								referencedBeans) && recursive) {
 							addBeanReferencesForBean(overrideBean, context, recursive, references, referencedBeans);
 						}
 					}
@@ -1159,8 +1157,7 @@ public abstract class BeansModelUtils {
 						String beanName = ((ReplaceOverride) methodOverride).getMethodReplacerBeanName();
 						IBean overrideBean = getBean(beanName, context);
 						if (addBeanReference(BeanType.METHOD_OVERRIDE, bean, overrideBean, context, references,
-								referencedBeans)
-								&& recursive) {
+								referencedBeans) && recursive) {
 							addBeanReferencesForBean(overrideBean, context, recursive, references, referencedBeans);
 						}
 					}
@@ -1179,10 +1176,10 @@ public abstract class BeansModelUtils {
 			}
 
 			// Add referenced beans from bean annotations contributed into the bean meta data model
-//			for (IBeanProperty property : BeansCorePlugin.getMetadataModel().getBeanProperties(bean)) {
-//				addBeanReferencesForValue(property, property.getValue(), context, references, referencedBeans,
-//						recursive);
-//			}
+			// for (IBeanProperty property : BeansCorePlugin.getMetadataModel().getBeanProperties(bean)) {
+			// addBeanReferencesForValue(property, property.getValue(), context, references, referencedBeans,
+			// recursive);
+			// }
 
 			// Add references from inner beans
 			for (IBean nestedBean : getInnerBeans(bean, false)) {
@@ -1366,12 +1363,11 @@ public abstract class BeansModelUtils {
 											}
 										}
 										else {
-											// we can't determine the beans type so don't be
-											// cleverer as we can and let it be processed again
-
-											// One last check before adding too much that is not
-											// even on the resource's classpath
-											if (JdtUtils.getJavaProject(project.getProject()).isOnClasspath(resource)) {
+											// We can't determine the beans type so don't be cleverer as we can and let it be processed again
+											// One last check before adding too much that is not even on the resource's classpath
+											if (project != null	&& JdtUtils.isJavaProject(project.getProject())
+													&& JdtUtils.getJavaProject(project.getProject()).isOnClasspath(
+															resource)) {
 												files.add(bean);
 											}
 										}
@@ -1432,8 +1428,8 @@ public abstract class BeansModelUtils {
 
 	/**
 	 * Extracts the {@link IType} of a {@link BeanDefinition} by only looking at the <code>
-	 * factory-method</code> . The passed
-	 * in {@link IType} <b>must</b> be the bean class or the resolved type of the factory bean in use.
+	 * factory-method</code> . The passed in {@link IType} <b>must</b> be the bean class or the resolved type of the
+	 * factory bean in use.
 	 */
 	private static IType extractTypeFromFactoryMethod(BeanDefinition bd, IType type) {
 		String factoryMethod = bd.getFactoryMethodName();
