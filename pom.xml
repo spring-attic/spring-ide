@@ -415,6 +415,7 @@
 							<manifestEntries>
 								<Source-Control-Identifier>${source.control.id}</Source-Control-Identifier>
 							</manifestEntries>
+							<addMavenDescriptor>false</addMavenDescriptor>
 						</archive>
 					</configuration>
 				</plugin>
