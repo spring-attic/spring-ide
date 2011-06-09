@@ -139,6 +139,8 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 	private Button versionCheckbox;
 
 	private Button classpathCheckbox;
+	
+	private Button sourceFolderCheckbox;
 
 	private Map<INamespaceDefinition, String> versions = new ConcurrentHashMap<INamespaceDefinition, String>();
 
@@ -208,16 +210,19 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 
 		boolean versionClasspath = true;
 		boolean useClasspath = true;
+		boolean searchSourceFolder = false;
 		if (isProjectPreferencePage()) {
 			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
 					BeansCorePlugin.PLUGIN_ID);
 			versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 			useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, true);
+			searchSourceFolder = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID, false);
 		}
 		else {
 			Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
 			versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 			useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
+			searchSourceFolder = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID);
 		}
 
 		initializeDialogUnits(parent);
@@ -257,8 +262,33 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 				}
 				namespaceDefinitionList.clear();
 				refresh();
+				
+				sourceFolderCheckbox.setEnabled(classpathCheckbox.getSelection());
 			}
 			
+		});
+		
+		sourceFolderCheckbox = new Button(composite, SWT.CHECK);
+		sourceFolderCheckbox.setText("Search in source folders");
+		sourceFolderCheckbox.setSelection(searchSourceFolder);
+		sourceFolderCheckbox.setEnabled(useClasspath);
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
+		data.horizontalIndent = 15;
+		sourceFolderCheckbox.setLayoutData(data);
+		
+		sourceFolderCheckbox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (isProjectPreferencePage()) {
+					SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+							BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID, sourceFolderCheckbox.getSelection());
+				}
+				else {
+					BeansCorePlugin.getDefault().getPluginPreferences().setValue(
+							BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID, sourceFolderCheckbox.getSelection());
+					BeansCorePlugin.getDefault().savePluginPreferences();
+				}
+			}
 		});
 
 		Label namespaceLabel = new Label(composite, SWT.NONE);
