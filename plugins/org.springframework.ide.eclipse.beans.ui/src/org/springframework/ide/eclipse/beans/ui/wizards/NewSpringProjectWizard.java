@@ -116,6 +116,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements
 					.ignoreMissingNamespaceHandlers();
 			final boolean loadHandlerFromClasspath = mainPage
 					.loadHandlerFromClasspath();
+			final boolean loadHandlerFromSourceFolders = mainPage.loadHandlerFromSourceFolders();
 			final boolean useHighestXsdVersion = mainPage
 					.useHighestXsdVersion();
 			final boolean useProjectSettings = mainPage.useProjectSettings();
@@ -142,6 +143,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements
 						prefs.putBoolean(
 								BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID,
 								loadHandlerFromClasspath);
+						prefs.putBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID, loadHandlerFromSourceFolders);
 					}
 					prefs.putBoolean(
 							BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
