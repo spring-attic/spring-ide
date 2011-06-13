@@ -123,7 +123,7 @@ public class UaaManager implements IUaa {
 	private final Lock r = rwl.readLock();
 	private final Lock w = rwl.writeLock();
 
-	private List<ProductDescriptor> productDescriptors = new ArrayList<ProductDescriptor>();
+	private List<ProductDescriptor> productDescriptors = new CopyOnWriteArrayList<UaaManager.ProductDescriptor>();
 	private List<RegistrationAttempt> registrationAttempts = new CopyOnWriteArrayList<RegistrationAttempt>();
 	private QueueingUaaServiceExtension service = new QueueingUaaServiceExtension(new JdkUrlTransmissionServiceImpl(new EclipseProxyService()));
 	
@@ -545,14 +545,9 @@ public class UaaManager implements IUaa {
 			}
 			newProductDescriptors.add(new ProductDescriptor());
 			
-			try {
-				w.lock();
-				// Override the global list
-				productDescriptors = newProductDescriptors;
-			}
-			finally {
-				w.unlock();
-			}
+			// Override the global list
+			productDescriptors.clear();
+			productDescriptors.addAll(newProductDescriptors);
 			
 			// Replace the existing cached version if required
 			if (incoming != existing) {
