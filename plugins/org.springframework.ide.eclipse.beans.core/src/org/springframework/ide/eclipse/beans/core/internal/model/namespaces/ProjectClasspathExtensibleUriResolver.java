@@ -22,11 +22,18 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolverExtension;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor.SchemaLocations;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Document;
 
 /**
@@ -37,10 +44,14 @@ import org.w3c.dom.Document;
  * @since 2.3.1
  */
 @SuppressWarnings("restriction")
-public class ProjectClasspathExtensibleUriResolver implements URIResolverExtension {
+public class ProjectClasspathExtensibleUriResolver implements URIResolverExtension, IElementChangedListener {
 
 	private static Map<IProject, ProjectClasspathUriResolver> projectResolvers = new ConcurrentHashMap<IProject, ProjectClasspathUriResolver>();
 	private ThreadLocal<IPath> previousFile = new ThreadLocal<IPath>();
+	
+	public ProjectClasspathExtensibleUriResolver() {
+		JavaCore.addElementChangedListener(this, ElementChangedEvent.POST_CHANGE);
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -105,6 +116,32 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 			ProjectClasspathUriResolver resolver = new ProjectClasspathUriResolver(project);
 			projectResolvers.put(project, resolver);
 			return resolver;
+		}
+	}
+	
+	public void elementChanged(ElementChangedEvent event) {
+		for (IJavaElementDelta delta : event.getDelta().getAffectedChildren()) {
+			if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
+					|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
+				resetForChangedElement(delta.getElement());
+			}
+			else if ((delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) {
+				resetForChangedElement(delta.getElement());
+			}
+			else if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0) {
+				resetForChangedElement(delta.getElement());
+			}
+		}
+	}
+
+	private void resetForChangedElement(IJavaElement element) {
+		for(IProject project : projectResolvers.keySet()) {
+			IJavaProject javaProject = JdtUtils.getJavaProject(project);
+			if (javaProject != null) {
+				if (javaProject.equals(element) || javaProject.isOnClasspath(element)) {
+					projectResolvers.remove(project);
+				}
+			}
 		}
 	}
 
