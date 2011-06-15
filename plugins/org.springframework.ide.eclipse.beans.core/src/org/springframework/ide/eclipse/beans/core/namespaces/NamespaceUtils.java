@@ -249,20 +249,19 @@ public class NamespaceUtils {
 				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static boolean useNamespacesAlsoFromSourceFolders(IProject project) {
 		if (project == null) {
 			return false;
 		}
 		
-		return true;
-
-//		if (SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
-//				BeansCorePlugin.PROJECT_PROPERTY_ID, false)) {
-//			return SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
-//					BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false);
-//		}
-//		return BeansCorePlugin.getDefault().getPluginPreferences().getBoolean(
-//				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
+		if (SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
+				BeansCorePlugin.PROJECT_PROPERTY_ID, false)) {
+			return SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
+					BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID, false);
+		}
+		return BeansCorePlugin.getDefault().getPluginPreferences().getBoolean(
+				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID);
 	}
 
 
