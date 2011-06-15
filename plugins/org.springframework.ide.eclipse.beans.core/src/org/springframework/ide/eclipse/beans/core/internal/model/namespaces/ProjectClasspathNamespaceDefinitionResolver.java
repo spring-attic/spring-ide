@@ -58,11 +58,11 @@ import org.xml.sax.SAXException;
 @SuppressWarnings("deprecation")
 public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDefinitionResolver {
 
-	private static final String DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
+	public static final String DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
 
-	private static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
+	public static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
 
-	private static final String DEFAULT_TOOLING_MAPPINGS_LOCATION = "META-INF/spring.tooling";
+	public static final String DEFAULT_TOOLING_MAPPINGS_LOCATION = "META-INF/spring.tooling";
 
 	private Map<String, NamespaceDefinition> namespaceDefinitionRegistry = null;
 
