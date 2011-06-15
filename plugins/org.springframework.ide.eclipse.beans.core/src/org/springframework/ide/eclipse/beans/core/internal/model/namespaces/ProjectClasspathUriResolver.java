@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -81,7 +82,7 @@ public class ProjectClasspathUriResolver {
 			String systemId) {
 		if (schemaMappings.containsKey(systemId)) {
 			String xsdPath = schemaMappings.get(systemId);
-			return resolveXsdPathOnClasspath(xsdPath);
+			return resolveXsdPathOnClasspathAndSourceFolders(xsdPath);
 		}
 		return null;
 	}
@@ -211,6 +212,20 @@ public class ProjectClasspathUriResolver {
 	}
 
 	private String resolveXsdPathOnClasspath(String xsdPath) {
+		ClassLoader cls = JdtUtils.getClassLoader(project, null);
+		
+		URL url = cls.getResource(xsdPath);
+
+		// fallback, if schema location starts with / and therefore fails to be found by classloader
+		if (url == null && xsdPath.startsWith("/")) {
+			xsdPath = xsdPath.substring(1);
+			url = cls.getResource(xsdPath);
+		}
+		
+		return url.toString();
+	}
+	
+	private String resolveXsdPathOnClasspathAndSourceFolders(String xsdPath) {
 		// fallback, if schema location starts with / and therefore fails to be
 		// found by classloader
 		if (xsdPath.startsWith("/")) {
