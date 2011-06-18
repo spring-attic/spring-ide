@@ -45,6 +45,8 @@
 
 										<delete file="${project.build.directory}/site/content.jar" />
 										<delete file="${project.build.directory}/site/artifacts.jar" />
+										
+										<copy todir="${project.build.directory}/site" file="${project.build.directory}/../pack.properties"/>
 
 										<java jvm="${java.home}/bin/java" classname="org.eclipse.equinox.internal.p2.jarprocessor.Main"
 											fork="true" classpathref="jarprocessor.classpath" failonerror="true" maxmemory="256m"
