@@ -465,18 +465,21 @@ public class JdtUtils {
 			try {
 				IField type = (IField) element;
 				int lines = 0;
-				String targetsource = type.getCompilationUnit().getSource();
-				if (targetsource != null) {
-					String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
-
-					char[] chars = new char[sourceuptomethod.length()];
-					sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
-					for (char element0 : chars) {
-						if (element0 == '\n') {
-							lines++;
+				ICompilationUnit cu = type.getCompilationUnit();
+				if (cu != null) {
+					String targetsource = cu.getSource();
+					if (targetsource != null) {
+						String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
+	
+						char[] chars = new char[sourceuptomethod.length()];
+						sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
+						for (char element0 : chars) {
+							if (element0 == '\n') {
+								lines++;
+							}
 						}
+						return new Integer(lines + 1);
 					}
-					return new Integer(lines + 1);
 				}
 			}
 			catch (JavaModelException e) {
