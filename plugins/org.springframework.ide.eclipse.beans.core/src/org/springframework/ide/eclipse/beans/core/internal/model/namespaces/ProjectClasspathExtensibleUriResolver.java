@@ -22,6 +22,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
@@ -33,39 +37,50 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor.SchemaLocations;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Document;
 
 /**
- * {@link URIResolverExtension} resolves URIs on the project classpath using the protocol established by
- * <code>spring.schemas</code> files.
+ * {@link URIResolverExtension} resolves URIs on the project classpath using the
+ * protocol established by <code>spring.schemas</code> files.
+ * 
  * @author Christian Dupuis
  * @author Martin Lippert
  * @since 2.3.1
  */
-@SuppressWarnings("restriction")
-public class ProjectClasspathExtensibleUriResolver implements URIResolverExtension, IElementChangedListener {
+@SuppressWarnings({ "restriction", "deprecation" })
+public class ProjectClasspathExtensibleUriResolver implements
+		URIResolverExtension, IElementChangedListener, IPropertyChangeListener,
+		IPreferenceChangeListener {
+
+	private static final String KEY_DISABLE_CACHING_PREFERENCE = BeansCorePlugin.PLUGIN_ID + "."
+			+ BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID;
 
 	private static Map<IProject, ProjectClasspathUriResolver> projectResolvers = new ConcurrentHashMap<IProject, ProjectClasspathUriResolver>();
 	private ThreadLocal<IPath> previousFile = new ThreadLocal<IPath>();
-	
+
 	public ProjectClasspathExtensibleUriResolver() {
-		JavaCore.addElementChangedListener(this, ElementChangedEvent.POST_CHANGE);
+		JavaCore.addElementChangedListener(this,
+				ElementChangedEvent.POST_CHANGE);
+		BeansCorePlugin.getDefault().getPluginPreferences()
+				.addPropertyChangeListener(this);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public String resolve(IFile file, String baseLocation, String publicId, String systemId) {
+	public String resolve(IFile file, String baseLocation, String publicId,
+			String systemId) {
 		// systemId is already resolved; so don't touch
 		if (systemId != null && systemId.startsWith("jar:")) {
 			return null;
 		}
-		
+
 		if (systemId == null && file != null) {
 			systemId = findSystemIdFromFile(file, publicId);
 		}
-		
+
 		if (systemId == null && publicId == null) {
 			return null;
 		}
@@ -73,16 +88,15 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		if (file == null) {
 			IPath prevFile = previousFile.get();
 			if (prevFile != null) {
-				file = ResourcesPlugin.getWorkspace().getRoot().getFile(prevFile);
-			}
-			else {
+				file = ResourcesPlugin.getWorkspace().getRoot()
+						.getFile(prevFile);
+			} else {
 				return null;
 			}
-		}
-		else {
+		} else {
 			previousFile.set(file.getFullPath());
 		}
-		
+
 		ProjectClasspathUriResolver resolver = getProjectResolver(file);
 		if (resolver != null) {
 			return resolver.resolveOnClasspath(publicId, systemId);
@@ -90,12 +104,13 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 
 		return null;
 	}
-	
+
 	private ProjectClasspathUriResolver getProjectResolver(IFile file) {
 		IProject project = file.getProject();
-		
+
 		// no project resolver if not a spring project
-		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(project);
+		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
+				project);
 		if (beansProject == null) {
 			return null;
 		}
@@ -103,43 +118,67 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 		if (!NamespaceUtils.useNamespacesFromClasspath(project)) {
 			return null;
 		}
-		
+
 		if (!checkFileExtension(file, beansProject)) {
 			return null;
 		}
-		
-		synchronized(projectResolvers) {
+
+		synchronized (projectResolvers) {
 			if (projectResolvers.containsKey(project)) {
 				return projectResolvers.get(project);
 			}
-			
-			ProjectClasspathUriResolver resolver = new ProjectClasspathUriResolver(project);
+
+			ProjectClasspathUriResolver resolver = new ProjectClasspathUriResolver(
+					project);
 			projectResolvers.put(project, resolver);
+
+			SpringCorePreferences
+					.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID)
+					.getProjectPreferences().addPreferenceChangeListener(this);
+
 			return resolver;
 		}
 	}
-	
+
 	public void elementChanged(ElementChangedEvent event) {
 		for (IJavaElementDelta delta : event.getDelta().getAffectedChildren()) {
 			if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
 					|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
 				resetForChangedElement(delta.getElement());
-			}
-			else if ((delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) {
+			} else if ((delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) {
 				resetForChangedElement(delta.getElement());
-			}
-			else if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0) {
+			} else if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0) {
 				resetForChangedElement(delta.getElement());
 			}
 		}
 	}
 
+	public void propertyChange(PropertyChangeEvent event) {
+		if (BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID
+				.equals(event.getProperty())) {
+			projectResolvers.clear();
+		}
+	}
+
+	public void preferenceChange(PreferenceChangeEvent event) {
+		if (KEY_DISABLE_CACHING_PREFERENCE.equals(event.getKey())) {
+			projectResolvers.clear();
+		}
+	}
+
 	private void resetForChangedElement(IJavaElement element) {
-		for(IProject project : projectResolvers.keySet()) {
+		for (IProject project : projectResolvers.keySet()) {
 			IJavaProject javaProject = JdtUtils.getJavaProject(project);
 			if (javaProject != null) {
-				if (javaProject.equals(element) || javaProject.isOnClasspath(element)) {
+				if (javaProject.equals(element)
+						|| javaProject.isOnClasspath(element)) {
 					projectResolvers.remove(project);
+
+					SpringCorePreferences
+							.getProjectPreferences(project,
+									BeansCorePlugin.PLUGIN_ID)
+							.getProjectPreferences()
+							.removePreferenceChangeListener(this);
 				}
 			}
 		}
@@ -147,23 +186,25 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 
 	/**
 	 * try to extract the system-id of the given namespace from the xml file
+	 * 
 	 * @since 2.6.0
 	 */
 	private String findSystemIdFromFile(IFile file, String publicIc) {
 		InputStream contents = null;
 		try {
 			contents = file.getContents();
-			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory builderFactory = DocumentBuilderFactory
+					.newInstance();
 			builderFactory.setValidating(false);
 			builderFactory.setNamespaceAware(true);
-			
+
 			DocumentBuilder builder = builderFactory.newDocumentBuilder();
 			Document doc = builder.parse(contents);
-			
+
 			DocumentAccessor accessor = new DocumentAccessor();
 			accessor.pushDocument(doc);
 			SchemaLocations locations = accessor.getCurrentSchemaLocations();
-			
+
 			String location = locations.getSchemaLocation(publicIc);
 			return location;
 		} catch (Exception e) {
@@ -191,11 +232,11 @@ public class ProjectClasspathExtensibleUriResolver implements URIResolverExtensi
 				}
 			}
 		}
-		
+
 		if (file.getName().endsWith(".xsd")) {
-		    return true;
+			return true;
 		}
-		
+
 		return false;
 	}
 
