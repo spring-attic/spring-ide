@@ -71,7 +71,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static final String LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID = "loadNamespaceHandlerFromClasspath";
 	
 	/** preference key to load namespace handler by searching source folders */
-	public static final String LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID = "loadNamespaceHandlerFromSourceFolders";
+	public static final String DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID = "disableCachingForNamespaceLoadingFromClasspath";
 
 	/** preference key for defining the parsing timeout */
 	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID + ".timeoutConfigLoading";

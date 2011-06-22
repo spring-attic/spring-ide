@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
 public class ProjectClasspathUriResolver {
 
 	private final IProject project;
-	private boolean includingSourceFolders;
+	private boolean disableCaching;
 
 	private Map<String, String> typePublic;
 	private Map<String, String> typeUri;
@@ -49,10 +49,10 @@ public class ProjectClasspathUriResolver {
 
 	public ProjectClasspathUriResolver(IProject project) {
 		this.project = project;
-		this.includingSourceFolders = NamespaceUtils
-				.useNamespacesAlsoFromSourceFolders(project);
+		this.disableCaching = NamespaceUtils
+				.disableCachingForNamespaceLoadingFromClasspath(project);
 
-		if (!includingSourceFolders) {
+		if (!disableCaching) {
 			init();
 		}
 	}
@@ -62,7 +62,7 @@ public class ProjectClasspathUriResolver {
 	 * the <code>file</code>'s project.
 	 */
 	public String resolveOnClasspath(String publicId, String systemId) {
-		if (includingSourceFolders) {
+		if (disableCaching) {
 			return resolveOnClasspathAndSourceFolders(publicId, systemId);
 		}
 

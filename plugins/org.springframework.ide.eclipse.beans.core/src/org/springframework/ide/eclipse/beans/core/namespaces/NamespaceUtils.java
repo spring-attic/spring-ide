@@ -250,7 +250,7 @@ public class NamespaceUtils {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public static boolean useNamespacesAlsoFromSourceFolders(IProject project) {
+	public static boolean disableCachingForNamespaceLoadingFromClasspath(IProject project) {
 		if (project == null) {
 			return false;
 		}
@@ -258,10 +258,10 @@ public class NamespaceUtils {
 		if (SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
 				BeansCorePlugin.PROJECT_PROPERTY_ID, false)) {
 			return SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
-					BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID, false);
+					BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, false);
 		}
 		return BeansCorePlugin.getDefault().getPluginPreferences().getBoolean(
-				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID);
+				BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
 	}
 
 

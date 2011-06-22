@@ -58,7 +58,7 @@ public class NewSpringProjectCreationPage extends WizardPage {
 
 	private Button classpathCheckbox;
 	
-	private Button searchSourceFoldersCheckbox;
+	private Button disableNamespaceCachingCheckbox;
 
 	private Button enableImportButton;
 
@@ -116,8 +116,8 @@ public class NewSpringProjectCreationPage extends WizardPage {
 		return classpathCheckbox.getSelection();
 	}
 	
-	public boolean loadHandlerFromSourceFolders() {
-		return searchSourceFoldersCheckbox.getSelection();
+	public boolean disableNamespaceCaching() {
+		return disableNamespaceCachingCheckbox.getSelection();
 	}
 
 	public boolean useHighestXsdVersion() {
@@ -235,7 +235,7 @@ public class NewSpringProjectCreationPage extends WizardPage {
 				.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 		boolean useClasspath = prefs
 				.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
-		boolean useSourceFolders = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_SOURCE_FOLDERS_ID);
+		boolean disableCachingNamespaces = prefs.getBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
 
 		versionCheckbox = createButton(namespacesGroup, SWT.CHECK, 1,
 				convertHorizontalDLUsToPixels(5));
@@ -251,16 +251,16 @@ public class NewSpringProjectCreationPage extends WizardPage {
 		classpathCheckbox.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				searchSourceFoldersCheckbox.setEnabled(classpathCheckbox.getSelection());
+				disableNamespaceCachingCheckbox.setEnabled(classpathCheckbox.getSelection());
 			}
 		});
 		
-		searchSourceFoldersCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, 
+		disableNamespaceCachingCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, 
 				convertHorizontalDLUsToPixels(15));
-		searchSourceFoldersCheckbox
-				.setText(BeansWizardsMessages.NewProjectPage_loadXsdsFromSourceFolders);
-		searchSourceFoldersCheckbox.setSelection(useSourceFolders);
-		searchSourceFoldersCheckbox.setEnabled(useClasspath);
+		disableNamespaceCachingCheckbox
+				.setText(BeansWizardsMessages.NewProjectPage_disableNamespaceCaching);
+		disableNamespaceCachingCheckbox.setSelection(disableCachingNamespaces);
+		disableNamespaceCachingCheckbox.setEnabled(useClasspath);
 
 		enableProjectSpecificSettings(false);
 	}
@@ -269,7 +269,7 @@ public class NewSpringProjectCreationPage extends WizardPage {
 			boolean useProjectSpecificSettings) {
 		versionCheckbox.setEnabled(useProjectSpecificSettings);
 		classpathCheckbox.setEnabled(useProjectSpecificSettings);
-		searchSourceFoldersCheckbox.setEnabled(useProjectSpecificSettings && classpathCheckbox.getSelection());
+		disableNamespaceCachingCheckbox.setEnabled(useProjectSpecificSettings && classpathCheckbox.getSelection());
 	}
 
 	// Copied from NewJavaProjectWizardPageOne so that our margins will match

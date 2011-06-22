@@ -60,7 +60,7 @@ public final class BeansWizardsMessages extends NLS {
 	public static String NewProjectPage_enableProjectSettings;
 	public static String NewProjectPage_highestXsdVersion;
 	public static String NewProjectPage_loadXsdsFromClasspath;
-	public static String NewProjectPage_loadXsdsFromSourceFolders;
+	public static String NewProjectPage_disableNamespaceCaching;
 
 	public static String NewProjectPage_facetsSettings;
 	public static String NewProjectPage_projectFacetsDescription;
