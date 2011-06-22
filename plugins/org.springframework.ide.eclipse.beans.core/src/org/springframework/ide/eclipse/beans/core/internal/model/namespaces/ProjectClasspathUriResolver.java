@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,12 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.parsers.DocumentBuilder;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJarEntryResource;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
@@ -59,8 +52,6 @@ public class ProjectClasspathUriResolver {
 		this.includingSourceFolders = NamespaceUtils
 				.useNamespacesAlsoFromSourceFolders(project);
 
-		schemaMappings = getSchemaMappings();
-
 		if (!includingSourceFolders) {
 			init();
 		}
@@ -80,9 +71,10 @@ public class ProjectClasspathUriResolver {
 
 	private String resolveOnClasspathAndSourceFolders(String publicId,
 			String systemId) {
-		if (schemaMappings.containsKey(systemId)) {
-			String xsdPath = schemaMappings.get(systemId);
-			return resolveXsdPathOnClasspathAndSourceFolders(xsdPath);
+		Map<String, String> mappings = getSchemaMappings();
+		if (mappings != null && systemId != null && mappings.containsKey(systemId)) {
+			String xsdPath = mappings.get(systemId);
+			return resolveXsdPathOnClasspath(xsdPath);
 		}
 		return null;
 	}
@@ -106,6 +98,7 @@ public class ProjectClasspathUriResolver {
 
 		Map<String, NamespaceDefinition> namespaceDefinitionRegistry = new HashMap<String, NamespaceDefinition>();
 
+		schemaMappings = getSchemaMappings();
 		if (schemaMappings != null) {
 			for (String key : schemaMappings.keySet()) {
 				String path = schemaMappings.get(key);
@@ -192,25 +185,6 @@ public class ProjectClasspathUriResolver {
 		return handlerMappings;
 	}
 
-	/**
-	 * Verify if the <code>resources</code> array contains a file matching
-	 * <code>fileName</code>.
-	 */
-	private boolean containsSchema(Object[] resources, String fileName) {
-		for (Object resource : resources) {
-			if (resource instanceof IResource) {
-				if (((IResource) resource).getName().equals(fileName)) {
-					return true;
-				}
-			} else if (resource instanceof IJarEntryResource) {
-				if (((IJarEntryResource) resource).getName().equals(fileName)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	private String resolveXsdPathOnClasspath(String xsdPath) {
 		ClassLoader cls = JdtUtils.getClassLoader(project, null);
 		
@@ -225,79 +199,4 @@ public class ProjectClasspathUriResolver {
 		return url.toString();
 	}
 	
-	private String resolveXsdPathOnClasspathAndSourceFolders(String xsdPath) {
-		// fallback, if schema location starts with / and therefore fails to be
-		// found by classloader
-		if (xsdPath.startsWith("/")) {
-			xsdPath = xsdPath.substring(1);
-		}
-
-		String packageName = "";
-		String fileName = xsdPath;
-
-		int ix = xsdPath.lastIndexOf('/');
-		if (ix > 0) {
-			packageName = xsdPath.substring(0, ix).replace('/', '.');
-			fileName = xsdPath.substring(ix + 1);
-		}
-
-		IJavaProject javaProject = JdtUtils.getJavaProject(project);
-		if (javaProject != null) {
-			try {
-				for (IPackageFragmentRoot root : javaProject
-						.getAllPackageFragmentRoots()) {
-					boolean found = false;
-
-					// Look in the root of the package fragment root
-					if ("".equals(packageName) && root.exists()) {
-						found = containsSchema(root.getNonJavaResources(),
-								fileName);
-					}
-
-					// Check the package
-					IPackageFragment packageFragment = root
-							.getPackageFragment(packageName);
-					if (!found && packageFragment != null
-							&& packageFragment.exists()) {
-						found = containsSchema(
-								packageFragment.getNonJavaResources(), fileName);
-					}
-
-					// Found the XSD in the package fragment root? -> construct
-					// usable URI
-					if (found) {
-						String path = "";
-
-						// Workspace jar or resource
-						if (root.getResource() != null) {
-							URI jarUri = SpringCoreUtils.getResourceURI(root
-									.getResource());
-							path = jarUri.toString();
-						}
-						// Workspace external jar
-						else {
-							File jarFile = root.getPath().toFile();
-							path = jarFile.toURI().toString();
-						}
-
-						// If the path points to a jar -> add jar: URI prefix
-						// and append ! as separator
-						if (path.endsWith(".jar")) {
-							path = "jar:" + path + "!";
-						}
-
-						// Make sure that all paths start with '/'
-						if (xsdPath.startsWith("/")) {
-							return path + xsdPath;
-						}
-						return path + "/" + xsdPath;
-					}
-				}
-			} catch (JavaModelException e) {
-				// The implementation is called too often to log
-			}
-		}
-		return null;
-	}
-
 }
