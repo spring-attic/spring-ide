@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.internal.model.resources;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -19,12 +20,18 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
+
 /**
  * Implementation of {@link IResourceChangeListener} which detects modifications to Spring projects (add/remove Spring
  * beans nature, open/close and delete).
@@ -219,11 +226,42 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 					return false;
 				}
 			}
+			else if (resource instanceof IFolder && JdtUtils.isJavaProject(resource)) {
+				// Make sure we don't iterate into output locations/folders
+				try {
+					IJavaProject jp = JdtUtils.getJavaProject(resource);
+					if (!checkPathForNonOutputLocation(jp.getOutputLocation(), resource)) {
+						return false;
+					}
+					for (IClasspathEntry entry : jp.getRawClasspath()) {
+						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							if (!checkPathForNonOutputLocation(entry.getOutputLocation(), resource)) {
+								return false;
+							}
+
+						}
+					}
+				}
+				catch (JavaModelException e) {
+					SpringCore.log(e);
+				}
+			}
 			return true;
 		}
 
 		protected boolean resourceRemoved(IResource resource) {
 			return true;
 		}
+		
+		protected boolean checkPathForNonOutputLocation(IPath path, IResource resource) {
+			if (path != null) {
+				path = path.removeFirstSegments(1);
+				if (path.isPrefixOf(resource.getProjectRelativePath())) {
+					return false;
+				}
+			}
+			return true;
+		}
+	
 	}
 }
