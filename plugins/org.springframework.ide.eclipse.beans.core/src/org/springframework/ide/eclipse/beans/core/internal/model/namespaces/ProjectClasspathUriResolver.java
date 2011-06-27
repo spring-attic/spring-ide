@@ -107,23 +107,23 @@ public class ProjectClasspathUriResolver {
 				String resolvedPath = resolveXsdPathOnClasspath(path);
 				if (resolvedPath != null) {
 					typeUri.put(key, resolvedPath);
-				}
 
-				// collect base information to later extract the default uri
-				String namespaceUri = getTargetNamespace(resolvedPath);
-
-				if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
-					namespaceDefinitionRegistry.get(namespaceUri)
-							.addSchemaLocation(key);
-					namespaceDefinitionRegistry.get(namespaceUri).addUri(path);
-				} else {
-					NamespaceDefinition namespaceDefinition = new NamespaceDefinition(
-							null);
-					namespaceDefinition.addSchemaLocation(key);
-					namespaceDefinition.setNamespaceUri(namespaceUri);
-					namespaceDefinition.addUri(path);
-					namespaceDefinitionRegistry.put(namespaceUri,
-							namespaceDefinition);
+					// collect base information to later extract the default uri
+					String namespaceUri = getTargetNamespace(resolvedPath);
+	
+					if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
+						namespaceDefinitionRegistry.get(namespaceUri)
+								.addSchemaLocation(key);
+						namespaceDefinitionRegistry.get(namespaceUri).addUri(path);
+					} else {
+						NamespaceDefinition namespaceDefinition = new NamespaceDefinition(
+								null);
+						namespaceDefinition.addSchemaLocation(key);
+						namespaceDefinition.setNamespaceUri(namespaceUri);
+						namespaceDefinition.addUri(path);
+						namespaceDefinitionRegistry.put(namespaceUri,
+								namespaceDefinition);
+					}
 				}
 			}
 
@@ -196,7 +196,7 @@ public class ProjectClasspathUriResolver {
 			url = cls.getResource(xsdPath);
 		}
 		
-		return url.toString();
+		return url != null ? url.toString() : null;
 	}
 	
 }
