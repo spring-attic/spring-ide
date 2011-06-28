@@ -65,16 +65,17 @@ public class ProjectClasspathUriResolver {
 		if (disableCaching) {
 			return resolveOnClasspathAndSourceFolders(publicId, systemId);
 		}
-
 		return resolveOnClasspathOnly(publicId, systemId);
 	}
 
 	private String resolveOnClasspathAndSourceFolders(String publicId,
 			String systemId) {
-		Map<String, String> mappings = getSchemaMappings();
-		if (mappings != null && systemId != null && mappings.containsKey(systemId)) {
+		ClassLoader classLoader = JdtUtils.getClassLoader(project, null);
+		Map<String, String> mappings = getSchemaMappings(classLoader);
+		if (mappings != null && systemId != null
+				&& mappings.containsKey(systemId)) {
 			String xsdPath = mappings.get(systemId);
-			return resolveXsdPathOnClasspath(xsdPath);
+			return resolveXsdPathOnClasspath(xsdPath, classLoader);
 		}
 		return null;
 	}
@@ -97,24 +98,27 @@ public class ProjectClasspathUriResolver {
 		this.typeUri = new ConcurrentHashMap<String, String>();
 
 		Map<String, NamespaceDefinition> namespaceDefinitionRegistry = new HashMap<String, NamespaceDefinition>();
+		ClassLoader classLoader = JdtUtils.getClassLoader(project, null);
 
-		schemaMappings = getSchemaMappings();
+		schemaMappings = getSchemaMappings(classLoader);
 		if (schemaMappings != null) {
 			for (String key : schemaMappings.keySet()) {
 				String path = schemaMappings.get(key);
 
 				// add the resolved path to the list of uris
-				String resolvedPath = resolveXsdPathOnClasspath(path);
+				String resolvedPath = resolveXsdPathOnClasspath(path,
+						classLoader);
 				if (resolvedPath != null) {
 					typeUri.put(key, resolvedPath);
 
 					// collect base information to later extract the default uri
 					String namespaceUri = getTargetNamespace(resolvedPath);
-	
+
 					if (namespaceDefinitionRegistry.containsKey(namespaceUri)) {
 						namespaceDefinitionRegistry.get(namespaceUri)
 								.addSchemaLocation(key);
-						namespaceDefinitionRegistry.get(namespaceUri).addUri(path);
+						namespaceDefinitionRegistry.get(namespaceUri).addUri(
+								path);
 					} else {
 						NamespaceDefinition namespaceDefinition = new NamespaceDefinition(
 								null);
@@ -133,7 +137,8 @@ public class ProjectClasspathUriResolver {
 				String namespaceKey = definition.getNamespaceUri();
 				String defaultUri = definition.getDefaultUri();
 
-				String resolvedPath = resolveXsdPathOnClasspath(defaultUri);
+				String resolvedPath = resolveXsdPathOnClasspath(defaultUri,
+						classLoader);
 				if (resolvedPath != null) {
 					typePublic.put(namespaceKey, resolvedPath);
 				}
@@ -170,14 +175,17 @@ public class ProjectClasspathUriResolver {
 	/**
 	 * Loads all schema mappings from all <code>spring.schemas</code> files on
 	 * the project classpath.
+	 * 
+	 * @param classLoader
+	 *            The classloader that is used to load the properties
 	 */
-	private Map<String, String> getSchemaMappings() {
+	private Map<String, String> getSchemaMappings(ClassLoader classLoader) {
 		Map<String, String> handlerMappings = new ConcurrentHashMap<String, String>();
 		try {
 			Properties mappings = PropertiesLoaderUtils
 					.loadAllProperties(
 							ProjectClasspathNamespaceDefinitionResolver.DEFAULT_SCHEMA_MAPPINGS_LOCATION,
-							JdtUtils.getClassLoader(project, null));
+							classLoader);
 			CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
 		} catch (IOException ex) {
 			// We can ignore this as we simply don't find the xsd file then.
@@ -185,18 +193,17 @@ public class ProjectClasspathUriResolver {
 		return handlerMappings;
 	}
 
-	private String resolveXsdPathOnClasspath(String xsdPath) {
-		ClassLoader cls = JdtUtils.getClassLoader(project, null);
-		
+	private String resolveXsdPathOnClasspath(String xsdPath, ClassLoader cls) {
 		URL url = cls.getResource(xsdPath);
 
-		// fallback, if schema location starts with / and therefore fails to be found by classloader
+		// fallback, if schema location starts with / and therefore fails to be
+		// found by classloader
 		if (url == null && xsdPath.startsWith("/")) {
 			xsdPath = xsdPath.substring(1);
 			url = cls.getResource(xsdPath);
 		}
-		
+
 		return url != null ? url.toString() : null;
 	}
-	
+
 }
