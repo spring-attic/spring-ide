@@ -12,8 +12,13 @@ package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -57,7 +62,8 @@ public class ProjectClasspathExtensibleUriResolver implements
 	private static final String KEY_DISABLE_CACHING_PREFERENCE = BeansCorePlugin.PLUGIN_ID + "."
 			+ BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID;
 
-	private static Map<IProject, ProjectClasspathUriResolver> projectResolvers = new ConcurrentHashMap<IProject, ProjectClasspathUriResolver>();
+//	private static Map<IProject, ProjectClasspathUriResolver> projectResolvers = new ConcurrentHashMap<IProject, ProjectClasspathUriResolver>();
+	private static ConcurrentMap<IProject, Future<ProjectClasspathUriResolver>> projectResolvers = new ConcurrentHashMap<IProject, Future<ProjectClasspathUriResolver>>();
 	private ThreadLocal<IPath> previousFile = new ThreadLocal<IPath>();
 
 	public ProjectClasspathExtensibleUriResolver() {
@@ -106,7 +112,7 @@ public class ProjectClasspathExtensibleUriResolver implements
 	}
 
 	private ProjectClasspathUriResolver getProjectResolver(IFile file) {
-		IProject project = file.getProject();
+		final IProject project = file.getProject();
 
 		// no project resolver if not a spring project
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
@@ -123,21 +129,45 @@ public class ProjectClasspathExtensibleUriResolver implements
 			return null;
 		}
 
-		synchronized (projectResolvers) {
-			if (projectResolvers.containsKey(project)) {
-				return projectResolvers.get(project);
+		while (true) {
+			Future<ProjectClasspathUriResolver> future = projectResolvers.get(project);
+			if (future == null) {
+				
+				Callable<ProjectClasspathUriResolver> createResolver = new Callable<ProjectClasspathUriResolver>() {
+					public ProjectClasspathUriResolver call() throws InterruptedException {
+						ProjectClasspathUriResolver resolver = new ProjectClasspathUriResolver(
+								project);
+						
+						SpringCorePreferences
+								.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID)
+								.getProjectPreferences().addPreferenceChangeListener(ProjectClasspathExtensibleUriResolver.this);
+
+						return resolver;
+					}
+				};
+				
+				FutureTask<ProjectClasspathUriResolver> futureTask = new FutureTask<ProjectClasspathUriResolver>(createResolver);
+				future = projectResolvers.putIfAbsent(project, futureTask);
+				if (future == null) {
+					future = futureTask;
+					futureTask.run();
+				}
 			}
-
-			ProjectClasspathUriResolver resolver = new ProjectClasspathUriResolver(
-					project);
-			projectResolvers.put(project, resolver);
-
-			SpringCorePreferences
-					.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID)
-					.getProjectPreferences().addPreferenceChangeListener(this);
-
-			return resolver;
+			
+			try {
+				return future.get();
+			}
+			catch (CancellationException e) {
+				projectResolvers.remove(project, future);
+				return null;
+			}
+			catch (ExecutionException e) {
+				return null;
+			} catch (InterruptedException e) {
+				return null;
+			}
 		}
+		
 	}
 
 	public void elementChanged(ElementChangedEvent event) {
@@ -147,7 +177,11 @@ public class ProjectClasspathExtensibleUriResolver implements
 				resetForChangedElement(delta.getElement());
 			} else if ((delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) {
 				resetForChangedElement(delta.getElement());
+			} else if ((delta.getFlags() & IJavaElementDelta.F_OPENED) != 0) {
+				resetForChangedElement(delta.getElement());
 			} else if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0) {
+				resetForChangedElement(delta.getElement());
+			} else if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
 				resetForChangedElement(delta.getElement());
 			}
 		}
@@ -167,11 +201,19 @@ public class ProjectClasspathExtensibleUriResolver implements
 	}
 
 	private void resetForChangedElement(IJavaElement element) {
+		if (element instanceof IJavaProject) {
+			IProject project = ((IJavaProject) element).getProject();
+			projectResolvers.remove(project);
+			SpringCorePreferences
+					.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID)
+					.getProjectPreferences()
+					.removePreferenceChangeListener(this);
+		}
+		
 		for (IProject project : projectResolvers.keySet()) {
 			IJavaProject javaProject = JdtUtils.getJavaProject(project);
 			if (javaProject != null) {
-				if (javaProject.equals(element)
-						|| javaProject.isOnClasspath(element)) {
+				if (javaProject.isOnClasspath(element)) {
 					projectResolvers.remove(project);
 
 					SpringCorePreferences
