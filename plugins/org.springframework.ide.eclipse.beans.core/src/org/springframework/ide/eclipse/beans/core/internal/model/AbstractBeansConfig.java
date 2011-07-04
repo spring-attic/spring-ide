@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -68,7 +69,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	protected volatile IFile file;
 
 	/** List of imports (in registration order) */
-	protected volatile Set<IBeansImport> imports = new LinkedHashSet<IBeansImport>();
+	protected volatile Set<IBeansImport> imports = new CopyOnWriteArraySet<IBeansImport>();
 
 	/** Indicator for a beans configuration embedded in a ZIP file */
 	protected volatile boolean isArchived;
@@ -81,7 +82,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	protected volatile long modificationTimestamp;
 
 	/** Set of parsing errors */
-	protected Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>();
+	protected Set<ValidationProblem> problems = new CopyOnWriteArraySet<ValidationProblem>();
 
 	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 

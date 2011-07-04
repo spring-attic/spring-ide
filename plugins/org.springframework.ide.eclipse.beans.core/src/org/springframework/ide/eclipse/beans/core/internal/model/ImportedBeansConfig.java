@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -61,11 +62,11 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 				if (this.isModelPopulated) {
 					return;
 				}
-				imports = new LinkedHashSet<IBeansImport>();
+				imports = new CopyOnWriteArraySet<IBeansImport>();
 				aliases = new LinkedHashMap<String, IBeanAlias>();
 				components = new LinkedHashSet<IBeansComponent>();
 				beans = new LinkedHashMap<String, IBean>();
-				problems = new LinkedHashSet<ValidationProblem>();
+				problems = new CopyOnWriteArraySet<ValidationProblem>();
 			} 
 			finally {
 				w.unlock();
@@ -126,7 +127,7 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 		if (file == null || !file.isAccessible()) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Imported Beans config file '" + resource + "' not accessible";
-			problems = new LinkedHashSet<ValidationProblem>();
+			problems = new CopyOnWriteArraySet<ValidationProblem>();
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
 		}
 		else {

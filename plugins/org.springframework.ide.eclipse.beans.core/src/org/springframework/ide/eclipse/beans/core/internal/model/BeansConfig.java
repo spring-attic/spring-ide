@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -281,7 +282,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		if (file == null || !file.exists()) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
-			problems = new LinkedHashSet<ValidationProblem>();
+			problems = new CopyOnWriteArraySet<ValidationProblem>();
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
 		}
 		else {
