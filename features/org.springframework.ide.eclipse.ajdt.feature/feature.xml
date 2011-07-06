@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.ajdt.feature"
       label="%featureName"
-      version="2.7.0.qualifier"
+      version="2.7.1.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
