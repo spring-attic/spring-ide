@@ -31,8 +31,8 @@
    </license>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.7.0"/>
-      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.7.0"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.8.0"/>
+      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.8.0"/>
       <import feature="org.eclipse.ajdt" version="2.0.1"/>
       <import feature="org.eclipse.contribution.weaving" version="2.0.1"/>
       <import feature="org.eclipse.contribution.xref" version="2.0.1"/>
