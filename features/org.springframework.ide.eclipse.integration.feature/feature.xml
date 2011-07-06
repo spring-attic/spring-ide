@@ -31,8 +31,8 @@
    </license>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.7.0"/>
-      <import feature="org.springframework.ide.eclipse.security.feature" version="2.7.0"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.7.1"/>
+      <import feature="org.springframework.ide.eclipse.security.feature" version="2.7.1"/>
    </requires>
 
    <plugin
