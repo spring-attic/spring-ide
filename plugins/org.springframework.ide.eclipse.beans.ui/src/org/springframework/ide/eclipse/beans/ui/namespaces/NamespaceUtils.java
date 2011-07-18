@@ -56,12 +56,18 @@ public class NamespaceUtils {
 	public static final String TOOLS_NAMESPACE_URI = "http://www.springframework.org/schema/tool";
 
 	public static final String P_NAMESPACE_URI = "http://www.springframework.org/schema/p";
+	
+	public static final String C_NAMESPACE_URI = "http://www.springframework.org/schema/c";
 
 	private static final Object IMAGE_REGISTRY_LOCK = new Object();
 
 	private static final INamespaceDefinition P_NAMESPACE_DEFINITION = new DefaultNamespaceDefinition("p",
 			P_NAMESPACE_URI, null, new DefaultImageAccessor(BeansUIPlugin.PLUGIN_ID,
 					"/icons/full/obj16/property_obj.gif"));
+	
+	private static final INamespaceDefinition C_NAMESPACE_DEFINITION = new DefaultNamespaceDefinition("c",
+			C_NAMESPACE_URI, null, new DefaultImageAccessor(BeansUIPlugin.PLUGIN_ID,
+					"/icons/full/obj16/constructor_obj.gif"));
 
 	/**
 	 * Returns the namespace URI for the given {@link ISourceModelElement} or
@@ -229,6 +235,7 @@ public class NamespaceUtils {
 
 		boolean foundPNamespace = false;
 		boolean foundDefaultNamespace = false;
+		boolean foundCNamespace = false;
 		// Remove the tool namespace as we don't want to surface on the UI
 		for (INamespaceDefinition definition : new ArrayList<INamespaceDefinition>(namespaceDefinitions)) {
 			if (TOOLS_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
@@ -238,11 +245,18 @@ public class NamespaceUtils {
 			else if (P_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
 				foundPNamespace = true;
 			}
+			else if (C_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
+				foundCNamespace = true;
+			}
 		}
 		
 		if (!foundPNamespace && foundDefaultNamespace) {
 			// Add in p-Namespace if we found the default namespace
 			namespaceDefinitions.add(P_NAMESPACE_DEFINITION);
+		}
+		if (!foundCNamespace && foundDefaultNamespace) {
+			// && is Spring 3.1 or greater
+			namespaceDefinitions.add(C_NAMESPACE_DEFINITION);
 		}
 
 		Collections.sort(namespaceDefinitions, new Comparator<INamespaceDefinition>() {
