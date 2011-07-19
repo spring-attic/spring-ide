@@ -73,8 +73,7 @@ public class ConstructorArgNameContentAssistCalculator implements IContentAssist
 			StringBuilder buf = new StringBuilder();
 			buf.append(paramName);
 			buf.append(" - ");
-			buf.append(method.getParent().getElementName());
-			buf.append('.');
+			
 			buf.append(method.getElementName());
 			buf.append('(');
 			if (parameterTypes != null && parameterNames != null && parameterTypes.length > 0
