@@ -41,6 +41,10 @@ public class BeansHyperlinkDetector extends NamespaceHyperlinkDetectorSupport im
 				&& attrName.endsWith("-ref")) {
 			return true;
 		}
+		if ("http://www.springframework.org/schema/c".equals(attr.getNamespaceURI())
+				&& attrName.endsWith("-ref")) {
+			return true;
+		}
 		return super.isLinkableAttr(attr);
 	}
 
@@ -78,7 +82,6 @@ public class BeansHyperlinkDetector extends NamespaceHyperlinkDetectorSupport im
 
 		registerHyperlinkCalculator("property", "name", new PropertyNameHyperlinkCalculator());
 		registerHyperlinkCalculator("factory-method", new FactoryMethodHyperlinkCalculator());
-		
 		registerHyperlinkCalculator("import", "resource", new ImportHyperlinkCalculator());
 	}
 

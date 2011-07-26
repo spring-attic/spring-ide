@@ -65,13 +65,11 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector, I
 								return hyperlinks;
 							}
 						}
-						else {
-							IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr.getNodeValue(),
-									currentNode, currentNode.getParentNode(), document, textViewer, hyperlinkRegion,
-									region);
-							if (hyperLink != null) {
-								return new IHyperlink[] { hyperLink };
-							}
+						IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr.getNodeValue(),
+								currentNode, currentNode.getParentNode(), document, textViewer, hyperlinkRegion,
+								region);
+						if (hyperLink != null) {
+							return new IHyperlink[] { hyperLink };
 						}
 					}
 				}
@@ -89,12 +87,10 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector, I
 							return hyperlinks;
 						}
 					}
-					else {
-						IHyperlink hyperLink = createHyperlink(parentNode.getNodeName(), currentNode.getNodeValue(),
-								currentNode, parentNode, document, textViewer, hyperlinkRegion, region);
-						if (hyperLink != null) {
-							return new IHyperlink[] { hyperLink };
-						}
+					IHyperlink hyperLink = createHyperlink(parentNode.getNodeName(), currentNode.getNodeValue(),
+							currentNode, parentNode, document, textViewer, hyperlinkRegion, region);
+					if (hyperLink != null) {
+						return new IHyperlink[] { hyperLink };
 					}
 				}
 				break;
