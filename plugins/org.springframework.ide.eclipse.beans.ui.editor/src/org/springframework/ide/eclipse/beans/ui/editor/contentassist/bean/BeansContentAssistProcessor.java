@@ -260,8 +260,10 @@ public class BeansContentAssistProcessor extends NamespaceContentAssistProcessor
 
 		registerContentAssistCalculator("bean", "scope", new ScopeContentAssistCalculator());
 		
-		registerContentAssistCalculator("http://www.springframework.org/schema/beans", "bean", "constructor-arg", "name",
+		registerContentAssistCalculator(NamespaceUtils.DEFAULT_NAMESPACE_URI, "bean", "constructor-arg", "name",
 				new ConstructorArgNameContentAssistCalculator());
+		registerContentAssistCalculator(NamespaceUtils.DEFAULT_NAMESPACE_URI, "bean", "constructor-arg", "value",
+				new ConstructorArgValueContentAssistCalculator());
 	}
 
 	@Override

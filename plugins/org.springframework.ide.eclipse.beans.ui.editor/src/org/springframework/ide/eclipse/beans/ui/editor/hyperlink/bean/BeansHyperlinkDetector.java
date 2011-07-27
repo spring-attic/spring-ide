@@ -81,6 +81,7 @@ public class BeansHyperlinkDetector extends NamespaceHyperlinkDetectorSupport im
 		registerHyperlinkCalculator("replaced-method", "name", lookupReplace);
 
 		registerHyperlinkCalculator("property", "name", new PropertyNameHyperlinkCalculator());
+		registerHyperlinkCalculator("constructor-arg", "name", new ConstructorArgNameHyperlinkCalculator());
 		registerHyperlinkCalculator("factory-method", new FactoryMethodHyperlinkCalculator());
 		registerHyperlinkCalculator("import", "resource", new ImportHyperlinkCalculator());
 	}
