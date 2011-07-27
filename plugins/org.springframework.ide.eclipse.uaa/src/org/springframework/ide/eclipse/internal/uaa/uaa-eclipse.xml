@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- For every change done to this document increment the below version -->
-<uaa version="1">
+<uaa version="2">
 	<product id="Spring IDE" root-plugin="org.springframework.ide.eclipse">
 		<feature id="org.springframework.ide.eclipse.ajdt.feature">
 			<plugin id="org.springframework.ide.eclipse.ajdt.ui.xref" />
@@ -352,6 +352,20 @@
 		<feature id="org.codehaus.groovy17.feature">
 			<plugin id="org.codehaus.groovy" />
 			<plugin id="org.codehaus.groovy.eclipse" />
+		</feature>
+	</product>
+	<product id="Gradle Plugin for STS" root-plugin="com.springsource.sts.gradle.core">
+		<feature id="com.springsource.sts.gradle.feature">
+			<plugin id="com.springsource.sts.gradle.core" />
+			<plugin id="com.springsource.sts.gradle.ui" />
+		</feature>
+	</product>
+	<product id="Cloud Foundry for STS" root-plugin="com.cloudfoundry.sts.server.core">
+		<feature id="com.cloudfoundry.sts.server">
+			<plugin id="com.cloudfoundry.sts.server.core" />
+			<plugin id="com.cloudfoundry.sts.server.ui" />
+			<plugin id="com.cloudfoundry.sts.server.rse" />
+			<plugin id="com.cloudfoundry.sts.server.ui.branding" />
 		</feature>
 	</product>
 </uaa>
