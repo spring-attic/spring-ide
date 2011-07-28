@@ -11,8 +11,12 @@
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.objectweb.asm.AnnotationVisitor;
@@ -31,6 +35,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -106,23 +111,31 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 								+ "'", new ValidationProblemAttribute("CLASS", className));
 					}
 				}
+				
 				// Validate the actual constructors for name, type matches
-				// else if (numArguments > 0) {
-				// Set<IMethod> ctors = Introspector.getConstructors(type, numArguments, true);
-				// if (ctors.size() == 1) {
-				// List<String> parameterNames = Arrays.asList(ctors.iterator().next().getParameterNames());
-				// for (IBeanConstructorArgument argument : bean.getConstructorArguments()) {
-				// String name = argument.getName();
-				// if (name != null && !parameterNames.contains(name)) {
-				// context.warning(argument, "MISSING_CONSTRUCTOR_ARG_NAME", String.format(
-				// "Cannot find constructor parameter with name '%s'", name));
-				// }
-				// }
-				// }
-				// else {
-				//						
-				// }
-				// }
+				else if (numArguments > 0) {
+					Set<IMethod> ctors = Introspector.getConstructors(type, numArguments, true);
+					
+					for (IBeanConstructorArgument argument : bean.getConstructorArguments()) {
+						String name = argument.getName();
+						if (name != null) {
+							boolean found = false;
+							for(IMethod ctor: ctors) {
+								List<String> parameterNames = Arrays.asList(ctor.getParameterNames());
+								if (parameterNames.contains(name)) {
+									found = true;
+								}
+							}
+							
+							if (!found) {
+								context.warning(argument, "MISSING_CONSTRUCTOR_ARG_NAME", String.format(
+										"Cannot find constructor parameter with name '%s'", name),
+										new ValidationProblemAttribute("CLASS", type.getFullyQualifiedName()),
+										new ValidationProblemAttribute("NUM_CONSTRUCTOR_ARGS", numArguments));
+							}
+						}
+					}
+				}
 			}
 			catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
