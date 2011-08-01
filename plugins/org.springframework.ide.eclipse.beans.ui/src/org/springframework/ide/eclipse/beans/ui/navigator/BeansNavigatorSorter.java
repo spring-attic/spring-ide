@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,11 @@ public class BeansNavigatorSorter extends ViewerSorter {
 		else if (e1 instanceof BeanMetadataNode && e2 instanceof BeanMetadataNode) {
 			int first = ((BeanMetadataNode) e1).getLocation().getStartLine();
 			int second = ((BeanMetadataNode) e2).getLocation().getStartLine();
+			return Integer.valueOf(first).compareTo(Integer.valueOf(second));
+		}
+		else if (e1 instanceof ISourceModelElement && e2 instanceof ISourceModelElement) {
+			int first = ((ISourceModelElement) e1).getElementStartLine();
+			int second = ((ISourceModelElement) e2).getElementStartLine();
 			return Integer.valueOf(first).compareTo(Integer.valueOf(second));
 		}
 		// We don't want to sort it, just show it in the order it's found
