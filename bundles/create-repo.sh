@@ -2,7 +2,7 @@
 
 WORKSPACE=`pwd`
 
-ECLIPSE_HOME=/Users/cdupuis/springsource-2.5.2.RELEASE-cocoa/sts-2.5.2.RELEASE
+ECLIPSE_HOME=/Users/cdupuis/springsource-2.7.1.RELEASE-cocoa/sts-2.7.1.RELEASE
 LAUNCHER_JAR=`ls $ECLIPSE_HOME/plugins/org.eclipse.equinox.launcher_*`
 
 rm $WORKSPACE/repo/content.jar $WORKSPACE/repo/artifacts.jar
