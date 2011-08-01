@@ -248,6 +248,22 @@ public class NamespaceUtils {
 		return BeansCorePlugin.getDefault().getPluginPreferences().getBoolean(
 				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
 	}
+	
+	@SuppressWarnings("deprecation")
+	public static boolean disableCachingForNamespaceLoadingFromClasspath(IProject project) {
+		if (project == null) {
+			return false;
+		}
+		
+		if (SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
+				BeansCorePlugin.PROJECT_PROPERTY_ID, false)) {
+			return SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
+					BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, false);
+		}
+		return BeansCorePlugin.getDefault().getPluginPreferences().getBoolean(
+				BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
+	}
+
 
 	private static Object loadHandler(String providerBundle, String handlerClassName) {
 		Bundle bundle = Platform.getBundle(providerBundle);
@@ -302,4 +318,5 @@ public class NamespaceUtils {
 			return 31 ^ ObjectUtils.nullSafeHashCode(namespaceUri) * ObjectUtils.nullSafeHashCode(schemaLocation);
 		}
 	}
+
 }

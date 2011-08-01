@@ -286,23 +286,26 @@ public class AopReferenceModelBuilderJob extends Job {
 	private void buildAopReferencesForBeansConfig(IBeansConfig config, IAspectDefinition info, IProgressMonitor monitor) {
 
 		IResource file = config.getElementResource();
-		IAopProject aopProject = ((AopReferenceModel) Activator.getModel()).getProjectWithInitialization(JdtUtils
-				.getJavaProject(file.getProject()));
-
-		Set<IBean> beans = new LinkedHashSet<IBean>();
-		beans.addAll(config.getBeans());
-
-		// add component registered beans
-		for (IBeansComponent component : config.getComponents()) {
-			Set<IBean> nestedBeans = component.getBeans();
-			for (IBean nestedBean : nestedBeans) {
-				if (!nestedBean.isInfrastructure()) {
-					beans.add(nestedBean);
+		IJavaProject javaProject = JdtUtils.getJavaProject(file.getProject());
+		
+		if (javaProject != null) {
+			IAopProject aopProject = ((AopReferenceModel) Activator.getModel()).getProjectWithInitialization(javaProject);
+	
+			Set<IBean> beans = new LinkedHashSet<IBean>();
+			beans.addAll(config.getBeans());
+	
+			// add component registered beans
+			for (IBeansComponent component : config.getComponents()) {
+				Set<IBean> nestedBeans = component.getBeans();
+				for (IBean nestedBean : nestedBeans) {
+					if (!nestedBean.isInfrastructure()) {
+						beans.add(nestedBean);
+					}
 				}
 			}
+	
+			buildAopReferencesForBeans(config, info, monitor, file, aopProject, beans);
 		}
-
-		buildAopReferencesForBeans(config, info, monitor, file, aopProject, beans);
 	}
 
 	private IAopProject buildAopReferencesForFile(IFile currentFile, IProgressMonitor monitor) {

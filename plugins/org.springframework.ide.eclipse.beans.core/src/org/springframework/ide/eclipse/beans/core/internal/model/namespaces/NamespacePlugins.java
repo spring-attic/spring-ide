@@ -202,23 +202,15 @@ public class NamespacePlugins implements NamespaceHandlerResolver, EntityResolve
 	 */
 	private static class Plugin implements NamespaceHandlerResolver, EntityResolver {
 
-		private final Bundle bundle;
-
 		private final EntityResolver entity;
 
 		private final NamespaceHandlerResolver namespace;
 
 		private Plugin(Bundle bundle) {
-			this.bundle = bundle;
-
 			ClassLoader loader = BundleDelegatingClassLoader.createBundleClassLoaderFor(bundle);
 
 			entity = new DelegatingEntityResolver(loader);
 			namespace = new DefaultNamespaceHandlerResolver(loader);
-		}
-
-		public Bundle getBundle() {
-			return bundle;
 		}
 
 		public NamespaceHandler resolve(String namespaceUri) {

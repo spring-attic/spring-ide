@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.core;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -741,8 +740,7 @@ public final class SpringCoreUtils {
 			@Override
 			public IStatus run(IProgressMonitor monitor) {
 				try {
-					project.build(IncrementalProjectBuilder.FULL_BUILD, SpringCore.BUILDER_ID, Collections.emptyMap(),
-							monitor);
+					project.build(IncrementalProjectBuilder.FULL_BUILD, SpringCore.BUILDER_ID, null, monitor);
 					return Status.OK_STATUS;
 				}
 				catch (CoreException e) {

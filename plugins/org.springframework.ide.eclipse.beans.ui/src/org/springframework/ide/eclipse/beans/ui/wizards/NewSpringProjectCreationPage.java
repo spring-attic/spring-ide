@@ -57,6 +57,8 @@ public class NewSpringProjectCreationPage extends WizardPage {
 			+ "ignoreMissingNamespaceHandler.label";
 
 	private Button classpathCheckbox;
+	
+	private Button disableNamespaceCachingCheckbox;
 
 	private Button enableImportButton;
 
@@ -112,6 +114,10 @@ public class NewSpringProjectCreationPage extends WizardPage {
 
 	public boolean loadHandlerFromClasspath() {
 		return classpathCheckbox.getSelection();
+	}
+	
+	public boolean disableNamespaceCaching() {
+		return disableNamespaceCachingCheckbox.getSelection();
 	}
 
 	public boolean useHighestXsdVersion() {
@@ -229,6 +235,7 @@ public class NewSpringProjectCreationPage extends WizardPage {
 				.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 		boolean useClasspath = prefs
 				.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
+		boolean disableCachingNamespaces = prefs.getBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
 
 		versionCheckbox = createButton(namespacesGroup, SWT.CHECK, 1,
 				convertHorizontalDLUsToPixels(5));
@@ -241,6 +248,19 @@ public class NewSpringProjectCreationPage extends WizardPage {
 		classpathCheckbox
 				.setText(BeansWizardsMessages.NewProjectPage_loadXsdsFromClasspath);
 		classpathCheckbox.setSelection(useClasspath);
+		classpathCheckbox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				disableNamespaceCachingCheckbox.setEnabled(classpathCheckbox.getSelection());
+			}
+		});
+		
+		disableNamespaceCachingCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, 
+				convertHorizontalDLUsToPixels(15));
+		disableNamespaceCachingCheckbox
+				.setText(BeansWizardsMessages.NewProjectPage_disableNamespaceCaching);
+		disableNamespaceCachingCheckbox.setSelection(disableCachingNamespaces);
+		disableNamespaceCachingCheckbox.setEnabled(useClasspath);
 
 		enableProjectSpecificSettings(false);
 	}
@@ -249,6 +269,7 @@ public class NewSpringProjectCreationPage extends WizardPage {
 			boolean useProjectSpecificSettings) {
 		versionCheckbox.setEnabled(useProjectSpecificSettings);
 		classpathCheckbox.setEnabled(useProjectSpecificSettings);
+		disableNamespaceCachingCheckbox.setEnabled(useProjectSpecificSettings && classpathCheckbox.getSelection());
 	}
 
 	// Copied from NewJavaProjectWizardPageOne so that our margins will match

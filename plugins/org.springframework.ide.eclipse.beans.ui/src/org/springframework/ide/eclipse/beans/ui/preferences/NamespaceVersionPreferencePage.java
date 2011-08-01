@@ -139,6 +139,8 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 	private Button versionCheckbox;
 
 	private Button classpathCheckbox;
+	
+	private Button disableNamespaceCachingCheckbox;
 
 	private Map<INamespaceDefinition, String> versions = new ConcurrentHashMap<INamespaceDefinition, String>();
 
@@ -208,16 +210,19 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 
 		boolean versionClasspath = true;
 		boolean useClasspath = true;
+		boolean disableCachingNamespaces = false;
 		if (isProjectPreferencePage()) {
 			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
 					BeansCorePlugin.PLUGIN_ID);
 			versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 			useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, true);
+			disableCachingNamespaces = prefs.getBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, false);
 		}
 		else {
 			Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
 			versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 			useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
+			disableCachingNamespaces = prefs.getBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
 		}
 
 		initializeDialogUnits(parent);
@@ -257,8 +262,33 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 				}
 				namespaceDefinitionList.clear();
 				refresh();
+				
+				disableNamespaceCachingCheckbox.setEnabled(classpathCheckbox.getSelection());
 			}
 			
+		});
+		
+		disableNamespaceCachingCheckbox = new Button(composite, SWT.CHECK);
+		disableNamespaceCachingCheckbox.setText("Disable caching for namespace resolving and loading");
+		disableNamespaceCachingCheckbox.setSelection(disableCachingNamespaces);
+		disableNamespaceCachingCheckbox.setEnabled(useClasspath);
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
+		data.horizontalIndent = 15;
+		disableNamespaceCachingCheckbox.setLayoutData(data);
+		
+		disableNamespaceCachingCheckbox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (isProjectPreferencePage()) {
+					SpringCorePreferences.getProjectPreferences(getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
+							BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, disableNamespaceCachingCheckbox.getSelection());
+				}
+				else {
+					BeansCorePlugin.getDefault().getPluginPreferences().setValue(
+							BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, disableNamespaceCachingCheckbox.getSelection());
+					BeansCorePlugin.getDefault().savePluginPreferences();
+				}
+			}
 		});
 
 		Label namespaceLabel = new Label(composite, SWT.NONE);
