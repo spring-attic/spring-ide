@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Spring IDE Developers
+ * Copyright (c) 2009, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.core.java.classreading;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
@@ -125,6 +127,19 @@ public class JdtClassMetadata implements ClassMetadata {
 		catch (JavaModelException e) {
 			throw new JdtMetadataReaderException(e);
 		}
+	}
+
+	public String[] getMemberClassNames() {
+		Set<String> memberClassNames = new LinkedHashSet<String>();
+		try {
+			for (IType memberType : type.getTypes()) {
+				memberClassNames.add(memberType.getFullyQualifiedName());
+			}
+		}
+		catch (JavaModelException e) {
+			throw new JdtMetadataReaderException(e);
+		}
+		return memberClassNames.toArray(new String[memberClassNames.size()]); 
 	}
 
 }
