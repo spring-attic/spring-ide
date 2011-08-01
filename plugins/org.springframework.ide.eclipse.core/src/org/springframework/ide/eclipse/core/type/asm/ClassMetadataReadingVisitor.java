@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @since 2.5
  */
-class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
+public class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 
 	private String className;
 
