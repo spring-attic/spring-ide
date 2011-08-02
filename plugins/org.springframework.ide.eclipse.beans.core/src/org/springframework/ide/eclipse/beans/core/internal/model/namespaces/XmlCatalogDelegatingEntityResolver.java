@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Set;
 
+import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolver;
+import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolverPlugin;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalog;
 import org.springframework.beans.factory.xml.DelegatingEntityResolver;
@@ -72,12 +77,18 @@ public class XmlCatalogDelegatingEntityResolver extends DelegatingEntityResolver
 				}
 			}
 			catch (Exception e) {
-				// Make sure a contributed EntityResolver can't prevent
-				// parsing
+				// Make sure a contributed EntityResolver can't prevent parsing
 				BeansCorePlugin.log(e);
 			}
 		}
-
+		
+		// Delegate to WTP to resolve over the XML Catalog and Cache
+		URIResolver resolver = URIResolverPlugin.createResolver();
+		String uri = resolver.resolvePhysicalLocation(null, publicId, systemId);
+		if (uri != null) {
+			inputSource = new InputSource(new FileInputStream(new File(URI.create(uri))));
+		}
+		
 		return inputSource;
 	}
 
