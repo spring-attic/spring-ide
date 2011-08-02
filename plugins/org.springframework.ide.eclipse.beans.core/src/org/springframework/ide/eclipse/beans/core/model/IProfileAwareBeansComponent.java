@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model;
 
+import java.util.Set;
+
 /**
  * Extension to {@link IBeansComponent} to specify that a component is annotated with Spring 3.1 
  * environment profiles.
@@ -22,6 +24,12 @@ public interface IProfileAwareBeansComponent extends IBeansComponent {
 	 * Returns the list of Spring 3.1 environment profiles.
 	 * @return the list of profiles.
 	 */
-	String[] getProfiles();
+	Set<String> getProfiles();
+	
+	/**
+	 * Checks if this config set has configured profiles.
+	 * @since 2.8.0 
+	 */
+	boolean hasProfiles();
 	
 }

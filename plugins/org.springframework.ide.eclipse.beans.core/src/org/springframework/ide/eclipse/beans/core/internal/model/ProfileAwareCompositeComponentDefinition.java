@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 
 /**
@@ -21,18 +26,23 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
  */
 public class ProfileAwareCompositeComponentDefinition extends CompositeComponentDefinition {
 	
-	private String[] profiles = null;
+	private Set<String> profiles = null;
 	
 	public ProfileAwareCompositeComponentDefinition(String name, Object source, String[] profiles) {
 		super(name, source);
-		this.profiles = profiles;
+		if (profiles != null && profiles.length > 0) {
+			this.profiles = new HashSet<String>(Arrays.asList(profiles));
+		}
+		else {
+			this.profiles = Collections.emptySet();
+		}
 	}
 	
 	/**
-	 * Returns the set of profiles in wh
+	 * Returns the set of profiles for which this component and all children is valid
 	 * @return
 	 */
-	public String[] getProfiles() {
+	public Set<String> getProfiles() {
 		return profiles;
 	}
 }

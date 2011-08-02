@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,11 +42,18 @@ public class PropertiesConfigSet extends BeansConfigSet {
 		super.setAllowBeanDefinitionOverriding(configSet
 				.isAllowBeanDefinitionOverriding());
 		super.setIncomplete(configSet.isIncomplete());
+		super.setProfiles(configSet.getProfiles());
 	}
 
 	@Override
 	public void setElementName(String name) {
 		super.setElementName(name);
+		notifyListeners();
+	}
+	
+	@Override
+	public void setProfiles(Set<String> profiles) {
+		super.setProfiles(profiles);
 		notifyListeners();
 	}
 

@@ -43,8 +43,8 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 		else if (element instanceof IProfileAwareBeansComponent) {
 			IProfileAwareBeansComponent component = (IProfileAwareBeansComponent) element;
 			buf.append(element.getElementName());
-			if (component.getProfiles() != null && component.getProfiles().length > 0) {
-				buf.append(" profiles=").append(StringUtils.arrayToDelimitedString(component.getProfiles(), ", "));
+			if (component.getProfiles() != null && component.getProfiles().size() > 0) {
+				buf.append(" profiles=\"").append(StringUtils.collectionToDelimitedString(component.getProfiles(), ", ")).append("\"");
 			}
 		}
 		else if (element instanceof ISourceModelElement) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 Spring IDE Developers
+ * Copyright (c) 2004, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,11 +48,11 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 
 	protected Set<String> configNames;
 
-	private boolean allowAliasOverriding;
+	private volatile boolean allowAliasOverriding;
 
-	private boolean allowBeanDefinitionOverriding;
+	private volatile boolean allowBeanDefinitionOverriding;
 
-	private boolean isIncomplete;
+	private volatile boolean isIncomplete;
 
 	private volatile Map<String, IBeanAlias> aliasesMap;
 
@@ -69,8 +69,10 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 	private volatile Map<String, Set<IBean>> beanClassesMap;
 
 	private volatile boolean isBeanClassesMapPopulated = false;
-	
+
 	private volatile Type type;
+
+	private volatile Set<String> profiles;
 
 	public BeansConfigSet(IBeansProject project, String name, Type type) {
 		this(project, name, new LinkedHashSet<String>(), type);
@@ -82,6 +84,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		allowAliasOverriding = true;
 		allowBeanDefinitionOverriding = true;
 		this.type = type;
+		this.profiles = new LinkedHashSet<String>();
 	}
 
 	/**
@@ -259,50 +262,24 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 	}
 
 	// TODO CD IDE-1079 commented out to prevent deadlocks
-	/*@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof BeansConfigSet)) {
-			return false;
-		}
-		try {
-			r.lock();
-			BeansConfigSet that = (BeansConfigSet) other;
-			if (!ObjectUtils.nullSafeEquals(this.configNames, that.configNames))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.allowAliasOverriding, that.allowAliasOverriding))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.allowBeanDefinitionOverriding,
-					that.allowBeanDefinitionOverriding))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.isIncomplete, that.isIncomplete))
-				return false;
-			return super.equals(other);
-		}
-		finally {
-			r.unlock();
-		}
-	}*/
+	/*
+	 * @Override public boolean equals(Object other) { if (this == other) { return true; } if (!(other instanceof
+	 * BeansConfigSet)) { return false; } try { r.lock(); BeansConfigSet that = (BeansConfigSet) other; if
+	 * (!ObjectUtils.nullSafeEquals(this.configNames, that.configNames)) return false; if
+	 * (!ObjectUtils.nullSafeEquals(this.allowAliasOverriding, that.allowAliasOverriding)) return false; if
+	 * (!ObjectUtils.nullSafeEquals(this.allowBeanDefinitionOverriding, that.allowBeanDefinitionOverriding)) return
+	 * false; if (!ObjectUtils.nullSafeEquals(this.isIncomplete, that.isIncomplete)) return false; return
+	 * super.equals(other); } finally { r.unlock(); } }
+	 */
 
 	// TODO CD IDE-1079 commented out to prevent deadlocks
-	/*@Override
-	public int hashCode() {
-		try {
-			r.lock();
-			int hashCode = ObjectUtils.nullSafeHashCode(configNames);
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(allowAliasOverriding);
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(allowBeanDefinitionOverriding);
-			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(isIncomplete);
-			return getElementType() * hashCode + super.hashCode();
-		}
-		finally {
-			r.unlock();
-		}
-	}*/
+	/*
+	 * @Override public int hashCode() { try { r.lock(); int hashCode = ObjectUtils.nullSafeHashCode(configNames);
+	 * hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(allowAliasOverriding); hashCode =
+	 * getElementType() * hashCode + ObjectUtils.nullSafeHashCode(allowBeanDefinitionOverriding); hashCode =
+	 * getElementType() * hashCode + ObjectUtils.nullSafeHashCode(isIncomplete); return getElementType() * hashCode +
+	 * super.hashCode(); } finally { r.unlock(); } }
+	 */
 
 	@Override
 	public String toString() {
@@ -330,8 +307,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 					IBeansConfig config = BeansModelUtils.getConfig(configName, this);
 					if (config != null) {
 						for (IBeanAlias alias : config.getAliases()) {
-							if (allowAliasOverriding
-									|| !aliasesMap.containsKey(alias.getElementName())) {
+							if (allowAliasOverriding || !aliasesMap.containsKey(alias.getElementName())) {
 								aliasesMap.put(alias.getElementName(), alias);
 							}
 						}
@@ -401,8 +377,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 					IBeansConfig config = BeansModelUtils.getConfig(configName, this);
 					if (config != null) {
 						for (IBean bean : config.getBeans()) {
-							if (allowBeanDefinitionOverriding
-									|| !beansMap.containsKey(bean.getElementName())) {
+							if (allowBeanDefinitionOverriding || !beansMap.containsKey(bean.getElementName())) {
 								beansMap.put(bean.getElementName(), bean);
 							}
 						}
@@ -476,6 +451,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPersistableElement.class) {
@@ -495,5 +471,21 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 
 	public boolean isExternal() {
 		return false;
+	}
+
+	public Set<String> getProfiles() {
+		return this.profiles;
+	}
+
+	public void setProfiles(Set<String> profiles) {
+		this.profiles = profiles;
+	}
+
+	public void addProfile(String profile) {
+		this.profiles.add(profile);
+	}
+
+	public boolean hasProfiles() {
+		return this.profiles != null && this.profiles.size() > 0;
 	}
 }

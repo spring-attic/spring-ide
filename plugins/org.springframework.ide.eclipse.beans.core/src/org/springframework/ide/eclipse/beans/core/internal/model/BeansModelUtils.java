@@ -69,6 +69,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -78,6 +79,7 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -847,7 +849,7 @@ public abstract class BeansModelUtils {
 	 * {@link BeanDefinitionRegistry}. All {@link BeansException}s thrown by the {@link BeanDefinitionRegistry} are
 	 * ignored.
 	 */
-	public static void register(IBeansConfig config, BeanDefinitionRegistry registry) {
+	public static void register(IBeansConfigSet configSet, IBeansConfig config, BeanDefinitionRegistry registry) {
 
 		// Register bean aliases
 		for (IBeanAlias alias : config.getAliases()) {
@@ -886,7 +888,7 @@ public abstract class BeansModelUtils {
 		}
 
 		// Register bean definitions from components
-		registerComponents(config.getComponents(), registry);
+		registerComponents(configSet, config.getComponents(), registry);
 	}
 
 	public static Object resolveValueIfNecessary(ISourceModelElement parent, Object value) {
@@ -1213,8 +1215,17 @@ public abstract class BeansModelUtils {
 	 * Registers all {@link IBean}s and {@link IBeansComponent}s that are nested within the given
 	 * <code>components</code>.
 	 */
-	private static void registerComponents(Set<IBeansComponent> components, BeanDefinitionRegistry registry) {
+	private static void registerComponents(IBeansConfigSet configSet, Set<IBeansComponent> components,
+			BeanDefinitionRegistry registry) {
 		for (IBeansComponent component : components) {
+			if (configSet != null && component instanceof IProfileAwareBeansComponent) {
+				IProfileAwareBeansComponent profileAwareBeansComponent = (IProfileAwareBeansComponent) component;
+				if (profileAwareBeansComponent.getProfiles().size() != 0
+						&& !CollectionUtils.containsAny(profileAwareBeansComponent.getProfiles(),
+								configSet.getProfiles())) {
+					continue;
+				}
+			}
 			for (IBean bean : component.getBeans()) {
 				try {
 					String beanName = bean.getElementName();
@@ -1236,7 +1247,7 @@ public abstract class BeansModelUtils {
 			}
 
 			// Register bean definitions from components
-			registerComponents(component.getComponents(), registry);
+			registerComponents(configSet, component.getComponents(), registry);
 		}
 	}
 
@@ -1363,9 +1374,12 @@ public abstract class BeansModelUtils {
 											}
 										}
 										else {
-											// We can't determine the beans type so don't be cleverer as we can and let it be processed again
-											// One last check before adding too much that is not even on the resource's classpath
-											if (project != null	&& JdtUtils.isJavaProject(project.getProject())
+											// We can't determine the beans type so don't be cleverer as we can and let
+											// it be processed again
+											// One last check before adding too much that is not even on the resource's
+											// classpath
+											if (project != null
+													&& JdtUtils.isJavaProject(project.getProject())
 													&& JdtUtils.getJavaProject(project.getProject()).isOnClasspath(
 															resource)) {
 												files.add(bean);

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
@@ -37,7 +39,14 @@ public class ProfileAwareBeansComponent extends BeansComponent implements IProfi
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getProfiles() {
+	public Set<String> getProfiles() {
 		return definition.getProfiles();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean hasProfiles() {
+		return definition.getProfiles() != null && definition.getProfiles().size() > 0;
 	}
 }
