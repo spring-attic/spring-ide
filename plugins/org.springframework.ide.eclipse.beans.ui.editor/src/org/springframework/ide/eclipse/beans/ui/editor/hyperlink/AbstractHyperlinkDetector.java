@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Spring IDE Developers
+ * Copyright (c) 2006, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,13 +65,11 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector, I
 								return hyperlinks;
 							}
 						}
-						else {
-							IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr.getNodeValue(),
-									currentNode, currentNode.getParentNode(), document, textViewer, hyperlinkRegion,
-									region);
-							if (hyperLink != null) {
-								return new IHyperlink[] { hyperLink };
-							}
+						IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr.getNodeValue(),
+								currentNode, currentNode.getParentNode(), document, textViewer, hyperlinkRegion,
+								region);
+						if (hyperLink != null) {
+							return new IHyperlink[] { hyperLink };
 						}
 					}
 				}
@@ -89,12 +87,10 @@ public abstract class AbstractHyperlinkDetector implements IHyperlinkDetector, I
 							return hyperlinks;
 						}
 					}
-					else {
-						IHyperlink hyperLink = createHyperlink(parentNode.getNodeName(), currentNode.getNodeValue(),
-								currentNode, parentNode, document, textViewer, hyperlinkRegion, region);
-						if (hyperLink != null) {
-							return new IHyperlink[] { hyperLink };
-						}
+					IHyperlink hyperLink = createHyperlink(parentNode.getNodeName(), currentNode.getNodeValue(),
+							currentNode, parentNode, document, textViewer, hyperlinkRegion, region);
+					if (hyperLink != null) {
+						return new IHyperlink[] { hyperLink };
 					}
 				}
 				break;

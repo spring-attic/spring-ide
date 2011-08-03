@@ -53,6 +53,12 @@
             uri="http://www.springframework.org/schema/p"
             prefix="p"
             icon="icons/full/obj16/property_obj.gif">
+      </namespace>
+      <namespace
+            icon="icons/full/obj16/constructor_obj.gif"
+            name="c Namespace"
+            prefix="c"
+            uri="http://www.springframework.org/schema/c">
       </namespace>                         
    </extension>
 

@@ -191,6 +191,12 @@
 			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.tool.ToolAnnotationBasedContentAssistProcessor"
 			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.tool.ToolAnnotationBasedHyperlinkDetector"
 			name="Spring Tool" uri="http://www.springframework.org/schema/tool" />
+		<!-- Spring 3.1 -->
+		<namespace
+        	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean.BeansContentAssistProcessor"
+        	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.bean.BeansOutlineLabelProvider"
+        	name="Spring C" uri="http://www.springframework.org/schema/c">
+		</namespace>
 	</extension>
 
 </plugin>
