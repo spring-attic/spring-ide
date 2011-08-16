@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings({ "deprecation", "restriction" })
 public class DefaultNamespaceDefinition implements INamespaceDefinition {
 
-	private static final Pattern VERSION_PATTERN = Pattern.compile(".*-([0-9,.]*)\\.xsd");
+	public static final Pattern VERSION_PATTERN = Pattern.compile(".*-([0-9,.]*)\\.xsd");
 
 	private final String defaultLocation;
 
