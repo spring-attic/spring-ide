@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * @author Christian Dupuis
@@ -57,6 +58,15 @@ public class JdtMethodMetadata implements MethodMetadata {
 
 	public String getMethodName() {
 		return method.getElementName();
+	}
+
+	public String getMethodReturnType() {
+		try {
+			return JdtUtils.resolveClassName(method.getReturnType(), method.getDeclaringType());
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
 	}
 
 	public boolean hasAnnotation(String annotationType) {

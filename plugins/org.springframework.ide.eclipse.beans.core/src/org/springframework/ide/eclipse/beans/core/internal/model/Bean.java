@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 Spring IDE Developers
+ * Copyright (c) 2004, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -298,6 +298,8 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			return false;
 		if (!ObjectUtils.nullSafeEquals(this.aliases, that.aliases))
 			return false;
+		if (!ObjectUtils.nullSafeEquals(getElementParent(), that.getElementParent()))
+			return false;
 		return super.equals(other);
 	}
 
@@ -308,6 +310,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		if (hashCode == null) {
 			hashCode = ObjectUtils.nullSafeHashCode(definition);
 			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(aliases);
+			hashCode = getElementType() * hashCode + ObjectUtils.nullSafeHashCode(getElementParent());
 			hashCode = getElementType() * super.hashCode();
 		}
 		return hashCode;

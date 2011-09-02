@@ -54,7 +54,7 @@ public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 			String localName = ModelUtils
 					.getLocalName((ISourceModelElement) element);
 			String contextLocalName = ModelUtils
-					.getLocalName((IBeansComponent) context);
+					.getLocalName((ISourceModelElement) context);
 			if (localName.equals(contextLocalName)) {
 				IType type = BeansModelUtils.getBeanType((IBean) element, null);
 				if (type != null) {

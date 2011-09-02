@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -145,20 +145,27 @@ public final class SpringUIUtils {
 	 * Returns a text field with the given label.
 	 */
 	public static Text createTextField(Composite parent, String labelText) {
-		return createTextField(parent, labelText, 0, 0);
+		return createTextField(parent, labelText, 0, 0, 0);
 	}
 
 	/**
 	 * Returns a text field with the given label and horizontal indentation.
 	 */
 	public static Text createTextField(Composite parent, String labelText, int indentation) {
-		return createTextField(parent, labelText, indentation, 0);
+		return createTextField(parent, labelText, indentation, 0, 0);
 	}
-
+	
 	/**
 	 * Returns a text field with the given label, horizontal indentation and width hint.
 	 */
-	public static Text createTextField(Composite parent, String labelText, int indentation, int widthHint) {
+	public static Text createTextField(Composite parent, String labelText, int indentation, int textWidth) {
+		return createTextField(parent, labelText, indentation, textWidth, 0);
+	}
+
+	/**
+	 * Returns a text field with the given label, horizontal indentation and label and text width hint.
+	 */
+	public static Text createTextField(Composite parent, String labelText, int indentation, int textWidth, int labelWidth) {
 		Composite textArea = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 2;
@@ -171,12 +178,17 @@ public final class SpringUIUtils {
 		Label label = new Label(textArea, SWT.NONE);
 		label.setText(labelText);
 		label.setFont(parent.getFont());
-
+		if (labelWidth > 0) {
+			gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+			gd.widthHint = labelWidth;
+			label.setLayoutData(gd);
+		}
+		
 		Text text = new Text(textArea, SWT.BORDER | SWT.SINGLE);
 		text.setFont(parent.getFont());
-		if (widthHint > 0) {
+		if (textWidth > 0) {
 			gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-			gd.widthHint = widthHint;
+			gd.widthHint = textWidth;
 		}
 		else {
 			gd = new GridData(GridData.FILL_HORIZONTAL);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="org.springframework.ide.eclipse.aop.core">
 
-	<property name="spring.version" value="3.0.5.RELEASE" />
+	<property name="spring.version" value="3.1.0.CI-1162" />
 
 	<target name="jar" depends="jarjar.init" description="Creates a JAR file containing the output of a compilation of the source tree.">
 		<delete file="org.springframework.aop-repackaged-${spring.version}.jar" />

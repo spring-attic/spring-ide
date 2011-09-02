@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 Spring IDE Developers
+ * Copyright (c) 2004, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		CONFIG_EXTENSION, CONFIG_SUFFIXES, CONFIG_SUFFIX, CONFIGS, 
 		CONFIG, CONFIG_SETS, CONFIG_SET, CONFIG_SET_NAME, CONFIG_SET_OVERRIDING, 
 		CONFIG_SET_INCOMPLETE, CONFIG_SET_CONFIGS,CONFIG_SET_CONFIG, VERSION, 
-		PLUGIN_VERSION, ENABLE_IMPORTS
+		PLUGIN_VERSION, ENABLE_IMPORTS, PROFILES, PROFILE
 	}
 	protected BeansProject project;
 	protected MultiStatus problems;
@@ -114,10 +114,16 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 				state = State.CONFIG_SET_INCOMPLETE;
 			} else if (elementName.equals(CONFIGS)) {
 				state = State.CONFIG_SET_CONFIGS;
+			} else if (elementName.equals(PROFILES)) {
+				state = State.PROFILES;
 			}
 		} else if (state == State.CONFIG_SET_CONFIGS) {
 			if (elementName.equals(CONFIG)) {
 				state = State.CONFIG_SET_CONFIG;
+			}
+		} else if (state == State.PROFILES) {
+			if (elementName.equals(PROFILE)) {
+			state = State.PROFILE;
 			}
 		}
 	}
@@ -192,6 +198,16 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 			if (elementName.equals(CONFIG_SET)) {
 				project.addConfigSet(configSet);
 				state = State.CONFIG_SETS;
+			}
+		} else if (state == State.PROFILES) {
+			if (elementName.equals(PROFILES)) {
+				state = State.CONFIG_SET;
+			}
+		} else if (state == State.PROFILE) {
+			if (elementName.equals(PROFILE)) {
+				String profile = charBuffer.toString().trim();
+				configSet.addProfile(profile);
+				state = State.PROFILES;
 			}
 		} else if (state == State.CONFIG_SET_NAME) {
 			if (elementName.equals(NAME)) {

@@ -39,19 +39,21 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Dialog for creating a beans config set.
@@ -71,19 +73,21 @@ public class ConfigSetDialog extends Dialog {
 	private static final String ERROR_USED_NAME = PREFIX + "error.usedName";
 
 	private static final String NAME_LABEL = PREFIX + "name.label";
+	private static final String PROFILE_LABEL = PREFIX + "profiles.label";
 	private static final String OVERRIDE_LABEL = PREFIX + "override.label";
 	private static final String INCOMPLETE_LABEL = PREFIX + "incomplete.label";
 	private static final String VIEWER_LABEL = PREFIX + "viewer.label";
 	private static final String SELECT_ALL_LABEL = PREFIX + "select.all.label";
 	private static final String DESELECT_ALL_LABEL = PREFIX + "deselect.all.label";
 	
-	
 
 	private static final int LIST_VIEWER_WIDTH = 400;
 	private static final int LIST_VIEWER_HEIGHT = 250;
 
-	private Text nameText;
 
+	private Text nameText;
+	private Text profilesText; 
+	
 	private Button overrideButton;
 	private Button incompleteButton;
 	private CheckboxTableViewer configsViewer;
@@ -128,22 +132,32 @@ public class ConfigSetDialog extends Dialog {
 		Composite optionsGroup = new Composite(composite, SWT.NULL);
 		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout layout = new GridLayout();
-		layout.marginHeight = convertVerticalDLUsToPixels(IDialogConstants
-				.VERTICAL_MARGIN);
-		layout.marginWidth = convertHorizontalDLUsToPixels(IDialogConstants
-				.HORIZONTAL_MARGIN);
 		optionsGroup.setLayout(layout);
 		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		// Create labeled name text field
 		nameText = SpringUIUtils.createTextField(optionsGroup, BeansUIPlugin
-				.getResourceString(NAME_LABEL));
+				.getResourceString(NAME_LABEL), 0, 0, 50);
 		nameText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				validateName();
 			}
 		});
-
+		
+		// Create labeled profiles text field
+		profilesText = SpringUIUtils.createTextField(optionsGroup, BeansUIPlugin
+				.getResourceString(PROFILE_LABEL), 0, 0, 50);
+		profilesText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				validateProfiles();
+			}
+		});
+		profilesText.setText(StringUtils.collectionToDelimitedString(configSet.getProfiles(), ", "));
+		
+		Label options = new Label(optionsGroup, SWT.WRAP);
+		options.setText("Options:");
+		options.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
 		// Create labeled checkboxes
 		overrideButton = SpringUIUtils.createCheckBox(optionsGroup,
 				BeansUIPlugin.getResourceString(OVERRIDE_LABEL));
@@ -152,7 +166,7 @@ public class ConfigSetDialog extends Dialog {
 		incompleteButton = SpringUIUtils.createCheckBox(optionsGroup,
 				BeansUIPlugin.getResourceString(INCOMPLETE_LABEL));
 		incompleteButton.setSelection(configSet.isIncomplete());
-
+		
 		// Create config set list viewer
 		Label viewerLabel = new Label(composite, SWT.NONE);
 		GridData gd = new GridData(GridData.GRAB_HORIZONTAL
@@ -198,7 +212,7 @@ public class ConfigSetDialog extends Dialog {
 				configsViewer.setAllChecked(false);
 			}
 		});
-		
+
 		// Create error label
 		errorLabel = new Label(composite, SWT.NONE);
 		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
@@ -241,10 +255,17 @@ public class ConfigSetDialog extends Dialog {
 
 			// Update config set
 			configSet.setElementName(nameText.getText());
-			configSet.setAllowBeanDefinitionOverriding(overrideButton
-					.getSelection());
+			configSet.setAllowBeanDefinitionOverriding(overrideButton.getSelection());
 			configSet.setIncomplete(incompleteButton.getSelection());
-
+			if (profilesText.getText().length()> 0) {
+				String[] profilesSpec = StringUtils.tokenizeToStringArray(profilesText.getText(), BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+				Set<String> profiles = new LinkedHashSet<String>();
+				for (String profile : profilesSpec) {
+					profiles.add(profile);
+				}
+				configSet.setProfiles(profiles);
+			}
+			
 			// Before removing all configs from this config set keep a copy of
 			// the original list of configs in the config set
 			Set<IBeansConfig> oldConfigs = new LinkedHashSet<IBeansConfig>(
@@ -318,6 +339,9 @@ public class ConfigSetDialog extends Dialog {
 		}
 	}
 
+	private void validateProfiles() {
+	}
+	
 	private void validateName() {
 		boolean isEnabled = false;
 

@@ -35,21 +35,5 @@
 			uri="http://www.springframework.org/schema/batch" />
 	</extension>
 	
-	<extension
-		point="org.springframework.ide.eclipse.beans.core.namespaces">
-		<namespace uri="http://www.springframework.org/schema/batch" >
-			<!-- for Spring Batch 2.1.0 -->
-			<namespaceHandler class="org.springframework.batch.core.configuration.xml.CoreNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/batch/spring-batch.xsd" 
-				provider="org.springframework.batch.core" />
-			<namespaceHandler class="org.springframework.batch.core.configuration.xml.CoreNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/batch/spring-batch-2.1.xsd" 
-				provider="org.springframework.batch.core" />
-			
-			<!-- for Spring Batch pre-2.1.0 -->
-			<namespaceHandler class="org.springframework.batch.core.configuration.v1.xml.CoreNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/batch/spring-batch-2.0.xsd" />
-		</namespace>
-	</extension>
 
 </plugin>

@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -38,6 +39,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceDefinition.Version;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
@@ -56,12 +58,18 @@ public class NamespaceUtils {
 	public static final String TOOLS_NAMESPACE_URI = "http://www.springframework.org/schema/tool";
 
 	public static final String P_NAMESPACE_URI = "http://www.springframework.org/schema/p";
+	
+	public static final String C_NAMESPACE_URI = "http://www.springframework.org/schema/c";
 
 	private static final Object IMAGE_REGISTRY_LOCK = new Object();
 
 	private static final INamespaceDefinition P_NAMESPACE_DEFINITION = new DefaultNamespaceDefinition("p",
 			P_NAMESPACE_URI, null, new DefaultImageAccessor(BeansUIPlugin.PLUGIN_ID,
 					"/icons/full/obj16/property_obj.gif"));
+	
+	private static final INamespaceDefinition C_NAMESPACE_DEFINITION = new DefaultNamespaceDefinition("c",
+			C_NAMESPACE_URI, null, new DefaultImageAccessor(BeansUIPlugin.PLUGIN_ID,
+					"/icons/full/obj16/constructor_obj.gif"));
 
 	/**
 	 * Returns the namespace URI for the given {@link ISourceModelElement} or
@@ -228,21 +236,38 @@ public class NamespaceUtils {
 		}
 
 		boolean foundPNamespace = false;
-		boolean foundDefaultNamespace = false;
+		boolean foundCNamespace = false;
+		INamespaceDefinition defaultNamespace = null; 
+		
 		// Remove the tool namespace as we don't want to surface on the UI
 		for (INamespaceDefinition definition : new ArrayList<INamespaceDefinition>(namespaceDefinitions)) {
 			if (TOOLS_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
 				namespaceDefinitions.remove(definition);
-				foundDefaultNamespace = true;
+			} else if (DEFAULT_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
+				defaultNamespace = definition;
 			}
 			else if (P_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
 				foundPNamespace = true;
 			}
+			else if (C_NAMESPACE_URI.equals(definition.getNamespaceURI())) {
+				foundCNamespace = true;
+			}
 		}
 		
-		if (!foundPNamespace && foundDefaultNamespace) {
+		if (!foundPNamespace && defaultNamespace != null) {
 			// Add in p-Namespace if we found the default namespace
 			namespaceDefinitions.add(P_NAMESPACE_DEFINITION);
+		}
+		if (!foundCNamespace && defaultNamespace != null) {
+			// Add in c-Namespace if we found the default namespace
+			// && is Spring 3.1 or greater
+			Set<String> locations = defaultNamespace.getSchemaLocations();
+			for (String locationUri : locations) {
+				if (isSpring31(locationUri)) {
+					namespaceDefinitions.add(C_NAMESPACE_DEFINITION);
+					break;
+				}
+			}
 		}
 
 		Collections.sort(namespaceDefinitions, new Comparator<INamespaceDefinition>() {
@@ -256,6 +281,19 @@ public class NamespaceUtils {
 		});
 
 		return namespaceDefinitions;
+	}
+	
+	private static boolean isSpring31(String locationUri) {
+		Version minimum = new Version("3.1");
+		Version temp = Version.MINIMUM_VERSION;
+		Matcher matcher = DefaultNamespaceDefinition.VERSION_PATTERN.matcher(locationUri);
+		if (matcher.matches()) {
+			temp = new Version(matcher.group(1));
+		}
+		if (temp.compareTo(minimum) >= 0) {
+			return true;
+		}
+		return false;
 	}
 
 	public static INamespaceDefinition getDefaultNamespaceDefinition() {

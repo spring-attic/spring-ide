@@ -83,7 +83,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.webflow.core.model,
  org.springframework.ide.eclipse.webflow.ui.editor,
  org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow,
- org.springframework.util;version="[3.0.5.RELEASE,3.1.0)",
+ org.springframework.util;version="[3.1.0,3.2.0)",
  org.w3c.dom
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.webflow.ui.graph,

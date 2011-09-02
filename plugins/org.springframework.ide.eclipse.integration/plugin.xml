@@ -15,26 +15,12 @@
 <plugin>
 
 	<extension
-		point="org.springframework.ide.eclipse.beans.core.namespaces">
-		<namespace uri="http://www.springframework.org/schema/oxm" >
-			<namespaceHandler class="org.springframework.oxm.config.OxmNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd" 
-				provider="org.springframework.oxm" />
-			<namespaceHandler class="org.springframework.oxm.v1.config.OxmNamespaceHandler" 
-				schemaLocation="http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd" />
-		</namespace>
-	</extension>
-	
-	<extension
 		point="org.springframework.ide.eclipse.beans.ui.namespaces">
 		<namespace
 			name="Spring Oxm"
 			uri="http://www.springframework.org/schema/oxm" 
 			prefix="oxm"
-			icon="icons/full/obj16/spring-oxm.gif"
-			defaultSchemaLocation="http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd">
-			<schemaLocation url="http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd" />
-			<schemaLocation url="http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd" />
+			icon="icons/full/obj16/spring-oxm.gif">
 		</namespace>
 		<namespace
 			name="Spring Web Services"
@@ -47,9 +33,7 @@
 			uri="http://www.springframework.org/schema/flex" 
 			prefix="flex" 
 			icon="icons/full/obj16/spring-flex.gif" 
-			labelProvider="org.springframework.ide.eclipse.integration.ui.namespaces.FlexNamespaceLabelProvider" 
-			defaultSchemaLocation="http://www.springframework.org/schema/flex/spring-flex-1.0.xsd">
-			<schemaLocation url="http://www.springframework.org/schema/flex/spring-flex-1.0.xsd" />
+			labelProvider="org.springframework.ide.eclipse.integration.ui.namespaces.FlexNamespaceLabelProvider" >
 		</namespace>
 	</extension>
 

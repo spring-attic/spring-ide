@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Spring IDE Developers
+ * Copyright (c) 2008, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,8 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.aop.core.internal.model.JavaAdvisorDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AbstractAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
-import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.aop.core.model.builder.IDocumentFactory;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
@@ -112,7 +112,17 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 						(present30 ? SECURED_ANNOTATION_V3_CLASS : SECURED_ANNOTATION_V2_CLASS)), present30);
 			}
 			if ("enabled".equals(jsr250Annoatations)) {
-				createAnnotationInfo(file, aspectInfos, node, JSR250_ANNOTATION_EXPRESSION, present30);
+				// Check if the JSR250 annotation are available
+				boolean presentDenyAll = ClassUtils.isPresent("javax.annotation.security.DenyAll", classLoaderSupport
+						.getProjectClassLoader());
+				boolean presentPermitAll = ClassUtils.isPresent("javax.annotation.security.PermitAll", classLoaderSupport
+						.getProjectClassLoader());
+				boolean presentRolesAllowed = ClassUtils.isPresent("javax.annotation.security.RolesAllowed", classLoaderSupport
+						.getProjectClassLoader());
+				
+				if (presentDenyAll && presentPermitAll && presentRolesAllowed) {
+					createAnnotationInfo(file, aspectInfos, node, JSR250_ANNOTATION_EXPRESSION, present30);
+				}
 			}
 
 			NodeList children = node.getChildNodes();

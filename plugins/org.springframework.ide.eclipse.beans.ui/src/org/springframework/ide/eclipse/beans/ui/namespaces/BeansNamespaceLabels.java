@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.ui.namespaces;
 
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -38,6 +39,13 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 		}
 		if (element instanceof IBean) {
 			appendBeanLabel((IBean) element, buf);
+		}
+		else if (element instanceof IProfileAwareBeansComponent) {
+			IProfileAwareBeansComponent component = (IProfileAwareBeansComponent) element;
+			buf.append(element.getElementName());
+			if (component.getProfiles() != null && component.getProfiles().size() > 0) {
+				buf.append(" profiles=\"").append(StringUtils.collectionToDelimitedString(component.getProfiles(), ", ")).append("\"");
+			}
 		}
 		else if (element instanceof ISourceModelElement) {
 			BeansModelLabels.appendElementLabel(element, buf);

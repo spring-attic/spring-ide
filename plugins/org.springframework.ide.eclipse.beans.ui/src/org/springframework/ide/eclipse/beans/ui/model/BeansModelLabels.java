@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Spring IDE Developers
+ * Copyright (c) 2006, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansList;
 import org.springframework.ide.eclipse.beans.core.model.IBeansMap;
 import org.springframework.ide.eclipse.beans.core.model.IBeansMapEntry;
@@ -50,6 +51,13 @@ public final class BeansModelLabels extends BeansUILabels {
 		}
 		if (element instanceof IBeansConfig) {
 			appendBeansConfigLabel((IBeansConfig) element, flags, buf);
+		}
+		else if (element instanceof IBeansConfigSet) {
+			buf.append(element.getElementName());
+			IBeansConfigSet configSet = (IBeansConfigSet) element;
+			if (configSet.getProfiles() != null && configSet.getProfiles().size() > 0) {
+				buf.append(" profiles=\"").append(StringUtils.collectionToDelimitedString(configSet.getProfiles(), ", ")).append("\"");
+			}
 		}
 		else if (element instanceof ISourceModelElement) {
 			appendElementLabel((ISourceModelElement) element, buf);

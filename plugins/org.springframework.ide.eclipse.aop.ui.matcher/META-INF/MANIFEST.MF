@@ -43,7 +43,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.core.model,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.ui.viewers,
- org.springframework.util;version="[3.0.5.RELEASE, 3.1.0)"
+ org.springframework.util;version="[3.1.0,3.2.0)"
 Export-Package: org.springframework.ide.eclipse.aop.ui.matcher,
  org.springframework.ide.eclipse.aop.ui.matcher.actions,
  org.springframework.ide.eclipse.aop.ui.matcher.internal

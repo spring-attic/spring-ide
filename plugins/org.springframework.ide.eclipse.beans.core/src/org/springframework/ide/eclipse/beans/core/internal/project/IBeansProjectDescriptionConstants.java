@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 Spring IDE Developers
+ * Copyright (c) 2004, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,8 @@ public interface IBeansProjectDescriptionConstants {
 	String CONFIG_SETS = "configSets";
 	String OVERRIDING = "allowBeanDefinitionOverriding";
 	String INCOMPLETE = "incomplete";
+	String PROFILES = "profiles";
+	String PROFILE = "profile";
 	String CONFIG_SET = "configSet";
 	String NAME = "name";
 	

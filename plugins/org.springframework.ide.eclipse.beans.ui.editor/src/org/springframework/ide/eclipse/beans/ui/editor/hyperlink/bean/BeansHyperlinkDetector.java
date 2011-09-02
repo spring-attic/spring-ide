@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,10 @@ public class BeansHyperlinkDetector extends NamespaceHyperlinkDetectorSupport im
 				&& attrName.endsWith("-ref")) {
 			return true;
 		}
+		if ("http://www.springframework.org/schema/c".equals(attr.getNamespaceURI())
+				&& attrName.endsWith("-ref")) {
+			return true;
+		}
 		return super.isLinkableAttr(attr);
 	}
 
@@ -77,8 +81,8 @@ public class BeansHyperlinkDetector extends NamespaceHyperlinkDetectorSupport im
 		registerHyperlinkCalculator("replaced-method", "name", lookupReplace);
 
 		registerHyperlinkCalculator("property", "name", new PropertyNameHyperlinkCalculator());
+		registerHyperlinkCalculator("constructor-arg", "name", new ConstructorArgNameHyperlinkCalculator());
 		registerHyperlinkCalculator("factory-method", new FactoryMethodHyperlinkCalculator());
-		
 		registerHyperlinkCalculator("import", "resource", new ImportHyperlinkCalculator());
 	}
 

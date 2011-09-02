@@ -21,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -66,14 +67,17 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.BeanDefinitionDocumentReader;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.beans.factory.xml.NamespaceHandler;
+import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
@@ -114,6 +118,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -169,6 +174,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 	/** Internal cache for all children */
 	private transient IModelElement[] children;
+	
+	private transient Stack<CompositeComponentDefinition> componentDefinitions = new Stack<CompositeComponentDefinition>();
 
 	/**
 	 * Creates a new {@link BeansConfig}.
@@ -222,6 +229,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				beanClassesMap.clear();
 				problems.clear();
 				children = null;
+				
+				componentDefinitions.clear();
 
 			}
 			finally {
@@ -354,7 +363,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					final DocumentAccessor documentAccessor = new DocumentAccessor();
 					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file.getProject());
 					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(this, resource, sourceExtractor, documentAccessor);
-
+					final NamespaceHandlerResolver namespaceHandlerResolver = new DelegatingNamespaceHandlerResolver(cl, this,	documentAccessor);
+					
 					problemReporter = new BeansConfigProblemReporter();
 					beanNameGenerator = new UniqueBeanNameGenerator(this);
 
@@ -393,6 +403,17 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 								documentAccessor.popDocument();
 							}
 						}
+						
+						@Override
+						protected XmlReaderContext createReaderContext(Resource resource) {
+							return new ProfileAwareReaderContext(resource, problemReporter, eventListener,
+									sourceExtractor, this, namespaceHandlerResolver);
+						}
+						
+						@Override
+						protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {
+							return new ToolingFriendlyBeanDefinitionDocumentReader(BeansConfig.this);
+						}
 					};
 
 					reader.setDocumentLoader(new XercesDocumentLoader());
@@ -403,10 +424,10 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(cl, this,	documentAccessor));
-					reader.setDocumentReaderClass(ToolingFriendlyBeanDefinitionDocumentReader.class);
+					reader.setNamespaceHandlerResolver(namespaceHandlerResolver);
 					reader.setBeanNameGenerator(beanNameGenerator);
-
+					// reader.setEnvironment(new ToolingAwareEnvironment());
+					
 					final Map<Throwable, Integer> throwables = new HashMap<Throwable, Integer>();
 					try {
 						Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
@@ -893,7 +914,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		}
 
 		private void addDefaultToCache(DocumentDefaultsDefinition defaultsDefinition, Resource resource) {
-			defaultDefinitionsCache.put(resource, defaultsDefinition);
+			if (!defaultDefinitionsCache.containsKey(resource)) {
+				defaultDefinitionsCache.put(resource, defaultsDefinition);
+			}
 		}
 
 		private void addImportToCache(ImportDefinition importDefinition, Resource resource) {
@@ -1199,8 +1222,24 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * placeholders in resource attributes as this is not support in the IDE.
 	 * @since 2.3.1
 	 */
-	public static class ToolingFriendlyBeanDefinitionDocumentReader extends DefaultBeanDefinitionDocumentReader {
+	static class ToolingFriendlyBeanDefinitionDocumentReader extends DefaultBeanDefinitionDocumentReader {
 
+		private Environment environment;
+		
+		private BeanDefinitionParserDelegate delegate;
+
+		private BeansConfig beansConfig;
+
+		public ToolingFriendlyBeanDefinitionDocumentReader(BeansConfig beansConfig) {
+			this.beansConfig = beansConfig;
+		}
+
+		@Override
+		public void setEnvironment(Environment environment) {
+			super.setEnvironment(environment);
+			this.environment = environment;
+		}
+		
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1219,9 +1258,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		 * {@inheritDoc}
 		 */
 		@Override
-		protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root) {
-			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext);
-			delegate.initDefaults(root);
+		protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext, environment);
+			delegate.initDefaults(root, parentDelegate);
 			return delegate;
 		}
 
@@ -1253,6 +1292,64 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 			}
 		}
+		
+		@Override
+		protected void doRegisterBeanDefinitions(Element root) {
+			String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
+			String[] specifiedProfiles = null;
+			if (StringUtils.hasText(profileSpec)) {
+				specifiedProfiles = StringUtils.tokenizeToStringArray(profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+			}
+			
+			// Spring 3.1 profile support; register composite component definition to carry nested beans
+			ProfileAwareCompositeComponentDefinition cd = new ProfileAwareCompositeComponentDefinition(root.getNodeName(), 
+					getReaderContext().extractSource(root), specifiedProfiles);
+			beansConfig.componentDefinitions.push(cd);
+			try {
+				
+				// any nested <beans> elements will cause recursion in this method. In
+				// order to propagate and preserve <beans> default-* attributes correctly,
+				// keep track of the current (parent) delegate, which may be null. Create
+				// the new (child) delegate with a reference to the parent for fallback purposes,
+				// then ultimately reset this.delegate back to its original (parent) reference.
+				// this behavior emulates a stack of delegates without actually necessitating one.
+				BeanDefinitionParserDelegate parent = this.delegate;
+				this.delegate = createHelper(getReaderContext(), root, parent);
+	
+				preProcessXml(root);
+				parseBeanDefinitions(root, this.delegate);
+				postProcessXml(root);
+	
+				this.delegate = parent;
+			}
+			finally {
+				beansConfig.componentDefinitions.pop();
+				getReaderContext().fireComponentRegistered(cd);
+			}
+		}
+	}
+	
+	class ProfileAwareReaderContext extends XmlReaderContext {
+
+		private ReaderEventListener eventListener;
+		
+		public ProfileAwareReaderContext(Resource resource, ProblemReporter problemReporter,
+				ReaderEventListener eventListener, SourceExtractor sourceExtractor, XmlBeanDefinitionReader reader,
+				NamespaceHandlerResolver namespaceHandlerResolver) {
+			super(resource, problemReporter, eventListener, sourceExtractor, reader, namespaceHandlerResolver);
+			this.eventListener = eventListener;
+		}
+		
+		@Override
+		public void fireComponentRegistered(ComponentDefinition componentDefinition) {
+			if (!componentDefinitions.empty()) {
+				componentDefinitions.peek().addNestedComponent(componentDefinition);
+			}
+			else {
+				eventListener.componentRegistered(componentDefinition);
+			}
+		}
+		
 	}
 
 	/**
@@ -1264,8 +1361,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 		private final XmlReaderContext readerContext;
 
-		public ErrorSuppressingBeanDefinitionParserDelegate(XmlReaderContext readerContext) {
-			super(readerContext);
+		public ErrorSuppressingBeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
+			super(readerContext, environment);
 			this.readerContext = readerContext;
 		}
 
@@ -1293,5 +1390,4 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			return super.parseCustomElement(ele, containingBd);
 		}
 	}
-
-}
+}	

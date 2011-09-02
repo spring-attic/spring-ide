@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -296,15 +296,23 @@ public class AopReferenceModelBuilderJob extends Job {
 	
 			// add component registered beans
 			for (IBeansComponent component : config.getComponents()) {
-				Set<IBean> nestedBeans = component.getBeans();
-				for (IBean nestedBean : nestedBeans) {
-					if (!nestedBean.isInfrastructure()) {
-						beans.add(nestedBean);
-					}
-				}
+				addBeansFromComponent(component, beans);
 			}
 	
 			buildAopReferencesForBeans(config, info, monitor, file, aopProject, beans);
+		}
+	}
+	
+	private void addBeansFromComponent(IBeansComponent bc, Set<IBean> beans) {
+		Set<IBean> nestedBeans = bc.getBeans();
+		for (IBean nestedBean : nestedBeans) {
+			if (!nestedBean.isInfrastructure()) {
+				beans.add(nestedBean);
+			}
+		}
+		
+		for (IBeansComponent component : bc.getComponents()) {
+			addBeansFromComponent(component, beans);
 		}
 	}
 

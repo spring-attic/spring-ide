@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 Spring IDE Developers
+ * Copyright (c) 2004, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,4 +65,16 @@ public interface IBeansConfigSet extends IBeansModelElement,
 	 * @since 2.0.5
 	 */
 	Type getType();
+	
+	/**
+	 * Returns the list of configured profiles.
+	 * @since 2.8.0 
+	 */
+	Set<String> getProfiles();
+	
+	/**
+	 * Checks if this config set has configured profiles.
+	 * @since 2.8.0 
+	 */
+	boolean hasProfiles();
 }
