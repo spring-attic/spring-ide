@@ -61,7 +61,6 @@ public class ConstructorArgNameHyperlinkCalculator implements IHyperlinkCalculat
 				cursor, target, propertyPaths);
 		if ("bean".equals(parentName) && StringUtils.hasText(target)) {
 			IFile file = BeansEditorUtils.getFile(document);
-			List<IType> classes = new ArrayList<IType>();
 			String className = BeansEditorUtils.getClassNameForBean(file, node.getOwnerDocument(), parentNode);
 			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			
@@ -77,19 +76,13 @@ public class ConstructorArgNameHyperlinkCalculator implements IHyperlinkCalculat
 							if (count > 0) {
 								try {
 									Set<IMethod> methods = Introspector.getConstructors(type, count, false);
-									if (methods.size() == 1) {
-										IMethod[] array = methods.toArray(new IMethod[]{});
-										IMethod candidate = array[0];
+									Iterator<IMethod> iter = methods.iterator();
+									while (iter.hasNext()) {
+										IMethod candidate = iter.next();
 										if (target.equalsIgnoreCase(candidate.getParameterNames()[argIndex])) {
-											return new JavaElementHyperlink(hyperlinkRegion, candidate.getParameters()[argIndex]);
-										}
-									} else {
-										Iterator<IMethod> iter = methods.iterator();
-										while (iter.hasNext()) {
-											IMethod candidate = iter.next();
-											if (target.equalsIgnoreCase(candidate.getParameterNames()[argIndex])) {
-												return new JavaElementHyperlink(hyperlinkRegion, candidate.getParameters()[argIndex]);
-											}
+											// return new JavaElementHyperlink(hyperlinkRegion, candidate.getParameters()[argIndex]);
+											// TODO: just a temporary workaround for making this Eclipse 3.6 compatible
+											return new JavaElementHyperlink(hyperlinkRegion, candidate);
 										}
 									}
 								} catch (JavaModelException e) {
