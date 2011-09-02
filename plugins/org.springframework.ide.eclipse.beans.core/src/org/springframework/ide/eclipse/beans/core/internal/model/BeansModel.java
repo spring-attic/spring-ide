@@ -188,7 +188,11 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	}
 
 	public IBeansProject getProject(String name) {
-
+		
+		if (name == null || name.length() == 0) {
+			return null;
+		}
+		
 		// If a config name given then extract project name
 		// External config files (with a leading '/') are handled too
 		int configNamePos = name.indexOf('/', (name.charAt(0) == '/' ? 1 : 0));
