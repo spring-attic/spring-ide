@@ -443,13 +443,13 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	}
 
 	private void checkForImportedBeansConfig(IFile file, IBeansConfig bc, Set<IBeansConfig> beansConfigs) {
-		if (bc.getElementResource().equals(file)) {
+		if (bc.getElementResource() != null && bc.getElementResource().equals(file)) {
 			beansConfigs.add(bc);
 		}
 
 		for (IBeansImport bi : bc.getImports()) {
 			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
-				if (importedBc.getElementResource().equals(file)) {
+				if (importedBc.getElementResource() != null && importedBc.getElementResource().equals(file)) {
 					beansConfigs.add(importedBc);
 				}
 				for (IBeansImport iBi : importedBc.getImports()) {
