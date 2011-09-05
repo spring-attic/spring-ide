@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -43,7 +44,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -68,7 +69,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -94,7 +95,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -120,7 +121,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -147,7 +148,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -184,7 +185,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -210,7 +211,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -237,7 +238,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -290,7 +291,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -315,7 +316,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -339,7 +340,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -364,7 +365,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -391,7 +392,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -424,7 +425,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -448,7 +449,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -472,7 +473,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("customBean");
+		IBean bean = BeansModelUtils.getBean("customBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -508,7 +509,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("customBean");
+		IBean bean = BeansModelUtils.getBean("customBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -578,7 +579,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("customBean");
+		IBean bean = BeansModelUtils.getBean("customBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));

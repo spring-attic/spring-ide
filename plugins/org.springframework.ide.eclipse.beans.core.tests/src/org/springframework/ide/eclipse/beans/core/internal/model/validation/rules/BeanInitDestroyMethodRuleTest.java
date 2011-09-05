@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
@@ -40,7 +41,7 @@ public class BeanInitDestroyMethodRuleTest extends BeansCoreTestCase {
 	}
 	
 	public void testCorrectInitAndDestroyMethodUsage() throws Exception {
-		IBean bean = beansConfig.getBean("correct");
+		IBean bean = BeansModelUtils.getBean("correct", beansConfig);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue("No error expected for bean", severity != IMarker.SEVERITY_ERROR
@@ -52,9 +53,9 @@ public class BeanInitDestroyMethodRuleTest extends BeansCoreTestCase {
 		String[] errorMessages = new String[] {
 				"Destroy-method 'notExisting' not found in bean class 'org.springframework.Base'",
 				"Init-method 'notExisting' not found in bean class 'org.springframework.Base'",
-				"Non-static factory method 'notExisting' with 0 arguments not found in factory bean class 'org.springframework.Base'" };
+				"Static factory method 'notExisting' with 0 arguments not found in factory bean class 'org.springframework.Base'" };
 
-		IBean bean = beansConfig.getBean("incorrect");
+		IBean bean = BeansModelUtils.getBean("incorrect", beansConfig);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue(severity == IMarker.SEVERITY_ERROR);
@@ -74,7 +75,7 @@ public class BeanInitDestroyMethodRuleTest extends BeansCoreTestCase {
 				"Destroy-method 'initWithParameters' not found in bean class 'org.springframework.Base'",
 				"Init-method 'initWithParameters' not found in bean class 'org.springframework.Base'" };
 
-		IBean bean = beansConfig.getBean("incorrectWithParameters");
+		IBean bean = BeansModelUtils.getBean("incorrectWithParameters", beansConfig);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue(severity == IMarker.SEVERITY_ERROR);

@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -44,7 +45,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));
@@ -72,7 +73,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 2);
 		assertTrue(references.containsKey(bean));
@@ -86,7 +87,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 					ref.getElementSourceLocation().getStartLine()));
 		}
 
-		bean = config.getBean("annotatedBean2");
+		bean = BeansModelUtils.getBean("annotatedBean2", config);
 
 		assertTrue(references.containsKey(bean));
 
@@ -113,7 +114,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		
 		assertTrue(references.size() == 1);
@@ -143,7 +144,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		IBean bean = config.getBean("annotatedBean");
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
 		assertTrue(references.size() == 1);
 		assertTrue(references.containsKey(bean));

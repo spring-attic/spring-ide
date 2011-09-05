@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
@@ -40,21 +41,21 @@ public class RequiredPropertyRuleTest extends BeansCoreTestCase {
 	}
 
 	public void testRequiredAnnotationConfiguration() throws Exception {
-		IBean bean = beansConfig.getBean("abstractFoo");
+		IBean bean = BeansModelUtils.getBean("abstractFoo", beansConfig);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue("Abstract beans are not required to be configured", severity == -1);
 
-		bean = beansConfig.getBean("goodFoo");
+		bean = BeansModelUtils.getBean("goodFoo", beansConfig);
 		severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue("Satisfying configuration given; no error expected", severity == -1);
 
-		bean = beansConfig.getBean("wrongFoo");
+		bean = BeansModelUtils.getBean("wrongFoo", beansConfig);
 		severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue("Missing required configuration; error expected",
-				severity == IMarker.SEVERITY_ERROR);
+				severity == IMarker.SEVERITY_WARNING);
 		Set<IMarker> markers = MarkerUtils.getAllMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue(markers.size() == 1);

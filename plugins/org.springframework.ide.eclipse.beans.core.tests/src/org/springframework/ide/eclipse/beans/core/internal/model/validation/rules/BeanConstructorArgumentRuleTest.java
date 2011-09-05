@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
@@ -41,7 +42,7 @@ public class BeanConstructorArgumentRuleTest extends BeansCoreTestCase {
 	}
 
 	public void testCorrectArgumentCount() throws Exception {
-		IBean bean = beansConfig.getBean("correct");
+		IBean bean = BeansModelUtils.getBean("correct", beansConfig);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue("No error expected for bean", severity != IMarker.SEVERITY_ERROR
@@ -50,7 +51,7 @@ public class BeanConstructorArgumentRuleTest extends BeansCoreTestCase {
 	}
 
 	public void testCorrectArgumentCountOnChildBean() throws Exception {
-		IBean bean = beansConfig.getBean("correctChild");
+		IBean bean = BeansModelUtils.getBean("correctChild", beansConfig);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue("No error expected for bean", severity != IMarker.SEVERITY_ERROR
@@ -61,7 +62,7 @@ public class BeanConstructorArgumentRuleTest extends BeansCoreTestCase {
 	public void testNoArgumentValues() throws Exception {
 		String[] errorMessages = new String[] { "No constructor with 0 arguments defined in class 'org.springframework.Factory'" };
 
-		IBean bean = beansConfig.getBean("incorrect");
+		IBean bean = BeansModelUtils.getBean("incorrect", beansConfig);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue(severity == IMarker.SEVERITY_ERROR);
@@ -79,7 +80,7 @@ public class BeanConstructorArgumentRuleTest extends BeansCoreTestCase {
 	public void testTooFewArgumentValues() throws Exception {
 		String[] errorMessages = new String[] { "No constructor with 3 arguments defined in class 'org.springframework.Factory'" };
 		
-		IBean bean = beansConfig.getBean("incorrectWithArgs");
+		IBean bean = BeansModelUtils.getBean("incorrectWithArgs", beansConfig);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
 		assertTrue(severity == IMarker.SEVERITY_ERROR);

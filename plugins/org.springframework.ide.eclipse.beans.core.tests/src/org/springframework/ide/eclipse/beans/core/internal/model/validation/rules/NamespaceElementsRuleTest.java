@@ -59,7 +59,7 @@ public class NamespaceElementsRuleTest extends BeansCoreTestCase {
 
 		IMarker[] markers = resource.findMarkers(BeansCorePlugin.PLUGIN_ID + ".problemmarker", false,
 				IResource.DEPTH_ZERO);
-		assertTrue(markers.length == 8);
+		assertTrue(markers.length >= 8);
 		MarkerAssertion.assertMarker(markers, assertions);
 	}
 }

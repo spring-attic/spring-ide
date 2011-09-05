@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.beans.core.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.springframework.ide.eclipse.beans.core.autowire.AutowiredAnnotationInjectionMetadataProviderTests;
+import org.springframework.ide.eclipse.beans.core.autowire.CommonAnnotationInjectionMetadataProviderTests;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
@@ -38,6 +40,8 @@ public class AllBeansCoreTests {
 		suite.addTest(new TestSuite(RequiredPropertyRuleTest.class));
 		suite.addTest(new TestSuite(NamespaceElementsRuleTest.class));
 		suite.addTest(new TestSuite(IntrospectorTest.class));
+		suite.addTest(new TestSuite(AutowiredAnnotationInjectionMetadataProviderTests.class));
+		suite.addTest(new TestSuite(CommonAnnotationInjectionMetadataProviderTests.class));
 		//$JUnit-END$
 		return suite;
 	}
