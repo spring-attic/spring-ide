@@ -500,25 +500,28 @@ public class BeansEditorUtils {
 		}
 
 		for (IBeansConfig bc : configs) {
-			Set<IBean> bs = bc.getBeans();
-			for (IBean b : bs) {
-				if (!b.getElementResource().equals(file)) {
-					beans.add(b);
-				}
-			}
 			Set<IBeansComponent> components = bc.getComponents();
 			for (IBeansComponent component : components) {
-				bs = component.getBeans();
-				for (IBean b : bs) {
-					if (!b.getElementResource().equals(file)) {
-						beans.add(b);
-					}
-				}
+				getBeansFromComponent(file, component, beans);
 			}
 		}
 		return beans;
 	}
 
+	private static void getBeansFromComponent(IFile file, IBeansComponent component, Set<IBean> beansAcc) {
+		Set<IBean> bs = component.getBeans();
+		for (IBean b : bs) {
+			if (!b.getElementResource().equals(file)) {
+				beansAcc.add(b);
+			}
+		}
+		
+		Set<IBeansComponent> childComponents = component.getComponents();
+		for (IBeansComponent childComponent : childComponents) {
+			getBeansFromComponent(file, childComponent, beansAcc);
+		}
+	}
+	
 	public static final String getClassNameForBean(IFile file, Document document, Node node) {
 
 		NamedNodeMap attributes = node.getAttributes();
