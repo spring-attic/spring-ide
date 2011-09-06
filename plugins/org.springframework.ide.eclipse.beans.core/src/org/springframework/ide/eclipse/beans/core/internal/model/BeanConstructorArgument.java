@@ -68,7 +68,8 @@ public class BeanConstructorArgument extends AbstractBeansValueHolder
 		BeanConstructorArgument that = (BeanConstructorArgument) other;
 		if (!ObjectUtils.nullSafeEquals(this.index, that.index)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.type, that.type)) return false;
-		return super.equals(other);
+		
+		return true;
 	}
 
 	public int getElementType() {
