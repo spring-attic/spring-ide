@@ -19,8 +19,8 @@ public enum RenameIdType {
 	BEAN(	"Bean",
 			"bean",
 			new String[] { "depends-on", "bean", "local", "parent", "ref", "key-ref", "value-ref" },
-			new String[] { "p:" },
-			new String[] { "-ref" }),
+			new String[] { "p:", "c:" },
+			new String[] { "-ref", "-ref" }),
 
 	ADVICE(	"Advice",
 			"tx:advice",
