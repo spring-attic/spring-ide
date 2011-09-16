@@ -66,8 +66,9 @@ public class NodeElementHyperlink implements IHyperlink {
 					Node profileNode = parentNode.getAttributes().getNamedItem("profile");
 					
 					if (profileNode != null) {
-						str.append(" in profile ");
+						str.append(" in profile \"");
 						str.append(profileNode.getNodeValue());
+						str.append("\"");
 					}
 				}
 				str.append(" - ");
