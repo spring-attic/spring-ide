@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
@@ -28,19 +30,29 @@ import org.w3c.dom.NodeList;
 public class DefaultReferenceableElementsLocator implements
 		IReferenceableElementsLocator {
 
-	public Map<String, Node> getReferenceableElements(Document document, IFile file) {
-		Map<String, Node> nodes = new HashMap<String, Node>();
+	public Map<String, Set<Node>> getReferenceableElements(Document document, IFile file) {
+		Map<String, Set<Node>> nodes = new HashMap<String, Set<Node>>();
 		NodeList childNodes = document.getDocumentElement().getChildNodes();
 
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
 			if (BeansEditorUtils.hasAttribute(node, "id")) {
-				nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
+				addNodeToMap(BeansEditorUtils.getAttribute(node, "id"), node, nodes);
 			}
 			else if (BeansEditorUtils.hasAttribute(node, "alias")) {
-				nodes.put(BeansEditorUtils.getAttribute(node, "alias"), node);
+				addNodeToMap(BeansEditorUtils.getAttribute(node, "alias"), node, nodes);
 			}
 		}
 		return nodes;
+	}
+	
+	private static void addNodeToMap(String name, Node node, Map<String, Set<Node>> nodes) {
+		Set<Node> matchedNodes = nodes.get(name);
+		if (matchedNodes == null) {
+			matchedNodes = new HashSet<Node>();
+			nodes.put(name, matchedNodes);
+		}
+		matchedNodes.add(node);
+
 	}
 }

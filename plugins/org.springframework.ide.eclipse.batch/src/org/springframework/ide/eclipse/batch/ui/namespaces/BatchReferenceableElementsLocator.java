@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.batch.ui.namespaces;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IReferenceableElementsLocator;
@@ -28,21 +30,35 @@ import org.w3c.dom.NodeList;
  */
 public class BatchReferenceableElementsLocator implements IReferenceableElementsLocator {
 
-	public Map<String, Node> getReferenceableElements(Document document,
+	public Map<String, Set<Node>> getReferenceableElements(Document document,
 			IFile file) {
 		return getReferenceableElementsHelper(document.getDocumentElement());
 	}
 	
-	private Map<String, Node> getReferenceableElementsHelper(Node parent) {
-		Map<String, Node> nodes = new HashMap<String, Node>();
+	private Map<String, Set<Node>> getReferenceableElementsHelper(Node parent) {
+		Map<String, Set<Node>> nodes = new HashMap<String, Set<Node>>();
 		NodeList childNodes = parent.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
 			if (BeansEditorUtils.hasAttribute(node, "id")) {
-				nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
+				String id = BeansEditorUtils.getAttribute(node, "id");
+				Set<Node> matchedNodes = nodes.get(id);
+				if (matchedNodes == null) {
+					matchedNodes = new HashSet<Node>();
+					nodes.put(id, matchedNodes);
+				}
+				matchedNodes.add(node);
 			}
 			if (node.hasChildNodes()) {
-				nodes.putAll(getReferenceableElementsHelper(node));
+				Map<String, Set<Node>> tempNodes = getReferenceableElementsHelper(node);
+				for(String id: tempNodes.keySet()) {
+					Set<Node> matchedNodes = nodes.get(id);
+					if (matchedNodes == null) {
+						nodes.put(id, tempNodes.get(id));
+					} else {
+						matchedNodes.addAll(tempNodes.get(id));
+					}
+				}
 			}
 		}
 		return nodes;

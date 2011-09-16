@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -54,6 +55,7 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
@@ -773,12 +775,54 @@ public class BeansEditorUtils {
 
 	public static final Node getFirstReferenceableNodeById(Document document, String id, IFile file) {
 		Map<String, Node> nodes = getReferenceableNodes(document, file);
-		for (Map.Entry<String, Node> node : nodes.entrySet()) {
+		for (Entry<String, Node> node : nodes.entrySet()) {
 			if (node.getKey().equals(id)) {
 				return node.getValue();
 			}
 		}
 		return null;
+	}
+
+	public static final List<Node> getReferenceableNodesById(Document document, String id, IFile file) {
+		List<Node> nodes = new ArrayList<Node>();
+		for (IReferenceableElementsLocator locator : NamespaceUtils.getAllElementsLocators()) {
+
+			Map<String, Set<Node>> tempNodess = locator.getReferenceableElements(document, file);
+			if (tempNodess != null) {
+				for(String name: tempNodess.keySet()) {
+					if (name.equals(id)) {
+						Set<Node> tempNodes = tempNodess.get(name);
+						for(Node tempNode: tempNodes) {
+							updateList(tempNode, nodes);
+						}
+					}
+				}
+			}
+		}
+		return nodes;
+	}
+	
+	/**
+	 * Add newNode to nodes if it is not already in the list of nodes
+	 * @param newNode
+	 * @param nodes
+	 */
+	private static void updateList(Node newNode, List<Node> nodes) {
+		IDOMNode domNewNode = (IDOMNode) newNode;
+		boolean found = false;
+		for(Node node: nodes) {
+			if (newNode.getOwnerDocument().equals(node.getOwnerDocument())) {
+				IDOMNode domNode = (IDOMNode) node;
+				if (domNode.getStartOffset() == domNewNode.getStartOffset() && domNode.getEndOffset() == domNewNode.getEndOffset()) {
+					found = true;
+				}
+			}
+			
+		}
+		
+		if (!found) {
+			nodes.add(newNode);
+		}
 	}
 
 	/**
@@ -861,9 +905,14 @@ public class BeansEditorUtils {
 		Map<String, Node> nodes = new HashMap<String, Node>();
 		for (IReferenceableElementsLocator locator : NamespaceUtils.getAllElementsLocators()) {
 
-			Map<String, Node> tempNodes = locator.getReferenceableElements(document, file);
+			Map<String, Set<Node>> tempNodes = locator.getReferenceableElements(document, file);
 			if (tempNodes != null) {
-				nodes.putAll(tempNodes);
+				for(String name: tempNodes.keySet()) {
+					Set<Node> set = tempNodes.get(name);
+					if (set != null && set.size() > 0) {
+						nodes.put(name, set.iterator().next());
+					}
+				}
 			}
 		}
 		return nodes;

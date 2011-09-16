@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
@@ -33,7 +35,7 @@ import org.w3c.dom.Node;
  * @since 2.0.2
  */
 @SuppressWarnings("restriction")
-public class BeanHyperlinkCalculator implements IHyperlinkCalculator {
+public class BeanHyperlinkCalculator implements IHyperlinkCalculator, IMultiHyperlinkCalculator {
 
 	/**
 	 * Calculates a {@link IHyperlink} for a bean reference expressed by the
@@ -49,9 +51,13 @@ public class BeanHyperlinkCalculator implements IHyperlinkCalculator {
 		IFile file = BeansEditorUtils.getFile(document);
 		Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
 				.getOwnerDocument(), target, file);
+		return createHyperlinkHelper(bean, target, hyperlinkRegion, textViewer, file);
+	}
+	
+	private IHyperlink createHyperlinkHelper(Node bean, String target, IRegion hyperlinkRegion, ITextViewer textViewer, IFile file) {
 		if (bean != null) {
 			IRegion region = getHyperlinkRegion(bean);
-			return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
+			return new NodeElementHyperlink(bean, file, hyperlinkRegion, region, textViewer);
 		}
 		else {
 			// assume this is an external reference
@@ -65,6 +71,26 @@ public class BeanHyperlinkCalculator implements IHyperlinkCalculator {
 			}
 		}
 		return null;
+	}
+
+	public IHyperlink[] createHyperlinks(String name, String target, Node node,
+			Node parentNode, IDocument document, ITextViewer textViewer,
+			IRegion hyperlinkRegion, IRegion cursor) {
+		IFile file = BeansEditorUtils.getFile(document);
+		List<Node> beans = BeansEditorUtils.getReferenceableNodesById(node.getOwnerDocument(), target, file);
+		List<IHyperlink> result = new ArrayList<IHyperlink>();
+		
+		for(Node bean: beans) {
+			IHyperlink link = createHyperlinkHelper(bean, target, hyperlinkRegion, textViewer, file);
+			if (link != null) {
+				result.add(link);
+			}
+		}
+		
+		if (result.isEmpty()) {
+			return null;
+		}
+		return result.toArray(new IHyperlink[result.size()]);
 	}
 
 	/**

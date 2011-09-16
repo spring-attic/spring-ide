@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.w3c.dom.Document;
@@ -23,6 +24,6 @@ import org.w3c.dom.Node;
  */
 public interface IReferenceableElementsLocator {
 
-	Map<String, Node> getReferenceableElements(Document document, IFile file);
+	Map<String, Set<Node>> getReferenceableElements(Document document, IFile file);
 
 }
