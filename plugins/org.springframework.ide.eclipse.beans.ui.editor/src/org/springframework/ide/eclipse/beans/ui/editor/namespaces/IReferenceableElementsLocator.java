@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.w3c.dom.Node;
 /**
  * Implementations of this interface can provide a {@link Map} of {@link Node}that can be referenced.
  * @author Christian Dupuis
+ * @author Terry Denney
  * @since 2.0
  */
 public interface IReferenceableElementsLocator {

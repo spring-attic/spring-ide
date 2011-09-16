@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Spring IDE Developers
+ * Copyright (c) 2006, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.w3c.dom.NodeList;
  * Default implementation of {@link IReferenceableElementsLocator} that returns
  * every {@link Node} that has an <code>id</code> attribute.
  * @author Christian Dupuis
+ * @author Terry Denney
  * @since 2.0
  */
 public class DefaultReferenceableElementsLocator implements
