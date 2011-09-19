@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.Flags;
@@ -39,7 +39,7 @@ public class ConstructorArgNameSearchRequestor {
 
 	protected JavaElementImageProvider imageProvider;
 
-	protected Map<String, IMethod> constructors;
+	protected Set<String> argNames;
 
 	protected ContentAssistRequest request;
 
@@ -53,7 +53,7 @@ public class ConstructorArgNameSearchRequestor {
 			String prefix, boolean attrAtLocationHasValue,
 			String nameSpacePrefix) {
 		this.request = request;
-		this.constructors = new HashMap<String, IMethod>();
+		this.argNames = new HashSet<String>();
 		this.imageProvider = new JavaElementImageProvider();
 		this.prefix = prefix;
 		this.attrAtLocationHasValue = attrAtLocationHasValue;
@@ -62,8 +62,7 @@ public class ConstructorArgNameSearchRequestor {
 		}
 	}
 
-	public void acceptSearchMatch(IMethod constructor)
-			throws CoreException {
+	public void acceptSearchMatch(IMethod constructor) throws CoreException {
 		if (Flags.isPublic(constructor.getFlags())
 				&& ((IType) constructor.getParent()).isClass()
 				&& constructor.isConstructor() && constructor.exists()) {
@@ -76,10 +75,8 @@ public class ConstructorArgNameSearchRequestor {
 			String[] parameterNames = constructor.getParameterNames();
 			String[] parameterTypes = JdtUtils
 					.getParameterTypesString(constructor);
-			String key = constructor.getElementName()
-					+ constructor.getSignature();
-			if (!constructors.containsKey(key)) {
-				for (String name : parameterNames) {
+			for (String name : parameterNames) {
+				if (!argNames.contains(name)) {
 					String replaceText = namespacePrefix + prefix + name;
 					StringBuffer buf = new StringBuffer();
 					buf.append(" - ");
@@ -91,6 +88,14 @@ public class ConstructorArgNameSearchRequestor {
 						buf.append(parameterTypes[0]);
 						buf.append(' ');
 						buf.append(parameterNames[0]);
+						if (parameterTypes.length > 1 && parameterTypes.length > 1) {
+							for (int i = 1; i < parameterTypes.length; i++) {
+								buf.append(", ");
+								buf.append(parameterTypes[i]);
+								buf.append(' ');
+								buf.append(parameterNames[i]);
+							}
+						}
 					}
 					buf.append(')');
 					String displayText = buf.toString();
@@ -131,8 +136,8 @@ public class ConstructorArgNameSearchRequestor {
 
 					request.addProposal(proposal1);
 					request.addProposal(proposal2);
+					argNames.add(name);
 				}
-				constructors.put(key, constructor);
 			}
 		} catch (JavaModelException e) {
 			// do nothing
