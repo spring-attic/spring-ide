@@ -68,6 +68,18 @@
 				</with>
 			</enablement>
 		</renameParticipant>
+		<renameParticipant
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.ConstructorArgumentRenameRefactoringParticipant"
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.constructorArgumentRenameParticipant"
+			name="%constructorArgumentRenameParticipant.name">
+			<enablement>
+				<with variable="element">
+					<instanceof
+						value="org.eclipse.jdt.core.ILocalVariable">
+					</instanceof>
+				</with>
+			</enablement>
+		</renameParticipant>
 	</extension>
 
 	<extension

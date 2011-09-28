@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -52,6 +53,82 @@ import org.w3c.dom.NodeList;
  */
 @SuppressWarnings("restriction")
 public class BeansRefactoringChangeUtils {
+
+	public static Change createConstructorArgumentRenameChange(IFile file, IJavaElement affectedElement, String newName,
+			IProgressMonitor pm) throws CoreException {
+		IStructuredModel model = null;
+		try {
+			model = StructuredModelManager.getModelManager().getModelForRead(file);
+
+			if (model == null) {
+				return null;
+			}
+			IDOMDocument document = ((DOMModelImpl) model).getDocument();
+			MultiTextEdit multiEdit = new MultiTextEdit();
+			NodeList nodes = document.getElementsByTagName("bean");
+			for (int i = 0; i < nodes.getLength(); i++) {
+				Set<TextEdit> edits = createConstructorTextEdits(nodes.item(i), affectedElement, newName, file);
+				if (edits != null) {
+					multiEdit.addChildren(edits.toArray(new TextEdit[edits.size()]));
+				}
+			}
+			if (multiEdit.hasChildren()) {
+				TextFileChange change = new TextFileChange("", file);
+				change.setEdit(multiEdit);
+				for (TextEdit e : multiEdit.getChildren()) {
+					change.addTextEditGroup(new TextEditGroup("Rename constructor argument name", e));
+				}
+				return change;
+			}
+		}
+		catch (IOException e) {
+		}
+		finally {
+			if (model != null) {
+				model.releaseFromRead();
+			}
+		}
+		return null;
+	}
+	
+	private static Set<TextEdit> createConstructorTextEdits(Node node, IJavaElement element, String newName, IFile file) {
+		if (node == null) {
+			return null;
+		}
+
+		Set<TextEdit> result = new HashSet<TextEdit>();
+
+		if (element instanceof ILocalVariable) {
+			// c-namespace references to the argument name that belong to the changed constructor argument
+			if (node.hasAttributes()) {
+				String argumentName = element.getElementName();
+				
+				String attributeNameStart = "c:";
+				String optionalAttributeNameEnd = "-ref";
+
+				NamedNodeMap attributes = node.getAttributes();
+				int attributeCount = attributes.getLength();
+
+				for (int i = 0; i < attributeCount; i++) {
+					AttrImpl attribute = (AttrImpl) attributes.item(i);
+					String attributeName = attribute.getNodeName();
+					if (attributeName != null && attributeName.startsWith(attributeNameStart)) {
+						if (attributeName.equals(attributeNameStart + argumentName)
+								|| attributeName.equals(attributeNameStart + argumentName + optionalAttributeNameEnd)) {
+							List<IType> types = BeansEditorUtils.getClassNamesOfBean(file, node);
+							if (types.contains(((ILocalVariable) element).getDeclaringMember().getDeclaringType())) {
+								int offset = attribute.getNameRegionStartOffset() + attributeNameStart.length();
+								result.add(new ReplaceEdit(offset, argumentName.length(), newName));
+							}
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+
 
 	public static Change createMethodRenameChange(IFile file, IJavaElement[] affectedElements, String[] newNames,
 			IProgressMonitor pm) throws CoreException {
