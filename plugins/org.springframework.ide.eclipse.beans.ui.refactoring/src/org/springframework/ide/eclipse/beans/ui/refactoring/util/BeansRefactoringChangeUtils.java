@@ -76,7 +76,7 @@ public class BeansRefactoringChangeUtils {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
 				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup("Rename constructor argument name", e));
+					change.addTextEditGroup(new TextEditGroup("Rename constructor argument", e));
 				}
 				return change;
 			}
@@ -116,7 +116,7 @@ public class BeansRefactoringChangeUtils {
 						if (attributeName.equals(attributeNameStart + argumentName)
 								|| attributeName.equals(attributeNameStart + argumentName + optionalAttributeNameEnd)) {
 							List<IType> types = BeansEditorUtils.getClassNamesOfBean(file, node);
-							if (types.contains(((ILocalVariable) element).getDeclaringMember().getDeclaringType())) {
+							if (element.getParent() != null && element.getParent() instanceof IMethod && types.contains(((IMethod) element.getParent()).getDeclaringType())) {
 								int offset = attribute.getNameRegionStartOffset() + attributeNameStart.length();
 								result.add(new ReplaceEdit(offset, argumentName.length(), newName));
 							}
