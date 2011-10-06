@@ -1,0 +1,6 @@
+a#springide-overview img {
+	background-image: url(../images/springide.png);
+}
+a#springide-overview:hover img {
+	background-image: url(../images/springide.png);
+}

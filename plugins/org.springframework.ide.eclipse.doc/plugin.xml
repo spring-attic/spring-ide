@@ -22,4 +22,12 @@
       </toc>
    </extension>
 
+   <extension
+         point="org.eclipse.ui.intro.configExtension">
+      <configExtension
+            configId="org.eclipse.ui.intro.universalConfig"
+            content="$nl$/intro/overview.xml">
+      </configExtension>
+   </extension>
+
 </plugin>
