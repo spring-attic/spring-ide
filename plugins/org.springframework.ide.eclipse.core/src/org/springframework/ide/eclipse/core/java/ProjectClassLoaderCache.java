@@ -284,8 +284,12 @@ public class ProjectClassLoaderCache {
 		}
 	}
 
-	private static boolean shouldFilter(String name) {
-		return "commons-logging.properties".equals(name) || (name != null && name.startsWith("META-INF/services/"));
+	public static boolean shouldFilter(String name) {
+		if ("commons-logging.properties".equals(name)) return true;
+		if (name != null && name.startsWith("META-INF/services/")) {
+			return (name.indexOf('/', 18) == -1);
+		}
+		return false;
 	}
 
 	private static boolean useNonLockingClassLoader() {
