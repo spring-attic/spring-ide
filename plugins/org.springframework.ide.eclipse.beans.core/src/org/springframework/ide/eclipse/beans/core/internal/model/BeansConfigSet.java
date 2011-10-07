@@ -169,6 +169,8 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 	}
 
 	public boolean hasConfig(IFile file) {
+		if (file == null) return false;
+		
 		if (file.getProject().equals(((IBeansProject) getElementParent()).getProject())) {
 			return getConfigNames().contains(file.getProjectRelativePath().toString());
 		}

@@ -473,7 +473,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			try {
 				r.lock();
 				for (IBeansConfig beansConfig : configs.values()) {
-					if (beansConfig.getElementResource().equals(file)) {
+					if (beansConfig.getElementResource() != null && beansConfig.getElementResource().equals(file)) {
 						return beansConfig;
 					}
 				}
