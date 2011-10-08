@@ -169,6 +169,8 @@ public class ProjectValidatorPropertyTab {
 
 	private Button configureButton;
 
+	private Button resetButton;
+
 	private Map<ValidationRuleDefinition, Map<String, String>> changedPropertyValues = new HashMap<ValidationRuleDefinition, Map<String, String>>();
 
 	private Map<ValidationRuleDefinition, Map<String, Integer>> changedMessageSeverities = new HashMap<ValidationRuleDefinition, Map<String, Integer>>();
@@ -177,6 +179,15 @@ public class ProjectValidatorPropertyTab {
 		@Override
 		public void widgetSelected(SelectionEvent e) {
 			handleButtonPressed((Button) e.widget);
+		}
+	};
+
+	private SelectionListener resetListener = new SelectionAdapter() {
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			if ((Button) e.widget == resetButton) {
+				initializeCheckedState(null);
+			}
 		}
 	};
 
@@ -315,8 +326,14 @@ public class ProjectValidatorPropertyTab {
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 30;
 		descriptionText.setLayoutData(data);
+		
+		resetButton = new Button(composite, SWT.PUSH);
+		resetButton.setText("Restore Defaults");
+		data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+		resetButton.setLayoutData(data);
+		resetButton.addSelectionListener(resetListener);
 
-		initializeCheckedState();
+		initializeCheckedState(project);
 
 		return composite;
 	}
@@ -367,7 +384,7 @@ public class ProjectValidatorPropertyTab {
 		}
 	}
 
-	private List<Object> getEnabledProjectBuilderDefinitions() {
+	private List<Object> getEnabledProjectBuilderDefinitions(IProject project) {
 		List<ValidatorDefinition> validatorDefinitions = this.validatorDefinitions;
 		List<Object> filteredValidatorDefinitions = new ArrayList<Object>();
 		for (ValidatorDefinition builderDefinition : validatorDefinitions) {
@@ -407,11 +424,11 @@ public class ProjectValidatorPropertyTab {
 		}
 	}
 
-	private void initializeCheckedState() {
+	private void initializeCheckedState(final IProject project) {
 
 		BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
 			public void run() {
-				List items = getEnabledProjectBuilderDefinitions();
+				List items = getEnabledProjectBuilderDefinitions(project);
 				validatorViewer.setCheckedElements(items.toArray());
 
 				for (int i = 0; i < items.size(); i++) {
