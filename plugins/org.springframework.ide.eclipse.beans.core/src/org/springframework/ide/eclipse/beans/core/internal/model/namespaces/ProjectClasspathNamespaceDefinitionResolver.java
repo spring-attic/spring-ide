@@ -146,7 +146,7 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 					continue;
 				}
 
-				String namespaceUri = getTargetNamespace(url);
+				String namespaceUri = TargetNamespaceScanner.getTargetNamespace(url);
 				
 				if (StringUtils.hasText(namespaceUri)) {
 				
@@ -218,24 +218,6 @@ public class ProjectClasspathNamespaceDefinitionResolver implements INamespaceDe
 						String.format("Error extracting icon file '%s' for namespace '%s'", icon, namespaceUri), e);
 				return null;
 			}
-		}
-		return null;
-	}
-
-	/**
-	 * Returns the target namespace of the XSD specified by the given {@link URL}.
-	 */
-	private String getTargetNamespace(URL url) {
-		try {
-			DocumentBuilder docBuilder = SpringCoreUtils.getDocumentBuilder();
-			Document doc = docBuilder.parse(url.openStream());
-			return doc.getDocumentElement().getAttribute("targetNamespace");
-		}
-		catch (SAXException e) {
-			BeansCorePlugin.log(e);
-		}
-		catch (IOException e) {
-			BeansCorePlugin.log(e);
 		}
 		return null;
 	}

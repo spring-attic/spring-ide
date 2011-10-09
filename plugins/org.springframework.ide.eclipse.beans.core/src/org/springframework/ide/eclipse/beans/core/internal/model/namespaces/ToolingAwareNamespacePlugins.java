@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.SafeRunner;
 import org.osgi.framework.Bundle;
@@ -29,10 +27,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
  * Extension to Spring DM's {@link NamespacePlugins} class that handles registering of XSDs in Eclipse' XML Catalog and
@@ -108,7 +103,7 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 				for (Object xsd : props.keySet()) {
 
 					String key = xsd.toString();
-					String namespaceUri = getTargetNamespace(bundle.getEntry(props.getProperty(key)));
+					String namespaceUri = TargetNamespaceScanner.getTargetNamespace(bundle.getEntry(props.getProperty(key)));
 					String icon = null;
 					String prefix = null;
 					String name = null;
@@ -164,29 +159,6 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 				}
 			});
 		}
-	}
-
-	/**
-	 * Returns the target namespace URI of the XSD identified by the given <code>url</code>.
-	 */
-	private String getTargetNamespace(URL url) {
-		// safe guard for invalid Spring namespaces
-		if (url == null) {
-			return null;
-		}
-
-		try {
-			DocumentBuilder docBuilder = SpringCoreUtils.getDocumentBuilder();
-			Document doc = docBuilder.parse(url.openStream());
-			return doc.getDocumentElement().getAttribute("targetNamespace");
-		}
-		catch (SAXException e) {
-			BeansCorePlugin.log(e);
-		}
-		catch (IOException e) {
-			BeansCorePlugin.log(e);
-		}
-		return null;
 	}
 
 	/**

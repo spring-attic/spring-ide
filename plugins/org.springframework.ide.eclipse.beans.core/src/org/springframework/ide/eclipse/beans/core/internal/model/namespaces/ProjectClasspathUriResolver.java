@@ -19,17 +19,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.eclipse.core.resources.IProject;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.CollectionUtils;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
  * resolves URIs on the project classpath using the protocol established by
@@ -157,13 +152,8 @@ public class ProjectClasspathUriResolver {
 		}
 
 		try {
-			URI uri = new URI(resolvedPath);
-
-			DocumentBuilder docBuilder = SpringCoreUtils.getDocumentBuilder();
-			Document doc = docBuilder.parse(uri.toURL().openStream());
-			return doc.getDocumentElement().getAttribute("targetNamespace");
-		} catch (SAXException e) {
-			BeansCorePlugin.log(e);
+			URL url = new URI(resolvedPath).toURL();
+			return TargetNamespaceScanner.getTargetNamespace(url);
 		} catch (IOException e) {
 			BeansCorePlugin.log(e);
 		} catch (URISyntaxException e) {
