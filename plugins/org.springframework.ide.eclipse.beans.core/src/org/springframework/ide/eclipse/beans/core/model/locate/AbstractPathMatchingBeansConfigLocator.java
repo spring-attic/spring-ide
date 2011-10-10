@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,9 @@ import org.springframework.util.PathMatcher;
  * <p>
  * Root directories to recursively search need to be provided by sub-classes by implementing the
  * {@link #getRootDirectories(IProject)} method.
+ * 
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.5
  */
 public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBeansConfigLocator {
@@ -76,6 +78,7 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 								rootDir.toString()));
 						IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(
 								rootDir);
+						
 						if (resource instanceof IFolder) {
 							locateConfigsInFolder(files, project, (IFolder) resource, rootDir);
 						}
@@ -174,7 +177,7 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 	 */
 	protected void locateConfigsInFolder(Set<IFile> files, IProject project, IFolder folder,
 			IPath rootDir) throws CoreException {
-		if (folder != null && folder.exists()) {
+		if (folder != null && folder.exists() && !folder.isDerived()) {
 			for (IResource resource : folder.members()) {
 				if (resource instanceof IFile) {
 					locateConfigInFile(files, project, rootDir, (IFile) resource);
@@ -191,13 +194,15 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 	 */
 	protected void locateConfigInFile(Set<IFile> files, IProject project, IPath rootDir,
 			IFile resource) {
-		String filePath = removeRootDir(resource.getFullPath(), rootDir);
-		for (String pattern : getAllowedFilePatterns()) {
-			if (getAllowedFileExtensions().contains(resource.getFileExtension())
-					&& matches(filePath, pattern)) {
-				files.add(resource);
+		if (!resource.isDerived()) {
+			String filePath = removeRootDir(resource.getFullPath(), rootDir);
+			for (String pattern : getAllowedFilePatterns()) {
+				if (getAllowedFileExtensions().contains(resource.getFileExtension())
+						&& matches(filePath, pattern)) {
+					files.add(resource);
+				}
+				doLocateConfig(files, project, resource);
 			}
-			doLocateConfig(files, project, resource);
 		}
 	}
 
