@@ -86,7 +86,10 @@ public class XmlCatalogDelegatingEntityResolver extends DelegatingEntityResolver
 		URIResolver resolver = URIResolverPlugin.createResolver();
 		String uri = resolver.resolvePhysicalLocation(null, publicId, systemId);
 		if (uri != null) {
-			inputSource = new InputSource(new FileInputStream(new File(URI.create(uri))));
+			URI realUri = URI.create(uri);
+			if (realUri.getScheme() == "file") {
+				inputSource = new InputSource(new FileInputStream(new File(URI.create(uri))));
+			}
 		}
 		
 		return inputSource;
