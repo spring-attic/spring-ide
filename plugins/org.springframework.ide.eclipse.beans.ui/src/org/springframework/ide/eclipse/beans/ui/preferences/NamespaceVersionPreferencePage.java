@@ -310,17 +310,19 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (event.getSelection() instanceof IStructuredSelection) {
 					Object obj = ((IStructuredSelection) event.getSelection()).getFirstElement();
-					selectedNamespaceDefinition = (INamespaceDefinition) obj;
-					versionViewer.setInput(obj);
-					prefixText.setText(prefixes.get(selectedNamespaceDefinition));
-					if (versions.get(selectedNamespaceDefinition) != null) {
-						versionViewer.setCheckedElements(new Object[] { versions.get(selectedNamespaceDefinition) });
-					}
-					if (selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
-						versionViewer.getControl().setEnabled(true);
-					}
-					else {
-						versionViewer.getControl().setEnabled(false);
+					if (obj != null) {
+						selectedNamespaceDefinition = (INamespaceDefinition) obj;
+						versionViewer.setInput(obj);
+						prefixText.setText(prefixes.get(selectedNamespaceDefinition));
+						if (versions.get(selectedNamespaceDefinition) != null) {
+							versionViewer.setCheckedElements(new Object[] { versions.get(selectedNamespaceDefinition) });
+						}
+						if (selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
+							versionViewer.getControl().setEnabled(true);
+						}
+						else {
+							versionViewer.getControl().setEnabled(false);
+						}
 					}
 				}
 			}
