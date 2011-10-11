@@ -103,5 +103,23 @@ public class BeansHyperlinkDetector extends NamespaceHyperlinkDetectorSupport im
 		}
 		return hyperlink;
 	}
+	
+	public IHyperlink[] createHyperlinks(String name, String target, Node node, Node parentNode,
+			IDocument document, ITextViewer textViewer, IRegion hyperlinkRegion, IRegion cursor) {
+		IHyperlink[] hyperlink = super.createHyperlinks(name, target, node, parentNode, document,
+				textViewer, hyperlinkRegion, cursor);
+		if (hyperlink == null && name != null) {
+			String parentName = null;
+			if (parentNode != null) {
+				parentName = parentNode.getNodeName();
+			}
+
+			if (name.endsWith("-ref")) {
+				return new BeanHyperlinkCalculator().createHyperlinks(parentName, target, node,
+						parentNode, document, textViewer, hyperlinkRegion, cursor);
+			}
+		}
+		return hyperlink;
+	}
 
 }
