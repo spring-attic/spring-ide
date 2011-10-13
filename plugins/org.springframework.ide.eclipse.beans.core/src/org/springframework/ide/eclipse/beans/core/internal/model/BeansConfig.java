@@ -594,7 +594,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		// Important: don't use getBeans or getComponents on this instance -> will lock
 		beansClone.addAll(beans.values());
 		for (IBeansComponent component : components) {
-			beansClone.addAll(component.getBeans());
+			addBeansFromCompoent(component, beansClone);
 		}
 
 		// Now collect from all imported configurations as well
@@ -602,7 +602,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			for (IBeansConfig bc : beansImport.getImportedBeansConfigs()) {
 				beansClone.addAll(bc.getBeans());
 				for (IBeansComponent component : bc.getComponents()) {
-					beansClone.addAll(component.getBeans());
+					addBeansFromCompoent(component, beansClone);
 				}
 			}
 		}
@@ -645,6 +645,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			}
 		}
 
+	}
+
+	private void addBeansFromCompoent(IBeansComponent component, List<IBean> beansClone) {
+		beansClone.addAll(component.getBeans());
+		
+		for (IBeansComponent bc : component.getComponents()) {
+			addBeansFromCompoent(bc, beansClone);
+		}
 	}
 
 	/**

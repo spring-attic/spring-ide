@@ -62,7 +62,7 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 	}
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		if (classValuesAsString) {
+		if (classValuesAsString && annotationMap.containsKey(annotationType)) {
 			Map<String, Object> annotationAttributes = new HashMap<String, Object>(annotationMap.get(annotationType));
 			for (Map.Entry<String, Object> entry : annotationMap.get(annotationType).entrySet()) {
 				if (entry.getValue() instanceof Class) {

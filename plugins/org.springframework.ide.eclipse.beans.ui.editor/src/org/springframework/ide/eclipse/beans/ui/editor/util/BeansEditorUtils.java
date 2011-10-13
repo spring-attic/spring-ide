@@ -503,6 +503,13 @@ public class BeansEditorUtils {
 		}
 
 		for (IBeansConfig bc : configs) {
+			Set<IBean> bs = bc.getBeans();
+			for (IBean b : bs) {
+				if (!b.getElementResource().equals(file)) {
+					beans.add(b);
+				}
+			}
+ 			
 			Set<IBeansComponent> components = bc.getComponents();
 			for (IBeansComponent component : components) {
 				getBeansFromComponent(file, component, beans);
