@@ -22,6 +22,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.ClassUtils;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
@@ -37,14 +38,24 @@ public class ClassHyperlinkCalculator implements IHyperlinkCalculator {
 			Node parentNode, IDocument document, ITextViewer textViewer,
 			IRegion hyperlinkRegion, IRegion cursor) {
 		IHyperlink[] detectedHyperlinks = getXmlJavaHyperlinks(textViewer, hyperlinkRegion);
+		
+		// return null if xml Java hyperlink will be created to avoid duplicates
 		if (detectedHyperlinks != null && detectedHyperlinks.length > 0) {
 			return null;
 		}
 		
-		IFile file = BeansEditorUtils.getFile(document);
-		IType type = JdtUtils.getJavaType(file.getProject(), target);
-		if (type != null) {
-			return new JavaElementHyperlink(hyperlinkRegion, type);
+		NamedNodeMap attributes = node.getAttributes();
+		if (attributes != null) {
+			Node classAttribute = attributes.getNamedItem("class");
+			
+			// only return hyperlink if attribute name is "class", otherwise hyperlink should be created by another calculator
+			if (classAttribute != null) {
+				IFile file = BeansEditorUtils.getFile(document);
+				IType type = JdtUtils.getJavaType(file.getProject(), target);
+				if (type != null) {
+					return new JavaElementHyperlink(hyperlinkRegion, type);
+				}
+			}
 		}
 		return null;
 	}
