@@ -10,12 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMAttr;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.core.StringUtils;
+import org.springframework.util.ClassUtils;
 import org.w3c.dom.Node;
 
 /**
@@ -65,4 +71,31 @@ public class HyperlinkUtils {
 		return null;
 	}
 
+	/**
+	 * Check to make sure org.eclipse.jst.jsp.ui.internal.hyperlink.XMLJavaHyperlinkDetector
+	 * does not return any hyperlinks to avoid duplicate hyperlinks shown
+	 * 
+	 * @param textViewer
+	 * @param hyperlinkRegion
+	 * @return
+	 */
+	public static IHyperlink[] getXmlJavaHyperlinks(ITextViewer textViewer, IRegion hyperlinkRegion) {
+		try {
+			Class<?> clazz = Class.forName("org.eclipse.jst.jsp.ui.internal.hyperlink.XMLJavaHyperlinkDetector", false, ClassUtils.getDefaultClassLoader());
+			Object target = clazz.getConstructor().newInstance();
+			Method method = clazz.getDeclaredMethod("detectHyperlinks", ITextViewer.class, IRegion.class, boolean.class);
+			return (IHyperlink[]) method.invoke(target, textViewer, hyperlinkRegion, true);
+		} catch (ClassNotFoundException e) {
+		} catch (SecurityException e) {
+		} catch (NoSuchMethodException e) {
+		} catch (IllegalArgumentException e) {
+		} catch (IllegalAccessException e) {
+		} catch (InvocationTargetException e) {
+		} catch (InstantiationException e) {
+		}
+		
+		return null;
+	}
+
+	
 }
