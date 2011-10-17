@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractAnnotationBasedHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.HyperlinkUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IAnnotationBasedHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
@@ -75,9 +76,14 @@ public class ToolAnnotationBasedHyperlinkDetector extends AbstractAnnotationBase
 			}
 		}
 		else if (Class.class.getName().equals(annotationData.getExpectedType())) {
-			IType type = JdtUtils.getJavaType(file.getProject(), target);
-			if (type != null) {
-				return new JavaElementHyperlink(hyperlinkRegion, type);
+			IHyperlink[] detectedHyperlinks = HyperlinkUtils.getXmlJavaHyperlinks(textViewer, hyperlinkRegion);
+			
+			// only return hyperlink if no xml Java hyperlink will be created to avoid duplicates
+			if (detectedHyperlinks == null || detectedHyperlinks.length == 0) {
+				IType type = JdtUtils.getJavaType(file.getProject(), target);
+				if (type != null) {
+					return new JavaElementHyperlink(hyperlinkRegion, type);
+				}
 			}
 		}
 		if (annotationData.getExpectedMethodType() != null) {
