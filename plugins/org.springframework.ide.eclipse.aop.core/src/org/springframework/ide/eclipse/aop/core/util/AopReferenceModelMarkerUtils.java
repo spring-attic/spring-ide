@@ -55,8 +55,6 @@ public class AopReferenceModelMarkerUtils {
 
 	public static final String SOURCE_INTRODUCTION_MARKER = Activator.PLUGIN_ID + ".sourceintroductionmarker";
 
-	public static final String ADIVCE_TYPE = "adivice_type";
-
 	public static Map<ADVICE_TYPE, String> sourceMarkerMapping;
 
 	public static Map<ADVICE_TYPE, String> targetMarkerMapping;

@@ -31,9 +31,9 @@ import org.springframework.util.StringUtils;
  */
 public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPersistableElement {
 
-	protected String adivceMethodName;
+	protected String adviceMethodName;
 
-	protected String[] adivceMethodParameterTypes = new String[0];
+	protected String[] adviceMethodParameterTypes = new String[0];
 
 	protected String[] argNames;
 
@@ -58,8 +58,8 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPer
 	protected IAopReference.ADVICE_TYPE type;
 
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(adivceMethodName);
-		hashCode = hashCode + ObjectUtils.nullSafeHashCode(adivceMethodParameterTypes);
+		int hashCode = ObjectUtils.nullSafeHashCode(adviceMethodName);
+		hashCode = hashCode + ObjectUtils.nullSafeHashCode(adviceMethodParameterTypes);
 		hashCode = hashCode + ObjectUtils.nullSafeHashCode(argNames);
 		hashCode = hashCode + ObjectUtils.nullSafeHashCode(aspectClassName);
 		hashCode = hashCode + aspectEndLineNumber;
@@ -82,9 +82,9 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPer
 			return false;
 		}
 		BeanAspectDefinition that = (BeanAspectDefinition) other;
-		if (!ObjectUtils.nullSafeEquals(this.adivceMethodName, that.adivceMethodName))
+		if (!ObjectUtils.nullSafeEquals(this.adviceMethodName, that.adviceMethodName))
 			return false;
-		if (!ObjectUtils.nullSafeEquals(this.adivceMethodParameterTypes, that.adivceMethodParameterTypes))
+		if (!ObjectUtils.nullSafeEquals(this.adviceMethodParameterTypes, that.adviceMethodParameterTypes))
 			return false;
 		if (!ObjectUtils.nullSafeEquals(this.argNames, that.argNames))
 			return false;
@@ -117,7 +117,7 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPer
 	public Method getAdviceMethod() {
 		try {
 			Class<?> aspectClass = ClassUtils.loadClass(this.aspectClassName);
-			Method method = BeanUtils.resolveSignature(this.adivceMethodName, aspectClass);
+			Method method = BeanUtils.resolveSignature(this.adviceMethodName, aspectClass);
 			return method;
 		}
 		catch (ClassNotFoundException e) {
@@ -126,11 +126,11 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPer
 	}
 
 	public String getAdviceMethodName() {
-		return adivceMethodName;
+		return adviceMethodName;
 	}
 
 	public String[] getAdviceMethodParameterTypes() {
-		return this.adivceMethodParameterTypes;
+		return this.adviceMethodParameterTypes;
 	}
 
 	public String[] getArgNames() {
@@ -178,11 +178,11 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPer
 	}
 	
 	public void saveState(IMemento memento) {
-		memento.putString(BeanAspectDefinitionElementFactory.ADVICE_METHOD_NAME_ATTRIBUTE, this.adivceMethodName);
+		memento.putString(BeanAspectDefinitionElementFactory.ADVICE_METHOD_NAME_ATTRIBUTE, this.adviceMethodName);
 		memento.putString(BeanAspectDefinitionElementFactory.ADVICE_CLASS_NAME_ATTRIBUTE, this.aspectClassName);
-		if (this.adivceMethodParameterTypes != null && this.adivceMethodParameterTypes.length > 0) {
-			memento.putString(BeanAspectDefinitionElementFactory.ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE, StringUtils
-					.arrayToCommaDelimitedString(this.adivceMethodParameterTypes));
+		if (this.adviceMethodParameterTypes != null && this.adviceMethodParameterTypes.length > 0) {
+			memento.putString(BeanAspectDefinitionElementFactory.ADVICE_METHOD_PARAMETER_TYPES_ATTRIBUTE, StringUtils
+					.arrayToCommaDelimitedString(this.adviceMethodParameterTypes));
 		}
 		memento.putString(BeanAspectDefinitionElementFactory.ASPECT_NAME_ATTRIBUTE, this.aspectName);
 		memento.putString(BeanAspectDefinitionElementFactory.POINTCUT_EXPRESSION_ATTRIBUTE,
@@ -205,12 +205,12 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable, IPer
 		memento.putString(BeanAspectDefinitionElementFactory.ADVICE_TYPE_ATTRIBUTE, this.type.toString());
 	}
 
-	public void setAdviceMethodName(String adivceMethodName) {
-		this.adivceMethodName = adivceMethodName;
+	public void setAdviceMethodName(String adviceMethodName) {
+		this.adviceMethodName = adviceMethodName;
 	}
 
 	public void setAdviceMethodParameterTypes(String[] params) {
-		this.adivceMethodParameterTypes = params;
+		this.adviceMethodParameterTypes = params;
 	}
 
 	public void setArgNames(String[] argNames) {

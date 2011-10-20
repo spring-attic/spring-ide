@@ -47,7 +47,7 @@ public class BeanAspectDefinitionElementFactory implements IElementFactory {
 
 	protected static final String ASPECT_NAME_ATTRIBUTE = "aspect-name";
 
-	protected static final String ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE = "adivce-method-parameter-types";
+	protected static final String ADVICE_METHOD_PARAMETER_TYPES_ATTRIBUTE = "advice-method-parameter-types";
 
 	protected static final String ADVICE_CLASS_NAME_ATTRIBUTE = "advice-class-name";
 
@@ -68,16 +68,16 @@ public class BeanAspectDefinitionElementFactory implements IElementFactory {
 
 	protected final void populateAspectDefinition(
 			BeanAspectDefinition definition, IMemento memento) {
-		String adivceMethodName = memento
+		String adviceMethodName = memento
 				.getString(ADVICE_METHOD_NAME_ATTRIBUTE);
 		String aspectClassName = memento.getString(ADVICE_CLASS_NAME_ATTRIBUTE);
-		String adivceMethodParameterTypesString = memento
-				.getString(ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE);
-		String[] adivceMethodParameterTypes = null;
-		if (adivceMethodParameterTypesString != null) {
-			adivceMethodParameterTypes = StringUtils
+		String adviceMethodParameterTypesString = memento
+				.getString(ADVICE_METHOD_PARAMETER_TYPES_ATTRIBUTE);
+		String[] adviceMethodParameterTypes = null;
+		if (adviceMethodParameterTypesString != null) {
+			adviceMethodParameterTypes = StringUtils
 					.delimitedListToStringArray(
-							adivceMethodParameterTypesString, ",");
+							adviceMethodParameterTypesString, ",");
 		}
 		String aspectName = memento.getString(ASPECT_NAME_ATTRIBUTE);
 		String pointcutExpressionString = memento
@@ -98,9 +98,9 @@ public class BeanAspectDefinitionElementFactory implements IElementFactory {
 		IAopReference.ADVICE_TYPE type = ADVICE_TYPE.valueOf(memento
 				.getString(ADVICE_TYPE_ATTRIBUTE));
 
-		definition.setAdviceMethodName(adivceMethodName);
+		definition.setAdviceMethodName(adviceMethodName);
 		definition.setAspectClassName(aspectClassName);
-		definition.setAdviceMethodParameterTypes(adivceMethodParameterTypes);
+		definition.setAdviceMethodParameterTypes(adviceMethodParameterTypes);
 		definition.setAspectName(aspectName);
 		definition.setPointcutExpression(pointcutExpressionString);
 		definition.setReturning(returning);
