@@ -66,6 +66,7 @@ import org.w3c.dom.Element;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Martin Lippert
+ * @author Leo Dos Santos
  */
 public final class BeansUIUtils {
 
@@ -301,6 +302,13 @@ public final class BeansUIUtils {
 			else if (segment instanceof BeanClassReferences) {
 				IBean bean = (IBean) path.getSegment(i + 1);
 				return bean.getElementParent();
+			}
+			else if (segment instanceof IFile) {
+				IFile file = (IFile) segment;
+				IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+				if (config != null) {
+					return config;
+				}
 			}
 		}
 		return null;
