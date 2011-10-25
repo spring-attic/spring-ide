@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
+import java.util.Set;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.springframework.ide.eclipse.beans.core.internal.model.ProfileAwareBeansComponent;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -42,7 +46,38 @@ public class ExternalBeanHyperlink implements IHyperlink {
 	}
 
 	public String getHyperlinkText() {
-		return "Open '" + modelElement.getElementName() + "'";
+		if (modelElement != null) {
+			StringBuilder str = new StringBuilder();
+			str.append("Navigate to ");
+			str.append(modelElement.getElementName());
+			IModelElement parent = modelElement.getElementParent();
+			if (parent instanceof ProfileAwareBeansComponent) {
+				ProfileAwareBeansComponent beans = (ProfileAwareBeansComponent) parent;
+				Set<String> profiles = beans.getProfiles();
+
+				str.append(" in profile");
+				if (profiles.size() > 1) {
+					str.append("s");
+				}
+				str.append(" ");
+
+				boolean first = true;
+				for(String profile: profiles) {
+					if (! first) {
+						str.append(", ");
+					}
+					str.append("\"");
+					str.append(profile);
+					str.append("\"");
+					first = false;
+				}
+				
+				str.append(" - ");
+				str.append(modelElement.getElementResource().getName());
+				return str.toString();
+			}
+		}
+		return "Navigate to " + modelElement.getElementName();
 	}
 
 	public void open() {
