@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
@@ -85,6 +86,14 @@ public class BeanHyperlinkCalculator implements IHyperlinkCalculator, IMultiHype
 			IHyperlink link = createHyperlinkHelper(bean, target, hyperlinkRegion, textViewer, file);
 			if (link != null) {
 				result.add(link);
+			}
+		}
+		
+		// get beans from outside current file
+		Set<IBean> beansFromConfigSets = BeansEditorUtils.getBeansFromConfigSets(file);
+		for(IBean bean: beansFromConfigSets) {
+			if (bean.getElementName().equals(target)) {
+				result.add(new ExternalBeanHyperlink(bean, hyperlinkRegion));
 			}
 		}
 		
