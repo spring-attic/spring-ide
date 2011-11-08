@@ -216,6 +216,9 @@
              class="org.springframework.ide.eclipse.beans.core.internal.model.namespaces.ProjectClasspathExtensibleUriResolver"
              priority="high"
              stage="postnormalization">
+          <projectNature
+                value="org.springframework.ide.eclipse.core.springnature">
+          </projectNature>
        </resolverExtension>
     </extension>
    
