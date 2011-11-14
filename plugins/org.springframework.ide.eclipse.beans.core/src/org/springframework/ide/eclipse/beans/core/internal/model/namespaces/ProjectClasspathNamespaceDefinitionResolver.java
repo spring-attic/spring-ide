@@ -24,8 +24,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -37,13 +35,10 @@ import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionList
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
  * {@link INamespaceDefinitionResolver} that resolves {@link INamespaceDefinition}s from the project's classpath as
