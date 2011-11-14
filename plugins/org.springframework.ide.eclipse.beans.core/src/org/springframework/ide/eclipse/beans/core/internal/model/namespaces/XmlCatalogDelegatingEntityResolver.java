@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.namespaces;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.util.Set;
 
+import org.eclipse.wst.common.uriresolver.internal.URI;
 import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolver;
 import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolverPlugin;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
@@ -27,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
 
 /**
  * Extension to Spring's {@link DelegatingEntityResolver} that tries to resolve entities from the
@@ -86,9 +86,9 @@ public class XmlCatalogDelegatingEntityResolver extends DelegatingEntityResolver
 		URIResolver resolver = URIResolverPlugin.createResolver();
 		String uri = resolver.resolvePhysicalLocation(null, publicId, systemId);
 		if (uri != null) {
-			URI realUri = URI.create(uri);
-			if (realUri.getScheme() == "file") {
-				inputSource = new InputSource(new FileInputStream(new File(URI.create(uri))));
+			URI realUri = URI.createURI(uri);
+			if (realUri.isFile()) {
+				inputSource = new InputSource(new FileInputStream(realUri.toFileString()));
 			}
 		}
 		
