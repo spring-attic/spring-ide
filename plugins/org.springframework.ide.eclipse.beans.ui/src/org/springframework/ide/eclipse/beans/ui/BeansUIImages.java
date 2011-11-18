@@ -116,6 +116,7 @@ public class BeansUIImages {
     public static final String IMG_OBJS_XSD = NAME_PREFIX + "xsd_obj.gif";
     public static final String IMG_OBJS_CONTEXT = NAME_PREFIX + "context_obj.gif";
     public static final String IMG_OBJS_JMS = NAME_PREFIX + "jms_obj.gif";
+    public static final String IMG_OBJS_WARNING = NAME_PREFIX + "warning.png";
 
 	public static final String IMG_WIZ_PROJECT = NAME_PREFIX + "project_wiz.png";
 	public static final String IMG_WIZ_CONFIG = NAME_PREFIX + "config_wiz.png";
@@ -167,6 +168,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_XSD = createManaged(OBJECT, IMG_OBJS_XSD);
 	public static final ImageDescriptor DESC_OBJS_CONTEXT = createManaged(OBJECT, IMG_OBJS_CONTEXT);
 	public static final ImageDescriptor DESC_OBJS_JMS = createManaged(OBJECT, IMG_OBJS_JMS);
+	public static final ImageDescriptor DESC_OBJS_WARNING = createManaged(OBJECT, IMG_OBJS_WARNING);
 
 	public static final ImageDescriptor DESC_OVR_SPRING = create(OVR, "spring_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ERROR = create(OVR, "error_ovr.gif");

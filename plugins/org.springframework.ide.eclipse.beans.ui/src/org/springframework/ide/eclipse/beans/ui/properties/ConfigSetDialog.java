@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.beans.ui.properties;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,14 +21,23 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -42,11 +53,14 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
@@ -84,7 +98,8 @@ public class ConfigSetDialog extends Dialog {
 	private static final int LIST_VIEWER_WIDTH = 400;
 	private static final int LIST_VIEWER_HEIGHT = 250;
 
-
+	private CLabel messageLabel;
+	
 	private Text nameText;
 	private Text profilesText; 
 	
@@ -126,14 +141,16 @@ public class ConfigSetDialog extends Dialog {
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-
-		// Create group composite for options
 		Composite composite = (Composite) super.createDialogArea(parent);
+		
+		// Create group composite for options
 		Composite optionsGroup = new Composite(composite, SWT.NULL);
 		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout layout = new GridLayout();
 		optionsGroup.setLayout(layout);
-		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		messageLabel = new CLabel(optionsGroup, SWT.NONE);
+		messageLabel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
 		// Create labeled name text field
 		nameText = SpringUIUtils.createTextField(optionsGroup, BeansUIPlugin
@@ -153,6 +170,7 @@ public class ConfigSetDialog extends Dialog {
 			}
 		});
 		profilesText.setText(StringUtils.collectionToDelimitedString(configSet.getProfiles(), ", "));
+		createProfilesContentAssist();
 		
 		Label options = new Label(optionsGroup, SWT.WRAP);
 		options.setText("Options:");
@@ -186,6 +204,12 @@ public class ConfigSetDialog extends Dialog {
 		configsViewer.setSorter(new ConfigFilesSorter());
 		configsViewer.setInput(this); // activate content provider
 		configsViewer.setCheckedElements(configSet.getConfigs().toArray());
+		configsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			public void selectionChanged(SelectionChangedEvent event) {
+				validateProfiles();
+			}
+		});
 		
 		// Create select all and deselect all buttons
 		Composite buttonsGroup = new Composite(composite, SWT.NULL);
@@ -222,6 +246,107 @@ public class ConfigSetDialog extends Dialog {
 				.getDisplay()));
 		applyDialogFont(composite);
 		return composite;
+	}
+
+	private Set<String> getDefinedProfiles(IBeansComponent component, String filter, Set<String> existingProfiles) {
+		Set<String> profiles = new HashSet<String>();
+		if (component instanceof IProfileAwareBeansComponent) {
+			Set<String> currentProfiles = ((IProfileAwareBeansComponent) component).getProfiles();
+			for(String profile: currentProfiles) {
+				if (profile.startsWith(filter) && !existingProfiles.contains(profile)) {
+					profiles.add(profile);
+				}
+			}
+		}
+		
+		Set<IBeansComponent> children = component.getComponents();
+		for(IBeansComponent child: children) {
+			profiles.addAll(getDefinedProfiles(child, filter, existingProfiles));
+		}
+		
+		return profiles;
+	}
+	
+	private class ProfileContentProposal implements IContentProposal {
+		
+		private final String profile;
+		
+		private final int offset;
+
+		private final int cursorPosition;
+
+		public ProfileContentProposal(String profile, int offset, int cursorPosition) {
+			this.profile = profile;
+			this.offset = offset;
+			this.cursorPosition = cursorPosition;
+		}
+		
+		public String getLabel() {
+			return profile;
+		}
+		
+		public String getDescription() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		public int getCursorPosition() {
+			return offset + profile.length();
+		}
+		
+		public String getContent() {
+			return profile.substring(cursorPosition - offset - 1, profile.length());
+		}
+	}
+	
+	private void createProfilesContentAssist() {
+		IContentProposalProvider proposalProvider = new IContentProposalProvider() {
+			
+			public IContentProposal[] getProposals(String contents, final int position) {
+				String prefix = contents.substring(0, position);
+				String filter = prefix;
+				Set<String> existingProfiles = new HashSet<String>();
+				
+				int separatorIndex = -1;
+				while(filter.contains(",")) {
+					separatorIndex = prefix.indexOf(",");
+					if (separatorIndex >= 0) {
+						existingProfiles.add(prefix.substring(0, separatorIndex));
+						filter = prefix.substring(separatorIndex + 1);
+						while(filter.startsWith(" ")) {
+							separatorIndex++;
+							filter = filter.substring(1);
+						}
+					}
+				}
+				
+				Set<IBeansConfig> configs = project.getConfigs();
+				Set<String> profiles = new HashSet<String>();
+				for(IBeansConfig config: configs) {
+					Set<IBeansComponent> components = config.getComponents();
+					for(IBeansComponent component: components) {
+						profiles.addAll(getDefinedProfiles(component, filter, existingProfiles));
+					}
+				}
+				
+				List<IContentProposal> proposals = new ArrayList<IContentProposal>();
+				for(final String profile: profiles) {
+					proposals.add(new ProfileContentProposal(profile, separatorIndex, position));
+				}
+
+				Collections.sort(proposals, new Comparator<IContentProposal>() {
+					public int compare(IContentProposal o1, IContentProposal o2) {
+						return o1.getLabel().compareTo(o2.getLabel());
+					}
+				});
+				return proposals.toArray(new IContentProposal[proposals.size()]);
+			}
+		};
+		try {
+			KeyStroke keyStroke = KeyStroke.getInstance("Ctrl+Space");
+			new ContentProposalAdapter(profilesText, new TextContentAdapter(), proposalProvider, keyStroke, null);
+		} catch (ParseException e) {
+		}
 	}
 
 	@Override
@@ -339,7 +464,72 @@ public class ConfigSetDialog extends Dialog {
 		}
 	}
 
+	private Set<IBeansConfig> getDefiningConfigForProfile(String profile) {
+		Set<IBeansConfig> configs = project.getConfigs();
+		Set<IBeansConfig> definingConfigs = new HashSet<IBeansConfig>();
+		for (IBeansConfig config : configs) {
+			Set<IBeansComponent> components = config.getComponents();
+			for(IBeansComponent component: components) {
+				Set<String> existingProfiles = Collections.emptySet();
+				if (getDefinedProfiles(component, "", existingProfiles).contains(profile)) {
+					definingConfigs.add(config);
+					break;
+				}
+			}
+		}
+		
+		return definingConfigs;
+	}
+	
 	private void validateProfiles() {
+		if (configsViewer != null) {		
+			String[] profiles = StringUtils.tokenizeToStringArray(profilesText.getText(), BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+			List configs = Arrays.asList(configsViewer.getCheckedElements());
+			Set<String> unselectedProfiles = new HashSet<String>();
+			
+			for(String profile: profiles) {
+				boolean configSelected = false;
+				for (Object obj : configs) {
+					IBeansConfig config = (IBeansConfig) obj;
+					Set<IBeansComponent> components = config.getComponents();
+					for(IBeansComponent component: components) {
+						Set<String> existingProfiles = Collections.emptySet();
+						if (getDefinedProfiles(component, "", existingProfiles).contains(profile)) {
+							configSelected = true;
+						}
+					}
+				}
+				
+				if (!configSelected) {
+					unselectedProfiles.add(profile);
+				}
+			}
+			
+			if (unselectedProfiles.size() > 0) {
+				messageLabel.setImage(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_WARNING));
+				messageLabel.setText("Profiles selected (" + StringUtils.arrayToDelimitedString(unselectedProfiles.toArray(), ", ") + ") are not defined in selected config files.");
+				return;
+			}
+
+			for(String profile: profiles) {
+				Set<IBeansConfig> definingConfigs = getDefiningConfigForProfile(profile);
+				for(IBeansConfig definingConfig: definingConfigs) {
+					if (! configs.contains(definingConfig)) {
+						messageLabel.setImage(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_WARNING));
+						messageLabel.setText("Selected config files do not completely define profiles selected.");
+						return;
+					}
+				}
+			}
+			
+		}
+		
+		messageLabel.setImage(null);
+		if (mode == Mode.NEW) {
+			messageLabel.setText("Create a new config set.");
+		} else {
+			messageLabel.setText("Edit config set.");
+		}
 	}
 	
 	private void validateName() {
