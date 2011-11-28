@@ -58,6 +58,8 @@ public class AopReferenceModelMarkerUtils {
 	public static Map<ADVICE_TYPE, String> sourceMarkerMapping;
 
 	public static Map<ADVICE_TYPE, String> targetMarkerMapping;
+	
+	private static int AOP_MARKER_SEVERITY = IMarker.SEVERITY_INFO;
 
 	static {
 		sourceMarkerMapping = new HashMap<ADVICE_TYPE, String>();
@@ -85,21 +87,21 @@ public class AopReferenceModelMarkerUtils {
 	public static void createTargetMarker(IAopReference reference, String markerId, IResource sourceResource) {
 		if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 			createProblemMarker(reference.getTarget().getResource(), "aspect declarations <"
-					+ reference.getDefinition().getAspectName() + ">", 1, reference.getTargetStartLine(), markerId,
+					+ reference.getDefinition().getAspectName() + ">", AOP_MARKER_SEVERITY, reference.getTargetStartLine(), markerId,
 					sourceResource);
 			if (reference.getTargetBeanResource() != null && reference.getTargetBeanStartline() > 0) {
 				createProblemMarker(reference.getTargetBeanResource(), "aspect declarations <"
-						+ reference.getDefinition().getAspectName() + ">", 1, reference.getTargetBeanStartline(),
+						+ reference.getDefinition().getAspectName() + ">", AOP_MARKER_SEVERITY, reference.getTargetBeanStartline(),
 						markerId, sourceResource);
 			}
 		}
 		else {
 			createProblemMarker(reference.getTarget().getResource(), "advised by "
-					+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), 1, reference
+					+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), AOP_MARKER_SEVERITY, reference
 					.getTargetStartLine(), markerId, sourceResource);
 			if (reference.getTargetBeanResource() != null && reference.getTargetBeanStartline() > 0) {
 				createProblemMarker(reference.getTargetBeanResource(), "advised by "
-						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), 1, reference
+						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getSource()), AOP_MARKER_SEVERITY, reference
 						.getTargetBeanStartline(), markerId, sourceResource);
 			}
 		}
@@ -112,23 +114,23 @@ public class AopReferenceModelMarkerUtils {
 		if (reference.getAdviceType() == ADVICE_TYPE.DECLARE_PARENTS) {
 			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
 				createProblemMarker(reference.getSource().getResource(), "declared on "
-						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, reference
+						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), AOP_MARKER_SEVERITY, reference
 						.getSourceStartLine(), markerId, sourceResource);
 			}
 			else {
 				createProblemMarker(sourceResource, "declared on "
-						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, reference
+						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), AOP_MARKER_SEVERITY, reference
 						.getDefinition().getAspectStartLineNumber(), markerId, sourceResource);
 			}
 		}
 		else {
 			if (reference.getSource() != null) {
 				createProblemMarker(reference.getSource().getResource(), "advises "
-						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, reference
+						+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), AOP_MARKER_SEVERITY, reference
 						.getSourceStartLine()	, markerId, sourceResource);
 			}
 			createProblemMarker(reference.getDefinition().getResource(), "advises "
-					+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), 1, reference
+					+ AopReferenceModelUtils.getJavaElementLinkNameForMarker(reference.getTarget()), AOP_MARKER_SEVERITY, reference
 					.getDefinition().getAspectStartLineNumber(), markerId, sourceResource);
 		}
 	}
@@ -136,7 +138,6 @@ public class AopReferenceModelMarkerUtils {
 	public static void deleteProblemMarkers(IResource resource) {
 		if (resource != null && resource.isAccessible()) {
 			try {
-				
 				resource.getProject().deleteMarkers(AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
 
 				IProject project = resource.getProject();
@@ -214,7 +215,7 @@ public class AopReferenceModelMarkerUtils {
 					}
 					if (l == line && marker.getType() != markerId) {
 						resource.findMarker(marker.getId()).delete();
-						createProblemMarker(resource, count + " Spring AOP marker at this line", 1, line,
+						createProblemMarker(resource, count + " Spring AOP marker at this line", AOP_MARKER_SEVERITY, line,
 								AopReferenceModelMarkerUtils.AOP_MARKER, count, sourceResource);
 						return;
 					}
