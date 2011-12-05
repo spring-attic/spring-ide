@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +25,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanProperty;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
@@ -35,11 +39,14 @@ import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonIn
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.StringUtils;
 
 /**
@@ -186,7 +193,38 @@ public class BeanReferenceRule implements IValidationRule<IBeansModelElement, IB
 		validateBeanReference(element, context, beanName);
 	}
 	
+	private URI getLocation(IResourceModelElement element) {
+		if (element instanceof AbstractSourceModelElement) {
+			AbstractSourceModelElement sourceElement = (AbstractSourceModelElement) element;
+			IModelSourceLocation sourceLocation = sourceElement.getElementSourceLocation();
+			if (sourceLocation instanceof XmlSourceLocation) {
+				XmlSourceLocation xmlSourceLocation = (XmlSourceLocation) sourceLocation;
+				Resource resource = xmlSourceLocation.getResource();
+				try {
+					File file = resource.getFile();
+					if (file != null) {
+						return file.toURI();
+					}
+				} catch (IOException e) {
+				}
+			}
+		} else {
+			return element.getElementResource().getLocationURI();
+		}
+		
+		return null;
+	}
+	
 	private void validateBeanReference(IResourceModelElement element, IBeansValidationContext context, String beanName) {
+		
+		// check whether element belongs in the same file as the root element, if not don't validate
+		// (defer validation to the file that the element belongs to)
+		URI elementURI = getLocation(element);
+		URI rootURI = getLocation(context.getRootElement());
+		if (elementURI != null && rootURI != null && ! elementURI.equals(rootURI)) {
+			return;
+		}
+		
 		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName) && !ignorableBeans.contains(beanName)) {
 			try {
 				BeanDefinition refBd = context.getCompleteRegistry().getBeanDefinition(beanName);
