@@ -82,7 +82,21 @@
 			id="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.property">
 		</contextType>
 		<include file="templates/templates.xml"
-			translations="templates/templates.properties" /> 
+			translations="templates/templates.properties" />
+    <template
+          autoinsert="true"
+          contextTypeId="java-members"
+          description="Stub out a new @Bean method"
+          id="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.beanMethod"
+          name="beanmethod">
+       <pattern>
+          ${x:import(org.springframework.context.annotation.Bean)}@Bean
+public ${bean_type} ${bean_name}() {
+	// TODO Auto generated method stub
+	${cursor}return null;
+}
+       </pattern>
+    </template> 
 	</extension>
 
 	<extension point="org.eclipse.ui.preferencePages">
