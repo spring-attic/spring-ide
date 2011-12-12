@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposalListener;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.resource.JFaceColors;
@@ -74,6 +75,7 @@ import org.springframework.util.StringUtils;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Martin Lippert
+ * @author Terry Denney
  */
 public class ConfigSetDialog extends Dialog {
 
@@ -286,8 +288,13 @@ public class ConfigSetDialog extends Dialog {
 		}
 		
 		public String getDescription() {
-			// TODO Auto-generated method stub
-			return null;
+			Set<IBeansConfig> configs = getDefiningConfigForProfile(profile);
+			Set<String> configNames = new HashSet<String>();
+			for(IBeansConfig config: configs) {
+				configNames.add(config.getElementName());
+			}
+			
+			return "Profile \"" + profile + "\" defined in " + StringUtils.collectionToDelimitedString(configNames, ", ");
 		}
 		
 		public int getCursorPosition() {
@@ -295,7 +302,11 @@ public class ConfigSetDialog extends Dialog {
 		}
 		
 		public String getContent() {
-			return profile.substring(cursorPosition - offset - 1, profile.length());
+			return profile.substring(cursorPosition - offset, profile.length());
+		}
+		
+		public String getProfile() {
+			return profile;
 		}
 	}
 	
@@ -331,7 +342,7 @@ public class ConfigSetDialog extends Dialog {
 				
 				List<IContentProposal> proposals = new ArrayList<IContentProposal>();
 				for(final String profile: profiles) {
-					proposals.add(new ProfileContentProposal(profile, separatorIndex, position));
+					proposals.add(new ProfileContentProposal(profile, separatorIndex + 1, position));
 				}
 
 				Collections.sort(proposals, new Comparator<IContentProposal>() {
@@ -344,7 +355,23 @@ public class ConfigSetDialog extends Dialog {
 		};
 		try {
 			KeyStroke keyStroke = KeyStroke.getInstance("Ctrl+Space");
-			new ContentProposalAdapter(profilesText, new TextContentAdapter(), proposalProvider, keyStroke, null);
+			ContentProposalAdapter contentProposalAdapter = new ContentProposalAdapter(profilesText, new TextContentAdapter(), proposalProvider, keyStroke, null);
+			contentProposalAdapter.addContentProposalListener(new IContentProposalListener() {
+				
+				public void proposalAccepted(IContentProposal proposal) {
+					if (proposal instanceof ProfileContentProposal) {
+						ProfileContentProposal profileProposal = (ProfileContentProposal) proposal;
+						Set<IBeansConfig> configs = getDefiningConfigForProfile(profileProposal.getProfile());
+						for(IBeansConfig config: configs) {
+							if (! configsViewer.getChecked(config)) {
+								configsViewer.setChecked(config, true);
+							}
+						}
+						
+						validateProfiles();
+					}
+				}
+			});
 		} catch (ParseException e) {
 		}
 	}
