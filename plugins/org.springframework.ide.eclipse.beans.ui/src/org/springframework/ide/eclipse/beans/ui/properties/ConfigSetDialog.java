@@ -409,7 +409,7 @@ public class ConfigSetDialog extends Dialog {
 			configSet.setElementName(nameText.getText());
 			configSet.setAllowBeanDefinitionOverriding(overrideButton.getSelection());
 			configSet.setIncomplete(incompleteButton.getSelection());
-			if (profilesText.getText().length()> 0) {
+			if (profilesText.getText().length() > 0) {
 				String[] profilesSpec = StringUtils.tokenizeToStringArray(profilesText.getText(), BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 				Set<String> profiles = new LinkedHashSet<String>();
 				for (String profile : profilesSpec) {
