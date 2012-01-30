@@ -16,6 +16,7 @@ import org.springframework.core.env.StandardEnvironment;
  * The ToolingAwareEnvironment is used to accept all kind of profiles
  * for creating the internal beans model for the tooling.
  * @author Martin Lippert
+ * @since 2.9.0
  */
 public class ToolingAwareEnvironment extends StandardEnvironment {
 	
