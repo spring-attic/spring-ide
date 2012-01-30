@@ -132,6 +132,7 @@ import org.xml.sax.SAXParseException;
  * @author Torsten Juergeleit
  * @author Dave Watkins
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement {
 
@@ -426,7 +427,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setErrorHandler(new BeansConfigErrorHandler());
 					reader.setNamespaceHandlerResolver(namespaceHandlerResolver);
 					reader.setBeanNameGenerator(beanNameGenerator);
-					// reader.setEnvironment(new ToolingAwareEnvironment());
+					reader.setEnvironment(new ToolingAwareEnvironment());
 					
 					final Map<Throwable, Integer> throwables = new HashMap<Throwable, Integer>();
 					try {
