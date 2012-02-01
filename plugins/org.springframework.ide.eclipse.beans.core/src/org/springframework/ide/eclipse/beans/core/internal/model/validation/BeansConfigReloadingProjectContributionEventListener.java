@@ -53,6 +53,7 @@ import org.springframework.ide.eclipse.core.project.ProjectContributionEventList
  * {@link IProjectContributionEventListener} implementation that handles resetting of {@link IBeansConfig}s based on
  * changes to the resource tree.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.2.5
  */
 public class BeansConfigReloadingProjectContributionEventListener extends ProjectContributionEventListenerAdapter {
@@ -157,17 +158,8 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 						&& JdtUtils.getJavaProject(beansProject.getProject()).isOnClasspath(resource)) {
 					for (IBeansConfig config : beansProject.getConfigs()) {
 						for (IBeansComponent component : config.getComponents()) {
-							if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
-								XmlSourceLocation location = (XmlSourceLocation) component.getElementSourceLocation();
-								if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
-										&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
-									propagateToConfigsFromConfigSet(config, false);
-								}
-								else if (ANNOTATION_CONFIG_ELEMENT_NAME.equals(location.getLocalName())
-										&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
-									propagateToConfigsFromConfigSet(config, false);
-								}
-							}
+							resetComponentScanningOrAnnotationConfigConfigs(
+									config, component);
 						}
 					}
 				}
@@ -187,6 +179,25 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 			else {
 				propagateToConfigsFromConfigSet(bc, true);
 			}
+		}
+	}
+
+	private void resetComponentScanningOrAnnotationConfigConfigs(
+			IBeansConfig config, IBeansComponent component) {
+		if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
+			XmlSourceLocation location = (XmlSourceLocation) component.getElementSourceLocation();
+			if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
+					&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
+				propagateToConfigsFromConfigSet(config, false);
+			}
+			else if (ANNOTATION_CONFIG_ELEMENT_NAME.equals(location.getLocalName())
+					&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
+				propagateToConfigsFromConfigSet(config, false);
+			}
+		}
+		
+		for (IBeansComponent childComponent : component.getComponents()) {
+			resetComponentScanningOrAnnotationConfigConfigs(config, childComponent);
 		}
 	}
 

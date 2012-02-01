@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2011 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,9 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -48,6 +51,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidator;
  * {@link IValidator} implementation that is responsible for validating the {@link IBeansModelElement}s.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 public class BeansConfigValidator extends AbstractValidator {
@@ -145,12 +149,34 @@ public class BeansConfigValidator extends AbstractValidator {
 								resources.add(beansConfig.getElementResource());
 								affectedBeans.add(bean.getElementID());
 							}
+							
+							// capture all beans if configuration class has changed
+							if (isConfigurationBean(bean)) {
+								addBeans(beansConfig);
+							}
 						}
 					}
 				}
 			}
 		}
 		return resources;
+	}
+
+	private boolean isConfigurationBean(IBean bean) {
+		IType beanType = BeansModelUtils.resolveBeanType(bean);
+		if (beanType != null) {
+			try {
+				for(IAnnotation annotation : beanType.getAnnotations()) {
+					if ("Configuration".equals(annotation.getElementName())) {
+						return true;
+					}
+				}
+			} catch (JavaModelException e) {
+				// ignore, no annotations can be found
+			}
+		}
+		
+		return false;
 	}
 
 	/**
