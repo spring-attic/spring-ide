@@ -82,6 +82,8 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 
 	private Map<String, String> messageDescriptions;
 
+	private boolean rulePropertiesInitialized;
+
 	public ValidationRuleDefinition(String validatorID, IConfigurationElement element) throws CoreException {
 		this.validatorId = validatorID;
 		init(element);
@@ -112,7 +114,7 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 	}
 
 	public IValidationRule getRule() {
-		if (propertyValues.size() > 0) {
+		if (propertyValues.size() > 0 && !rulePropertiesInitialized) {
 			BeanWrapper wrapper = new BeanWrapperImpl(rule);
 			for (Map.Entry<String, String> entry : propertyValues.entrySet()) {
 				try {
@@ -122,6 +124,7 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 					SpringCore.log(e);
 				}
 			}
+			rulePropertiesInitialized = true;
 		}
 		return rule;
 	}
@@ -159,6 +162,7 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 			}
 		}
 		originalPropertyValues = new HashMap<String, String>(propertyValues);
+		rulePropertiesInitialized = false;
 
 		// get severity data
 		messageSeverities = new HashMap<String, Integer>();
@@ -234,6 +238,7 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 				}
 			}
 		}
+		rulePropertiesInitialized = false;
 	}
 
 	public void setSpecificConfiguration(Map<String, String> newPropertyValues,
