@@ -100,8 +100,8 @@ public class NamespaceElementsRule extends AbstractXmlValidationRule {
 	protected boolean supports(Node n) {
 		// only validate non standard nodes; nodes from the bean namespace are validated with all the subsequent
 		// validation rules
-		return !NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(n.getNamespaceURI())
-				&& n.getNodeType() == Node.ELEMENT_NODE;
+		return n.getNodeType() == Node.ELEMENT_NODE &&
+				!NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(n.getNamespaceURI());
 	}
 
 	/**
