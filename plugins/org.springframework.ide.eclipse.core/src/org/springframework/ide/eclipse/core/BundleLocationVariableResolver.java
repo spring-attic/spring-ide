@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Spring IDE Developers
+ * Copyright (c) 2008, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,23 +25,26 @@ import org.osgi.framework.Bundle;
  * <code>$
  * {bundle_loc}</code> to the bundle location.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.3
  */
 public class BundleLocationVariableResolver implements IDynamicVariableResolver {
 	
 	public String resolveValue(IDynamicVariable variable, String argument)
 			throws CoreException {
-		Bundle bundle = Platform.getBundle(argument);
-		if (bundle != null) {
-			try {
-				String path = FileLocator.toFileURL(bundle.getEntry("/")).getPath();
-				if (path != null && path.endsWith(File.separator)) {
-					return path.substring(0, path.length() - 1);
+		if (argument != null) {
+			Bundle bundle = Platform.getBundle(argument);
+			if (bundle != null) {
+				try {
+					String path = FileLocator.toFileURL(bundle.getEntry("/")).getPath();
+					if (path != null && path.endsWith(File.separator)) {
+						return path.substring(0, path.length() - 1);
+					}
+					return path;
 				}
-				return path;
-			}
-			catch (IOException e) {
-				// ignore
+				catch (IOException e) {
+					// ignore
+				}
 			}
 		}
 		return null;
