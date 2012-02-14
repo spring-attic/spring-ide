@@ -474,6 +474,8 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 	}
 
 	private void refresh() {
-		xsdViewer.setInput(this);
+		if (xsdViewer != null && xsdViewer.getControl() != null && !xsdViewer.getControl().isDisposed()) {
+			xsdViewer.setInput(this);
+		}
 	}
 }
