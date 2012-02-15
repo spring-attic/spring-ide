@@ -180,7 +180,7 @@ public class NamespaceUtils {
 						if ("namespaceHandlerResolver".equals(config.getName()) && config.getAttribute("class") != null) {
 							try {
 								String handlerClassName = config.getAttribute("class");
-								Object handler = loadHandler(handlerClassName, extension.getContributor().getName());
+								Object handler = loadHandler(extension.getContributor().getName(), handlerClassName);
 								if (handler instanceof NamespaceHandlerResolver) {
 									NamespaceHandlerResolver namespaceHandlerResolver = (NamespaceHandlerResolver) handler;
 									handlers.add(namespaceHandlerResolver);
