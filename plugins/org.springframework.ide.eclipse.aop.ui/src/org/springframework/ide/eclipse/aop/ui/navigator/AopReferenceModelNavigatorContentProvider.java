@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 Spring IDE Developers
+ * Copyright (c) 2006, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,8 +40,8 @@ import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AopReferenceModelBuilderJob;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPE;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
@@ -261,13 +261,7 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 			String id = BeansEditorUtils.getAttribute(element, "id");
 
-			nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, beansConfig.getBeans()));
-
-			// add inner beans
-			if (nodes.size() == 0) {
-				nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, BeansModelUtils
-						.getInnerBeans(beansConfig)));
-			}
+			nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, BeansModelUtils.getBeans(beansConfig)));
 
 			return nodes.toArray();
 		}

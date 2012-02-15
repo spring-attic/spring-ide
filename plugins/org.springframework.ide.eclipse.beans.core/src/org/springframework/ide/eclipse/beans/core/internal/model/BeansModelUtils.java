@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -269,7 +269,7 @@ public abstract class BeansModelUtils {
 			monitor = new NullProgressMonitor();
 		}
 
-		Set<IBean> beans = new LinkedHashSet<IBean>();
+		final Set<IBean> beans = new LinkedHashSet<IBean>();
 		if (element instanceof IBeansModel) {
 			Set<IBeansProject> projects = ((IBeansModel) element).getProjects();
 			monitor.beginTask("Locating bean definitions", projects.size());
@@ -278,13 +278,21 @@ public abstract class BeansModelUtils {
 					monitor.subTask("Locating bean definitions in project '" + project.getElementName() + "'");
 					for (IBeansConfig config : project.getConfigs()) {
 						monitor.subTask("Locating bean defintions from file '" + config.getElementName() + "'");
-						beans.addAll(config.getBeans());
+						
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						for (IBeansComponent component : config.getComponents()) {
-							beans.addAll(component.getBeans());
-						}
+
+						config.accept(new IModelElementVisitor() {
+							
+							public boolean visit(IModelElement element, IProgressMonitor monitor) {
+								if (element instanceof IBean) {
+									beans.add((IBean) element);
+								}
+								return !monitor.isCanceled();
+							}
+						}, new NullProgressMonitor());
+						
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -150,11 +150,12 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		}
 
 		List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
-
-		for (IBean bean : beansConfig.getBeans()) {
+		
+		// make sure to iterate into all the beans nested inside components etc.
+		for (IBean bean : BeansModelUtils.getBeans(beansConfig)) {
 			parseAnnotationAspectFromSingleBean(beansConfig, classLoaderSupport, aspectDefinitions, configuration, bean);
 		}
-
+		
 		if (configuration.isProxyTargetClass()) {
 			for (IAspectDefinition def : aspectDefinitions) {
 				((BeanAspectDefinition) def).setProxyTargetClass(configuration.isProxyTargetClass());
