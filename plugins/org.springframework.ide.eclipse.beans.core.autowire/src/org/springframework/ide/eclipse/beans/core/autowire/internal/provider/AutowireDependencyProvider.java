@@ -13,8 +13,6 @@ package org.springframework.ide.eclipse.beans.core.autowire.internal.provider;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.inject.Provider;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.jdt.core.IJavaElement;
@@ -52,7 +51,7 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.IAutowireDependencyResolver;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.InjectionMetadata.InjectedElement;
@@ -361,7 +360,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			BeanDefinition beanDef = BeansModelUtils.getMergedBeanDefinition(bean, context);
 			if (beanDef.getPropertyValues().size() > 0) {
 				BeanWrapperImpl wrapper = new BeanWrapperImpl(true);
-				wrapper.setConversionService(ConversionServiceFactory.createDefaultConversionService());
+				wrapper.setConversionService(new DefaultConversionService());
 				wrapper.setWrappedInstance(provider);
 				for (PropertyValue pv : beanDef.getPropertyValues().getPropertyValueList()) {
 					if (wrapper.isWritableProperty(pv.getName())) {
@@ -384,7 +383,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			BeanDefinition beanDef = BeansModelUtils.getMergedBeanDefinition(bean, context);
 			if (beanDef.getPropertyValues().size() > 0) {
 				BeanWrapperImpl wrapper = new BeanWrapperImpl(true);
-				wrapper.setConversionService(ConversionServiceFactory.createDefaultConversionService());
+				wrapper.setConversionService(new DefaultConversionService());
 				wrapper.setWrappedInstance(provider);
 				for (PropertyValue pv : beanDef.getPropertyValues().getPropertyValueList()) {
 					if (wrapper.isWritableProperty(pv.getName())) {
@@ -595,16 +594,11 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 	public void resolveDependency(DependencyDescriptor descriptor, Class<?> type, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 		descriptor.initParameterNameDiscovery(this.parameterNameDiscoverer);
-		if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
-			type = Object.class;
-			Type fieldFile = descriptor.getGenericDependencyType();
-			if (fieldFile instanceof ParameterizedType) {
-				Type arg = ((ParameterizedType) fieldFile).getActualTypeArguments()[0];
-				if (arg instanceof Class<?>) {
-					type = (Class<?>) arg;
-				}
-			}
+		if (descriptor.getDependencyType().equals(ObjectFactory.class) || descriptor.getDependencyType().equals(Provider.class)) {
+			descriptor.increaseNestingLevel();
+			type = descriptor.getDependencyType();
 		}
+		
 		try {
 			doResolveDependency(descriptor, type, beanName, autowiredBeanNames, typeConverter);
 		}
