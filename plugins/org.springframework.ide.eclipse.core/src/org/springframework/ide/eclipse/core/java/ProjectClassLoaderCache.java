@@ -36,9 +36,11 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -124,7 +126,7 @@ public class ProjectClassLoaderCache {
 			if (JdtUtils.isJavaProject(project)) {
 				IJavaProject jp = JavaCore.create(project);
 				// configured classpath
-				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
+				IClasspathEntry[] classpath = safeGetResolvedClasspath(jp);
 
 				// add class path entries
 				for (int i = 0; i < classpath.length; i++) {
@@ -171,6 +173,26 @@ public class ProjectClassLoaderCache {
 			// ignore
 		}
 	}
+	
+	/**
+	 * Gets the resolved classpath in a safe manner by first grabbing the build rule
+	 * to prevent deadlock.
+	 * @param jp 
+	 * @return resolved classpath of the project
+	 */
+    protected static IClasspathEntry[] safeGetResolvedClasspath(final IJavaProject jp) {
+    	final IClasspathEntry[][] cp = new IClasspathEntry[1][];
+    	try {
+            ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
+                public void run(IProgressMonitor monitor) throws CoreException {
+                    cp[0] = jp.getResolvedClasspath(true);
+                }
+            }, ResourcesPlugin.getWorkspace().getRuleFactory().buildRule(), IWorkspace.AVOID_UPDATE, null);
+        } catch (CoreException e) {
+			SpringCore.log(e);
+        }
+        return cp[0];
+    }
 
 	private static void addUri(List<URL> paths, URI uri) throws MalformedURLException {
 		File file = new File(uri);
