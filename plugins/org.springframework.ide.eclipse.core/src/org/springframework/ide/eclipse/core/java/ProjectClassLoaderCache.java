@@ -300,29 +300,31 @@ public class ProjectClassLoaderCache {
 	 * Returns a {@link ClassLoader} for the given project.
 	 */
 	@SuppressWarnings({ "unchecked" })
-	protected synchronized static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
-		// Setup the root class loader to be used when no explicit parent class loader is given
-		if (parentClassLoader == null && cachedParentClassLoader == null) {
-			List<URL> paths = new ArrayList<URL>();
-			Enumeration<String> libs = SpringCore.getDefault().getBundle().getEntryPaths("/lib/");
-			while (libs.hasMoreElements()) {
-				String lib = libs.nextElement();
-				// Don't add the non locking classloader jar
-				if (!lib.contains("xbean-nonlocking-classloader")) {
-					paths.add(SpringCore.getDefault().getBundle().getEntry(lib));
+	protected static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
+		synchronized (ProjectClassLoaderCache.class) {
+			// Setup the root class loader to be used when no explicit parent class loader is given
+			if (parentClassLoader == null && cachedParentClassLoader == null) {
+				List<URL> paths = new ArrayList<URL>();
+				Enumeration<String> libs = SpringCore.getDefault().getBundle().getEntryPaths("/lib/");
+				while (libs.hasMoreElements()) {
+					String lib = libs.nextElement();
+					// Don't add the non locking classloader jar
+					if (!lib.contains("xbean-nonlocking-classloader")) {
+						paths.add(SpringCore.getDefault().getBundle().getEntry(lib));
+					}
 				}
+				paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
+				paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
+				paths.addAll(JdtUtils.getBundleClassPath("org.aopalliance"));
+				cachedParentClassLoader = new URLClassLoader(paths.toArray(new URL[paths.size()]));
 			}
-			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
-			paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
-			paths.addAll(JdtUtils.getBundleClassPath("org.aopalliance"));
-			cachedParentClassLoader = new URLClassLoader(paths.toArray(new URL[paths.size()]));
-		}
 
-		if (project == null) {
-			return cachedParentClassLoader;
-		}
+			if (project == null) {
+				return cachedParentClassLoader;
+			}
 
-		registerListenersIfRequired();
+			registerListenersIfRequired();
+		}
 
 		ClassLoader classLoader = findClassLoaderInCache(project, parentClassLoader);
 		if (classLoader == null) {
