@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 Spring IDE Developers
+ * Copyright (c) 2009, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,6 +78,7 @@ import org.springframework.util.StringUtils;
  * This class is the entry point into autowiring resolution within Spring IDE.
  * @author Christian Dupuis
  * @author Terry Denney
+ * @author Martin Lippert
  * @since 2.2.7
  */
 public class AutowireDependencyProvider implements IAutowireDependencyResolver {
