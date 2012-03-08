@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.webflow.feature.source"
       label="%featureName"
-      version="2.9.0.qualifier"
+      version="3.0.0.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
