@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007 - 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,7 +110,9 @@ public class SetActionPropertiesDialog extends TitleAreaDialog implements IDialo
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		// do this here because setting the text will set enablement on the
 		// ok button
-		nameText.setFocus();
+		if (nameText != null) {
+			nameText.setFocus();
+		}
 		if (this.action != null && this.action.getName() != null) {
 			okButton.setEnabled(true);
 		}
@@ -228,7 +230,7 @@ public class SetActionPropertiesDialog extends TitleAreaDialog implements IDialo
 			typeLabel = new Label(nameGroup, SWT.NONE);
 			typeLabel.setText("Type");
 			typeText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
-			if (this.action != null && this.action.getType() != null) {
+			if (this.action != null && this.action.getSetType() != null) {
 				this.typeText.setText(this.action.getSetType());
 			}
 			typeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
