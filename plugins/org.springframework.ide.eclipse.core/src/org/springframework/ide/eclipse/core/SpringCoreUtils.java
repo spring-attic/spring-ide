@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ import org.xml.sax.SAXException;
  * Some helper methods.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public final class SpringCoreUtils {
 
@@ -195,13 +196,24 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Triggers a build of the given {@link IProject} instance.
+	 * Triggers a build of the given {@link IProject} instance, but only the Spring builder
 	 * @param project the project to build
 	 */
 	public static void buildProject(IProject project) {
 		if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
 			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace().getRuleFactory().buildRule(),
-					new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD });
+					new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD }, true);
+		}
+	}
+
+	/**
+	 * Triggers a build of the given {@link IProject} instance with a full build and all builders
+	 * @param project the project to build
+	 */
+	public static void buildFullProject(IProject project) {
+		if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
+			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace().getRuleFactory().buildRule(),
+					new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD }, false);
 		}
 	}
 
@@ -721,7 +733,7 @@ public final class SpringCoreUtils {
 	}
 
 	private static void scheduleBuildInBackground(final IProject project, ISchedulingRule rule,
-			final Object[] jobFamilies) {
+			final Object[] jobFamilies, final boolean springBuilderOnly) {
 		Job job = new Job("Building workspace") {
 
 			@Override
@@ -740,7 +752,12 @@ public final class SpringCoreUtils {
 			@Override
 			public IStatus run(IProgressMonitor monitor) {
 				try {
-					project.build(IncrementalProjectBuilder.FULL_BUILD, SpringCore.BUILDER_ID, null, monitor);
+					if (springBuilderOnly) {
+						project.build(IncrementalProjectBuilder.FULL_BUILD, SpringCore.BUILDER_ID, null, monitor);
+					}
+					else {
+						project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+					}
 					return Status.OK_STATUS;
 				}
 				catch (CoreException e) {
