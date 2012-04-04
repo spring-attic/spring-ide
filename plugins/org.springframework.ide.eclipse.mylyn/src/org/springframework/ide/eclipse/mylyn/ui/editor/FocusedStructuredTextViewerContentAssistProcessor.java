@@ -22,11 +22,10 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.mylyn.commons.ui.CommonImages;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
-import org.eclipse.mylyn.internal.context.ui.ContextUiImages;
 import org.eclipse.mylyn.internal.java.ui.editor.FocusedJavaProposalProcessor;
-import org.eclipse.mylyn.internal.provisional.commons.ui.CommonImages;
 import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceCompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.ProposalComparator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
@@ -48,8 +47,7 @@ public class FocusedStructuredTextViewerContentAssistProcessor implements
 	static class FocusedProposalSeparator extends JavaCompletionProposal
 			implements IRelevanceCompletionProposal {
 		public FocusedProposalSeparator(int baseRelevance) {
-			super("", 0, 0, ContextUiImages
-					.getImage(CommonImages.SEPARATOR_LIST),
+			super("", 0, 0, CommonImages.getImage(CommonImages.SEPARATOR_LIST),
 					LABEL_SEPARATOR, THRESHOLD_INTEREST + baseRelevance);
 		}
 	}
