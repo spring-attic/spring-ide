@@ -247,6 +247,11 @@
 			<name>SpringSource Maven Release Repository</name>
 			<url>http://repository.springsource.com/maven/bundles/release</url>
 		</repository>
+		<repository>
+			<id>mylyn-37</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/mylyn/releases/3.7</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
