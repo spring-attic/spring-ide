@@ -119,7 +119,6 @@
 								</loadfile>
 
 								<property name="dist.file.name" value="${dist.project}-${dist.full.version}-updatesite.zip" />
-								<property name="dist.path" value="${dist.type}/${dist.key}/nightly" />
 								<property name="dist.full.path" value="${site.target.dir}/site/${dist.file.name}" />
 
 								<delete file="${dist.full.path}" />
