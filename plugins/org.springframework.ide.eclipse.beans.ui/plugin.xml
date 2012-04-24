@@ -359,7 +359,7 @@
 				<filterExpression>
 					<and>
 						<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBean"/>
-						<test property="org.springframework.ide.eclipse.beans.core.model.isInfrastructureBean"/>
+						<test property="org.springframework.ide.eclipse.beans.core.model.isInfrstructureBean"/>
 					</and>
 				</filterExpression>
       </commonFilter>
