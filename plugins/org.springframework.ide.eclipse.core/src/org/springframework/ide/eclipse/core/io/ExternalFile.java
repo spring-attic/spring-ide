@@ -210,6 +210,10 @@ public class ExternalFile extends AbstractResource implements IFile {
 		// no-op
 	}
 
+	public void accept(IResourceProxyVisitor visitor, int depth, int memberFlags) throws CoreException {
+		// no-op
+	}
+
 	public void accept(IResourceVisitor visitor, int depth, int memberFlags) throws CoreException {
 		// no-op
 	}
@@ -614,4 +618,5 @@ public class ExternalFile extends AbstractResource implements IFile {
 	public boolean isFiltered() {
 		return false;
 	}
+
 }
