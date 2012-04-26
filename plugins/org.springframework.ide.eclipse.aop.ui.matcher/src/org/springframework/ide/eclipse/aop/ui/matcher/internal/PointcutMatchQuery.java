@@ -215,7 +215,7 @@ public class PointcutMatchQuery implements ISearchQuery {
 						try {
 							// get beans before messing around with the class
 							// loader
-							final Set<IBean> beans = config.getBeans();
+							final Set<IBean> beans = BeansModelUtils.getBeans(config);
 
 							getClassLoaderSupport(project).executeCallback(
 									new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
