@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Spring IDE Developers
+ * Copyright (c) 2008 - 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin;
 import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -152,13 +153,13 @@ public class BeanMetadataUtils {
 		// add meta data grouping
 		for (IBeansConfig beansConfig : project.getConfigs()) {
 			// add beans from config
-			for (IBean bean : beansConfig.getBeans()) {
+			for (IBean bean : BeansModelUtils.getBeans(beansConfig)) {
 				addMetaDataForBean(project, metaDataMapping, bean);
 			}
 
 			// add nested component beans; required for component scan
 			for (IBeansComponent beansComponent : beansConfig.getComponents()) {
-				for (IBean bean : beansComponent.getBeans()) {
+				for (IBean bean : BeansModelUtils.getBeans(beansComponent)) {
 					addMetaDataForBean(project, metaDataMapping, bean);
 				}
 			}
