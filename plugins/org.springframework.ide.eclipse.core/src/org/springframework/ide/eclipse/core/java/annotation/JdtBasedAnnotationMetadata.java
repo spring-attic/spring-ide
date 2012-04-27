@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 Spring IDE Developers
+ * Copyright (c) 2009 - 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.springframework.util.ClassUtils;
  * {@link IAnnotationMetadata} implementation that uses Eclipse JDT core model information for
  * extracting the metadata.
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  * @since 2.2.2
  */
 public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
@@ -72,6 +73,10 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 				for (IAnnotation annotation : method.getAnnotations()) {
 					modelAnnotations.add(processAnnotation(annotation));
 				}
+				if (modelAnnotations.size() <= 0) {
+					// If no annotations found on concrete method, look for them on the interface
+					modelAnnotations = processInterfaceMethods(method);
+				}
 				if (modelAnnotations.size() > 0) {
 					methodAnnotations.put(method, modelAnnotations);
 				}
@@ -100,13 +105,13 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 		}
 	}
 
-	private Annotation processAnnotation(IAnnotation annotation) {
+	private Annotation processAnnotation(IAnnotation annotation, IType itype) {
 		Annotation modelAnnotation;
-		if (type.isBinary()) {
+		if (itype.isBinary()) {
 			modelAnnotation = new Annotation(annotation.getElementName());
 		}
 		else {
-			modelAnnotation = new Annotation(JdtUtils.resolveClassName(annotation.getElementName(), type));
+			modelAnnotation = new Annotation(JdtUtils.resolveClassName(annotation.getElementName(), itype));
 		}
 		try {
 			for (IMemberValuePair member : annotation.getMemberValuePairs()) {
@@ -136,6 +141,25 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 		}
 		return modelAnnotation;
 	}
+	
+	private Annotation processAnnotation(IAnnotation annotation) {
+		return processAnnotation(annotation, type);
+	}
+	
+	private Set<Annotation> processInterfaceMethods(IMethod method) throws JavaModelException {
+		Set<Annotation> modelAnnotations = new LinkedHashSet<Annotation>();
+		Set<IType> interfaces = Introspector.getAllImplementedInterfaces(type);
+		for (IType iface : interfaces) {
+			IMethod[] interfaceMethod = iface.findMethods(method);
+			if (interfaceMethod != null && interfaceMethod.length > 0) {
+				for (IAnnotation annotation : interfaceMethod[0].getAnnotations()) {
+					modelAnnotations.add(processAnnotation(annotation, iface));
+				}
+			}
+		}
+		return modelAnnotations;
+	}
+
 
 	private void processStringValue(IMemberValuePair member, StringBuilder builder, String value) {
 		// class value
