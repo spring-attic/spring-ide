@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="Spring Data Eclipse" sequenceNumber="25">
+<locations>
+<location path="${eclipse_home}" type="Profile"/>
+<location path="/Users/olivergierke/.m2/repository/org/springframework/data/spring-data-jpa/1.2.0.BUILD-SNAPSHOT" type="Directory"/>
+<location path="/Users/olivergierke/.m2/repository/org/springframework/data/spring-data-commons-core/1.4.0.BUILD-SNAPSHOT" type="Directory"/>
+<location path="/Users/olivergierke/.m2/repository/org/mockito/mockito-all/1.9.0" type="Directory"/>
+<location path="/Users/olivergierke/.m2/repository/org/springframework/data/spring-data-mongodb/1.1.0.M1" type="Directory"/>
+</locations>
+<environment>
+<arch>x86</arch>
+</environment>
+</target>
