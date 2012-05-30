@@ -73,6 +73,7 @@ import org.xml.sax.SAXException;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Martin Lippert
+ * @deprecated Moved to eclipse-integration-commons SpringCoreUtils
  */
 public final class SpringCoreUtils {
 
