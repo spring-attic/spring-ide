@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="com.springsource.sts.config.ui" xmlns="http://www.w3.org/2001/XMLSchema">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="com.springsource.sts.config.ui" id="pageAdapters" name="Spring Config Form Page Adapters"/>
+      </appInfo>
+      <documentation>
+         This extension point is used to contribute support for additional namespaces into existing &lt;samp&gt;SpringConfigEditor&lt;/samp&gt; form pages. Each contributions is intended to represent a single namespace in a Spring configuration XML file.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
+      <complexType>
+         <sequence>
+            <element ref="adapter" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="adapter">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a unique name that will be used to identify this adapter
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="label" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a short label that appropriately identifies the namespace that the adapter represents
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="namespaceUri" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a valid URI that points to the schema definition of the namespace represented by this adapter
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="parentUri" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a valid URI that points to the schema definition of the namespace that the adapter will contribute to
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="detailsFactory" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="com.springsource.sts.config.ui.editors.AbstractNamespaceMasterDetailsBlock:"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="modelFactory" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":com.springsource.sts.config.flow.model.IModelFactory"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="editpartFactory" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.gef.EditPartFactory"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="paletteFactory" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":com.springsource.sts.config.flow.parts.IPaletteFactory"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         SpringSource Tool Suite 2.3.3
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         [Enter extension point usage example here.]
+      </documentation>
+   </annotation>
+
+
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         Copyright (c) 2007, 2010 SpringSource.  All rights reserved.
+      </documentation>
+   </annotation>
+
+</schema>

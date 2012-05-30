@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd 
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd" xmlns:jee="http://www.springframework.org/schema/jee">
+
+	<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+	
+		<property name = "jndiName" value="jdbc/MyDataSource"/>
+		
+		<property name="jndiEnvironment">
+		    <bean class="java.util.Properties">
+
+    		</bean>
+		</property>
+	</bean>
+	
+	<bean id="propertiesbean" class="java.util.Properties"/>
+
+
+	<bean id="complex" class="org.springframework.jndi.JndiObjectFactoryBean">
+	    <property name="jndiName" value="jdbc/MyDataSource"/>
+	    <property name="cache" value="true"/>
+	    <property name="resourceRef" value="true"/>
+	    <property name="lookupOnStartup" value="false"/>
+	    <property name="expectedType" value="com.myapp.DefaultFoo"/>
+	    <property name="proxyInterface" value="com.myapp.Foo"/>
+	</bean>
+	
+	<bean id="simple3" class="org.springframework.jndi.JndiObjectFactoryBean">
+    	<property name="jndiName" value="jdbc/MyDataSource"/>
+    	<property name="jndiEnvironment">
+        	<props>
+            	<prop key="foo">bar</prop>
+        	</props>
+    	</property>
+	</bean>
+
+
+</beans>
+
+<!--
+
+	<bean id="simple3" class="org.springframework.jndi.JndiObjectFactoryBean">
+    	<property name="jndiName" value="jdbc/MyDataSource"/>
+    	<property name="jndiEnvironment">
+        	<props>
+            	<prop key="foo">bar</prop>
+        	</props>
+    	</property>
+	</bean>
+	
+
+-->

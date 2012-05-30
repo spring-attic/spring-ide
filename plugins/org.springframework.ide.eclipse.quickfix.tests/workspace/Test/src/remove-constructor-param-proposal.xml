@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="account" class="com.test.Account"/>
+	
+	<bean id="removeConstructorParamTest1" class="com.test.AccountContribution"/>
+	
+	<bean id="removeConstructorParamTest2" class="com.test.Restaurant">
+		<constructor-arg value="McDonald's"/>
+	</bean>
+
+	<bean id="removeConstructorParamTest3" class="com.test.Restaurant"/>
+	
+	<bean id="removeConstructorParamTest4" class="com.test.RestaurantReward">
+		<constructor-arg value="Jan 1, 2009"/>
+	</bean>
+	
+
+</beans>

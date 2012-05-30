@@ -1,0 +1,24 @@
+<beans:beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns="http://www.springframework.org/schema/batch"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<job id="theJob">
+		<step id="step1" next="step2"></step>
+		<step id="step2" next="split"></step>
+		<split id="split" next="step3">
+			<flow>
+				<step id="innerStep1" next="innerStep2"></step>
+				<step id="innerStep2"></step>
+			</flow>
+			<flow>
+				<step id="parallelStep1" next="parallelStep2"></step>
+				<step id="parallelStep2"></step>
+			</flow>
+		</split>
+		<step id="step3"></step>
+	</job>
+	<step id="outerStep"></step>
+	
+</beans:beans>

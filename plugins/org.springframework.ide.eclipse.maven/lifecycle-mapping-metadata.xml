@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lifecycleMappingMetadata>
+	<pluginExecutions>
+		<pluginExecution>
+			<pluginExecutionFilter>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<versionRange>[2.0,)</versionRange>
+				<goals>
+					<goal>compile</goal>
+					<goal>testCompile</goal>
+				</goals>
+			</pluginExecutionFilter>
+			<action>
+				<configurator>
+					<id>com.springsource.sts.ide.maven.core.springProjectConfigurator</id>
+				</configurator>
+			</action>
+		</pluginExecution>
+		<pluginExecution>
+			<pluginExecutionFilter>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>maven-datanucleus-plugin</artifactId>
+				<versionRange>[1.0,)</versionRange>
+				<goals>
+					<goal>enhance</goal>
+				</goals>
+			</pluginExecutionFilter>
+			<action>
+				<configurator>
+					<id>com.springsource.sts.maven.internal.core.dataNucleusProjectConfigurator</id>
+				</configurator>
+			</action>
+		</pluginExecution>
+	</pluginExecutions>
+</lifecycleMappingMetadata>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="classTest1" class="com.test.Account"/>
+	
+	<bean id="classTest2" class="Account"/>
+	
+	<bean id="classTest3" class="com.test.Accoun"/>
+	
+	<bean id="classTest4" class="com.test.Account">
+		<constructor-arg value="Sam"/>
+	</bean>
+
+	<bean id="classTest5" class="com.test.Account$AccountReader"/>
+
+	<bean id="classTest6" class="Foo">
+		<!-- comment -->
+	</bean>
+
+	<bean id="classTest7" class="com.test.ui.Account"/>
+	
+	<bean id="deprecatedTest" class="com.test.DeprecatedAccount"/>
+	
+	<bean id="interfaceTest" class="com.test.Bar"/>
+
+</beans>

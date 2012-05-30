@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="account" class="com.test.Account"/>
+	
+	<bean id="renameTest1" class="com.test.Accoun"/>
+	
+	<bean id="renameTest2" class="Account"/>
+	
+	<bean id="renameTest3" class="com.test.AccountContribution">
+		<property name="accoun"/>
+	</bean>
+	
+	<bean id="renameTest4" class="com.test.AccountContribution">
+		<property name="accoun"/>
+	</bean>
+	
+	<bean id="renamteTest5" class="com.test.Account">
+		<property  name="balanc"/>
+	</bean>
+	
+</beans>

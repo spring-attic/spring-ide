@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.3"?>
+<plugin>
+	<!--extension point="org.eclipse.ui.newWizards">
+		<wizard
+			id="org.springframework.ide.eclipse.beans.ui.wizards.newBeanDefinition"
+            name="New Bean Definition"
+            class="com.springsource.sts.wizard.NewBeanWizard"
+            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+            icon="icons/full/etool16/newconfig_wiz.gif">
+			<description>
+				Create a new Bean Definition
+			</description>
+			<selection
+				class="org.eclipse.core.resources.IResource">
+			</selection>
+		</wizard>
+	</extension-->
+
+	<extension point="org.eclipse.ui.popupMenus">
+		<objectContribution
+        id="com.springsource.sts.wizard.resource"
+        nameFilter="*.xml"
+        objectClass="org.eclipse.core.resources.IResource">
+            <action
+				class="org.springframework.ide.eclipse.wizard.actions.CreateNewBeanDefAction"
+				enablesFor="*" 
+				icon="icons/full/etool16/newconfig_wiz.gif"
+				id="com.springsource.sts.wizard.createNewBeanDef"
+				label="New bean definition..."
+				tooltip="Create new bean definition">
+			</action>
+		</objectContribution>
+  		<objectContribution
+        id="com.springsource.sts.wizard.resource"
+        objectClass="org.springframework.ide.eclipse.beans.core.model.IBean">
+            <action
+                  class="org.springframework.ide.eclipse.wizard.actions.ModifyBeanDefAction"
+ 	              enablesFor="*" 
+                  icon="icons/full/etool16/newconfig_wiz.gif"
+                  id="com.springsource.sts.wizard.modifyBeanDef"
+                  label="Modify bean definition..."
+                  tooltip="Modify bean definition">
+            </action> 
+        </objectContribution>
+	</extension>
+ <extension
+       point="org.eclipse.ui.newWizards">
+    <wizard
+          category="com.springsource.sts.category"
+          class="org.springframework.ide.eclipse.wizard.template.TemplateWizard"
+          finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+          hasPages="true"
+          icon="icons/full/etool16/new_template_project_obj.png"
+          id="com.springsource.sts.wizard.template"
+          name="Spring Template Project"
+          preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+          project="true">
+    </wizard>
+    <wizard
+          category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+          class="org.springframework.ide.eclipse.wizard.ui.BeanWizard"
+          icon="icons/full/obj16/bean_obj.gif"
+          id="com.springsource.sts.wizard.bean"
+          name="Spring Bean Definition">
+    </wizard>
+ </extension>
+<extension
+       point="org.eclipse.ui.navigator.navigatorContent">
+    <navigatorContent
+          activeByDefault="true"
+          contentProvider="org.springframework.ide.eclipse.wizard.dnd.SpringContentProvider"
+          id="com.springsource.sts.wizard.navigatorContent"
+          labelProvider="org.springframework.ide.eclipse.wizard.dnd.SpringLabelProvider"
+          name="Spring Content">
+       <dropAssistant
+             class="org.springframework.ide.eclipse.wizard.dnd.BeanWizardDropAdapter"
+             id="com.springsource.sts.wizard.beanWizardDropAdapter">
+          <possibleDropTargets>
+             <or>
+                <instanceof
+                      value="java.lang.Object">
+                </instanceof>
+             </or>
+          </possibleDropTargets>
+       </dropAssistant>
+       <triggerPoints>
+          <or>
+             <instanceof
+                   value="org.eclipse.jdt.core.ICompilationUnit">
+             </instanceof>
+             <instanceof
+                   value="org.eclipse.jdt.core.IType">
+             </instanceof></or>
+       </triggerPoints>
+    </navigatorContent>
+ </extension>
+ <extension
+       point="org.eclipse.ui.navigator.viewer">
+    <viewerContentBinding
+          viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
+       <includes>
+          <contentExtension
+                pattern="com.springsource.sts.wizard.navigatorContent">
+          </contentExtension>
+          <contentExtension
+                pattern="java.lang.Object">
+          </contentExtension>
+       </includes>
+    </viewerContentBinding>
+ </extension>
+ 
+ <extension
+       point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension
+          targetID="org.eclipse.jdt.ui.JavaPerspective">
+       <newWizardShortcut
+             id="com.springsource.sts.wizard.template">
+       </newWizardShortcut>
+    </perspectiveExtension>
+    <perspectiveExtension
+          targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+       <newWizardShortcut
+             id="com.springsource.sts.wizard.template">
+       </newWizardShortcut>
+    </perspectiveExtension>
+    <perspectiveExtension
+          targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+       <newWizardShortcut
+             id="com.springsource.sts.wizard.template">
+       </newWizardShortcut>
+    </perspectiveExtension>
+    <perspectiveExtension
+          targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+       <newWizardShortcut
+             id="com.springsource.sts.wizard.template">
+       </newWizardShortcut>
+    </perspectiveExtension>
+ </extension>
+ 
+     <extension
+          point="com.springsource.sts.ide.ui.dashboard">
+       <part
+             class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsDashboardPart"
+             id="com.springsource.sts.ide.help.dashboard.part.samples"
+             page="com.springsource.sts.ide.ui.new.dashboard.page.overview"
+             path="com.springsource.sts.ide.ui.dashboard.doc">
+       </part>
+    </extension>
+    
+  <extension
+       point="com.springsource.sts.ide.ui.dashboard">
+    <part
+          class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsDashboardPart"
+          id="com.springsource.sts.ide.help.dashboard.part.samples"
+          page="com.springsource.sts.ide.ui.dashboard.page.overview"
+          path="com.springsource.sts.ide.ui.dashboard.doc">
+    </part>
+ </extension>
+    
+    
+    <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.springframework.ide.eclipse.ui.preferencePage"
+            class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsPreferencePage"
+            id="com.springsource.sts.help.ui.examplepreferencepage"
+            name="Example Projects">
+      </page>
+      <page
+            category="org.springframework.ide.eclipse.ui.preferencePage"
+            class="org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage"
+            id="com.springsource.sts.help.ui.templatepreferencepage"
+            name="Template Projects">
+      </page>
+      </extension>
+      
+	
+</plugin>

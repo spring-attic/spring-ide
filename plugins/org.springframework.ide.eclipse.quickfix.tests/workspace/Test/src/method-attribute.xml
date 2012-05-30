@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="factoryMethodTest1" class="com.test.AccountManager" factory-method="createDefaultAccount"/>
+
+	<bean id="factoryMethodTest2" class="com.test.AccountManager" factory-method="createDefaultAccounts"/>
+	
+	<bean id="initMethodTest1" class="com.test.Account" init-method="initializeAccount"/>
+	
+	<bean id="initMethodTest2" class="com.test.Account" init-method="initializeAccounts"/>
+	
+	<bean id="destroyMethodTest1" class="com.test.Account"  destroy-method="disposeAccount"/>
+	
+	<bean id="destroyMethodTest2" class="com.test.Account"  destroy-method="disposeAccoun"/>
+	
+	<bean id="deprecatedDestroyMethod" class="com.test.Account" destroy-method="deleteAccount"/>
+	
+	<bean id="deprecatedInitMethod" class="com.test.Account" init-method="createAccount"/>
+	
+</beans>

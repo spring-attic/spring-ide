@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="createMethodTest1" class="com.test.Account">
+		<property name="name" value="Sam"/>
+	</bean>
+
+	<!--  this file is totally bogus, we never look inside: it is only for testing -->
+	<bean id="bogus" class="com.test.ContextConfigurationTests" init-method="toString"/>
+
+</beans>

@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.springsource.sts.roo.test
+Bundle-SymbolicName: org.springframework.ide.eclipse.roo.test;singleton:=true
+Bundle-Version: 3.0.0.qualifier
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: 
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: org.eclipse.swtbot.go,
+ org.springsource.ide.eclipse.commons.frameworks.test.util;bundle-version="1.0.0",
+ org.springsource.ide.eclipse.commons.tests.util,
+ org.eclipse.core.resources
+Import-Package: org.springframework.ide.eclipse.roo.ui.internal

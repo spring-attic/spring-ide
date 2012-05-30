@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+
+	<bean id="bean1" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean2" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean3" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean4" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean5" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean6" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean7" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean8" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean9" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean10" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean11" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean12" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean13" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean14" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean15" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean16" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean17" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean18" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean19" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean20" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean21" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean22" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean23" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean24" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean25" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean26" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean27" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean28" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean29" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean30" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean31" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean32" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean33" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean34" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean35" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean36" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean37" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean38" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean39" class="com.test.MyConcreteClass" abstract="true"/>
+	<bean id="bean40" class="com.test.MyConcreteClass" abstract="true"/>
+
+	
+</beans>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+ 
+	<bean id="target1" class="java.lang.String" />
+	<bean id="target3" class="com.test.Foo"/>
+ 
+    <util:list id="test1" list-class="java.lang.String" />
+    <util:list id="test2" list-class="java.lang.NoSuchClass" />
+    <util:list id="test3" list-class="java.util.ArrayList" />
+  
+  	<task:scheduled-tasks>  
+ 		<task:scheduled ref="target1" method="toString" fixed-rate="1"/>
+  	</task:scheduled-tasks>
+	
+ 	<task:scheduled-tasks>  
+ 		<task:scheduled ref="target1" method="nosuchmethod" fixed-rate="1"/>
+ 	</task:scheduled-tasks>
+ 	<task:scheduled-tasks>  
+ 		<task:scheduled ref="target2" method="toString" fixed-rate="1"/>
+ 	</task:scheduled-tasks>
+	
+	<osgi:reference id="test4" > 
+		<osgi:interfaces>
+			<value>java.util.List</value>	
+			<value>java.lang.NoSuchClass</value>	
+			<value>java.util.ArrayList</value>	
+		</osgi:interfaces>
+	</osgi:reference>   
+	 
+	<util:constant static-field="com.test.Bar"/> 
+	<util:constant static-field="com.test.Foo.NO_SUCH_FIELD"/> 
+	<util:constant static-field="com.test.Foo.ABCD"/>
+</beans>

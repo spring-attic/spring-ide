@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<!--
+/*******************************************************************************
+ * Copyright (c) 2007, 2009 SpringSource.  All rights reserved.
+ *******************************************************************************/
+-->
+<plugin>
+   
+  	<extension
+         id="com.springsource.sts.roo.core.nature"
+         name="%rooNatureLabel"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.springframework.ide.eclipse.roo.core.internal.RooNature">
+         </run>
+      </runtime>
+      <requires-nature
+            id="org.springframework.ide.eclipse.core.springnature">
+      </requires-nature>
+   </extension>
+
+   <extension
+         point="com.springsource.sts.ide.configurator.participant">
+      <participant
+            class="org.springframework.ide.eclipse.roo.core.internal.model.RooInstallWorkspaceConfigurator"
+            id="com.springsource.sts.configurator.roo"
+            label="Roo">
+      </participant>
+   </extension>
+   
+</plugin> 

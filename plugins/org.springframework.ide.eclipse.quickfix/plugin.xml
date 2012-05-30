@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+	<extension point="org.eclipse.wst.sse.ui.sourcevalidation">
+		<validator scope="partial"
+			class="org.springframework.ide.eclipse.quickfix.BeansEditorValidator"
+			id="com.springsource.sts.quickfix.validator.classattributevalidator">
+			<contentTypeIdentifier id="org.eclipse.core.runtime.xml">
+				<!--partitionType id="org.eclipse.wst.sse.ST_DEFAULT"/-->
+				<partitionType id="org.eclipse.wst.xml.XML_DEFAULT" />
+			</contentTypeIdentifier>
+			<!--
+				contentTypeIdentifier id="org.eclipse.wst.xml.core.xmlsource">
+				<partitionType id="org.eclipse.wst.xml.XML_DEFAULT"/> <partitionType
+				id="org.eclipse.wst.sse.ST_DEFAULT"/> </contentTypeIdentifier
+			-->
+		</validator>
+	</extension>
+	
+	<extension point="org.springframework.ide.eclipse.core.listeners">
+		<listener
+			class="org.springframework.ide.eclipse.quickfix.refresh.RefreshProjectContributionEventListener">
+		</listener>
+	</extension>
+	
+	<extension
+		point="org.eclipse.ltk.core.refactoring.renameParticipants">
+		<renameParticipant
+			class="org.springframework.ide.eclipse.quickfix.rename.MethodRenameParticipant"
+			id="com.springsource.sts.quickfix.method.beanRename"
+			name="beanMethodRenameParticipant">
+			<enablement>
+				<with
+					variable="element">
+					<instanceof
+						value="org.eclipse.jdt.core.IMethod">
+					</instanceof>
+				</with>
+			</enablement>
+		</renameParticipant>
+  <renameParticipant
+        class="org.springframework.ide.eclipse.quickfix.jdt.RequestMappingRenameParticipant"
+        id="com.springsource.sts.quickfix.jdt.requestMappingRenameParticipant"
+        name="Request Mapping Rename Participant">
+     <enablement>
+				<with
+					variable="element">
+					<instanceof
+						value="org.eclipse.jdt.core.ILocalVariable">
+					</instanceof>
+				</with>
+     </enablement>
+  </renameParticipant>
+	</extension>
+
+	<extension
+		point="org.eclipse.jdt.core.manipulation.changeMethodSignatureParticipants">
+		<changeMethodSignatureParticipant
+			class="org.springframework.ide.eclipse.quickfix.rename.ChangeMethodSignatureRenameParticipant"
+			id="com.springsource.sts.quickfix.method.beanRename"
+			name="changeMethodSignatureParticipant">
+			<enablement>
+				<with variable="element">
+					<instanceof value="org.eclipse.jdt.core.IMethod">
+					</instanceof>
+				</with>
+			</enablement>
+		</changeMethodSignatureParticipant>
+	</extension>
+
+ <extension
+       point="org.eclipse.jdt.ui.quickAssistProcessors">
+    <quickAssistProcessor
+    	  name="Spring Annotation Quick Assist Processor"
+          class="org.springframework.ide.eclipse.quickfix.jdt.processors.JavaEditorQuickAssistProcessor"
+          id="com.springsource.sts.quickfix.jdt.quickAssistProcessor">
+    </quickAssistProcessor>
+ </extension>
+ <extension
+       id="com.springsource.sts.quickfix.jdt.proposal.computer"
+       point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+       name="Spring Annotation Proposal">
+    <javaCompletionProposalComputer
+          activate="true"
+          categoryId="com.springsource.sts.quickfix.jdt.proposal.computer"
+          class="org.springframework.ide.eclipse.quickfix.jdt.computers.AnnotationArgumentProposalComputer">
+          <partition type="__java_string"/>
+          <partition
+                type="__dftl_partition_content_type">
+          </partition>
+    </javaCompletionProposalComputer>
+ </extension>
+ 
+ 	<extension
+		point="org.eclipse.ui.ide.markerResolution">
+		<markerResolutionGenerator
+			markerType="org.springframework.ide.eclipse.beans.core.problemmarker"
+			class="org.springframework.ide.eclipse.quickfix.jdt.AutowireMarkerResolutionGenerator">
+		</markerResolutionGenerator>
+	</extension>
+  <extension
+        point="org.eclipse.jdt.core.compilationParticipant">
+     <compilationParticipant
+           class="org.springframework.ide.eclipse.quickfix.jdt.AnnotationCompilationParticipant"
+           createsProblems="true"
+           id="com.springsource.sts.quickfix.jdt.compilationParticipant"
+           modifiesEnvironment="false">
+     </compilationParticipant>
+  </extension>
+  <extension
+        id="org.springframework.ide.eclipse.core.annotation.problemmarker"
+        name="Spring Problems"
+        point="org.eclipse.core.resources.markers">
+     <super
+           type="org.springframework.ide.eclipse.core.problemmarker">
+     </super>
+  </extension>
+  <extension
+        id="com.springsource.sts.jdt.quickfix.marker"
+        name="Spring Problems"
+        point="org.eclipse.core.resources.markers">
+     <super
+           type="org.springframework.ide.eclipse.core.problemmarker">
+     </super>
+  </extension>
+  <extension
+        point="org.eclipse.ui.editors.templates">
+     <template
+           autoinsert="true"
+           contextTypeId="java-members"
+           description="Create method that initializes the WebDataBinder which will be used for populating command and form object arguments of annotated handler methods"
+           id="com.springsource.sts.quickfix.initBinder"
+           name="InitBinder method">
+        <pattern>
+           ${:import(org.springframework.web.bind.annotation.InitBinder, org.springframework.web.bind.WebDataBinder)}@InitBinder
+public void ${initBinder}(WebDataBinder ${binder}) {
+	${line_selection}${cursor}
+}
+        </pattern>
+     </template>
+     <template
+           autoinsert="true"
+           contextTypeId="java-members"
+           description="Exception handling method"
+           id="com.springsource.sts.quickfix.exceptionHandler"
+           name="ExceptionHandler method">
+        <pattern>
+           ${:import(org.springframework.web.bind.annotation.ExceptionHandler)}@ExceptionHandler(${Exception}.class)
+public ${void} ${handleException}(${Exception} ${exception}) {
+	${line_selection}${cursor}
+}
+        </pattern>
+     </template>
+     <template
+           autoinsert="true"
+           contextTypeId="java-members"
+           description="GET HTTP method"
+           id="com.springsource.sts.quickfix.getHandler"
+           name="GET method">
+        <pattern>
+           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod)}@RequestMapping(value=&quot;${cursor}${path}&quot;, method = RequestMethod.GET)
+public ${String} ${get}(${Object} ${model}) {
+	// TODO Auto generated method stub
+	return null;
+}
+        </pattern>
+     </template>
+     <template
+           autoinsert="true"
+           contextTypeId="java-members"
+           description="POST HTTP method"
+           id="com.springsource.sts.quickfix.postHandler"
+           name="POST method">
+        <pattern>
+           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod, org.springframework.validation.BindingResult)}@RequestMapping(value=&quot;${cursor}${path}&quot;, method = RequestMethod.POST)
+public ${String} ${post}(${Object} ${formObject}, ${BindingResult} ${bindingResult}) {
+	// TODO Auto generated method stub
+	return null;
+}
+        </pattern>
+     </template>
+     <template
+           autoinsert="true"
+           contextTypeId="java-members"
+           description="PUT HTTP method"
+           id="com.springsource.sts.quickfix.putHandler"
+           name="PUT method">
+        <pattern>
+           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod, org.springframework.validation.BindingResult)}@RequestMapping(value=&quot;${cursor}${path}&quot;, method = RequestMethod.PUT)
+public ${String} ${post}(${Object} ${formObject}, ${BindingResult} ${bindingResult}) {
+	// TODO Auto generated method stub
+	return null;
+}
+        </pattern>
+     </template>
+     <template
+           autoinsert="true"
+           contextTypeId="xml_all"
+           description="DispatcherServlet declaration"
+           id="com.springsource.sts.quickfix.dispatcherservlet"
+           name="dispatcherservlet">
+        <pattern>
+                &lt;!-- The front controller of this Spring Web application, responsible for handling all application requests --&gt;
+	&lt;servlet&gt;
+		&lt;servlet-name&gt;springDispatcherServlet&lt;/servlet-name&gt;
+		&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+		&lt;init-param&gt;
+			&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+			&lt;param-value&gt;${location}${cursor}&lt;/param-value&gt;
+		&lt;/init-param&gt;
+		&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+	&lt;/servlet&gt;
+
+	&lt;!-- Map all requests to the DispatcherServlet for handling --&gt;
+	&lt;servlet-mapping&gt;
+		&lt;servlet-name&gt;springDispatcherServlet&lt;/servlet-name&gt;
+		&lt;url-pattern&gt;${url}&lt;/url-pattern&gt;
+	&lt;/servlet-mapping&gt;
+        </pattern>
+     </template>
+     
+     <template
+           autoinsert="true"
+           contextTypeId="xml_all"
+           description="ContextLoaderListener"
+           id="com.springsource.sts.quickfix.contextloaderlistener"
+           name="contextloaderlistener">
+        <pattern>
+           &lt;!-- needed for ContextLoaderListener --&gt;
+	&lt;context-param&gt;
+		&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+		&lt;param-value&gt;${location}${cursor}&lt;/param-value&gt;
+	&lt;/context-param&gt;
+
+	&lt;!-- Bootstraps the root web application context before servlet initialization --&gt;
+	&lt;listener&gt;
+		&lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+	&lt;/listener&gt;
+        </pattern>
+     </template>
+     
+     <!--template
+           autoinsert="true"
+           contextTypeId="java-members"
+           description="DELETE HTTP method"
+           id="com.springsource.sts.quickfix.requestMapping"
+           name="DELETE method">
+        <pattern>
+           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod)}@RequestMapping(value=&quot;/${path}&quot;, method = RequestMethod.${GET})
+public ${String} ${get}(${}) {
+	${line_selection}${cursor}
+}
+        </pattern>
+     </template>
+     <template
+           autoinsert="true"
+           contextTypeId="java-members"
+           description="OPTIONS HTTP method"
+           id="com.springsource.sts.quickfix.requestMapping"
+           name="OPTIONS method">
+        <pattern>
+           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod)}@RequestMapping(value=&quot;/${path}&quot;, method = RequestMethod.${GET})
+public ${String} ${get}(${}) {
+	${line_selection}${cursor}
+}
+        </pattern>
+     </template>
+      <template
+           autoinsert="true"
+           contextTypeId="java-members"
+           description="TRACE HTTP method"
+           id="com.springsource.sts.quickfix.requestMapping"
+           name="TRACE method">
+        <pattern>
+           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod)}@RequestMapping(value=&quot;/${path}&quot;, method = RequestMethod.${GET})
+public ${String} ${get}(${}) {
+	${line_selection}${cursor}
+}
+        </pattern>
+     </template-->
+  </extension>
+  <extension
+        point="org.eclipse.jdt.ui.quickFixProcessors">
+     <quickFixProcessor
+           class="org.springframework.ide.eclipse.quickfix.jdt.PathVariableQuickFixProcessor"
+           id="com.springsource.sts.quickfix.pathvariablequickfixprocessor"
+           name="Spring Request Mapping Path Variable Quick Fix Processor">
+        <handledMarkerTypes>
+           <markerType
+                 id="com.springsource.sts.jdt.quickfix.marker">
+           </markerType>
+        </handledMarkerTypes>
+     </quickFixProcessor>
+  </extension>
+ 
+
+</plugin>

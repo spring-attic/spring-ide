@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spring IDE Best Practices Tests
+Bundle-SymbolicName: org.springframework.ide.eclipse.bestpractices.tests;singleton:=true
+Bundle-Version: 3.0.0.qualifier
+Bundle-Vendor: Spring IDE Developers
+Require-Bundle: org.eclipse.core.runtime,
+ org.springframework.ide.eclipse.beans.core,
+ org.springframework.ide.eclipse.core,
+ org.eclipse.core.resources,
+ org.eclipse.jdt.core,
+ org.springframework.ide.eclipse.bestpractices,
+ org.springsource.ide.eclipse.commons.tests.util,
+ org.springsource.ide.eclipse.commons.core,
+ org.junit4
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: org.springframework.ide.eclipse.bestpractices.tests;x-internal:=true,
+ org.springframework.ide.eclipse.bestpractices.tests.ruletests;x-internal:=true
+Bundle-ActivationPolicy: lazy

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="account" class="com.test.Account"/>
+	
+	<bean id="propertyBeanRefTest1" class="com.test.AccountContribution">
+		<property name="account" ref="account"/>
+	</bean>
+	
+	<bean id="propertyBeanRefTest2" class="com.test.AccountContribution">
+		<property name="account" ref="accoun"/>
+	</bean>
+	
+	<bean id="constructorArgBeanRefTest1" class="com.test.AccountContribution">
+		<constructor-arg ref="account"/>
+	</bean>
+	
+	<bean id="constructorArgBeanRefTest2" class="com.test.AccountContribution">
+		<constructor-arg ref="accoun"/>
+	</bean>
+	
+	<bean id="factoryBeanRefTest1" factory-bean="account"/>
+	
+	<bean id="factoryBeanRefTest2" factory-bean="accounts"/>
+	
+	<bean id="parentBeanRefTest1" parent="account"/>
+	
+	<bean id="parentBeanRefTest2" parent="accoun"/>
+	
+</beans>
