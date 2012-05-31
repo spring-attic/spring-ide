@@ -27,13 +27,13 @@
      <extension
            point="org.maven.ide.eclipse.projectConfigurators">
         <configurator
-              class="com.springsource.sts.maven.legacy.internal.core.SpringProjectConfigurator"
+              class="org.springframework.ide.eclipse.maven.legacy.internal.core.SpringProjectConfigurator"
               id="com.springsource.sts.ide.maven.core.springProjectConfigurator.legacy"
               name="Spring"
               priority="102">
         </configurator>
         <configurator
-              class="com.springsource.sts.maven.legacy.internal.core.DataNucleusProjectConfigurator"
+              class="org.springframework.ide.eclipse.maven.legacy.internal.core.DataNucleusProjectConfigurator"
               id="com.springsource.sts.maven.internal.core.dataNucleusProjectConfigurato.legacyr"
               name="DataNucleus"
               priority="103">

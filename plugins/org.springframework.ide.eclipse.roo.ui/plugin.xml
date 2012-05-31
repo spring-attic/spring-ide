@@ -352,7 +352,7 @@
  <extension
        point="org.maven.ide.eclipse.projectConfigurators">
     <configurator
-          class="com.springsource.sts.roo.ui.internal.maven.LegacyRooProjectConfigurator"
+          class="org.springframework.ide.eclipse.roo.ui.internal.maven.LegacyRooProjectConfigurator"
           id="com.springsource.sts.roo.ui.maven.legacyRooProjectConfigurator"
           name="Roo (legacy)"
           priority="103">

@@ -11,7 +11,7 @@
 			  icon="icons/view16/springsource_16.png"
 			  markerId="problemmarker"
 			  enabledByDefault="false" />
-		<rules validatorId="com.springsource.sts.bestpractices.beansvalidator">
+		<rules validatorId="org.springframework.ide.eclipse.bestpractices.beansvalidator">
 		  <rule
           class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.UseDedicatedNamespacesRule"
           description="Detects cases where dedicated namespace syntax is available"
