@@ -48,9 +48,9 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -374,16 +374,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection = treeViewer.getSelection();
 
-				// While something is downloading, the tree is deselected,
-				// which means there might not be a selected template.
-				// Save the last selected template. The only time you should
-				// null out selectedTemplate is if the model has emptied
-				// completely after starting a download.
-				if (ContentPlugin.getDefault().getManager().getItemsByKind("Template").size() == 0) {
-					selectedTemplate = null;
-				}
-				if (selection instanceof IStructuredSelection) {
-					Object element = ((IStructuredSelection) selection).getFirstElement();
+				if (selection instanceof TreeSelection) {
+					Object element = ((TreeSelection) selection).getFirstElement();
 					if (element instanceof Template) {
 						selectedTemplate = ((Template) element);
 					}
@@ -395,6 +387,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 					wizard.getContainer().updateButtons();
 				}
 			}
+
 		});
 
 		this.contentManagerListener = new PropertyChangeListener() {
