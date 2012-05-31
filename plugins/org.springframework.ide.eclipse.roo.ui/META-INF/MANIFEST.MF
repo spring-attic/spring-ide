@@ -38,7 +38,7 @@ Require-Bundle: org.eclipse.ui,
  org.maven.ide.eclipse.maven_embedder;bundle-version="0.12.1";resolution:=optional
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-LazyStart: true
-Bundle-ActivationPolicy: lazy;exclude:="com.springsource.sts.roo.ui.internal.listener"
+Bundle-ActivationPolicy: lazy;exclude:="org.springframework.ide.eclipse.roo.ui.internal.listener"
 Bundle-Localization: plugin
 Import-Package: org.springframework.ide.eclipse.maven;resolution:=optional
 Export-Package: org.springframework.ide.eclipse.roo.ui,
