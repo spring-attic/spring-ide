@@ -94,6 +94,14 @@
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.search</module>
 		<module>features/org.springframework.ide.eclipse.feature</module>
 
+		<module>plugins/org.springframework.ide.eclipse.metadata</module>
+		<module>plugins/org.springframework.ide.eclipse.bestpractices</module>
+		<module>plugins/org.springframework.ide.eclipse.config.core</module>
+		<module>plugins/org.springframework.ide.eclipse.config.graph</module>
+		<module>plugins/org.springframework.ide.eclipse.config.ui</module>
+		<module>plugins/org.springframework.ide.eclipse.quickfix</module>
+		<module>plugins/org.springframework.ide.eclipse.wizard</module>
+
 		<!-- aop -->
 		<module>plugins/org.springframework.ide.eclipse.aop.core</module>
 		<module>plugins/org.springframework.ide.eclipse.aop.ui</module>
@@ -103,6 +111,7 @@
 		<!-- osgi -->
 		<module>plugins/org.springframework.ide.eclipse.osgi</module>
 		<module>plugins/org.springframework.ide.eclipse.osgi.targetdefinition</module>
+		<module>plugins/org.springframework.ide.eclipse.osgi.runtime</module>
 		<module>features/org.springframework.ide.eclipse.osgi.feature</module>
 
 		<!-- security -->
@@ -141,6 +150,16 @@
 		<module>plugins/org.springframework.ide.eclipse.webflow.mylyn</module>
 		<module>features/org.springframework.ide.eclipse.mylyn.feature</module>
 
+		<!-- roo -->
+		<module>plugins/org.springframework.ide.eclipse.roo.core</module>
+		<module>plugins/org.springframework.ide.eclipse.roo.ui</module>
+		<module>features/org.springframework.ide.eclipse.roo.feature</module>
+		
+		<!-- maven -->
+		<module>plugins/org.springframework.ide.eclipse.maven</module>
+		<module>plugins/org.springframework.ide.eclipse.maven.legacy</module>
+		<module>features/org.springframework.ide.eclipse.maven.feature</module>
+		
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.aop.feature.source</module>
@@ -152,6 +171,8 @@
 		<module>features/org.springframework.ide.eclipse.mylyn.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.webflow.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.ajdt.feature.source</module>
+		<module>features/org.springframework.ide.eclipse.maven.feature.source</module>
+		<module>features/org.springframework.ide.eclipse.roo.feature.source</module>
 
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
@@ -227,6 +248,37 @@
 					<id>ajdt-e36</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/tools/ajdt/36/milestone/</url>
+				</repository>
+			</repositories>
+		</profile>
+		<profile>
+			<id>e37</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 3.7</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e36</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/3.7/</url>
+				</repository>
+				<repository>
+					<id>helios</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/indigo/</url>
+				</repository>
+				<repository>
+					<id>ajdt-e36</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/37/milestone/</url>
+				</repository>
+				<repository>
+				  <id>m2eclipse-legacy</id>
+				  <layout>p2</layout>
+				  <url>http://download.springsource.com/release/TOOLS/third-party/m2eclipse-012</url>
 				</repository>
 			</repositories>
 		</profile>
