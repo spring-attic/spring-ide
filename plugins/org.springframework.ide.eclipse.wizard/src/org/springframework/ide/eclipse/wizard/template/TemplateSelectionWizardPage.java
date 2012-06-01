@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -280,6 +279,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		refreshButton = new Button(legendContainer, SWT.PUSH);
 		refreshButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		refreshButton.setText("Refresh");
+		refreshButton.setEnabled(!isRefreshing());
 
 		// refreshButton.setImage(WizardImages.getImage(WizardImages.REFRESH_ICON));
 
@@ -293,64 +293,20 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
-							try {
-								if (isRefreshing()) {
-									while (isRefreshing()) {
-										Thread.sleep(300);
-										if (monitor.isCanceled()) {
-											break;
-										}
-									}
-								}
-								else {
-									final IStatus status = manager.refresh(monitor);
-									if (!status.isOK()) {
-
-										String statusMessage = "";
-										if (status instanceof MultiStatus) {
-											IStatus[] statuses = ((MultiStatus) status).getChildren();
-											for (final IStatus childStatus : statuses) {
-												if (!childStatus.isOK()) {
-													statusMessage += childStatus.getMessage() + "\n";
-												}
-											}
-										}
-										else {
-											statusMessage = status.getMessage();
-										}
-										final String finalString = statusMessage;
-
-										PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-											public void run() {
-												try {
-													MessageDialog.openError(null, NLS.bind("Error", null), finalString);
-												}
-												finally {
-													// ignore: if we couldn't
-													// put up an error, we have
-													// bigger problems.
-												}
-											}
-										});
-									}
-								}
-							}
-
-							catch (Exception e) {
-								MessageDialog.openError(null, NLS.bind("Download error", null), e.getMessage());
-							}
-
+							manager.refresh(monitor);
 						}
 					});
 				}
 				catch (InvocationTargetException e1) {
-					MessageDialog.openError(null, NLS.bind("Download error", null), e1.getMessage());
+					// MessageDialog.openError(null, NLS.bind("Download error",
+					// null), e1.getMessage());
 				}
 				catch (InterruptedException e1) {
-					MessageDialog.openError(null, NLS.bind("Download error", null), e1.getMessage());
+					// MessageDialog.openError(null,
+					// NLS.bind("Download cancelled", null), e1.getMessage());
 				}
-			}
 
+			}
 		});
 
 		Composite descriptionComposite = new Composite(container, SWT.NONE);
@@ -402,7 +358,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 							refreshPage();
 						}
 						finally {
-							// ignore
+							refreshButton.setEnabled(true);
+
 						}
 					}
 
