@@ -338,9 +338,12 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				}
 				firstPage = null;
 
-				setDescription(selectedTemplate);
-				if (TemplateSelectionWizardPage.this.equals(wizard.getContainer().getCurrentPage())) {
-					wizard.getContainer().updateButtons();
+				// selectedTemplate can be null if there is no network
+				if (selectedTemplate != null) {
+					setDescription(selectedTemplate);
+					if (TemplateSelectionWizardPage.this.equals(wizard.getContainer().getCurrentPage())) {
+						wizard.getContainer().updateButtons();
+					}
 				}
 			}
 
