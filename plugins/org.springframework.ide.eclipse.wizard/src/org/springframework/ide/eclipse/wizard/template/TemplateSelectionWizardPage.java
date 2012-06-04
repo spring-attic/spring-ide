@@ -272,7 +272,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			public void linkActivated(HyperlinkEvent event) {
 				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null,
 						TemplatesPreferencePage.EXAMPLE_PREFERENCES_PAGE_ID, null, null);
+				refreshButton.setEnabled(false);
 				dialog.open();
+				refreshButton.setEnabled(!isRefreshing());
 			}
 		});
 
