@@ -295,17 +295,32 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
-							manager.refresh(monitor);
+							try {
+								IStatus results = manager.refresh(monitor);
+								if (!results.isOK()) {
+									if (results.isMultiStatus() && results.getChildren().length > 0) {
+										throw new InvocationTargetException(new CoreException(results.getChildren()[0]));
+									}
+									else {
+										throw new InvocationTargetException(new CoreException(results));
+									}
+								}
+							}
+							catch (OperationCanceledException e) {
+								// If we don't catch and throw the exception
+								// *here*, cancellations don't get recognized
+								// until the download is finished.
+								throw e;
+							}
 						}
 					});
 				}
 				catch (InvocationTargetException e1) {
-					// MessageDialog.openError(null, NLS.bind("Download error",
-					// null), e1.getMessage());
+					MessageDialog.openError(null, NLS.bind("Download error", null), e1.getTargetException()
+							.getLocalizedMessage());
 				}
 				catch (InterruptedException e1) {
-					// MessageDialog.openError(null,
-					// NLS.bind("Download cancelled", null), e1.getMessage());
+					// ignore, just let the job die
 				}
 
 			}
@@ -431,7 +446,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			});
 		}
 		catch (InterruptedException e) {
-			throw new OperationCanceledException();
+			return null;
 		}
 		catch (InvocationTargetException e) {
 			UiStatusHandler.logAndDisplay(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getTargetException()
