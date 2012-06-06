@@ -29,7 +29,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 
-
 public abstract class AbstractNameUrlPreferenceModel {
 
 	private final IEclipsePreferences store;
@@ -37,6 +36,8 @@ public abstract class AbstractNameUrlPreferenceModel {
 	private final IEclipsePreferences defaultStore;
 
 	private String currentString;
+
+	private boolean didChangeFlag = false;
 
 	protected abstract IEclipsePreferences getStore();
 
@@ -129,10 +130,30 @@ public abstract class AbstractNameUrlPreferenceModel {
 		return currentString;
 	}
 
-	public void persist() {
+	// sets didChange as a side effect: we need to get that information
+	// back up to the preferences page
+	public boolean persist() {
+		didChangeFlag = false;
+		if (!currentString.equals(store.get(getStoreKey(), null))) {
+			Assert.isNotNull(currentString, "INTERNAL ERROR: current string should not be null in " + this.getClass());
+			store.put(getStoreKey(), currentString);
+			didChangeFlag = true;
+		}
+		return false;
+	}
 
-		Assert.isNotNull(currentString, "INTERNAL ERROR: current string should not be null in " + this.getClass());
-		store.put(getStoreKey(), currentString);
+	// We need a way to get information back to the templates preference page so
+	// it can kick off updating the descriptors. You can perhaps imagine
+	// that this flag would be a little scary, that it could get stuck "on" or
+	// "off". However, the only method that does anything with the flag is
+	// TemplatesPreferencePage.performOk(), so there's not a danger of a race.
+	// (ExamplesPreferencePage ignores it.) IF YOU CHANGE SOMETHING SO THAT
+	// MORE THAN ONE METHOD LOOKS AT/MODIFIES didChangeFlag, you might need
+	// to use a different method to kick off updating the descriptors.
+	public boolean getAndClearChangedFlag() {
+		boolean oldValue = didChangeFlag;
+		didChangeFlag = false;
+		return oldValue;
 	}
 
 	protected void clearNonDefaults() {

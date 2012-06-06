@@ -69,7 +69,9 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	@Override
 	public boolean performOk() {
 		boolean okay = super.performOk();
-		updateDescriptorsInBackground();
+		if (getModel().getAndClearChangedFlag()) {
+			updateDescriptorsInBackground();
+		}
 		return okay;
 	}
 
