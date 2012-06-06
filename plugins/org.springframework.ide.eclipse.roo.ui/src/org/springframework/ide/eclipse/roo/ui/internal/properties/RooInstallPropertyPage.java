@@ -45,13 +45,13 @@ public class RooInstallPropertyPage extends ProjectAndPreferencePage {
 	public boolean performOk() {
 
 		if (useProjectSettings()) {
-			SpringCorePreferences.getProjectPreferences(getProject(), RooCoreActivator.LEGACY_ID).putBoolean(
+			SpringCorePreferences.getProjectPreferences(getProject(), RooCoreActivator.PLUGIN_ID).putBoolean(
 					RooCoreActivator.PROJECT_PROPERTY_ID, false);
-			SpringCorePreferences.getProjectPreferences(getProject(), RooCoreActivator.LEGACY_ID).putString(
+			SpringCorePreferences.getProjectPreferences(getProject(), RooCoreActivator.PLUGIN_ID).putString(
 					RooCoreActivator.ROO_INSTALL_PROPERTY, rooInstallCombo.getText());
 		}
 		else {
-			SpringCorePreferences.getProjectPreferences(getProject(), RooCoreActivator.LEGACY_ID).putBoolean(
+			SpringCorePreferences.getProjectPreferences(getProject(), RooCoreActivator.PLUGIN_ID).putBoolean(
 					RooCoreActivator.PROJECT_PROPERTY_ID, true);
 		}
 
@@ -87,7 +87,7 @@ public class RooInstallPropertyPage extends ProjectAndPreferencePage {
 		rooInstallCombo.setItems(RooCoreActivator.getDefault().getInstallManager().getAllInstallNames());
 		rooInstallCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		String installName = SpringCorePreferences.getProjectPreferences(getProject(), RooCoreActivator.LEGACY_ID)
+		String installName = SpringCorePreferences.getProjectPreferences(getProject(), RooCoreActivator.PLUGIN_ID)
 				.getString(RooCoreActivator.ROO_INSTALL_PROPERTY, null);
 		String[] names = rooInstallCombo.getItems();
 		for (int i = 0; i < names.length; i++) {
@@ -114,7 +114,7 @@ public class RooInstallPropertyPage extends ProjectAndPreferencePage {
 
 	@Override
 	protected boolean hasProjectSpecificOptions(IProject project) {
-		return !SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.LEGACY_ID).getBoolean(
+		return !SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.PLUGIN_ID).getBoolean(
 				RooCoreActivator.PROJECT_PROPERTY_ID, false);
 	}
 }

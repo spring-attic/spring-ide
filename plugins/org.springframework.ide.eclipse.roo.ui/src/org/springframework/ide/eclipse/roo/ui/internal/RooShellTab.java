@@ -101,7 +101,7 @@ public class RooShellTab {
 
 	private Text command;
 
-	private final ICommandHistory history = CommandHistoryProvider.getCommandHistory(RooUiActivator.LEGACY_ID,
+	private final ICommandHistory history = CommandHistoryProvider.getCommandHistory(RooUiActivator.PLUGIN_ID,
 			RooCoreActivator.NATURE_ID);
 
 	private String initialCommand;

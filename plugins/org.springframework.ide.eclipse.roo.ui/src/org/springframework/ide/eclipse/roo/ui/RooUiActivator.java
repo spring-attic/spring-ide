@@ -26,8 +26,6 @@ public class RooUiActivator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.roo.ui";
 	
-	public static final String LEGACY_ID = "com.springsource.sts.roo.ui";
-
 	// The shared instance
 	private static RooUiActivator plugin;
 	

@@ -46,6 +46,7 @@ import org.xml.sax.SAXException;
 
 /**
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  */
 public class RooInstallManager {
 
@@ -91,13 +92,13 @@ public class RooInstallManager {
 		if (project == null) {
 			return null;
 		}
-		if (SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.LEGACY_ID).getBoolean(
+		if (SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.PLUGIN_ID).getBoolean(
 				RooCoreActivator.PROJECT_PROPERTY_ID, true)) {
 			return getDefaultRooInstall();
 		}
-		else if (SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.LEGACY_ID).getString(
+		else if (SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.PLUGIN_ID).getString(
 				RooCoreActivator.ROO_INSTALL_PROPERTY, null) != null) {
-			return getRooInstall(SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.LEGACY_ID)
+			return getRooInstall(SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.PLUGIN_ID)
 					.getString(RooCoreActivator.ROO_INSTALL_PROPERTY, null));
 		}
 		return null;
@@ -175,8 +176,14 @@ public class RooInstallManager {
 
 	public void start() {
 		try {
+			boolean readFromLegacyLocation = false;
 			DocumentBuilder docBuilder = SpringCoreUtils.getDocumentBuilder();
 			IPath rooInstallFile = RooCoreActivator.getDefault().getStateLocation().append("roo.installs");
+			if (!rooInstallFile.toFile().exists()) {
+				// Look for legacy install file at <workspace>/.metadata/.plugins/com.springsource.sts.roo.core/roo.installs
+				rooInstallFile = rooInstallFile.removeLastSegments(2).append("com.springsource.sts.roo.core/roo.installs");
+				readFromLegacyLocation = true;
+			}
 			if (rooInstallFile.toFile().exists()) {
 				Document doc = docBuilder.parse(rooInstallFile.toFile());
 				NodeList installNodes = doc.getElementsByTagName("install");
@@ -209,6 +216,9 @@ public class RooInstallManager {
 					else {
 						RooCoreActivator.log("Discarding Roo install [" + home + "] with name [" + name + "]", null);
 					}
+					if (readFromLegacyLocation) {
+						save(doc);
+					}
 				}
 			}
 		}
@@ -220,4 +230,26 @@ public class RooInstallManager {
 		}
 	}
 
+	private void save(Document document) {
+		try {
+			IPath grailsInstallFile = RooCoreActivator.getDefault().getStateLocation().append("roo.installs");
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+
+			Writer out = new OutputStreamWriter(new FileOutputStream(grailsInstallFile.toFile()), "ISO-8859-1");
+			StreamResult result = new StreamResult(out);
+			DOMSource source = new DOMSource(document);
+			transformer.transform(source, result);
+			out.close();
+		} catch (IOException e) {
+			RooCoreActivator.log(e);
+		}
+		catch (TransformerException e) {
+			RooCoreActivator.log(e);
+		}
+	}
+	
 }

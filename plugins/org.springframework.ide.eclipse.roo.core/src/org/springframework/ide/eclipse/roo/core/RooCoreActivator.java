@@ -44,14 +44,12 @@ public class RooCoreActivator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.roo.core";
 	
-	public static final String LEGACY_ID = "com.springsource.sts.roo.core";
-
-	public static String NATURE_ID = LEGACY_ID + ".nature";
+	public static String NATURE_ID = "com.springsource.sts.roo.core.nature";
 
 	/** The identifier for enablement of project versus workspace settings */
 	public static final String PROJECT_PROPERTY_ID = "use.default.install";
 
-	public static final String ROO_INSTALL_PROPERTY = LEGACY_ID + ".install.name";
+	public static final String ROO_INSTALL_PROPERTY = PLUGIN_ID + ".install.name";
 	
 	// The shared instance
 	private static RooCoreActivator plugin;

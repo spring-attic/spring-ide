@@ -247,9 +247,9 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					project.open(0, new NullProgressMonitor());
 					project.setDescription(desc, new NullProgressMonitor());
 
-					SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.LEGACY_ID).putBoolean(
+					SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.PLUGIN_ID).putBoolean(
 							RooCoreActivator.PROJECT_PROPERTY_ID, useDefault);
-					SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.LEGACY_ID).putString(
+					SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.PLUGIN_ID).putString(
 							RooCoreActivator.ROO_INSTALL_PROPERTY, rooInstall);
 					
 					configureProjectUi(project);
