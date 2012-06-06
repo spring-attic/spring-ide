@@ -374,15 +374,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				// switch to UI thread
 				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 					public void run() {
-						try {
-							refreshPage();
-						}
-						finally {
-							refreshButton.setEnabled(true);
-
-						}
+						refreshPage();
 					}
-
 				});
 			}
 		};
@@ -628,6 +621,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	}
 
 	private void refreshPage() {
+		selectedTemplate = null;
+
 		treeViewer.refresh(true);
 		treeViewer.setSelection(new StructuredSelection());
 
@@ -642,6 +637,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		legendImage.setVisible(needsDownload);
 		legendText.setVisible(needsDownload);
 		descriptionText.setText(""); //$NON-NLS-1$
+		refreshButton.setEnabled(true);
+
+		setPageComplete(false);
 	}
 
 	private void setDescription(Template template) {
