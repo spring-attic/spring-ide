@@ -61,6 +61,13 @@
 		<p2.sign>false</p2.sign>
 		<p2.repository.name>Spring IDE</p2.repository.name>
 		
+		<!-- Signing -->
+		<signing.skip>true</signing.skip>
+		<signing.alias>vmware</signing.alias>
+		<signing.keystore>~/.keytool/springsource.jks</signing.keystore>
+		<signing.store.password>${STORE_PASSWORD}</signing.store.password>
+		<signing.key.password>${KEY_PASSWORD}</signing.key.password>
+
 		<dist.name>Spring IDE</dist.name>
 		<dist.project>spring-ide</dist.project>
 		<dist.key>IDE</dist.key>
@@ -69,7 +76,7 @@
 		<dist.path>${dist.type}/${dist.key}/${dist.pathpostfix}</dist.path>
 		<dist.bucket>dist.springframework.org</dist.bucket>
 
-		<tycho-version>0.12.0</tycho-version>
+		<tycho-version>0.14.1</tycho-version>
 		<maven.test.skip>true</maven.test.skip>
 		<maven.test.error.ignore>true</maven.test.error.ignore>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
@@ -360,6 +367,7 @@
 					</successCodes>
 				</configuration>
             </plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
@@ -378,6 +386,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.5</version>
@@ -385,12 +394,14 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+			
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
+			
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
@@ -399,6 +410,28 @@
 					<resolver>p2</resolver>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<skip>${signing.skip}</skip>
+					<alias>${signing.alias}</alias>
+					<keystore>${signing.keystore}</keystore>
+					<storepass>${signing.store.password}</storepass>
+					<keypass>${signing.key.password}</keypass>
+				</configuration>
+			</plugin>
+
 		</plugins>
 
 		<pluginManagement>
