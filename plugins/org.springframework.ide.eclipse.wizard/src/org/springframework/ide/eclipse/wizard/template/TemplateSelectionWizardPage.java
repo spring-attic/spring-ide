@@ -414,7 +414,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 									new SubProgressMonitor(monitor, 1));
 						}
 						selectedTemplate.setTemplateData(data);
-						monitor.done();
 					}
 					catch (CoreException e) {
 						throw new InvocationTargetException(e);

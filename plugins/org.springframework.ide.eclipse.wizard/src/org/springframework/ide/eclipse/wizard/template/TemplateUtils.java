@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -35,17 +36,17 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateP
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateProjectData;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
-import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager.DownloadJob;
+import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
-
 
 /**
  * @author Terry Denney
  */
 public class TemplateUtils {
 
-	public static File importDirectory(ContentItem item, final Shell shell, SubMonitor monitor) throws CoreException {
+	public static File importDirectory(ContentItem item, final Shell shell, SubMonitor monitor) throws CoreException,
+			InterruptedException {
 		Assert.isNotNull(item);
 		String id = item.getId();
 		if (item.needsDownload()) {
@@ -58,7 +59,20 @@ public class TemplateUtils {
 			});
 			if (response[0]) {
 				DownloadJob job = ContentPlugin.getDefault().getManager().createDownloadJob(item);
-				job.run(monitor.newChild(80));
+				job.schedule();
+
+				try {
+					if (!job.getLatch().await(60, TimeUnit.SECONDS)) {
+						job.cancel();
+					}
+				}
+				catch (InterruptedException e) {
+					job.cancel();
+					throw e;
+				}
+				catch (Exception e) {
+					System.err.println("Caught exception @@@@@" + e);
+				}
 
 				// re-get sample project since it may changed
 				item = ContentPlugin.getDefault().getManager().getItem(id);
@@ -137,7 +151,7 @@ public class TemplateUtils {
 	}
 
 	public static ITemplateProjectData importTemplate(Template template, final Shell shell,
-			final IProgressMonitor monitor) throws CoreException {
+			final IProgressMonitor monitor) throws CoreException, InterruptedException {
 		SubMonitor progress = SubMonitor.convert(monitor, 100);
 		File templateDir = importDirectory(template.getItem(), shell, progress);
 
