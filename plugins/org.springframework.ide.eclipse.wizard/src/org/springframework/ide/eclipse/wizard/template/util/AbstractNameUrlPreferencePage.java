@@ -249,6 +249,10 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 							}
 							model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
 							tableViewer.refresh();
+							// the tableViewer refresh deselects the line, so
+							// disable the buttons
+							editButton.setEnabled(false);
+							removeButton.setEnabled(false);
 						}
 						catch (URISyntaxException e1) {
 							errorText.setText("Error!  The URL " + urlString + " was malformed.  Ignoring.");
