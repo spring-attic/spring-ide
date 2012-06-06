@@ -286,6 +286,7 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 						tableViewer.remove(selectedTuple);
 						tableViewer.refresh();
 						editButton.setEnabled(false);
+						removeButton.setEnabled(false);
 					}
 				}
 				catch (URISyntaxException e1) {
