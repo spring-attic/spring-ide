@@ -82,6 +82,7 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateCa
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoLoader;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage;
+import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencesModel;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
@@ -530,9 +531,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	}
 
 	private void initializeTemplates() {
-		// FIXME keep old templates; only replace if there wasn't an error
 		templates.clear();
 
+		TemplatesPreferencesModel.getInstance(); // side effect: initializes
 		Collection<ContentItem> items = ContentPlugin.getDefault().getManager()
 				.getItemsByKind(ContentManager.KIND_TEMPLATE);
 

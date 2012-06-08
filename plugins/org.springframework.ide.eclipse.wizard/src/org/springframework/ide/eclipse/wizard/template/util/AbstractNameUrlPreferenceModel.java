@@ -58,8 +58,17 @@ public abstract class AbstractNameUrlPreferenceModel {
 							+ "The issue tracker is at https://issuetracker.springsource.com/browse/STS", null);
 			MessageDialog.openError(null, title, message);
 		}
+
+		// You always want the defaults set;
+		// you might not want to overwrite the store
 		setDefaults();
+
+		// side effect: if the instance store is empty, set the instance store
+		// to the default values
 		revert();
+
+		// If don't persist it here, it isn't available to the ResourceProvider
+		persist();
 	}
 
 	public void revert() {
