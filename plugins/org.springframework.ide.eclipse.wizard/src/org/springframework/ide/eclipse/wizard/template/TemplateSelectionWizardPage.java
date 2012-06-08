@@ -261,9 +261,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		legendText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		legendText.setText("requires downloading");
 
-		Hyperlink hyperlink = new Hyperlink(container, SWT.WRAP | SWT.BOTTOM);
-		GridDataFactory.fillDefaults().grab(false, true).indent(5, 0).applyTo(hyperlink);
-		hyperlink.setText(NLS.bind("Edit list of template projects", null));
+		Hyperlink hyperlink = new Hyperlink(container, SWT.WRAP | SWT.TRAIL | SWT.TOP);
+		GridDataFactory.fillDefaults().grab(false, true).align(SWT.END, SWT.BEGINNING).indent(5, 0).applyTo(hyperlink);
+		hyperlink.setText(NLS.bind("Configure templates...", null));
 		Color blue = new Color(null, 0, 0, 255);
 		hyperlink.setForeground(blue);
 		hyperlink.setUnderlined(true);
