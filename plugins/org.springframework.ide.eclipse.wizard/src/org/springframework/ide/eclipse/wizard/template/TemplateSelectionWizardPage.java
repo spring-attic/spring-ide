@@ -149,7 +149,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 	@Override
 	public boolean canFlipToNextPage() {
-		return selectedTemplate != null;
+		return treeViewer.getSelection() != null && !treeViewer.getSelection().isEmpty();
 	}
 
 	public void createControl(Composite parent) {
@@ -351,12 +351,13 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				if (selection instanceof TreeSelection) {
 					Object element = ((TreeSelection) selection).getFirstElement();
 					if (element instanceof Template) {
-						selectedTemplate = ((Template) element);
+						if (element != null) {
+							selectedTemplate = ((Template) element);
+						}
 					}
 				}
 				firstPage = null;
 
-				// selectedTemplate can be null if there is no network
 				if (selectedTemplate != null) {
 					setDescription(selectedTemplate);
 					if (TemplateSelectionWizardPage.this.equals(wizard.getContainer().getCurrentPage())) {
@@ -395,7 +396,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			return firstPage;
 		}
 
-		if (selectedTemplate == null) {
+		if (!canFlipToNextPage()) {
 			return null;
 		}
 
@@ -621,7 +622,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	}
 
 	private void refreshPage() {
-		selectedTemplate = null;
+		// selectedTemplate = null;
 
 		treeViewer.refresh(true);
 		treeViewer.setSelection(new StructuredSelection());
