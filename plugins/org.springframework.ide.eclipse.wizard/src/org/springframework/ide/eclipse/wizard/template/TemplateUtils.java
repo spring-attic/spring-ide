@@ -70,9 +70,6 @@ public class TemplateUtils {
 					job.cancel();
 					throw e;
 				}
-				catch (Exception e) {
-					System.err.println("Caught exception @@@@@" + e);
-				}
 
 				// re-get sample project since it may changed
 				item = ContentPlugin.getDefault().getManager().getItem(id);
@@ -93,8 +90,8 @@ public class TemplateUtils {
 		}
 
 		if (item == null || !item.isLocal()) {
-			throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, NLS.bind(
-					"Download of template ''{0}'' failed", id)));
+			String message = NLS.bind("Download of template ''{0}'' failed", id);
+			throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message));
 		}
 
 		File projectDir = new File(baseDir, item.getPath());
