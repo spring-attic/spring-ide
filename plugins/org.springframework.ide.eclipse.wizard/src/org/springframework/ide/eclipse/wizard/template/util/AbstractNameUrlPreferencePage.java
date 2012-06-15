@@ -180,7 +180,6 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 			}
 		});
 
-		// @@@ What is this for?
 		// after adding an item do the packing of the table
 		if (table.getItemCount() > 0) {
 			TableColumn[] columns = table.getColumns();
@@ -303,20 +302,6 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 
 		});
 
-		// restoreButton = new Button(buttonComp, SWT.NONE);
-		// GridDataFactory.fillDefaults().grab(true,
-		// false).applyTo(restoreButton);
-		//
-		// restoreButton.setText(NLS.bind("Restore defaults", null));
-		// restoreButton.addSelectionListener(new SelectionAdapter() {
-		// @Override
-		// public void widgetSelected(SelectionEvent e) {
-		// doRestoreDefaults();
-		// tableViewer.refresh();
-		// }
-		//
-		// });
-
 		errorText = new Label(parent, SWT.NONE);
 		errorText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		errorText.setText(""); // leaving space for error message
@@ -333,8 +318,6 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 	}
 
 	protected void updateSelection(ISelection selection) {
-		// FIXME when does this happen?
-		System.err.println("Updated!");
 	}
 
 	// we are not using the IPreferenceStore; we are using
