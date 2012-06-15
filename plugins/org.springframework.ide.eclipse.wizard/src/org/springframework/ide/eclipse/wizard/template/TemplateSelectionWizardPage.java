@@ -647,7 +647,11 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		String description = null;
 
 		if (template != null) {
-			description = template.getDescription() + " URL: " + template.getItem().getRemoteDescriptor().getUrl();
+			description = template.getDescription();
+			if (template.getItem().getRemoteDescriptor() != null) {
+				description += "\n\nURL:" + template.getItem().getRemoteDescriptor().getUrl();
+
+			}
 		}
 
 		if (description != null) {
