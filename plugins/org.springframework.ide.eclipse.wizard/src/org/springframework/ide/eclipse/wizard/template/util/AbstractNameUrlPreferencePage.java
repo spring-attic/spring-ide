@@ -17,7 +17,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -64,6 +63,8 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 
 	private Label errorText;
 
+	private Button optionalCheckbox;
+
 	protected abstract String preferencePageHeaderText();
 
 	protected abstract boolean validateUrl(String urlString);
@@ -71,6 +72,10 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 	protected abstract AbstractNameUrlPreferenceModel getModel();
 
 	protected abstract String validationErrorMessage(String urlString);
+
+	protected abstract boolean shouldShowCheckbox();
+
+	protected abstract String checkboxLabel();
 
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(doGetPreferenceStore());
@@ -302,6 +307,13 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 
 		});
 
+		if (shouldShowCheckbox()) {
+			optionalCheckbox = new Button(parent, SWT.CHECK | SWT.WRAP | SWT.BOTTOM);
+			GridDataFactory.fillDefaults().grab(true, false).applyTo(optionalCheckbox);
+			optionalCheckbox.setText(checkboxLabel());
+			optionalCheckbox.setEnabled(true);
+		}
+
 		errorText = new Label(parent, SWT.NONE);
 		errorText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		errorText.setText(""); // leaving space for error message
@@ -320,12 +332,8 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 	protected void updateSelection(ISelection selection) {
 	}
 
-	// we are not using the IPreferenceStore; we are using
-	// IEclipsePreferences instead because the ContentManager
-	// uses IEclipsePreferences.
-	@Override
-	protected IPreferenceStore doGetPreferenceStore() {
-		return null;
+	protected boolean getCheckboxValue() {
+		return optionalCheckbox.getSelection();
 	}
 
 }

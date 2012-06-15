@@ -57,4 +57,14 @@ public class ExampleProjectsPreferencePage extends AbstractNameUrlPreferencePage
 		return ExampleProjectsPreferenceModel.getInstance();
 	}
 
+	@Override
+	protected boolean shouldShowCheckbox() {
+		return false;
+	}
+
+	@Override
+	protected String checkboxLabel() {
+		return null;
+	}
+
 }

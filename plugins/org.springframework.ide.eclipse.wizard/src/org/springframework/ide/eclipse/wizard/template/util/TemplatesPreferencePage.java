@@ -99,4 +99,19 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 		job.schedule();
 
 	}
+
+	@Override
+	protected boolean shouldShowCheckbox() {
+		return true;
+	}
+
+	@Override
+	protected String checkboxLabel() {
+		return NLS.bind("Show self-hosted templates in New Template Wizard", null);
+	}
+
+	// is the "Show self-hosted templates" checkbox enabled?
+	public boolean shouldGetSelfHosted() {
+		return getCheckboxValue();
+	}
 }
