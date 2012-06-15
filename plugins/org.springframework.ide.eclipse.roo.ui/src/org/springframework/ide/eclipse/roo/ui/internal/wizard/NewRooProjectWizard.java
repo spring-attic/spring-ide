@@ -24,7 +24,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
@@ -34,7 +33,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
 import org.springframework.ide.eclipse.roo.core.model.IRooInstall;
 import org.springframework.ide.eclipse.roo.ui.RooUiActivator;
@@ -43,10 +41,13 @@ import org.springframework.ide.eclipse.roo.ui.internal.StyledTextAppender;
 import org.springframework.ide.eclipse.roo.ui.internal.actions.OpenShellJob;
 import org.springframework.roo.shell.eclipse.Bootstrap;
 import org.springframework.roo.shell.eclipse.ProjectRefresher;
+import org.springsource.ide.eclipse.commons.core.SpringCorePreferences;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 
 /**
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  * @since 2.2.0
  */
 @SuppressWarnings("restriction")
@@ -83,31 +84,6 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 			+ "	<classpathentry excluding=\"**\" kind=\"src\" output=\"target/test-classes\" path=\"src/test/resources\"/>\n"
 			+ "	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n"
 			+ "	<classpathentry kind=\"output\" path=\"target/classes\"/>\n" + "</classpath>\n" + "";
-
-	private static final String PROJECT_FILE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<projectDescription>\n" + "	<name>%PROJECTNAME%</name>\n" + "	<comment></comment>\n" + "	<projects>\n"
-			+ "	</projects>\n" + "	<buildSpec>\n" +  "		<buildCommand>\n"
-			+ "			<name>org.eclipse.ajdt.core.ajbuilder</name>\n" + "			<arguments>\n" + "			</arguments>\n"
-			+ "		</buildCommand>\n" + "		<buildCommand>\n"
-			+ "			<name>org.springframework.ide.eclipse.core.springbuilder</name>\n" + "			<arguments>\n"
-			+ "			</arguments>\n" + "		</buildCommand>\n" + "	</buildSpec>\n" + "	<natures>\n"
-			+ "		<nature>org.eclipse.jdt.core.javanature</nature>\n"
-			+ "		<nature>org.eclipse.ajdt.ui.ajnature</nature>\n"
-			+ "		<nature>com.springsource.sts.roo.core.nature</nature>\n"
-			+ "		<nature>org.springframework.ide.eclipse.core.springnature</nature>\n"
-			+ "		</natures>\n" + "</projectDescription>\n"
-			+ "";
-
-	private static final String ADDON_PROJECT_FILE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<projectDescription>\n" + "	<name>%PROJECTNAME%</name>\n" + "	<comment></comment>\n" + "	<projects>\n"
-			+ "	</projects>\n" + "	<buildSpec>\n" + "		<buildCommand>\n"
-			+ "			<name>org.eclipse.jdt.core.javabuilder</name>\n" + "			<arguments>\n" + "			</arguments>\n"
-			+ "		</buildCommand>\n" + "		<buildCommand>\n"
-			+ "			<name>org.springframework.ide.eclipse.core.springbuilder</name>\n" + "			<arguments>\n"
-			+ "			</arguments>\n" + "		</buildCommand>\n" + "	</buildSpec>\n" + "	<natures>\n"
-			+ "		<nature>org.eclipse.jdt.core.javanature</nature>\n"
-			+ "		<nature>org.springframework.ide.eclipse.core.springnature</nature>\n" + "	</natures>\n"
-			+ "</projectDescription>\n" + "";
 
 	private NewRooProjectWizardPageOne projectPage;
 
@@ -215,21 +191,14 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 
 					monitor.subTask("configuring Eclipse project meta data");
 					// Setup Eclipse metadata
-					File projectDescriptor = new File(projectFile, ".project");
-					FileWriter writer = new FileWriter(projectDescriptor);
-					if (type == ProjectType.PROJECT) {
-						writer.write(PROJECT_FILE.replace("%PROJECTNAME%", projectPage.getProjectName()));
-					}
-					else {
-						writer.write(ADDON_PROJECT_FILE.replace("%PROJECTNAME%", projectPage.getProjectName()));
-					}
-					writer.flush();
-					writer.close();
-
 					File classpathDescriptor = new File(projectFile, ".classpath");
-					writer = new FileWriter(classpathDescriptor);
+					FileWriter writer = new FileWriter(classpathDescriptor);
 					if (type == ProjectType.PROJECT) {
-						writer.write(CLASSPATH_FILE);
+						// For now, only Java projects & web projects
+						if (!RooUiUtil.isRoo120OrGreater(install) || "jar".equalsIgnoreCase(packagingProvider)
+								|| "war".equalsIgnoreCase(packagingProvider)) {
+							writer.write(CLASSPATH_FILE);
+						}
 					}
 					else {
 						writer.write(ADDON_CLASSPATH_FILE);
@@ -238,15 +207,33 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					writer.close();
 
 					monitor.subTask("importing project into workspace");
-					IProjectDescription desc = ResourcesPlugin.getWorkspace().loadProjectDescription(
-							new Path(projectDescriptor.getAbsolutePath()));
 					IWorkspace workspace = ResourcesPlugin.getWorkspace();
 					IProject project = workspace.getRoot().getProject(projectPage.getProjectName());
+					IProjectDescription desc = workspace.newProjectDescription(projectPage.getProjectName());
 
 					project.create(desc, new NullProgressMonitor());
 					project.open(0, new NullProgressMonitor());
 					project.setDescription(desc, new NullProgressMonitor());
 
+					if (type == ProjectType.PROJECT) {
+						if (!RooUiUtil.isRoo120OrGreater(install) || "jar".equalsIgnoreCase(packagingProvider)
+								|| "war".equalsIgnoreCase(packagingProvider)) {
+							// For now, only Java projects & web projects
+							SpringCoreUtils.addProjectBuilder(project, "org.eclipse.ajdt.core.ajbuilder", new NullProgressMonitor());
+							SpringCoreUtils.addProjectBuilder(project, SpringCore.BUILDER_ID, new NullProgressMonitor());
+							SpringCoreUtils.addProjectNature(project, JavaCore.NATURE_ID, new NullProgressMonitor());
+							SpringCoreUtils.addProjectNature(project, "org.eclipse.ajdt.ui.ajnature", new NullProgressMonitor());
+						}
+						SpringCoreUtils.addProjectNature(project, SpringCore.NATURE_ID, new NullProgressMonitor());
+						SpringCoreUtils.addProjectNature(project, RooCoreActivator.NATURE_ID, new NullProgressMonitor());
+					} else {
+						// Add-ons
+						SpringCoreUtils.addProjectBuilder(project, JavaCore.BUILDER_ID, new NullProgressMonitor());
+						SpringCoreUtils.addProjectNature(project, JavaCore.NATURE_ID, new NullProgressMonitor());
+						SpringCoreUtils.addProjectBuilder(project, SpringCore.BUILDER_ID, new NullProgressMonitor());
+						SpringCoreUtils.addProjectNature(project, SpringCore.NATURE_ID, new NullProgressMonitor());
+					}
+					
 					SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.PLUGIN_ID).putBoolean(
 							RooCoreActivator.PROJECT_PROPERTY_ID, useDefault);
 					SpringCorePreferences.getProjectPreferences(project, RooCoreActivator.PLUGIN_ID).putString(
@@ -364,4 +351,5 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 		}
 
 	}
+	
 }
