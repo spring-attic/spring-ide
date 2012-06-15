@@ -312,6 +312,13 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 			GridDataFactory.fillDefaults().grab(true, false).applyTo(optionalCheckbox);
 			optionalCheckbox.setText(checkboxLabel());
 			optionalCheckbox.setEnabled(true);
+			optionalCheckbox.setSelection(model.getOptionalFlagValue());
+			optionalCheckbox.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					model.setOptionalFlagValue(optionalCheckbox.getSelection());
+				}
+			});
 		}
 
 		errorText = new Label(parent, SWT.NONE);

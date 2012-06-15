@@ -32,9 +32,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -88,6 +90,7 @@ import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.ContentUtil;
 import org.springsource.ide.eclipse.commons.content.core.util.Descriptor;
+import org.springsource.ide.eclipse.commons.content.core.util.DescriptorReader;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
@@ -534,9 +537,19 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	private void initializeTemplates() {
 		templates.clear();
 
-		TemplatesPreferencesModel.getInstance(); // side effect: initializes
+		TemplatesPreferencesModel model = TemplatesPreferencesModel.getInstance(); // side
+																					// effect:
+																					// initializes
 		Collection<ContentItem> items = ContentPlugin.getDefault().getManager()
 				.getItemsByKind(ContentManager.KIND_TEMPLATE);
+
+		if (model.shouldShowSelfHostedProjects()) {
+			Collection<ContentItem> allProjects = findLocalTemplateProjects();
+			if (allProjects != null && allProjects.size() > 0) {
+				allProjects.addAll(items);
+				items = allProjects;
+			}
+		}
 
 		List<ContentItem> sortedItems = new ArrayList<ContentItem>();
 		sortedItems.addAll(items);
@@ -614,6 +627,56 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				return t1.getName().compareTo(t2.getName());
 			}
 		});
+	}
+
+	private Collection<ContentItem> findLocalTemplateProjects() {
+
+		Collection<ContentItem> localProjects = new ArrayList<ContentItem>();
+
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		if (projects != null) {
+			int size = projects.length;
+
+			for (int i = 0; i < size; i++) {
+				// does it have templates.xml and wizard.json?
+				IProject project = projects[i];
+				if (project.exists() && project.isOpen()) {
+					IPath path = projects[i].getFullPath();
+
+					File baseDir = path.toFile();
+					IFile templateFile = project.getFile(new Path("template.xml"));
+					IFile wizardFile = project.getFile(new Path("wizard.json"));
+					if (templateFile.exists() && wizardFile.exists()) {
+
+						InputStream templateFileStream;
+						try {
+							templateFileStream = templateFile.getContents();
+
+							DescriptorReader reader = new DescriptorReader();
+							List<Descriptor> localDescriptors = reader.read(templateFileStream);
+							// There should only be one descriptor in
+							// template.xml,ignore subsequent ones
+							if (localDescriptors.size() > 0) {
+								Descriptor descriptor = localDescriptors.get(0);
+								descriptor.setLocal(true);
+								ContentItem newItem = new ContentItem(descriptor.getId(), project);
+								newItem.setLocalDescriptor(descriptor);
+								localProjects.add(newItem);
+
+							}
+
+						}
+						catch (CoreException e) {
+							String message = NLS.bind("Error while parsing ''{0}/{1}''", baseDir, "template.xml");
+							MessageDialog.openWarning(getShell(), "Warning", message);
+						}
+
+					}
+				}
+			}
+		}
+
+		return localProjects;
 	}
 
 	@Override

@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
-
 public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 
 	public final static String DEFAULT_FILENAME = "/defaultTemplateUrls.properties";
@@ -34,6 +33,8 @@ public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 		return instance;
 	}
 
+	public boolean shouldShowSelfHostedProjects;
+
 	public TemplatesPreferencesModel() {
 		super();
 	}
@@ -43,9 +44,28 @@ public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 		return ContentManager.RESOURCE_CONTENT_DESCRIPTORS;
 	}
 
+	protected String getStoreSelfHostingKey() {
+		return "templates.selfhosting.key";
+	}
+
 	@Override
 	protected String getDefaultFilename() {
 		return DEFAULT_FILENAME;
+	}
+
+	@Override
+	protected void setDefaults() {
+		super.setDefaults();
+		// We don't really need to store the default value in defaultStore since
+		// we can get the default value from the second argument in the
+		// store.get()
+		getDefaultStore().putBoolean(getStoreSelfHostingKey(), optionalFlagDefault());
+	}
+
+	@Override
+	public void revert() {
+		super.revert();
+		shouldShowSelfHostedProjects = getStore().getBoolean(getStoreSelfHostingKey(), optionalFlagDefault());
 	}
 
 	@Override
@@ -57,4 +77,27 @@ public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 	protected IEclipsePreferences getDefaultStore() {
 		return DefaultScope.INSTANCE.getNode(CorePlugin.PLUGIN_ID);
 	}
+
+	@Override
+	public boolean persist() {
+		boolean successful = super.persist();
+		getStore().putBoolean(getStoreSelfHostingKey(), shouldShowSelfHostedProjects);
+		return successful;
+	}
+
+	@Override
+	protected void setOptionalFlagValue(boolean flagValue) {
+		shouldShowSelfHostedProjects = flagValue;
+		getAndClearChangedFlag();
+	}
+
+	@Override
+	protected boolean getOptionalFlagValue() {
+		return shouldShowSelfHostedProjects;
+	}
+
+	public boolean shouldShowSelfHostedProjects() {
+		return getOptionalFlagValue();
+	}
+
 }

@@ -76,6 +76,9 @@ public abstract class AbstractNameUrlPreferenceModel {
 		if (currentString == null) {
 			currentString = defaultStore.get(getStoreKey(), "");
 		}
+		// don't need to be as careful with the optional flag because
+		// its default is something reasonable; also it can't be set to
+		// null to show that it has not been set
 	}
 
 	// This initializes the defaults; it is NOT ever called by the user
@@ -167,6 +170,16 @@ public abstract class AbstractNameUrlPreferenceModel {
 
 	protected void clearNonDefaults() {
 		currentString = defaultStore.get(getStoreKey(), null);
+	}
+
+	// The templates need somewhere to keep a boolean of whether or
+	// not to show self-hosted templates in the New Template Wizard.
+	protected abstract void setOptionalFlagValue(boolean flagValue);
+
+	protected abstract boolean getOptionalFlagValue();
+
+	protected boolean optionalFlagDefault() {
+		return false;
 	}
 
 }

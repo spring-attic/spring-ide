@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 
-
 public class ExampleProjectsPreferenceModel extends AbstractNameUrlPreferenceModel {
 
 	private static ExampleProjectsPreferenceModel instance;
@@ -55,6 +54,17 @@ public class ExampleProjectsPreferenceModel extends AbstractNameUrlPreferenceMod
 	@Override
 	protected IEclipsePreferences getDefaultStore() {
 		return DefaultScope.INSTANCE.getNode(WizardPlugin.PLUGIN_ID);
+	}
+
+	@Override
+	protected void setOptionalFlagValue(boolean flagValue) {
+		// not applicable
+	}
+
+	@Override
+	protected boolean getOptionalFlagValue() {
+		// not applicable, return value doesn't matter
+		return false;
 	}
 
 }
