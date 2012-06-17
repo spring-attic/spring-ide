@@ -11,13 +11,34 @@
   collect some usage data. This is completely anonymous and helps us to understand better how
   the tooling is used and how to improve it in the future.
 
-## Installation
+  It also comes with the SpringSource Dashboard is an optional component, which brings you
+  up-to-date information about SpringSource-related projects as well as an easy-to-use extension
+  install to get additional tooling add-ons, like the VMware vFabric tc Server Integration for
+  Eclipse or the Cloud Foundry Integration for Eclipse.
+
+## Installation (Release)
 
   First, you can install Spring IDE from the Eclipse Marketplace into your existing Eclipse installation.
   Second, you can install Spring IDE manually from this udpate site:
 
   http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse Indigo 3.7)
   http://dist.springsource.com/release/TOOLS/update/e3.6 (for Eclipse Helios 3.6)
+
+## Installation (Milestone)
+
+  You can install the latest milestone build of the Spring IDE manually from this udpate site:
+
+  https://dist.springframework.org/milestone/IDE/
+
+## Installation (CI builds)
+
+  If you want to live on the leading egde, you can also install always up-to-date continuous
+  integration buids from this update site:
+
+  http://dist.springframework.org/snapshot/IDE/nightly/
+
+  But take care, those builds could be broken from time to time and might contain non-ship-ready
+  features that might never appear in the milestone or release builds.
 
 ## Getting started
 
@@ -53,7 +74,7 @@
   The Spring IDE project uses Maven Tycho to do continuous integration builds and to produce
   p2 repos and update sites. To build Spring IDE itself, you can execute:
 
-  mvn -Dp2.qualifier=SNAPSHOT -Pe36 clean install
+  mvn -Pe37 clean install
 
 ## Contributing
 
