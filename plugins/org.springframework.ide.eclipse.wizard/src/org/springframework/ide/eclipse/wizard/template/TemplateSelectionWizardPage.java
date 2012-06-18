@@ -32,11 +32,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -90,7 +88,6 @@ import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.ContentUtil;
 import org.springsource.ide.eclipse.commons.content.core.util.Descriptor;
-import org.springsource.ide.eclipse.commons.content.core.util.DescriptorReader;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
@@ -543,14 +540,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		Collection<ContentItem> items = ContentPlugin.getDefault().getManager()
 				.getItemsByKind(ContentManager.KIND_TEMPLATE);
 
-		if (model.shouldShowSelfHostedProjects()) {
-			Collection<ContentItem> allProjects = findLocalTemplateProjects();
-			if (allProjects != null && allProjects.size() > 0) {
-				allProjects.addAll(items);
-				items = allProjects;
-			}
-		}
-
 		List<ContentItem> sortedItems = new ArrayList<ContentItem>();
 		sortedItems.addAll(items);
 		Collections.sort(sortedItems, new Comparator<ContentItem>() {
@@ -577,49 +566,53 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			}
 		}
 
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (IProject project : projects) {
-			IFile templateFile = project.getFile("template.xml");
-			if (templateFile.exists()) {
-				File file = templateFile.getLocation().toFile();
-				try {
-					DocumentBuilder documentBuilder = ContentUtil.createDocumentBuilder();
-					Document document = documentBuilder.parse(file);
-					Element rootNode = document.getDocumentElement();
-					if (rootNode != null) {
-						NodeList children = rootNode.getChildNodes();
-						for (int i = 0; i < children.getLength(); i++) {
-							Node childNode = children.item(i);
-							if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-								if ("descriptor".equals(childNode.getNodeName())) {
-									Descriptor descriptor = Descriptor.read(childNode);
-									ContentItem item = new ContentItem(descriptor.getId(), project);
-									item.setLocalDescriptor(descriptor);
-									descriptor.setUrl(project.getName());
-									ImageDescriptor icon = null;
-									Template template = new Template(item, icon);
-									templates.add(template);
+		if (model.shouldShowSelfHostedProjects()) {
+
+			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+			for (IProject project : projects) {
+				IFile templateFile = project.getFile("template.xml");
+				IFile wizardFile = project.getFile("wizard.json");
+				if (templateFile.exists() && wizardFile.exists()) {
+					File file = templateFile.getLocation().toFile();
+					try {
+						DocumentBuilder documentBuilder = ContentUtil.createDocumentBuilder();
+						Document document = documentBuilder.parse(file);
+						Element rootNode = document.getDocumentElement();
+						if (rootNode != null) {
+							NodeList children = rootNode.getChildNodes();
+							for (int i = 0; i < children.getLength(); i++) {
+								Node childNode = children.item(i);
+								if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+									if ("descriptor".equals(childNode.getNodeName())) {
+										Descriptor descriptor = Descriptor.read(childNode);
+										ContentItem item = new ContentItem(descriptor.getId(), project);
+										item.setLocalDescriptor(descriptor);
+										descriptor.setUrl(project.getName());
+										ImageDescriptor icon = null;
+										Template template = new Template(item, icon);
+										templates.add(template);
+									}
 								}
 							}
 						}
 					}
-				}
-				catch (CoreException e) {
-					String message = NLS.bind("Error getting and parsing descriptors file in background {0}",
-							e.getMessage());
-					MessageDialog.openWarning(getShell(), "Warning", message);
-				}
-				catch (SAXException e) {
-					String message = NLS.bind("Error parsing tmp descriptors file at {0} in background.\n{1}", file,
-							e.getMessage());
-					MessageDialog.openWarning(getShell(), "Warning", message);
-				}
-				catch (IOException e) {
-					String message = NLS.bind("IO error on file at {0} opened in background.\n{1}", file,
-							e.getMessage());
-					MessageDialog.openWarning(getShell(), "Warning", message);
-				}
+					catch (CoreException e) {
+						String message = NLS.bind("Error getting and parsing descriptors file in background {0}",
+								e.getMessage());
+						MessageDialog.openWarning(getShell(), "Warning", message);
+					}
+					catch (SAXException e) {
+						String message = NLS.bind("Error parsing tmp descriptors file at {0} in background.\n{1}",
+								file, e.getMessage());
+						MessageDialog.openWarning(getShell(), "Warning", message);
+					}
+					catch (IOException e) {
+						String message = NLS.bind("IO error on file at {0} opened in background.\n{1}", file,
+								e.getMessage());
+						MessageDialog.openWarning(getShell(), "Warning", message);
+					}
 
+				}
 			}
 		}
 		Collections.sort(templates, new Comparator<Template>() {
@@ -627,56 +620,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				return t1.getName().compareTo(t2.getName());
 			}
 		});
-	}
-
-	private Collection<ContentItem> findLocalTemplateProjects() {
-
-		Collection<ContentItem> localProjects = new ArrayList<ContentItem>();
-
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		if (projects != null) {
-			int size = projects.length;
-
-			for (int i = 0; i < size; i++) {
-				// does it have templates.xml and wizard.json?
-				IProject project = projects[i];
-				if (project.exists() && project.isOpen()) {
-					IPath path = projects[i].getFullPath();
-
-					File baseDir = path.toFile();
-					IFile templateFile = project.getFile(new Path("template.xml"));
-					IFile wizardFile = project.getFile(new Path("wizard.json"));
-					if (templateFile.exists() && wizardFile.exists()) {
-
-						InputStream templateFileStream;
-						try {
-							templateFileStream = templateFile.getContents();
-
-							DescriptorReader reader = new DescriptorReader();
-							List<Descriptor> localDescriptors = reader.read(templateFileStream);
-							// There should only be one descriptor in
-							// template.xml,ignore subsequent ones
-							if (localDescriptors.size() > 0) {
-								Descriptor descriptor = localDescriptors.get(0);
-								descriptor.setLocal(true);
-								ContentItem newItem = new ContentItem(descriptor.getId(), project);
-								newItem.setLocalDescriptor(descriptor);
-								localProjects.add(newItem);
-
-							}
-
-						}
-						catch (CoreException e) {
-							String message = NLS.bind("Error while parsing ''{0}/{1}''", baseDir, "template.xml");
-							MessageDialog.openWarning(getShell(), "Warning", message);
-						}
-
-					}
-				}
-			}
-		}
-
-		return localProjects;
 	}
 
 	@Override

@@ -151,16 +151,24 @@ public abstract class AbstractNameUrlPreferenceModel {
 			store.put(getStoreKey(), currentString);
 			didChangeFlag = true;
 		}
+
+		boolean oldValue = getStore().getBoolean(getStoreOptionalFlagKey(), optionalFlagDefault());
+		boolean newValue = getOptionalFlagValue();
+		if (oldValue != newValue) {
+			didChangeFlag = true;
+			getStore().putBoolean(getStoreOptionalFlagKey(), getOptionalFlagValue());
+		}
+
 		return false;
 	}
 
 	// We need a way to get information back to the templates preference page so
 	// it can kick off updating the descriptors. You can perhaps imagine
 	// that this flag would be a little scary, that it could get stuck "on" or
-	// "off". However, the only method that does anything with the flag is
-	// TemplatesPreferencePage.performOk(), so there's not a danger of a race.
-	// (ExamplesPreferencePage ignores it.) IF YOU CHANGE SOMETHING SO THAT
-	// MORE THAN ONE METHOD LOOKS AT/MODIFIES didChangeFlag, you might need
+	// "off". However, the only methods that do anything with the flag are in
+	// TemplatesPreferencePage, so there's not currently a danger of
+	// a race.(ExamplesPreferencePage ignores it.) IF YOU CHANGE SOMETHING SO
+	// THAT MORE THAN ONE OBJECT LOOKS AT/MODIFIES didChangeFlag, you might need
 	// to use a different method to kick off updating the descriptors.
 	public boolean getAndClearChangedFlag() {
 		boolean oldValue = didChangeFlag;
@@ -177,6 +185,8 @@ public abstract class AbstractNameUrlPreferenceModel {
 	protected abstract void setOptionalFlagValue(boolean flagValue);
 
 	protected abstract boolean getOptionalFlagValue();
+
+	protected abstract String getStoreOptionalFlagKey();
 
 	protected boolean optionalFlagDefault() {
 		return false;

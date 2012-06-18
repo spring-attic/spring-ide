@@ -79,13 +79,6 @@ public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 	}
 
 	@Override
-	public boolean persist() {
-		boolean successful = super.persist();
-		getStore().putBoolean(getStoreSelfHostingKey(), shouldShowSelfHostedProjects);
-		return successful;
-	}
-
-	@Override
 	protected void setOptionalFlagValue(boolean flagValue) {
 		shouldShowSelfHostedProjects = flagValue;
 		getAndClearChangedFlag();
@@ -94,6 +87,11 @@ public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 	@Override
 	protected boolean getOptionalFlagValue() {
 		return shouldShowSelfHostedProjects;
+	}
+
+	@Override
+	protected String getStoreOptionalFlagKey() {
+		return getStoreSelfHostingKey();
 	}
 
 	public boolean shouldShowSelfHostedProjects() {

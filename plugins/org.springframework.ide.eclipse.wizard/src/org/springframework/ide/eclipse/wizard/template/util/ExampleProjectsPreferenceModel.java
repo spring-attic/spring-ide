@@ -63,8 +63,12 @@ public class ExampleProjectsPreferenceModel extends AbstractNameUrlPreferenceMod
 
 	@Override
 	protected boolean getOptionalFlagValue() {
-		// not applicable, return value doesn't matter
 		return false;
+	}
+
+	@Override
+	protected String getStoreOptionalFlagKey() {
+		return "example.notused.key";
 	}
 
 }
