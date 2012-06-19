@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<bean id="test1" class="com.test.Foo" factory-method="createFoo" >
+		<constructor-arg>
+			<bean class="java.lang.String" />
+		</constructor-arg>
+	</bean> 
+
+	<bean id="test2" class="com.test.Foo" factory-method="createFoos" >
+		<constructor-arg>
+			<bean class="java.lang.String" />
+		</constructor-arg>
+	</bean> 
+	
+	<bean id="noClass" factory-method="foo"/>
+	
+</beans>

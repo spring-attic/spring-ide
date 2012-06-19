@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+	<extension
+	       point="org.springframework.ide.eclipse.core.validators">
+	    <validator id="beansvalidator"
+	          class="org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansConfigValidator"
+	          name="Spring IDE Bean Validator"
+	          description="Spring IDE Best Practices Validator"
+			  icon="icons/view16/springsource_16.png"
+			  markerId="problemmarker"
+			  enabledByDefault="false" />
+		<rules validatorId="org.springframework.ide.eclipse.bestpractices.beansvalidator">
+		  <rule
+          class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.UseDedicatedNamespacesRule"
+          description="Detects cases where dedicated namespace syntax is available"
+          enabledByDefault="false"
+          id="legacyxmlusage.jndiobjectfactory"
+          name="Use Dedicated Namespace Syntax"/>
+	      <rule
+             class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.UnnecessaryValueElementRule"
+             description="This rule suggests that the value attribute should be used instead of the value element for short literals"
+             enabledByDefault="false"
+             id="com.springsource.sts.bestpractices.UnnecessaryValueElementRule"
+             name="Unnecessary Value Element">
+	      		<property name="minValueLength" value="40" description="Min value string length necessary to avoid info message" />
+	      </rule>
+	      <rule
+	            class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.RefElementRule"
+	            enabledByDefault="false"
+	            id="com.springsource.sts.bestpractices.RefElementRule"
+	            name="Unnecessary Ref Element"
+	            description="This rule checks for ref elements and suggests that the ref attribute should be used instead for readability" >
+	      </rule>
+	      <rule
+	            class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.ImportElementsAtTopRule"
+	            enabledByDefault="false"
+	            id="com.springsource.sts.bestpractices.ImportElementsAtTopRulee"
+	            name="Import elements at the top"
+	            description="Imports should appear before bean definitions" >
+	      </rule>
+	      <rule
+	            class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.TooManyBeansInFileRule"
+	            enabledByDefault="false"
+	            id="com.springsource.sts.bestpractices.TooManyBeansInFileRule"
+	            name="Too many beans in file"
+	            description="Bean definitions should be decomposed into several smaller files">
+	            <property name="maxBeanCount" value="40" description="Max beans per file" />
+	      </rule>
+	      <rule
+	            class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.AvoidDriverManagerDataSource"
+	            enabledByDefault="false"
+	            id="com.springsource.sts.bestpractices.AvoidDriverManagerDataSource"
+	            name="Avoid use of DriverManagerDataSource"
+	            description="Use of DriverManagerDataSource is discouraged in most cases because it does not pool connections. See the Javadoc for more information.">
+	      </rule>
+	      <rule
+	            class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.ParentBeanSpecifiesAbstractClassRule"
+	            enabledByDefault="false"
+	            id="com.springsource.sts.bestpractices.ParentBeanSpecifiesAbstractClassRule"
+	            name="Parent beans should not specify abstract classes"
+	            description="Parent beans should not specify abstract classes because the class will be inherited by child beans with no class attribute.">
+	      </rule>
+	      <rule
+	            class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.UseBeanInheritance"
+	            enabledByDefault="false"
+	            id="com.springsource.sts.bestpractices.UseBeanInheritance"
+	            name="Consider using bean inheritance"
+	            description="Configuration could be simplified using bean inheritance" >
+	            <property name="minNumSharedProperties" value="3" description="Minimum number of common properties among beans for inheritance to be suggested" />
+	            <property name="minNumSimilarBeanDefs" value="3" description="Minimum number of similar beans for inheritance to be suggested" />
+	      </rule>
+		</rules>
+	</extension>
+	
+	<!-- Specifies the marker image that appears along the left side of the editor -->
+    <extension point="org.eclipse.ui.ide.markerImageProviders">
+	    <imageprovider 
+	  		markertype="com.springsource.sts.bestpractices.problemmarker" 
+	  		icon="icons/view16/springsource_marker.gif" 
+	  		id="com.springsource.sts.bestPracticeMarkerProvider" /> 
+    </extension> 
+    
+    <extension point="org.eclipse.core.resources.markers"
+			id="com.springsource.sts.bestpractices.problemmarker"
+			name="Spring IDE Problem Marker">
+		<super type="org.springframework.ide.eclipse.core.problemmarker" />
+		<attribute name="ruleId"/>
+		<attribute name="errorId"/>
+		<persistent value="true" />
+	</extension>
+
+	<extension point="org.eclipse.ui.editors.annotationTypes"> 
+		<type 
+        	name="com.springsource.sts.bestpractices.problemmarker.annotation" 
+         	super="org.eclipse.ui.workbench.texteditor.info" 
+         	markerType="com.springsource.sts.bestpractices.problemmarker"/> 
+    </extension> 
+    <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"> 
+      	<specification
+             annotationType="com.springsource.sts.bestpractices.problemmarker.annotation"
+             colorPreferenceKey="problemIndicationColor"
+             colorPreferenceValue="0,112,60"
+             contributesToHeader="true"
+             highlightPreferenceKey="manifestHighlighting"
+             highlightPreferenceValue="true"
+             icon="icons/view16/springsource_marker.gif"
+             label="Spring IDE Problem"
+             overviewRulerPreferenceKey="problemIndicationInOverviewRuler"
+             overviewRulerPreferenceValue="true"
+             quickFixIcon="icons/view16/springsource_marker.png"
+             textPreferenceKey="problemIndication"
+             textPreferenceValue="true"
+             verticalRulerPreferenceKey="problemIndicationInVerticalRuler"
+             verticalRulerPreferenceValue="true"/>
+    </extension> 
+	
+	<!-- Quick Fix -->
+	<extension
+		point="org.eclipse.ui.ide.markerResolution">
+		<markerResolutionGenerator
+			markerType="org.springframework.ide.eclipse.beans.core.problemmarker"
+			class="org.springframework.ide.eclipse.internal.bestpractices.quickfix.MarkerResolutionGenerator">
+		</markerResolutionGenerator>
+	</extension> 
+	<extension
+		point="org.eclipse.ui.ide.markerResolution">
+		<markerResolutionGenerator
+			markerType="com.springsource.sts.bestpractices.problemmarker"
+			class="org.springframework.ide.eclipse.internal.bestpractices.quickfix.MarkerResolutionGenerator">
+		</markerResolutionGenerator>
+	</extension>
+	
+	
+	 <!-- Documentation menu item for marker context menus -->
+	 <extension
+	       point="org.eclipse.ui.popupMenus">
+	    <objectContribution
+	          id="com.springsource.sts.bestpractices.objectContribution.springsourcemarker"
+	          objectClass="org.eclipse.core.resources.IMarker">
+	       <action
+	             class="org.springframework.ide.eclipse.bestpractices.ui.actions.ShowProblemDocumentationAction"
+	             enablesFor="1"
+	             icon="icons/view16/springsource_16.png"
+	             id="com.springsource.sts.bestpractices.action1"
+	             label="SpringSource Documentation"
+	             tooltip="View SpringSource Documentation">
+	       </action>
+	       <filter
+	             name="type"
+	             value="org.springframework.ide.eclipse.beans.core.problemmarker">
+	       </filter>
+	    </objectContribution>
+	    <objectContribution
+	          id="com.springsource.sts.bestpractices.objectContribution.stsmarker"
+	          objectClass="org.eclipse.core.resources.IMarker">
+	       <action
+	             class="org.springframework.ide.eclipse.bestpractices.ui.actions.ShowProblemDocumentationAction"
+	             enablesFor="1"
+	             icon="icons/view16/springsource_16.png"
+	             id="com.springsource.sts.bestpractices.action1"
+	             label="SpringSource Documentation"
+	             tooltip="View SpringSource Documentation">
+	       </action>
+	       <filter
+	             name="type"
+	             value="com.springsource.sts.bestpractices.problemmarker">
+	       </filter>
+	    </objectContribution>
+	 </extension>
+	
+</plugin>

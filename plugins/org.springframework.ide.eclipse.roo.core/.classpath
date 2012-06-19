@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.apache.felix.framework-3.2.2.jar" sourcepath="/org.apache.felix.framework"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.apache.felix.scr-1.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.springframework.roo.felix-1.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.springframework.roo.url.stream-1.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.springframework.roo.wrapping.bcpg-jdk15-1.45.0.0001.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.springframework.roo.wrapping.bcprov-jdk15-1.45.0.0001.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.springframework.roo.support-1.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.springframework.roo.support.osgi-1.1.0.RELEASE.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

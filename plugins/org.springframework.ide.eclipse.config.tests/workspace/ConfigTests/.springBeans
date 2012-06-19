@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<version>1</version>
+	<pluginVersion><![CDATA[2.2.2.qualifier]]></pluginVersion>
+	<configSuffixes>
+		<configSuffix><![CDATA[xml]]></configSuffix>
+	</configSuffixes>
+	<enableImports><![CDATA[false]]></enableImports>
+	<configs>
+		<config>src/aop-config.xml</config>
+		<config>src/batch-config.xml</config>
+		<config>src/beans-config.xml</config>
+		<config>src/empty-beans.xml</config>
+		<config>src/many-beans.xml</config>
+		<config>src/scoped-config.xml</config>
+		<config>src/split-batch.xml</config>
+	</configs>
+	<configSets>
+	</configSets>
+</beansProjectDescription>

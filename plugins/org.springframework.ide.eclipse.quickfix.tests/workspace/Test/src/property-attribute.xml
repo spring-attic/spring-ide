@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="propertyTest1" class="com.test.Account">
+		<property name="balance" value="0"/>
+	</bean>
+	
+	<bean id="propertyTest2" class="com.test.Account">
+		<property name="balances" value="0"/>
+	</bean>
+	
+	<bean id="propertyTest3" class="com.test.Foo">
+		<property name="bar.foobar" value="test"/>
+	</bean>
+	
+	<bean id="propertyTest4" class="com.test.Foo">
+		<property name="bars.foobar" value="test"/>
+	</bean>
+
+	<bean id="deprecatedPropertyTest" class="com.test.Foo">
+		<property name="zoo" value="test"/>
+	</bean>
+
+</beans>

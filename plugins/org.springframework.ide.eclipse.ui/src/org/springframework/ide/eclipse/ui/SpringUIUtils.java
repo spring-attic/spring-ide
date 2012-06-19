@@ -87,6 +87,7 @@ import org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage;
  * This is a collection of UI-related helper methods.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @deprecated Moved to eclipse-integration-commons SpringUIUtils
  */
 @SuppressWarnings("restriction")
 public final class SpringUIUtils {

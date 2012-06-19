@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.3"?>
+<plugin>
+	
+	<extension point="org.springframework.ide.eclipse.core.builders">
+		<builder
+			class="org.springframework.ide.eclipse.osgi.runtime.builder.OsgiBundleUpdateBuilder"
+			enabledByDefault="false" 
+			icon="icons/full/obj16/spring_osgi_obj.gif"
+			id="osgibundleupdater" 
+			name="%osgibundleupdater.name"
+			description="%osgibundleupdater.description" >
+		</builder>
+	</extension>
+	
+	<extension point="org.eclipse.core.variables.dynamicVariables">
+		<variable 
+			description="description" 
+			name="osgi.console.port"
+			resolver="org.springframework.ide.eclipse.osgi.runtime.ConsolePortVariableResolver"
+			supportsArgument="false">
+		</variable>
+	</extension>
+	
+	<extension point="org.eclipse.ui.preferencePages">
+		<page 
+			id="com.springsource.sts.ide.osgi.ui.preferencePage" 
+			name="%preferencePage.name"
+			class="org.springframework.ide.eclipse.osgi.runtime.ui.OSGiRuntimePreferencePage"
+			category="org.springframework.ide.eclipse.ui.preferencePage">
+     <keywordReference
+           id="com.springsource.sts.ide.osgi.ui.keywords">
+     </keywordReference>
+		</page>
+	</extension>
+	
+	<extension point="org.eclipse.ui.keywords">
+      <keyword id="com.springsource.sts.ide.osgi.ui.keywords"
+            label="%propertyKeywords.label"/>
+    </extension>
+	
+</plugin>

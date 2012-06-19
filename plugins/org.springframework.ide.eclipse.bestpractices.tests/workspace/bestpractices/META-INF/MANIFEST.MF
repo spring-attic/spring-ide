@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: bestpractices
+Bundle-SymbolicName: bestpractices
+Bundle-Version: 1.1.1
+Export-Package: com.test
+Import-Package: org.springframework.beans.factory.annotation,
+ org.springframework.jdbc.datasource,
+ org.springframework.jndi

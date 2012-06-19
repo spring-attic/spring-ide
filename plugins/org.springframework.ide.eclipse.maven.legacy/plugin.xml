@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.3"?>
+<!--
+/*******************************************************************************
+ * Copyright (c) 2007, 2010 SpringSource.  All rights reserved.
+ *******************************************************************************/-->
+<plugin>
+	
+    <extension
+          point="com.springsource.sts.ide.configurator.participant">
+       <participant
+             class="org.springframework.ide.eclipse.maven.legacy.internal.core.MavenRuntimeWorkspaceConfigurator"
+             id="com.springsource.sts.configurator.maven.runtime.legacy"
+             label="Maven Runtime">
+       </participant>
+    </extension>
+
+    <extension
+          point="com.springsource.sts.ide.configurator.participant">
+       <participant
+             class="org.springframework.ide.eclipse.maven.legacy.internal.core.MavenRepositoryWorkspaceConfigurator"
+             id="com.springsource.sts.configurator.maven.repository.legacy"
+             label="Maven Repository">
+       </participant>
+    </extension>
+    
+     <extension
+           point="org.maven.ide.eclipse.projectConfigurators">
+        <configurator
+              class="org.springframework.ide.eclipse.maven.legacy.internal.core.SpringProjectConfigurator"
+              id="com.springsource.sts.ide.maven.core.springProjectConfigurator.legacy"
+              name="Spring"
+              priority="102">
+        </configurator>
+        <configurator
+              class="org.springframework.ide.eclipse.maven.legacy.internal.core.DataNucleusProjectConfigurator"
+              id="com.springsource.sts.maven.internal.core.dataNucleusProjectConfigurato.legacyr"
+              name="DataNucleus"
+              priority="103">
+        </configurator>
+     </extension>
+
+     <extension
+           point="org.springframework.ide.eclipse.core.builders">
+        <builder
+              class="org.springframework.ide.eclipse.maven.legacy.internal.core.DataNucleusEnhancerProjectBuilder"
+              description="Incremental project builder that will enhance @Entity classes using DataNucleus"
+              enabledByDefault="false"
+              icon="icons/full/obj16/datanucleus_obj.png"
+              id="com.springsource.sts.maven.core.dataNucleusEnhancerProjectBuilder.legacy"
+              name="DataNucleus Enhancer">
+        </builder>
+     </extension>
+     
+</plugin>

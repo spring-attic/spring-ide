@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="createConstructorTest1" class="com.test.Account">
+		<constructor-arg value="10"/>
+	</bean>
+	
+	<bean id="createConstructorTest2" class="com.test.Account">
+		<constructor-arg value="100"/>
+		<constructor-arg value="Sam"/>
+	</bean>
+
+	<bean id="createConstructorTest3" class="com.test.AccountContribution"/>
+
+</beans>

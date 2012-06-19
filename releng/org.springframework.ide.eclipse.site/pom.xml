@@ -28,13 +28,13 @@
 								<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
 
 								<path id="eclipse.classpath">
-									<fileset dir="${settings.localRepository}/org/sonatype/tycho/tycho-p2-runtime">
+									<fileset dir="${settings.localRepository}/org/eclipse/tycho/tycho-bundles-external">
 										<include name="*/eclipse/plugins/org.eclipse.equinox.launcher_*.jar" />
 									</fileset>
 								</path>
 
 								<path id="jarprocessor.classpath">
-									<fileset dir="${settings.localRepository}/org/sonatype/tycho/tycho-p2-runtime">
+									<fileset dir="${settings.localRepository}/org/eclipse/tycho/tycho-bundles-external">
 										<include name="*/eclipse/plugins/org.eclipse.equinox.p2.jarprocessor_*.jar" />
 									</fileset>
 								</path>

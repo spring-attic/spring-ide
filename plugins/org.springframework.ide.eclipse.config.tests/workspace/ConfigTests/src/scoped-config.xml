@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<description>Example job to get you started. It provides a
+		skeleton for a typical batch application.</description>
+
+	<job id="job1" xmlns="http://www.springframework.org/schema/batch">
+		<step id="step1" parent="simpleStep">
+			<tasklet>
+				<chunk reader="reader" writer="writer" />
+			</tasklet>
+		</step>
+	</job>
+	
+</beans>

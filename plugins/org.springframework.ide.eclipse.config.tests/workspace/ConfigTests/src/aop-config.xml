@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+	<beans:description>A sample configuration file.</beans:description>
+	<beans:bean class="com.test.MyConcreteClass" id="myConcreteClass"/>
+	<beans:bean class="com.test.PropertyChangeTracker" id="propertyChangeTracker"/>
+	
+	<config>
+		<pointcut expression="execution(void set*(*))" id="setterMethod"/>
+		<aspect ref="propertyChangeTracker">
+			<before pointcut-ref="setterMethod" method="trackChange"/>
+		</aspect>
+	</config>
+	
+	<tx:annotation-driven/>
+
+</beans:beans>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+
+	<bean id="myclass" class="com.test.BeanInheritanceTestClass"/>
+
+	<bean id="myclass1" class="com.test.BeanInheritanceTestClass">
+		<constructor-arg type="java.lang.String" value="Hello World"/>
+		<property name="foo" value="bar"/>
+		<property name="fooReference" ref="myclass"/>
+		<property name="theList">
+			<list>
+				<ref bean="myclass"/>
+			</list>
+		</property>
+		<property name="param" value="foobar"/>
+	</bean>
+
+
+	<bean id="myclass2" class="com.test.BeanInheritanceTestClass">
+		<constructor-arg type="java.lang.String" value="Hello World"/>
+		<property name="foo" value="bar"/>
+		<property name="fooReference" ref="myclass"/>
+		<property name="param" value="foobar"/>
+		<property name="param2" value="somedifferentvalue"/>
+	</bean>	
+	
+
+	
+	<bean id="myclass3" class="com.test.BeanInheritanceTestClass">
+		<constructor-arg type="java.lang.String" value="Hello World"/>
+		<property name="foo" value = "bar"/>
+		<property name="fooReference" ref="myclass"/>
+		<property name="param" value="foobar"/>
+		<property name="param2" value="alsodifferent"/>
+	</bean>
+
+
+</beans>

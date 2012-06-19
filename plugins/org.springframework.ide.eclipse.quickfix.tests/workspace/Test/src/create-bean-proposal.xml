@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="createBeanTest1" class="com.test.AccountContribution">
+		<constructor-arg ref="account"/>
+	</bean>
+
+	<bean id="createBeanTest2" factory-bean="accountManager"/>
+
+	<bean id="createBeanTest3" class="com.test.AccountContribution">
+		<constructor-arg>
+			<bean class="com.test.Account">
+				<property name="balances" ref="balance"/>
+			</bean>
+		</constructor-arg>
+	</bean>
+	
+	<task:scheduled-tasks>  
+ 		<task:scheduled ref="target2" method="toString" fixed-rate="1"/>
+ 	</task:scheduled-tasks>
+	
+</beans>

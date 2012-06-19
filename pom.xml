@@ -61,6 +61,13 @@
 		<p2.sign>false</p2.sign>
 		<p2.repository.name>Spring IDE</p2.repository.name>
 		
+		<!-- Signing -->
+		<signing.skip>true</signing.skip>
+		<signing.alias>vmware</signing.alias>
+		<signing.keystore>~/.keytool/springsource.jks</signing.keystore>
+		<signing.store.password>${STORE_PASSWORD}</signing.store.password>
+		<signing.key.password>${KEY_PASSWORD}</signing.key.password>
+
 		<dist.name>Spring IDE</dist.name>
 		<dist.project>spring-ide</dist.project>
 		<dist.key>IDE</dist.key>
@@ -80,10 +87,6 @@
 
 	<modules>
 		
-		<!-- uaa -->
-		<module>plugins/org.springframework.ide.eclipse.uaa</module>
-		<module>features/org.springframework.ide.eclipse.uaa.feature</module>
-		
 		<!-- core -->
 		<module>plugins/org.springframework.ide.eclipse</module>
 		<module>plugins/org.springframework.ide.eclipse.doc</module>
@@ -98,6 +101,14 @@
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.search</module>
 		<module>features/org.springframework.ide.eclipse.feature</module>
 
+		<module>plugins/org.springframework.ide.eclipse.metadata</module>
+		<module>plugins/org.springframework.ide.eclipse.bestpractices</module>
+		<module>plugins/org.springframework.ide.eclipse.config.core</module>
+		<module>plugins/org.springframework.ide.eclipse.config.graph</module>
+		<module>plugins/org.springframework.ide.eclipse.config.ui</module>
+		<module>plugins/org.springframework.ide.eclipse.quickfix</module>
+		<module>plugins/org.springframework.ide.eclipse.wizard</module>
+
 		<!-- aop -->
 		<module>plugins/org.springframework.ide.eclipse.aop.core</module>
 		<module>plugins/org.springframework.ide.eclipse.aop.ui</module>
@@ -107,6 +118,7 @@
 		<!-- osgi -->
 		<module>plugins/org.springframework.ide.eclipse.osgi</module>
 		<module>plugins/org.springframework.ide.eclipse.osgi.targetdefinition</module>
+		<module>plugins/org.springframework.ide.eclipse.osgi.runtime</module>
 		<module>features/org.springframework.ide.eclipse.osgi.feature</module>
 
 		<!-- security -->
@@ -149,8 +161,17 @@
 		<module>plugins/org.springframework.ide.eclipse.data.core</module>
 		<module>plugins/org.springframework.ide.eclipse.data.core.tests</module>
 
+		<!-- roo -->
+		<module>plugins/org.springframework.ide.eclipse.roo.core</module>
+		<module>plugins/org.springframework.ide.eclipse.roo.ui</module>
+		<module>features/org.springframework.ide.eclipse.roo.feature</module>
+		
+		<!-- maven -->
+		<module>plugins/org.springframework.ide.eclipse.maven</module>
+		<module>plugins/org.springframework.ide.eclipse.maven.legacy</module>
+		<module>features/org.springframework.ide.eclipse.maven.feature</module>
+		
 		<!-- sources -->
-		<module>features/org.springframework.ide.eclipse.uaa.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.aop.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.autowire.feature.source</module>
@@ -161,6 +182,8 @@
 		<module>features/org.springframework.ide.eclipse.mylyn.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.webflow.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.ajdt.feature.source</module>
+		<module>features/org.springframework.ide.eclipse.maven.feature.source</module>
+		<module>features/org.springframework.ide.eclipse.roo.feature.source</module>
 
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
@@ -244,13 +267,44 @@
 				</repository>
 			</repositories>
 		</profile>
+		<profile>
+			<id>e37</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 3.7</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e36</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/3.7/</url>
+				</repository>
+				<repository>
+					<id>helios</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/indigo/</url>
+				</repository>
+				<repository>
+					<id>ajdt-e36</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/37/milestone/</url>
+				</repository>
+				<repository>
+				  <id>m2eclipse-legacy</id>
+				  <layout>p2</layout>
+				  <url>http://download.springsource.com/release/TOOLS/third-party/m2eclipse-012</url>
+				</repository>
+			</repositories>
+		</profile>
 	</profiles>
 
 	<repositories>
 		<repository>
-			<id>bundles</id>
+			<id>eclipse-integration-commons</id>
 			<layout>p2</layout>
-			<url>file://${basedir}/../../bundles/repo</url>
+			<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 		</repository>
 		<repository>
 			<!-- necessary for maven and ant AWS dependency -->
@@ -322,6 +376,7 @@
 					</successCodes>
 				</configuration>
             </plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
@@ -340,6 +395,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.5</version>
@@ -347,12 +403,14 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+			
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
+			
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
@@ -361,6 +419,28 @@
 					<resolver>p2</resolver>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<skip>${signing.skip}</skip>
+					<alias>${signing.alias}</alias>
+					<keystore>${signing.keystore}</keystore>
+					<storepass>${signing.store.password}</storepass>
+					<keypass>${signing.key.password}</keypass>
+				</configuration>
+			</plugin>
+
 		</plugins>
 
 		<pluginManagement>
@@ -391,11 +471,6 @@
 								<os>macosx</os>
 								<ws>cocoa</ws>
 								<arch>x86_64</arch>
-							</environment>
-							<environment>
-								<os>macosx</os>
-								<ws>carbon</ws>
-								<arch>x86</arch>
 							</environment>
 							<environment>
 								<os>win32</os>

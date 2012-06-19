@@ -19,6 +19,7 @@ import org.osgi.service.prefs.BackingStoreException;
 /**
  * @author Christian Dupuis
  * @since 2.0
+ * @deprecated Moved to eclipse-integration-commons SpringCorePreferences
  */
 public class SpringCorePreferences {
 	

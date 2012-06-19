@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<!--
+/**
+ * Copyright (c) 2007-2010 SpringSource.  All rights reserved.
+ */
+-->
+<plugin>
+
+    <extension 
+         point="org.springframework.ide.eclipse.beans.core.metadata.metadataproviders">
+        <annotationMetadataProvider
+              class="org.springframework.ide.eclipse.metadata.core.AspectAnnotationMetadataProvider">
+        </annotationMetadataProvider>
+        <annotationMetadataProvider
+              class="org.springframework.ide.eclipse.metadata.core.StereotypeAnnotationMetadataProvider">
+        </annotationMetadataProvider>
+        <annotationMetadataProvider
+              class="org.springframework.ide.eclipse.metadata.core.TransactionalAnnotationMetadataProvider">
+        </annotationMetadataProvider>
+        <annotationMetadataProvider
+              class="org.springframework.ide.eclipse.metadata.core.RequestMappingAnnotationMetadataProvider">
+        </annotationMetadataProvider>
+        <annotationMetadataProvider
+              class="org.springframework.ide.eclipse.metadata.core.ConfigurationClassAnnotationMetadataProvider">
+        </annotationMetadataProvider>
+        <annotationMetadataProvider
+              class="org.springframework.ide.eclipse.metadata.core.AutowireAnnotationMetadataProvider">
+        </annotationMetadataProvider>
+    </extension>
+    
+    <extension
+        point="org.springframework.ide.eclipse.beans.ui.metadataproviders">
+         <metadataProviders 
+               contentProvider="org.springframework.ide.eclipse.metadata.ui.AnnotationMetadataContentProvider"
+               labelProvider="org.springframework.ide.eclipse.metadata.ui.AnnotationMetadataLabelProvider">
+         </metadataProviders>
+    </extension>
+    
+    <extension
+          point="org.springframework.ide.eclipse.beans.core.beansconfiglocators">
+       <beansConfigLocator
+             class="org.springframework.ide.eclipse.metadata.locate.DynamicWebProjectBeansConfigLocator"
+             description="Detects Spring configuration files from the web.xml settings. Looks for ContextLoaderListener, ContextLoaderServlet, DispatcherServlet and MessageDispatcherServlet configurations."
+             enabledByDefault="true"
+             id="webAppBeansConfigLocator"
+             name="Auto detection for WTP Dynamic Web Projects"
+             order="5">
+       </beansConfigLocator>
+    </extension>
+
+    <extension
+          point="org.springframework.ide.eclipse.beans.core.postprocessors">
+       <postprocessor
+             class="org.springframework.ide.eclipse.metadata.process.JdtConfigurationClassPostProcessor"
+             type="org.springframework.context.annotation.ConfigurationClassPostProcessor">
+       </postprocessor>
+    </extension>
+    
+    <extension
+          point="org.eclipse.ui.navigator.viewer">
+       <viewer
+             viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
+       </viewer>
+       <viewerActionBinding
+             viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
+          <includes>
+             <actionExtension
+                   pattern="com.springsource.sts.ide.metadata.AnnotationActions">
+             </actionExtension>
+          </includes>
+       </viewerActionBinding>
+       <viewer
+             viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+       </viewer>
+       <viewerActionBinding
+             viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+          <includes>
+             <actionExtension
+                   pattern="com.springsource.sts.ide.metadata.AnnotationActions">
+             </actionExtension>
+          </includes>
+       </viewerActionBinding>
+    </extension>
+    
+    <extension
+          point="org.eclipse.ui.navigator.navigatorContent">
+       <actionProvider
+             class="org.springframework.ide.eclipse.metadata.actions.AnnotationsActionProvider"
+             id="com.springsource.sts.ide.metadata.AnnotationActions">
+          <enablement>
+             <or>
+                <and>
+                   <instanceof
+                         value="org.eclipse.core.resources.IFile">
+                   </instanceof>
+                   <test
+                         property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig">
+                   </test>
+                </and>
+                <instanceof
+                      value="org.springframework.ide.eclipse.core.model.IModelElement">
+                </instanceof>
+                <instanceof
+                      value="org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference">
+                </instanceof>
+             </or>
+          </enablement>
+       </actionProvider>
+    </extension>
+    
+    <extension
+          point="org.eclipse.ui.views">
+       <view
+             category="org.springframework.ide.eclipse.ui.views"
+             class="org.springframework.ide.eclipse.metadata.ui.RequestMappingView"
+             icon="icons/full/obj16/request_mapping_obj.gif"
+             id="com.springsource.sts.ide.metadata.ui.RequestMappingView"
+             name="%requestMappingsViewName"
+             restorable="true">
+       </view>
+    </extension>
+    
+    <extension
+          point="org.springframework.ide.eclipse.core.listeners">
+       <listener
+             class="org.springframework.ide.eclipse.metadata.ui.RequestMappingViewModelEventListener">
+       </listener>
+    </extension>
+    
+    <extension
+          point="org.eclipse.ui.popupMenus">
+       <objectContribution
+             adaptable="true"
+             id="com.springsource.sts.ide.metadata.ui.actions.requestMappingView"
+             objectClass="org.eclipse.core.resources.IResource">
+          <menu
+                id="org.springframework.ide.eclipse.ui.tools"
+                label="%springToolsMenuLabel">
+             <separator
+                   name="group0">
+             </separator>
+          </menu>
+          <visibility>
+          	<and>
+	          	<or>
+	            	<objectState
+	                	name="contentTypeId"
+	                   	value="org.springframework.ide.eclipse.beans.ui.editor.beansConfig">
+	             	</objectState>
+	             	<objectState
+	                  	name="contentTypeId"
+	                  	value="com.springsource.sts.config.ui.beanConfigFile">
+	          	 	</objectState>
+                   <objectClass
+                         name="org.eclipse.core.resources.IProject">
+                   </objectClass>
+	          	</or>
+	          	<objectState
+                  name="projectNature"
+                  value="org.springframework.ide.eclipse.core.springnature">
+	          	</objectState>
+          	</and>
+          </visibility>
+          <action
+                class="org.springframework.ide.eclipse.metadata.actions.ShowRequestMappingsAction"
+                icon="icons/full/obj16/request_mapping_obj.gif"
+                id="com.springsource.sts.ide.metadata.actions.ShowRequestMappingsAction"
+                label="%showRequestMappingsActionLabel"
+                menubarPath="org.springframework.ide.eclipse.ui.tools/group0">
+          </action>
+       </objectContribution>
+    </extension>
+    
+</plugin>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="placeholderTest1" class="${batch.database.incrementer.class}"/>
+	
+	<bean id="placeholderTest2" class="${batch.database.incrementer.class}">
+		<property name="incrementerName" value="ID" />
+	</bean>
+	
+	<bean id="placeholderTest3" class="com.test.AccountContribution">
+		<constructor-arg> 
+			<bean parent="placeholderTest2">  
+				<property name="incrementerName" value="TRADE_SEQ" />
+			</bean> 
+		</constructor-arg> 
+	</bean>
+	
+	<bean id="placeholderTest4" class="com.test.AccountContribution">
+		<property name="account"> 
+			<bean parent="placeholderTest2">  
+				<property name="incrementerName" value="TRADE_SEQ" />
+			</bean> 
+		</property> 
+	</bean>
+	
+	<bean id="placeholderTest5" class="batch.database.incrementer.class"/>
+
+</beans>

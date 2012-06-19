@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<version>1</version>
+	<pluginVersion><![CDATA[2.0.5.qualifier]]></pluginVersion>
+	<configSuffixes>
+		<configSuffix><![CDATA[xml]]></configSuffix>
+	</configSuffixes>
+	<enableImports><![CDATA[false]]></enableImports>
+	<configs>
+		<config>src/bean-inheritance-negative-1.xml</config>
+		<config>src/bean-inheritance-negative-2.xml</config>
+		<config>src/bean-inheritance-negative-3.xml</config>
+		<config>src/bean-inheritance-negative-4.xml</config>
+		<config>src/bean-inheritance-negative-5.xml</config>
+		<config>src/bean-inheritance-positive.xml</config>
+		<config>src/drivermanager-negative.xml</config>
+		<config>src/drivermanager-positive.xml</config>
+		<config>src/import-at-top-negative.xml</config>
+		<config>src/import-at-top-positive.xml</config>
+		<config>src/missing-constructor-test.xml</config>
+		<config>src/missing-init-destroy-test.xml</config>
+		<config>src/missing-setter-test.xml</config>
+		<config>src/namespaces-negative.xml</config>
+		<config>src/namespaces-positive.xml</config>
+		<config>src/namespaces-test.xml</config>
+		<config>src/parent-bean-specifies-abstract-negative.xml</config>
+		<config>src/parent-bean-specifies-abstract-positive.xml</config>
+		<config>src/ref-element-negative.xml</config>
+		<config>src/ref-element-positive.xml</config>
+		<config>src/required-test.xml</config>
+		<config>src/too-many-beans-negative.xml</config>
+		<config>src/too-many-beans-positive.xml</config>
+		<config>src/value-element-negative.xml</config>
+		<config>src/value-element-positive.xml</config>
+	</configs>
+	<configSets>
+	</configSets>
+</beansProjectDescription>

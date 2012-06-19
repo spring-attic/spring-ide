@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.3"?>
+<!--
+/*******************************************************************************
+ * Copyright (c) 2007, 2012 SpringSource.  All rights reserved.
+ *******************************************************************************/-->
+<plugin>
+	
+    <extension
+          point="com.springsource.sts.ide.configurator.participant">
+       <participant
+             class="org.springframework.ide.eclipse.maven.internal.core.MavenRuntimeWorkspaceConfigurator"
+             id="com.springsource.sts.configurator.maven.runtime"
+             label="Maven Runtime">
+       </participant>
+    </extension>
+
+    <extension
+          point="com.springsource.sts.ide.configurator.participant">
+       <participant
+             class="org.springframework.ide.eclipse.maven.internal.core.MavenRepositoryWorkspaceConfigurator"
+             id="com.springsource.sts.configurator.maven.repository"
+             label="Maven Repository">
+       </participant>
+    </extension>
+    
+     <extension
+         point="org.eclipse.ui.popupMenus">
+        <!-- 
+        	This action will launch an external mvn eclipse:eclipse process 
+        	So should only be available if m2e (either version) is around AND
+        	the selected project is not a maven project
+        -->
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IResource"
+             adaptable="true"
+             id="com.springsource.sts.ide.maven.updateDependencies">
+		      <visibility>
+		         	<and>
+		         		<not>
+				         	<objectState name="nature" value="org.eclipse.m2e.core.maven2Nature"/>
+			         	</not>
+				        <objectState name="open" value="true"/>
+			         	<or>
+	                 <pluginState
+	                       id="org.eclipse.m2e.core"
+	                       value="activated" />
+	                 <pluginState
+	                       id="org.maven.ide.eclipse.core"
+	                       value="activated" />
+			          </or>
+				    </and>
+		         </visibility>
+		        <menu
+               label="Spring Tools"
+               id="org.springframework.ide.eclipse.ui.tools">
+            <separator
+               name="group4">
+            </separator>
+         </menu> 
+         <action
+               class="org.springframework.ide.eclipse.maven.internal.core.RefreshMavenClasspathActionDelegate"
+               enablesFor="+"
+               id="com.springsource.sts.ide.maven.updateDependencies"
+               label="Update Maven Dependencies"
+               menubarPath="org.springframework.ide.eclipse.ui.tools/group4">
+         </action>
+      </objectContribution>
+      
+      <!-- Deal with legacy maven projects -->
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="iprojectcontributions">
+      <visibility>
+         	<and>
+	         	<objectState name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
+		        <objectState name="open" value="true"/>
+                 <pluginState
+                       id="org.eclipse.m2e.core"
+                       value="activated">
+                 </pluginState>
+		    </and>
+         </visibility>
+         <action
+               label="Convert legacy Maven projects..."
+               class="org.springframework.ide.eclipse.maven.internal.ui.ConvertLegacyProjectAction"
+               menubarPath="org.eclipse.ui.projectConfigure/additions"
+               id="com.springsource.sts.maven.convert">
+         </action>
+      </objectContribution>
+     </extension>
+     
+     <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            id="com.springsource.sts.ide.maven.internal.ui.mavenPreferencePage"
+            name="Dependency Management"
+            class="org.springframework.ide.eclipse.maven.internal.ui.MavenPreferencePage"
+            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
+           <enabledWhen>
+               <adapt type="org.eclipse.core.resources.IProject">
+	                 <test property="org.eclipse.core.resources.projectNature"
+	                       value="org.springframework.ide.eclipse.core.springnature">
+	                 </test>
+               </adapt>
+           </enabledWhen>
+      </page>
+	 </extension>
+     
+    <extension point="org.eclipse.m2e.core.lifecycleMappingMetadataSource" />
+     <extension
+           point="org.eclipse.m2e.core.projectConfigurators">
+        <configurator
+              class="org.springframework.ide.eclipse.maven.internal.core.SpringProjectConfigurator"
+              id="com.springsource.sts.ide.maven.core.springProjectConfigurator"
+              name="Spring"
+              secondaryTo="org.eclipse.m2e.jdt.javaConfigurator">
+        </configurator>
+        <configurator
+              class="org.springframework.ide.eclipse.maven.internal.core.DataNucleusProjectConfigurator"
+              id="com.springsource.sts.maven.internal.core.dataNucleusProjectConfigurator"
+              name="DataNucleus">
+        </configurator>
+     </extension>
+
+     <extension
+           point="org.springframework.ide.eclipse.core.builders">
+        <builder
+              class="org.springframework.ide.eclipse.maven.internal.core.DataNucleusEnhancerProjectBuilder"
+              description="Incremental project builder that will enhance @Entity classes using DataNucleus"
+              enabledByDefault="false"
+              icon="icons/full/obj16/datanucleus_obj.png"
+              id="com.springsource.sts.maven.core.dataNucleusEnhancerProjectBuilder"
+              name="DataNucleus Enhancer">
+        </builder>
+     </extension>
+     <extension
+           point="org.eclipse.ui.startup">
+        <startup
+              class="org.springframework.ide.eclipse.maven.internal.legacyconversion.LegacyProjectChecker">
+        </startup>
+     </extension>
+     
+</plugin>

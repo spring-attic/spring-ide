@@ -1,0 +1,34 @@
+{
+	"info" : {
+		"elements" : {
+			"element" :	[
+				{
+					"name" : "projectName",
+					"description" : "Please specify the project name e.g. myproject",
+					"type" : "java.lang.String",
+					"page" : 0,
+					"order" : 1,
+					"required" : true
+				},
+				{
+					"name" : "topLevelPackage",
+					"description" : "Please specify the top-level package e.g. com.mycompany.travel or com.mycompany.travel.hotel",
+					"type" : "java.lang.String",
+					"page" : 0,
+					"order" : 1,
+					"required" : true,
+					"pattern" : "\\w+\\.\\w+(\\.\\w+)+";
+				}
+			]
+		},
+		
+		"pages" : {
+			"page" : [
+			{
+				"order" : 0,
+				"description" : "Project Settings"
+			}
+			]
+		}
+	}
+}

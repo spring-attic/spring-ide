@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="createClassTest1" class="com.test.Account1"/>
+	
+	<bean id="createClassTest2" class="com.test.Account2">
+		<property name="name" value="Sam"/>
+	</bean>
+	
+	<bean id="createClassTest3" class="com.test.Account3">
+		<property name="name" value="Sam"/>
+		<property name="creationDate" value="Jan 1, 2009"/>
+	</bean>
+
+	<bean id="createClassTest4" class="com.test.Account4">
+		<constructor-arg value="Sam"/>
+	</bean>
+	
+	<bean id="createClassTest5" class="com.test.Account5">
+		<constructor-arg value="Sam"/>
+		<property name="creationDate" value="Jan 1, 2009"/>
+	</bean>
+	
+	<bean id="createClassTest6" class="com.test.Account6">
+		<constructor-arg value="Sam"/>
+		<property name="creationDate" value="Jan 1, 2009"/>
+		<property name="nickName" value="Sammy"/>
+	</bean>
+
+	<bean id="createClassTest7" class="com.test.Account7">
+		<constructor-arg value="Sam"/>
+		<constructor-arg value="Jan 1, 2009"/>
+	</bean>
+	
+	<bean id="createClassTest8" class="com.test.Account8">
+		<constructor-arg value="Sam"/>
+		<constructor-arg value="Jan 1, 2009"/>
+		<property name="nickName" value="Sammy"/>
+	</bean>
+	
+	<bean id="createClassTest9" class="com.test.Account9">
+		<constructor-arg value="Sam"/>
+		<constructor-arg value="Jan 1, 2009"/>
+		<property name="nickName" value="Sammy"/>
+		<property name="expriyDate" value="Jan 1, 2010"/>
+	</bean>
+	
+	<bean id="createClassTest10" class="com.test.Account$Test" />
+
+</beans>

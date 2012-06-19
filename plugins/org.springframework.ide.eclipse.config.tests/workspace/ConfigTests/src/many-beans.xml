@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean class="com.test.MyConcreteClass" id="bean1"/>
+	<bean class="com.test.MyConcreteClass" id="bean2"/>
+	<bean class="com.test.MyConcreteClass" id="bean3"/>
+	<bean class="com.test.MyConcreteClass" id="bean4"/>
+	<bean class="com.test.MyConcreteClass" id="bean5"/>
+	<bean class="com.test.MyConcreteClass" id="bean6"/>
+	<bean class="com.test.MyConcreteClass" id="bean7"/>
+	<bean class="com.test.MyConcreteClass" id="bean8"/>
+	<bean class="com.test.MyConcreteClass" id="bean9"/>
+	<bean class="com.test.MyConcreteClass" id="bean10"/>
+	<bean class="com.test.MyConcreteClass" id="bean11"/>
+	<bean class="com.test.MyConcreteClass" id="bean12"/>
+	<bean class="com.test.MyConcreteClass" id="bean13"/>
+	<bean class="com.test.MyConcreteClass" id="bean14"/>
+	<bean class="com.test.MyConcreteClass" id="bean15"/>
+	<bean class="com.test.MyConcreteClass" id="bean16"/>
+	<bean class="com.test.MyConcreteClass" id="bean17"/>
+	<bean class="com.test.MyConcreteClass" id="bean18"/>
+	<bean class="com.test.MyConcreteClass" id="bean19"/>
+	<bean class="com.test.MyConcreteClass" id="bean20"/>
+
+</beans>
