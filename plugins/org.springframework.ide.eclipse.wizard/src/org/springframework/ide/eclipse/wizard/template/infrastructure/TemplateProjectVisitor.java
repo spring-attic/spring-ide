@@ -25,10 +25,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
 import org.springsource.ide.eclipse.commons.core.FileUtil;
 import org.springsource.ide.eclipse.commons.core.Policy;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
-
 
 public class TemplateProjectVisitor implements IResourceVisitor {
 
@@ -44,7 +44,8 @@ public class TemplateProjectVisitor implements IResourceVisitor {
 	private boolean select(IResource resource) {
 		String lastSegment = resource.getFullPath().lastSegment();
 		if (lastSegment != null) {
-			if (lastSegment.equals("template.xml") || lastSegment.equals("wizard.json")) {
+			if (lastSegment.equals(IContentConstants.TEMPLATE_DATA_FILE_NAME)
+					|| lastSegment.equals(IContentConstants.WIZARD_DATA_FILE_NAME)) {
 				return false;
 			}
 		}

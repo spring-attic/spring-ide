@@ -88,6 +88,7 @@ import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.ContentUtil;
 import org.springsource.ide.eclipse.commons.content.core.util.Descriptor;
+import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
@@ -570,8 +571,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 			for (IProject project : projects) {
-				IFile templateFile = project.getFile("template.xml");
-				IFile wizardFile = project.getFile("wizard.json");
+				IFile templateFile = project.getFile(IContentConstants.TEMPLATE_DATA_FILE_NAME);
+				IFile wizardFile = project.getFile(IContentConstants.WIZARD_DATA_FILE_NAME);
 				if (templateFile.exists() && wizardFile.exists()) {
 					File file = templateFile.getLocation().toFile();
 					try {
