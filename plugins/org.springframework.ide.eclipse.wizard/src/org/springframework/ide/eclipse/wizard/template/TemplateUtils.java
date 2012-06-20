@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplatePr
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager.DownloadJob;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
+import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 
 /**
@@ -156,11 +157,54 @@ public class TemplateUtils {
 			return null;
 		}
 
+		if (!wasDownloadedViaDescriptor(templateDir)) {
+			File[] childrenFiles = templateDir.listFiles();
+			if (childrenFiles.length != 1) {
+				String message = NLS
+						.bind("There are more files the template download directory {0} than expected; using first directory",
+								templateDir);
+				IStatus status = new Status(IStatus.WARNING, WizardPlugin.PLUGIN_ID, message);
+				UiStatusHandler.logAndDisplay(shell, status);
+			}
+
+			File subdir = null;
+			for (File childFile : childrenFiles) {
+				if (childFile.isDirectory()) {
+					subdir = childFile;
+					break;
+				}
+			}
+
+			if (subdir != null) {
+				File[] grandchildren = subdir.listFiles();
+				for (File grandchild : grandchildren) {
+					grandchild.renameTo(new File(templateDir, grandchild.getName()));
+				}
+				subdir.delete();
+			}
+			else {
+				// There is another error thrown later on
+				String message = NLS.bind(
+						"There wasn't either {0} or a directory in the template download directory {1}",
+						IContentConstants.TEMPLATE_DATA_FILE_NAME, templateDir);
+				IStatus status = new Status(IStatus.WARNING, WizardPlugin.PLUGIN_ID, message);
+				UiStatusHandler.logAndDisplay(shell, status);
+			}
+
+		}
+
 		TemplateProjectData data = new TemplateProjectData(templateDir);
 		data.read();
 		progress.setWorkRemaining(10);
 
 		return data;
+	}
+
+	// The layout of templates downloaded via descriptors.xml must
+	// have template.xml in the root directory.
+	private static boolean wasDownloadedViaDescriptor(File templateDir) {
+		File templateXml = new File(templateDir, IContentConstants.TEMPLATE_DATA_FILE_NAME);
+		return templateXml.exists();
 	}
 
 	protected static boolean promptForDownload(Shell shell, ContentItem item) {
