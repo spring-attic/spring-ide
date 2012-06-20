@@ -300,7 +300,7 @@
 				<signing.store.password>${bamboo.signing.store.password}</signing.store.password>
 				<signing.key.password>${bamboo.signing.key.password}</signing.key.password>
 			</properties>
-		</profile
+		</profile>
 
 	</profiles>
 
