@@ -173,17 +173,21 @@ public class TemplateUtils {
 			for (ContentItem dependency : dependencies) {
 				size += dependency.getDownloadSize();
 			}
-			String formattedSize = NLS.bind("{0} bytes", size);
+			String formattedSize;
+			if (size > 0) {
+				formattedSize = NLS.bind("{0} bytes", size);
+			}
+			else {
+				formattedSize = NLS.bind("unknown size", null);
+			}
 			if (!item.isLocal()) {
-				return MessageDialog.openQuestion(shell, "Import",
-						NLS.bind("{0} requires a download of {1}. Proceed?", item.getName(), formattedSize));
+				String message = NLS.bind("{0} requires a download of {1}. Proceed?", item.getName(), formattedSize);
+				return MessageDialog.openQuestion(shell, "Import", message);
 			}
 			else if (item.isNewerVersionAvailable()) {
-				return MessageDialog.openQuestion(
-						shell,
-						"Import",
-						NLS.bind("An update for {0} is available which requires a download ({1}). Update?",
-								item.getName(), formattedSize));
+				String message = NLS.bind("An update for {0} is available which requires a download ({1}). Update?",
+						item.getName(), formattedSize);
+				return MessageDialog.openQuestion(shell, "Import", message);
 			}
 		}
 		catch (CoreException e) {
