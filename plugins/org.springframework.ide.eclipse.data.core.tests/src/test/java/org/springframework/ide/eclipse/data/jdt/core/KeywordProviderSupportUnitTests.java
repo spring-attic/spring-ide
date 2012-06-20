@@ -39,7 +39,6 @@ public class KeywordProviderSupportUnitTests {
 	public void addsUpKeywordsPerMapping() throws JavaModelException {
 
 		KeywordProviderSupport provider = new KeywordProviderSupport(new TypePredicates() {
-			@Override
 			public boolean typeImplements(IType type, String candidateType) {
 				return Arrays.asList(Object.class.getName(), String.class.getName()).contains(candidateType);
 			}

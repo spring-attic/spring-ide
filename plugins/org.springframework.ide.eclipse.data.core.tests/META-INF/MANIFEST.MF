@@ -8,4 +8,4 @@ Bundle-Vendor: %providerName
 Require-Bundle: org.junit;bundle-version="[4.8.2,5.0.0)",
  org.springframework.data.core;bundle-version="[1.3.1,2.0.0)",
  org.springframework.ide.eclipse.data.core,
- org.mockito;bundle-version="[1.8.0,2.0.0)"
+ org.mockito.mockito-core;bundle-version="[1.8.4,2.0.0)"
