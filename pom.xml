@@ -186,6 +186,7 @@
 	</modules>
 
 	<profiles>
+		
 		<profile>
 			<id>e34</id>
 			<properties>
@@ -209,6 +210,7 @@
 				</repository>
 			</repositories>
 		</profile>
+		
 		<profile>
 			<id>e35</id>
 			<properties>
@@ -232,6 +234,7 @@
 				</repository>
 			</repositories>
 		</profile>
+		
 		<profile>
 			<id>e36</id>
 			<activation>
@@ -258,6 +261,7 @@
 				</repository>
 			</repositories>
 		</profile>
+		
 		<profile>
 			<id>e37</id>
 			<activation>
@@ -289,6 +293,15 @@
 				</repository>
 			</repositories>
 		</profile>
+		
+		<profile>
+			<id>bamboo-signing</id>
+			<properties>
+				<signing.store.password>${bamboo.signing.store.password}</signing.store.password>
+				<signing.key.password>${bamboo.signing.key.password}</signing.key.password>
+			</properties>
+		</profile
+
 	</profiles>
 
 	<repositories>
