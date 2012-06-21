@@ -24,6 +24,9 @@
 				<configuration>
 					<resolver>p2</resolver>
 					<pomDependencies>ignore</pomDependencies>
+					<dependency-resolution>
+						<optionalDependencies>ignore</optionalDependencies>
+					</dependency-resolution>
 				</configuration>
 			</plugin>
 
