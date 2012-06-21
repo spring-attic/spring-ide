@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -43,6 +44,7 @@ import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 
 /**
  * @author Terry Denney
+ * @author Kaitlin Duck Sherwood
  */
 public class TemplateUtils {
 
@@ -224,13 +226,33 @@ public class TemplateUtils {
 			else {
 				formattedSize = NLS.bind("unknown size", null);
 			}
+
+			String message;
+			String requiredBundle = null;
+			if (item.getLocalDescriptor() != null) {
+				requiredBundle = item.getLocalDescriptor().getRequiresBundle();
+			}
+			else if (item.getRemoteDescriptor() != null) {
+				requiredBundle = item.getRemoteDescriptor().getRequiresBundle();
+			}
+
+			if (requiredBundle != null && !hasBundle(requiredBundle)) {
+				message = NLS
+						.bind("Warning: this project requires the bundle \n\t{0}\nwhich is not installed.  You can download this template, but it will probably get build errors.\n\n",
+								requiredBundle);
+			}
+			else {
+				message = "";
+			}
+
 			if (!item.isLocal()) {
-				String message = NLS.bind("{0} requires a download of {1}. Proceed?", item.getName(), formattedSize);
+				message = message
+						+ NLS.bind("{0} requires a download of {1}.\n\nProceed?", item.getName(), formattedSize);
 				return MessageDialog.openQuestion(shell, "Import", message);
 			}
 			else if (item.isNewerVersionAvailable()) {
-				String message = NLS.bind("An update for {0} is available which requires a download ({1}). Update?",
-						item.getName(), formattedSize);
+				message = NLS.bind("An update for {0} is available which requires a download of {1}.\n\n" + message
+						+ "Update?", item.getName(), formattedSize);
 				return MessageDialog.openQuestion(shell, "Import", message);
 			}
 		}
@@ -241,4 +263,7 @@ public class TemplateUtils {
 		return true;
 	}
 
+	private static boolean hasBundle(String requiredBundle) {
+		return (Platform.getBundle(requiredBundle) != null);
+	}
 }
