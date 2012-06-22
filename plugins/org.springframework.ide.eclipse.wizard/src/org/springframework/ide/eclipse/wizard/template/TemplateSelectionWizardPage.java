@@ -678,36 +678,39 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 		ContentManager manager = ContentPlugin.getDefault().getManager();
 		if (visible && manager.getItemsByKind(ContentManager.KIND_TEMPLATE).size() == 0 && !isRefreshing()) {
-			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					String refreshErrorMessage = NLS.bind(
-							"There was an error refreshing the template descriptors; possibly the network went down.",
-							null);
-					try {
-						getContainer().run(true, true, new IRunnableWithProgress() {
+			downloadDescriptors();
+		}
+	}
 
-							public void run(IProgressMonitor monitor) throws InvocationTargetException,
-									InterruptedException {
-								IStatus status = ContentPlugin.getDefault().getManager().refresh(monitor);
-								if (!status.isOK()) {
-									MessageDialog.openWarning(getShell(), NLS.bind("Warning", null),
-											status.getMessage());
-								}
+	public void downloadDescriptors() {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				String refreshErrorMessage = NLS
+						.bind("There was an error refreshing the template descriptors; possibly the network went down.",
+								null);
+				try {
+					getContainer().run(true, true, new IRunnableWithProgress() {
+
+						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+								InterruptedException {
+							IStatus status = ContentPlugin.getDefault().getManager().refresh(monitor);
+							if (!status.isOK()) {
+								MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), status.getMessage());
 							}
-						});
-					}
-					catch (InvocationTargetException e) {
-						MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
-
-					}
-					catch (InterruptedException e) {
-						MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
-
-					}
+						}
+					});
+				}
+				catch (InvocationTargetException e) {
+					MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
 
 				}
-			});
-		}
+				catch (InterruptedException e) {
+					MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
+
+				}
+
+			}
+		});
 	}
 
 	@Override
