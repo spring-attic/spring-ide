@@ -145,7 +145,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		templates = new ArrayList<Template>();
 		this.wizard = wizard;
 
-		initializeTemplates();
 	}
 
 	@Override
@@ -154,6 +153,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	}
 
 	public void createControl(Composite parent) {
+		initializeTemplates();
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -275,8 +275,12 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null,
 						TemplatesPreferencePage.EXAMPLE_PREFERENCES_PAGE_ID, null, null);
 				refreshButton.setEnabled(false);
+
 				dialog.open();
+				downloadDescriptors();
+
 				refreshButton.setEnabled(!isRefreshing());
+
 			}
 		});
 
@@ -290,42 +294,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		refreshButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				final ContentManager manager = ContentPlugin.getDefault().getManager();
-				try {
-
-					getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
-
-						public void run(IProgressMonitor monitor) throws InvocationTargetException,
-								InterruptedException {
-							try {
-								IStatus results = manager.refresh(monitor);
-								if (!results.isOK()) {
-									if (results.isMultiStatus() && results.getChildren().length > 0) {
-										throw new InvocationTargetException(new CoreException(results.getChildren()[0]));
-									}
-									else {
-										throw new InvocationTargetException(new CoreException(results));
-									}
-								}
-							}
-							catch (OperationCanceledException e) {
-								// If we don't catch and throw the exception
-								// *here*, cancellations don't get recognized
-								// until the download is finished.
-								throw e;
-							}
-						}
-					});
-				}
-				catch (InvocationTargetException e1) {
-					MessageDialog.openError(null, NLS.bind("Download error", null), e1.getTargetException()
-							.getLocalizedMessage());
-				}
-				catch (InterruptedException e1) {
-					// ignore, just let the job die
-				}
-
+				downloadDescriptors();
 			}
+
 		});
 
 		Composite descriptionComposite = new Composite(container, SWT.NONE);
@@ -372,7 +343,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		this.contentManagerListener = new PropertyChangeListener() {
 
 			public void propertyChange(PropertyChangeEvent arg0) {
-
 				initializeTemplates();
 				// switch to UI thread
 				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -381,11 +351,12 @@ public class TemplateSelectionWizardPage extends WizardPage {
 					}
 				});
 			}
+
 		};
 
 		ContentPlugin.getDefault().getManager().addListener(contentManagerListener);
 
-		refreshPage();
+		downloadDescriptors();
 		setControl(container);
 
 	}
@@ -535,9 +506,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	private void initializeTemplates() {
 		templates.clear();
 
-		TemplatesPreferencesModel model = TemplatesPreferencesModel.getInstance(); // side
-																					// effect:
-																					// initializes
+		TemplatesPreferencesModel model = TemplatesPreferencesModel.getInstance();
 		Collection<ContentItem> items = ContentPlugin.getDefault().getManager()
 				.getItemsByKind(ContentManager.KIND_TEMPLATE);
 
@@ -672,16 +641,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		descriptionText.redraw();
 	}
 
-	@Override
-	public void setVisible(boolean visible) {
-		super.setVisible(visible);
-
-		ContentManager manager = ContentPlugin.getDefault().getManager();
-		if (visible && manager.getItemsByKind(ContentManager.KIND_TEMPLATE).size() == 0 && !isRefreshing()) {
-			downloadDescriptors();
-		}
-	}
-
 	public void downloadDescriptors() {
 		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			public void run() {
@@ -724,4 +683,5 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	private boolean isRefreshing() {
 		return ContentPlugin.getDefault().getManager().isRefreshing();
 	}
+
 }

@@ -10,14 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template.util;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
-import org.springsource.ide.eclipse.commons.content.core.ContentManager;
-import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 
 /**
  * @author Kaitlin Duck Sherwood
@@ -56,7 +49,6 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	}
 
 	@Override
-	// TODO: mildly useful to make a singleton, perhaps
 	protected TemplatesPreferencesModel getModel() {
 		return TemplatesPreferencesModel.getInstance();
 	}
@@ -64,40 +56,6 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	@Override
 	protected String validationErrorMessage(String urlString) {
 		return NLS.bind("Sorry, {0} isn't a valid URL.  Right now we only take HTTP or HTTPS URLs.", urlString);
-	}
-
-	@Override
-	public boolean performOk() {
-		boolean okay = super.performOk();
-		if (getModel().getAndClearChangedFlag()) {
-			updateDescriptorsInBackground();
-		}
-		return okay;
-	}
-
-	private void updateDescriptorsInBackground() {
-
-		Job job = new Job("Refreshing template projects") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				final ContentManager defaultContentManager = ContentPlugin.getDefault().getManager();
-				IStatus status = defaultContentManager.refresh(monitor);
-				if (status instanceof MultiStatus) {
-					String statusMessage = "";
-					for (IStatus childStatus : status.getChildren()) {
-						statusMessage += childStatus.getMessage() + "\n";
-					}
-					return new Status(status.getSeverity(), status.getPlugin(), statusMessage);
-				}
-				else {
-					return status;
-				}
-			}
-		};
-
-		// Start the Job
-		job.schedule();
-
 	}
 
 	@Override

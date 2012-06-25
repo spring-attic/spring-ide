@@ -33,8 +33,6 @@ public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 		return instance;
 	}
 
-	public boolean shouldShowSelfHostedProjects;
-
 	public TemplatesPreferencesModel() {
 		super();
 	}
@@ -65,7 +63,7 @@ public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 	@Override
 	public void revert() {
 		super.revert();
-		shouldShowSelfHostedProjects = getStore().getBoolean(getStoreSelfHostingKey(), optionalFlagDefault());
+		optionalFlagValue = getStore().getBoolean(getStoreSelfHostingKey(), optionalFlagDefault());
 	}
 
 	@Override
@@ -76,17 +74,6 @@ public class TemplatesPreferencesModel extends AbstractNameUrlPreferenceModel {
 	@Override
 	protected IEclipsePreferences getDefaultStore() {
 		return DefaultScope.INSTANCE.getNode(CorePlugin.PLUGIN_ID);
-	}
-
-	@Override
-	protected void setOptionalFlagValue(boolean flagValue) {
-		shouldShowSelfHostedProjects = flagValue;
-		getAndClearChangedFlag();
-	}
-
-	@Override
-	protected boolean getOptionalFlagValue() {
-		return shouldShowSelfHostedProjects;
 	}
 
 	@Override
