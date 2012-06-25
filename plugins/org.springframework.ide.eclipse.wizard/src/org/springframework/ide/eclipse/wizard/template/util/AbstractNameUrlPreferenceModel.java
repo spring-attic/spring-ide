@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -152,6 +154,9 @@ public abstract class AbstractNameUrlPreferenceModel {
 
 	public boolean persist() {
 		boolean didChangeFlag = false;
+
+		normalizeCurrentStringOrder();
+
 		if (!currentString.equals(store.get(getStoreKey(), null))) {
 			Assert.isNotNull(currentString, "INTERNAL ERROR: current string should not be null in " + this.getClass());
 			store.put(getStoreKey(), currentString);
@@ -169,6 +174,19 @@ public abstract class AbstractNameUrlPreferenceModel {
 			ContentPlugin.getDefault().getManager().setDirty();
 		}
 		return didChangeFlag;
+	}
+
+	private void normalizeCurrentStringOrder() {
+		List<NameUrlPair> sortedItems = NameUrlPair.decodeMultipleNameUrlStrings(currentString);
+		Collections.sort(sortedItems, new Comparator<NameUrlPair>() {
+			public int compare(NameUrlPair o1, NameUrlPair o2) {
+				return o1.getUrlString().compareTo(o2.getUrlString());
+			}
+		});
+		currentString = "";
+		for (NameUrlPair nameUrlPair : sortedItems) {
+			currentString += nameUrlPair.asCombinedString();
+		}
 	}
 
 	protected void clearNonDefaults() {
