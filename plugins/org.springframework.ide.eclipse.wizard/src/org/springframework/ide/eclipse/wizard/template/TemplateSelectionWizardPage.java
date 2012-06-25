@@ -294,6 +294,11 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		refreshButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				// under most circumstances, we don't want to download templates
+				// if there has not been any change. However, when the user
+				// presses Refresh, they really do want to see something happen.
+				ContentPlugin.getDefault().getManager().setDirty();
+
 				downloadDescriptors();
 			}
 
