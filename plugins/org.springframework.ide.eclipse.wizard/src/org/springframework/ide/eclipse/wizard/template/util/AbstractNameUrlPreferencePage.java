@@ -147,6 +147,8 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 		nameColumn.getColumn().addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				tableViewer.setSorter(new NameUrlViewerSorter(true));
+				removeButton.setEnabled(false);
+				editButton.setEnabled(false);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -168,6 +170,8 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 		urlColumn.getColumn().addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				tableViewer.setSorter(new NameUrlViewerSorter(false));
+				removeButton.setEnabled(false);
+				editButton.setEnabled(false);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {
