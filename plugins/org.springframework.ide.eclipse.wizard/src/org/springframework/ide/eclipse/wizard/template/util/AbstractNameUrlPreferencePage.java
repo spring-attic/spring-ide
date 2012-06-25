@@ -249,21 +249,27 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 				if (dialog.open() == Dialog.OK) {
 					String urlString = dialog.getUrlString();
 					String name = dialog.getName();
+					if (!validateUrl(urlString)) {
+						String title = NLS.bind("Invalid URL", null);
+						MessageDialog.openError(null, title, validationErrorMessage(urlString));
+					}
+					else {
 
-					if (name.length() > 0 && urlString.length() > 0) {
-						try {
-							if (oldNameUrl != null) {
-								model.removeNameUrlPairInEncodedString(oldNameUrl);
+						if (name.length() > 0 && urlString.length() > 0) {
+							try {
+								if (oldNameUrl != null) {
+									model.removeNameUrlPairInEncodedString(oldNameUrl);
+								}
+								model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
+								tableViewer.refresh();
+								// the tableViewer refresh deselects the line,
+								// so disable the buttons
+								editButton.setEnabled(false);
+								removeButton.setEnabled(false);
 							}
-							model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
-							tableViewer.refresh();
-							// the tableViewer refresh deselects the line, so
-							// disable the buttons
-							editButton.setEnabled(false);
-							removeButton.setEnabled(false);
-						}
-						catch (URISyntaxException e1) {
-							errorText.setText("Error!  The URL " + urlString + " was malformed.  Ignoring.");
+							catch (URISyntaxException e1) {
+								errorText.setText("Error!  The URL " + urlString + " was malformed.  Ignoring.");
+							}
 						}
 					}
 				}
