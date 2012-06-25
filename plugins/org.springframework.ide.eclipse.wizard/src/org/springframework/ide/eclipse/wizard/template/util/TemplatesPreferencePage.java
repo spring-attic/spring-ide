@@ -31,16 +31,11 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 
 	@Override
 	protected boolean validateUrl(String urlString) {
-		if (urlString.startsWith("http")) {
-			return true;
-		}
-
-		// if (urlString.startsWith("file:")) {
-		// return true;
-		// }
-		else {
+		if (!urlString.startsWith("http")) {
 			return false;
 		}
+
+		return true;
 	}
 
 	@Override
