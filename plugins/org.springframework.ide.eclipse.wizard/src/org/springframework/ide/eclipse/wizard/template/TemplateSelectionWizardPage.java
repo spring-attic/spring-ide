@@ -648,26 +648,39 @@ public class TemplateSelectionWizardPage extends WizardPage {
 						.bind("There was an error refreshing the template descriptors; possibly the network went down.",
 								null);
 				try {
-					getContainer().run(true, true, new IRunnableWithProgress() {
+					final ContentManager manager = ContentPlugin.getDefault().getManager();
+
+					getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
 
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
-							IStatus status = ContentPlugin.getDefault().getManager().refresh(monitor);
-							if (!status.isOK()) {
-								MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), status.getMessage());
+							try {
+								IStatus results = manager.refresh(monitor);
+								if (!results.isOK()) {
+									if (results.isMultiStatus() && results.getChildren().length > 0) {
+										throw new InvocationTargetException(new CoreException(results.getChildren()[0]));
+									}
+									else {
+										throw new InvocationTargetException(new CoreException(results));
+									}
+								}
+							}
+							catch (OperationCanceledException e) {
+								// If we don't catch and throw the exception
+								// *here*, cancellations don't get recognized
+								// until the download is finished.
+								throw e;
 							}
 						}
 					});
 				}
-				catch (InvocationTargetException e) {
-					MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
-
+				catch (InvocationTargetException e1) {
+					MessageDialog.openError(null, NLS.bind("Download error", null), e1.getTargetException()
+							.getLocalizedMessage());
 				}
-				catch (InterruptedException e) {
+				catch (InterruptedException e1) {
 					MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
-
 				}
-
 			}
 		});
 	}
