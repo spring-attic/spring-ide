@@ -277,7 +277,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				refreshButton.setEnabled(false);
 
 				dialog.open();
-				downloadDescriptors();
+				if (ContentPlugin.getDefault().getManager().isDirty()) {
+					downloadDescriptors();
+				}
 
 				refreshButton.setEnabled(!isRefreshing());
 
