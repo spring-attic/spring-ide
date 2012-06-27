@@ -361,9 +361,13 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 		};
 
-		ContentPlugin.getDefault().getManager().addListener(contentManagerListener);
+		ContentManager manager = ContentPlugin.getDefault().getManager();
+		manager.addListener(contentManagerListener);
 
-		downloadDescriptors();
+		if (manager.isDirty()) {
+			downloadDescriptors();
+		}
+
 		setControl(container);
 
 	}
