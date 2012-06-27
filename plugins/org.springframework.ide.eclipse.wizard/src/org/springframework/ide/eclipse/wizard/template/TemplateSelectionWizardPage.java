@@ -660,7 +660,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
 							try {
-								IStatus results = manager.refresh(monitor);
+								IStatus results = manager.refresh(monitor, true);
 								if (!results.isOK()) {
 									if (results.isMultiStatus() && results.getChildren().length > 0) {
 										throw new InvocationTargetException(new CoreException(results.getChildren()[0]));
