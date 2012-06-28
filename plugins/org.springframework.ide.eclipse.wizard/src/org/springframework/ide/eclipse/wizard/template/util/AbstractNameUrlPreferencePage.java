@@ -77,6 +77,8 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 
 	protected abstract String checkboxLabel();
 
+	protected abstract String addDialogHeaderText();
+
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(doGetPreferenceStore());
 		model = getModel();
@@ -210,7 +212,7 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				AddEditExampleProjectDialog dialog = new AddEditExampleProjectDialog(getShell(), model, null,
-						preferencePageHeaderText());
+						addDialogHeaderText());
 				if (dialog.open() == Dialog.OK) {
 					String urlString = dialog.getUrlString().trim().replaceAll("\\n", "");
 					String name = dialog.getName();
