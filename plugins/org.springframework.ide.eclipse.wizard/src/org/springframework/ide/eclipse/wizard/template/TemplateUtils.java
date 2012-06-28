@@ -74,8 +74,11 @@ public class TemplateUtils {
 					throw e;
 				}
 
-				// re-get sample project since it may changed
+				// re-get template project since it may changed
 				item = ContentPlugin.getDefault().getManager().getItem(id);
+				if (item == null) {
+					return null;
+				}
 			}
 			else if (!item.isLocal()) {
 				return null;
@@ -92,7 +95,7 @@ public class TemplateUtils {
 			copyFolder(templateFolder, directory);
 		}
 
-		if (item == null || !item.isLocal()) {
+		if (!item.isLocal()) {
 			String message = NLS.bind("Download of template ''{0}'' failed", id);
 			throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message));
 		}
