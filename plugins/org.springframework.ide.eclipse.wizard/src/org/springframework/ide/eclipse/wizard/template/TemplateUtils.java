@@ -40,6 +40,7 @@ import org.springsource.ide.eclipse.commons.content.core.ContentItem;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager.DownloadJob;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
+import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 
 /**
@@ -67,6 +68,9 @@ public class TemplateUtils {
 				try {
 					if (!job.getLatch().await(60, TimeUnit.SECONDS)) {
 						job.cancel();
+						String message = NLS.bind("Download of {0} timed out, perhaps the network went down.", item
+								.getRemoteDescriptor().getUrl());
+						throw new CoreException(new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, message));
 					}
 				}
 				catch (InterruptedException e) {

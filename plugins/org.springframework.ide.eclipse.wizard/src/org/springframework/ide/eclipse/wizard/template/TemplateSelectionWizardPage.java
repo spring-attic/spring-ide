@@ -426,8 +426,10 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			return null;
 		}
 		catch (InvocationTargetException e) {
-			UiStatusHandler.logAndDisplay(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getTargetException()
-					.getLocalizedMessage(), e));
+			// All the failures that can cause an invocation exception to show
+			// up here also cause a different dialog box to appear. Thus, doing
+			// anything but quietly returning here gives a redundant error
+			// dialog.
 			return null;
 		}
 
