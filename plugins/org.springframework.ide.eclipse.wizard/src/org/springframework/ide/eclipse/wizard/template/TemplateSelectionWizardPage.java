@@ -88,6 +88,7 @@ import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.ContentUtil;
 import org.springsource.ide.eclipse.commons.content.core.util.Descriptor;
+import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
@@ -144,7 +145,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		templates = new ArrayList<Template>();
 		this.wizard = wizard;
 
-		initializeTemplates();
 	}
 
 	@Override
@@ -153,6 +153,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	}
 
 	public void createControl(Composite parent) {
+		initializeTemplates();
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -274,8 +275,14 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null,
 						TemplatesPreferencePage.EXAMPLE_PREFERENCES_PAGE_ID, null, null);
 				refreshButton.setEnabled(false);
+
 				dialog.open();
+				if (ContentPlugin.getDefault().getManager().isDirty()) {
+					downloadDescriptors();
+				}
+
 				refreshButton.setEnabled(!isRefreshing());
+
 			}
 		});
 
@@ -289,42 +296,14 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		refreshButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				final ContentManager manager = ContentPlugin.getDefault().getManager();
-				try {
+				// under most circumstances, we don't want to download templates
+				// if there has not been any change. However, when the user
+				// presses Refresh, they really do want to see something happen.
+				ContentPlugin.getDefault().getManager().setDirty();
 
-					getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
-
-						public void run(IProgressMonitor monitor) throws InvocationTargetException,
-								InterruptedException {
-							try {
-								IStatus results = manager.refresh(monitor);
-								if (!results.isOK()) {
-									if (results.isMultiStatus() && results.getChildren().length > 0) {
-										throw new InvocationTargetException(new CoreException(results.getChildren()[0]));
-									}
-									else {
-										throw new InvocationTargetException(new CoreException(results));
-									}
-								}
-							}
-							catch (OperationCanceledException e) {
-								// If we don't catch and throw the exception
-								// *here*, cancellations don't get recognized
-								// until the download is finished.
-								throw e;
-							}
-						}
-					});
-				}
-				catch (InvocationTargetException e1) {
-					MessageDialog.openError(null, NLS.bind("Download error", null), e1.getTargetException()
-							.getLocalizedMessage());
-				}
-				catch (InterruptedException e1) {
-					// ignore, just let the job die
-				}
-
+				downloadDescriptors();
 			}
+
 		});
 
 		Composite descriptionComposite = new Composite(container, SWT.NONE);
@@ -371,7 +350,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		this.contentManagerListener = new PropertyChangeListener() {
 
 			public void propertyChange(PropertyChangeEvent arg0) {
-
 				initializeTemplates();
 				// switch to UI thread
 				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -380,11 +358,16 @@ public class TemplateSelectionWizardPage extends WizardPage {
 					}
 				});
 			}
+
 		};
 
-		ContentPlugin.getDefault().getManager().addListener(contentManagerListener);
+		ContentManager manager = ContentPlugin.getDefault().getManager();
+		manager.addListener(contentManagerListener);
 
-		refreshPage();
+		if (manager.isDirty()) {
+			downloadDescriptors();
+		}
+
 		setControl(container);
 
 	}
@@ -443,8 +426,10 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			return null;
 		}
 		catch (InvocationTargetException e) {
-			UiStatusHandler.logAndDisplay(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getTargetException()
-					.getLocalizedMessage(), e));
+			// All the failures that can cause an invocation exception to show
+			// up here also cause a different dialog box to appear. Thus, doing
+			// anything but quietly returning here gives a redundant error
+			// dialog.
 			return null;
 		}
 
@@ -534,9 +519,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	private void initializeTemplates() {
 		templates.clear();
 
-		TemplatesPreferencesModel model = TemplatesPreferencesModel.getInstance(); // side
-																					// effect:
-																					// initializes
+		TemplatesPreferencesModel model = TemplatesPreferencesModel.getInstance();
 		Collection<ContentItem> items = ContentPlugin.getDefault().getManager()
 				.getItemsByKind(ContentManager.KIND_TEMPLATE);
 
@@ -570,8 +553,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 			for (IProject project : projects) {
-				IFile templateFile = project.getFile("template.xml");
-				IFile wizardFile = project.getFile("wizard.json");
+				IFile templateFile = project.getFile(IContentConstants.TEMPLATE_DATA_FILE_NAME);
+				IFile wizardFile = project.getFile(IContentConstants.WIZARD_DATA_FILE_NAME);
 				if (templateFile.exists() && wizardFile.exists()) {
 					File file = templateFile.getLocation().toFile();
 					try {
@@ -671,42 +654,48 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		descriptionText.redraw();
 	}
 
-	@Override
-	public void setVisible(boolean visible) {
-		super.setVisible(visible);
+	public void downloadDescriptors() {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				String refreshErrorMessage = NLS
+						.bind("There was an error refreshing the template descriptors; possibly the network went down.",
+								null);
+				try {
+					final ContentManager manager = ContentPlugin.getDefault().getManager();
 
-		ContentManager manager = ContentPlugin.getDefault().getManager();
-		if (visible && manager.getItemsByKind(ContentManager.KIND_TEMPLATE).size() == 0 && !isRefreshing()) {
-			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					String refreshErrorMessage = NLS.bind(
-							"There was an error refreshing the template descriptors; possibly the network went down.",
-							null);
-					try {
-						getContainer().run(true, true, new IRunnableWithProgress() {
+					getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
 
-							public void run(IProgressMonitor monitor) throws InvocationTargetException,
-									InterruptedException {
-								IStatus status = ContentPlugin.getDefault().getManager().refresh(monitor);
-								if (!status.isOK()) {
-									MessageDialog.openWarning(getShell(), NLS.bind("Warning", null),
-											status.getMessage());
+						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+								InterruptedException {
+							try {
+								IStatus results = manager.refresh(monitor, true);
+								if (!results.isOK()) {
+									if (results.isMultiStatus() && results.getChildren().length > 0) {
+										throw new InvocationTargetException(new CoreException(results.getChildren()[0]));
+									}
+									else {
+										throw new InvocationTargetException(new CoreException(results));
+									}
 								}
 							}
-						});
-					}
-					catch (InvocationTargetException e) {
-						MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
-
-					}
-					catch (InterruptedException e) {
-						MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
-
-					}
-
+							catch (OperationCanceledException e) {
+								// If we don't catch and throw the exception
+								// *here*, cancellations don't get recognized
+								// until the download is finished.
+								throw e;
+							}
+						}
+					});
 				}
-			});
-		}
+				catch (InvocationTargetException e1) {
+					MessageDialog.openError(null, NLS.bind("Download error", null), e1.getTargetException()
+							.getLocalizedMessage());
+				}
+				catch (InterruptedException e1) {
+					MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -720,4 +709,5 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	private boolean isRefreshing() {
 		return ContentPlugin.getDefault().getManager().isRefreshing();
 	}
+
 }

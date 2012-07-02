@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -38,10 +39,13 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplatePr
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager.DownloadJob;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
+import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
+import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 
 /**
  * @author Terry Denney
+ * @author Kaitlin Duck Sherwood
  */
 public class TemplateUtils {
 
@@ -64,6 +68,9 @@ public class TemplateUtils {
 				try {
 					if (!job.getLatch().await(60, TimeUnit.SECONDS)) {
 						job.cancel();
+						String message = NLS.bind("Download of {0} timed out, perhaps the network went down.", item
+								.getRemoteDescriptor().getUrl());
+						throw new CoreException(new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, message));
 					}
 				}
 				catch (InterruptedException e) {
@@ -71,8 +78,11 @@ public class TemplateUtils {
 					throw e;
 				}
 
-				// re-get sample project since it may changed
+				// re-get template project since it may changed
 				item = ContentPlugin.getDefault().getManager().getItem(id);
+				if (item == null) {
+					return null;
+				}
 			}
 			else if (!item.isLocal()) {
 				return null;
@@ -89,7 +99,7 @@ public class TemplateUtils {
 			copyFolder(templateFolder, directory);
 		}
 
-		if (item == null || !item.isLocal()) {
+		if (!item.isLocal()) {
 			String message = NLS.bind("Download of template ''{0}'' failed", id);
 			throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message));
 		}
@@ -156,11 +166,54 @@ public class TemplateUtils {
 			return null;
 		}
 
+		if (!wasDownloadedViaDescriptor(templateDir)) {
+			File[] childrenFiles = templateDir.listFiles();
+			if (childrenFiles.length != 1) {
+				String message = NLS
+						.bind("There are more files the template download directory {0} than expected; using first directory",
+								templateDir);
+				IStatus status = new Status(IStatus.WARNING, WizardPlugin.PLUGIN_ID, message);
+				UiStatusHandler.logAndDisplay(shell, status);
+			}
+
+			File subdir = null;
+			for (File childFile : childrenFiles) {
+				if (childFile.isDirectory()) {
+					subdir = childFile;
+					break;
+				}
+			}
+
+			if (subdir != null) {
+				File[] grandchildren = subdir.listFiles();
+				for (File grandchild : grandchildren) {
+					grandchild.renameTo(new File(templateDir, grandchild.getName()));
+				}
+				subdir.delete();
+			}
+			else {
+				// There is another error thrown later on
+				String message = NLS.bind(
+						"There wasn't either {0} or a directory in the template download directory {1}",
+						IContentConstants.TEMPLATE_DATA_FILE_NAME, templateDir);
+				IStatus status = new Status(IStatus.WARNING, WizardPlugin.PLUGIN_ID, message);
+				UiStatusHandler.logAndDisplay(shell, status);
+			}
+
+		}
+
 		TemplateProjectData data = new TemplateProjectData(templateDir);
 		data.read();
 		progress.setWorkRemaining(10);
 
 		return data;
+	}
+
+	// The layout of templates downloaded via descriptors.xml must
+	// have template.xml in the root directory.
+	private static boolean wasDownloadedViaDescriptor(File templateDir) {
+		File templateXml = new File(templateDir, IContentConstants.TEMPLATE_DATA_FILE_NAME);
+		return templateXml.exists();
 	}
 
 	protected static boolean promptForDownload(Shell shell, ContentItem item) {
@@ -173,17 +226,41 @@ public class TemplateUtils {
 			for (ContentItem dependency : dependencies) {
 				size += dependency.getDownloadSize();
 			}
-			String formattedSize = NLS.bind("{0} bytes", size);
+			String formattedSize;
+			if (size > 0) {
+				formattedSize = NLS.bind("{0} bytes", size);
+			}
+			else {
+				formattedSize = NLS.bind("unknown size", null);
+			}
+
+			String message;
+			String requiredBundle = null;
+			if (item.getLocalDescriptor() != null) {
+				requiredBundle = item.getLocalDescriptor().getRequiresBundle();
+			}
+			else if (item.getRemoteDescriptor() != null) {
+				requiredBundle = item.getRemoteDescriptor().getRequiresBundle();
+			}
+
+			if (requiredBundle != null && !hasBundle(requiredBundle)) {
+				message = NLS
+						.bind("Warning: this project requires the bundle \n\t{0}\nwhich is not installed.  You can download this template, but it will probably get build errors.\n\n",
+								requiredBundle);
+			}
+			else {
+				message = "";
+			}
+
 			if (!item.isLocal()) {
-				return MessageDialog.openQuestion(shell, "Import",
-						NLS.bind("{0} requires a download of {1}. Proceed?", item.getName(), formattedSize));
+				message = message
+						+ NLS.bind("{0} requires a download of {1}.\n\nProceed?", item.getName(), formattedSize);
+				return MessageDialog.openQuestion(shell, "Import", message);
 			}
 			else if (item.isNewerVersionAvailable()) {
-				return MessageDialog.openQuestion(
-						shell,
-						"Import",
-						NLS.bind("An update for {0} is available which requires a download ({1}). Update?",
-								item.getName(), formattedSize));
+				message = NLS.bind("An update for {0} is available which requires a download of {1}.\n\n" + message
+						+ "Update?", item.getName(), formattedSize);
+				return MessageDialog.openQuestion(shell, "Import", message);
 			}
 		}
 		catch (CoreException e) {
@@ -193,4 +270,7 @@ public class TemplateUtils {
 		return true;
 	}
 
+	private static boolean hasBundle(String requiredBundle) {
+		return (Platform.getBundle(requiredBundle) != null);
+	}
 }

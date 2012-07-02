@@ -77,6 +77,8 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 
 	protected abstract String checkboxLabel();
 
+	protected abstract String addDialogHeaderText();
+
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(doGetPreferenceStore());
 		model = getModel();
@@ -147,6 +149,8 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 		nameColumn.getColumn().addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				tableViewer.setSorter(new NameUrlViewerSorter(true));
+				removeButton.setEnabled(false);
+				editButton.setEnabled(false);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -168,6 +172,8 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 		urlColumn.getColumn().addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				tableViewer.setSorter(new NameUrlViewerSorter(false));
+				removeButton.setEnabled(false);
+				editButton.setEnabled(false);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -206,7 +212,7 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				AddEditExampleProjectDialog dialog = new AddEditExampleProjectDialog(getShell(), model, null,
-						preferencePageHeaderText());
+						addDialogHeaderText());
 				if (dialog.open() == Dialog.OK) {
 					String urlString = dialog.getUrlString().trim().replaceAll("\\n", "");
 					String name = dialog.getName();
@@ -245,21 +251,27 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 				if (dialog.open() == Dialog.OK) {
 					String urlString = dialog.getUrlString();
 					String name = dialog.getName();
+					if (!validateUrl(urlString)) {
+						String title = NLS.bind("Invalid URL", null);
+						MessageDialog.openError(null, title, validationErrorMessage(urlString));
+					}
+					else {
 
-					if (name.length() > 0 && urlString.length() > 0) {
-						try {
-							if (oldNameUrl != null) {
-								model.removeNameUrlPairInEncodedString(oldNameUrl);
+						if (name.length() > 0 && urlString.length() > 0) {
+							try {
+								if (oldNameUrl != null) {
+									model.removeNameUrlPairInEncodedString(oldNameUrl);
+								}
+								model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
+								tableViewer.refresh();
+								// the tableViewer refresh deselects the line,
+								// so disable the buttons
+								editButton.setEnabled(false);
+								removeButton.setEnabled(false);
 							}
-							model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
-							tableViewer.refresh();
-							// the tableViewer refresh deselects the line, so
-							// disable the buttons
-							editButton.setEnabled(false);
-							removeButton.setEnabled(false);
-						}
-						catch (URISyntaxException e1) {
-							errorText.setText("Error!  The URL " + urlString + " was malformed.  Ignoring.");
+							catch (URISyntaxException e1) {
+								errorText.setText("Error!  The URL " + urlString + " was malformed.  Ignoring.");
+							}
 						}
 					}
 				}

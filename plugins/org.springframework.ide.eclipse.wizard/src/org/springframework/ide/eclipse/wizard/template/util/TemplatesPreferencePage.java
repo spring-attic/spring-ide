@@ -10,14 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template.util;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
-import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
+import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
 
 /**
  * @author Kaitlin Duck Sherwood
@@ -28,26 +23,22 @@ import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	public static final String EXAMPLE_PREFERENCES_PAGE_ID = "com.springsource.sts.help.ui.templatepreferencepage";
 
-	public static final String URL_SUFFIX = "/descriptions.xml";
+	public static final String URL_SUFFIX = "/" + ContentPlugin.FILENAME_DESCRIPTORS;
 
-	public static final String PREFERENCE_PAGE_HEADER = NLS.bind(
-			"You can reach templates by selecting New->Templates.\n", null);
+	public static final String PREFERENCE_PAGE_HEADER = NLS
+			.bind("You can import template projects via New->Spring Template Project.\n\n(Note that templates and descriptors require special packaging.)",
+					null);
 
-	public static final String ADD_EDIT_URL_DIALOG_INSTRUCTIONS = NLS.bind("Give the URL to a template.\n"
-			+ "Note that templates require special packaging", null);
+	public static final String ADD_EDIT_URL_DIALOG_INSTRUCTIONS = NLS.bind("Give the URL to a {0} or {1} file.",
+			IContentConstants.TEMPLATE_DATA_FILE_NAME, ContentPlugin.FILENAME_DESCRIPTORS);
 
 	@Override
 	protected boolean validateUrl(String urlString) {
-		if (urlString.startsWith("http")) {
-			return true;
-		}
-
-		// if (urlString.startsWith("file:")) {
-		// return true;
-		// }
-		else {
+		if (!urlString.startsWith("http")) {
 			return false;
 		}
+
+		return true;
 	}
 
 	@Override
@@ -56,7 +47,11 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	}
 
 	@Override
-	// TODO: mildly useful to make a singleton, perhaps
+	protected String addDialogHeaderText() {
+		return ADD_EDIT_URL_DIALOG_INSTRUCTIONS;
+	}
+
+	@Override
 	protected TemplatesPreferencesModel getModel() {
 		return TemplatesPreferencesModel.getInstance();
 	}
@@ -64,40 +59,6 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	@Override
 	protected String validationErrorMessage(String urlString) {
 		return NLS.bind("Sorry, {0} isn't a valid URL.  Right now we only take HTTP or HTTPS URLs.", urlString);
-	}
-
-	@Override
-	public boolean performOk() {
-		boolean okay = super.performOk();
-		if (getModel().getAndClearChangedFlag()) {
-			updateDescriptorsInBackground();
-		}
-		return okay;
-	}
-
-	private void updateDescriptorsInBackground() {
-
-		Job job = new Job("Refreshing template projects") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				final ContentManager defaultContentManager = ContentPlugin.getDefault().getManager();
-				IStatus status = defaultContentManager.refresh(monitor);
-				if (status instanceof MultiStatus) {
-					String statusMessage = "";
-					for (IStatus childStatus : status.getChildren()) {
-						statusMessage += childStatus.getMessage() + "\n";
-					}
-					return new Status(status.getSeverity(), status.getPlugin(), statusMessage);
-				}
-				else {
-					return status;
-				}
-			}
-		};
-
-		// Start the Job
-		job.schedule();
-
 	}
 
 	@Override

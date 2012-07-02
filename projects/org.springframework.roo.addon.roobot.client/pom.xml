@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.roo</groupId>
+    <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
+    <version>1.2.0.RELEASE</version>
+    <relativePath>../../../spring-roo/osgi-roo-bundle</relativePath>
+  </parent>
+  <artifactId>org.springframework.roo.addon.roobot.eclipse.client</artifactId>
+  <packaging>bundle</packaging>
+  <name>Spring Roo - Addon - RooBot (Eclipse Implementation)</name>
+  <properties>
+    <roo.version>1.2.0.RELEASE</roo.version>
+  </properties>
+  <dependencies>
+    <!-- Eclipse -->
+    <dependency>
+      <groupId>org.springframework.roo</groupId>
+      <artifactId>org.springframework.roo.addon.roobot.client</artifactId>
+      <version>${roo.version}</version>
+      <type>bundle</type>
+    </dependency>
+    <dependency>
+    	<groupId>org.springframework.roo</groupId>
+    	<artifactId>org.springframework.roo.addon.roobot.eclipse.api</artifactId>
+    	<version>1.2.0</version>
+    	<type>bundle</type>
+    	<scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>

@@ -19,6 +19,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+import org.eclipse.osgi.util.NLS;
 import org.springsource.ide.eclipse.commons.core.ResourceProvider;
 
 class NameUrlPair {
@@ -56,9 +57,10 @@ class NameUrlPair {
 	}
 
 	public void setUrlString(String url) throws URISyntaxException {
+
 		URI testUri = new URI(url);
 		if (testUri.getScheme() == null) {
-			throw new URISyntaxException(urlString, "URL has no protocol");
+			throw new URISyntaxException(urlString, NLS.bind("URL {0} has no protocol", url));
 		}
 		this.urlString = testUri.toASCIIString();
 	}

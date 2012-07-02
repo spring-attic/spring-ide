@@ -76,7 +76,7 @@
 		<dist.path>${dist.type}/${dist.key}/${dist.pathpostfix}</dist.path>
 		<dist.bucket>dist.springframework.org</dist.bucket>
 
-		<tycho-version>0.12.0</tycho-version>
+		<tycho-version>0.14.1</tycho-version>
 		<maven.test.skip>true</maven.test.skip>
 		<maven.test.error.ignore>true</maven.test.error.ignore>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
@@ -192,6 +192,7 @@
 	</modules>
 
 	<profiles>
+		
 		<profile>
 			<id>e34</id>
 			<properties>
@@ -215,6 +216,7 @@
 				</repository>
 			</repositories>
 		</profile>
+		
 		<profile>
 			<id>e35</id>
 			<properties>
@@ -238,6 +240,7 @@
 				</repository>
 			</repositories>
 		</profile>
+		
 		<profile>
 			<id>e36</id>
 			<activation>
@@ -269,6 +272,7 @@
 				</repository>
 			</repositories>
 		</profile>
+		
 		<profile>
 			<id>e37</id>
 			<activation>
@@ -305,6 +309,15 @@
 				</repository>
 			</repositories>
 		</profile>
+		
+		<profile>
+			<id>bamboo-signing</id>
+			<properties>
+				<signing.store.password>${env.bamboo_signing_store_password}</signing.store.password>
+				<signing.key.password>${env.bamboo_signing_key_password}</signing.key.password>
+			</properties>
+		</profile>
+
 	</profiles>
 
 	<repositories>

@@ -14,11 +14,16 @@
  */
 package org.springframework.ide.eclipse.wizard.template.util;
 
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
@@ -28,6 +33,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 
 public abstract class AbstractNameUrlPreferenceModel {
 
@@ -37,7 +43,9 @@ public abstract class AbstractNameUrlPreferenceModel {
 
 	private String currentString;
 
-	private boolean didChangeFlag = false;
+	protected boolean optionalFlagValue;
+
+	private final List<PropertyChangeListener> listeners;
 
 	protected abstract IEclipsePreferences getStore();
 
@@ -48,6 +56,8 @@ public abstract class AbstractNameUrlPreferenceModel {
 	protected abstract IEclipsePreferences getDefaultStore();
 
 	public AbstractNameUrlPreferenceModel() {
+		listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
+
 		store = getStore();
 		defaultStore = getDefaultStore();
 
@@ -142,10 +152,11 @@ public abstract class AbstractNameUrlPreferenceModel {
 		return currentString;
 	}
 
-	// sets didChange as a side effect: we need to get that information
-	// back up to the preferences page
 	public boolean persist() {
-		didChangeFlag = false;
+		boolean didChangeFlag = false;
+
+		normalizeCurrentStringOrder();
+
 		if (!currentString.equals(store.get(getStoreKey(), null))) {
 			Assert.isNotNull(currentString, "INTERNAL ERROR: current string should not be null in " + this.getClass());
 			store.put(getStoreKey(), currentString);
@@ -159,37 +170,51 @@ public abstract class AbstractNameUrlPreferenceModel {
 			getStore().putBoolean(getStoreOptionalFlagKey(), getOptionalFlagValue());
 		}
 
-		return false;
+		if (didChangeFlag) {
+			ContentPlugin.getDefault().getManager().setDirty();
+		}
+		return didChangeFlag;
 	}
 
-	// We need a way to get information back to the templates preference page so
-	// it can kick off updating the descriptors. You can perhaps imagine
-	// that this flag would be a little scary, that it could get stuck "on" or
-	// "off". However, the only methods that do anything with the flag are in
-	// TemplatesPreferencePage, so there's not currently a danger of
-	// a race.(ExamplesPreferencePage ignores it.) IF YOU CHANGE SOMETHING SO
-	// THAT MORE THAN ONE OBJECT LOOKS AT/MODIFIES didChangeFlag, you might need
-	// to use a different method to kick off updating the descriptors.
-	public boolean getAndClearChangedFlag() {
-		boolean oldValue = didChangeFlag;
-		didChangeFlag = false;
-		return oldValue;
+	private void normalizeCurrentStringOrder() {
+		List<NameUrlPair> sortedItems = NameUrlPair.decodeMultipleNameUrlStrings(currentString);
+		Collections.sort(sortedItems, new Comparator<NameUrlPair>() {
+			public int compare(NameUrlPair o1, NameUrlPair o2) {
+				return o1.getUrlString().compareTo(o2.getUrlString());
+			}
+		});
+		currentString = "";
+		for (NameUrlPair nameUrlPair : sortedItems) {
+			currentString += nameUrlPair.asCombinedString();
+		}
 	}
 
 	protected void clearNonDefaults() {
 		currentString = defaultStore.get(getStoreKey(), null);
 	}
 
-	// The templates need somewhere to keep a boolean of whether or
-	// not to show self-hosted templates in the New Template Wizard.
-	protected abstract void setOptionalFlagValue(boolean flagValue);
-
-	protected abstract boolean getOptionalFlagValue();
-
 	protected abstract String getStoreOptionalFlagKey();
 
 	protected boolean optionalFlagDefault() {
 		return false;
+	}
+
+	// The templates need somewhere to keep a boolean of whether or
+	// not to show self-hosted templates in the New Template Wizard.
+	protected void setOptionalFlagValue(boolean flagValue) {
+		optionalFlagValue = flagValue;
+	}
+
+	protected boolean getOptionalFlagValue() {
+		return optionalFlagValue;
+	}
+
+	public void addListener(PropertyChangeListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(PropertyChangeListener listener) {
+		listeners.remove(listener);
 	}
 
 }

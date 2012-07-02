@@ -20,12 +20,12 @@ public class ExampleProjectsPreferencePage extends AbstractNameUrlPreferencePage
 
 	public static final String EXAMPLE_PREFERENCES_PAGE_ID = "com.springsource.sts.help.ui.examplepreferencepage";
 
-	public static final String ADD_EDIT_URL_DIALOG_INSTRUCTIONS = NLS.bind("Give the URL to a Github project.\n"
-			+ "Note that the projects must be Eclipse projects or Maven projects.", null);
+	public static final String ADD_EDIT_URL_DIALOG_INSTRUCTIONS = NLS.bind("Give the URL to a Github project.\n\n"
+			+ "Note that currently the projects must be Eclipse projects or Maven projects.", null);
 
 	public static final String PREFERENCE_PAGE_HEADER = NLS.bind(
 			"Example projects appear on the dashboard, where you can click to import them.\n"
-					+ "At the moment, we only download projects from github.", null);
+					+ "At the moment, we only support projects on github.", null);
 
 	@Override
 	protected boolean validateUrl(String urlString) {
@@ -65,6 +65,11 @@ public class ExampleProjectsPreferencePage extends AbstractNameUrlPreferencePage
 	@Override
 	protected String checkboxLabel() {
 		return null;
+	}
+
+	@Override
+	protected String addDialogHeaderText() {
+		return ADD_EDIT_URL_DIALOG_INSTRUCTIONS;
 	}
 
 }

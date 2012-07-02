@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.wizard.template.infrastructure.processor
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.core.resources.IProject;
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
@@ -35,10 +37,11 @@ import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.FileSystemUtils;
+import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
 import org.springsource.ide.eclipse.commons.core.Policy;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
-
 
 /**
  * @author Terry Denney
@@ -233,7 +236,19 @@ public class TemplateProjectCreator {
 
 			unzipFolder.mkdir();
 
-			ZipFileUtil.unzip(archiveFile, unzipFolder, monitor);
+			if (archiveFile.getProtocol().equals("file") && !new File(archiveFile.toURI()).isDirectory()) {
+				ZipFileUtil.unzip(archiveFile, unzipFolder, monitor);
+			}
+			else {
+				File templateDir = new File(unzipFolder, "template");
+				FileSystemUtils.copyRecursively(new File(archiveFile.toURI()), templateDir);
+
+				// template.xml and wizard.json are not needed at this point
+				File templateXml = new File(templateDir, IContentConstants.TEMPLATE_DATA_FILE_NAME);
+				File wizardJson = new File(templateDir, IContentConstants.WIZARD_DATA_FILE_NAME);
+				templateXml.delete();
+				wizardJson.delete();
+			}
 
 			File tempFolder = new File(parentPath + "/tempFolder");
 			if (tempFolder.exists()) {
@@ -249,10 +264,16 @@ public class TemplateProjectCreator {
 			return tempFolder;
 		}
 		catch (IOException e) {
-			Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, "Could not create template project", e);
+			String message = NLS.bind("Could not create template project {0}", project);
+			Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message, e);
+			UiStatusHandler.logAndDisplay(status);
+			throw new CoreException(status);
+		}
+		catch (URISyntaxException e) {
+			String message = NLS.bind("The project path {0} in template.xml does not exist or can't be read.", project);
+			Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message, e);
 			UiStatusHandler.logAndDisplay(status);
 			throw new CoreException(status);
 		}
 	}
-
 }

@@ -299,9 +299,11 @@ public class AutoProcessor {
 				return matchesVersion("[1.1.2, 1.1.5)", rooVersion);
 			}
 			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.1.5")) { 				
-				return matchesVersion("1.1.5", rooVersion);
+				return matchesVersion("[1.1.5, 1.2.0)", rooVersion);
 			}
-			return true;
+			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.2.0")) {
+				return matchesVersion("1.2.0", rooVersion);
+			}
 		}
 		return false;
 	}
