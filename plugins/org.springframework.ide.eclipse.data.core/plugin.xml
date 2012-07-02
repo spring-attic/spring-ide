@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+    
+    <extension point="org.springframework.ide.eclipse.beans.ui.metadataproviders">
+         <metadataProviders
+               contentProvider="org.springframework.ide.eclipse.data.beans.ui.RepositoriesNamespaceContentProvider"
+               labelProvider="org.springframework.ide.eclipse.data.metadata.ui.RepositoriesBeanMetadataLabelProvider"
+               priority="100">
+         </metadataProviders>
+    </extension>
+  	<extension point="org.springframework.ide.eclipse.beans.ui.namespaces">
+	  <namespace
+         contentProvider="org.springframework.ide.eclipse.data.beans.ui.RepositoriesNamespaceContentProvider"
+         defaultSchemaLocation="http://www.springframework.org/schema/data/jpa/spring-jpa.xsd"
+         labelProvider="org.springframework.ide.eclipse.data.beans.ui.RepositoriesNamespaceLabelProvider"
+         name="Spring Data JPA"
+         prefix="jpa"
+         uri="http://www.springframework.org/schema/data/jpa">
+      <schemaLocation
+            url="http://www.springframework.org/schema/data/jpa/spring-data-jpa-1.1.xsd">
+      </schemaLocation>
+      <schemaLocation
+            url="http://www.springframework.org/schema/data/jpa/spring-data-jpa-1.0.xsd">
+      </schemaLocation>
+      <schemaLocation
+            url="http://www.springframework.org/schema/data/jpa/spring-data-jpa.xsd">
+      </schemaLocation>
+   </namespace>
+   <namespace
+         contentProvider="org.springframework.ide.eclipse.data.beans.ui.RepositoriesNamespaceContentProvider"
+         defaultSchemaLocation="http://www.springframework.org/schema/data/mongo/spring-mongo.xsd"
+         labelProvider="org.springframework.ide.eclipse.data.beans.ui.RepositoriesNamespaceLabelProvider"
+         name="Spring Data MongoDB"
+         prefix="mongo"
+         uri="http://www.springframework.org/schema/data/mongo">
+      <schemaLocation
+            url="http://www.springframework.org/schema/data/mongod/spring-mongo-1.1.xsd">
+      </schemaLocation>
+      <schemaLocation
+            url="http://www.springframework.org/schema/data/mongod/spring-mongo-1.0.xsd">
+      </schemaLocation>
+      <schemaLocation
+            url="http://www.springframework.org/schema/data/mongod/spring-mongo.xsd">
+      </schemaLocation>
+   </namespace>
+	</extension>
+   
+   <extension point="org.springframework.ide.eclipse.beans.core.metadata.metadataproviders">
+        <metadataProvider class="org.springframework.ide.eclipse.data.metadata.ui.RepositoriesBeanMetadataProvider" />
+    </extension>
+    <extension
+          point="org.eclipse.jdt.core.compilationParticipant">
+          <compilationParticipant
+           class="org.springframework.ide.eclipse.data.jdt.core.SpringDataCompilationParticipant"
+           createsProblems="true"
+           id="org.springframework.ide.eclipse.data.jdt.core.compilationParticipant"
+           modifiesEnvironment="false">
+     </compilationParticipant>
+    </extension>
+    
+    <extension id="org.springframework.ide.eclipse.data.jdt.core.completionRequestor"
+          point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+          name="Spring Data Proposals">
+          <javaCompletionProposalComputer
+            
+            class="org.springframework.ide.eclipse.data.jdt.core.EntityPropertyCompletionProposals"
+            activate="true">
+            <partition type="__java_string" />
+            <partition type="__dftl_partition_content_type" />
+          </javaCompletionProposalComputer>
+    </extension>
+	
+	<extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            adaptable="false"
+            location="TOP_RIGHT"
+            label="%decorator.label"
+            state="true"
+            class="org.springframework.ide.eclipse.data.beans.ui.model.RepositoriesModelLabelDecorator"
+            id="org.springframework.ide.eclipse.data.beans.ui.model.RepositoriesModelLabelDecorator">
+         <description>
+            %decorator.description
+         </description>
+         <enablement>
+            <or>
+               <objectClass name="org.eclipse.core.resources.IFolder"/>
+               <objectClass name="org.eclipse.core.resources.IFile"/>
+               <objectClass name="org.eclipse.jdt.core.IJavaElement"/>
+               <objectClass name="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
+            </or>
+         </enablement>
+      </decorator>
+   </extension>
+
+<extension point="org.eclipse.ui.navigator.navigatorContent">
+
+		<navigatorContent
+	            id="org.springframework.ide.eclipse.data.beans.ui.model.projectExplorerContent"
+	            name="Spring Data Repositories reference"
+	            contentProvider="org.springframework.ide.eclipse.data.beans.ui.model.RepositoriesModelContentProvider"
+	            labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider"
+	            activeByDefault="true"
+	            priority="highest">
+	            <enablement>
+	            	<instanceof value="org.eclipse.jdt.core.IType"/>
+	            </enablement> 
+	   	</navigatorContent>
+   </extension>
+ 
+ <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
+      <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <contentExtension pattern="org.springframework.ide.eclipse.data.beans.ui.model.projectExplorerContent"/>
+         </includes>
+      </viewerContentBinding>
+   </extension>
+	
+	<extension  point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
+	 <namespace
+        contentAssistProcessor="org.springframework.ide.eclipse.data.beans.ui.editor.RepositoriesContentAssistProcessor"
+        elementLocator="org.springframework.ide.eclipse.data.beans.ui.editor.RepositoriesReferenceableElementLocator"
+        name="Spring Data JPA"
+        uri="http://www.springframework.org/schema/data/jpa"/>
+  <namespace
+        contentAssistProcessor="org.springframework.ide.eclipse.data.beans.ui.editor.RepositoriesContentAssistProcessor"
+        elementLocator="org.springframework.ide.eclipse.data.beans.ui.editor.RepositoriesReferenceableElementLocator"
+        name="Spring Data MongoDB"
+        uri="http://www.springframework.org/schema/data/mongo">
+  </namespace>
+	</extension>
+
+</plugin>

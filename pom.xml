@@ -157,6 +157,11 @@
 		<module>plugins/org.springframework.ide.eclipse.webflow.mylyn</module>
 		<module>features/org.springframework.ide.eclipse.mylyn.feature</module>
 
+		<!-- data -->
+		<module>plugins/org.springframework.ide.eclipse.data.core</module>
+		<module>plugins/org.springframework.ide.eclipse.data.core.tests</module>
+		<module>features/org.springframework.ide.eclipse.data.feature</module>
+
 		<!-- roo -->
 		<module>plugins/org.springframework.ide.eclipse.roo.core</module>
 		<module>plugins/org.springframework.ide.eclipse.roo.ui</module>
@@ -180,6 +185,7 @@
 		<module>features/org.springframework.ide.eclipse.ajdt.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.roo.feature.source</module>
+		<module>features/org.springframework.ide.eclipse.data.feature.source</module>
 
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
@@ -259,6 +265,11 @@
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/tools/ajdt/36/milestone/</url>
 				</repository>
+				<repository>
+					<id>orbit</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20120119162704/repository/</url>
+				</repository>
 			</repositories>
 		</profile>
 		
@@ -290,6 +301,11 @@
 				  <id>m2eclipse-legacy</id>
 				  <layout>p2</layout>
 				  <url>http://download.springsource.com/release/TOOLS/third-party/m2eclipse-012</url>
+				</repository>
+				<repository>
+					<id>orbit</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20120119162704/repository/</url>
 				</repository>
 			</repositories>
 		</profile>

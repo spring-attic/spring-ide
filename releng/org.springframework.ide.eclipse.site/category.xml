@@ -57,6 +57,12 @@
 			<category name="Extensions / Spring IDE" />
 		</feature>	
 
+		<feature
+			url="features/org.springframework.ide.eclipse.data.feature_3.0.0.qualifier.jar"
+			id="org.springframework.ide.eclipse.data.feature" version="3.0.0.qualifier">
+			<category name="Extensions / Spring IDE" />
+		</feature>	
+
 		<!-- Extensions (Incubation) features -->	
 		<feature
 			url="features/org.springframework.ide.eclipse.autowire.feature_3.0.0.qualifier.jar"
@@ -147,6 +153,12 @@
 		<feature
 			url="features/org.springframework.ide.eclipse.maven.feature.source_3.0.0.qualifier.jar"
 			id="org.springframework.ide.eclipse.maven.feature.source" version="3.0.0.qualifier">
+			<category name="Resources / Spring IDE" />
+		</feature>		
+
+		<feature
+			url="features/org.springframework.ide.eclipse.data.feature.source_3.0.0.qualifier.jar"
+			id="org.springframework.ide.eclipse.data.feature.source" version="3.0.0.qualifier">
 			<category name="Resources / Spring IDE" />
 		</feature>		
 
