@@ -53,6 +53,31 @@ public class QueryMethodCandidateUnitTests {
 		assertThat(part.getSeed(), is("fir"));
 	}
 
+	/**
+	 * @see IDE-1255
+	 */
+	@Test
+	public void returnsNullQueryMethodPartForInvocationsInsideThePrefix() {
+
+		QueryMethodCandidate candidate = new QueryMethodCandidate("findByLastname", User.class);
+		QueryMethodPart part = candidate.getPartAtPosition(4);
+
+		assertThat(part, is(nullValue()));
+	}
+
+	/**
+	 * @see IDE-1255
+	 */
+	@Test
+	public void doesNotReturnProposalForRequestOutsideMethodName() {
+
+		String methodName = "findByLastname";
+		QueryMethodCandidate candidate = new QueryMethodCandidate(methodName, User.class);
+		QueryMethodPart part = candidate.getPartAtPosition(methodName.length() + 1);
+
+		assertThat(part, is(nullValue()));
+	}
+
 	static class User {
 
 		String firstname;

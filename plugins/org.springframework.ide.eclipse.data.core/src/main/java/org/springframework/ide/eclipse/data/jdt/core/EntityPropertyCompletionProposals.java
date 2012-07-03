@@ -108,6 +108,10 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 				information.getManagedDomainClass());
 		QueryMethodPart part = candidate.getPartAtPosition(positionInMethodName);
 
+		if (part == null) {
+			return proposals;
+		}
+
 		KeywordProposalsProvider keywordProposalsProvider = new KeywordProposalsProvider(keywordProvider);
 
 		IType type = part.isRoot() ? domainType : project.findType(part.getPathLeaf().getType().getName());

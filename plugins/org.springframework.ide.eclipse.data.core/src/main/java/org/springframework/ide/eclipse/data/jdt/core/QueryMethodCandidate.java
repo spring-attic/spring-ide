@@ -55,9 +55,15 @@ class QueryMethodCandidate {
 	 * position.
 	 * 
 	 * @param i the current position within the method name.
-	 * @return
+	 * @return the {@link QueryMethodPart} in case a reasonable proposal can be given or {@literal null} in case this is
+	 *         not the case.
 	 */
 	public QueryMethodPart getPartAtPosition(int i) {
+
+		// Don't provide propsals for request in prefix or after method
+		if (i < prefixLength || i > prefixLength + name.length()) {
+			return null;
+		}
 
 		Matcher matcher = CONCATENATOR_PATERN.matcher(name);
 		int startIndex = matcher.find() ? matcher.end() : 0;
