@@ -275,6 +275,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null,
 						TemplatesPreferencePage.EXAMPLE_PREFERENCES_PAGE_ID, null, null);
 				refreshButton.setEnabled(false);
+				setErrorMessage(null);
 
 				dialog.open();
 				if (ContentPlugin.getDefault().getManager().isDirty()) {
@@ -296,6 +297,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		refreshButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				setErrorMessage(null);
 				// under most circumstances, we don't want to download templates
 				// if there has not been any change. However, when the user
 				// presses Refresh, they really do want to see something happen.
@@ -374,6 +376,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 	@Override
 	public IWizardPage getNextPage() {
+		setErrorMessage(null);
 
 		if (firstPage != null) {
 			return firstPage;
@@ -669,20 +672,27 @@ public class TemplateSelectionWizardPage extends WizardPage {
 								InterruptedException {
 							try {
 								IStatus results = manager.refresh(monitor, true);
+								if (results.isOK()) {
+									return;
+								}
+								final String message = (results.getChildren()[0]).getMessage();
 								if (!results.isOK()) {
-									if (results.isMultiStatus() && results.getChildren().length > 0) {
-										throw new InvocationTargetException(new CoreException(results.getChildren()[0]));
-									}
-									else {
-										throw new InvocationTargetException(new CoreException(results));
-									}
+									PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+										public void run() {
+											setErrorMessage(message);
+										}
+									});
+
 								}
 							}
 							catch (OperationCanceledException e) {
-								// If we don't catch and throw the exception
-								// *here*, cancellations don't get recognized
-								// until the download is finished.
-								throw e;
+								final String message = ("Download of descriptor files cancelled.");
+
+								PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+									public void run() {
+										setErrorMessage(message);
+									}
+								});
 							}
 						}
 					});
