@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -104,7 +105,12 @@ public class ExampleProjectsImporterJob extends Job implements IOverwriteQuery {
 		catch (IOException e1) {
 			return new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, NLS.bind("Error downloading {0} to {1}", url,
 					archiveFile.getAbsolutePath()));
-
+		}
+		catch (OperationCanceledException e) {
+			System.err.println("Operation cancelled!");
+			monitor.done();
+			return new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, NLS.bind("Cancelled download of {0} to {1}.", url,
+					archiveFile.getAbsolutePath()));
 		}
 
 		if (!targetDirectory.exists()) {
