@@ -15,11 +15,19 @@
 
 package org.springframework.ide.eclipse.wizard.template.util;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -27,7 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class AddEditExampleProjectDialog extends Dialog {
+public class AddEditNameUrlDialog extends Dialog {
 	AbstractNameUrlPreferenceModel model;
 
 	Text nameText;
@@ -40,7 +48,11 @@ public class AddEditExampleProjectDialog extends Dialog {
 
 	private final String explanatoryText;
 
-	public AddEditExampleProjectDialog(Shell parent, AbstractNameUrlPreferenceModel aModel, NameUrlPair nameUrl,
+	protected Label errorTextLabel;
+
+	protected Composite composite;
+
+	public AddEditNameUrlDialog(Shell parent, AbstractNameUrlPreferenceModel aModel, NameUrlPair nameUrl,
 			String headerText) {
 		super(parent);
 		explanatoryText = headerText;
@@ -57,7 +69,7 @@ public class AddEditExampleProjectDialog extends Dialog {
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NONE);
+		composite = new Composite(parent, SWT.NONE);
 
 		GridLayoutFactory.fillDefaults().numColumns(2).extendedMargins(5, 13, 10, 0).applyTo(composite);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(composite);
@@ -77,9 +89,9 @@ public class AddEditExampleProjectDialog extends Dialog {
 			nameText.setText(name);
 		}
 
-		Label UrlLabel = new Label(composite, SWT.NONE);
-		UrlLabel.setText(NLS.bind("URL:", null));
-		UrlLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		Label urlLabel = new Label(composite, SWT.NONE);
+		urlLabel.setText(NLS.bind("URL:", null));
+		urlLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		urlText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, false).hint(300, SWT.DEFAULT).applyTo(urlText);
 		urlText.setEditable(true);
@@ -87,7 +99,44 @@ public class AddEditExampleProjectDialog extends Dialog {
 			urlText.setText(urlString);
 		}
 
+		urlText.addKeyListener(getUrlValidationListener());
+
+		String errorText = "";
+		errorTextLabel = new Label(composite, SWT.WRAP);
+		errorTextLabel.setText(errorText);
+		GridDataFactory.fillDefaults().grab(true, false).span(2, 1).applyTo(errorTextLabel);
+
+		// getButton(IDialogConstants.OK_ID).setEnabled(validateUrl(urlString));
+
 		return composite;
+	}
+
+	@Override
+	public void create() {
+		super.create();
+		getButton(IDialogConstants.OK_ID).setEnabled(validateUrl(urlString));
+	}
+
+	protected KeyListener getUrlValidationListener() {
+		return new KeyListener() {
+
+			public void keyReleased(KeyEvent e) {
+
+				String urlString = ((Text) e.getSource()).getText();
+				if (!validateUrl(urlString)) {
+					getButton(IDialogConstants.OK_ID).setEnabled(false);
+				}
+				else {
+					errorTextLabel.setText("");
+					composite.update();
+					getButton(IDialogConstants.OK_ID).setEnabled(true);
+				}
+			}
+
+			public void keyPressed(KeyEvent e) {
+				// do nothing
+			}
+		};
 	}
 
 	@Override
@@ -111,4 +160,36 @@ public class AddEditExampleProjectDialog extends Dialog {
 		return name;
 	}
 
+	protected boolean validateUrl(String urlString) {
+		if (urlString == null || urlString.length() <= 0) {
+			return false;
+		}
+
+		try {
+			@SuppressWarnings("unused")
+			URI testUri = new URI(urlString);
+		}
+		catch (URISyntaxException e1) {
+			errorTextLabel.setText(NLS.bind("Malformed URL", null));
+			composite.update();
+			return false;
+		}
+
+		try {
+			URL testUrl = new URL(urlString);
+			if (!testUrl.getProtocol().startsWith("http")) {
+				errorTextLabel.setText(NLS.bind("URL must start with http or https", null));
+				composite.update();
+				return false;
+			}
+		}
+
+		catch (MalformedURLException e) {
+			errorTextLabel.setText(NLS.bind("Malformed URL", null));
+			composite.update();
+			return false;
+		}
+
+		return true;
+	}
 }

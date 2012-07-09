@@ -33,15 +33,6 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 			IContentConstants.TEMPLATE_DATA_FILE_NAME, ContentPlugin.FILENAME_DESCRIPTORS);
 
 	@Override
-	protected boolean validateUrl(String urlString) {
-		if (!urlString.startsWith("http")) {
-			return false;
-		}
-
-		return true;
-	}
-
-	@Override
 	protected String preferencePageHeaderText() {
 		return PREFERENCE_PAGE_HEADER;
 	}
@@ -54,11 +45,6 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	@Override
 	protected TemplatesPreferencesModel getModel() {
 		return TemplatesPreferencesModel.getInstance();
-	}
-
-	@Override
-	protected String validationErrorMessage(String urlString) {
-		return NLS.bind("Sorry, {0} isn't a valid URL.  Right now we only take HTTP or HTTPS URLs.", urlString);
 	}
 
 	@Override
@@ -75,4 +61,10 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	public boolean shouldGetSelfHosted() {
 		return getCheckboxValue();
 	}
+
+	@Override
+	protected TemplateAddEditNameUrlDialog getAddEditDialog(NameUrlPair existingNameUrlPair) {
+		return new TemplateAddEditNameUrlDialog(getShell(), model, existingNameUrlPair, addDialogHeaderText());
+	}
+
 }

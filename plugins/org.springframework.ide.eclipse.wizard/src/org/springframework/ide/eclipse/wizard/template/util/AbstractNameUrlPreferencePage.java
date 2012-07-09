@@ -55,7 +55,7 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 
 	List<NameUrlPair> elements;
 
-	private AbstractNameUrlPreferenceModel model;
+	protected AbstractNameUrlPreferenceModel model;
 
 	private Button editButton;
 
@@ -67,17 +67,15 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 
 	protected abstract String preferencePageHeaderText();
 
-	protected abstract boolean validateUrl(String urlString);
-
 	protected abstract AbstractNameUrlPreferenceModel getModel();
-
-	protected abstract String validationErrorMessage(String urlString);
 
 	protected abstract boolean shouldShowCheckbox();
 
 	protected abstract String checkboxLabel();
 
 	protected abstract String addDialogHeaderText();
+
+	protected abstract AddEditNameUrlDialog getAddEditDialog(NameUrlPair existingNameUrlPair);
 
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(doGetPreferenceStore());
@@ -211,29 +209,26 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				AddEditExampleProjectDialog dialog = new AddEditExampleProjectDialog(getShell(), model, null,
-						addDialogHeaderText());
+				AddEditNameUrlDialog dialog = getAddEditDialog(null);
 				if (dialog.open() == Dialog.OK) {
 					String urlString = dialog.getUrlString().trim().replaceAll("\\n", "");
+					// the validation of the URL is done in the dialog class
 					String name = dialog.getName();
-					if (!validateUrl(urlString)) {
-						String title = NLS.bind("Invalid URL", null);
-						MessageDialog.openError(null, title, validationErrorMessage(urlString));
-					}
-					else {
 
-						if (name.length() > 0 && urlString.length() > 0) {
-							try {
-								model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
-								tableViewer.refresh();
-							}
-							catch (URISyntaxException e1) {
-								String title = NLS.bind("Invalid URL", null);
-								String message = NLS.bind("The URL {0} was malformed.  Ignoring.", urlString);
-								MessageDialog.openError(null, title, message);
-							}
+					if (name.length() > 0 && urlString.length() > 0) {
+						try {
+							model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
+							tableViewer.refresh();
+						}
+						catch (URISyntaxException e1) {
+							// Errors in URL *should* be caught in the add/edit
+							// dialog, i.e. before getting to this point.
+							String title = NLS.bind("Invalid URL", null);
+							String message = NLS.bind("The URL {0} was malformed.  Ignoring.", urlString);
+							MessageDialog.openError(null, title, message);
 						}
 					}
+
 				}
 			}
 
@@ -247,34 +242,29 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				NameUrlPair oldNameUrl = getSelectedNameUrlPair();
-				AddEditExampleProjectDialog dialog = new AddEditExampleProjectDialog(getShell(), model, oldNameUrl, "");
+				AddEditNameUrlDialog dialog = getAddEditDialog(oldNameUrl);
 				if (dialog.open() == Dialog.OK) {
 					String urlString = dialog.getUrlString();
 					String name = dialog.getName();
-					if (!validateUrl(urlString)) {
-						String title = NLS.bind("Invalid URL", null);
-						MessageDialog.openError(null, title, validationErrorMessage(urlString));
-					}
-					else {
 
-						if (name.length() > 0 && urlString.length() > 0) {
-							try {
-								if (oldNameUrl != null) {
-									model.removeNameUrlPairInEncodedString(oldNameUrl);
-								}
-								model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
-								tableViewer.refresh();
-								// the tableViewer refresh deselects the line,
-								// so disable the buttons
-								editButton.setEnabled(false);
-								removeButton.setEnabled(false);
+					if (name.length() > 0 && urlString.length() > 0) {
+						try {
+							if (oldNameUrl != null) {
+								model.removeNameUrlPairInEncodedString(oldNameUrl);
 							}
-							catch (URISyntaxException e1) {
-								errorText.setText("Error!  The URL " + urlString + " was malformed.  Ignoring.");
-							}
+							model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
+							tableViewer.refresh();
+							// the tableViewer refresh deselects the line,
+							// so disable the buttons
+							editButton.setEnabled(false);
+							removeButton.setEnabled(false);
+						}
+						catch (URISyntaxException e1) {
+							errorText.setText("Error!  The URL " + urlString + " was malformed.  Ignoring.");
 						}
 					}
 				}
+
 			}
 		});
 

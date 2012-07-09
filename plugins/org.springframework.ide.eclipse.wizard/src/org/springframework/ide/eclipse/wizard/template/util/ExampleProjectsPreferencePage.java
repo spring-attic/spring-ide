@@ -28,26 +28,6 @@ public class ExampleProjectsPreferencePage extends AbstractNameUrlPreferencePage
 					+ "At the moment, we only support projects on github.", null);
 
 	@Override
-	protected boolean validateUrl(String urlString) {
-		// github and local files only
-		if (urlString.startsWith("http") && urlString.indexOf("github.com") > 0) {
-			return true;
-		}
-
-		// if (urlString.startsWith("file:")) {
-		// return true;
-		// }
-		else {
-			return false;
-		}
-	}
-
-	@Override
-	protected String validationErrorMessage(String urlString) {
-		return NLS.bind("Sorry, {0} isn't a valid URL.  Right now we can only handle projects on github.", urlString);
-	}
-
-	@Override
 	protected String preferencePageHeaderText() {
 		return ExampleProjectsPreferencePage.PREFERENCE_PAGE_HEADER;
 	}
@@ -70,6 +50,11 @@ public class ExampleProjectsPreferencePage extends AbstractNameUrlPreferencePage
 	@Override
 	protected String addDialogHeaderText() {
 		return ADD_EDIT_URL_DIALOG_INSTRUCTIONS;
+	}
+
+	@Override
+	protected ExampleAddEditNameUrlDialog getAddEditDialog(NameUrlPair existingNameUrlPair) {
+		return new ExampleAddEditNameUrlDialog(getShell(), model, existingNameUrlPair, addDialogHeaderText());
 	}
 
 }
