@@ -29,7 +29,6 @@ class NameUrlPair {
 	private String urlEncodedName;
 
 	public NameUrlPair(String unencodedName, String urlString) throws URISyntaxException {
-		super();
 		setName(unencodedName);
 		setUrlString(urlString);
 	}
