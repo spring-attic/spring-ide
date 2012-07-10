@@ -122,7 +122,7 @@ public class AddEditNameUrlDialog extends Dialog {
 
 			public void keyReleased(KeyEvent e) {
 
-				String urlString = ((Text) e.getSource()).getText();
+				String urlString = ((Text) e.getSource()).getText().trim();
 				if (!validateUrl(urlString)) {
 					getButton(IDialogConstants.OK_ID).setEnabled(false);
 				}

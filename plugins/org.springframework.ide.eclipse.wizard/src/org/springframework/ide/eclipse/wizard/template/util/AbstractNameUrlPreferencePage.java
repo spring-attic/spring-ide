@@ -212,6 +212,9 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 				AddEditNameUrlDialog dialog = getAddEditDialog(null);
 				if (dialog.open() == Dialog.OK) {
 					String urlString = dialog.getUrlString().trim().replaceAll("\\n", "");
+					if (urlString.endsWith("/")) {
+						urlString = urlString.substring(0, urlString.length() - 1);
+					}
 					// the validation of the URL is done in the dialog class
 					String name = dialog.getName();
 
@@ -244,7 +247,10 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 				NameUrlPair oldNameUrl = getSelectedNameUrlPair();
 				AddEditNameUrlDialog dialog = getAddEditDialog(oldNameUrl);
 				if (dialog.open() == Dialog.OK) {
-					String urlString = dialog.getUrlString();
+					String urlString = dialog.getUrlString().trim().replaceAll("\\n", "");
+					if (urlString.endsWith("/")) {
+						urlString = urlString.substring(0, urlString.length() - 1);
+					}
 					String name = dialog.getName();
 
 					if (name.length() > 0 && urlString.length() > 0) {
