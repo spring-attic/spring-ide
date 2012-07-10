@@ -386,6 +386,14 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			return null;
 		}
 
+		ContentItem selectedItem = selectedTemplate.getItem();
+		if (!selectedItem.isLocal() && selectedItem.getRemoteDescriptor().getUrl() == null) {
+			String message = NLS.bind("In the descriptor file for ''{0}'', the URL to the project ZIP is missing.",
+					selectedItem.getName());
+			MessageDialog.openError(getShell(), NLS.bind("URL missing", null), message);
+			return null;
+		}
+
 		try {
 			getContainer().run(true, true, new IRunnableWithProgress() {
 
