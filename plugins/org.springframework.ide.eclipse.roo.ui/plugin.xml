@@ -202,7 +202,7 @@
          point="org.eclipse.ui.newWizards">
       <wizard
             canFinishEarly="false"
-            category="com.springsource.sts.category"
+            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
             class="org.springframework.ide.eclipse.roo.ui.internal.wizard.NewRooProjectWizard"
             finalPerspective="com.springsource.sts.ide.perspective"
             hasPages="true"

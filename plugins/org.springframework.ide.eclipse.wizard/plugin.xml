@@ -47,7 +47,7 @@
  <extension
        point="org.eclipse.ui.newWizards">
     <wizard
-          category="com.springsource.sts.category"
+          category="org.springframework.ide.eclipse.beans.ui.wizards.category"
           class="org.springframework.ide.eclipse.wizard.template.TemplateWizard"
           finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
           hasPages="true"
