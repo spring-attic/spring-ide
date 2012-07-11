@@ -66,6 +66,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -122,7 +123,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 	private Label descriptionLabel;
 
-	private Label descriptionText;
+	private Text descriptionText;
 
 	private String projectNameToken;
 
@@ -317,11 +318,10 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		descriptionLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		descriptionLabel.setVisible(false);
 
-		descriptionText = new Label(descriptionComposite, SWT.WRAP);
-
-		GridData descriptionData = new GridData(SWT.FILL, SWT.FILL, false, false);
+		descriptionText = new Text(descriptionComposite, SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
+		GridData descriptionData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		descriptionData.widthHint = 200;
-		descriptionData.heightHint = 40;
+		descriptionData.heightHint = 80;
 		descriptionText.setLayoutData(descriptionData);
 
 		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
