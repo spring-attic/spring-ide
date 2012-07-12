@@ -25,6 +25,12 @@
 		<category name="Core / Spring IDE" />
 	</feature>
 	
+	<feature
+		url="features/org.springframework.ide.eclipse.uaa.feature_0.0.0.jar"
+		id="org.springframework.ide.eclipse.uaa.feature" version="0.0.0">
+        <category name="Core / Spring IDE"/>
+    </feature>
+	
 	<!-- Extensions features -->
 	<feature
 		url="features/org.springframework.ide.eclipse.aop.feature_3.0.0.qualifier.jar"
@@ -177,8 +183,8 @@
 		url="features/org.springframework.ide.eclipse.data.feature.source_3.0.0.qualifier.jar"
 		id="org.springframework.ide.eclipse.data.feature.source" version="3.0.0.qualifier">
 		<category name="Resources / Spring IDE" />
-	</feature>		
-		
+	</feature>
+
 	<category-def name="Core / Spring IDE" label="Core / Spring IDE" />
 	<category-def name="Dependencies / Spring IDE" label="Dependencies / Spring IDE" />
 	<category-def name="Extensions / Spring IDE" label="Extensions / Spring IDE" />

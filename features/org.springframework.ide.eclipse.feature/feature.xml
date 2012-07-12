@@ -30,11 +30,6 @@
       %license
    </license>
 
-   <includes
-         id="org.springframework.ide.eclipse.uaa.feature"
-         version="0.0.0"
-         optional="true"/>
-
    <requires>
       <import feature="org.eclipse.wst.xml_ui.feature" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.3.0" match="greaterOrEqual"/>

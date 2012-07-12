@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
 
-	<!-- Core features -->
+		<!-- Core features -->
 		<feature
 			url="features/org.springframework.ide.eclipse.feature_3.0.0.qualifier.jar"
 			id="org.springframework.ide.eclipse.feature" version="3.0.0.qualifier">
 			<category name="Core / Spring IDE" />
 		</feature>
+
+		<feature
+			url="features/org.springframework.ide.eclipse.uaa.feature_0.0.0.jar"
+			id="org.springframework.ide.eclipse.uaa.feature" version="0.0.0">
+			<category name="Core / Spring IDE"/>
+	    </feature>
 
 		<!-- Extensions features -->
 		<feature
