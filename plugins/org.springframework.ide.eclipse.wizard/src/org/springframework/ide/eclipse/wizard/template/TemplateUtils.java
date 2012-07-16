@@ -16,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -37,10 +36,10 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateP
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateProjectData;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
-import org.springsource.ide.eclipse.commons.content.core.ContentManager.DownloadJob;
+import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
+import org.springsource.ide.eclipse.commons.content.core.TemplateDownloader;
 import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
-import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 
 /**
@@ -53,6 +52,7 @@ public class TemplateUtils {
 			InterruptedException {
 		Assert.isNotNull(item);
 		String id = item.getId();
+		ContentManager manager = ContentPlugin.getDefault().getManager();
 		if (item.needsDownload()) {
 			final ContentItem finalItem = item;
 			final boolean[] response = new boolean[1];
@@ -62,24 +62,15 @@ public class TemplateUtils {
 				}
 			});
 			if (response[0]) {
-				DownloadJob job = ContentPlugin.getDefault().getManager().createDownloadJob(item);
-				job.schedule();
-
-				try {
-					if (!job.getLatch().await(60, TimeUnit.SECONDS)) {
-						job.cancel();
-						String message = NLS.bind("Download of {0} timed out, perhaps the network went down.", item
-								.getRemoteDescriptor().getUrl());
-						throw new CoreException(new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, message));
-					}
-				}
-				catch (InterruptedException e) {
-					job.cancel();
-					throw e;
+				TemplateDownloader downloader = manager.createDownloader(item);
+				IStatus status = downloader.downloadTemplate(monitor);
+				if (!status.isOK()) {
+					String message = NLS.bind("Download of template ''{0}'' failed: {1}", id, status.getMessage());
+					throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message));
 				}
 
 				// re-get template project since it may changed
-				item = ContentPlugin.getDefault().getManager().getItem(id);
+				item = manager.getItem(id);
 				if (item == null) {
 					return null;
 				}
@@ -89,7 +80,7 @@ public class TemplateUtils {
 			}
 		}
 
-		File baseDir = ContentPlugin.getDefault().getManager().getInstallDirectory();
+		File baseDir = manager.getInstallDirectory();
 
 		if (item.isRuntimeDefined()) {
 			File directory = new File(baseDir, item.getPath());

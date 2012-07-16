@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -395,7 +396,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		}
 
 		try {
-			getContainer().run(true, true, new IRunnableWithProgress() {
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+			dialog.run(true, true, new IRunnableWithProgress() {
 
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
@@ -437,10 +439,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			return null;
 		}
 		catch (InvocationTargetException e) {
-			// All the failures that can cause an invocation exception to show
-			// up here also cause a different dialog box to appear. Thus, doing
-			// anything but quietly returning here gives a redundant error
-			// dialog.
+			UiStatusHandler.logAndDisplay(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getTargetException()
+					.getLocalizedMessage(), e));
 			return null;
 		}
 
