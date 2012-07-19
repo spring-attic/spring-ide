@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.data.jdt.core;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IJavaProject;
@@ -19,8 +22,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.Repository;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.data.SpringDataUtils;
@@ -28,10 +33,17 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * 
  * @author Oliver Gierke
  */
 public class RepositoryInformation {
+
+	private static Set<String> METHOD_NAMES = new HashSet<String>();
+
+	static {
+		for (Method method : PagingAndSortingRepository.class.getMethods()) {
+			METHOD_NAMES.add(method.getName());
+		}
+	}
 
 	static enum Module {
 
@@ -153,5 +165,27 @@ public class RepositoryInformation {
 
 	public Class<?> getManagedDomainClass() {
 		return GenericTypeResolver.resolveTypeArguments(this.repositoryInterface, this.repositoryBaseInterface)[0];
+	}
+
+	/**
+	 * Returns all {@link IMethod}s that shall be considered query methods (which need to be validated).
+	 * 
+	 * @return
+	 */
+	public Iterable<IMethod> getQueryMethods() {
+
+		Set<IMethod> result = new HashSet<IMethod>();
+
+		try {
+			for (IMethod method : type.getMethods()) {
+				if (!METHOD_NAMES.contains(method.getElementName())) {
+					result.add(method);
+				}
+			}
+		} catch (JavaModelException e) {
+			SpringCore.log(e);
+		}
+
+		return result;
 	}
 }

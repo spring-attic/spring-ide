@@ -95,21 +95,24 @@ public class InvalidDerivedQueryProblem extends CategorizedProblem {
 		}
 	}
 
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceStart()
 	 */
 	public int getSourceStart() {
 		return getSourceLineNumber();
 	}
 
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see org.eclipse.jdt.core.compiler.IProblem#isError()
 	 */
 	public boolean isError() {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see org.eclipse.jdt.core.compiler.IProblem#isWarning()
 	 */
 	public boolean isWarning() {
@@ -127,7 +130,6 @@ public class InvalidDerivedQueryProblem extends CategorizedProblem {
 	 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceLineNumber(int)
 	 */
 	public void setSourceLineNumber(int arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -135,7 +137,6 @@ public class InvalidDerivedQueryProblem extends CategorizedProblem {
 	 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceStart(int)
 	 */
 	public void setSourceStart(int arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -144,8 +145,7 @@ public class InvalidDerivedQueryProblem extends CategorizedProblem {
 	 */
 	@Override
 	public int getCategoryID() {
-		// TODO Auto-generated method stub
-		return 0;
+		return CategorizedProblem.CAT_SYNTAX;
 	}
 
 	/* (non-Javadoc)
@@ -153,8 +153,6 @@ public class InvalidDerivedQueryProblem extends CategorizedProblem {
 	 */
 	@Override
 	public String getMarkerType() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

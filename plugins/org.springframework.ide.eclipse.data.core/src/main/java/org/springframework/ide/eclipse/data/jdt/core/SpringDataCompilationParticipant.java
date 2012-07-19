@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
@@ -27,7 +28,6 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
- * 
  * @author Oliver Gierke
  */
 public class SpringDataCompilationParticipant extends CompilationParticipant {
@@ -50,7 +50,8 @@ public class SpringDataCompilationParticipant extends CompilationParticipant {
 		try {
 
 			CompilationUnit compilationUnit = context.getAST3();
-			IType type = compilationUnit.getTypeRoot().findPrimaryType();
+			ITypeRoot typeRoot = compilationUnit.getTypeRoot();
+			IType type = typeRoot.findPrimaryType();
 
 			// Skip non-interfaces
 			if (type == null || !type.isInterface()) {
@@ -60,16 +61,15 @@ public class SpringDataCompilationParticipant extends CompilationParticipant {
 
 			RepositoryInformation information = new RepositoryInformation(type);
 
-			if (information.isSpringDataRepository()) {
-				System.out.println("Found Spring Data Repository " + type.getFullyQualifiedName());
-			} else {
+			if (!information.isSpringDataRepository()) {
+				super.reconcile(context);
 				return;
 			}
 
 			Class<?> domainClass = information.getManagedDomainClass();
 			List<CategorizedProblem> problems = new ArrayList<CategorizedProblem>();
 
-			for (IMethod method : type.getMethods()) {
+			for (IMethod method : information.getQueryMethods()) {
 
 				String methodName = method.getElementName();
 
@@ -80,7 +80,7 @@ public class SpringDataCompilationParticipant extends CompilationParticipant {
 				}
 			}
 
-			context.putProblems("MARKER", problems.toArray(new CategorizedProblem[problems.size()]));
+			context.putProblems("org.eclipse.jdt.core.problem", problems.toArray(new CategorizedProblem[problems.size()]));
 
 		} catch (JavaModelException e) {
 			SpringCore.log(e);
