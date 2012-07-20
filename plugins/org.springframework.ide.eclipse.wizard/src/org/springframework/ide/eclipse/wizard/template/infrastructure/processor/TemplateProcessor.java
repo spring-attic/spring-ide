@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
  * @author Terry Denney
  * @author Leo Dos Santos
  * @author Christian Dupuis
+ * @author Kaitlin Duck Sherwood
  */
 public class TemplateProcessor {
 	private static Logger logger = Logger.getLogger(TemplateProcessor.class);
@@ -99,17 +100,19 @@ public class TemplateProcessor {
 	}
 
 	public String replacePathForDirectory(String path, char separator) {
-		String topLevelPackageStr = replacementContext.get("||top-level-package||");
-		if (topLevelPackageStr != null) {
-			topLevelPackageStr = topLevelPackageStr.replaceAll("&&", "\\" + separator);
+		String originalTopLevelPackageStr = replacementContext.get("||top-level-package||");
+		if (originalTopLevelPackageStr != null) {
+			originalTopLevelPackageStr = originalTopLevelPackageStr.replaceAll("&&", "\\" + separator);
+
 			String userTopLevelPackageStr = replacementContext.get("||user-top-level-package||");
 
-			if (path.contains(topLevelPackageStr) && userTopLevelPackageStr != null) {
-				int index = path.indexOf(topLevelPackageStr);
-				String newPath = path.substring(0, index) + userTopLevelPackageStr.replaceAll("&&", "\\" + separator);
+			if (path.contains(originalTopLevelPackageStr) && userTopLevelPackageStr != null) {
+				int index = path.indexOf(originalTopLevelPackageStr);
+				String replacementString = userTopLevelPackageStr.replaceAll("&&", "\\" + separator);
+				String newPath = path.substring(0, index) + replacementString;
 
-				if (index + topLevelPackageStr.length() + 1 < path.length()) {
-					newPath += path.substring(index + topLevelPackageStr.length() + 1);
+				if (index + 1 + originalTopLevelPackageStr.length() < path.length()) {
+					newPath += path.substring(index + originalTopLevelPackageStr.length());
 				}
 
 				return newPath;
