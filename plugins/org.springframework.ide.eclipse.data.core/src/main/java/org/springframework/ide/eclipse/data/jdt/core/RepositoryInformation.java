@@ -33,6 +33,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
+ * Value object to easily access information about a Spring Data repository.
+ * 
  * @author Oliver Gierke
  */
 public class RepositoryInformation {
@@ -172,13 +174,14 @@ public class RepositoryInformation {
 	 * 
 	 * @return
 	 */
-	public Iterable<IMethod> getQueryMethods() {
+	public Iterable<IMethod> getMethodsToValidate() {
 
 		Set<IMethod> result = new HashSet<IMethod>();
 
 		try {
 			for (IMethod method : type.getMethods()) {
-				if (!METHOD_NAMES.contains(method.getElementName())) {
+
+				if (!isCrudMethod(method) && !hasQueryAnnotation(method)) {
 					result.add(method);
 				}
 			}
@@ -187,5 +190,20 @@ public class RepositoryInformation {
 		}
 
 		return result;
+	}
+
+	private boolean isCrudMethod(IMethod method) {
+		return METHOD_NAMES.contains(method.getElementName());
+	}
+
+	private boolean hasQueryAnnotation(IMethod method) throws JavaModelException {
+
+		for (IAnnotation annotation : method.getAnnotations()) {
+			if (annotation.getElementName().equals("Query")) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

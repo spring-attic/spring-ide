@@ -69,7 +69,7 @@ public class SpringDataCompilationParticipant extends CompilationParticipant {
 			Class<?> domainClass = information.getManagedDomainClass();
 			List<CategorizedProblem> problems = new ArrayList<CategorizedProblem>();
 
-			for (IMethod method : information.getQueryMethods()) {
+			for (IMethod method : information.getMethodsToValidate()) {
 
 				String methodName = method.getElementName();
 
