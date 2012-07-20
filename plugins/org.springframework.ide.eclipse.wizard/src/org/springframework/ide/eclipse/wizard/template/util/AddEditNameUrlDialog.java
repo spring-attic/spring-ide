@@ -176,14 +176,8 @@ public class AddEditNameUrlDialog extends Dialog {
 		}
 
 		try {
-			URL testUrl = new URL(urlString);
-			if (!testUrl.getProtocol().startsWith("http")) {
-				errorTextLabel.setText(NLS.bind("URL must start with http or https", null));
-				composite.update();
-				return false;
-			}
+			new URL(urlString);
 		}
-
 		catch (MalformedURLException e) {
 			errorTextLabel.setText(NLS.bind("Malformed URL", null));
 			composite.update();
