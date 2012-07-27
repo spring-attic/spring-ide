@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.maven;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.apache.maven.Maven;
 import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -25,10 +26,12 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -220,6 +223,19 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 
 			Model model = MavenPlugin.getMavenModelManager().readMavenModel(pomFile);
 			String derivedProjectName = model.getName();
+			if(derivedProjectName == null) {
+				derivedProjectName = model.getArtifactId();
+			}
+			if(derivedProjectName == null) {
+				String[] groupPieces = model.getGroupId().split("\\.");
+				int lastIndex = groupPieces.length -1;
+				if(lastIndex >= 0) {
+				derivedProjectName = groupPieces[lastIndex];
+				} else {
+					String message = NLS.bind("Bad pom.xml: no name, artifactId, or groupId.", null);
+					throw new CoreException(new Status(Status.ERROR, MavenCorePlugin.PLUGIN_ID, message));
+				}
+			}
 			MavenProjectInfo parent = null;
 			MavenProjectInfo projectInfo = new MavenProjectInfo(derivedProjectName, pomFile, model, parent);
 			ArrayList<MavenProjectInfo> projectInfos = new ArrayList<MavenProjectInfo>();
