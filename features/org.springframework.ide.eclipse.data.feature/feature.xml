@@ -20,11 +20,17 @@
 
    <requires>
       <import feature="org.springframework.ide.eclipse.feature" version="3.0.0" />
-      <import feature="org.springsource.ide.eclipse.commons" version="3.0.0.qualifier"/>
    </requires>
 
    <plugin
          id="org.springframework.ide.eclipse.data.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.data.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
