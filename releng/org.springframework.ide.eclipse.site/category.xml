@@ -8,11 +8,24 @@
 			<category name="Core / Spring IDE" />
 		</feature>
 
+		<!-- UAA -->
 		<feature
 			url="features/org.springframework.ide.eclipse.uaa.feature_0.0.0.jar"
 			id="org.springframework.ide.eclipse.uaa.feature" version="0.0.0">
 			<category name="Core / Spring IDE"/>
 	    </feature>
+
+		<!-- Dashboard -->
+		<feature 
+			url="features/org.springsource.ide.eclipse.dashboard_3.0.0.qualifier.jar" 
+			id="org.springsource.ide.eclipse.dashboard" version="3.0.0.qualifier">
+			<category name="Core / Spring IDE"/>
+		</feature>
+
+		<feature 
+			url="features/org.springsource.ide.eclipse.commons_3.0.0.qualifier.jar" 
+			id="org.springsource.ide.eclipse.commons" version="3.0.0.qualifier">
+		</feature>
 
 		<!-- Extensions features -->
 		<feature
