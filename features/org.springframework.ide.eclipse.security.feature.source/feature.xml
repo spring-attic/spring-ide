@@ -3,8 +3,8 @@
       id="org.springframework.ide.eclipse.security.feature.source"
       label="%featureName"
       version="3.0.0.qualifier"
-      provider-name="%featureProvider">
-   
+      provider-name="%providerName">
+
    <description>
       %description
    </description>
@@ -23,5 +23,5 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
 </feature>

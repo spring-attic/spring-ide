@@ -15,7 +15,7 @@
       id="org.springframework.ide.eclipse.batch.feature"
       label="%featureName"
       version="3.0.0.qualifier"
-      provider-name="%featureProvider"
+      provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
    <description>

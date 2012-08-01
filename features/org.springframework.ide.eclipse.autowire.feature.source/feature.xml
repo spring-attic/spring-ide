@@ -15,9 +15,9 @@
       id="org.springframework.ide.eclipse.autowire.feature.source"
       label="%featureName"
       version="3.0.0.qualifier"
-      provider-name="%featureProvider"
+      provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
-   
+
    <description>
       %description
    </description>
@@ -43,5 +43,5 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
 </feature>

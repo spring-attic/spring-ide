@@ -15,7 +15,7 @@
       id="org.springframework.ide.eclipse.security.feature"
       label="%featureName"
       version="3.0.0.qualifier"
-      provider-name="%featureProvider"
+      provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
    <description>
@@ -29,7 +29,7 @@
    <license url="%licenseUrl">
       %license
    </license>
-   
+
    <requires>
       <import feature="org.springframework.ide.eclipse.feature" version="3.0.0"/>
    </requires>
@@ -40,5 +40,5 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
 </feature>
