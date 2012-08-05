@@ -19,7 +19,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
 
-
 /**
  * @author Terry Denney
  * @author Leo Dos Santos
@@ -67,7 +66,7 @@ public class Template implements ITemplateElement {
 	public URL getTemplateLocation() throws CoreException {
 		if (data != null) {
 			try {
-				return data.getJsonDescriptor().toURL();
+				return data.getJsonDescriptor().toURI().toURL();
 			}
 			catch (MalformedURLException e) {
 				throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
@@ -80,7 +79,7 @@ public class Template implements ITemplateElement {
 	public URL getZippedLocation() throws CoreException {
 		if (data != null) {
 			try {
-				return data.getZippedProject().toURL();
+				return data.getZippedProject().toURI().toURL();
 			}
 			catch (MalformedURLException e) {
 				throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
