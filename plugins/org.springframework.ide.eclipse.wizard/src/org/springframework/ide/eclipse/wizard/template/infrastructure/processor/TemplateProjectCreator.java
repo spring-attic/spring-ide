@@ -236,7 +236,7 @@ public class TemplateProjectCreator {
 
 			unzipFolder.mkdir();
 
-			if (archiveFile.getProtocol().equals("file") && !new File(archiveFile.toURI()).isDirectory()) {
+			if (archiveFile.getProtocol().equals("file") && !new File(archiveFile.getPath()).isDirectory()) {
 				ZipFileUtil.unzip(archiveFile, unzipFolder, monitor);
 			}
 			else {
@@ -264,15 +264,26 @@ public class TemplateProjectCreator {
 			return tempFolder;
 		}
 		catch (IOException e) {
-			String message = NLS.bind("Could not create template project {0}", project);
-			Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message, e);
-			UiStatusHandler.logAndDisplay(status);
+			System.err.println("Caught IOException " + e);
+			String message = NLS.bind("Could not create template project {0} because {1}", project,
+					e.getLocalizedMessage());
+			final Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message, e);
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					UiStatusHandler.logAndDisplay(status);
+				}
+			});
 			throw new CoreException(status);
 		}
 		catch (URISyntaxException e) {
-			String message = NLS.bind("The project path {0} in template.xml does not exist or can't be read.", project);
-			Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message, e);
-			UiStatusHandler.logAndDisplay(status);
+			String message = NLS.bind("The project path {0} in template.xml does not exist or can't be read: {1}.",
+					project, e.getLocalizedMessage());
+			final Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message, e);
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					UiStatusHandler.logAndDisplay(status);
+				}
+			});
 			throw new CoreException(status);
 		}
 	}
