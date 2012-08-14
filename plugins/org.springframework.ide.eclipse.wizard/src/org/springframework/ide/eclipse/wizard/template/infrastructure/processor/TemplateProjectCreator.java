@@ -264,7 +264,6 @@ public class TemplateProjectCreator {
 			return tempFolder;
 		}
 		catch (IOException e) {
-			System.err.println("Caught IOException " + e);
 			String message = NLS.bind("Could not create template project {0} because {1}", project,
 					e.getLocalizedMessage());
 			final Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, message, e);
