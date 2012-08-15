@@ -21,6 +21,7 @@
   First, you can install Spring IDE from the Eclipse Marketplace into your existing Eclipse installation.
   Second, you can install Spring IDE manually from this udpate site:
 
+  http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse Juno 4.2)
   http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse Indigo 3.7)
   http://dist.springsource.com/release/TOOLS/update/e3.6 (for Eclipse Helios 3.6)
 
