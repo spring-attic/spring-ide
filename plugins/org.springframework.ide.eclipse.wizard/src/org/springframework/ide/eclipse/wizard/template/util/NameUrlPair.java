@@ -20,6 +20,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import org.eclipse.osgi.util.NLS;
+import org.springframework.util.Assert;
 import org.springsource.ide.eclipse.commons.core.ResourceProvider;
 
 class NameUrlPair {
@@ -57,11 +58,20 @@ class NameUrlPair {
 
 	public void setUrlString(String url) throws URISyntaxException {
 
-		URI testUri = new URI(url);
+		String despacedUrl = url.replace(" ", "%20");
+		// encoding the whole URL means that you get URLs that look like
+		// http%3C%2F%2Fmydomain%2Fblah%2Fblah%2Fblah.html
+		// This is not what we want. The most likely error will be not
+		// encoding spaces, so convert + and space to %20
+
+		URI testUri = new URI(despacedUrl);
+		// URL testUrl = new URL(url);
+
 		if (testUri.getScheme() == null) {
-			throw new URISyntaxException(urlString, NLS.bind("URL {0} has no protocol", url));
+			throw new URISyntaxException(url, NLS.bind("URL {0} has no protocol", url));
 		}
 		this.urlString = testUri.toASCIIString();
+
 	}
 
 	public String getName() {
@@ -70,6 +80,8 @@ class NameUrlPair {
 			return URLDecoder.decode(urlEncodedName, "UTF-8");
 		}
 		catch (UnsupportedEncodingException e) {
+			// UTF-8 *is* supported, so we should never reach here.
+			Assert.isTrue(false);
 			return "";
 		}
 	}
@@ -113,12 +125,13 @@ class NameUrlPair {
 						nameUrlPairs.add(new NameUrlPair(myUnencodedName, myUnencodedUrl));
 					}
 					catch (UnsupportedEncodingException e) {
-						// There shouldn't be any encoding errors at this point;
-						// if there are, just ignore them.
+						// There shouldn't be any encoding errors at this point.
+						Assert.isTrue(false);
 					}
 					catch (URISyntaxException e) {
-						// There shouldn't be any malformed URLs at this point;
-						// if there are, just ignore them.
+						// There shouldn't be any malformed URLs at this
+						// point;
+						Assert.isTrue(false);
 					}
 				}
 				else {
@@ -129,7 +142,7 @@ class NameUrlPair {
 						catch (URISyntaxException e) {
 							// There shouldn't be any malformed URLs at this
 							// point;
-							// if there are, just ignore them.
+							Assert.isTrue(false);
 						}
 					}
 					else {

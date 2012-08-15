@@ -161,6 +161,12 @@ public class AddEditNameUrlDialog extends Dialog {
 	}
 
 	protected boolean validateUrl(String urlString) {
+		if (urlString != null && urlString.contains(" ")) {
+			urlString = urlString.replace(" ", "%20");
+			urlText.setText(urlString);
+			urlText.setSelection(urlString.length());
+
+		}
 		if (urlString == null || urlString.length() <= 0) {
 			return false;
 		}
