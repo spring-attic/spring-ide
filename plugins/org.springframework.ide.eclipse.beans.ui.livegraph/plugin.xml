@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="org.springframework.ide.eclipse.ui.views"
+            class="org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView"
+            id="org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView"
+            name="Live Beans Graph"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>
