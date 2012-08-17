@@ -35,6 +35,7 @@ public class LiveBeansGraphView extends ViewPart {
 	}
 
 	private void generateModel(Graph graph) {
+		// TODO: use the LiveBeansModel
 		GraphNode topBean = new GraphNode(graph, SWT.NONE, "topBean");
 		GraphNode childBean1 = new GraphNode(graph, SWT.NONE, "childBean1");
 		GraphNode childBean2 = new GraphNode(graph, SWT.NONE, "childBean2");
