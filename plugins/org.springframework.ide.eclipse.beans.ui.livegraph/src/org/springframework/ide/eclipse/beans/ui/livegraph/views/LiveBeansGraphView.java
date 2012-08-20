@@ -13,10 +13,9 @@ package org.springframework.ide.eclipse.beans.ui.livegraph.views;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.zest.core.widgets.Graph;
-import org.eclipse.zest.core.widgets.GraphConnection;
-import org.eclipse.zest.core.widgets.GraphNode;
+import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.layouts.algorithms.TreeLayoutAlgorithm;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 
 /**
  * A simple view to host our graph mockup
@@ -29,22 +28,12 @@ public class LiveBeansGraphView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		Graph graph = new Graph(parent, SWT.NONE);
-		generateModel(graph);
+		GraphViewer graph = new GraphViewer(parent, SWT.NONE);
+		graph.setContentProvider(new LiveBeansGraphContentProvider());
+		graph.setLabelProvider(new LiveBeansGraphLabelProvider());
+		graph.setInput(new LiveBeansModel());
 		graph.setLayoutAlgorithm(new TreeLayoutAlgorithm(), true);
-	}
-
-	private void generateModel(Graph graph) {
-		// TODO: use the LiveBeansModel
-		GraphNode topBean = new GraphNode(graph, SWT.NONE, "topBean");
-		GraphNode childBean1 = new GraphNode(graph, SWT.NONE, "childBean1");
-		GraphNode childBean2 = new GraphNode(graph, SWT.NONE, "childBean2");
-		GraphNode grandChild1 = new GraphNode(graph, SWT.NONE, "grandChildBean");
-		new GraphNode(graph, SWT.NONE, "looseBean1");
-		new GraphNode(graph, SWT.NONE, "looseBean2");
-		new GraphConnection(graph, SWT.NONE, topBean, childBean1);
-		new GraphConnection(graph, SWT.NONE, topBean, childBean2);
-		new GraphConnection(graph, SWT.NONE, childBean2, grandChild1);
+		graph.applyLayout();
 	}
 
 	@Override

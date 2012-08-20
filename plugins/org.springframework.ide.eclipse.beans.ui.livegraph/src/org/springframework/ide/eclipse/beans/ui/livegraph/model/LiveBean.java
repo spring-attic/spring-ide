@@ -22,14 +22,14 @@ public class LiveBean {
 
 	private final String beanId;
 
-	private final Set<String> children; // TODO: should these be LiveBeans??
+	private final Set<LiveBean> children;
 
 	private final Map<String, String> attributes; // TODO: will values be
 													// Objects??
 
 	public LiveBean(String id) {
 		this.beanId = id;
-		children = new HashSet<String>();
+		children = new HashSet<LiveBean>();
 		attributes = new HashMap<String, String>();
 	}
 
@@ -37,7 +37,7 @@ public class LiveBean {
 		attributes.put(key, value);
 	}
 
-	public void addChild(String childId) {
+	public void addChild(LiveBean childId) {
 		children.add(childId);
 	}
 
@@ -45,7 +45,7 @@ public class LiveBean {
 		return attributes;
 	}
 
-	public Set<String> getChildren() {
+	public Set<LiveBean> getChildren() {
 		return children;
 	}
 

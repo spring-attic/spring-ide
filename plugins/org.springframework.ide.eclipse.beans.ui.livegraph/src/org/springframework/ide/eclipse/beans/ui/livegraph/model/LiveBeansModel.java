@@ -30,9 +30,9 @@ public class LiveBeansModel {
 		LiveBean childBean2 = new LiveBean("childBean2");
 		LiveBean grandChild = new LiveBean("grandChildBean");
 
-		topBean.addChild("childBean1");
-		topBean.addChild("childBean2");
-		childBean2.addChild("grandChildBean");
+		topBean.addChild(childBean1);
+		topBean.addChild(childBean2);
+		childBean2.addChild(grandChild);
 
 		beans.add(topBean);
 		beans.add(childBean1);
