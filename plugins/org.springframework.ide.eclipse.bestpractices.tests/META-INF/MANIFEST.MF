@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE Best Practices Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.bestpractices.tests;singleton:=true
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-Vendor: Spring IDE Developers
 Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.core,
