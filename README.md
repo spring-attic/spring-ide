@@ -1,5 +1,5 @@
 # Spring IDE
-      
+
   Spring IDE enhances a regular Eclipse IDE with tooling for building Spring-based applications.
   It makes your Eclipse IDE Spring-aware and adds code-completion, validation, content-assist,
   and quick-fixes to all different kinds of Spring-related artifacts (Spring configuration files,
@@ -21,8 +21,8 @@
   First, you can install Spring IDE from the Eclipse Marketplace into your existing Eclipse installation.
   Second, you can install Spring IDE manually from this udpate site:
 
-  http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse Juno 4.2)
-  http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse Indigo 3.7)
+  http://dist.springsource.com/release/TOOLS/update/e4.2 (for Eclipse Juno 4.2)  
+  http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse Indigo 3.7)  
   http://dist.springsource.com/release/TOOLS/update/e3.6 (for Eclipse Helios 3.6)
 
 ## Installation (Milestone)
@@ -33,7 +33,7 @@
 
 ## Installation (CI builds)
 
-  If you want to live on the leading egde, you can also install always up-to-date continuous
+  If you want to live on the bleading egde, you can also install always up-to-date continuous
   integration buids from this update site:
 
   http://dist.springframework.org/snapshot/IDE/nightly/
@@ -75,7 +75,7 @@
   The Spring IDE project uses Maven Tycho to do continuous integration builds and to produce
   p2 repos and update sites. To build Spring IDE itself, you can execute:
 
-  mvn -Pe37 clean install
+  `mvn -Pe37 clean install`
 
 ## Contributing
 
