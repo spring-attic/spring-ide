@@ -35,6 +35,7 @@ public class LiveBeansGraphView extends ViewPart {
 		graph.setInput(new LiveBeansModel());
 		graph.setLayoutAlgorithm(new TreeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING), true);
 		graph.applyLayout();
+		getSite().setSelectionProvider(graph);
 	}
 
 	@Override

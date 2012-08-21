@@ -15,10 +15,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.views.properties.IPropertySource;
+
 /**
  * @author Leo Dos Santos
  */
-public class LiveBean {
+public class LiveBean implements IAdaptable {
 
 	private final String beanId;
 
@@ -31,14 +34,23 @@ public class LiveBean {
 		this.beanId = id;
 		children = new HashSet<LiveBean>();
 		attributes = new HashMap<String, String>();
+		attributes.put("name", id);
 	}
 
 	public void addAttribute(String key, String value) {
 		attributes.put(key, value);
 	}
 
-	public void addChild(LiveBean childId) {
-		children.add(childId);
+	public void addChild(LiveBean child) {
+		children.add(child);
+		child.addAttribute("parent", beanId);
+	}
+
+	public Object getAdapter(Class adapter) {
+		if (adapter == IPropertySource.class) {
+			return new LiveBeanPropertySource(this);
+		}
+		return null;
 	}
 
 	public Map<String, String> getAttributes() {
