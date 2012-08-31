@@ -25,21 +25,29 @@ public class LiveBeansModel {
 	public LiveBeansModel() {
 		beans = new ArrayList<LiveBean>();
 
-		LiveBean topBean = new LiveBean("topBean");
-		LiveBean childBean1 = new LiveBean("childBean1");
-		LiveBean childBean2 = new LiveBean("childBean2");
-		LiveBean grandChild = new LiveBean("grandChildBean");
+		LiveBean twitterInbound = new LiveBean("twitterInbound");
+		LiveBean searchAdapter = new LiveBean("searchAdapter");
+		LiveBean twitterTemplate = new LiveBean("twitterTemplate");
+		LiveBean anonCEFB = new LiveBean("<anonymous> ConsumerEndpointFactoryBean");
+		LiveBean tfBean0 = new LiveBean("org.springframework.integration.config.TransformerFactoryBean#0");
+		LiveBean tfBean1 = new LiveBean("org.springframework.integration.config.TransformerFactoryBean#1");
+		LiveBean twitterOut = new LiveBean("int:channel twitterOut");
+		LiveBean twitterOutAdapter = new LiveBean("twitterOut.adapter");
 
-		topBean.addChild(childBean1);
-		topBean.addChild(childBean2);
-		childBean2.addChild(grandChild);
+		twitterInbound.addChild(twitterTemplate);
+		searchAdapter.addChild(twitterTemplate);
+		anonCEFB.addChild(tfBean1);
+		tfBean0.addChild(twitterOut);
+		tfBean1.addChild(twitterOut);
 
-		beans.add(topBean);
-		beans.add(childBean1);
-		beans.add(childBean2);
-		beans.add(grandChild);
-		beans.add(new LiveBean("looseBean1"));
-		beans.add(new LiveBean("looseBean2"));
+		beans.add(twitterInbound);
+		beans.add(searchAdapter);
+		beans.add(twitterTemplate);
+		beans.add(anonCEFB);
+		beans.add(tfBean0);
+		beans.add(tfBean1);
+		beans.add(twitterOut);
+		beans.add(twitterOutAdapter);
 	}
 
 	public List<LiveBean> getBeans() {
