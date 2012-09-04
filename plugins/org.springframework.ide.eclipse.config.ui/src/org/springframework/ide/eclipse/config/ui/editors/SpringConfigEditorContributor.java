@@ -32,7 +32,6 @@ import org.springframework.ide.eclipse.config.graph.actions.MultiPageZoomComboCo
 import org.springframework.ide.eclipse.config.graph.actions.ToggleLayoutAction;
 import org.springframework.ide.eclipse.config.ui.actions.ToggleMarkOccurrencesAction;
 
-
 /**
  * Manages the installation/deinstallation of global actions for multi-page
  * editors. Responsible for the redirection of global actions to the active
@@ -81,10 +80,13 @@ public class SpringConfigEditorContributor extends MultiPageEditorActionBarContr
 
 	@Override
 	public void dispose() {
-		super.dispose();
 		if (sourceViewerActionContributor != null) {
 			sourceViewerActionContributor.dispose();
 		}
+		if (occurrencesAction != null) {
+			occurrencesAction.setActiveEditor(null);
+		}
+		super.dispose();
 	}
 
 	/**
