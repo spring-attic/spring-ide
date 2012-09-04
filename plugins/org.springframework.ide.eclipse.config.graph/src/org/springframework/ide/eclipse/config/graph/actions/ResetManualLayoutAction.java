@@ -19,7 +19,6 @@ import org.springframework.ide.eclipse.config.core.preferences.SpringConfigPrefe
 import org.springframework.ide.eclipse.config.graph.AbstractConfigGraphicalEditor;
 import org.springframework.ide.eclipse.config.graph.ConfigGraphPlugin;
 
-
 /**
  * @author Leo Dos Santos
  */
@@ -40,6 +39,14 @@ public class ResetManualLayoutAction extends SelectionAction implements IPropert
 	@Override
 	protected boolean calculateEnabled() {
 		return prefStore.getBoolean(SpringConfigPreferenceConstants.PREF_MANUAL_LAYOUT);
+	}
+
+	@Override
+	public void dispose() {
+		if (prefStore != null) {
+			prefStore.removePropertyChangeListener(this);
+		}
+		super.dispose();
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
