@@ -102,7 +102,11 @@ public abstract class AbstractProcessingInfo implements ProcessingInfo {
 
 		for (String token : replacementContext.keySet()) {
 			String value = replacementContext.get(token);
-			value = value.replace(".", "/");
+
+			String kind = this.inputKinds.get(token);
+			if (kind == null || !kind.equals("fixedtoken")) {
+				value = value.replace(".", "/");
+			}
 			replacementContext.put(token, value);
 		}
 		return replacementContext;
