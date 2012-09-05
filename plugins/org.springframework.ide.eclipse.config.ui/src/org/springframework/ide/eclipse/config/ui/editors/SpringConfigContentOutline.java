@@ -25,6 +25,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.eclipse.wst.sse.ui.internal.contentoutline.ConfigurableContentOutlinePage;
 
 /**
  * @author Leo Dos Santos
@@ -92,6 +93,9 @@ public class SpringConfigContentOutline extends Page implements IContentOutlineP
 	private void releasePages() {
 		for (IContentOutlinePage outline : pages) {
 			if (outline != null) {
+				if (outline instanceof ConfigurableContentOutlinePage) {
+					((ConfigurableContentOutlinePage) outline).setEditorPart(null);
+				}
 				try {
 					outline.dispose();
 				}
