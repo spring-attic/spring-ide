@@ -25,29 +25,44 @@ public class LiveBeansModel {
 	public LiveBeansModel() {
 		beans = new ArrayList<LiveBean>();
 
-		LiveBean twitterInbound = new LiveBean("twitterInbound");
-		LiveBean searchAdapter = new LiveBean("searchAdapter");
-		LiveBean twitterTemplate = new LiveBean("twitterTemplate");
-		LiveBean anonCEFB = new LiveBean("<anonymous> ConsumerEndpointFactoryBean");
-		LiveBean tfBean0 = new LiveBean("org.springframework.integration.config.TransformerFactoryBean#0");
-		LiveBean tfBean1 = new LiveBean("org.springframework.integration.config.TransformerFactoryBean#1");
-		LiveBean twitterOut = new LiveBean("int:channel twitterOut");
-		LiveBean twitterOutAdapter = new LiveBean("twitterOut.adapter");
+		// applicationContext-dataSource.xml
+		LiveBean dataSource = new LiveBean("dataSource");
+		LiveBean initDatabase = new LiveBean("<anonymous> DataSourceInitializer");
 
-		twitterInbound.addChild(twitterTemplate);
-		searchAdapter.addChild(twitterTemplate);
-		anonCEFB.addChild(tfBean1);
-		tfBean0.addChild(twitterOut);
-		tfBean1.addChild(twitterOut);
+		// applicationContext-jdbc.xml
+		LiveBean txManager = new LiveBean("transacationManager");
+		LiveBean clinic = new LiveBean("clinic");
+		LiveBean callMonitor = new LiveBean("callMonitor");
 
-		beans.add(twitterInbound);
-		beans.add(searchAdapter);
-		beans.add(twitterTemplate);
-		beans.add(anonCEFB);
-		beans.add(tfBean0);
-		beans.add(tfBean1);
-		beans.add(twitterOut);
-		beans.add(twitterOutAdapter);
+		// petclinic-servlet.xml
+		LiveBean visits = new LiveBean("visits");
+		LiveBean vets = new LiveBean("vets");
+		LiveBean marshaller = new LiveBean("marshaller");
+		LiveBean messageSource = new LiveBean("messageSource");
+		LiveBean methodHandler = new LiveBean("<anonymous> AnnotationMethodHandlerAdapter");
+		LiveBean exceptionResolver = new LiveBean("<anonymous> SimpleMappingExceptionResolver");
+		LiveBean contentNegotiatingViewResolver = new LiveBean("<anonymous> ContentNegotiatingViewResolver");
+		LiveBean beanNameViewResolver = new LiveBean("<anonymous> BeanNameViewResolver");
+		LiveBean internalResourceViewResolver = new LiveBean("<anonymous> InternalResourceViewResolver");
+
+		initDatabase.addChild(dataSource);
+		txManager.addChild(dataSource);
+		vets.addChild(marshaller);
+
+		beans.add(dataSource);
+		beans.add(initDatabase);
+		beans.add(txManager);
+		beans.add(clinic);
+		beans.add(callMonitor);
+		beans.add(visits);
+		beans.add(vets);
+		beans.add(marshaller);
+		beans.add(messageSource);
+		beans.add(methodHandler);
+		beans.add(exceptionResolver);
+		beans.add(contentNegotiatingViewResolver);
+		beans.add(beanNameViewResolver);
+		beans.add(internalResourceViewResolver);
 	}
 
 	public List<LiveBean> getBeans() {
