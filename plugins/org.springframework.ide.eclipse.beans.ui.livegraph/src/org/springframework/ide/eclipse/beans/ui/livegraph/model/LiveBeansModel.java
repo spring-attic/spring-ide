@@ -27,23 +27,68 @@ public class LiveBeansModel {
 
 		// applicationContext-dataSource.xml
 		LiveBean dataSource = new LiveBean("dataSource");
+		dataSource.addAttribute(LiveBean.ATTR_CLASS, "org.apache.commons.dbcp.BasicDataSource");
+		dataSource.addAttribute(LiveBean.ATTR_APP_CONTEXT, "applicationContext-dataSource.xml");
+
 		LiveBean initDatabase = new LiveBean("<anonymous> DataSourceInitializer");
+		initDatabase.addAttribute(LiveBean.ATTR_APP_CONTEXT, "applicationContext-dataSource.xml");
 
 		// applicationContext-jdbc.xml
-		LiveBean txManager = new LiveBean("transacationManager");
+		LiveBean txManager = new LiveBean("transactionManager");
+		txManager.addAttribute(LiveBean.ATTR_CLASS, "org.springframework.jdbc.datasource.DataSourceTransactionManager");
+		txManager.addAttribute(LiveBean.ATTR_APP_CONTEXT, "applicationContext-jdbc.xml");
+
 		LiveBean clinic = new LiveBean("clinic");
+		clinic.addAttribute(LiveBean.ATTR_CLASS, "org.springframework.samples.petclinic.jdbc.SimpleJdbcClinic");
+		clinic.addAttribute(LiveBean.ATTR_APP_CONTEXT, "applicationContext-jdbc.xml");
+
 		LiveBean callMonitor = new LiveBean("callMonitor");
+		callMonitor.addAttribute(LiveBean.ATTR_CLASS,
+				"org.springframework.samples.petclinic.aspects.CallMonitoringAspect");
+		callMonitor.addAttribute(LiveBean.ATTR_APP_CONTEXT, "applicationContext-jdbc.xml");
 
 		// petclinic-servlet.xml
 		LiveBean visits = new LiveBean("visits");
+		visits.addAttribute(LiveBean.ATTR_CLASS, "org.springframework.samples.petclinic.web.VisitsAtomView");
+		visits.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
+
 		LiveBean vets = new LiveBean("vets");
+		vets.addAttribute(LiveBean.ATTR_CLASS, "org.springframework.web.servlet.view.xml.MarshallingView");
+		vets.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
+
 		LiveBean marshaller = new LiveBean("marshaller");
+		marshaller.addAttribute(LiveBean.ATTR_CLASS, "org.springframework.samples.petclinic.Vets");
+		marshaller.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
+
 		LiveBean messageSource = new LiveBean("messageSource");
+		messageSource.addAttribute(LiveBean.ATTR_CLASS,
+				"org.springframework.context.support.ResourceBundleMessageSource");
+		messageSource.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
+
 		LiveBean methodHandler = new LiveBean("<anonymous> AnnotationMethodHandlerAdapter");
+		methodHandler.addAttribute(LiveBean.ATTR_CLASS,
+				"org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter");
+		methodHandler.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
+
 		LiveBean exceptionResolver = new LiveBean("<anonymous> SimpleMappingExceptionResolver");
+		exceptionResolver.addAttribute(LiveBean.ATTR_CLASS,
+				"org.springframework.web.servlet.handler.SimpleMappingExceptionResolver");
+		exceptionResolver.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
+
 		LiveBean contentNegotiatingViewResolver = new LiveBean("<anonymous> ContentNegotiatingViewResolver");
+		contentNegotiatingViewResolver.addAttribute(LiveBean.ATTR_CLASS,
+				"org.springframework.web.servlet.view.ContentNegotiatingViewResolver");
+		contentNegotiatingViewResolver.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
+
 		LiveBean beanNameViewResolver = new LiveBean("<anonymous> BeanNameViewResolver");
+		beanNameViewResolver.addAttribute(LiveBean.ATTR_CLASS,
+				"org.springframework.web.servlet.view.BeanNameViewResolver");
+		beanNameViewResolver.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
+
 		LiveBean internalResourceViewResolver = new LiveBean("<anonymous> InternalResourceViewResolver");
+		internalResourceViewResolver.addAttribute(LiveBean.ATTR_CLASS,
+				"org.springframework.web.servlet.view.InternalResourceViewResolver");
+		internalResourceViewResolver.addAttribute(LiveBean.ATTR_APP_CONTEXT, "petclinic-servlet.xml");
 
 		initDatabase.addChild(dataSource);
 		txManager.addChild(dataSource);

@@ -23,6 +23,10 @@ import org.eclipse.ui.views.properties.IPropertySource;
  */
 public class LiveBean implements IAdaptable {
 
+	public static final String ATTR_CLASS = "class";
+
+	public static final String ATTR_APP_CONTEXT = "app-context";
+
 	private final String beanId;
 
 	private final Set<LiveBean> children;
@@ -53,8 +57,16 @@ public class LiveBean implements IAdaptable {
 		return null;
 	}
 
+	public String getApplicationContext() {
+		return attributes.get(ATTR_APP_CONTEXT);
+	}
+
 	public Map<String, String> getAttributes() {
 		return attributes;
+	}
+
+	public String getBeanClass() {
+		return attributes.get(ATTR_CLASS);
 	}
 
 	public Set<LiveBean> getChildren() {
