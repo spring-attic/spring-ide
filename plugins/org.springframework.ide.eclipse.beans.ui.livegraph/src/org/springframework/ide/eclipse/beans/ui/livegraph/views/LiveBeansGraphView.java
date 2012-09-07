@@ -14,6 +14,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.zest.core.viewers.GraphViewer;
+import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutStyles;
 import org.eclipse.zest.layouts.algorithms.TreeLayoutAlgorithm;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGenerator;
@@ -32,6 +33,7 @@ public class LiveBeansGraphView extends ViewPart {
 		GraphViewer graph = new GraphViewer(parent, SWT.NONE);
 		graph.setContentProvider(new LiveBeansGraphContentProvider());
 		graph.setLabelProvider(new LiveBeansGraphLabelProvider());
+		graph.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED);
 		graph.setInput(LiveBeansModelGenerator.generateModel());
 		graph.setLayoutAlgorithm(new TreeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING), true);
 		graph.applyLayout();
