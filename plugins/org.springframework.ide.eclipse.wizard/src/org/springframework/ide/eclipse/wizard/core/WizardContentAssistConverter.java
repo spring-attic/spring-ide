@@ -17,7 +17,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAss
 import org.springframework.ide.eclipse.quickfix.AbstractContentAssistConverter;
 import org.w3c.dom.Attr;
 
-
 /**
  * Content assist converter that is used to validate bean attributes and
  * property attributes.
@@ -25,6 +24,7 @@ import org.w3c.dom.Attr;
  * @author Leo Dos Santos
  * @author Christian Dupuis
  * @author Steffen Pingel
+ * @author Martin Lippert
  * @since 2.0
  */
 @SuppressWarnings("restriction")
@@ -33,7 +33,7 @@ public class WizardContentAssistConverter extends AbstractContentAssistConverter
 	private final IDOMDocument originalDocument;
 
 	public WizardContentAssistConverter(IDOMNode node, Attr attribute, IFile file, IDOMDocument originalDocument) {
-		super(node, attribute.getName(), file);
+		super(node, attribute != null ? attribute.getName() : null, file);
 		this.originalDocument = originalDocument;
 	}
 
