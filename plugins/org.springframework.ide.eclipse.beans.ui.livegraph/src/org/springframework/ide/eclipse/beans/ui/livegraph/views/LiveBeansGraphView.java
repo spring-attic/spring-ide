@@ -17,11 +17,14 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutStyles;
 import org.eclipse.zest.layouts.algorithms.TreeLayoutAlgorithm;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenContextFileAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGenerator;
 
 /**
@@ -35,6 +38,10 @@ public class LiveBeansGraphView extends ViewPart {
 
 	private GraphViewer viewer;
 
+	private BaseSelectionListenerAction openBeanClassAction;
+
+	private BaseSelectionListenerAction openContextAction;
+
 	@Override
 	public void createPartControl(Composite parent) {
 		viewer = new GraphViewer(parent, SWT.NONE);
@@ -46,7 +53,23 @@ public class LiveBeansGraphView extends ViewPart {
 		viewer.applyLayout();
 		getSite().setSelectionProvider(viewer);
 
+		makeActions();
 		hookContextMenu();
+	}
+
+	@Override
+	public void dispose() {
+		if (viewer != null) {
+			viewer.removeSelectionChangedListener(openBeanClassAction);
+			viewer.removeSelectionChangedListener(openContextAction);
+		}
+		super.dispose();
+	}
+
+	private void fillContextMenu(IMenuManager menuManager) {
+		menuManager.add(new Separator());
+		menuManager.add(openBeanClassAction);
+		menuManager.add(openContextAction);
 	}
 
 	private void hookContextMenu() {
@@ -66,10 +89,11 @@ public class LiveBeansGraphView extends ViewPart {
 
 	}
 
-	private void fillContextMenu(IMenuManager menuManager) {
-		menuManager.add(new Separator());
-		// TODO: open bean class action
-		// TODO: open context file action
+	private void makeActions() {
+		openBeanClassAction = new OpenBeanClassAction();
+		viewer.addSelectionChangedListener(openBeanClassAction);
+		openContextAction = new OpenContextFileAction();
+		viewer.addSelectionChangedListener(openContextAction);
 	}
 
 	@Override

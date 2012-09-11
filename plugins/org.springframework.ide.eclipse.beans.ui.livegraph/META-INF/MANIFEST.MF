@@ -6,6 +6,7 @@ Bundle-Version: 3.1.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
+ org.eclipse.core.resources,
  org.eclipse.zest.core;bundle-version="[1.0.0,2.0.0)",
  org.eclipse.zest.layouts;bundle-version="[1.0.0,2.0.0)",
  org.eclipse.ui.views.properties.tabbed,
@@ -14,7 +15,9 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.core,
  org.springframework.aop,
  org.aopalliance,
- org.springsource.ide.eclipse.commons.core
+ org.springsource.ide.eclipse.commons.core,
+ org.springsource.ide.eclipse.commons.ui,
+ org.eclipse.jdt.core
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Spring IDE Developers
