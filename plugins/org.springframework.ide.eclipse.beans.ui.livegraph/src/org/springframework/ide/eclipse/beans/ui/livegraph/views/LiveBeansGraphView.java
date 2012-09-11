@@ -14,6 +14,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -55,6 +57,14 @@ public class LiveBeansGraphView extends ViewPart {
 
 		makeActions();
 		hookContextMenu();
+
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				if (openContextAction != null && openContextAction.isEnabled()) {
+					openContextAction.run();
+				}
+			}
+		});
 	}
 
 	@Override
