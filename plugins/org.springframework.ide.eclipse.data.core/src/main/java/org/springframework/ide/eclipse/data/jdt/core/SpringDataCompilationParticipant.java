@@ -54,7 +54,7 @@ public class SpringDataCompilationParticipant extends CompilationParticipant {
 			IType type = typeRoot.findPrimaryType();
 
 			// Skip non-interfaces
-			if (type == null || !type.isInterface()) {
+			if (type == null || !type.isInterface() || type.isAnnotation()) {
 				super.reconcile(context);
 				return;
 			}
