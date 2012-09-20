@@ -35,7 +35,7 @@ Export-Package: org.springframework.ide.eclipse.roo.core,
  org.springframework.ide.eclipse.roo.core.model,
  org.springframework.roo.shell.eclipse
 Bundle-ClassPath: .,
- lib/org.apache.felix.framework-3.2.2.jar,
+ lib/org.apache.felix.framework-4.0.3.jar,
  lib/org.apache.felix.scr-1.6.0.jar,
  lib/org.springframework.roo.felix-1.1.0.RELEASE.jar,
  lib/org.springframework.roo.url.stream-1.1.0.RELEASE.jar,
