@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.maven;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.maven.Maven;
 import org.apache.maven.model.Model;
@@ -28,6 +29,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.project.IMavenProjectImportResult;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
@@ -245,10 +247,10 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 			resolverConfiguration.setActiveProfiles(activeProfiles);
 			ProjectImportConfiguration configuration = new ProjectImportConfiguration(resolverConfiguration);
 
-			MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos, configuration, monitor);
-			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(derivedProjectName);
-			MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-		
+			List<IMavenProjectImportResult> importResults = MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos, configuration, monitor);
+			for (IMavenProjectImportResult importResult : importResults) {
+				MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(importResult.getProject(), monitor);
+			}
 	}
 
 }
