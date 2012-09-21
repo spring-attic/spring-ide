@@ -14,7 +14,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.maven.Maven;
 import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -41,13 +40,12 @@ import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.maven.internal.core.MavenClasspathUpdateJob;
 
-
 /**
  * @author Christian Dupuis
  * @author Andrew Eisenberg
  */
 public class MavenCorePlugin extends AbstractUIPlugin {
-	
+
 	private static final String M2ECLIPSE_CLASS = "org.eclipse.m2e.core.MavenPlugin";
 	private static final String M2ECLIPSE_LEGACY_CLASS = "org.maven.ide.eclipse.MavenPlugin";
 
@@ -58,8 +56,7 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 		try {
 			Class.forName(className);
 			return true;
-		}
-		catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			return false;
 		}
 	}
@@ -72,12 +69,12 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 
 	public static final String M2ECLIPSE_NATURE = "org.eclipse.m2e.core.maven2Nature";
 
-    public static final String M2ECLIPSE_LEGACY_NATURE = "org.maven.ide.eclipse.maven2Nature";
+	public static final String M2ECLIPSE_LEGACY_NATURE = "org.maven.ide.eclipse.maven2Nature";
 
 	private static MavenCorePlugin plugin;
 
 	private IResourceChangeListener resourceChangeListener;
-	
+
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
@@ -106,7 +103,8 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * {@link IResourceChangeListener} that listens to changes to the pom.xml resources.
+	 * {@link IResourceChangeListener} that listens to changes to the pom.xml
+	 * resources.
 	 */
 	class PomResourceChangeListener implements IResourceChangeListener {
 
@@ -175,8 +173,7 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 			}
 		}
 
-		public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE
-				| IResourceChangeEvent.PRE_BUILD;
+		public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.PRE_BUILD;
 
 		private static final int VISITOR_FLAGS = IResourceDelta.ADDED | IResourceDelta.CHANGED | IResourceDelta.REMOVED;
 
@@ -189,15 +186,13 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 					if (delta != null) {
 						try {
 							delta.accept(getVisitor(eventType), VISITOR_FLAGS);
-						}
-						catch (CoreException e) {
+						} catch (CoreException e) {
 							SpringCore.log("Error while traversing resource change delta", e);
 						}
 					}
 					break;
 				}
-			}
-			else if (event.getSource() instanceof IProject) {
+			} else if (event.getSource() instanceof IProject) {
 				int eventType = event.getType();
 				switch (eventType) {
 				case IResourceChangeEvent.POST_CHANGE:
@@ -205,8 +200,7 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 					if (delta != null) {
 						try {
 							delta.accept(getVisitor(eventType), VISITOR_FLAGS);
-						}
-						catch (CoreException e) {
+						} catch (CoreException e) {
 							SpringCore.log("Error while traversing resource change delta", e);
 						}
 					}
@@ -220,37 +214,38 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 			return new PomResourceVisitor(eventType);
 		}
 	}
-	
+
 	public static void createEclipseProjectFromExistingMavenProject(File pomFile, IProgressMonitor monitor) throws CoreException {
 
-			Model model = MavenPlugin.getMavenModelManager().readMavenModel(pomFile);
-			String derivedProjectName = model.getName();
-			if(derivedProjectName == null) {
-				derivedProjectName = model.getArtifactId();
-			}
-			if(derivedProjectName == null) {
-				String[] groupPieces = model.getGroupId().split("\\.");
-				int lastIndex = groupPieces.length -1;
-				if(lastIndex >= 0) {
+		Model model = MavenPlugin.getMavenModelManager().readMavenModel(pomFile);
+		String derivedProjectName = model.getName();
+		if (derivedProjectName == null) {
+			derivedProjectName = model.getArtifactId();
+		}
+		if (derivedProjectName == null) {
+			String[] groupPieces = model.getGroupId().split("\\.");
+			int lastIndex = groupPieces.length - 1;
+			if (lastIndex >= 0) {
 				derivedProjectName = groupPieces[lastIndex];
-				} else {
-					String message = NLS.bind("Bad pom.xml: no name, artifactId, or groupId.", null);
-					throw new CoreException(new Status(Status.ERROR, MavenCorePlugin.PLUGIN_ID, message));
-				}
+			} else {
+				String message = NLS.bind("Bad pom.xml: no name, artifactId, or groupId.", null);
+				throw new CoreException(new Status(Status.ERROR, MavenCorePlugin.PLUGIN_ID, message));
 			}
-			MavenProjectInfo parent = null;
-			MavenProjectInfo projectInfo = new MavenProjectInfo(derivedProjectName, pomFile, model, parent);
-			ArrayList<MavenProjectInfo> projectInfos = new ArrayList<MavenProjectInfo>();
-			projectInfos.add(projectInfo);
-			ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-			String activeProfiles = "pom.xml";
-			resolverConfiguration.setActiveProfiles(activeProfiles);
-			ProjectImportConfiguration configuration = new ProjectImportConfiguration(resolverConfiguration);
+		}
+		MavenProjectInfo parent = null;
+		MavenProjectInfo projectInfo = new MavenProjectInfo(derivedProjectName, pomFile, model, parent);
+		ArrayList<MavenProjectInfo> projectInfos = new ArrayList<MavenProjectInfo>();
+		projectInfos.add(projectInfo);
+		ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+		String activeProfiles = "pom.xml";
+		resolverConfiguration.setActiveProfiles(activeProfiles);
+		ProjectImportConfiguration configuration = new ProjectImportConfiguration(resolverConfiguration);
 
-			List<IMavenProjectImportResult> importResults = MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos, configuration, monitor);
-			for (IMavenProjectImportResult importResult : importResults) {
-				MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(importResult.getProject(), monitor);
-			}
+		List<IMavenProjectImportResult> importResults = MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos, configuration,
+				monitor);
+		for (IMavenProjectImportResult importResult : importResults) {
+			MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(importResult.getProject(), monitor);
+		}
 	}
 
 }
