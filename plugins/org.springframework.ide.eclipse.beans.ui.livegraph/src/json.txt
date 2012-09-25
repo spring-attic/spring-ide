@@ -1,0 +1,64 @@
+{
+"context": "org.springframework.context.support.GenericApplicationContext@374f1544",
+"parent": null,
+"logicOne": {
+"bean": "logicOne",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/contextB.xml]",
+"dependencies": ["wrappedAssemblerTwo"]
+},
+"logicTwo": {
+"bean": "logicTwo",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/contextC.xml]",
+"dependencies": ["wrappedAssemblerOne"]
+},
+"assemblerOne": {
+"bean": "assemblerOne",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/import1.xml]",
+"dependencies": ["service", "logicOne"]
+},
+"inheritingAssemblerOne": {
+"bean": "inheritingAssemblerOne",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/import1.xml]",
+"dependencies": ["service", "logicOne"]
+},
+"assemblerTwo": {
+"bean": "assemblerTwo",
+"scope": "singleton",
+"resource": "file [C:\\dev\\projects\\spring-framework.png\\out\\test\\spring-context\\org\\springframework\\context\\support\\test\\subtest\\import2.xml]",
+"dependencies": ["service", "logicTwo"]
+},
+"messageSource": {
+"bean": "messageSource",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/contextA.xml]",
+"dependencies": []
+},
+"service": {
+"bean": "service",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/contextA.xml]",
+"dependencies": []
+},
+"autowiredService": {
+"bean": "autowiredService",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/contextA.xml]",
+"dependencies": ["messageSource"]
+},
+"wrappedAssemblerOne": {
+"bean": "wrappedAssemblerOne",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/contextA.xml]",
+"dependencies": ["assemblerOne"]
+},
+"wrappedAssemblerTwo": {
+"bean": "wrappedAssemblerTwo",
+"scope": "singleton",
+"resource": "class path resource [org/springframework/context/support/test/contextA.xml]",
+"dependencies": ["assemblerTwo"]
+}
+}

@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -21,7 +25,7 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
 
 /**
  * Loads an MBean exposed by the Spring Framework and generates a
- * {@link LiveBeansModel} from the information contained within.
+ * {@link LiveBeansModel} from the JSON contained within.
  * 
  * @author Leo Dos Santos
  */
@@ -31,6 +35,7 @@ public class LiveBeansModelGenerator {
 		LiveBeansModel model = new LiveBeansModel();
 		try {
 			LiveGraphUiPlugin plugin = LiveGraphUiPlugin.getDefault();
+
 			URL jmxConfig = plugin.getBundle().getResource("jmx-client-config.xml");
 			ClassLoader loader = plugin.getClass().getClassLoader();
 
@@ -44,6 +49,20 @@ public class LiveBeansModelGenerator {
 				String name = remoteModel.getName();
 				LiveBean remoteBean = new LiveBean(name);
 				model.getBeans().add(remoteBean);
+			}
+
+			URL jsonFile = plugin.getBundle().getResource("json.txt");
+			if (jsonFile != null) {
+				InputStream stream = jsonFile.openConnection().getInputStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+				StringBuilder builder = new StringBuilder();
+				String output = "";
+				while ((output = reader.readLine()) != null) {
+					builder.append(output);
+				}
+				reader.close();
+				Collection<LiveBean> collection = LiveBeansJsonParser.parse(builder.toString());
+				model.getBeans().addAll(collection);
 			}
 		}
 		catch (Exception e) {
