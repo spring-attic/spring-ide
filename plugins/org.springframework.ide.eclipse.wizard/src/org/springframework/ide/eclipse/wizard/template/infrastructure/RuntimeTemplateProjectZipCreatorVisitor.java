@@ -30,13 +30,17 @@ import org.springsource.ide.eclipse.commons.core.FileUtil;
 import org.springsource.ide.eclipse.commons.core.Policy;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
-public class TemplateProjectVisitor implements IResourceVisitor {
+/**
+ * @author Kaitlin Sherwood
+ * @author Martin Lippert
+ */
+public class RuntimeTemplateProjectZipCreatorVisitor implements IResourceVisitor {
 
 	private final ZipOutputStream out;
 
 	private final IProgressMonitor monitor;
 
-	public TemplateProjectVisitor(ZipOutputStream out, IProgressMonitor monitor) {
+	public RuntimeTemplateProjectZipCreatorVisitor(ZipOutputStream out, IProgressMonitor monitor) {
 		this.out = out;
 		this.monitor = monitor;
 	}
@@ -78,13 +82,13 @@ public class TemplateProjectVisitor implements IResourceVisitor {
 
 		String path = "template/" + resource.getProjectRelativePath().toString();
 		try {
-			if (resource instanceof IFile) {
+			if (resource instanceof IFile && !ignore(resource)) {
 				ZipEntry entry = new ZipEntry(path);
 				out.putNextEntry(entry);
 				addFile((IFile) resource);
 				out.closeEntry();
 			}
-			else if (resource instanceof IFolder) {
+			else if (resource instanceof IFolder && !ignore(resource)) {
 				ZipEntry entry = new ZipEntry(path + "/");
 				out.putNextEntry(entry);
 				out.closeEntry();
@@ -96,6 +100,10 @@ public class TemplateProjectVisitor implements IResourceVisitor {
 		}
 
 		return true;
+	}
+
+	private boolean ignore(IResource resource) {
+		return resource == null || resource.getName().endsWith(".DS_Store");
 	}
 
 }

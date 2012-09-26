@@ -120,7 +120,7 @@ public class RuntimeTemplateProjectData implements ITemplateProjectData {
 		try {
 			out = new ZipOutputStream(new BufferedOutputStream(dest));
 
-			project.accept(new TemplateProjectVisitor(out, null), IResource.DEPTH_INFINITE, false);
+			project.accept(new RuntimeTemplateProjectZipCreatorVisitor(out, null), IResource.DEPTH_INFINITE, false);
 		}
 		finally {
 			if (out != null) {
