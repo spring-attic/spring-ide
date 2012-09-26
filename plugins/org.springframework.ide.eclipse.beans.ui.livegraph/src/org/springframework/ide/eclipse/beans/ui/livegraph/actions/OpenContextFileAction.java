@@ -46,7 +46,7 @@ public class OpenContextFileAction extends BaseSelectionListenerAction {
 		for (Object obj : elements) {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
-				final String appContext = bean.getApplicationContext();
+				final String appContext = bean.getResource();
 				if (appContext != null && appContext.trim().length() > 0) {
 					contexts.add(appContext);
 				}
@@ -86,7 +86,7 @@ public class OpenContextFileAction extends BaseSelectionListenerAction {
 			for (Object obj : elements) {
 				if (obj instanceof LiveBean) {
 					LiveBean bean = (LiveBean) obj;
-					String appContext = bean.getApplicationContext();
+					String appContext = bean.getResource();
 					if (appContext != null && appContext.trim().length() > 0) {
 						return true;
 					}

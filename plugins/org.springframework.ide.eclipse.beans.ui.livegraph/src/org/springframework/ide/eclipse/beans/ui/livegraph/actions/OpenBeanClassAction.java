@@ -43,7 +43,7 @@ public class OpenBeanClassAction extends BaseSelectionListenerAction {
 		for (Object obj : elements) {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
-				String beanClass = bean.getBeanClass();
+				String beanClass = bean.getBeanType();
 				if (beanClass != null && beanClass.trim().length() > 0) {
 					// find the class files in the workspace and open them
 					try {
@@ -69,7 +69,7 @@ public class OpenBeanClassAction extends BaseSelectionListenerAction {
 			for (Object obj : elements) {
 				if (obj instanceof LiveBean) {
 					LiveBean bean = (LiveBean) obj;
-					String beanClass = bean.getBeanClass();
+					String beanClass = bean.getBeanType();
 					if (beanClass != null && beanClass.trim().length() > 0) {
 						return true;
 					}

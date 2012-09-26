@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collection;
 
@@ -46,23 +43,7 @@ public class LiveBeansModelGenerator {
 
 				LiveBeansViewMBean remoteModel = (LiveBeansViewMBean) context.getBean("proxy");
 				String json = remoteModel.getSnapshotAsJson();
-
-				// String name = remoteModel.getName();
-				// LiveBean remoteBean = new LiveBean(name);
-				// model.getBeans().add(remoteBean);
-			}
-
-			URL jsonFile = plugin.getBundle().getResource("json.txt");
-			if (jsonFile != null) {
-				InputStream stream = jsonFile.openConnection().getInputStream();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-				StringBuilder builder = new StringBuilder();
-				String output = "";
-				while ((output = reader.readLine()) != null) {
-					builder.append(output);
-				}
-				reader.close();
-				Collection<LiveBean> collection = LiveBeansJsonParser.parse(builder.toString());
+				Collection<LiveBean> collection = LiveBeansJsonParser.parse(json);
 				model.getBeans().addAll(collection);
 			}
 		}

@@ -9,7 +9,7 @@
 	</bean>
  
  	<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
- 		<property name="objectName" value="DefaultDomain:application=/spring-mvc-showcase" />
+ 		<property name="objectName" value="DefaultDomain:application=/com.springsource.petclinic" />
  		<property name="proxyInterface" value="org.springframework.context.support.LiveBeansViewMBean" />
  		<property name="server" ref="clientConnector" />
  	</bean>

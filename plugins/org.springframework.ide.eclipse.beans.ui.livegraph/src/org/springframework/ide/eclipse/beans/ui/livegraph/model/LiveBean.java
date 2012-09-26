@@ -23,31 +23,36 @@ import org.eclipse.ui.views.properties.IPropertySource;
  */
 public class LiveBean implements IAdaptable {
 
-	public static final String ATTR_CLASS = "class";
+	public static final String ATTR_BEAN = "bean";
 
-	public static final String ATTR_APP_CONTEXT = "app-context";
+	public static final String ATTR_SCOPE = "scope";
+
+	public static final String ATTR_TYPE = "type";
+
+	public static final String ATTR_RESOURCE = "resource";
+
+	public static final String ATTR_DEPENDENCIES = "dependencies";
 
 	private final String beanId;
 
-	private final Set<LiveBean> children;
+	private final Set<LiveBean> dependencies;
 
-	private final Map<String, String> attributes; // TODO: will values be
-													// Objects??
+	private final Map<String, String> attributes;
 
 	public LiveBean(String id) {
 		this.beanId = id;
-		children = new HashSet<LiveBean>();
+		dependencies = new HashSet<LiveBean>();
 		attributes = new HashMap<String, String>();
-		attributes.put("name", id);
+		attributes.put(ATTR_BEAN, id);
 	}
 
 	public void addAttribute(String key, String value) {
 		attributes.put(key, value);
 	}
 
-	public void addChild(LiveBean child) {
-		children.add(child);
-		child.addAttribute("parent", beanId);
+	public void addDependency(LiveBean dependency) {
+		dependencies.add(dependency);
+		dependency.addAttribute("parent", beanId);
 	}
 
 	public Object getAdapter(Class adapter) {
@@ -57,24 +62,24 @@ public class LiveBean implements IAdaptable {
 		return null;
 	}
 
-	public String getApplicationContext() {
-		return attributes.get(ATTR_APP_CONTEXT);
-	}
-
 	public Map<String, String> getAttributes() {
 		return attributes;
 	}
 
-	public String getBeanClass() {
-		return attributes.get(ATTR_CLASS);
+	public String getBeanType() {
+		return attributes.get(ATTR_TYPE);
 	}
 
-	public Set<LiveBean> getChildren() {
-		return children;
+	public Set<LiveBean> getDependencies() {
+		return dependencies;
 	}
 
 	public String getId() {
 		return beanId;
+	}
+
+	public String getResource() {
+		return attributes.get(ATTR_RESOURCE);
 	}
 
 }

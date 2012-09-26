@@ -25,45 +25,59 @@ public class LiveBeansJsonParser {
 
 	public static Collection<LiveBean> parse(String jsonInput) throws JSONException {
 		Map<String, LiveBean> beansMap = new HashMap<String, LiveBean>();
-		JSONObject json = new JSONObject(jsonInput);
-		JSONArray names = json.names();
-
-		// construct LiveBeans
-		for (int i = 0; i < names.length(); i++) {
-			JSONObject candidate = json.optJSONObject(names.getString(i));
-			if (candidate != null && candidate.has("bean")) {
-				LiveBean bean = new LiveBean(candidate.getString("bean"));
-				if (candidate.has("scope")) {
-					bean.addAttribute("scope", candidate.getString("scope"));
-				}
-				if (candidate.has("type")) {
-					bean.addAttribute("type", candidate.getString("type"));
-				}
-				if (candidate.has("resource")) {
-					bean.addAttribute("resource", candidate.getString("resource"));
-				}
-				beansMap.put(bean.getId(), bean);
+		// structure is an array of context descriptions, each containing an
+		// array of beans
+		JSONArray contextsArray = new JSONArray(jsonInput);
+		for (int i = 0; i < contextsArray.length(); i++) {
+			JSONObject context = contextsArray.optJSONObject(i);
+			if (context != null) {
+				// TODO: group beans by context
+				JSONArray beansArray = context.optJSONArray("beans");
+				beansMap.putAll(parseBeans(beansArray));
 			}
 		}
+		return beansMap.values();
+	}
 
-		// populate LiveBean dependencies
-		for (int i = 0; i < names.length(); i++) {
-			JSONObject candidate = json.optJSONObject(names.getString(i));
-			if (candidate != null && candidate.has("bean")) {
-				LiveBean bean = beansMap.get(candidate.getString("bean"));
-				JSONArray dependencies = candidate.optJSONArray("dependencies");
-				if (dependencies != null) {
-					for (int j = 0; j < dependencies.length(); j++) {
-						String child = dependencies.getString(j);
-						LiveBean childBean = beansMap.get(child);
-						if (childBean != null) {
-							bean.addChild(childBean);
+	private static Map<String, LiveBean> parseBeans(JSONArray beansArray) throws JSONException {
+		Map<String, LiveBean> beansMap = new HashMap<String, LiveBean>();
+		if (beansArray != null) {
+			// construct LiveBeans
+			for (int i = 0; i < beansArray.length(); i++) {
+				JSONObject candidate = beansArray.getJSONObject(i);
+				if (candidate != null && candidate.has(LiveBean.ATTR_BEAN)) {
+					LiveBean bean = new LiveBean(candidate.getString(LiveBean.ATTR_BEAN));
+					if (candidate.has(LiveBean.ATTR_SCOPE)) {
+						bean.addAttribute(LiveBean.ATTR_SCOPE, candidate.getString(LiveBean.ATTR_SCOPE));
+					}
+					if (candidate.has(LiveBean.ATTR_TYPE)) {
+						bean.addAttribute(LiveBean.ATTR_TYPE, candidate.getString(LiveBean.ATTR_TYPE));
+					}
+					if (candidate.has(LiveBean.ATTR_RESOURCE)) {
+						bean.addAttribute(LiveBean.ATTR_RESOURCE, candidate.getString(LiveBean.ATTR_RESOURCE));
+					}
+					beansMap.put(bean.getId(), bean);
+				}
+			}
+			// populate LiveBean dependencies
+			for (int i = 0; i < beansArray.length(); i++) {
+				JSONObject candidate = beansArray.optJSONObject(i);
+				if (candidate != null && candidate.has(LiveBean.ATTR_BEAN)) {
+					LiveBean bean = beansMap.get(candidate.getString(LiveBean.ATTR_BEAN));
+					JSONArray dependencies = candidate.optJSONArray(LiveBean.ATTR_DEPENDENCIES);
+					if (dependencies != null) {
+						for (int j = 0; j < dependencies.length(); j++) {
+							String dependency = dependencies.getString(j);
+							LiveBean dependencyBean = beansMap.get(dependency);
+							if (dependencyBean != null) {
+								bean.addDependency(dependencyBean);
+							}
 						}
 					}
 				}
 			}
 		}
-		return beansMap.values();
+		return beansMap;
 	}
 
 }

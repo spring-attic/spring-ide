@@ -43,7 +43,7 @@ public class LiveBeansGraphContentProvider implements IGraphEntityContentProvide
 	public Object[] getConnectedTo(Object entity) {
 		if (entity instanceof LiveBean) {
 			LiveBean bean = (LiveBean) entity;
-			return bean.getChildren().toArray();
+			return bean.getDependencies().toArray();
 		}
 		return null;
 	}
