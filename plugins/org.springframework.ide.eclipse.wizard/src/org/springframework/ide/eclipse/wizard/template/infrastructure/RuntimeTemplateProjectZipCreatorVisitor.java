@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.wizard.template.infrastructure;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -22,6 +24,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -40,19 +43,35 @@ public class RuntimeTemplateProjectZipCreatorVisitor implements IResourceVisitor
 
 	private final IProgressMonitor monitor;
 
+	private final Set<String> excludes;
+
 	public RuntimeTemplateProjectZipCreatorVisitor(ZipOutputStream out, IProgressMonitor monitor) {
 		this.out = out;
 		this.monitor = monitor;
+
+		this.excludes = new HashSet<String>();
+		this.excludes.add("build");
+		this.excludes.add("target");
+		this.excludes.add(".DS_Store");
+		this.excludes.add(IContentConstants.TEMPLATE_DATA_FILE_NAME);
+		this.excludes.add(IContentConstants.WIZARD_DATA_FILE_NAME);
 	}
 
 	private boolean select(IResource resource) {
-		String lastSegment = resource.getFullPath().lastSegment();
-		if (lastSegment != null) {
-			if (lastSegment.equals(IContentConstants.TEMPLATE_DATA_FILE_NAME)
-					|| lastSegment.equals(IContentConstants.WIZARD_DATA_FILE_NAME)) {
-				return false;
+		if (resource.isDerived()) {
+			return false;
+		}
+
+		IPath fullPath = resource.getFullPath();
+		String[] segments = fullPath.segments();
+		if (segments != null) {
+			for (String segment : segments) {
+				if (this.excludes.contains(segment)) {
+					return false;
+				}
 			}
 		}
+
 		return true;
 	}
 
@@ -82,13 +101,13 @@ public class RuntimeTemplateProjectZipCreatorVisitor implements IResourceVisitor
 
 		String path = "template/" + resource.getProjectRelativePath().toString();
 		try {
-			if (resource instanceof IFile && !ignore(resource)) {
+			if (resource instanceof IFile) {
 				ZipEntry entry = new ZipEntry(path);
 				out.putNextEntry(entry);
 				addFile((IFile) resource);
 				out.closeEntry();
 			}
-			else if (resource instanceof IFolder && !ignore(resource)) {
+			else if (resource instanceof IFolder) {
 				ZipEntry entry = new ZipEntry(path + "/");
 				out.putNextEntry(entry);
 				out.closeEntry();
@@ -100,10 +119,6 @@ public class RuntimeTemplateProjectZipCreatorVisitor implements IResourceVisitor
 		}
 
 		return true;
-	}
-
-	private boolean ignore(IResource resource) {
-		return resource == null || resource.getName().endsWith(".DS_Store");
 	}
 
 }
