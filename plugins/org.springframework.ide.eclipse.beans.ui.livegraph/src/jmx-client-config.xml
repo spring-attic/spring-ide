@@ -3,14 +3,15 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
  
+	<!-- TODO: remove this file, have all connections done in code  -->
 	<bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
 		<property name="serviceUrl" value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi" />
 	</bean>
  
-	<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
-		<property name="objectName" value="bean:name=liveGraphModelBean" />
-		<property name="proxyInterface" value="org.springframework.ide.eclipse.beans.ui.livegraph.remote.IRemoteLiveBeansModel" />
-		<property name="server" ref="clientConnector" />
-	</bean>
+ 	<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
+ 		<property name="objectName" value="DefaultDomain:application=/spring-mvc-showcase" />
+ 		<property name="proxyInterface" value="org.springframework.context.support.LiveBeansViewMBean" />
+ 		<property name="server" ref="clientConnector" />
+ 	</bean>
  
 </beans>

@@ -19,8 +19,8 @@ import java.util.Collection;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.LiveBeansViewMBean;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
-import org.springframework.ide.eclipse.beans.ui.livegraph.remote.IRemoteLiveBeansModel;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 
 /**
@@ -35,7 +35,6 @@ public class LiveBeansModelGenerator {
 		LiveBeansModel model = new LiveBeansModel();
 		try {
 			LiveGraphUiPlugin plugin = LiveGraphUiPlugin.getDefault();
-
 			URL jmxConfig = plugin.getBundle().getResource("jmx-client-config.xml");
 			ClassLoader loader = plugin.getClass().getClassLoader();
 
@@ -45,10 +44,12 @@ public class LiveBeansModelGenerator {
 				context.setConfigLocation(jmxConfig.toString());
 				context.refresh();
 
-				IRemoteLiveBeansModel remoteModel = (IRemoteLiveBeansModel) context.getBean("proxy");
-				String name = remoteModel.getName();
-				LiveBean remoteBean = new LiveBean(name);
-				model.getBeans().add(remoteBean);
+				LiveBeansViewMBean remoteModel = (LiveBeansViewMBean) context.getBean("proxy");
+				String json = remoteModel.getSnapshotAsJson();
+
+				// String name = remoteModel.getName();
+				// LiveBean remoteBean = new LiveBean(name);
+				// model.getBeans().add(remoteBean);
 			}
 
 			URL jsonFile = plugin.getBundle().getResource("json.txt");
