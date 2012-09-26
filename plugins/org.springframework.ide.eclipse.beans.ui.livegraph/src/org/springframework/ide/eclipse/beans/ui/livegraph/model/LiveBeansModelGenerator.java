@@ -10,12 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 
-import java.net.URL;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collection;
+
+import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.json.JSONException;
 import org.springframework.context.support.LiveBeansViewMBean;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
@@ -28,28 +37,57 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
  */
 public class LiveBeansModelGenerator {
 
-	public static LiveBeansModel generateModel() {
+	public static LiveBeansModel connectToModel(String serviceUrl, String appName) {
+		JMXConnector connector = null;
+		try {
+			if (serviceUrl != null && serviceUrl.length() > 0 && appName != null && appName.length() > 0) {
+				connector = JMXConnectorFactory.connect(new JMXServiceURL(serviceUrl));
+				ObjectName name = ObjectName.getInstance("", "application", appName);
+				MBeanServerConnection connection = connector.getMBeanServerConnection();
+				LiveBeansViewMBean mbean = MBeanServerInvocationHandler.newProxyInstance(connection, name,
+						LiveBeansViewMBean.class, false);
+				return generateModel(mbean);
+			}
+		}
+		catch (MalformedObjectNameException e) {
+			StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
+					"An error occurred while connecting to server. Please check that the application name is correct.",
+					e));
+		}
+		catch (MalformedURLException e) {
+			StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
+					"An error occurred while connecting to server. Please check that the service URL is correct.", e));
+		}
+		catch (IOException e) {
+			StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
+					"An error occurred while connecting to server.", e));
+		}
+		finally {
+			if (connector != null) {
+				try {
+					connector.close();
+				}
+				catch (IOException e) {
+					StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
+							"An error occurred while closing connection to server.", e));
+				}
+			}
+		}
+		return new LiveBeansModel();
+	}
+
+	private static LiveBeansModel generateModel(LiveBeansViewMBean mbean) {
 		LiveBeansModel model = new LiveBeansModel();
 		try {
-			LiveGraphUiPlugin plugin = LiveGraphUiPlugin.getDefault();
-			URL jmxConfig = plugin.getBundle().getResource("jmx-client-config.xml");
-			ClassLoader loader = plugin.getClass().getClassLoader();
-
-			if (jmxConfig != null && loader != null) {
-				ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext();
-				context.setClassLoader(loader);
-				context.setConfigLocation(jmxConfig.toString());
-				context.refresh();
-
-				LiveBeansViewMBean remoteModel = (LiveBeansViewMBean) context.getBean("proxy");
-				String json = remoteModel.getSnapshotAsJson();
+			if (mbean != null) {
+				String json = mbean.getSnapshotAsJson();
 				Collection<LiveBean> collection = LiveBeansJsonParser.parse(json);
 				model.getBeans().addAll(collection);
 			}
 		}
-		catch (Exception e) {
+		catch (JSONException e) {
 			StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
-					"An error occured while loading graph model.", e));
+					"An error occurred while generating graph model.", e));
 		}
 		return model;
 	}

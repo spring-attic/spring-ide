@@ -27,10 +27,10 @@ import org.eclipse.zest.layouts.LayoutStyles;
 import org.eclipse.zest.layouts.algorithms.TreeLayoutAlgorithm;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenContextFileAction;
-import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGenerator;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 
 /**
- * A simple view to host our graph mockup
+ * A simple view to host our graph
  * 
  * @author Leo Dos Santos
  */
@@ -50,7 +50,7 @@ public class LiveBeansGraphView extends ViewPart {
 		viewer.setContentProvider(new LiveBeansGraphContentProvider());
 		viewer.setLabelProvider(new LiveBeansGraphLabelProvider());
 		viewer.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED);
-		viewer.setInput(LiveBeansModelGenerator.generateModel());
+		viewer.setInput(new LiveBeansModel());
 		viewer.setLayoutAlgorithm(new TreeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING), true);
 		viewer.applyLayout();
 		getSite().setSelectionProvider(viewer);

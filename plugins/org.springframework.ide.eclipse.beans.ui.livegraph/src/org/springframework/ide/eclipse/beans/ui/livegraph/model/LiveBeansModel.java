@@ -11,10 +11,11 @@
 package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
- * A mock pre-generated beans model
+ * A model of a running Spring application to be graphed in the Live Beans Graph
  * 
  * @author Leo Dos Santos
  */
@@ -24,6 +25,10 @@ public class LiveBeansModel {
 
 	public LiveBeansModel() {
 		beans = new ArrayList<LiveBean>();
+	}
+
+	public void addBeans(Collection<LiveBean> beansToAdd) {
+		beans.addAll(beansToAdd);
 	}
 
 	public List<LiveBean> getBeans() {
