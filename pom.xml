@@ -97,6 +97,7 @@
 		<module>plugins/org.springframework.ide.eclipse.beans.ui</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.graph</module>
+		<module>plugins/org.springframework.ide.eclipse.beans.ui.livegraph</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.refactoring</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.search</module>
 		<module>features/org.springframework.ide.eclipse.feature</module>
