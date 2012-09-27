@@ -23,7 +23,7 @@ import org.json.JSONObject;
  */
 public class LiveBeansJsonParser {
 
-	public static Collection<LiveBean> parse(String jsonInput) throws JSONException {
+	public static Collection<LiveBean> parse(String jsonInput, String applicationName) throws JSONException {
 		Map<String, LiveBean> beansMap = new HashMap<String, LiveBean>();
 		// structure is an array of context descriptions, each containing an
 		// array of beans
@@ -33,13 +33,13 @@ public class LiveBeansJsonParser {
 			if (context != null) {
 				// TODO: group beans by context
 				JSONArray beansArray = context.optJSONArray("beans");
-				beansMap.putAll(parseBeans(beansArray));
+				beansMap.putAll(parseBeans(beansArray, applicationName));
 			}
 		}
 		return beansMap.values();
 	}
 
-	private static Map<String, LiveBean> parseBeans(JSONArray beansArray) throws JSONException {
+	private static Map<String, LiveBean> parseBeans(JSONArray beansArray, String applicationName) throws JSONException {
 		Map<String, LiveBean> beansMap = new HashMap<String, LiveBean>();
 		if (beansArray != null) {
 			// construct LiveBeans
@@ -55,6 +55,9 @@ public class LiveBeansJsonParser {
 					}
 					if (candidate.has(LiveBean.ATTR_RESOURCE)) {
 						bean.addAttribute(LiveBean.ATTR_RESOURCE, candidate.getString(LiveBean.ATTR_RESOURCE));
+					}
+					if (applicationName != null) {
+						bean.addAttribute(LiveBean.ATTR_APPLICATION, applicationName);
 					}
 					beansMap.put(bean.getId(), bean);
 				}

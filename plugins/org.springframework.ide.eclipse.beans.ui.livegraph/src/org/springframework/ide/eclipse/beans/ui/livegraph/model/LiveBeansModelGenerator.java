@@ -46,7 +46,7 @@ public class LiveBeansModelGenerator {
 				MBeanServerConnection connection = connector.getMBeanServerConnection();
 				LiveBeansViewMBean mbean = MBeanServerInvocationHandler.newProxyInstance(connection, name,
 						LiveBeansViewMBean.class, false);
-				return generateModel(mbean);
+				return generateModel(mbean, appName);
 			}
 		}
 		catch (MalformedObjectNameException e) {
@@ -76,12 +76,12 @@ public class LiveBeansModelGenerator {
 		return new LiveBeansModel();
 	}
 
-	private static LiveBeansModel generateModel(LiveBeansViewMBean mbean) {
+	private static LiveBeansModel generateModel(LiveBeansViewMBean mbean, String appName) {
 		LiveBeansModel model = new LiveBeansModel();
 		try {
 			if (mbean != null) {
 				String json = mbean.getSnapshotAsJson();
-				Collection<LiveBean> collection = LiveBeansJsonParser.parse(json);
+				Collection<LiveBean> collection = LiveBeansJsonParser.parse(json, appName);
 				model.getBeans().addAll(collection);
 			}
 		}

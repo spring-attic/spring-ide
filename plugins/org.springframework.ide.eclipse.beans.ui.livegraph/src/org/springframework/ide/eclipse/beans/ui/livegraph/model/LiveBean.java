@@ -33,6 +33,8 @@ public class LiveBean implements IAdaptable {
 
 	public static final String ATTR_DEPENDENCIES = "dependencies";
 
+	public static final String ATTR_APPLICATION = "application name";
+
 	private final String beanId;
 
 	private final Set<LiveBean> dependencies;
@@ -60,6 +62,10 @@ public class LiveBean implements IAdaptable {
 			return new LiveBeanPropertySource(this);
 		}
 		return null;
+	}
+
+	public String getApplicationName() {
+		return attributes.get(ATTR_APPLICATION);
 	}
 
 	public Map<String, String> getAttributes() {
