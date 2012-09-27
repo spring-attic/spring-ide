@@ -43,19 +43,18 @@ public class OpenBeanClassAction extends BaseSelectionListenerAction {
 		for (Object obj : elements) {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
+				String appName = bean.getApplicationName();
 				String beanClass = bean.getBeanType();
-				if (beanClass != null && beanClass.trim().length() > 0) {
+				if (beanClass != null && beanClass.trim().length() > 0 && appName != null) {
 					// find the class files in the workspace and open them
 					try {
-						// need a project mapper in place of hard-coded sample
-						IProject project = SpringCoreUtils.createProject("org.springframework.samples.petclinic", null,
-								new NullProgressMonitor());
+						IProject project = SpringCoreUtils.createProject(appName, null, new NullProgressMonitor());
 						IType type = JdtUtils.getJavaType(project, beanClass);
 						SpringUIUtils.openInEditor(type);
 					}
 					catch (CoreException e) {
 						StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
-								"An error occurred while attempting to open a class file."));
+								"An error occurred while attempting to open a class file.", e));
 					}
 				}
 			}
