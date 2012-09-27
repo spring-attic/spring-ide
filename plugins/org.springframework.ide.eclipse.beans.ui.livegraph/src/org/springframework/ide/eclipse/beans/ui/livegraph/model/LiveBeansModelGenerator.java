@@ -42,7 +42,7 @@ public class LiveBeansModelGenerator {
 		try {
 			if (serviceUrl != null && serviceUrl.length() > 0 && appName != null && appName.length() > 0) {
 				connector = JMXConnectorFactory.connect(new JMXServiceURL(serviceUrl));
-				ObjectName name = ObjectName.getInstance("", "application", appName);
+				ObjectName name = ObjectName.getInstance("", "application", "/".concat(appName));
 				MBeanServerConnection connection = connector.getMBeanServerConnection();
 				LiveBeansViewMBean mbean = MBeanServerInvocationHandler.newProxyInstance(connection, name,
 						LiveBeansViewMBean.class, false);

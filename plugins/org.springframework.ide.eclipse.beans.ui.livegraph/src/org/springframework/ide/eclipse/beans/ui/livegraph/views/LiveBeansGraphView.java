@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.views;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -19,12 +20,14 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutStyles;
 import org.eclipse.zest.layouts.algorithms.TreeLayoutAlgorithm;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToApplicationAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenContextFileAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
@@ -44,6 +47,8 @@ public class LiveBeansGraphView extends ViewPart {
 
 	private BaseSelectionListenerAction openContextAction;
 
+	private Action connectApplicationAction;
+
 	@Override
 	public void createPartControl(Composite parent) {
 		viewer = new GraphViewer(parent, SWT.NONE);
@@ -56,6 +61,7 @@ public class LiveBeansGraphView extends ViewPart {
 		getSite().setSelectionProvider(viewer);
 
 		makeActions();
+		hookPullDownMenu();
 		hookContextMenu();
 
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -82,6 +88,10 @@ public class LiveBeansGraphView extends ViewPart {
 		menuManager.add(openContextAction);
 	}
 
+	private void fillPullDownMenu(IMenuManager menuManager) {
+		menuManager.add(connectApplicationAction);
+	}
+
 	private void hookContextMenu() {
 		MenuManager menuManager = new MenuManager();
 		menuManager.setRemoveAllWhenShown(true);
@@ -99,17 +109,29 @@ public class LiveBeansGraphView extends ViewPart {
 
 	}
 
+	private void hookPullDownMenu() {
+		IActionBars bars = getViewSite().getActionBars();
+		fillPullDownMenu(bars.getMenuManager());
+	}
+
 	private void makeActions() {
 		openBeanClassAction = new OpenBeanClassAction();
 		viewer.addSelectionChangedListener(openBeanClassAction);
 		openContextAction = new OpenContextFileAction();
 		viewer.addSelectionChangedListener(openContextAction);
+		connectApplicationAction = new ConnectToApplicationAction(this);
 	}
 
 	@Override
 	public void setFocus() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void setInput(LiveBeansModel model) {
+		if (viewer != null) {
+			viewer.setInput(model);
+		}
 	}
 
 }
