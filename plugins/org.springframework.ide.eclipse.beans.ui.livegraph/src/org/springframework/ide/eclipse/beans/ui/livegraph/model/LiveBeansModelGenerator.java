@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.MBeanServerConnection;
@@ -60,10 +61,6 @@ public class LiveBeansModelGenerator {
 		return new LiveBeansModel();
 	}
 
-	public static LiveBeansModel connectToModel(String serviceUrl, String appName) {
-		return connectToModel(serviceUrl, null, null, appName);
-	}
-
 	public static LiveBeansModel connectToModel(String serviceUrl, String username, String password, String appName) {
 		JMXConnector connector = null;
 		try {
@@ -103,7 +100,7 @@ public class LiveBeansModelGenerator {
 		JMXConnector connector = null;
 		try {
 			if (serviceUrl != null && serviceUrl.length() > 0) {
-				Map env = null;
+				Map env = new HashMap();
 				if (username != null && password != null) {
 					String[] creds = new String[] { username, password };
 					env.put(JMXConnector.CREDENTIALS, creds);

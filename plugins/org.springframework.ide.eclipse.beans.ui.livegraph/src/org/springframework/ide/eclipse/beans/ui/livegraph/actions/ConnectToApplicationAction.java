@@ -34,8 +34,8 @@ public class ConnectToApplicationAction extends Action {
 	@Override
 	public void run() {
 		if (dialog.open() == IDialogConstants.OK_ID) {
-			LiveBeansModel model = LiveBeansModelGenerator.connectToModel(dialog.getServiceUrl(),
-					dialog.getApplicationName());
+			LiveBeansModel model = LiveBeansModelGenerator.connectToModel(dialog.getServiceUrl(), dialog.getUsername(),
+					dialog.getPassword(), dialog.getApplicationName());
 			view.setInput(model);
 		}
 	}

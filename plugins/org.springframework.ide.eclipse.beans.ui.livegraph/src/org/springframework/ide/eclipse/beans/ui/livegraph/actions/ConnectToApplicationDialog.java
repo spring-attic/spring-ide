@@ -33,6 +33,10 @@ public class ConnectToApplicationDialog extends Dialog {
 
 	private String appName;
 
+	private String username;
+
+	private String password;
+
 	public ConnectToApplicationDialog(Shell parentShell) {
 		super(parentShell);
 	}
@@ -89,6 +93,38 @@ public class ConnectToApplicationDialog extends Dialog {
 			}
 		});
 
+		Label authentication = new Label(composite, SWT.NONE);
+		authentication.setText("Server Authentication (if required):");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(2, 1).applyTo(authentication);
+
+		Label usernameLabel = new Label(composite, SWT.NONE);
+		usernameLabel.setText("Username:");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(usernameLabel);
+
+		final Text usernameText = new Text(composite, SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).hint(350, SWT.DEFAULT)
+				.applyTo(usernameText);
+		usernameText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				username = usernameText.getText();
+				update();
+			}
+		});
+
+		Label passLabel = new Label(composite, SWT.NONE);
+		passLabel.setText("Password:");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(passLabel);
+
+		final Text passText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).hint(350, SWT.DEFAULT)
+				.applyTo(passText);
+		passText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				password = passText.getText();
+				update();
+			}
+		});
+
 		return control;
 	}
 
@@ -96,8 +132,16 @@ public class ConnectToApplicationDialog extends Dialog {
 		return appName;
 	}
 
+	public String getPassword() {
+		return password;
+	}
+
 	public String getServiceUrl() {
 		return serviceUrl;
+	}
+
+	public String getUsername() {
+		return username;
 	}
 
 	private void update() {
