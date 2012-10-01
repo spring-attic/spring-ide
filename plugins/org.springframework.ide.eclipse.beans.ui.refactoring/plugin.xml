@@ -122,7 +122,7 @@
 			</enablement>
 		</moveParticipant>
 	</extension>
-
+<!--
 	<extension point="org.eclipse.ui.editorActions">
 		<editorContribution
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.actions"
@@ -181,8 +181,14 @@
 			</action>
 		</viewerContribution>
 	</extension>
-
+-->
+<!--
 	<extension point="org.eclipse.ui.commands">
+		<command
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.context.refactorBeanClassAction"
+			name="%renameBeanElement.label"
+			defaultHandler="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction"
+			categoryId="org.eclipse.jdt.ui.category.refactoring"/>
 		<command
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
 			name="Rename Bean Java Elements"
@@ -197,6 +203,14 @@
 			categoryId="org.eclipse.jdt.ui.category.refactoring"/>
 	</extension>
 
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.eclipse.wst.sse.ui.StructuredTextEditor.EditorContext?before=additions">
+			<command commandId="org.springframework.ide.eclipse.beans.ui.refactoring.context.refactorBeanClassAction" />
+		</menuContribution>
+	</extension>
+-->
+<!--
 	<extension point="org.eclipse.ui.bindings">
 		<key sequence="M2+M3+R"
 			commandId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
@@ -223,5 +237,6 @@
 			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
 
 	</extension>
+-->
 
 </plugin>
