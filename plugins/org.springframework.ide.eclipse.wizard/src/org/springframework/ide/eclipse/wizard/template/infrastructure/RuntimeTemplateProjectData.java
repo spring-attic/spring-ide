@@ -33,7 +33,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
 public class RuntimeTemplateProjectData implements ITemplateProjectData {
 
 	private final IProject project;
@@ -44,7 +43,7 @@ public class RuntimeTemplateProjectData implements ITemplateProjectData {
 
 	private File jsonDescriptor;
 
-	public RuntimeTemplateProjectData(IProject project) {
+	public RuntimeTemplateProjectData(IProject project) throws CoreException {
 		this.project = project;
 		initialize();
 	}
@@ -53,54 +52,47 @@ public class RuntimeTemplateProjectData implements ITemplateProjectData {
 		return descriptor;
 	}
 
-	private void initialize() {
+	private void initialize() throws CoreException {
 		IFile descriptorFile = project.getFile(IContentConstants.TEMPLATE_DATA_FILE_NAME);
-		try {
-			DocumentBuilder documentBuilder = ContentUtil.createDocumentBuilder();
+		DocumentBuilder documentBuilder = ContentUtil.createDocumentBuilder();
 
-			try {
-				Document document = documentBuilder.parse(descriptorFile.getContents());
-				Element rootNode = document.getDocumentElement();
-				if (rootNode == null) {
-					throw new SAXException("No root node");
-				}
-				if (!TAG_TEMPLATE.equals(rootNode.getNodeName())) {
-					throw new SAXException("Not a valid template");
-				}
-				NodeList children = rootNode.getChildNodes();
-				for (int i = 0; i < children.getLength(); i++) {
-					Node childNode = children.item(i);
-					if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-						if (TAG_DESCRIPTOR.equals(childNode.getNodeName())) {
-							descriptor = Descriptor.read(childNode);
+		try {
+			Document document = documentBuilder.parse(descriptorFile.getContents());
+			Element rootNode = document.getDocumentElement();
+			if (rootNode == null) {
+				throw new SAXException("No root node");
+			}
+			if (!TAG_TEMPLATE.equals(rootNode.getNodeName())) {
+				throw new SAXException("Not a valid template");
+			}
+			NodeList children = rootNode.getChildNodes();
+			for (int i = 0; i < children.getLength(); i++) {
+				Node childNode = children.item(i);
+				if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+					if (TAG_DESCRIPTOR.equals(childNode.getNodeName())) {
+						descriptor = Descriptor.read(childNode);
+					}
+					else if (TAG_JSON.equals(childNode.getNodeName())) {
+						String filePath = ContentUtil.getAttributeValue(childNode, ATTRIBUTE_PATH);
+						if (filePath == null) {
+							throw new SAXException("The json descriptor is invalid");
 						}
-						else if (TAG_JSON.equals(childNode.getNodeName())) {
-							String filePath = ContentUtil.getAttributeValue(childNode, ATTRIBUTE_PATH);
-							if (filePath == null) {
-								throw new SAXException("The json descriptor is invalid");
-							}
-							jsonDescriptor = new File(project.getLocation().toOSString(), filePath);
-						}
+						jsonDescriptor = new File(project.getLocation().toOSString(), filePath);
 					}
 				}
-				if (descriptor != null) {
-					zippedProject = createZippedProject(project.getName());
-				}
-
 			}
-			catch (SAXException e) {
-				throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-						"Could not read initialization data for template \"" + project.getName() + "\"", e));
-			}
-			catch (IOException e) {
-				throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-						"Could not read initialization data for template \"" + project.getName() + "\"", e));
+			if (descriptor != null) {
+				zippedProject = createZippedProject(project.getName());
 			}
 
 		}
-		catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		catch (SAXException e) {
+			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
+					"Could not read initialization data for template \"" + project.getName() + "\"", e));
+		}
+		catch (IOException e) {
+			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
+					"Could not read initialization data for template \"" + project.getName() + "\"", e));
 		}
 	}
 
