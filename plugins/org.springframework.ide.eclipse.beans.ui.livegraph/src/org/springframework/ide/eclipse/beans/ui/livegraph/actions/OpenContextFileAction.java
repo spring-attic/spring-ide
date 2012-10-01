@@ -74,7 +74,7 @@ public class OpenContextFileAction extends BaseSelectionListenerAction {
 		}
 		catch (CoreException e) {
 			StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
-					"An error occurred while attempting to open an application context file."));
+					"An error occurred while attempting to open an application context file.", e));
 		}
 
 	}
