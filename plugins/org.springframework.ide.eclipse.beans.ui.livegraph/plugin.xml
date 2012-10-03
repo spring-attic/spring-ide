@@ -8,6 +8,7 @@
             category="org.springframework.ide.eclipse.ui.views"
             class="org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView"
             id="org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView"
+            icon="icons/live-beans-graph.png"
             name="Live Beans Graph"
             restorable="true">
       </view>
