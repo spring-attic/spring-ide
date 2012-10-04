@@ -15,6 +15,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -30,6 +32,7 @@ import org.eclipse.zest.layouts.algorithms.DirectedGraphLayoutAlgorithm;
 import org.eclipse.zest.layouts.algorithms.HorizontalShift;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToApplicationAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanDefinitionAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 
 /**
@@ -45,7 +48,7 @@ public class LiveBeansGraphView extends ViewPart {
 
 	private BaseSelectionListenerAction openBeanClassAction;
 
-	// private BaseSelectionListenerAction openContextAction;
+	private BaseSelectionListenerAction openBeanDefAction;
 
 	private Action connectApplicationAction;
 
@@ -66,20 +69,20 @@ public class LiveBeansGraphView extends ViewPart {
 		hookPullDownMenu();
 		hookContextMenu();
 
-		// viewer.addDoubleClickListener(new IDoubleClickListener() {
-		// public void doubleClick(DoubleClickEvent event) {
-		// if (openContextAction != null && openContextAction.isEnabled()) {
-		// openContextAction.run();
-		// }
-		// }
-		// });
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				if (openBeanDefAction != null && openBeanDefAction.isEnabled()) {
+					openBeanDefAction.run();
+				}
+			}
+		});
 	}
 
 	@Override
 	public void dispose() {
 		if (viewer != null) {
 			viewer.removeSelectionChangedListener(openBeanClassAction);
-			// viewer.removeSelectionChangedListener(openContextAction);
+			viewer.removeSelectionChangedListener(openBeanDefAction);
 		}
 		super.dispose();
 	}
@@ -87,7 +90,7 @@ public class LiveBeansGraphView extends ViewPart {
 	private void fillContextMenu(IMenuManager menuManager) {
 		menuManager.add(new Separator());
 		menuManager.add(openBeanClassAction);
-		// menuManager.add(openContextAction);
+		menuManager.add(openBeanDefAction);
 	}
 
 	private void fillPullDownMenu(IMenuManager menuManager) {
@@ -119,8 +122,8 @@ public class LiveBeansGraphView extends ViewPart {
 	private void makeActions() {
 		openBeanClassAction = new OpenBeanClassAction();
 		viewer.addSelectionChangedListener(openBeanClassAction);
-		// openContextAction = new OpenContextFileAction();
-		// viewer.addSelectionChangedListener(openContextAction);
+		openBeanDefAction = new OpenBeanDefinitionAction();
+		viewer.addSelectionChangedListener(openBeanDefAction);
 		connectApplicationAction = new ConnectToApplicationAction(this);
 	}
 
