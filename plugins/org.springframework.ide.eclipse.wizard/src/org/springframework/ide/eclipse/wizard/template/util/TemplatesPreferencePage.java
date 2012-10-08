@@ -63,8 +63,12 @@ public class TemplatesPreferencePage extends AbstractNameUrlPreferencePage {
 	}
 
 	@Override
-	protected TemplateAddEditNameUrlDialog getAddEditDialog(NameUrlPair existingNameUrlPair) {
-		return new TemplateAddEditNameUrlDialog(getShell(), model, existingNameUrlPair, addDialogHeaderText());
+	protected AddEditNameUrlDialog getAddEditDialog(NameUrlPair existingNameUrlPair) {
+		AddEditNameUrlDialog dialog = new TemplateAddEditNameUrlDialog(getShell(), model, existingNameUrlPair,
+				addDialogHeaderText());
+		dialog.setTitle(existingNameUrlPair == null ? AddEditNameUrlDialogMessages.TemplateProjects_addTitle
+				: AddEditNameUrlDialogMessages.TemplateProjects_editTitle);
+		return dialog;
 	}
 
 }

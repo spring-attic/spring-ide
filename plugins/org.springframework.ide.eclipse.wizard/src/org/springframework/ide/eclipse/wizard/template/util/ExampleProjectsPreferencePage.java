@@ -53,8 +53,12 @@ public class ExampleProjectsPreferencePage extends AbstractNameUrlPreferencePage
 	}
 
 	@Override
-	protected ExampleAddEditNameUrlDialog getAddEditDialog(NameUrlPair existingNameUrlPair) {
-		return new ExampleAddEditNameUrlDialog(getShell(), model, existingNameUrlPair, addDialogHeaderText());
+	protected AddEditNameUrlDialog getAddEditDialog(NameUrlPair existingNameUrlPair) {
+		AddEditNameUrlDialog dialog = new ExampleAddEditNameUrlDialog(getShell(), model, existingNameUrlPair,
+				addDialogHeaderText());
+		dialog.setTitle(existingNameUrlPair == null ? AddEditNameUrlDialogMessages.ExampleProjects_addTitle
+				: AddEditNameUrlDialogMessages.ExampleProjects_editTitle);
+		return dialog;
 	}
 
 }

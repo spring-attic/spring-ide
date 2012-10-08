@@ -61,8 +61,6 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 
 	private Button removeButton;
 
-	private Label errorText;
-
 	private Button optionalCheckbox;
 
 	protected abstract String preferencePageHeaderText();
@@ -208,7 +206,7 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 		addButton.setText(NLS.bind("Add", null));
 		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent ev) {
 				AddEditNameUrlDialog dialog = getAddEditDialog(null);
 				if (dialog.open() == Dialog.OK) {
 					String urlString = dialog.getUrlString().trim().replaceAll("\\n", "");
@@ -223,15 +221,13 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 							model.addNameUrlPairInEncodedString(new NameUrlPair(name, urlString));
 							tableViewer.refresh();
 						}
-						catch (URISyntaxException e1) {
+						catch (URISyntaxException e) {
 							// Errors in URL *should* be caught in the add/edit
 							// dialog, i.e. before getting to this point.
-							String title = NLS.bind("Invalid URL", null);
-							String message = NLS.bind("The URL {0} was malformed.  Ignoring.", urlString);
-							MessageDialog.openError(null, title, message);
+							String message = NLS.bind(AddEditNameUrlDialogMessages.malformedUrlIgnoring, urlString);
+							MessageDialog.openError(getShell(), AddEditNameUrlDialogMessages.malformedUrl, message);
 						}
 					}
-
 				}
 			}
 
@@ -243,7 +239,7 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 		editButton.setEnabled(false);
 		editButton.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent ev) {
 				NameUrlPair oldNameUrl = getSelectedNameUrlPair();
 				AddEditNameUrlDialog dialog = getAddEditDialog(oldNameUrl);
 				if (dialog.open() == Dialog.OK) {
@@ -265,12 +261,14 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 							editButton.setEnabled(false);
 							removeButton.setEnabled(false);
 						}
-						catch (URISyntaxException e1) {
-							errorText.setText("Error!  The URL " + urlString + " was malformed.  Ignoring.");
+						catch (URISyntaxException e) {
+							// Errors in URL *should* be caught in the add/edit
+							// dialog, i.e. before getting to this point.
+							String message = NLS.bind(AddEditNameUrlDialogMessages.malformedUrlIgnoring, urlString);
+							MessageDialog.openError(getShell(), AddEditNameUrlDialogMessages.malformedUrl, message);
 						}
 					}
 				}
-
 			}
 		});
 
@@ -328,10 +326,6 @@ public abstract class AbstractNameUrlPreferencePage extends PreferencePage imple
 				}
 			});
 		}
-
-		errorText = new Label(parent, SWT.NONE);
-		errorText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		errorText.setText(""); // leaving space for error message
 
 		Dialog.applyDialogFont(composite);
 

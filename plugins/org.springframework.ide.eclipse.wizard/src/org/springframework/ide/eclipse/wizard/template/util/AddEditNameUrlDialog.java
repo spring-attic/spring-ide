@@ -52,6 +52,8 @@ public class AddEditNameUrlDialog extends Dialog {
 
 	protected Composite composite;
 
+	private String title;
+
 	public AddEditNameUrlDialog(Shell parent, AbstractNameUrlPreferenceModel aModel, NameUrlPair nameUrl,
 			String headerText) {
 		super(parent);
@@ -114,6 +116,9 @@ public class AddEditNameUrlDialog extends Dialog {
 	@Override
 	public void create() {
 		super.create();
+		if (title != null) {
+			getShell().setText(title);
+		}
 		getButton(IDialogConstants.OK_ID).setEnabled(validateUrl(urlString));
 	}
 
@@ -163,33 +168,41 @@ public class AddEditNameUrlDialog extends Dialog {
 	protected boolean validateUrl(String urlString) {
 		if (urlString != null && urlString.contains(" ")) {
 			urlString = urlString.replace(" ", "%20");
+			int caret = urlText.getCaretPosition();
 			urlText.setText(urlString);
-			urlText.setSelection(urlString.length());
-
+			urlText.setSelection(caret + "%20".length() - 1);
 		}
 		if (urlString == null || urlString.length() <= 0) {
 			return false;
 		}
 
 		try {
-			@SuppressWarnings("unused")
-			URI testUri = new URI(urlString);
+			new URI(urlString);
 		}
-		catch (URISyntaxException e1) {
-			errorTextLabel.setText(NLS.bind("Malformed URL", null));
-			composite.update();
-			return false;
+		catch (URISyntaxException e) {
+			return showError();
 		}
 
 		try {
-			new URL(urlString);
+			URL url = new URL(urlString);
+			if (url.getHost().isEmpty()) {
+				return showError();
+			}
 		}
 		catch (MalformedURLException e) {
-			errorTextLabel.setText(NLS.bind("Malformed URL", null));
-			composite.update();
-			return false;
+			return showError();
 		}
 
 		return true;
+	}
+
+	private boolean showError() {
+		errorTextLabel.setText(AddEditNameUrlDialogMessages.malformedUrl);
+		composite.update();
+		return false;
+	}
+
+	protected void setTitle(String title) {
+		this.title = title;
 	}
 }
