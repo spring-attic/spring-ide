@@ -25,8 +25,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
-
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 /**
  * @author Oliver Gierke
  */
