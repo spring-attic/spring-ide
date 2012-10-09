@@ -244,7 +244,9 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 		List<IMavenProjectImportResult> importResults = MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos, configuration,
 				monitor);
 		for (IMavenProjectImportResult importResult : importResults) {
-			MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(importResult.getProject(), monitor);
+			// skip projects which have not been properly imported 
+			if (importResult.getProject() != null)
+				MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(importResult.getProject(), monitor);
 		}
 	}
 
