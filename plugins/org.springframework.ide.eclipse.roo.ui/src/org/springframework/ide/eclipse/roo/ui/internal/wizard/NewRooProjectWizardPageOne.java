@@ -1077,6 +1077,10 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 		}
 		return URIUtil.toURI(fLocationGroup.getLocation());
 	}
+	
+	public boolean isExternalProject() {
+		return fLocationGroup.fExternalRadio.isSelected();
+	}
 
 	public String getRooInstallName() {
 		if (rooInstallGroup.rooInstallCombo.getSelectionIndex() >= 0) {
