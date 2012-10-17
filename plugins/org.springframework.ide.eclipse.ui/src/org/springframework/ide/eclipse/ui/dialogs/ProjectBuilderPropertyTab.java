@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 Spring IDE Developers
+ * Copyright (c) 2007, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -131,9 +131,11 @@ public class ProjectBuilderPropertyTab {
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		Label beansLabel = new Label(composite, SWT.NONE);
-		beansLabel
-				.setText(SpringUIMessages.ProjectBuilderPropertyPage_description);
+		if (project != null) {
+			Label beansLabel = new Label(composite, SWT.NONE);
+			beansLabel
+					.setText(SpringUIMessages.ProjectBuilderPropertyPage_description);
+		}
 		// config set list viewer
 		builderViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_BOTH);
