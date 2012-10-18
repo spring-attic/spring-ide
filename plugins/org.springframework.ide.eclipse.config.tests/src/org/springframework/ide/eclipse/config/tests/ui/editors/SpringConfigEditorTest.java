@@ -32,12 +32,27 @@ import org.springframework.ide.eclipse.config.ui.editors.namespaces.NamespacesFo
 import org.springframework.ide.eclipse.config.ui.editors.overview.OverviewFormPage;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
-
 /**
  * @author Leo Dos Santos
  */
 @SuppressWarnings("restriction")
 public class SpringConfigEditorTest extends AbstractConfigTestCase {
+
+	private boolean prefEnableGefPages;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		prefEnableGefPages = ConfigUiPlugin.getDefault().getPreferenceStore()
+				.getBoolean(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES);
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		ConfigUiPlugin.getDefault().getPreferenceStore()
+				.setValue(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES, prefEnableGefPages);
+		super.tearDown();
+	}
 
 	public void testActivePagePreference() throws Exception {
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
