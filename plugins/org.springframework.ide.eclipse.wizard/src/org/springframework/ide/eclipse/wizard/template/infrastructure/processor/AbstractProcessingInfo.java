@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoElement;
 
-
 /**
  * Processing info for wizard providing replacement context and patterns for
  * copying resources
@@ -66,6 +65,7 @@ public abstract class AbstractProcessingInfo implements ProcessingInfo {
 		Collection<String> exclusionPatterns = new ArrayList<String>();
 		exclusionPatterns.add("/**/target/**");
 		exclusionPatterns.add("/**/*.svn/**");
+		exclusionPatterns.add("/**/*.git/**");
 		return exclusionPatterns;
 	}
 
