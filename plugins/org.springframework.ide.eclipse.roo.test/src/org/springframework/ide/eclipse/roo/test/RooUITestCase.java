@@ -17,7 +17,6 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ResourceExists;
-import org.springsource.ide.eclipse.commons.frameworks.test.util.SWTBotUtils;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.UITestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -40,7 +39,7 @@ public abstract class RooUITestCase extends UITestCase {
 		System.out.println("Create Roo project:" + projectName);
 		System.out.println("    package prefix:" + pkgPrefix);
 		
-		SWTBotShell wizard = activateFileNewWizardShell("Roo Project", "New Roo Project");
+		SWTBotShell wizard = activateFileNewWizardShell("Spring Roo Project", "New Roo Project");
 		
 		SWTBotText projectNameTxt = bot.textWithLabel("Project name:");
 		projectNameTxt.setText(projectName);
