@@ -8,22 +8,16 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.parts;
+package org.springframework.ide.eclipse.config.ui.editors.integration.mongodb.graph.parts;
 
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.parts.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.springframework.ide.eclipse.config.ui.editors.integration.mongodb.graph.parts.messages"; //$NON-NLS-1$
 
-	public static String IntRedisPaletteFactory_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
+	public static String IntMongoDbPaletteFactory_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
 
-	public static String IntRedisPaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
-
-	public static String IntRedisPaletteFactory_PUBLISH_SUBSCRIBE_CHANNEL_COMPONENT_DESCRIPTION;
-
-	public static String IntRedisPaletteFactory_STORE_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
-
-	public static String IntRedisPaletteFactory_STORE_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
+	public static String IntMongoDbPaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

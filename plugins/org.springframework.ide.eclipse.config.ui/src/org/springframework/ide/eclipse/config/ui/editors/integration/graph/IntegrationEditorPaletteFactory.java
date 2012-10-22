@@ -57,9 +57,9 @@ import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.RouterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.ServiceActivatorModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.SplitterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.SyslogToMapTransformerModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.TransformerModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.AlternateTransitionCreationFactory;
-
 
 /**
  * @author Leo Dos Santos
@@ -85,7 +85,8 @@ public class IntegrationEditorPaletteFactory extends AbstractConfigPaletteFactor
 		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
 		ToolEntry tool = new ConnectionCreationToolEntry(
 				Messages.getString("IntegrationEditorPaletteFactory.CONNECTION_COMPONENT_TITLE"), Messages.getString("IntegrationEditorPaletteFactory.CONNECTION_COMPONENT_DESCRIPTION"), //$NON-NLS-1$ //$NON-NLS-2$
-				new TransitionCreationFactory(), ConfigGraphCommonImages.CONNECTION_SOLID, ConfigGraphCommonImages.CONNECTION_SOLID);
+				new TransitionCreationFactory(), ConfigGraphCommonImages.CONNECTION_SOLID,
+				ConfigGraphCommonImages.CONNECTION_SOLID);
 		entries.add(tool);
 
 		tool = new ConnectionCreationToolEntry(
@@ -273,6 +274,12 @@ public class IntegrationEditorPaletteFactory extends AbstractConfigPaletteFactor
 				Messages.getString("IntegrationEditorPaletteFactory.PAYLOAD_SERIALIZING_TRANSFORMER_COMPONENT_DESCRIPTION"), new ModelElementCreationFactory( //$NON-NLS-1$
 						PayloadSerializingTransformerModelElement.class, getDiagram()),
 				IntegrationImages.TRANSFORMER_SMALL, IntegrationImages.TRANSFORMER);
+		entries.add(entry);
+
+		entry = new CombinedTemplateCreationEntry(IntegrationSchemaConstants.ELEM_SYSLOG_TO_MAP_TRANSFORMER,
+				Messages.getString("IntegrationEditorPaletteFactory.SYSLOG_TO_MAP_TRANSFORMER_COMPONENT_DESCRIPTON"), new ModelElementCreationFactory( //$NON-NLS-1$
+						SyslogToMapTransformerModelElement.class, getDiagram()), IntegrationImages.TRANSFORMER_SMALL,
+				IntegrationImages.TRANSFORMER);
 		entries.add(entry);
 
 		entry = new CombinedTemplateCreationEntry(

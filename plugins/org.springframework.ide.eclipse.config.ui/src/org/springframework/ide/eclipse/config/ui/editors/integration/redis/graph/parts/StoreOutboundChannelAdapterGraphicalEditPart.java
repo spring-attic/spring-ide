@@ -13,29 +13,29 @@ package org.springframework.ide.eclipse.config.ui.editors.integration.redis.grap
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
-import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.AbstractChannelGraphicalEditPart;
-import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.PublishSubscribeChannelModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BorderedIntegrationPart;
+import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.StoreOutboundChannelAdapterModelElement;
 
 /**
  * @author Leo Dos Santos
  */
-public class PublishSubscribeChannelGraphicalEditPart extends AbstractChannelGraphicalEditPart {
+public class StoreOutboundChannelAdapterGraphicalEditPart extends BorderedIntegrationPart {
 
-	public PublishSubscribeChannelGraphicalEditPart(PublishSubscribeChannelModelElement channel) {
-		super(channel);
+	public StoreOutboundChannelAdapterGraphicalEditPart(StoreOutboundChannelAdapterModelElement adapter) {
+		super(adapter);
 	}
 
 	@Override
 	protected IFigure createFigure() {
 		Label l = (Label) super.createFigure();
-		l.setIcon(IntegrationImages.getImageWithBadge(IntegrationImages.PUBSUB_CHANNEL,
+		l.setIcon(IntegrationImages.getImageWithBadge(IntegrationImages.OUTBOUND_ADAPTER,
 				IntegrationImages.BADGE_SI_REDIS));
 		return l;
 	}
 
 	@Override
-	public PublishSubscribeChannelModelElement getModelElement() {
-		return (PublishSubscribeChannelModelElement) getModel();
+	public StoreOutboundChannelAdapterModelElement getModelElement() {
+		return (StoreOutboundChannelAdapterModelElement) getModel();
 	}
 
 }

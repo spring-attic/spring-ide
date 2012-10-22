@@ -14,12 +14,14 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BorderedIntegrationPart;
-import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.OutboundChannelAdaperModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.OutboundChannelAdapterModelElement;
 
-
+/**
+ * @author Leo Dos Santos
+ */
 public class OutboundChannelAdapterGraphicalEditPart extends BorderedIntegrationPart {
 
-	public OutboundChannelAdapterGraphicalEditPart(OutboundChannelAdaperModelElement adapter) {
+	public OutboundChannelAdapterGraphicalEditPart(OutboundChannelAdapterModelElement adapter) {
 		super(adapter);
 	}
 
@@ -32,8 +34,8 @@ public class OutboundChannelAdapterGraphicalEditPart extends BorderedIntegration
 	}
 
 	@Override
-	public OutboundChannelAdaperModelElement getModelElement() {
-		return (OutboundChannelAdaperModelElement) getModel();
+	public OutboundChannelAdapterModelElement getModelElement() {
+		return (OutboundChannelAdapterModelElement) getModel();
 	}
 
 }

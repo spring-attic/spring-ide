@@ -13,9 +13,10 @@ package org.springframework.ide.eclipse.config.ui.editors.integration.redis.grap
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.InboundChannelAdapterModelElement;
-import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.OutboundChannelAdaperModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.OutboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.PublishSubscribeChannelModelElement;
-
+import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.StoreInboundChannelAdapterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.StoreOutboundChannelAdapterModelElement;
 
 /**
  * @author Leo Dos Santos
@@ -27,11 +28,17 @@ public class IntRedisEditPartFactory implements EditPartFactory {
 		if (model instanceof InboundChannelAdapterModelElement) {
 			part = new InboundChannelAdapterGraphicalEditPart((InboundChannelAdapterModelElement) model);
 		}
-		else if (model instanceof OutboundChannelAdaperModelElement) {
-			part = new OutboundChannelAdapterGraphicalEditPart((OutboundChannelAdaperModelElement) model);
+		else if (model instanceof OutboundChannelAdapterModelElement) {
+			part = new OutboundChannelAdapterGraphicalEditPart((OutboundChannelAdapterModelElement) model);
 		}
 		else if (model instanceof PublishSubscribeChannelModelElement) {
 			part = new PublishSubscribeChannelGraphicalEditPart((PublishSubscribeChannelModelElement) model);
+		}
+		else if (model instanceof StoreInboundChannelAdapterModelElement) {
+			part = new StoreInboundChannelAdapterGraphicalEditPart((StoreInboundChannelAdapterModelElement) model);
+		}
+		else if (model instanceof StoreOutboundChannelAdapterModelElement) {
+			part = new StoreOutboundChannelAdapterGraphicalEditPart((StoreOutboundChannelAdapterModelElement) model);
 		}
 		return part;
 	}

@@ -22,9 +22,10 @@ import org.springframework.ide.eclipse.config.graph.model.ModelElementCreationFa
 import org.springframework.ide.eclipse.config.graph.parts.IPaletteFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
 import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.InboundChannelAdapterModelElement;
-import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.OutboundChannelAdaperModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.OutboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.PublishSubscribeChannelModelElement;
-
+import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.StoreInboundChannelAdapterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.StoreOutboundChannelAdapterModelElement;
 
 /**
  * @author Leo Dos Santos
@@ -36,21 +37,34 @@ public class IntRedisPaletteFactory implements IPaletteFactory {
 		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
 
 		CombinedTemplateCreationEntry entry = new CombinedTemplateCreationEntry(
-				IntRedisSchemaConstants.ELEM_INBOUND_CHANNEL_ADAPTER, Messages.IntRedisPaletteFactory_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
+				IntRedisSchemaConstants.ELEM_INBOUND_CHANNEL_ADAPTER,
+				Messages.IntRedisPaletteFactory_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
 				new ModelElementCreationFactory(InboundChannelAdapterModelElement.class, diagram, namespaceUri),
 				IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);
 		entries.add(entry);
 
 		entry = new CombinedTemplateCreationEntry(IntRedisSchemaConstants.ELEM_OUTBOUND_CHANNEL_ADAPTER,
-				Messages.IntRedisPaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION, new ModelElementCreationFactory(
-						OutboundChannelAdaperModelElement.class, diagram, namespaceUri),
+				Messages.IntRedisPaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(OutboundChannelAdapterModelElement.class, diagram, namespaceUri),
 				IntegrationImages.OUTBOUND_ADAPTER_SMALL, IntegrationImages.OUTBOUND_ADAPTER);
 		entries.add(entry);
 
 		entry = new CombinedTemplateCreationEntry(IntRedisSchemaConstants.ELEM_PUBLISH_SUBSCRIBE_CHANNEL,
-				Messages.IntRedisPaletteFactory_PUBLISH_SUBSCRIBE_CHANNEL_COMPONENT_DESCRIPTION, new ModelElementCreationFactory(
-						PublishSubscribeChannelModelElement.class, diagram, namespaceUri),
+				Messages.IntRedisPaletteFactory_PUBLISH_SUBSCRIBE_CHANNEL_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(PublishSubscribeChannelModelElement.class, diagram, namespaceUri),
 				IntegrationImages.PUBSUB_CHANNEL_SMALL, IntegrationImages.PUBSUB_CHANNEL);
+		entries.add(entry);
+
+		entry = new CombinedTemplateCreationEntry(IntRedisSchemaConstants.ELEM_STORE_INBOUND_CHANNEL_ADAPTER,
+				Messages.IntRedisPaletteFactory_STORE_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION, new ModelElementCreationFactory(
+						StoreInboundChannelAdapterModelElement.class, diagram, namespaceUri),
+				IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);
+		entries.add(entry);
+
+		entry = new CombinedTemplateCreationEntry(IntRedisSchemaConstants.ELEM_STORE_OUTBOUND_CHANNEL_ADAPTER,
+				Messages.IntRedisPaletteFactory_STORE_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION, new ModelElementCreationFactory(
+						StoreOutboundChannelAdapterModelElement.class, diagram, namespaceUri),
+				IntegrationImages.OUTBOUND_ADAPTER_SMALL, IntegrationImages.OUTBOUND_ADAPTER);
 		entries.add(entry);
 
 		drawer.addAll(entries);

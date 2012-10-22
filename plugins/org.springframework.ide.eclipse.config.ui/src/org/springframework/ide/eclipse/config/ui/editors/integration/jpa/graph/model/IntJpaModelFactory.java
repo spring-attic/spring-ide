@@ -8,12 +8,12 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model;
+package org.springframework.ide.eclipse.config.ui.editors.integration.jpa.graph.model;
 
 import java.util.List;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
-import org.springframework.ide.eclipse.config.core.schemas.IntRedisSchemaConstants;
+import org.springframework.ide.eclipse.config.core.schemas.IntJpaSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.model.Activity;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractIntegrationModelFactory;
 
@@ -21,33 +21,28 @@ import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model
  * @author Leo Dos Santos
  */
 @SuppressWarnings("restriction")
-public class IntRedisModelFactory extends AbstractIntegrationModelFactory {
+public class IntJpaModelFactory extends AbstractIntegrationModelFactory {
 
 	public void getChildrenFromXml(List<Activity> list, IDOMElement input, Activity parent) {
-		if (input.getLocalName().equals(IntRedisSchemaConstants.ELEM_INBOUND_CHANNEL_ADAPTER)) {
+		if (input.getLocalName().equals(IntJpaSchemaConstants.ELEM_INBOUND_CHANNEL_ADAPTER)) {
 			InboundChannelAdapterModelElement adapter = new InboundChannelAdapterModelElement(input,
 					parent.getDiagram());
 			list.add(adapter);
 		}
-		else if (input.getLocalName().equals(IntRedisSchemaConstants.ELEM_OUTBOUND_CHANNEL_ADAPTER)) {
+		else if (input.getLocalName().equals(IntJpaSchemaConstants.ELEM_OUTBOUND_CHANNEL_ADAPTER)) {
 			OutboundChannelAdapterModelElement adapter = new OutboundChannelAdapterModelElement(input,
 					parent.getDiagram());
 			list.add(adapter);
 		}
-		else if (input.getLocalName().equals(IntRedisSchemaConstants.ELEM_PUBLISH_SUBSCRIBE_CHANNEL)) {
-			PublishSubscribeChannelModelElement channel = new PublishSubscribeChannelModelElement(input,
+		else if (input.getLocalName().equals(IntJpaSchemaConstants.ELEM_RETRIEVING_OUTBOUND_GATEWAY)) {
+			RetrievingOutboundGatewayModelElement gateway = new RetrievingOutboundGatewayModelElement(input,
 					parent.getDiagram());
-			list.add(channel);
+			list.add(gateway);
 		}
-		else if (input.getLocalName().equals(IntRedisSchemaConstants.ELEM_STORE_INBOUND_CHANNEL_ADAPTER)) {
-			StoreInboundChannelAdapterModelElement adapter = new StoreInboundChannelAdapterModelElement(input,
+		else if (input.getLocalName().equals(IntJpaSchemaConstants.ELEM_UPDATING_OUTBOUND_GATEWAY)) {
+			UpdatingOutboundGatewayModelElement gateway = new UpdatingOutboundGatewayModelElement(input,
 					parent.getDiagram());
-			list.add(adapter);
-		}
-		else if (input.getLocalName().equals(IntRedisSchemaConstants.ELEM_STORE_OUTBOUND_CHANNEL_ADAPTER)) {
-			StoreOutboundChannelAdapterModelElement adapter = new StoreOutboundChannelAdapterModelElement(input,
-					parent.getDiagram());
-			list.add(adapter);
+			list.add(gateway);
 		}
 	}
 

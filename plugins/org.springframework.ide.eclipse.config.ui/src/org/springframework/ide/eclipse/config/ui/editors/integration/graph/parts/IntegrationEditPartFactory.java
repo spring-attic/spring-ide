@@ -55,8 +55,8 @@ import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.RouterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.ServiceActivatorModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.SplitterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.SyslogToMapTransformerModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.TransformerModelElement;
-
 
 /**
  * @author Leo Dos Santos
@@ -191,6 +191,9 @@ public class IntegrationEditPartFactory extends AbstractConfigEditPartFactory {
 		}
 		else if (model instanceof SplitterModelElement) {
 			part = new SplitterGraphicalEditPart((SplitterModelElement) model);
+		}
+		else if (model instanceof SyslogToMapTransformerModelElement) {
+			part = new SyslogToMapTransformerGraphicalEditPart((SyslogToMapTransformerModelElement) model);
 		}
 		else if (model instanceof TransformerModelElement) {
 			part = new TransformerGraphicalEditPart((TransformerModelElement) model);

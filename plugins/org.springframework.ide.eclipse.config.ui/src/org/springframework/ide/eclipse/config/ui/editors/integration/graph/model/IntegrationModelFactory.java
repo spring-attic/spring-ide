@@ -18,7 +18,6 @@ import org.springframework.ide.eclipse.config.graph.model.AbstractConfigGraphDia
 import org.springframework.ide.eclipse.config.graph.model.Activity;
 import org.springframework.ide.eclipse.config.graph.model.IDiagramModelFactory;
 
-
 /**
  * @author Leo Dos Santos
  */
@@ -169,6 +168,11 @@ public class IntegrationModelFactory extends AbstractIntegrationModelFactory imp
 		else if (input.getLocalName().equals(IntegrationSchemaConstants.ELEM_SPLITTER)) {
 			SplitterModelElement splitter = new SplitterModelElement(input, parent.getDiagram());
 			list.add(splitter);
+		}
+		else if (input.getLocalName().equals(IntegrationSchemaConstants.ELEM_SYSLOG_TO_MAP_TRANSFORMER)) {
+			SyslogToMapTransformerModelElement transformer = new SyslogToMapTransformerModelElement(input,
+					parent.getDiagram());
+			list.add(transformer);
 		}
 		else if (input.getLocalName().equals(IntegrationSchemaConstants.ELEM_TRANSFORMER)) {
 			TransformerModelElement transformer = new TransformerModelElement(input, parent.getDiagram());

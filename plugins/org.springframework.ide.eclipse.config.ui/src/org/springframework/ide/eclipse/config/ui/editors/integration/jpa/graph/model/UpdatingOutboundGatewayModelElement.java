@@ -8,25 +8,30 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model;
+package org.springframework.ide.eclipse.config.ui.editors.integration.jpa.graph.model;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
+import org.springframework.ide.eclipse.config.core.schemas.IntJpaSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.model.AbstractConfigGraphDiagram;
-import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractOutboundChannelAdapterModelElement;
-
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractOutboundGatewayModelElement;
 
 /**
  * @author Leo Dos Santos
  */
 @SuppressWarnings("restriction")
-public class OutboundChannelAdaperModelElement extends AbstractOutboundChannelAdapterModelElement {
+public class UpdatingOutboundGatewayModelElement extends AbstractOutboundGatewayModelElement {
 
-	public OutboundChannelAdaperModelElement() {
+	public UpdatingOutboundGatewayModelElement() {
 		super();
 	}
 
-	public OutboundChannelAdaperModelElement(IDOMElement input, AbstractConfigGraphDiagram diagram) {
+	public UpdatingOutboundGatewayModelElement(IDOMElement input, AbstractConfigGraphDiagram diagram) {
 		super(input, diagram);
+	}
+
+	@Override
+	public String getInputName() {
+		return IntJpaSchemaConstants.ELEM_UPDATING_OUTBOUND_GATEWAY;
 	}
 
 }

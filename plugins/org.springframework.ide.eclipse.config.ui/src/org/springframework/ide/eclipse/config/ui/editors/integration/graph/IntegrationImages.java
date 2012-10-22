@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.config.graph.BadgedImageDescriptor;
 import org.springframework.ide.eclipse.config.graph.ScaledImageDescriptor;
 import org.springframework.ide.eclipse.config.ui.ConfigUiPlugin;
 
-
 /**
  * @author Leo Dos Santos
  */
@@ -164,7 +163,11 @@ public class IntegrationImages {
 
 	public static final ImageDescriptor BADGE_SI_JMX = create(INT16, "spring-integration-jmx.gif"); //$NON-NLS-1$
 
+	public static final ImageDescriptor BADGE_SI_JPA = create(INT16, "spring-integration-jpa.gif"); //$NON-NLS-1$
+
 	public static final ImageDescriptor BADGE_SI_MAIL = create(INT16, "spring-integration-mail.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BADGE_SI_MONGODB = create(INT16, "spring-integration-mongodb.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_REDIS = create(INT16, "spring-integration-redis.gif"); //$NON-NLS-1$
 

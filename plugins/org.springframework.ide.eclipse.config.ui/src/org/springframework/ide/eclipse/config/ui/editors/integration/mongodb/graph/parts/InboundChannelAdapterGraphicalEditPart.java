@@ -8,34 +8,34 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.parts;
+package org.springframework.ide.eclipse.config.ui.editors.integration.mongodb.graph.parts;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
-import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.AbstractChannelGraphicalEditPart;
-import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.PublishSubscribeChannelModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BorderedIntegrationPart;
+import org.springframework.ide.eclipse.config.ui.editors.integration.mongodb.graph.model.InboundChannelAdapterModelElement;
 
 /**
  * @author Leo Dos Santos
  */
-public class PublishSubscribeChannelGraphicalEditPart extends AbstractChannelGraphicalEditPart {
+public class InboundChannelAdapterGraphicalEditPart extends BorderedIntegrationPart {
 
-	public PublishSubscribeChannelGraphicalEditPart(PublishSubscribeChannelModelElement channel) {
-		super(channel);
+	public InboundChannelAdapterGraphicalEditPart(InboundChannelAdapterModelElement adapter) {
+		super(adapter);
 	}
 
 	@Override
 	protected IFigure createFigure() {
 		Label l = (Label) super.createFigure();
-		l.setIcon(IntegrationImages.getImageWithBadge(IntegrationImages.PUBSUB_CHANNEL,
-				IntegrationImages.BADGE_SI_REDIS));
+		l.setIcon(IntegrationImages.getImageWithBadge(IntegrationImages.INBOUND_ADAPTER,
+				IntegrationImages.BADGE_SI_MONGODB));
 		return l;
 	}
 
 	@Override
-	public PublishSubscribeChannelModelElement getModelElement() {
-		return (PublishSubscribeChannelModelElement) getModel();
+	public InboundChannelAdapterModelElement getModelElement() {
+		return (InboundChannelAdapterModelElement) getModel();
 	}
 
 }

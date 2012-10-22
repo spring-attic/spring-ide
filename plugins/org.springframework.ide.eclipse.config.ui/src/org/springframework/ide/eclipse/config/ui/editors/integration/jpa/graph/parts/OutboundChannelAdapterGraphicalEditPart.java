@@ -8,34 +8,34 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.parts;
+package org.springframework.ide.eclipse.config.ui.editors.integration.jpa.graph.parts;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
-import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.AbstractChannelGraphicalEditPart;
-import org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.model.PublishSubscribeChannelModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BorderedIntegrationPart;
+import org.springframework.ide.eclipse.config.ui.editors.integration.jpa.graph.model.OutboundChannelAdapterModelElement;
 
 /**
  * @author Leo Dos Santos
  */
-public class PublishSubscribeChannelGraphicalEditPart extends AbstractChannelGraphicalEditPart {
+public class OutboundChannelAdapterGraphicalEditPart extends BorderedIntegrationPart {
 
-	public PublishSubscribeChannelGraphicalEditPart(PublishSubscribeChannelModelElement channel) {
-		super(channel);
+	public OutboundChannelAdapterGraphicalEditPart(OutboundChannelAdapterModelElement adapter) {
+		super(adapter);
 	}
 
 	@Override
 	protected IFigure createFigure() {
 		Label l = (Label) super.createFigure();
-		l.setIcon(IntegrationImages.getImageWithBadge(IntegrationImages.PUBSUB_CHANNEL,
-				IntegrationImages.BADGE_SI_REDIS));
+		l.setIcon(IntegrationImages.getImageWithBadge(IntegrationImages.OUTBOUND_ADAPTER,
+				IntegrationImages.BADGE_SI_JPA));
 		return l;
 	}
 
 	@Override
-	public PublishSubscribeChannelModelElement getModelElement() {
-		return (PublishSubscribeChannelModelElement) getModel();
+	public OutboundChannelAdapterModelElement getModelElement() {
+		return (OutboundChannelAdapterModelElement) getModel();
 	}
 
 }

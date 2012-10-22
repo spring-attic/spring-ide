@@ -154,6 +154,8 @@ public class IntegrationSchemaConstants {
 
 	public static String ELEM_SPLITTER = "splitter"; //$NON-NLS-1$
 
+	public static String ELEM_SYSLOG_TO_MAP_TRANSFORMER = "syslog-to-map-transformer"; //$NON-NLS-1$
+
 	public static String ELEM_THREAD_LOCAL_CHANNEL = "thread-local-channel"; //$NON-NLS-1$
 
 	public static String ELEM_THREAD_POOL_TASK_EXECUTOR = "thread-pool-task-executor"; //$NON-NLS-1$

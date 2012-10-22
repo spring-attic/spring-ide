@@ -521,12 +521,32 @@
       </adapter>
       <adapter
             detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.jpa.graph.parts.IntJpaEditPartFactory"
+            id="org.springframework.ide.eclipse.config.ui.editors.integration.jpa"
+            label="jpa"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.jpa.graph.model.IntJpaModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/jpa"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.jpa.graph.parts.IntJpaPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
             editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mail.graph.parts.IntMailEditPartFactory"
             id="com.springsource.sts.config.ui.editors.integration.mail"
             modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mail.graph.model.IntMailModelFactory"
             label="mail"
             namespaceUri="http://www.springframework.org/schema/integration/mail"
             paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mail.graph.parts.IntMailPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mongodb.graph.parts.IntMongoDbEditPartFactory"
+            id="org.springframework.ide.eclipse.config.ui.editors.integration.mongodb"
+            label="mongodb"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mongodb.graph.model.IntMongoDbModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/mongodb"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mongodb.graph.parts.IntMongoDbPaletteFactory"
             parentUri="http://www.springframework.org/schema/integration">
       </adapter>
       <adapter
