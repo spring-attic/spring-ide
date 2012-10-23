@@ -17,10 +17,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
+import org.springframework.ide.eclipse.roo.core.internal.model.DefaultRooInstall;
 import org.springframework.ide.eclipse.roo.core.model.IRooInstall;
-
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * Roo utility methods.
@@ -45,7 +45,7 @@ public class RooUiUtil {
 	public static boolean isRoo120OrGreater(IRooInstall install) {
 		if (install != null) {
 			String versionStr = install.getVersion();
-			if (versionStr != null && versionStr != "<UNKNOWN VERSION>") {
+			if (versionStr != null && !DefaultRooInstall.UNKNOWN_VERSION.equals(versionStr)) {
 				Version version;
 				if (versionStr.contains(" ")) {
 					int index = versionStr.indexOf(" ");

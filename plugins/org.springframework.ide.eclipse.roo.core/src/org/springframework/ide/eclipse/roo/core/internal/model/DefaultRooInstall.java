@@ -41,6 +41,8 @@ public class DefaultRooInstall implements IRooInstall {
 	private boolean isDefault = false;
 
 	private final String name;
+	
+	public static String UNKNOWN_VERSION = "<UNKNOWN VERSION>";
 
 	public DefaultRooInstall(String home, String name, boolean isDefault) {
 		this.home = (home != null && !home.endsWith(File.separator) ? home + File.separator : home);
@@ -75,7 +77,7 @@ public class DefaultRooInstall implements IRooInstall {
 		if (home != null) {
 			return versionInfo();
 		}
-		return "<UNKNOWN VERSION>";
+		return UNKNOWN_VERSION;
 	}
 
 	public boolean isDefault() {
@@ -119,7 +121,7 @@ public class DefaultRooInstall implements IRooInstall {
 			return new Status(IStatus.ERROR, RooCoreActivator.PLUGIN_ID, String.format(
 					"Roo installation '%s' is missing the 'conf/config.properties' file.", getName()));
 		}
-		if ("<UNKNOWN VERSION>".equals(getVersion())) {
+		if (UNKNOWN_VERSION.equals(getVersion())) {
 			return new Status(IStatus.ERROR, RooCoreActivator.PLUGIN_ID, String.format(
 					"Cannot determine Roo version for installation '%s'.", getName()));
 		}
@@ -198,7 +200,7 @@ public class DefaultRooInstall implements IRooInstall {
 		}
 
 		if (sb.length() == 0) {
-			sb.append("<UNKNOWN VERSION>");
+			sb.append(UNKNOWN_VERSION);
 		}
 
 		return sb.toString();
