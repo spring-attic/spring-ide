@@ -54,7 +54,6 @@ public class LiveBean implements IAdaptable {
 
 	public void addDependency(LiveBean dependency) {
 		dependencies.add(dependency);
-		dependency.addAttribute("parent", beanId);
 	}
 
 	public Object getAdapter(Class adapter) {
