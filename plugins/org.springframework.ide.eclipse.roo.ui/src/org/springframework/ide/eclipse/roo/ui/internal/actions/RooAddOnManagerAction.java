@@ -10,26 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal.actions;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
-import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
-import org.springframework.ide.eclipse.roo.core.model.IRooInstall;
 import org.springframework.ide.eclipse.roo.ui.RooUiActivator;
 import org.springframework.ide.eclipse.roo.ui.internal.RooShellView;
 import org.springframework.ide.eclipse.roo.ui.internal.RooUiUtil;

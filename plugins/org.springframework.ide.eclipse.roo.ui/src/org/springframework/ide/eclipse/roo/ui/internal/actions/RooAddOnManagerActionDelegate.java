@@ -101,7 +101,7 @@ public class RooAddOnManagerActionDelegate extends AbstractActionDelegate {
 				IStatus result;
 				if (pluginVersion.getParent().isInstalled()) {
 					// Get some output onto the console
-					tab.getStyledTextAppender().append("addon update bundle --bundleSymbolicName " + pluginVersion.getName() + ";" + 
+					tab.getStyledTextAppender().append("addon upgrade bundle --bundleSymbolicName " + pluginVersion.getName() + ";" + 
 							pluginVersion.getVersion() + System.getProperty("line.separator"), Level.INFO.intValue());
 					result = bootstrap.update(pluginVersion);
 				}
