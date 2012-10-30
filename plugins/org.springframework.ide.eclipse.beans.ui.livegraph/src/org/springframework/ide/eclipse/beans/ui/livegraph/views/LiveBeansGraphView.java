@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.views;
 
+import java.util.Set;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -34,6 +36,7 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToAppli
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanDefinitionAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelCollection;
 
 /**
  * A simple view to host our graph
@@ -41,6 +44,27 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
  * @author Leo Dos Santos
  */
 public class LiveBeansGraphView extends ViewPart {
+
+	private class LoadModelAction extends Action {
+
+		private final LiveBeansModel model;
+
+		public LoadModelAction(LiveBeansModel model) {
+			super(model.getApplicationName(), Action.AS_RADIO_BUTTON);
+			this.model = model;
+		}
+
+		@Override
+		public void run() {
+			viewer.setInput(model);
+		}
+
+		@Override
+		public boolean isChecked() {
+			return viewer.getInput().equals(model);
+		}
+
+	}
 
 	public static final String VIEW_ID = "org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView";
 
@@ -95,6 +119,13 @@ public class LiveBeansGraphView extends ViewPart {
 
 	private void fillPullDownMenu(IMenuManager menuManager) {
 		menuManager.add(connectApplicationAction);
+		Set<LiveBeansModel> collection = LiveBeansModelCollection.getInstance().getCollection();
+		if (collection.size() > 0) {
+			menuManager.add(new Separator());
+		}
+		for (LiveBeansModel model : collection) {
+			menuManager.add(new LoadModelAction(model));
+		}
 	}
 
 	private void hookContextMenu() {
@@ -116,7 +147,15 @@ public class LiveBeansGraphView extends ViewPart {
 
 	private void hookPullDownMenu() {
 		IActionBars bars = getViewSite().getActionBars();
+		IMenuManager menuManager = bars.getMenuManager();
+		menuManager.setRemoveAllWhenShown(true);
 		fillPullDownMenu(bars.getMenuManager());
+
+		menuManager.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				fillPullDownMenu(manager);
+			}
+		});
 	}
 
 	private void makeActions() {

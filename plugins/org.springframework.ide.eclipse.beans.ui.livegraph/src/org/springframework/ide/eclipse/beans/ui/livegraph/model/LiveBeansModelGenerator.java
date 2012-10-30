@@ -160,6 +160,8 @@ public class LiveBeansModelGenerator {
 				String json = mbean.getSnapshotAsJson();
 				Collection<LiveBean> collection = LiveBeansJsonParser.parse(json, appName);
 				model.getBeans().addAll(collection);
+				// add model to collection
+				LiveBeansModelCollection.getInstance().addModel(model);
 			}
 		}
 		catch (JSONException e) {

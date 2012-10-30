@@ -19,7 +19,7 @@ import java.util.List;
  * 
  * @author Leo Dos Santos
  */
-public class LiveBeansModel {
+public class LiveBeansModel implements Comparable<LiveBeansModel> {
 
 	private final List<LiveBean> beans;
 
@@ -29,6 +29,17 @@ public class LiveBeansModel {
 
 	public void addBeans(Collection<LiveBean> beansToAdd) {
 		beans.addAll(beansToAdd);
+	}
+
+	public int compareTo(LiveBeansModel o) {
+		return getApplicationName().compareTo(o.getApplicationName());
+	}
+
+	public String getApplicationName() {
+		if (!beans.isEmpty()) {
+			return beans.get(0).getApplicationName();
+		}
+		return "";
 	}
 
 	public List<LiveBean> getBeans() {
