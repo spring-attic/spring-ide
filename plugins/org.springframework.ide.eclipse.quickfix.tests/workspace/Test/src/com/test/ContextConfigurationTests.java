@@ -12,7 +12,6 @@ package com.test;
 
 import org.springframework.test.context.ContextConfiguration;
 
-
 /**
  * @author Kaitlin Duck Sherwood
  */

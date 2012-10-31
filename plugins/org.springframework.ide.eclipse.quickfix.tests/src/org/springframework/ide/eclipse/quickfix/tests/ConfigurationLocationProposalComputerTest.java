@@ -36,7 +36,6 @@ import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.quickfix.jdt.computers.ConfigurationLocationProposalComputer;
 import org.springsource.ide.eclipse.commons.core.FileUtil;
 
-
 // NOTE: This is not an end-to-end test.  There are some checks on the proposals *after* 
 // they are generated but before they are presented to the user.  This only checks the 
 // creation of the proposals.
@@ -311,7 +310,7 @@ public class ConfigurationLocationProposalComputerTest extends AbstractCompilati
 
 		String[] expectedResultsArray = expectedResultsList.toArray(new String[expectedResultsList.size()]);
 		assertTrue(proposals.size() > 0);
-		assertTrue(proposals.size() == expectedResultsArray.length);
+		assertEquals(expectedResultsArray.length, proposals.size());
 		int expectedResultsIndex = 0;
 		for (Object element : proposals) {
 			if (element instanceof JavaCompletionProposal) {
@@ -328,7 +327,7 @@ public class ConfigurationLocationProposalComputerTest extends AbstractCompilati
 						errorMessage = "expected proposal: >" + expectedProposal + "<, got >" + replacementString + "<";
 						System.err.println(errorMessage);
 					}
-					assertTrue(errorMessage, expectedProposal.equals(replacementString));
+					assertEquals(errorMessage, expectedProposal, replacementString);
 				}
 				expectedResultsIndex++;
 			}
@@ -354,9 +353,8 @@ public class ConfigurationLocationProposalComputerTest extends AbstractCompilati
 
 		// This is purely to help with writing tests
 		if ((characterIndex != offset) && (offset > 0)) {
-			System.err.println("############" + label + ": offest is " + offset + ", characterIndex is "
-					+ characterIndex + " characterOffset should be " + (referencePosition - offset));
-			assertTrue(false);
+			fail("############" + label + ": offest is " + offset + ", characterIndex is " + characterIndex
+					+ " characterOffset should be " + (referencePosition - offset));
 		}
 		else {
 
