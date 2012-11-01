@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -50,17 +49,17 @@ public class LiveBeansModelGenerator {
 	 * the connection has failed, clients may capture the thrown
 	 * {@link CoreException} and inform the user. This method is not UI safe,
 	 * and may block the UI with network operations. Clients will need to call
-	 * this method from a non-blocking {@link Job}. This method will never
-	 * return a <code>null</code> {@link LiveBeansModel}
+	 * this method from a non-blocking {@link Job}.
 	 * 
 	 * @param connector
 	 * @param appName
-	 * @return A valid {@link LiveBeansModel} model, empty if connection has
-	 * failed
+	 * @return A valid {@link LiveBeansModel} model, or <code>null</code> if
+	 * connection has failed
 	 * @throws CoreException
 	 */
-	public static LiveBeansModel connectToModel(JMXConnector connector, String appName) throws CoreException {
+	public static LiveBeansModel connectToModel(JMXConnector connector, LiveBeansSession session) throws CoreException {
 		try {
+			String appName = session.getApplicationName();
 			if (connector != null && appName != null && appName.length() > 0) {
 				ObjectName name = ObjectName.getInstance("", "application", "/".concat(appName));
 				MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -69,7 +68,7 @@ public class LiveBeansModelGenerator {
 				connection.getObjectInstance(name);
 				LiveBeansViewMBean mbean = MBeanServerInvocationHandler.newProxyInstance(connection, name,
 						LiveBeansViewMBean.class, false);
-				return generateModel(mbean, appName);
+				return generateModel(mbean, session);
 			}
 		}
 		catch (MalformedObjectNameException e) {
@@ -86,7 +85,7 @@ public class LiveBeansModelGenerator {
 			throw new CoreException(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
 					"An error occurred while connecting to server.", e));
 		}
-		return new LiveBeansModel();
+		return null;
 	}
 
 	/**
@@ -94,15 +93,14 @@ public class LiveBeansModelGenerator {
 	 * parameters and will close it when it is finished. If the connection has
 	 * failed, clients may capture the thrown {@link CoreException} and inform
 	 * the user. This method is UI safe, and will not block the UI with network
-	 * operations. It will never return a <code>null</code>
-	 * {@link LiveBeansModel}
+	 * operations.
 	 * 
 	 * @param serviceUrl
 	 * @param username
 	 * @param password
 	 * @param appName
-	 * @return A valid {@link LiveBeansModel} model, empty if connection has
-	 * failed
+	 * @return A valid {@link LiveBeansModel} model, or <code>null</code> if
+	 * connection has failed
 	 * @throws CoreException
 	 */
 	public static LiveBeansModel connectToModel(final String serviceUrl, final String username, final String password,
@@ -117,7 +115,7 @@ public class LiveBeansModelGenerator {
 				JMXConnector connector = null;
 				try {
 					connector = setupConnector(serviceUrl, username, password);
-					result[0] = connectToModel(connector, appName);
+					result[0] = connectToModel(connector, new LiveBeansSession(serviceUrl, username, password, appName));
 				}
 				catch (CoreException e) {
 					status[0] = e;
@@ -150,30 +148,51 @@ public class LiveBeansModelGenerator {
 		catch (InterruptedException e) {
 			// swallowed
 		}
-		return new LiveBeansModel();
+		return null;
 	}
 
-	private static LiveBeansModel generateModel(LiveBeansViewMBean mbean, String appName) throws CoreException {
-		LiveBeansModel model = new LiveBeansModel();
+	private static LiveBeansModel generateModel(LiveBeansViewMBean mbean, LiveBeansSession session)
+			throws CoreException {
 		try {
 			if (mbean != null) {
 				String json = mbean.getSnapshotAsJson();
-				Collection<LiveBean> collection = LiveBeansJsonParser.parse(json, appName);
-				model.getBeans().addAll(collection);
+				LiveBeansModel model = new LiveBeansModel(session);
+				model.addBeans(LiveBeansJsonParser.parse(json, session.getApplicationName()));
 				// add model to collection
 				LiveBeansModelCollection.getInstance().addModel(model);
+				return model;
 			}
 		}
 		catch (JSONException e) {
 			throw new CoreException(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
 					"An error occurred while generating graph model.", e));
 		}
-		return model;
+		return null;
+	}
+
+	/**
+	 * This method will attempt to produce an up to date {@link LiveBeansModel}
+	 * from the connection information in the given model. Will return the
+	 * original model if there is a failure.
+	 * 
+	 * @param originalModel
+	 * @return {@link LiveBeansModel}
+	 * @throws CoreException
+	 */
+	public static LiveBeansModel refreshModel(LiveBeansModel originalModel) throws CoreException {
+		LiveBeansSession session = originalModel.getSession();
+		if (session != null) {
+			LiveBeansModel model = connectToModel(session.getServiceUrl(), session.getUsername(),
+					session.getPassword(), session.getApplicationName());
+			if (model != null) {
+				return model;
+			}
+		}
+		return originalModel;
 	}
 
 	private static JMXConnector setupConnector(String serviceUrl, String username, String password)
 			throws CoreException {
-		JMXConnector connector = null;
 		try {
 			if (serviceUrl != null && serviceUrl.length() > 0) {
 				Map env = new HashMap();
@@ -181,7 +200,7 @@ public class LiveBeansModelGenerator {
 					String[] creds = new String[] { username, password };
 					env.put(JMXConnector.CREDENTIALS, creds);
 				}
-				connector = JMXConnectorFactory.connect(new JMXServiceURL(serviceUrl), env);
+				return JMXConnectorFactory.connect(new JMXServiceURL(serviceUrl), env);
 			}
 		}
 		catch (MalformedURLException e) {
@@ -192,7 +211,7 @@ public class LiveBeansModelGenerator {
 			throw new CoreException(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
 					"An error occurred while connecting to server.", e));
 		}
-		return connector;
+		return null;
 	}
 
 }

@@ -82,7 +82,6 @@ public class LiveBeansGraphView extends ViewPart {
 		viewer.setContentProvider(new LiveBeansGraphContentProvider());
 		viewer.setLabelProvider(new LiveBeansGraphLabelProvider());
 		viewer.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED);
-		viewer.setInput(new LiveBeansModel());
 		viewer.setLayoutAlgorithm(new CompositeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING,
 				new LayoutAlgorithm[] { new DirectedGraphLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING),
 						new HorizontalShift(LayoutStyles.NO_LAYOUT_NODE_RESIZING) }));

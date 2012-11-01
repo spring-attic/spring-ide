@@ -23,8 +23,11 @@ public class LiveBeansModel implements Comparable<LiveBeansModel> {
 
 	private final List<LiveBean> beans;
 
-	public LiveBeansModel() {
-		beans = new ArrayList<LiveBean>();
+	private final LiveBeansSession session;
+
+	public LiveBeansModel(LiveBeansSession session) {
+		this.beans = new ArrayList<LiveBean>();
+		this.session = session;
 	}
 
 	public void addBeans(Collection<LiveBean> beansToAdd) {
@@ -36,14 +39,18 @@ public class LiveBeansModel implements Comparable<LiveBeansModel> {
 	}
 
 	public String getApplicationName() {
-		if (!beans.isEmpty()) {
-			return beans.get(0).getApplicationName();
+		if (session != null) {
+			session.getApplicationName();
 		}
 		return "";
 	}
 
 	public List<LiveBean> getBeans() {
 		return beans;
+	}
+
+	public LiveBeansSession getSession() {
+		return session;
 	}
 
 }
