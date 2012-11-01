@@ -40,7 +40,7 @@ public class LiveBeansModel implements Comparable<LiveBeansModel> {
 
 	public String getApplicationName() {
 		if (session != null) {
-			session.getApplicationName();
+			return session.getApplicationName();
 		}
 		return "";
 	}

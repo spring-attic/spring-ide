@@ -61,7 +61,7 @@ public class LiveBeansGraphView extends ViewPart {
 
 		@Override
 		public boolean isChecked() {
-			return viewer.getInput().equals(model);
+			return model.equals(viewer.getInput());
 		}
 
 	}
