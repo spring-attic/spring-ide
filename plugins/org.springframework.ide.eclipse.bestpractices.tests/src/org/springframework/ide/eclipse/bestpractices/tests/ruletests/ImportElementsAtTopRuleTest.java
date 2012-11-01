@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.bestpractices.tests.ruletests;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.bestpractices.tests.AbstractBeansCoreTestCase;
 import org.springframework.ide.eclipse.internal.bestpractices.springiderules.ImportElementsAtTopRule;
-
 
 /**
  * Test case for the {@link ImportElementsAtTopRule} class.
@@ -25,7 +23,7 @@ import org.springframework.ide.eclipse.internal.bestpractices.springiderules.Imp
  * @author Christian Dupuis
  * @author Steffen Pingel
  */
-public class ImportElementsAtTopRuleTest extends AbstractBeansCoreTestCase {
+public class ImportElementsAtTopRuleTest extends AbstractRuleTest {
 
 	public void testMarkerCreated() throws Exception {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/import-at-top-positive.xml");
@@ -37,6 +35,11 @@ public class ImportElementsAtTopRuleTest extends AbstractBeansCoreTestCase {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/import-at-top-negative.xml");
 		IMarker[] markers = resource.findMarkers(null, false, IResource.DEPTH_ZERO);
 		assertNotHasMarkerWithText(markers, ImportElementsAtTopRule.INFO_MESSAGE);
+	}
+
+	@Override
+	String getRuleId() {
+		return "com.springsource.sts.bestpractices.ImportElementsAtTopRulee";
 	}
 
 }

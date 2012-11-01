@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.bestpractices.tests.ruletests;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.bestpractices.tests.AbstractBeansCoreTestCase;
 import org.springframework.ide.eclipse.internal.bestpractices.springiderules.TooManyBeansInFileRule;
-
 
 /**
  * Test case for the {@link TooManyBeansInFileRule} class.
@@ -25,7 +23,7 @@ import org.springframework.ide.eclipse.internal.bestpractices.springiderules.Too
  * @author Christian Dupuis
  * @author Steffen Pingel
  */
-public class TooManyBeansInFileRuleTest extends AbstractBeansCoreTestCase {
+public class TooManyBeansInFileRuleTest extends AbstractRuleTest {
 
 	public void testMarkerCreated() throws Exception {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/too-many-beans-positive.xml");
@@ -37,6 +35,11 @@ public class TooManyBeansInFileRuleTest extends AbstractBeansCoreTestCase {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/too-many-beans-negative.xml");
 		IMarker[] markers = resource.findMarkers(null, false, IResource.DEPTH_ZERO);
 		assertNotHasMarkerWithText(markers, TooManyBeansInFileRule.INFO_MESSAGE);
+	}
+
+	@Override
+	String getRuleId() {
+		return "com.springsource.sts.bestpractices.TooManyBeansInFileRule";
 	}
 
 }

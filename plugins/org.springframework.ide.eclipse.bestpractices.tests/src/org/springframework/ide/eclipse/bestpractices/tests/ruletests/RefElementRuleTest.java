@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.bestpractices.tests.ruletests;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.bestpractices.tests.AbstractBeansCoreTestCase;
 import org.springframework.ide.eclipse.internal.bestpractices.springiderules.RefElementRule;
-
 
 /**
  * Test case for the {@link RefElementRule} class.
@@ -25,7 +23,7 @@ import org.springframework.ide.eclipse.internal.bestpractices.springiderules.Ref
  * @author Christian Dupuis
  * @author Steffen Pingel
  */
-public class RefElementRuleTest extends AbstractBeansCoreTestCase {
+public class RefElementRuleTest extends AbstractRuleTest {
 
 	public void testMarkerCreated() throws Exception {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/ref-element-positive.xml");
@@ -37,6 +35,11 @@ public class RefElementRuleTest extends AbstractBeansCoreTestCase {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/ref-element-negative.xml");
 		IMarker[] markers = resource.findMarkers(null, false, IResource.DEPTH_ZERO);
 		assertNotHasMarkerWithText(markers, RefElementRule.INFO_MESSAGE);
+	}
+
+	@Override
+	String getRuleId() {
+		return "com.springsource.sts.bestpractices.RefElementRule";
 	}
 
 }

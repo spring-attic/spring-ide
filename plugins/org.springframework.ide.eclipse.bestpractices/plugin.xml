@@ -43,14 +43,14 @@
 	            enabledByDefault="false"
 	            id="com.springsource.sts.bestpractices.RefElementRule"
 	            name="Unnecessary Ref Element"
-	            description="This rule checks for ref elements and suggests that the ref attribute should be used instead for readability" >
+	            description="This rule checks for ref elements and suggests that the ref attribute should be used instead for readability">
 	      </rule>
 	      <rule
 	            class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.ImportElementsAtTopRule"
 	            enabledByDefault="false"
 	            id="com.springsource.sts.bestpractices.ImportElementsAtTopRulee"
 	            name="Import elements at the top"
-	            description="Imports should appear before bean definitions" >
+	            description="Imports should appear before bean definitions">
 	      </rule>
 	      <rule
 	            class="org.springframework.ide.eclipse.internal.bestpractices.springiderules.TooManyBeansInFileRule"
@@ -79,7 +79,7 @@
 	            enabledByDefault="false"
 	            id="com.springsource.sts.bestpractices.UseBeanInheritance"
 	            name="Consider using bean inheritance"
-	            description="Configuration could be simplified using bean inheritance" >
+	            description="Configuration could be simplified using bean inheritance">
 	            <property name="minNumSharedProperties" value="3" description="Minimum number of common properties among beans for inheritance to be suggested" />
 	            <property name="minNumSimilarBeanDefs" value="3" description="Minimum number of similar beans for inheritance to be suggested" />
 	      </rule>
@@ -139,7 +139,7 @@
 	<extension
 		point="org.eclipse.ui.ide.markerResolution">
 		<markerResolutionGenerator
-			markerType="com.springsource.sts.bestpractices.problemmarker"
+			markerType="org.springframework.ide.eclipse.bestpractices.problemmarker"
 			class="org.springframework.ide.eclipse.internal.bestpractices.quickfix.MarkerResolutionGenerator">
 		</markerResolutionGenerator>
 	</extension>

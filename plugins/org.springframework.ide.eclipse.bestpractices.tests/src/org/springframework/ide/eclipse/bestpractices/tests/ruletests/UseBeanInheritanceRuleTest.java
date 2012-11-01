@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.bestpractices.tests.ruletests;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.bestpractices.tests.AbstractBeansCoreTestCase;
 import org.springframework.ide.eclipse.internal.bestpractices.springiderules.RefElementRule;
-
 
 /**
  * Test case for the {@link UseBeanInheritanceRule} class.
@@ -25,7 +23,7 @@ import org.springframework.ide.eclipse.internal.bestpractices.springiderules.Ref
  * @author Christian Dupuis
  * @author Steffen Pingel
  */
-public class UseBeanInheritanceRuleTest extends AbstractBeansCoreTestCase {
+public class UseBeanInheritanceRuleTest extends AbstractRuleTest {
 
 	private static final String SUBSTRING_OF_INFO_MESSAGE = "Consider using bean inheritance";
 
@@ -59,6 +57,11 @@ public class UseBeanInheritanceRuleTest extends AbstractBeansCoreTestCase {
 
 	public void testMarkerNotCreated5() throws Exception {
 		checkMarkerNotCreated("src/bean-inheritance-negative-5.xml");
+	}
+
+	@Override
+	String getRuleId() {
+		return "com.springsource.sts.bestpractices.UseBeanInheritance";
 	}
 
 }

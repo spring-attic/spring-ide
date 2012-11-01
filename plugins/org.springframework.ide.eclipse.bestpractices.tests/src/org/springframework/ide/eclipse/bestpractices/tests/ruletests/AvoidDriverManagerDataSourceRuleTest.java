@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.bestpractices.tests.ruletests;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.bestpractices.tests.AbstractBeansCoreTestCase;
 import org.springframework.ide.eclipse.internal.bestpractices.springiderules.AvoidDriverManagerDataSource;
-
 
 /**
  * Test case for the {@link AvoidDriverManagerDataSource} class.
@@ -25,7 +23,7 @@ import org.springframework.ide.eclipse.internal.bestpractices.springiderules.Avo
  * @author Christian Dupuis
  * @author Steffen Pingel
  */
-public class AvoidDriverManagerDataSourceRuleTest extends AbstractBeansCoreTestCase {
+public class AvoidDriverManagerDataSourceRuleTest extends AbstractRuleTest {
 
 	public void testMarkerCreated() throws Exception {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/drivermanager-positive.xml");
@@ -37,6 +35,11 @@ public class AvoidDriverManagerDataSourceRuleTest extends AbstractBeansCoreTestC
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/drivermanager-negative.xml");
 		IMarker[] markers = resource.findMarkers(null, false, IResource.DEPTH_ZERO);
 		assertNotHasMarkerWithText(markers, AvoidDriverManagerDataSource.INFO_MESSAGE);
+	}
+
+	@Override
+	String getRuleId() {
+		return "com.springsource.sts.bestpractices.AvoidDriverManagerDataSource";
 	}
 
 }

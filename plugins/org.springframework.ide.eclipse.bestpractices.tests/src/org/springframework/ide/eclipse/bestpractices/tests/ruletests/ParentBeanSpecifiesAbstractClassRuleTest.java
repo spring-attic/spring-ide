@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.bestpractices.tests.ruletests;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.bestpractices.tests.AbstractBeansCoreTestCase;
 import org.springframework.ide.eclipse.internal.bestpractices.springiderules.ParentBeanSpecifiesAbstractClassRule;
-
 
 /**
  * Test case for the {@link ParentBeanSpecifiesAbstractClassRule} class.
@@ -25,7 +23,7 @@ import org.springframework.ide.eclipse.internal.bestpractices.springiderules.Par
  * @author Christian Dupuis
  * @author Steffen Pingel
  */
-public class ParentBeanSpecifiesAbstractClassRuleTest extends AbstractBeansCoreTestCase {
+public class ParentBeanSpecifiesAbstractClassRuleTest extends AbstractRuleTest {
 
 	public void testMarkerCreated() throws Exception {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices",
@@ -39,6 +37,11 @@ public class ParentBeanSpecifiesAbstractClassRuleTest extends AbstractBeansCoreT
 				"src/parent-bean-specifies-abstract-negative.xml");
 		IMarker[] markers = resource.findMarkers(null, false, IResource.DEPTH_ZERO);
 		assertNotHasMarkerWithText(markers, ParentBeanSpecifiesAbstractClassRule.INFO_MESSAGE);
+	}
+
+	@Override
+	String getRuleId() {
+		return "com.springsource.sts.bestpractices.ParentBeanSpecifiesAbstractClassRule";
 	}
 
 }

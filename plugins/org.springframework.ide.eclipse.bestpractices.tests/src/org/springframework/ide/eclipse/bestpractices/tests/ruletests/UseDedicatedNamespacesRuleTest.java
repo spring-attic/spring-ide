@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.bestpractices.tests.ruletests;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.bestpractices.tests.AbstractBeansCoreTestCase;
 import org.springframework.ide.eclipse.internal.bestpractices.springiderules.UseDedicatedNamespacesRule;
-
 
 /**
  * Test case for the {@link UseDedicatedNamespacesRule} class.
@@ -25,7 +23,7 @@ import org.springframework.ide.eclipse.internal.bestpractices.springiderules.Use
  * @author Christian Dupuis
  * @author Steffen Pingel
  */
-public class UseDedicatedNamespacesRuleTest extends AbstractBeansCoreTestCase {
+public class UseDedicatedNamespacesRuleTest extends AbstractRuleTest {
 
 	private static final String INFO_MESSAGE = "Consider using namespace syntax";
 
@@ -39,6 +37,11 @@ public class UseDedicatedNamespacesRuleTest extends AbstractBeansCoreTestCase {
 		IResource resource = createPredefinedProjectAndGetResource("bestpractices", "src/namespaces-negative.xml");
 		IMarker[] markers = resource.findMarkers(null, false, IResource.DEPTH_ZERO);
 		assertNotHasMarkerWithText(markers, INFO_MESSAGE);
+	}
+
+	@Override
+	String getRuleId() {
+		return "legacyxmlusage.jndiobjectfactory";
 	}
 
 }
