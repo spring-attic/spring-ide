@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * Test case to test the {@link RequiredPropertyRule}.
@@ -37,7 +38,7 @@ public class RequiredPropertyRuleTest extends BeansCoreTestCase {
 	protected void setUp() throws Exception {
 		resource = createPredefinedProjectAndGetResource("required", "src/ide-825.xml");
 		beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource);
-		Thread.sleep(5000);
+		StsTestUtil.waitForResource(resource);
 	}
 
 	public void testRequiredAnnotationConfiguration() throws Exception {

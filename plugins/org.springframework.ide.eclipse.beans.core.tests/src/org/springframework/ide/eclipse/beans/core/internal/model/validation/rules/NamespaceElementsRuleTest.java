@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 import org.springframework.ide.eclipse.beans.core.tests.MarkerAssertion;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * Test case to test the {@link NamespaceElementsRule}.
@@ -42,7 +43,7 @@ public class NamespaceElementsRuleTest extends BeansCoreTestCase {
 		}
 
 		resource = createPredefinedProjectAndGetResource("validation", "src/sts-385.xml");
-		Thread.sleep(5000);
+		StsTestUtil.waitForResource(resource);
 	}
 
 	public void testNamespaceValidation() throws Exception {

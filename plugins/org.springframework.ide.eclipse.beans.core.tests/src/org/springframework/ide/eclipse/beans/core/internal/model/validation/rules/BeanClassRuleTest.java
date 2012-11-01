@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * Test case to test the {@link BeanClassRule}.
@@ -27,7 +28,7 @@ public class BeanClassRuleTest extends BeansCoreTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		resource = createPredefinedProjectAndGetResource("validation", "src/ide-832.xml");
-		Thread.sleep(5000);
+		StsTestUtil.waitForResource(resource);
 	}
 
 	public void testSpecialTreatmentForOsgiClasses() throws Exception {
