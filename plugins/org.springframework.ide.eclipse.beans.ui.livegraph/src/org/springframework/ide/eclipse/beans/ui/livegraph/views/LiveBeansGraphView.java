@@ -171,9 +171,13 @@ public class LiveBeansGraphView extends ViewPart {
 
 	private void makeActions() {
 		openBeanClassAction = new OpenBeanClassAction();
+		openBeanClassAction.setEnabled(false);
 		viewer.addSelectionChangedListener(openBeanClassAction);
+
 		openBeanDefAction = new OpenBeanDefinitionAction();
+		openBeanDefAction.setEnabled(false);
 		viewer.addSelectionChangedListener(openBeanDefAction);
+
 		connectApplicationAction = new ConnectToApplicationAction(this);
 
 		IActionBars bars = getViewSite().getActionBars();
