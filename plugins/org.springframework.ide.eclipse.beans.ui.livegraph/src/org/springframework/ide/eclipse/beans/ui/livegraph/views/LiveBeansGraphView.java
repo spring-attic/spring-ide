@@ -15,6 +15,7 @@ import java.util.Set;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -35,6 +36,7 @@ import org.eclipse.zest.layouts.algorithms.HorizontalShift;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToApplicationAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanDefinitionAction;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.RefreshApplicationAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelCollection;
 
@@ -55,13 +57,13 @@ public class LiveBeansGraphView extends ViewPart {
 		}
 
 		@Override
-		public void run() {
-			viewer.setInput(model);
+		public boolean isChecked() {
+			return model.equals(viewer.getInput());
 		}
 
 		@Override
-		public boolean isChecked() {
-			return model.equals(viewer.getInput());
+		public void run() {
+			viewer.setInput(model);
 		}
 
 	}
@@ -127,6 +129,16 @@ public class LiveBeansGraphView extends ViewPart {
 		}
 	}
 
+	public LiveBeansModel getInput() {
+		if (viewer != null) {
+			Object obj = viewer.getInput();
+			if (obj instanceof LiveBeansModel) {
+				return (LiveBeansModel) obj;
+			}
+		}
+		return null;
+	}
+
 	private void hookContextMenu() {
 		MenuManager menuManager = new MenuManager();
 		menuManager.setRemoveAllWhenShown(true);
@@ -163,6 +175,10 @@ public class LiveBeansGraphView extends ViewPart {
 		openBeanDefAction = new OpenBeanDefinitionAction();
 		viewer.addSelectionChangedListener(openBeanDefAction);
 		connectApplicationAction = new ConnectToApplicationAction(this);
+
+		IActionBars bars = getViewSite().getActionBars();
+		IToolBarManager toolbar = bars.getToolBarManager();
+		toolbar.add(new RefreshApplicationAction(this));
 	}
 
 	@Override
