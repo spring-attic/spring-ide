@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
@@ -39,6 +40,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
  * @author Christian Dupuis
  * @author Leo Dos Santos
  * @author Steffen Pingel
+ * @author Tomasz Zarna
  * @since 2.3.2
  */
 public class AddAsBeanConfigAction extends Action implements IObjectActionDelegate {
@@ -61,33 +63,8 @@ public class AddAsBeanConfigAction extends Action implements IObjectActionDelega
 				if (object instanceof IFile) {
 					IFile file = (IFile) object;
 					if (file != null) {
-						try {
-							IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
-							InputStream contents = file.getContents();
-							try {
-								IContentType contentType = contentTypeManager.findContentTypeFor(contents,
-										file.getName());
-								if (contentType != null
-										&& contentType.isKindOf(contentTypeManager
-												.getContentType("com.springsource.sts.config.ui.beanConfigFile")) //$NON-NLS-1$
-										&& !BeansCoreUtils.isBeansConfig(file)) {
-									action.setEnabled(true);
-									selectedFiles.add(file);
-								}
-							}
-							finally {
-								contents.close();
-							}
-						}
-						catch (IOException e) {
-							// if something goes wrong, treats the file as non
-							// spring
-							// content type
-						}
-						catch (CoreException e) {
-							// if something goes wrong, treats the file as non
-							// spring
-							// content type
+						if (isBeansProject(file.getProject()) && isBeansConfigFileToBe(file)) {
+							selectedFiles.add(file);
 						}
 					}
 				}
@@ -95,6 +72,38 @@ public class AddAsBeanConfigAction extends Action implements IObjectActionDelega
 		}
 
 		action.setEnabled(selectedFiles.size() > 0);
+	}
+
+	private boolean isBeansProject(IProject project) {
+		return BeansCorePlugin.getModel().getProject(project) != null;
+	}
+
+	private boolean isBeansConfigFileToBe(IFile file) {
+		try {
+			IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
+			InputStream contents = file.getContents();
+			try {
+				IContentType contentType = contentTypeManager.findContentTypeFor(contents, file.getName());
+				if (contentType != null
+						&& contentType.isKindOf(contentTypeManager
+								.getContentType("com.springsource.sts.config.ui.beanConfigFile")) //$NON-NLS-1$
+						&& !BeansCoreUtils.isBeansConfig(file)) {
+					return true;
+				}
+			}
+			finally {
+				contents.close();
+			}
+		}
+		catch (IOException e) {
+			// if something goes wrong, treats the file as non spring content
+			// type
+		}
+		catch (CoreException e) {
+			// if something goes wrong, treats the file as non spring content
+			// type
+		}
+		return false;
 	}
 
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
