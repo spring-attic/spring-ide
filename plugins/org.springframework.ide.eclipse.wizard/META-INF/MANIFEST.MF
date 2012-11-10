@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE Template Project Wizards
 Bundle-SymbolicName: org.springframework.ide.eclipse.wizard;singleton:=true
-Bundle-Version: 3.1.0.qualifier
+Bundle-Version: 3.2.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.wizard.WizardPlugin
 Bundle-Vendor: Spring IDE Developers
 Require-Bundle: org.eclipse.ui,
