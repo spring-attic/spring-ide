@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,9 +39,9 @@ public interface IProjectBuilder extends IProjectContributor {
 	 * <ul>
 	 * <li>{@link IncrementalProjectBuilder.FULL_BUILD} - indicates a full
 	 * build.</li>
-	 * <li>{@link IncrementalProjectBuilder.INCREMENTAL_BUILD}Ê- indicates an
+	 * <li>{@link IncrementalProjectBuilder.INCREMENTAL_BUILD} - indicates an
 	 * incremental build.</li>
-	 * <li>{@link IncrementalProjectBuilder.AUTO_BUILD}Ê- indicates an
+	 * <li>{@link IncrementalProjectBuilder.AUTO_BUILD} - indicates an
 	 * automatically triggered incremental build (autobuilding on).</li>
 	 * </ul>
 	 * @param monitor  a progress monitor, or <code>null</code> if progress
