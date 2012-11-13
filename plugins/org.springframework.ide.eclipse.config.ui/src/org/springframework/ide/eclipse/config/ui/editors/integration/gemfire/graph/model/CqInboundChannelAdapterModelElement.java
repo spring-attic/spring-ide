@@ -11,9 +11,9 @@
 package org.springframework.ide.eclipse.config.ui.editors.integration.gemfire.graph.model;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
+import org.springframework.ide.eclipse.config.core.schemas.IntGemfireSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.model.AbstractConfigGraphDiagram;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractInboundChannelAdapterModelElement;
-
 
 /**
  * @author Leo Dos Santos
@@ -27,6 +27,11 @@ public class CqInboundChannelAdapterModelElement extends AbstractInboundChannelA
 
 	public CqInboundChannelAdapterModelElement(IDOMElement input, AbstractConfigGraphDiagram diagram) {
 		super(input, diagram);
+	}
+
+	@Override
+	public String getInputName() {
+		return IntGemfireSchemaConstants.ELEM_CQ_INBOUND_CHANNEL_ADAPTER;
 	}
 
 }
