@@ -57,15 +57,22 @@ public class SpringDataCompilationParticipant extends CompilationParticipant {
 				super.reconcile(context);
 				return;
 			}
-
-			RepositoryInformation information = new RepositoryInformation(type);
-
-			if (!information.isSpringDataRepository()) {
+			
+			// Skip non-spring-data repositories
+			if (!RepositoryInformation.isSpringDataRepository(type)) {
 				super.reconcile(context);
 				return;
 			}
 
+			// resolve repository information and generate problem markers
+			RepositoryInformation information = new RepositoryInformation(type);
+
 			Class<?> domainClass = information.getManagedDomainClass();
+			if (domainClass == null) {
+				super.reconcile(context);
+				return;
+			}
+
 			List<CategorizedProblem> problems = new ArrayList<CategorizedProblem>();
 
 			for (IMethod method : information.getMethodsToValidate()) {

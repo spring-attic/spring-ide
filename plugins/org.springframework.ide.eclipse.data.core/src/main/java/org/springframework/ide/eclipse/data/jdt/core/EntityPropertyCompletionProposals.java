@@ -97,7 +97,13 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 		}
 
 		IJavaProject project = javaContext.getProject();
-		IType domainType = project.findType(information.getManagedDomainClass().getName());
+		
+		Class<?> managedDomainClass = information.getManagedDomainClass();
+		if (managedDomainClass == null) {
+			return Collections.emptyList();
+		}
+		
+		IType domainType = project.findType(managedDomainClass.getName());
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 		int offset = javaContext.getCoreContext().getOffset();

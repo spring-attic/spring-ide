@@ -11,9 +11,7 @@
 package org.springframework.ide.eclipse.data.jdt.core;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IAnnotation;
@@ -75,8 +73,6 @@ public class RepositoryInformation {
 		}
 	}
 
-	private static final String REPOSITORY_INTERFACE_NAME = "org.springframework.data.repository.Repository";
-
 	private final IType type;
 	private final Class<?> repositoryInterface;
 	private final Class<?> repositoryBaseInterface;
@@ -127,19 +123,34 @@ public class RepositoryInformation {
 		}
 	}
 
-	public boolean isSpringDataRepository() {
-
+	public static boolean isSpringDataRepository(IType type) {
 		try {
-			List<String> interfaces = Arrays.asList(type.getSuperInterfaceNames());
-			if (interfaces.contains(REPOSITORY_INTERFACE_NAME)) {
-				return true;
+			String[] interfaces = type.getSuperInterfaceNames();
+			for (String extendedInterface : interfaces) {
+				if (extendedInterface.startsWith("Repository")) {
+					String[][] resolvedInterfaceTypes = type.resolveType(extendedInterface);
+					for (String[] match : resolvedInterfaceTypes) {
+						if (match != null && match.length == 2) {
+							if ("org.springframework.data.repository".equals(match[0]) &&
+									"Repository".equals(match[1])) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+
+			IAnnotation[] annotations = type.getAnnotations();
+			for (IAnnotation annotation : annotations) {
+				if (annotation.getElementName().equals("org.springframework.data.repository.RepositoryDefinition") ||
+						annotation.getElementName().equals("RepositoryDefinition")) {
+					return true;
+				}
 			}
 		} catch (JavaModelException e) {
-			return false;
 		}
-
-		IAnnotation repoDefinitionAnnotation = type.getAnnotation("RepositoryDefinition");
-		return repoDefinitionAnnotation != null;
+		
+		return false;
 	}
 
 	/**
@@ -166,7 +177,13 @@ public class RepositoryInformation {
 	}
 
 	public Class<?> getManagedDomainClass() {
-		return GenericTypeResolver.resolveTypeArguments(this.repositoryInterface, this.repositoryBaseInterface)[0];
+		Class<?>[] resolvedTypeArguments = GenericTypeResolver.resolveTypeArguments(this.repositoryInterface, this.repositoryBaseInterface);
+		if (resolvedTypeArguments != null && resolvedTypeArguments.length > 0) {
+			return resolvedTypeArguments[0];
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
