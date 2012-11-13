@@ -92,67 +92,6 @@
          </part>
       </actionSetPartAssociation>
    </extension>
-   
-
-   	<extension point="org.eclipse.ui.editorActions">
-		<editorContribution
-			id="org.springframework.ide.eclipse.beans.ui.refactoring.actions"
-			targetID="com.springsource.sts.config.ui.editors.SpringConfigEditor">
-			<menu label="%refactorMenu.label" path="sourceMenuId"
-				id="org.springframework.ide.eclipse.beans.ui.refactoring.menu">
-				<groupMarker name="sourceGroup"></groupMarker>
-			</menu>
-			<action
-				id="org.springframework.ide.eclipse.beans.ui.refactoring.refactorBeanClassAction"
-				label="%renameBeanElement.label"
-				definitionId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
-				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction">
-			</action>
-			<action
-				id="org.springframework.ide.eclipse.beans.ui.refactoring.moveBeanClassAction"
-				label="%moveBeanElement.label"
-				definitionId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.moveBeanClassAction"
-				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansMoveRefactorAction">
-			</action>
-			<action
-				id="org.springframework.ide.eclipse.beans.ui.editor.actions.refactorPropertyElementAction"
-				label="%refactorPropertyElement.label"
-				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RefactorPropertyElementAction">
-			</action>
-		</editorContribution>
-	</extension>
-	
-	<extension point="org.eclipse.ui.popupMenus">
-		<viewerContribution
-			targetID="com.springsource.sts.config.ui.beanConfigFile.source.EditorContext"
-			id="org.springframework.ide.eclipse.beans.ui.editor.actions.context">
-			<menu label="%refactorMenu.label" path="sourcePopupMenuId"
-				id="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu">
-			</menu>
-			<action
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction"
-				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.refactorBeanClassAction"
-				label="%renameBeanElement.label"
-				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
-			</action>
-			<action
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansMoveRefactorAction"
-				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.moveBeanClassAction"
-				label="%moveBeanElement.label"
-				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
-			</action>
-			<action
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RefactorPropertyElementAction"
-				id="org.springframework.ide.eclipse.beans.ui.editor.actions.refactorPropertyElementAction"
-				label="%refactorPropertyElement.label"
-				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
-			</action>
-		</viewerContribution>
-	</extension>
-
 
    <extension
          point="org.eclipse.wst.sse.ui.editorConfiguration">
@@ -358,34 +297,6 @@
       <listener
             class="org.springframework.ide.eclipse.config.ui.editors.BeansModelLoadListener">
       </listener>
-   </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="false"
-            id="com.springsource.sts.config.ui.resource"
-            objectClass="org.eclipse.core.resources.IFile">
-         <enablement>
-         	<not>
-         		<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
-         	</not>
-         </enablement>
-          <menu
-               label="Spring Tools"
-               id="org.springframework.ide.eclipse.ui.tools">
-            <separator
-               name="sts">
-            </separator>
-         </menu> 
-         <action
-               class="org.springframework.ide.eclipse.config.ui.actions.AddAsBeanConfigAction"
-               enablesFor="1"
-               id="com.springsource.sts.config.ui.action.addAsBeanConfig"
-               label="Add Bean Configuration File"
-               menubarPath="org.springframework.ide.eclipse.ui.tools/sts"
-               tooltip="Add file as a bean configuration file">
-         </action>
-      </objectContribution>
    </extension>
    <extension
          point="com.springsource.sts.config.ui.pageAdapters">
@@ -813,6 +724,26 @@
 		<command id="com.springsource.sts.ide.ui.configure.namespaces"
 			defaultHandler="org.springframework.ide.eclipse.config.ui.actions.OpenNamespaceConfigWizardCommandHandler"
 			name="Configure Namespaces..." description="Configure namespaces" />
+      <command
+         description="Add file as a bean configuration file"
+         id="org.springframework.ide.eclipse.config.ui.command.addAsBeanConfig"
+         name="Add Bean Configuration File"
+         defaultHandler="org.springframework.ide.eclipse.config.ui.actions.AddAsBeanConfigAction" />
+      <command
+         defaultHandler="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction"
+         id="org.springframework.ide.eclipse.beans.ui.refactoring.command.refactorBeanClass"
+         name="%renameBeanElement.label">
+      </command>
+      <command
+         defaultHandler="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansMoveRefactorAction"
+         id="org.springframework.ide.eclipse.beans.ui.refactoring.command.moveBeanClass"
+         name="%moveBeanElement.label">
+      </command>
+      <command
+         defaultHandler="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RefactorPropertyElementAction"
+         id="org.springframework.ide.eclipse.beans.ui.refactoring.command.refactorPropertyElement"
+         name="%refactorPropertyElement.label">
+      </command>
 	</extension>
 
 	<extension point="org.eclipse.ui.menus">
@@ -820,6 +751,110 @@
 			locationURI="popup:org.eclipse.wst.sse.ui.StructuredTextEditor.EditorContext?before=additions">
 			<command commandId="com.springsource.sts.ide.ui.configure.namespaces" />
 		</menuContribution>
+      <menuContribution
+         locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+         <menu label="Spring Tools" id="org.springframework.ide.eclipse.ui.tools">
+            <separator name="sts"></separator>
+            <command commandId="org.springframework.ide.eclipse.config.ui.command.addAsBeanConfig">
+               <visibleWhen
+                     checkEnabled="false">
+                  <reference
+                        definitionId="org.springframework.ide.eclipse.config.ui.definition.singleFileNotBean">
+                  </reference>
+               </visibleWhen></command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+         allPopups="false"
+         locationURI="popup:refactorPopupMenuId">
+         <command
+            commandId="org.springframework.ide.eclipse.beans.ui.refactoring.command.refactorPropertyElement">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="org.springframework.ide.eclipse.config.ui.definition.activeSpringConfigEditor">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+            commandId="org.springframework.ide.eclipse.beans.ui.refactoring.command.moveBeanClass">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="org.springframework.ide.eclipse.config.ui.definition.activeSpringConfigEditor">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+            commandId="org.springframework.ide.eclipse.beans.ui.refactoring.command.refactorBeanClass">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="org.springframework.ide.eclipse.config.ui.definition.activeSpringConfigEditor">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=sourceMenuId">
+         <menu
+               label="%refactorMenu.label">
+            <command
+                  commandId="org.springframework.ide.eclipse.beans.ui.refactoring.command.refactorPropertyElement">
+               <visibleWhen
+                     checkEnabled="false">
+                  <reference
+                        definitionId="org.springframework.ide.eclipse.config.ui.definition.activeSpringConfigEditor">
+                  </reference>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.springframework.ide.eclipse.beans.ui.refactoring.command.moveBeanClass">
+               <visibleWhen
+                     checkEnabled="false">
+                  <reference
+                        definitionId="org.springframework.ide.eclipse.config.ui.definition.activeSpringConfigEditor">
+                  </reference>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.springframework.ide.eclipse.beans.ui.refactoring.command.refactorBeanClass">
+               <visibleWhen
+                     checkEnabled="false">
+                  <reference
+                        definitionId="org.springframework.ide.eclipse.config.ui.definition.activeSpringConfigEditor">
+                  </reference>
+               </visibleWhen>
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition id="org.springframework.ide.eclipse.config.ui.definition.activeSpringConfigEditor">
+         <with variable="activePartId">
+            <equals
+               value="com.springsource.sts.config.ui.editors.SpringConfigEditor">
+            </equals>
+         </with>
+      </definition>
+      <definition id="org.springframework.ide.eclipse.config.ui.definition.singleFileNotBean">
+         <with variable="activeMenuSelection">
+            <iterate ifEmpty="false">
+               <adapt type="org.eclipse.core.resources.IResource">
+                  <instanceof
+                     value="org.eclipse.core.resources.IFile">
+                  </instanceof>
+                  <not>
+                     <test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+                  </not>
+               </adapt>
+            </iterate>
+            <count
+               value="1">
+            </count>
+         </with>
+      </definition>
 	</extension>
-   
 </plugin>
