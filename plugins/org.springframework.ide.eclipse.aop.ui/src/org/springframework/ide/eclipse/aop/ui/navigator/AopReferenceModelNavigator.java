@@ -298,10 +298,11 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 				&& isLinkingEnabled()) {
 			refreshViewer(getCommonViewer(), calculateRootElement(element,
 					showBeansRefsForFileEnabled), element);
+
+			lastElement = element;
+			lastSelection = selection;
+			lastWorkbenchPart = part;
 		}
-		lastElement = element;
-		lastSelection = selection;
-		lastWorkbenchPart = part;
 	}
 
 	/**
