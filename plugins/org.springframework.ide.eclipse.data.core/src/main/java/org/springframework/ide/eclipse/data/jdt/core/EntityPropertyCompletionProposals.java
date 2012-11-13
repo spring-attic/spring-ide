@@ -116,8 +116,10 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 
 		IType type = part.isRoot() ? domainType : project.findType(part.getPathLeaf().getType().getName());
 
-		proposals.addAll(getProposalsFor(type, part, offset));
-		proposals.addAll(keywordProposalsProvider.getProposalsFor(type, offset, part));
+		if (type != null) {
+			proposals.addAll(getProposalsFor(type, part, offset));
+			proposals.addAll(keywordProposalsProvider.getProposalsFor(type, offset, part));
+		}
 
 		return proposals;
 	}
