@@ -83,6 +83,10 @@ public class SpringDataCompilationParticipant extends CompilationParticipant {
 
 		} catch (JavaModelException e) {
 			SpringCore.log(e);
+		} catch (Exception e) {
+			SpringCore.log(e);
+		} catch (Error e) {
+			SpringCore.log(e);
 		}
 
 		super.reconcile(context);
