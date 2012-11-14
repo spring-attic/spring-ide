@@ -58,6 +58,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -66,8 +67,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -124,7 +125,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 	private Label descriptionLabel;
 
-	private Text descriptionText;
+	private StyledText descriptionText;
 
 	private String projectNameToken;
 
@@ -319,7 +320,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		descriptionLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		descriptionLabel.setVisible(false);
 
-		descriptionText = new Text(descriptionComposite, SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
+		descriptionText = new StyledText(descriptionComposite, SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
+		descriptionText.setAlwaysShowScrollBars(false);
+		descriptionText.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		GridData descriptionData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		descriptionData.widthHint = 200;
 		descriptionData.heightHint = 80;
