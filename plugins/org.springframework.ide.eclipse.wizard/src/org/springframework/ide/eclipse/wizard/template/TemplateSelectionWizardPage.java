@@ -322,7 +322,11 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 		descriptionText = new StyledText(descriptionComposite, SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
 		descriptionText.setAlwaysShowScrollBars(false);
-		descriptionText.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		Display display = Display.getCurrent();
+		if (display != null) {
+			descriptionText.setBackground(display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		}
+
 		GridData descriptionData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		descriptionData.widthHint = 200;
 		descriptionData.heightHint = 80;
