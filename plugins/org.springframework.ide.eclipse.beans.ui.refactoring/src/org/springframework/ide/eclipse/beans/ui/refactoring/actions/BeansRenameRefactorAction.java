@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.refactoring.actions;
 
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -25,7 +27,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -47,6 +48,7 @@ import org.w3c.dom.Element;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @author Martin Lippert
+ * @author Tomasz Zarna
  * @since 2.0
  */
 @SuppressWarnings("restriction")
@@ -96,14 +98,14 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 	}
 
 	@Override
-	public void run(IAction action) {
-		IDocument document = getTextEditor().getDocumentProvider().getDocument(
-				getTextEditor().getEditorInput());
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IDocument document = getTextEditor(event).getDocumentProvider().getDocument(
+				getTextEditor(event).getEditorInput());
 		if (document != null) {
 			// get current text selection
-			ITextSelection textSelection = getCurrentSelection();
+			ITextSelection textSelection = getCurrentSelection(event);
 			if (textSelection.isEmpty())
-				return;
+				return null;
 
 			Object obj = ((IStructuredSelection) textSelection)
 					.getFirstElement();
@@ -141,17 +143,18 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 					refactoring.setNode((IDOMNode) node);
 					refactoring.setBeanId(BeansEditorUtils.getAttribute(node,
 							"id"));
-					refactoring.setFile(getConfigFile());
+					refactoring.setFile(getConfigFile(event));
 					refactoring.setOffset(textSelection.getOffset());
 					RenameIdRefactoringWizard wizard = new RenameIdRefactoringWizard(
 							refactoring, "Rename " + idType.getType() + " id");
 					run(wizard, BeansUIPlugin.getActiveWorkbenchShell(),
 							"Rename " + idType.getType() + " id");
 				} else {
-					processAction(document, textSelection);
+					processAction(event, document, textSelection);
 				}
 			}
 		}
+		return null;
 	}
 
 	@Override

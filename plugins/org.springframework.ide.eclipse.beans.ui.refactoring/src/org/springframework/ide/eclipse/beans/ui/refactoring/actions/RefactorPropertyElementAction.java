@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Spring IDE Developers
+ * Copyright (c) 2006, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,20 +13,17 @@ package org.springframework.ide.eclipse.beans.ui.refactoring.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.action.IAction;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.xml.core.internal.document.TextImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.format.FormatProcessorXML;
-import org.springframework.ide.eclipse.beans.ui.actions.AbstractBeansConfigEditorAction;
+import org.springframework.ide.eclipse.beans.ui.actions.AbstractBeansConfigEditorHandler;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -38,10 +35,11 @@ import org.w3c.dom.NodeList;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @author Martin Lippert
+ * @author Tomasz Zarna
  */
 @SuppressWarnings("restriction")
 public class RefactorPropertyElementAction extends
-		AbstractBeansConfigEditorAction {
+		AbstractBeansConfigEditorHandler {
 
 	void processAction(IDocument document, ITextSelection textSelection) {
 		IStructuredModel model = StructuredModelManager.getModelManager()
@@ -167,90 +165,23 @@ public class RefactorPropertyElementAction extends
 		elem.normalize();
 	}
 
-	@Override
-	public void run(IAction action) {
-		IDocument document = getTextEditor().getDocumentProvider().getDocument(
-				getTextEditor().getEditorInput());
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IDocument document = getTextEditor(event).getDocumentProvider().getDocument(
+				getTextEditor(event).getEditorInput());
 		if (document != null) {
 			// get current text selection
-			ITextSelection textSelection = getCurrentSelection();
+			ITextSelection textSelection = getCurrentSelection(event);
 			if (textSelection.isEmpty())
-				return;
+				return null;
 
 			processAction(document, textSelection);
 		}
-	}
-
-	private ITextSelection getCurrentSelection() {
-		ISelectionProvider provider = getTextEditor().getSelectionProvider();
-		if (provider != null) {
-			ISelection selection = provider.getSelection();
-			if (selection instanceof ITextSelection)
-				return (ITextSelection) selection;
-		}
-		return TextSelection.emptySelection();
+		return null;
 	}
 
 	private void formatElement(Element element) {
 		FormatProcessorXML formatProcessor = new FormatProcessorXML();
 		formatProcessor.getFormatPreferences().setClearAllBlankLines(true);
 		formatProcessor.formatNode(element);
-	}
-
-	/**
-	 * The <code>ActionDelegate</code> implementation of this
-	 * <code>IActionDelegate</code> method does nothing. Subclasses may
-	 * reimplement.
-	 */
-	@Override
-	public void selectionChanged(IAction action, ISelection selection) {
-//		boolean enabled = false;
-//		if (selection != null) {
-//			if (selection instanceof IStructuredSelection) {
-//				IStructuredSelection structSelection = (IStructuredSelection) selection;
-//
-//				Object obj = structSelection.getFirstElement();
-//				
-//				Element elem = null;
-//				if (obj instanceof Element) {
-//					elem = (Element) obj;
-//				}
-//				else if (obj instanceof Attr) {
-//					elem = ((Attr) obj).getOwnerElement();
-//				}
-//				
-//				if (elem != null) {
-//					if ("property".equals(elem.getTagName())
-//							|| "constructor-arg".equals(elem.getTagName())) {
-//						NodeList children = elem.getChildNodes();
-//
-//						for (int i = 0; i < children.getLength(); i++) {
-//							Node child = children.item(i);
-//							if (child != null) {
-//								if ("value".equals(child.getNodeName())
-//										|| "ref".equals(child.getNodeName())) {
-//									enabled = true;
-//								}
-//							}
-//							else {
-//								enabled = true;
-//							}
-//						}
-//
-//						if (children.getLength() == 0) {
-//							enabled = true;
-//						}
-//					}
-//					else if (("ref".equals(elem.getTagName()) || "value"
-//							.equals(elem.getTagName()))
-//							&& ("property".equals(elem.getParentNode()
-//									.getNodeName()) || "constructor-arg"
-//									.equals(elem.getParentNode().getNodeName()))) {
-//						enabled = true;
-//					}
-//				}
-//			}
-//		}
-//		action.setEnabled(enabled);
 	}
 }
