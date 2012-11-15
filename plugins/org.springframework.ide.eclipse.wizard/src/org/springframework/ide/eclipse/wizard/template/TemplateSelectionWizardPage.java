@@ -321,7 +321,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		descriptionLabel.setVisible(false);
 
 		descriptionText = new StyledText(descriptionComposite, SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
-		descriptionText.setAlwaysShowScrollBars(false);
+		// descriptionText.setAlwaysShowScrollBars(false);
 		Display display = Display.getCurrent();
 		if (display != null) {
 			descriptionText.setBackground(display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
