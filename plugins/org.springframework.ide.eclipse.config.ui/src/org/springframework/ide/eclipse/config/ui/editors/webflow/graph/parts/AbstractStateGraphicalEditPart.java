@@ -20,11 +20,9 @@ import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
 import org.springframework.ide.eclipse.config.graph.parts.SimpleActivityPart;
-import org.springframework.ide.eclipse.config.graph.policies.StructuredActivityLayoutEditPolicy;
 import org.springframework.ide.eclipse.config.ui.editors.webflow.graph.StateDirectEditPolicy;
 import org.springframework.ide.eclipse.config.ui.editors.webflow.graph.StateNodeEditPolicy;
 import org.springframework.ide.eclipse.config.ui.editors.webflow.graph.model.AbstractStateModelElement;
-
 
 /**
  * @author Leo Dos Santos
@@ -47,7 +45,6 @@ public abstract class AbstractStateGraphicalEditPart extends SimpleActivityPart 
 		super.createEditPolicies();
 		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, new StateDirectEditPolicy());
 		installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE, new StateNodeEditPolicy());
-		installEditPolicy(EditPolicy.LAYOUT_ROLE, new StructuredActivityLayoutEditPolicy());
 	}
 
 	@Override
