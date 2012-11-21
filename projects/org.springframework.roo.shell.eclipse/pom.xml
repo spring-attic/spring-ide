@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.roo</groupId>
         <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
-        <version>1.2.0.RELEASE</version>
+        <version>1.2.1.RELEASE</version>
 		<relativePath>../../../spring-roo/osgi-roo-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.shell.eclipse</artifactId>
@@ -69,6 +69,6 @@
       </plugins>
     </build>
     <properties>
-    	<roo.version>1.2.0.RELEASE</roo.version>
+    	<roo.version>1.2.1.RELEASE</roo.version>
     </properties>
 </project>

@@ -31,6 +31,7 @@ import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -46,7 +47,6 @@ import org.springframework.roo.felix.BundleSymbolicName;
 import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.shell.Shell;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
@@ -150,7 +150,7 @@ public class AddOnRooBotEclipseOperationsImpl implements AddOnRooBotEclipseOpera
 		Bundle bundle = ((RooAddOnVersion)pluginVersion).getBundle();
 		BundleSymbolicName bsn = new BundleSymbolicName(bundle.getSymbolicName());
 		synchronized (mutex) {
-			Assert.notNull(bsn, "Bundle symbolic name required");
+			Validate.notNull(bsn, "Bundle symbolic name required");
 			boolean success = false;
 			int count = countBundles();
 			success = shell.executeCommand("osgi uninstall --bundleSymbolicName " + bsn.getKey());
@@ -479,7 +479,7 @@ public class AddOnRooBotEclipseOperationsImpl implements AddOnRooBotEclipseOpera
 			} else {
 				doc = db.parse(obrUrl.openStream());
 			}
-			Assert.notNull(doc, "RooBot was unable to parse the repository document of this add-on");
+			Validate.notNull(doc, "RooBot was unable to parse the repository document of this add-on");
 			for (Element resource: XmlUtils.findElements("resource", doc.getDocumentElement())) {
 				if (resource.hasAttribute("uri")) {
 					if (!resource.getAttribute("uri").startsWith("httppgp")) {
