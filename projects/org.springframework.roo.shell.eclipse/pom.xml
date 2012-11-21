@@ -66,8 +66,20 @@
             </instructions>
           </configuration>
         </plugin>
+        <plugin>
+  			<!-- skip execution of the format goal from the parent build -->
+  			<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+  			<artifactId>maven-java-formatter-plugin</artifactId>
+  			<configuration>
+  				<configFile>../../../spring-roo/deployment-support/eclipse-formatter-config.xml</configFile>
+  				<excludes>
+  					<exclude>**/*.java</exclude>
+  				</excludes>
+  			</configuration>
+  		</plugin>
       </plugins>
     </build>
+    
     <properties>
     	<roo.version>1.2.1.RELEASE</roo.version>
     </properties>
