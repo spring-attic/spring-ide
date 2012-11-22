@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.quickfix.validator.helper.BeanHelper;
 import org.springframework.ide.eclipse.quickfix.validator.helper.BeanPropertyHelper;
 import org.springframework.ide.eclipse.quickfix.validator.helper.BeansValidationContextHelper;
 
-
 /**
  * Validates property nodes of a bean configuration
  * @author Terry Denney
@@ -52,10 +51,14 @@ public class PropertyValidator extends BeanValidator {
 
 		ValidationRuleDefinition depracationRuleDefinition = getValidationRule(project, BeanDeprecationRule.class);
 		BeanDeprecationRule deprecationRule = (BeanDeprecationRule) (depracationRuleDefinition != null ? depracationRuleDefinition
-				.getRule()
-				: null);
+				.getRule() : null);
 
-		BeanHelper parentBean = new BeanHelper(getParentBeanNode(parent), file, project);
+		IDOMNode parentBeanNode = getParentBeanNode(parent);
+		if (parentBeanNode == null) {
+			return false;
+		}
+
+		BeanHelper parentBean = new BeanHelper(parentBeanNode, file, project);
 
 		BeansValidationContextHelper context = new BeansValidationContextHelper(attribute, parent, contextElement,
 				project, reporter, validator, QuickfixProcessorFactory.PROPERTY, false, reportError, config);
