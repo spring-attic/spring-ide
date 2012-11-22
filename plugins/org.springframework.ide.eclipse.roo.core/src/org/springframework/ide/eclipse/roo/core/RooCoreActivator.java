@@ -38,6 +38,7 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  * The activator class controls the plug-in life cycle
  * @author Christian Dupuis
  * @author Steffen Pingel
+ * @author Leo Dos Santos
  */
 public class RooCoreActivator extends AbstractUIPlugin {
 
@@ -110,9 +111,12 @@ public class RooCoreActivator extends AbstractUIPlugin {
 		
 		// Create our own forwarding UrlInputStreamService
 		UrlInputStreamService inputStreamService = new UrlInputStreamService() {
-			
 			public InputStream openConnection(URL url) throws IOException {
 				return url.openStream();
+			}
+
+			public String getUrlCannotBeOpenedMessage(URL url) {
+				return "Cannot open URL " + url.toString();
 			}
 		};
 		
