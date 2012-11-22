@@ -18,18 +18,21 @@ public enum RenameIdType {
 	
 	BEAN(	"Bean",
 			"bean",
+			"http://www.springframework.org/schema/beans",
 			new String[] { "depends-on", "bean", "local", "parent", "ref", "key-ref", "value-ref" },
 			new String[] { "p:", "c:" },
 			new String[] { "-ref", "-ref" }),
 
 	ADVICE(	"Advice",
-			"tx:advice",
+			"advice",
+			"http://www.springframework.org/schema/tx",
 			new String[] {"advice-ref"},
 			new String[0],
 			new String[0]),
 
 	POINTCUT(	"Pointcut",
-				"aop:pointcut",
+				"pointcut",
+				"http://www.springframework.org/schema/aop",
 				new String[] {"pointcut-ref"},
 				new String[0],
 				new String[0]);
@@ -37,14 +40,16 @@ public enum RenameIdType {
 
 	private final String type;
 	private final String elementName;
+	private final String elementNamespaceURI;
 	private final String[] referenceAttributeNames;
 	private final String[] referenceAttributeStarts;
 	private final String[] referenceAttributeEnds;
 
-	private RenameIdType(String type, String elementName, String[] referenceAttributeNames,
+	private RenameIdType(String type, String elementName, String elementNamespaceURI, String[] referenceAttributeNames,
 			String[] referenceAttributeStarts, String[] referenceAttributeEnds) {
 		this.type = type;
 		this.elementName = elementName;
+		this.elementNamespaceURI = elementNamespaceURI;
 		this.referenceAttributeNames = referenceAttributeNames;
 		this.referenceAttributeStarts = referenceAttributeStarts;
 		this.referenceAttributeEnds = referenceAttributeEnds;
@@ -58,6 +63,10 @@ public enum RenameIdType {
 		return elementName;
 	}
 
+	public String getElementNamespaceURI() {
+		return elementNamespaceURI;
+	}
+	
 	public String[] getReferenceAttributeNames() {
 		return this.referenceAttributeNames;
 	}
@@ -69,5 +78,5 @@ public enum RenameIdType {
 	public String[] getReferenceAttributeEnds() {
 		return referenceAttributeEnds;
 	}
-	
+
 }

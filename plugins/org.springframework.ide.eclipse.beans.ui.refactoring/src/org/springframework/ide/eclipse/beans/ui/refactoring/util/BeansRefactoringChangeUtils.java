@@ -274,7 +274,7 @@ public class BeansRefactoringChangeUtils {
 			}
 			IDOMDocument document = ((DOMModelImpl) model).getDocument();
 			MultiTextEdit multiEdit = new MultiTextEdit();
-			NodeList nodes = document.getElementsByTagName(descriptor.getElementName());
+			NodeList nodes = document.getElementsByTagNameNS(descriptor.getElementNamespaceURI(), descriptor.getElementName());
 			for (int i = 0; i < nodes.getLength(); i++) {
 				TextEdit edit = createRenameBeanIdTextEdit(nodes.item(i), oldBeanId, newBeanId);
 				if (edit != null) {

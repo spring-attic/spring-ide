@@ -126,13 +126,13 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 				// start Spring IDE's own bean id refactoring
 				RenameIdType idType = null;
 
-				if ("bean".equals(node.getLocalName())
+				if ("bean".equals(node.getLocalName()) && "http://www.springframework.org/schema/beans".equals(node.getNamespaceURI())
 						&& "id".equals(attributeName)) {
 					idType = RenameIdType.BEAN;
-				} else if ("tx:advice".equals(node.getNodeName())
+				} else if ("advice".equals(node.getLocalName()) && "http://www.springframework.org/schema/tx".equals(node.getNamespaceURI())
 						&& "id".equals(attributeName)) {
 					idType = RenameIdType.ADVICE;
-				} else if ("aop:pointcut".equals(node.getNodeName())
+				} else if ("pointcut".equals(node.getLocalName()) && "http://www.springframework.org/schema/aop".equals(node.getNamespaceURI())
 						&& "id".equals(attributeName)) {
 					idType = RenameIdType.POINTCUT;
 				}
