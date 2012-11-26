@@ -28,14 +28,16 @@ import org.springframework.ide.eclipse.data.SpringDataUtils;
  * @author Oliver Gierke
  */
 public class RepositoriesModelLabelDecorator extends BeansModelLabelDecorator {
+	
+	@Override
+	public void decorate(Object element, IDecoration decoration) {
+		if (element instanceof IJavaElement) {
+			decorateJavaElement(((IJavaElement) element), decoration);
+		}
+	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator#decorateJavaElement(org.eclipse.jdt.core.IJavaElement, org.eclipse.jface.viewers.IDecoration)
-	 */
 	@Override
 	protected void decorateJavaElement(IJavaElement element, IDecoration decoration) {
-		
 		IJavaProject javaProject = element.getJavaProject();
 		if (javaProject != null) {
 			int type = element.getElementType();
@@ -67,7 +69,6 @@ public class RepositoriesModelLabelDecorator extends BeansModelLabelDecorator {
 				// ignore
 			}
 		}
-
-		super.decorateJavaElement(element, decoration);
 	}
+	
 }
