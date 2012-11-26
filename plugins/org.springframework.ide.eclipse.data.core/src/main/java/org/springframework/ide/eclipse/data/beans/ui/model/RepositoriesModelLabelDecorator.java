@@ -48,7 +48,7 @@ public class RepositoriesModelLabelDecorator extends BeansModelLabelDecorator {
 					// Decorate Java class file
 					IType javaType = ((IClassFile) element).getType();
 	
-					if (SpringDataUtils.hasRepositoryBeanFor(project, javaType)) {
+					if (javaType.isInterface() && SpringDataUtils.hasRepositoryBeanFor(project, javaType)) {
 						decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 					}
 	
@@ -56,7 +56,7 @@ public class RepositoriesModelLabelDecorator extends BeansModelLabelDecorator {
 	
 					// Decorate Java source file
 					for (IType javaType : ((ICompilationUnit) element).getTypes()) {
-						if (SpringDataUtils.hasRepositoryBeanFor(project, javaType)) {
+						if (javaType.isInterface() && SpringDataUtils.hasRepositoryBeanFor(project, javaType)) {
 							decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 							break;
 						}
