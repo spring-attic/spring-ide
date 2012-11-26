@@ -53,7 +53,6 @@ public abstract class SpringDataUtils {
 	 * @return
 	 */
 	public static String getRepositoryInterfaceName(IBean bean) {
-
 		IBeansTypedString property = (IBeansTypedString) bean.getProperty("repositoryInterface").getValue();
 		return property.getString();
 	}
@@ -64,7 +63,6 @@ public abstract class SpringDataUtils {
 	 * @return
 	 */
 	public static Set<String> getRepositoryBeanIds(IProject project) {
-
 		Set<String> result = new HashSet<String>();
 
 		for (IBean bean : getRepositoryBeansFor(project)) {
@@ -119,7 +117,6 @@ public abstract class SpringDataUtils {
 	 * @return
 	 */
 	public static Set<IBean> getRepositoryBeansFor(IProject project) {
-
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(project);
 
 		if (beansProject == null) {
@@ -129,8 +126,7 @@ public abstract class SpringDataUtils {
 		Set<IBean> result = new HashSet<IBean>();
 
 		for (IBean bean : BeansModelUtils.getBeans(beansProject)) {
-			IType type = JdtUtils.getJavaType(project, bean.getClassName());
-			if (JdtUtils.doesImplement(project, type, getFactoryName())) {
+			if (bean.getProperty("repositoryInterface") != null) {
 				result.add(bean);
 			}
 		}
