@@ -15,6 +15,7 @@
  */
 package org.springframework.ide.eclipse.data.metadata.ui;
 
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
@@ -34,7 +35,7 @@ public class RepositoriesBeanMetadata implements IBeanMetadata {
 
 	private static final long serialVersionUID = 5730990435174474138L;
 
-	private final IBean bean;
+	private final String beanId;
 	private final IModelSourceLocation location;
 
 	/**
@@ -49,7 +50,7 @@ public class RepositoriesBeanMetadata implements IBeanMetadata {
 		Assert.notNull(bean);
 		Assert.isTrue(SpringDataUtils.isRepositoryBean(bean));
 
-		this.bean = bean;
+		this.beanId = bean.getElementID();
 		this.location = location;
 	}
 
@@ -58,7 +59,7 @@ public class RepositoriesBeanMetadata implements IBeanMetadata {
 	 * @see org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata#getValueAsText()
 	 */
 	public String getValueAsText() {
-		return SpringDataUtils.asText(bean);
+		return SpringDataUtils.asText(getValue());
 	}
 
 	/*
@@ -66,7 +67,7 @@ public class RepositoriesBeanMetadata implements IBeanMetadata {
 	 * @see org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata#getHandleIdentifier()
 	 */
 	public String getHandleIdentifier() {
-		return bean.getElementID();
+		return beanId;
 	}
 
 	/*
@@ -82,7 +83,7 @@ public class RepositoriesBeanMetadata implements IBeanMetadata {
 	 * @see org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata#getValue()
 	 */
 	public IBean getValue() {
-		return bean;
+		return (IBean) BeansCorePlugin.getModel().getElement(beanId);
 	}
 
 	/*
@@ -110,7 +111,7 @@ public class RepositoriesBeanMetadata implements IBeanMetadata {
 
 		RepositoriesBeanMetadata that = (RepositoriesBeanMetadata) obj;
 
-		return ObjectUtils.nullSafeEquals(this.bean, that.bean) && ObjectUtils.nullSafeEquals(this.location, that.location);
+		return ObjectUtils.nullSafeEquals(this.beanId, that.beanId) && ObjectUtils.nullSafeEquals(this.location, that.location);
 	}
 
 	/*
@@ -119,6 +120,6 @@ public class RepositoriesBeanMetadata implements IBeanMetadata {
 	 */
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(bean) + ObjectUtils.nullSafeHashCode(location);
+		return ObjectUtils.nullSafeHashCode(beanId) + ObjectUtils.nullSafeHashCode(location);
 	}
 }
