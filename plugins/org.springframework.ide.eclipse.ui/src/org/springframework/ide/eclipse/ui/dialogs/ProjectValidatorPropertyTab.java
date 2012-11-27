@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
@@ -186,7 +187,7 @@ public class ProjectValidatorPropertyTab {
 		@Override
 		public void widgetSelected(SelectionEvent e) {
 			if ((Button) e.widget == resetButton) {
-				initializeCheckedState(null);
+				initializeCheckedState(null, true);
 			}
 		}
 	};
@@ -335,7 +336,7 @@ public class ProjectValidatorPropertyTab {
 		resetButton.setLayoutData(data);
 		resetButton.addSelectionListener(resetListener);
 
-		initializeCheckedState(project);
+		initializeCheckedState(project, false);
 
 		return composite;
 	}
@@ -386,17 +387,17 @@ public class ProjectValidatorPropertyTab {
 		}
 	}
 
-	private List<Object> getEnabledProjectBuilderDefinitions(IProject project) {
+	private List<PersistablePreferenceObjectSupport> getEnabledProjectBuilderDefinitions(IProject project, boolean getDefault) {
 		List<ValidatorDefinition> validatorDefinitions = this.validatorDefinitions;
-		List<Object> filteredValidatorDefinitions = new ArrayList<Object>();
+		List<PersistablePreferenceObjectSupport> filteredValidatorDefinitions = new ArrayList<PersistablePreferenceObjectSupport>();
 		for (ValidatorDefinition builderDefinition : validatorDefinitions) {
-			if (builderDefinition.isEnabled(project)) {
+			if (getDefault ? builderDefinition.isEnabledByDefault(): builderDefinition.isEnabled(project)) {
 				filteredValidatorDefinitions.add(builderDefinition);
 			}
 		}
 		for (List<ValidationRuleDefinition> defs : this.validationRuleDefinitions.values()) {
 			for (ValidationRuleDefinition def : defs) {
-				if (def.isEnabled(project)) {
+				if (getDefault ? def.isEnabledByDefault(): def.isEnabled(project)) {
 					filteredValidatorDefinitions.add(def);
 				}
 			}
@@ -426,11 +427,11 @@ public class ProjectValidatorPropertyTab {
 		}
 	}
 
-	private void initializeCheckedState(final IProject project) {
+	private void initializeCheckedState(final IProject project, final boolean getDefault) {
 
 		BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
 			public void run() {
-				List items = getEnabledProjectBuilderDefinitions(project);
+				List items = getEnabledProjectBuilderDefinitions(project, getDefault);
 				validatorViewer.setCheckedElements(items.toArray());
 
 				for (int i = 0; i < items.size(); i++) {

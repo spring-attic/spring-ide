@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 Spring IDE Developers
+ * Copyright (c) 2007. 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IProject;
  * {@link #setEnabled(boolean,IProject)} the preference is stored in the
  * project preferences or under global workspace scope.
  * @author Christian Dupuis
+ * @author Tomasz Zarna
  * @since 2.0.2
  */
 public abstract class PersistablePreferenceObjectSupport {
@@ -53,6 +54,17 @@ public abstract class PersistablePreferenceObjectSupport {
 			return SpringCore.getDefault().getPluginPreferences().getBoolean(
 					getPreferenceIdForPluginPreference());
 		}
+	}
+
+	/**
+	 * Checks if the current preference is enabled by default.
+	 *
+	 * @return <code>true</code> if the preference is enabled by default, <code>false</code> otherwise
+	 *
+	 * @since 3.2.0
+	 */
+	public boolean isEnabledByDefault() {
+		return isEnabledByDefault;
 	}
 
 	/**
