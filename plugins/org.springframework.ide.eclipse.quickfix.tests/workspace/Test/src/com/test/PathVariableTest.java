@@ -109,4 +109,22 @@ public class PathVariableTest {
 		
 	}
 	
+	@RequestMapping("{user.+}")
+	private class VariableWithRegexPathVariable {
+		
+		public void variableNoPathVariable(@PathVariable int userId) {
+			
+		}
+		
+	}
+	
+	@RequestMapping("{userId.+}")
+	private class VariableWithWrongRegexPathVariable {
+		
+		public void variableNoPathVariable(@PathVariable int userId) {
+			
+		}
+		
+	}
+	
 }

@@ -23,7 +23,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.springframework.ide.eclipse.quickfix.jdt.processors.PathVariableAnnotationQuickAssistProcessor;
 import org.springframework.ide.eclipse.quickfix.jdt.proposals.AddPathVariableCompletionProposal;
 
-
 /**
  * @author Terry Denney
  * @since 2.6
@@ -209,6 +208,27 @@ public class PathVariableAnnotationQuickAssistProcessorTest extends AnnotationPr
 				proposals.get(0) instanceof AddPathVariableCompletionProposal);
 		assertTrue("AddPathVariableCompletionProposal expected",
 				proposals.get(1) instanceof AddPathVariableCompletionProposal);
+	}
+
+	public void testTypeVariableWithRegexPathVariable() throws JavaModelException {
+		IType t = type.getType("VariableWithRegexPathVariable");
+		ISourceRange sourceRange = t.getSourceRange();
+		TypeDeclaration typeDecl = (TypeDeclaration) getASTNode(sourceRange, t, viewer);
+		IInvocationContext context = getContext(sourceRange, t, typeDecl);
+
+		List<IJavaCompletionProposal> proposals = processor.getAssists(typeDecl.getName(), context);
+		assertTrue("No proposals expected", proposals.isEmpty());
+	}
+
+	// expects warning but no AddPathVariableCompletionProposal
+	public void testType1VariableWithWrongRegexPathVariables() throws JavaModelException {
+		IType t = type.getType("VariableWithWrongRegexPathVariable");
+		ISourceRange sourceRange = t.getSourceRange();
+		TypeDeclaration typeDecl = (TypeDeclaration) getASTNode(sourceRange, t, viewer);
+		IInvocationContext context = getContext(sourceRange, t, typeDecl);
+
+		List<IJavaCompletionProposal> proposals = processor.getAssists(typeDecl.getName(), context);
+		assertEquals("1 proposal expected", 0, proposals.size());
 	}
 
 }

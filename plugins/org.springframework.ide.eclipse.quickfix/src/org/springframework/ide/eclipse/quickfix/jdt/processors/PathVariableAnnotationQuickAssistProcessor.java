@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -31,7 +32,6 @@ import org.springframework.ide.eclipse.quickfix.jdt.proposals.AddPathVariableCom
 import org.springframework.ide.eclipse.quickfix.jdt.proposals.AddPathVariableParameterCompletionProposal;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 import org.springframework.ide.eclipse.quickfix.jdt.util.UriTemplateVariable;
-
 
 /**
  * @author Terry Denney
@@ -66,7 +66,7 @@ public class PathVariableAnnotationQuickAssistProcessor extends AbstractAnnotati
 					if (variableName == null) {
 						variableToMissingAnnotationParams.get(variable).add(param);
 					}
-					else if (variableName.equals(variable.getVariableName())) {
+					else if (variableName.equals(variable.getVariableName()) && !isRegEx(variableName)) {
 						variableToParams.get(variable).add(param);
 					}
 				}
@@ -85,8 +85,11 @@ public class PathVariableAnnotationQuickAssistProcessor extends AbstractAnnotati
 
 		if (variables.size() > 0) {
 			for (UriTemplateVariable variable : variables) {
-				variableToMissingAnnotationParams.put(variable, new ArrayList<SingleVariableDeclaration>());
-				variableToParams.put(variable, new ArrayList<SingleVariableDeclaration>());
+				String variableName = variable.getVariableName();
+				if (!isRegEx(variableName)) {
+					variableToMissingAnnotationParams.put(variable, new ArrayList<SingleVariableDeclaration>());
+					variableToParams.put(variable, new ArrayList<SingleVariableDeclaration>());
+				}
 			}
 
 			List<SingleVariableDeclaration> params = methodDecl.parameters();
@@ -101,6 +104,10 @@ public class PathVariableAnnotationQuickAssistProcessor extends AbstractAnnotati
 		}
 
 		return false;
+	}
+
+	private boolean isRegEx(String variableName) {
+		return Pattern.matches(".*\\W.*", variableName);
 	}
 
 	@SuppressWarnings("unchecked")

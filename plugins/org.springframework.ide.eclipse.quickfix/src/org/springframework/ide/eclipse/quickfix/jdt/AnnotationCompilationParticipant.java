@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.quickfix.jdt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,11 +34,10 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 import org.springframework.ide.eclipse.quickfix.jdt.util.UriTemplateVariable;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
-
 
 /**
  * Compilation participant to display warning in Spring annotation definitions
@@ -151,7 +151,15 @@ public class AnnotationCompilationParticipant extends CompilationParticipant {
 								List<UriTemplateVariable> variables = ProposalCalculatorUtil
 										.getUriTemplatVariables(annotation);
 								for (UriTemplateVariable variable : variables) {
-									if (!currentPathVariables.contains(variable.getVariableName())) {
+									boolean found = false;
+									for (String currentPathVariable : currentPathVariables) {
+										if (Pattern.matches(variable.getVariableName(), currentPathVariable)) {
+											found = true;
+											break;
+										}
+									}
+
+									if (!found) {
 										problems.add(new MissingPathVariableWarning(annotation, variable, file, cuAST
 												.getLineNumber(variable.getOffset())));
 									}
