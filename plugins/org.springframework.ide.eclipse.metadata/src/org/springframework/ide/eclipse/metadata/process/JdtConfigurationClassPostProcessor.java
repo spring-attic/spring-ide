@@ -39,8 +39,8 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegistrationSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.java.classreading.JdtAnnotationMetadata;
-import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.java.classreading.JdtMethodMetadata;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
@@ -65,7 +65,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 
 		ConfigurationClassPostProcessor processor = new ConfigurationClassPostProcessor();
 		processor.setSourceExtractor(new DelegatingSourceExtractor(project.getProject()));
-		processor.setMetadataReaderFactory(new JdtMetadataReaderFactory(project));
+		processor.setMetadataReaderFactory(new CachingJdtMetadataReaderFactory(project));
 		processor.setProblemReporter(new JdtAnnotationMetadataProblemReporter(postProcessingContext));
 
 		processor.processConfigBeanDefinitions(new ReaderEventListenerForwardingBeanDefinitionRegistry(
