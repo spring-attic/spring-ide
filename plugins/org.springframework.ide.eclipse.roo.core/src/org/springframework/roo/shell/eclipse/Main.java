@@ -243,7 +243,7 @@ public class Main {
 		// System.out.println("================\n");
 		// **** END OF CHANGE FROM ORIGINAL FELIX VERSION ****
 
-		try {
+//		try {
 			// Create an instance of the framework.
 			FrameworkFactory factory = getFrameworkFactory();
 			m_fwk = factory.newFramework(configProps);
@@ -255,14 +255,14 @@ public class Main {
 			// Start the framework.
 			m_fwk.start();
 			return m_fwk;
-		}
-		catch (Exception ex) {
-			System.err.println("Could not create framework: " + ex);
-			ex.printStackTrace();
-			// System.exit(-1);
-		}
-		
-		return null;
+//		}
+//		catch (Exception ex) {
+//			System.err.println("Could not create framework: " + ex);
+//			ex.printStackTrace();
+//			// System.exit(-1);
+//		}
+//		
+//		return null;
 	}
 
 	private boolean shouldCleanCache(String cacheDir) throws FileNotFoundException {

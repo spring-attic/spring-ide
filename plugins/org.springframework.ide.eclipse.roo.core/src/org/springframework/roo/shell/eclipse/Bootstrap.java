@@ -38,8 +38,8 @@ import org.springsource.ide.eclipse.commons.frameworks.core.internal.commands.Ja
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.commands.ParameterFactory;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins.Plugin;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins.PluginService;
-import org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins.PluginVersion;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins.PluginService.InstallOrUpgradeStatus;
+import org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins.PluginVersion;
 
 
 /**
@@ -160,7 +160,6 @@ public class Bootstrap {
 	public void start(Object appender, String projectName) {
 		try {
 			this.appender = appender;
-
 			Main felixLauncher = new Main();
 			framework = felixLauncher.start(new File(projectLocation).getCanonicalPath(),
 					new File(rooHome + "/bundle").getCanonicalPath(),
@@ -168,14 +167,15 @@ public class Bootstrap {
 							+ "/conf/config.properties").toURI().toURL().toString(), rooVersion);
 
 			new Thread(new RooShellExitMonitor()).start();
-
 			// We need to wait for the Roo shell to be ready
 			Thread startupMonitor = new Thread(new RooShellStartupMonitor());
 			startupMonitor.start();
 			startupMonitor.join();
 		}
 		catch (Throwable e) {
-			RooCoreActivator.log(e);
+			// TODO propagate the error message up to the shell
+			RooCoreActivator.log(new Status(IStatus.ERROR, RooCoreActivator.PLUGIN_ID,
+					"Failed to start the Felix framework", e));
 		}
 	}
 
