@@ -60,7 +60,7 @@
 		<p2.qualifier>SNAPSHOT</p2.qualifier>
 		<p2.sign>false</p2.sign>
 		<p2.repository.name>Spring IDE</p2.repository.name>
-		
+
 		<!-- Signing -->
 		<signing.skip>true</signing.skip>
 		<signing.alias>vmware</signing.alias>
@@ -86,7 +86,7 @@
 	</properties>
 
 	<modules>
-		
+
 		<!-- core -->
 		<module>plugins/org.springframework.ide.eclipse</module>
 		<module>plugins/org.springframework.ide.eclipse.doc</module>
@@ -167,12 +167,12 @@
 		<module>plugins/org.springframework.ide.eclipse.roo.core</module>
 		<module>plugins/org.springframework.ide.eclipse.roo.ui</module>
 		<module>features/org.springframework.ide.eclipse.roo.feature</module>
-		
+
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
 		<module>plugins/org.springframework.ide.eclipse.maven.legacy</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature</module>
-		
+
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.aop.feature.source</module>
@@ -217,7 +217,7 @@
 				</repository>
 			</repositories>
 		</profile>
-		
+
 		<profile>
 			<id>e35</id>
 			<properties>
@@ -241,7 +241,7 @@
 				</repository>
 			</repositories>
 		</profile>
-		
+
 		<profile>
 			<id>e36</id>
 			<activation>
@@ -273,7 +273,7 @@
 				</repository>
 			</repositories>
 		</profile>
-		
+
 		<profile>
 			<id>e37</id>
 			<activation>
@@ -284,12 +284,12 @@
 			</properties>
 			<repositories>
 				<repository>
-					<id>platform-e36</id>
+					<id>platform-e37</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/eclipse/updates/3.7/</url>
 				</repository>
 				<repository>
-					<id>helios</id>
+					<id>indigo</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/releases/indigo/</url>
 				</repository>
@@ -310,7 +310,7 @@
 				</repository>
 			</repositories>
 		</profile>
-		
+
 		<profile>
 			<id>bamboo-signing</id>
 			<properties>
@@ -396,7 +396,7 @@
 						<successCode>128</successCode>
 					</successCodes>
 				</configuration>
-            </plugin>
+			</plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -416,7 +416,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.5</version>
@@ -431,7 +431,7 @@
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
@@ -440,7 +440,7 @@
 					<resolver>p2</resolver>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
