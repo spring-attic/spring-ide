@@ -46,6 +46,8 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 
 	private Map<IField, Set<Annotation>> fieldAnnotations = new LinkedHashMap<IField, Set<Annotation>>();
 
+	private Set<IType> allImplementedInterfaces;
+
 	public JdtBasedAnnotationMetadata(IType type) {
 		this.type = type;
 		init();
@@ -68,6 +70,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 			for (IAnnotation annotation : Introspector.getAllAnnotations(type)) {
 				classAnnotations.add(processAnnotation(annotation));
 			}
+			
 			for (IMethod method : Introspector.getAllMethods(type)) {
 				Set<Annotation> modelAnnotations = new LinkedHashSet<Annotation>();
 				for (IAnnotation annotation : method.getAnnotations()) {
@@ -81,6 +84,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 					methodAnnotations.put(method, modelAnnotations);
 				}
 			}
+			
 			for (IMethod method : Introspector.getAllConstructors(type)) {
 				Set<Annotation> modelAnnotations = new LinkedHashSet<Annotation>();
 				for (IAnnotation annotation : method.getAnnotations()) {
@@ -90,6 +94,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 					methodAnnotations.put(method, modelAnnotations);
 				}
 			}
+			
 			for (IField field : Introspector.getAllFields(type)) {
 				Set<Annotation> modelAnnotations = new LinkedHashSet<Annotation>();
 				for (IAnnotation annotation : field.getAnnotations()) {
@@ -148,7 +153,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 	
 	private Set<Annotation> processInterfaceMethods(IMethod method) throws JavaModelException {
 		Set<Annotation> modelAnnotations = new LinkedHashSet<Annotation>();
-		Set<IType> interfaces = Introspector.getAllImplementedInterfaces(type);
+		Set<IType> interfaces = getAllImplementedInterfaces();
 		for (IType iface : interfaces) {
 			IMethod[] interfaceMethod = iface.findMethods(method);
 			if (interfaceMethod != null && interfaceMethod.length > 0) {
@@ -160,6 +165,12 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 		return modelAnnotations;
 	}
 
+	private Set<IType> getAllImplementedInterfaces() {
+		if (allImplementedInterfaces == null) {
+			allImplementedInterfaces = Introspector.getAllImplementedInterfaces(type); 
+		}
+		return allImplementedInterfaces;
+	}
 
 	private void processStringValue(IMemberValuePair member, StringBuilder builder, String value) {
 		// class value
