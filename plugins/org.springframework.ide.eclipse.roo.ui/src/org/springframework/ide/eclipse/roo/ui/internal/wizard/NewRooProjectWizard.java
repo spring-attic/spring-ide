@@ -73,16 +73,6 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 			+ "	<classpathentry kind=\"src\" output=\"target/classes\" path=\"src/main/java\"/>\n"
 			+ "	<classpathentry excluding=\"**\" kind=\"src\" output=\"target/classes\" path=\"src/main/resources\"/>\n"
 			+ "	<classpathentry kind=\"src\" output=\"target/test-classes\" path=\"src/test/java\"/>\n"
-			+ "	<classpathentry excluding=\"**\" kind=\"src\" output=\"target/test-classes\" path=\"src/test/resources\"/>\n"
-			+ "	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n"
-			+ "	<classpathentry kind=\"output\" path=\"target/classes\"/>\n" + "</classpath>\n" + "";
-
-	private static final String ADDON_CLASSPATH_FILE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<classpath>\n"
-			+ "	<classpathentry kind=\"src\" output=\"target/classes\" path=\"src/main/java\"/>\n"
-			+ "	<classpathentry excluding=\"**\" kind=\"src\" output=\"target/classes\" path=\"src/main/resources\"/>\n"
-			+ "	<classpathentry kind=\"src\" output=\"target/test-classes\" path=\"src/test/java\"/>\n"
-			+ "	<classpathentry excluding=\"**\" kind=\"src\" output=\"target/test-classes\" path=\"src/test/resources\"/>\n"
 			+ "	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n"
 			+ "	<classpathentry kind=\"output\" path=\"target/classes\"/>\n" + "</classpath>\n" + "";
 
@@ -190,22 +180,26 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					bootstrap = null;
 					monitor.worked(4);
 
-					monitor.subTask("configuring Eclipse project meta data");
-					// Setup Eclipse metadata
-					File classpathDescriptor = new File(projectFile, ".classpath");
-					FileWriter writer = new FileWriter(classpathDescriptor);
-					if (type == ProjectType.PROJECT) {
-						// For now, only Java projects & web projects
-						if (!RooUiUtil.isRoo120OrGreater(install) || "jar".equalsIgnoreCase(packagingProvider)
-								|| "war".equalsIgnoreCase(packagingProvider)) {
+					// Write our own .classpath file if M2E can't provide one for us
+					if (!DependencyManagementUtils.IS_M2ECLIPSE_PRESENT) {
+						monitor.subTask("configuring Eclipse project meta data");
+						// Setup Eclipse metadata
+						File classpathDescriptor = new File(projectFile, ".classpath");
+						FileWriter writer = new FileWriter(classpathDescriptor);
+						if (type == ProjectType.PROJECT) {
+							// For now, only Java projects & web projects
+							if (!RooUiUtil.isRoo120OrGreater(install) || "jar".equalsIgnoreCase(packagingProvider)
+									|| "war".equalsIgnoreCase(packagingProvider)) {
+								writer.write(CLASSPATH_FILE);
+							}
+						}
+						else {
+							// Add-on projects
 							writer.write(CLASSPATH_FILE);
 						}
+						writer.flush();
+						writer.close();
 					}
-					else {
-						writer.write(ADDON_CLASSPATH_FILE);
-					}
-					writer.flush();
-					writer.close();
 
 					monitor.subTask("importing project into workspace");
 					IWorkspace workspace = ResourcesPlugin.getWorkspace();
