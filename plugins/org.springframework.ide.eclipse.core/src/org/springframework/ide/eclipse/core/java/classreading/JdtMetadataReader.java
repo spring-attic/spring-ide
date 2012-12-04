@@ -31,13 +31,11 @@ public class JdtMetadataReader implements MetadataReader {
 	private ClassMetadata classMetadata;
 
 	public JdtMetadataReader(IType type) {
-		System.out.println("JdtMetadataReader created for: " + type.getFullyQualifiedName());
 		this.type = type;
 	}
 
 	public AnnotationMetadata getAnnotationMetadata() {
 		if (this.annotationMetadata == null) {
-			System.out.println("getAnnotationMetadata for: " + type.getFullyQualifiedName());
 			this.annotationMetadata = new JdtAnnotationMetadata(type);
 		}
 		return this.annotationMetadata;
