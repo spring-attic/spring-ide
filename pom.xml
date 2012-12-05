@@ -77,9 +77,9 @@
 		<dist.bucket>dist.springframework.org</dist.bucket>
 
 		<tycho-version>0.14.1</tycho-version>
-		<maven.test.skip>true</maven.test.skip>
-		<maven.test.error.ignore>true</maven.test.error.ignore>
-		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		<test.skip>${maven.test.skip}</test.skip>
+		<maven.test.error.ignore>false</maven.test.error.ignore>
+		<maven.test.failure.ignore>false</maven.test.failure.ignore>
 		<maven.compiler.source>1.5</maven.compiler.source>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<encoding>UTF-8</encoding>
