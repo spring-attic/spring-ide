@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.autowire;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +19,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -25,16 +29,21 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 
+/**
+ * @author Tomasz Zarna
+ *
+ */
 public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTestCase {
 
 	private IResource resource;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		resource = null;
 		Thread.sleep(1500);
 	}
 
+	@Test
 	public void testResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
@@ -59,6 +68,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		}
 	}
 
+	@Test
 	public void testExtendedResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
@@ -101,6 +111,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		}
 	}
 
+	@Test
 	public void testExtendedResourceInjectionWithOverriding() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
@@ -129,7 +140,8 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 					ref.getElementSourceLocation().getStartLine()));
 		}
 	}
-	
+
+	@Test
 	public void testExtendedEjbInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });

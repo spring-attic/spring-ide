@@ -77,9 +77,9 @@
 		<dist.bucket>dist.springframework.org</dist.bucket>
 
 		<tycho-version>0.14.1</tycho-version>
-		<maven.test.skip>true</maven.test.skip>
-		<maven.test.error.ignore>true</maven.test.error.ignore>
-		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		<test.skip>${maven.test.skip}</test.skip>
+		<maven.test.error.ignore>false</maven.test.error.ignore>
+		<maven.test.failure.ignore>false</maven.test.failure.ignore>
 		<maven.compiler.source>1.5</maven.compiler.source>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<encoding>UTF-8</encoding>
@@ -92,6 +92,7 @@
 		<module>plugins/org.springframework.ide.eclipse.doc</module>
 		<module>plugins/org.springframework.ide.eclipse.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core</module>
+		<module>plugins/org.springframework.ide.eclipse.beans.core.tests</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core.metadata</module>
 		<module>plugins/org.springframework.ide.eclipse.ui</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui</module>
@@ -104,10 +105,13 @@
 
 		<module>plugins/org.springframework.ide.eclipse.metadata</module>
 		<module>plugins/org.springframework.ide.eclipse.bestpractices</module>
+		<module>plugins/org.springframework.ide.eclipse.bestpractices.tests</module>
 		<module>plugins/org.springframework.ide.eclipse.config.core</module>
 		<module>plugins/org.springframework.ide.eclipse.config.graph</module>
 		<module>plugins/org.springframework.ide.eclipse.config.ui</module>
+		<module>plugins/org.springframework.ide.eclipse.config.tests</module>
 		<module>plugins/org.springframework.ide.eclipse.quickfix</module>
+		<module>plugins/org.springframework.ide.eclipse.quickfix.tests</module>
 		<module>plugins/org.springframework.ide.eclipse.wizard</module>
 
 		<!-- aop -->
@@ -160,7 +164,8 @@
 
 		<!-- data -->
 		<module>plugins/org.springframework.ide.eclipse.data.core</module>
-		<module>plugins/org.springframework.ide.eclipse.data.core.tests</module>
+		<!-- see STS-3039 -->
+		<!--module>plugins/org.springframework.ide.eclipse.data.core.tests</module-->
 		<module>features/org.springframework.ide.eclipse.data.feature</module>
 
 		<!-- roo -->
@@ -193,7 +198,7 @@
 	</modules>
 
 	<profiles>
-		
+
 		<profile>
 			<id>e34</id>
 			<properties>
@@ -307,6 +312,11 @@
 					<id>orbit</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -424,7 +434,7 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
@@ -461,7 +471,6 @@
 					<keypass>${signing.key.password}</keypass>
 				</configuration>
 			</plugin>
-
 		</plugins>
 
 		<pluginManagement>

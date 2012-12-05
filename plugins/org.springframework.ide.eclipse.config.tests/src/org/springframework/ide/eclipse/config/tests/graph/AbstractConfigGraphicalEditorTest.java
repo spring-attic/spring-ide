@@ -17,17 +17,19 @@ import org.springframework.ide.eclipse.config.core.schemas.UtilSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.AbstractConfigGraphicalEditor;
 import org.springframework.ide.eclipse.config.tests.AbstractConfigTestCase;
 
-
 /**
  * @author Leo Dos Santos
+ * @author Tomasz Zarna
  */
 public class AbstractConfigGraphicalEditorTest extends AbstractConfigTestCase {
 
 	public void testBatchFile() throws Exception {
+		enableGefPages(true);
 		cEditor = openFileInEditor("src/batch-config.xml");
 		assertNotNull("Could not open a configuration editor.", cEditor);
 
 		AbstractConfigGraphicalEditor batch = cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI);
+		assertNotNull(batch);
 		assertEquals(BatchSchemaConstants.URI, batch.getNamespaceUri());
 
 		AbstractConfigGraphicalEditor beans = cEditor.getGraphicalEditorForUri(BeansSchemaConstants.URI);
@@ -52,6 +54,7 @@ public class AbstractConfigGraphicalEditorTest extends AbstractConfigTestCase {
 	}
 
 	public void testIntegrationFile() throws Exception {
+		enableGefPages(true);
 		cEditor = openFileInEditor("src/integration-config.xml");
 		assertNotNull("Could not open a configuration editor.", cEditor);
 
@@ -62,6 +65,7 @@ public class AbstractConfigGraphicalEditorTest extends AbstractConfigTestCase {
 		assertNull(beans);
 
 		AbstractConfigGraphicalEditor integration = cEditor.getGraphicalEditorForUri(IntegrationSchemaConstants.URI);
+		assertNotNull(integration);
 		assertEquals(IntegrationSchemaConstants.URI, integration.getNamespaceUri());
 
 		AbstractConfigGraphicalEditor util = cEditor.getGraphicalEditorForUri(UtilSchemaConstants.URI);
@@ -69,10 +73,12 @@ public class AbstractConfigGraphicalEditorTest extends AbstractConfigTestCase {
 	}
 
 	public void testScopedFile() throws Exception {
+		enableGefPages(true);
 		cEditor = openFileInEditor("src/scoped-config.xml");
 		assertNotNull("Could not open a configuration editor.", cEditor);
 
 		AbstractConfigGraphicalEditor batch = cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI);
+		assertNotNull(batch);
 		assertEquals(BatchSchemaConstants.URI, batch.getNamespaceUri());
 
 		AbstractConfigGraphicalEditor beans = cEditor.getGraphicalEditorForUri(BeansSchemaConstants.URI);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.autowire;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +19,9 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -25,16 +30,21 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 
+/**
+ * @author Tomasz Zarna
+ *
+ */
 public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCoreTestCase {
 
 	private IResource resource;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		resource = null;
 		Thread.sleep(1500);
 	}
 
+	@Test
 	public void testResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 48 });
@@ -58,6 +68,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testExtendedResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 68, 82, 87, 93 });
@@ -84,6 +95,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testExtendedResourceInjectionWithOverriding() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 68, 87, 93 });
@@ -110,6 +122,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testExtendedResourceInjectionWithSkippedOverriddenMethods() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 68, 87, 93, 140 });
@@ -136,6 +149,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testOptionalResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 149, 161, 166 });
@@ -164,6 +178,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	}
 
+	@Test
 	public void testOptionalResourceInjectionWithNoDependencies() throws Exception {
 		resource = createPredefinedProjectAndGetResource("autowire",
 				"src/org/springframework/beans/factory/annotation/testOptionalResourceInjectionWithNoDependencies-context.xml");
@@ -174,6 +189,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		assertTrue(references.size() == 0);
 	}
 
+	@Test
 	public void testConstructorResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 244, 262, 278 });
@@ -200,6 +216,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidates() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 312, 317 });
@@ -226,6 +243,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidatesAsCollection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 356, 361 });
@@ -253,6 +271,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
+	@Ignore
 	public void testConstructorResourceInjectionWithMultipleCandidatesAndFallback() {
 		// DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		// AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -268,6 +288,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		// bf.destroySingletons();
 	}
 
+	@Test
+	@Ignore
 	public void testConstructorResourceInjectionWithMultipleCandidatesAndDefaultFallback() {
 		// DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		// AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -281,6 +303,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		// bf.destroySingletons();
 	}
 
+	@Test
 	public void testConstructorInjectionWithMap() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean1", new Integer[] { 394 });
@@ -306,6 +329,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testFieldInjectionWithMap() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean1", new Integer[] { 407 });
@@ -331,6 +355,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testMethodInjectionWithMap() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 423 });
@@ -355,6 +380,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testMethodInjectionWithMapAndMultipleMatches() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean1", new Integer[] { 423 });
@@ -382,6 +408,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		assertTrue(provider.getValidationProblems().size() == 1);
 	}
 
+	@Test
 	public void testMethodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean2", new Integer[] { 423 });
@@ -407,6 +434,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testMethodInjectionWithMapAndNoMatches() throws Exception {
 		resource = createPredefinedProjectAndGetResource("autowire",
 				"src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndNoMatches-context.xml");
@@ -416,6 +444,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		assertTrue(references.size() == 0);
 	}
 
+	@Test
 	public void testObjectFactoryInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 441 });
@@ -440,6 +469,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testObjectFactoryQualifierInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 453 });
@@ -464,6 +494,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 464 });
@@ -488,6 +519,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjectionFailsWhenNoDependencyFound() throws Exception {
 		resource = createPredefinedProjectAndGetResource(
 				"autowire",
@@ -500,6 +532,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		assertTrue(provider.getValidationProblems().size() == 1);
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 477 });
@@ -524,6 +557,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenNoDependencyFound() throws Exception {
 		resource = createPredefinedProjectAndGetResource(
 				"autowire",
@@ -536,6 +570,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		assertTrue(provider.getValidationProblems().size() == 1);
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenMultipleDependenciesFound()
 			throws Exception {
 		resource = createPredefinedProjectAndGetResource(
@@ -549,6 +584,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		assertTrue(provider.getValidationProblems().size() == 1);
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalFieldResourceInjection() throws Exception {
 		resource = createPredefinedProjectAndGetResource("autowire",
 				"src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalFieldResourceInjection-context.xml");
@@ -558,6 +594,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		assertTrue(references.size() == 0);
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalFieldResourceInjectionWhenNoDependencyFound() throws Exception {
 		resource = createPredefinedProjectAndGetResource(
 				"autowire",
@@ -569,7 +606,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 		assertTrue(provider.getValidationProblems().size() == 1);
 	}
-	
+
+	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjection() throws Exception {
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 504 });
@@ -594,6 +632,7 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 		}
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjectionWhenNoDependencyFound() throws Exception {
 		resource = createPredefinedProjectAndGetResource(
 				"autowire",
@@ -605,7 +644,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 		assertTrue(provider.getValidationProblems().size() == 0);
 	}
-	
+
+	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjectionWhenMultipleDependenciesFound() throws Exception {
 		resource = createPredefinedProjectAndGetResource(
 				"autowire",

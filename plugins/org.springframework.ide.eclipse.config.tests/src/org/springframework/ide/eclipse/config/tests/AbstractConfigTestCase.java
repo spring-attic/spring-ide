@@ -20,6 +20,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.springframework.ide.eclipse.config.core.preferences.SpringConfigPreferenceConstants;
+import org.springframework.ide.eclipse.config.ui.ConfigUiPlugin;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigEditor;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 
@@ -29,14 +31,36 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
  * @author Terry Denney
  * @author Christian Dupuis
  * @author Steffen Pingel
+ * @author Tomasz Zarna
  */
 public class AbstractConfigTestCase extends StsTestCase {
 
 	public AbstractConfigEditor cEditor;
 
+	private boolean prefEnableGefPages;
+
 	@Override
 	protected String getBundleName() {
 		return "org.springframework.ide.eclipse.config.tests";
+	}
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		prefEnableGefPages = ConfigUiPlugin.getDefault().getPreferenceStore()
+				.getBoolean(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES);
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		ConfigUiPlugin.getDefault().getPreferenceStore()
+				.setValue(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES, prefEnableGefPages);
+		super.tearDown();
+	}
+
+	protected void enableGefPages(boolean enable) {
+		ConfigUiPlugin.getDefault().getPreferenceStore()
+				.setValue(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES, enable);
 	}
 
 	protected AbstractConfigEditor openFileInEditor(String path) throws CoreException, IOException {

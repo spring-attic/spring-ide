@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 Spring IDE Developers
+ * Copyright (c) 2004, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -52,6 +53,7 @@ import org.springframework.osgi.util.OsgiBundleUtils;
  * <code>"org.springframework.ide.eclipse.beans.core"</code>).
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Tomasz Zarna
  */
 public class BeansCorePlugin extends AbstractUIPlugin {
 
@@ -146,9 +148,12 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 			
 			public Thread newThread(Runnable runnable) {
 				Version version = Version.parseVersion(getPluginVersion());
-				String product = ("com.springsource.sts".equals(Platform.getProduct().getId()) ? "STS" : "Spring IDE");
+				String productId = "Spring IDE";
+				IProduct product = Platform.getProduct();
+				if (product != null && "com.springsource.sts".equals(product.getId()))
+						productId = "STS";
 				Thread reportingThread = new Thread(runnable, String.format(THREAD_NAME_TEMPLATE, threadCount.incrementAndGet(), 
-						product, version.getMajor(), version.getMinor(), version.getMicro()));
+						productId, version.getMajor(), version.getMinor(), version.getMicro()));
 				reportingThread.setDaemon(true);
 				return reportingThread;
 			}

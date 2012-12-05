@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ConcurrentModificationException;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -33,17 +31,19 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.junit.After;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * @author Christian Dupuis
  * @author Martin Lippert
+ * @author Tomasz Zarna
  * @since 2.0.3
  */
-public abstract class BeansCoreTestCase extends TestCase {
+public abstract class BeansCoreTestCase {
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 		StsTestUtil.deleteAllProjects();
 	}
 

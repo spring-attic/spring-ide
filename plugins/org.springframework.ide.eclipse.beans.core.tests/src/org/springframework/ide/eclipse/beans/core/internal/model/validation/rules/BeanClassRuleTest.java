@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import static org.junit.Assert.assertEquals;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -19,23 +23,25 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 /**
  * Test case to test the {@link BeanClassRule}.
  * @author Christian Dupuis
+ * @author Tomasz Zarna
  * @since 2.0.5
  */
 public class BeanClassRuleTest extends BeansCoreTestCase {
 
 	private IResource resource;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		resource = createPredefinedProjectAndGetResource("validation", "src/ide-832.xml");
 		StsTestUtil.waitForResource(resource);
 	}
 
+	@Test
 	public void testSpecialTreatmentForOsgiClasses() throws Exception {
 		IMarker[] markers = resource.findMarkers(BeansCorePlugin.PLUGIN_ID + ".problemmarker",
 				false, IResource.DEPTH_ZERO);
-		assertTrue("No error messages expected as OSGi class names should get a special treatment",
-				markers.length == 0);
+		assertEquals("No error messages expected as OSGi class names should get a special treatment", 0,
+				markers.length);
 	}
 
 }

@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 import org.springframework.ide.eclipse.beans.core.tests.MarkerAssertion;
@@ -24,14 +28,15 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 /**
  * Test case to test the {@link NamespaceElementsRule}.
  * @author Christian Dupuis
+ * @author Tomasz Zarna
  * @since 2.2.7
  */
 public class NamespaceElementsRuleTest extends BeansCoreTestCase {
 
 	private IResource resource;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		// Enable XSD tool annotation rule
 		Set<ValidationRuleDefinition> rules = ValidationRuleDefinitionFactory
 				.getRuleDefinitions("org.springframework.ide.eclipse.beans.core.beansvalidator");
@@ -46,6 +51,7 @@ public class NamespaceElementsRuleTest extends BeansCoreTestCase {
 		StsTestUtil.waitForResource(resource);
 	}
 
+	@Test
 	public void testNamespaceValidation() throws Exception {
 
 		MarkerAssertion[] assertions = new MarkerAssertion[] {

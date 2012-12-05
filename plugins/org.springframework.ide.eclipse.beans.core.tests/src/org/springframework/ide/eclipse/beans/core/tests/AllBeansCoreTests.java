@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.ide.eclipse.beans.core.autowire.AutowiredAnnotationInjectionMetadataProviderTests;
 import org.springframework.ide.eclipse.beans.core.autowire.CommonAnnotationInjectionMetadataProviderTests;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRuleTest;
@@ -24,26 +24,22 @@ import org.springframework.ide.eclipse.beans.core.internal.model.validation.rule
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 
 /**
- * {@link TestSuite} for <code>beans.core</code> plugin.
+ * Test suite for <code>beans.core</code> plugin.
  * @author Christian Dupuis
+ * @author Tomasz Zarna
  * @since 2.0.3
  */
+@RunWith(Suite.class)
+@SuiteClasses({ BeanClassRuleTest.class, //
+	BeanConstructorArgumentRuleTest.class, //
+	BeanPropertyRuleTest.class, //
+	BeanInitDestroyMethodRuleTest.class, //
+	RequiredPropertyRuleTest.class, //
+	NamespaceElementsRuleTest.class, //
+	IntrospectorTest.class, //
+	AutowiredAnnotationInjectionMetadataProviderTests.class, //
+	CommonAnnotationInjectionMetadataProviderTests.class //
+})
 public class AllBeansCoreTests {
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllBeansCoreTests.class.getName());
-		//$JUnit-BEGIN$
-		suite.addTest(new TestSuite(BeanClassRuleTest.class));
-		suite.addTest(new TestSuite(BeanConstructorArgumentRuleTest.class));
-		suite.addTest(new TestSuite(BeanPropertyRuleTest.class));
-		suite.addTest(new TestSuite(BeanInitDestroyMethodRuleTest.class));
-		suite.addTest(new TestSuite(RequiredPropertyRuleTest.class));
-		suite.addTest(new TestSuite(NamespaceElementsRuleTest.class));
-		suite.addTest(new TestSuite(IntrospectorTest.class));
-		suite.addTest(new TestSuite(AutowiredAnnotationInjectionMetadataProviderTests.class));
-		suite.addTest(new TestSuite(CommonAnnotationInjectionMetadataProviderTests.class));
-		//$JUnit-END$
-		return suite;
-	}
-
+	// goofy junit4, no class body needed
 }

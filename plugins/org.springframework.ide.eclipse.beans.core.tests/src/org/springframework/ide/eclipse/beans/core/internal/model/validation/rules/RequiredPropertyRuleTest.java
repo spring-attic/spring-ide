@@ -10,11 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -26,6 +31,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 /**
  * Test case to test the {@link RequiredPropertyRule}.
  * @author Christian Dupuis
+ * @author Tomasz Zarna
  * @since 2.0.5
  */
 public class RequiredPropertyRuleTest extends BeansCoreTestCase {
@@ -34,38 +40,39 @@ public class RequiredPropertyRuleTest extends BeansCoreTestCase {
 
 	private IBeansConfig beansConfig;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		resource = createPredefinedProjectAndGetResource("required", "src/ide-825.xml");
 		beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		StsTestUtil.waitForResource(resource);
 	}
 
+	@Test
 	public void testRequiredAnnotationConfiguration() throws Exception {
 		IBean bean = BeansModelUtils.getBean("abstractFoo", beansConfig);
+		assertNotNull(bean);
 		int severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
-		assertTrue("Abstract beans are not required to be configured", severity == -1);
+		assertEquals("Abstract beans are not required to be configured", -1, severity);
 
 		bean = BeansModelUtils.getBean("goodFoo", beansConfig);
 		severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
-		assertTrue("Satisfying configuration given; no error expected", severity == -1);
+		assertEquals("Satisfying configuration given; no error expected", -1, severity);
 
 		bean = BeansModelUtils.getBean("wrongFoo", beansConfig);
 		severity = MarkerUtils.getHighestSeverityFromMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
-		assertTrue("Missing required configuration; error expected",
-				severity == IMarker.SEVERITY_WARNING);
+		assertEquals("Missing required configuration; error expected", IMarker.SEVERITY_WARNING,
+				severity);
 		Set<IMarker> markers = MarkerUtils.getAllMarkersInRange(resource, bean
 				.getElementStartLine(), bean.getElementEndLine());
-		assertTrue(markers.size() == 1);
+		assertEquals(1, markers.size());
 		for (IMarker marker : markers) {
 			String msg = (String) marker.getAttribute(IMarker.MESSAGE);
-			assertTrue("Error message not expected '" + msg + "'",
-					"Property 'bar' is required for bean 'wrongFoo'".equals(msg));
+			assertEquals("Error message not expected '" + msg + "'",
+					"Property 'bar' is required for bean 'wrongFoo'", msg);
 		}
-
 	}
 
 }

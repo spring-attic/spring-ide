@@ -20,15 +20,16 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
  * @author Leo Dos Santos
  * @author Christian Dupuis
  * @author Steffen Pingel
+ * @author Tomasz Zarna
  * @since 2.0.3
  */
 public abstract class AbstractBeansCoreTestCase extends StsTestCase {
 
 	/**
 	 * Checks if the given message text appears in any of the specified markers.
-	 * @return true if the marker text is found
 	 */
 	protected void assertHasMarkerWithText(IMarker[] markers, String messageText) throws CoreException {
+		assertTrue(markers.length > 0);
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < markers.length; i++) {
 			IMarker currMarker = markers[i];
@@ -44,6 +45,10 @@ public abstract class AbstractBeansCoreTestCase extends StsTestCase {
 		fail("Expected '" + messageText + "' in '" + sb.toString() + "'.");
 	}
 
+	/**
+	 * Checks if the given message text does not appear in any of the specified
+	 * markers.
+	 */
 	protected void assertNotHasMarkerWithText(IMarker[] markers, String messageText) throws CoreException {
 		boolean failed = false;
 		StringBuilder sb = new StringBuilder();

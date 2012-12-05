@@ -18,12 +18,10 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
-import org.springframework.ide.eclipse.config.core.preferences.SpringConfigPreferenceConstants;
 import org.springframework.ide.eclipse.config.core.schemas.BatchSchemaConstants;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.AbstractConfigGraphicalEditor;
 import org.springframework.ide.eclipse.config.tests.AbstractConfigTestCase;
-import org.springframework.ide.eclipse.config.ui.ConfigUiPlugin;
 import org.springframework.ide.eclipse.config.ui.actions.LowerNodeAction;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigEditor;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigFormPage;
@@ -34,25 +32,10 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * @author Leo Dos Santos
+ * @author Tomasz Zarna
  */
 @SuppressWarnings("restriction")
 public class SpringConfigEditorTest extends AbstractConfigTestCase {
-
-	private boolean prefEnableGefPages;
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		prefEnableGefPages = ConfigUiPlugin.getDefault().getPreferenceStore()
-				.getBoolean(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES);
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		ConfigUiPlugin.getDefault().getPreferenceStore()
-				.setValue(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES, prefEnableGefPages);
-		super.tearDown();
-	}
 
 	public void testActivePagePreference() throws Exception {
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -64,27 +47,27 @@ public class SpringConfigEditorTest extends AbstractConfigTestCase {
 		page.closeEditor(cEditor, false);
 
 		cEditor = (AbstractConfigEditor) page.openEditor(input, SpringConfigEditor.ID_EDITOR);
-		assertTrue(cEditor.getActiveEditor().equals(cEditor.getSourcePage()));
+		assertEquals(cEditor.getSourcePage(), cEditor.getActiveEditor());
 		cEditor.setActivePage(cEditor.getFormPageForUri(BatchSchemaConstants.URI).getId());
 		page.closeEditor(cEditor, false);
 
 		cEditor = (AbstractConfigEditor) page.openEditor(input, SpringConfigEditor.ID_EDITOR);
-		assertTrue(cEditor.getActivePageInstance().equals(cEditor.getFormPageForUri(BatchSchemaConstants.URI)));
+		assertEquals(cEditor.getFormPageForUri(BatchSchemaConstants.URI), cEditor.getActivePageInstance());
 		cEditor.setActiveEditor(cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI));
 		page.closeEditor(cEditor, false);
 
 		cEditor = (AbstractConfigEditor) page.openEditor(input, SpringConfigEditor.ID_EDITOR);
-		assertTrue(cEditor.getActiveEditor().equals(cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI)));
+		assertEquals(cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI), cEditor.getActiveEditor());
 		cEditor.setActivePage(OverviewFormPage.ID);
 		page.closeEditor(cEditor, false);
 
 		cEditor = (AbstractConfigEditor) page.openEditor(input, SpringConfigEditor.ID_EDITOR);
-		assertTrue(cEditor.getActivePageInstance().equals(cEditor.getFormPage(OverviewFormPage.ID)));
+		assertEquals(cEditor.getFormPage(OverviewFormPage.ID), cEditor.getActivePageInstance());
 		cEditor.setActivePage(NamespacesFormPage.ID);
 		page.closeEditor(cEditor, false);
 
 		cEditor = (AbstractConfigEditor) page.openEditor(input, SpringConfigEditor.ID_EDITOR);
-		assertTrue(cEditor.getActivePageInstance().equals(cEditor.getFormPage(NamespacesFormPage.ID)));
+		assertEquals(cEditor.getFormPage(NamespacesFormPage.ID), cEditor.getActivePageInstance());
 	}
 
 	public void testGraphicalPagesPreference() throws Exception {
@@ -92,26 +75,24 @@ public class SpringConfigEditorTest extends AbstractConfigTestCase {
 		cEditor = openFileInEditor("src/batch-config.xml");
 		assertNotNull("Could not open a configuration editor.", cEditor);
 
+		enableGefPages(true);
 		IEditorInput input = cEditor.getEditorInput();
 		AbstractConfigGraphicalEditor gEditor = cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI);
 		assertNotNull(gEditor);
 		page.closeEditor(cEditor, false);
 
-		ConfigUiPlugin.getDefault().getPreferenceStore()
-				.setValue(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES, false);
+		enableGefPages(false);
 		cEditor = (AbstractConfigEditor) page.openEditor(input, SpringConfigEditor.ID_EDITOR);
 		gEditor = cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI);
 		assertNull(gEditor);
 		page.closeEditor(cEditor, false);
 
-		ConfigUiPlugin.getDefault().getPreferenceStore()
-				.setValue(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES, true);
+		enableGefPages(true);
 		cEditor = (AbstractConfigEditor) page.openEditor(input, SpringConfigEditor.ID_EDITOR);
 		gEditor = cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI);
 		assertNotNull(gEditor);
 
-		ConfigUiPlugin.getDefault().getPreferenceStore()
-				.setValue(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES, false);
+		enableGefPages(false);
 		gEditor = cEditor.getGraphicalEditorForUri(BatchSchemaConstants.URI);
 		assertNull(gEditor);
 	}
