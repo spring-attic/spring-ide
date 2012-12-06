@@ -81,7 +81,7 @@ public class LiveBeansGraphView extends ViewPart {
 		viewer.setContentProvider(new LiveBeansGraphContentProvider());
 		viewer.setLabelProvider(new LiveBeansGraphLabelProvider());
 		viewer.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED);
-		viewer.setNodeStyle(ZestStyles.NODES_FISHEYE);
+		// viewer.setNodeStyle(ZestStyles.NODES_FISHEYE);
 
 		// CompositeLayoutAlgorithm layout = new
 		// CompositeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING,

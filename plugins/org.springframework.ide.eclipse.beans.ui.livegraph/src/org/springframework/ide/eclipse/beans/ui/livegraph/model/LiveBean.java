@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.views.properties.IPropertySource;
 
@@ -36,6 +37,8 @@ public class LiveBean implements IAdaptable {
 	public static final String ATTR_APPLICATION = "application name";
 
 	private final String beanId;
+
+	private String displayName;
 
 	private final Set<LiveBean> dependencies;
 
@@ -77,6 +80,23 @@ public class LiveBean implements IAdaptable {
 
 	public Set<LiveBean> getDependencies() {
 		return dependencies;
+	}
+
+	public String getDisplayName() {
+		// compute the display name the first time it's needed
+		if (displayName == null) {
+			// truncate Class names and name with multiple segments
+			if (beanId.contains(getBeanType()) || StringUtils.countMatches(beanId, ".") > 1) {
+				int index = beanId.lastIndexOf('.');
+				if (index >= 0) {
+					displayName = beanId.substring(index + 1, beanId.length());
+				}
+			}
+			if (displayName == null) {
+				displayName = beanId;
+			}
+		}
+		return displayName;
 	}
 
 	public String getId() {
