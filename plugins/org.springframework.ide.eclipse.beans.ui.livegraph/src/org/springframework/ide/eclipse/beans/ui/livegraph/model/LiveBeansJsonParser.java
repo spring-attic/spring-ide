@@ -29,17 +29,19 @@ public class LiveBeansJsonParser {
 		// array of beans
 		JSONArray contextsArray = new JSONArray(jsonInput);
 		for (int i = 0; i < contextsArray.length(); i++) {
-			JSONObject context = contextsArray.optJSONObject(i);
-			if (context != null) {
+			JSONObject contextObj = contextsArray.optJSONObject(i);
+			if (contextObj != null) {
 				// TODO: group beans by context
-				JSONArray beansArray = context.optJSONArray("beans");
-				beansMap.putAll(parseBeans(beansArray, applicationName));
+				JSONArray beansArray = contextObj.optJSONArray("beans");
+				String context = contextObj.getString(LiveBean.ATTR_CONTEXT);
+				beansMap.putAll(parseBeans(beansArray, applicationName, context));
 			}
 		}
 		return beansMap.values();
 	}
 
-	private static Map<String, LiveBean> parseBeans(JSONArray beansArray, String applicationName) throws JSONException {
+	private static Map<String, LiveBean> parseBeans(JSONArray beansArray, String applicationName, String context)
+			throws JSONException {
 		Map<String, LiveBean> beansMap = new HashMap<String, LiveBean>();
 		if (beansArray != null) {
 			// construct LiveBeans
@@ -47,6 +49,7 @@ public class LiveBeansJsonParser {
 				JSONObject candidate = beansArray.getJSONObject(i);
 				if (candidate != null && candidate.has(LiveBean.ATTR_BEAN)) {
 					LiveBean bean = new LiveBean(candidate.getString(LiveBean.ATTR_BEAN));
+					bean.addAttribute(LiveBean.ATTR_CONTEXT, context);
 					if (candidate.has(LiveBean.ATTR_SCOPE)) {
 						bean.addAttribute(LiveBean.ATTR_SCOPE, candidate.getString(LiveBean.ATTR_SCOPE));
 					}
