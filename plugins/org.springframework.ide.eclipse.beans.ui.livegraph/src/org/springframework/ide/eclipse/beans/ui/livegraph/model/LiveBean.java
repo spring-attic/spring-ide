@@ -24,8 +24,6 @@ import org.eclipse.ui.views.properties.IPropertySource;
  */
 public class LiveBean implements IAdaptable {
 
-	public static final String ATTR_CONTEXT = "context";
-
 	public static final String ATTR_BEAN = "bean";
 
 	public static final String ATTR_SCOPE = "scope";

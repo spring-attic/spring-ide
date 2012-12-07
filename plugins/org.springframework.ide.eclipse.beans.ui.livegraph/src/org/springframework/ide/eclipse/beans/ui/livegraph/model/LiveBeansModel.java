@@ -23,15 +23,29 @@ public class LiveBeansModel implements Comparable<LiveBeansModel> {
 
 	private final List<LiveBean> beans;
 
+	private final List<LiveBeansGroup> contexts;
+
+	private final List<LiveBeansGroup> resources;
+
 	private final LiveBeansSession session;
 
 	public LiveBeansModel(LiveBeansSession session) {
 		this.beans = new ArrayList<LiveBean>();
+		this.contexts = new ArrayList<LiveBeansGroup>();
+		this.resources = new ArrayList<LiveBeansGroup>();
 		this.session = session;
 	}
 
 	public void addBeans(Collection<LiveBean> beansToAdd) {
 		beans.addAll(beansToAdd);
+	}
+
+	public void addContexts(Collection<? extends LiveBeansGroup> contextsToAdd) {
+		contexts.addAll(contextsToAdd);
+	}
+
+	public void addResources(Collection<? extends LiveBeansGroup> resourcesToAdd) {
+		resources.addAll(resourcesToAdd);
 	}
 
 	public int compareTo(LiveBeansModel o) {
@@ -47,6 +61,14 @@ public class LiveBeansModel implements Comparable<LiveBeansModel> {
 
 	public List<LiveBean> getBeans() {
 		return beans;
+	}
+
+	public List<LiveBeansGroup> getBeansByContext() {
+		return contexts;
+	}
+
+	public List<LiveBeansGroup> getBeansByResource() {
+		return resources;
 	}
 
 	public LiveBeansSession getSession() {
