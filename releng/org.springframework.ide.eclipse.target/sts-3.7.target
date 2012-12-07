@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?><target name="STS release for Indigo" sequenceNumber="57">
+<locations>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.springsource.sts.feature.group" version="0.0.0"/>
+<unit id="org.springframework.data.core" version="0.0.0"/>
+<unit id="org.springframework.uaa.client" version="0.0.0"/>
+<repository location="http://dist.springsource.com/release/TOOLS/update/e3.7"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.platform.source.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.wst.sse.core" version="1.1.602.v201112071516"/>
+<unit id="org.eclipse.jst.server.tomcat.ui" version="1.1.200.v20100418"/>
+<unit id="org.eclipse.m2e.feature.feature.group" version="1.0.200.20111228-1245"/>
+<repository location="http://download.eclipse.org/releases/indigo"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.ajdt.feature.group" version="2.2.0.e37x-RELEASE-20120704-0900"/>
+<repository location="http://download.eclipse.org/tools/ajdt/37/update"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.draw2d.feature.group" version="3.8.1.201208200205"/>
+<repository location="http://download.eclipse.org/tools/gef/updates/releases"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.0.5.20111003_1754-3676ac8-dev-e36"/>
+<unit id="org.eclipse.swtbot.eclipse.gef.feature.group" version="2.0.5.20111003_1754-3676ac8-dev-e36"/>
+<unit id="org.eclipse.swtbot.ide.feature.group" version="2.0.5.20111003_1754-3676ac8-dev-e36"/>
+<unit id="org.eclipse.swtbot.eclipse.test.junit3.feature.group" version="2.0.5.20111003_1754-3676ac8-dev-e36"/>
+<unit id="org.eclipse.swtbot.eclipse.test.junit4.feature.group" version="2.0.5.20111003_1754-3676ac8-dev-e36"/>
+<unit id="org.eclipse.swtbot.forms.feature.group" version="2.0.5.20111003_1754-3676ac8-dev-e36"/>
+<unit id="org.eclipse.swtbot.feature.group" version="2.0.5.20111003_1754-3676ac8-dev-e36"/>
+<repository location="http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="com.google.protobuf" version="2.4.0.v201105131100"/>
+<unit id="com.google.protobuf.source" version="2.4.0.v201105131100"/>
+<unit id="com.thoughtworks.qdox" version="1.6.3.v20081201-1400"/>
+<unit id="com.thoughtworks.qdox.source" version="1.6.3.v20081201-1400"/>
+<unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.core" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.core.source" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.generator" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.generator.source" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.integration" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.integration.source" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.library" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.library.source" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.text.source" version="1.1.0.v20090501071000"/>
+<unit id="org.objenesis" version="1.0.0.v201105211943"/>
+<unit id="org.objenesis.source" version="1.0.0.v201105211943"/>
+<unit id="org.mockito" version="1.8.4.v201102171835"/>
+<unit id="org.mockito.source" version="1.8.4.v201102171835"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/"/>
+</location>
+</locations>
+</target>
