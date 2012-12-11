@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
  * Value object to easily access information about a Spring Data repository.
  * 
  * @author Oliver Gierke
+ * @author Tomasz Zarna
  */
 public class RepositoryInformation {
 
@@ -129,11 +130,13 @@ public class RepositoryInformation {
 			for (String extendedInterface : interfaces) {
 				if (extendedInterface.startsWith("Repository")) {
 					String[][] resolvedInterfaceTypes = type.resolveType(extendedInterface);
-					for (String[] match : resolvedInterfaceTypes) {
-						if (match != null && match.length == 2) {
-							if ("org.springframework.data.repository".equals(match[0]) &&
-									"Repository".equals(match[1])) {
-								return true;
+					if (resolvedInterfaceTypes != null) {
+						for (String[] match : resolvedInterfaceTypes) {
+							if (match != null && match.length == 2) {
+								if ("org.springframework.data.repository".equals(match[0]) &&
+										"Repository".equals(match[1])) {
+									return true;
+								}
 							}
 						}
 					}
