@@ -11,8 +11,14 @@
 <unit id="org.eclipse.platform.source.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.wst.sse.core" version="1.1.602.v201112071516"/>
 <unit id="org.eclipse.jst.server.tomcat.ui" version="1.1.200.v20100418"/>
-<unit id="org.eclipse.m2e.feature.feature.group" version="1.0.200.20111228-1245"/>
+<unit id="org.eclipse.epp.usagedata.gathering" version="1.3.1.R201106061540"/>
 <repository location="http://download.eclipse.org/releases/indigo"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.m2e.feature.feature.group" version="1.2.0.20120903-1050"/>
+<unit id="org.sonatype.m2e.buildhelper" version="0.15.0.201207090124"/>
+<unit id="org.sonatype.m2e.mavenarchiver" version="0.15.0.201207090125-signed-201209140800"/>
+<repository location="http://download.springsource.com/release/TOOLS/third-party/m2e-sts310"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ajdt.feature.group" version="2.2.0.e37x-RELEASE-20120704-0900"/>

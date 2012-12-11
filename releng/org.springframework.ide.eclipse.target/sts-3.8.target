@@ -13,6 +13,12 @@
 <unit id="org.eclipse.jst.server.tomcat.ui" version="1.1.300.v20120420_1012"/>
 <unit id="org.eclipse.m2e.feature.feature.group" version="1.2.0.20120903-1050"/>
 <repository location="http://download.eclipse.org/releases/juno"/>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.m2e.feature.feature.group" version="1.2.0.20120903-1050"/>
+<unit id="org.sonatype.m2e.buildhelper" version="0.15.0.201207090124"/>
+<unit id="org.sonatype.m2e.mavenarchiver" version="0.15.0.201207090125-signed-201209140800"/>
+<repository location="http://download.springsource.com/release/TOOLS/third-party/m2e-sts310"/>
+</location>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ajdt.feature.group" version="2.2.1.e42x-RELEASE-20120921-1400"/>
