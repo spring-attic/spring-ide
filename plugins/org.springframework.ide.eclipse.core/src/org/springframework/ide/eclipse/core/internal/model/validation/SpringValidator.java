@@ -34,7 +34,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidator;
  * @author Christian Dupuis
  * @since 2.0.3
  */
-public class SpringValidator extends AbstractValidator implements IValidator {
+public class SpringValidator extends AbstractValidator {
 
 	/**
 	 * Creates the {@link IValidationContext} used to validate the spring.core
