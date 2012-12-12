@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 

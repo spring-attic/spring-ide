@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,7 @@ public class ValidationProblem {
 	}
 
 	/**
-	 * Returns the ID of the {@link IValidationRule}Êwhich raised this problem
+	 * Returns the ID of the {@link IValidationRule} which raised this problem
 	 * or <code>null</code> if no validation rule was involved.
 	 */
 	public String getRuleId() {
