@@ -128,13 +128,14 @@ public class RepositoryInformation {
 		try {
 			String[] interfaces = type.getSuperInterfaceNames();
 			for (String extendedInterface : interfaces) {
-				if (extendedInterface.startsWith("Repository")) {
+				if (extendedInterface.contains("Repository")) {
 					String[][] resolvedInterfaceTypes = type.resolveType(extendedInterface);
 					if (resolvedInterfaceTypes != null) {
 						for (String[] match : resolvedInterfaceTypes) {
-							if (match != null && match.length == 2) {
-								if ("org.springframework.data.repository".equals(match[0]) &&
-										"Repository".equals(match[1])) {
+							if (match != null && match.length == 2 && match[0] != null && match[1] != null) {
+								if ("org.springframework.data.repository".equals(match[0])
+										|| "org.springframework.data.jpa.repository".equals(match[0])
+										&&	match[1].contains("Repository")) {
 									return true;
 								}
 							}
