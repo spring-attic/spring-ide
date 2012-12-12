@@ -181,13 +181,14 @@ public class RepositoryInformation {
 	}
 
 	public Class<?> getManagedDomainClass() {
-		Class<?>[] resolvedTypeArguments = GenericTypeResolver.resolveTypeArguments(this.repositoryInterface, this.repositoryBaseInterface);
-		if (resolvedTypeArguments != null && resolvedTypeArguments.length > 0) {
-			return resolvedTypeArguments[0];
+		try {
+			Class<?>[] resolvedTypeArguments = GenericTypeResolver.resolveTypeArguments(this.repositoryInterface, this.repositoryBaseInterface);
+			if (resolvedTypeArguments != null && resolvedTypeArguments.length > 0) {
+				return resolvedTypeArguments[0];
+			}
+		} catch (TypeNotPresentException e) {
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
