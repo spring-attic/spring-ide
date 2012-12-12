@@ -25,9 +25,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.data.internal.validation.InvalidDerivedQueryRule;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 /**
  * @author Oliver Gierke
+ * @deprecated replaced with {@link InvalidDerivedQueryRule}.
  */
 public class SpringDataCompilationParticipant extends CompilationParticipant {
 

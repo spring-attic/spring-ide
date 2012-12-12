@@ -13,12 +13,14 @@ package org.springframework.ide.eclipse.data.jdt.core;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
+import org.springframework.ide.eclipse.data.internal.validation.InvalidDerivedQueryRule;
 import org.springframework.util.Assert;
 
 /**
  * {@link CategorizedProblem} to express an invalid Spring Data query method.
  * 
  * @author Oliver Gierke
+ * @deprecated replaced with {@link InvalidDerivedQueryRule}.
  */
 public class InvalidDerivedQueryProblem extends CategorizedProblem {
 

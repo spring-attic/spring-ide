@@ -61,7 +61,8 @@
    <extension point="org.springframework.ide.eclipse.beans.core.metadata.metadataproviders">
         <metadataProvider class="org.springframework.ide.eclipse.data.metadata.ui.RepositoriesBeanMetadataProvider" />
     </extension>
-    <extension
+    <!-- replaced with SpringDataValidator below -->
+    <!--extension
           point="org.eclipse.jdt.core.compilationParticipant">
           <compilationParticipant
            class="org.springframework.ide.eclipse.data.jdt.core.SpringDataCompilationParticipant"
@@ -69,7 +70,7 @@
            id="org.springframework.ide.eclipse.data.jdt.core.compilationParticipant"
            modifiesEnvironment="false">
      </compilationParticipant>
-    </extension>
+    </extension-->
     
     <extension id="org.springframework.ide.eclipse.data.jdt.core.completionRequestor"
           point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
@@ -145,5 +146,34 @@
         uri="http://www.springframework.org/schema/data/mongo">
   </namespace>
 	</extension>
+	<extension point="org.eclipse.core.resources.markers"
+			id="problemmarker"
+			name="Spring Data Problem">
+		<super type="org.springframework.ide.eclipse.core.problemmarker" />
+		<attribute name="ruleId"/>
+		<attribute name="errorId"/>
+		<persistent value="true" />
+	</extension>
+ <extension
+       point="org.springframework.ide.eclipse.core.validators">
+    <validator
+          class="org.springframework.ide.eclipse.data.internal.validation.SpringDataValidator"
+          enabledByDefault="true"
+          id="datavalidator"
+          markerId="problemmarker"
+          name="%dataValidator.name">
+    </validator>
+    <rules
+          validatorId="org.springframework.ide.eclipse.data.core.datavalidator">
+       <rule
+             class="org.springframework.ide.eclipse.data.internal.validation.InvalidDerivedQueryRule"
+             description="%dataValidator.rule.invalidDerivedQuery.description"
+             enabledByDefault="true"
+             id="invalidDerivedQuery"
+             name="%dataValidator.rule.invalidDerivedQuery.name">
+          <message id="INVALID_DERIVED_QUERY" label="%dataValidator.rule.invalidDerivedQuery.message" severity="ERROR" />
+       </rule>
+    </rules>
+ </extension>
 
 </plugin>
