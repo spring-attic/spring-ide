@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -103,7 +103,7 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 				}
 
 				// call close on callback to execute any required resource cleanup in template
-				callback.destory();
+				callback.destroy();
 
 				subMonitor.worked(1);
 				if (subMonitor.isCanceled()) {

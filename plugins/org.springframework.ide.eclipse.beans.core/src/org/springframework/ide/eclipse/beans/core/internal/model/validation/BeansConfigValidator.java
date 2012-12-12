@@ -271,7 +271,7 @@ public class BeansConfigValidator extends AbstractValidator {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void destory() {
+		public void destroy() {
 		}
 
 		/**
