@@ -29,7 +29,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutStyles;
-import org.eclipse.zest.layouts.algorithms.HorizontalTreeLayoutAlgorithm;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToApplicationAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanDefinitionAction;
@@ -83,19 +82,8 @@ public class LiveBeansGraphView extends ViewPart {
 		viewer.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED);
 		// viewer.setNodeStyle(ZestStyles.NODES_FISHEYE);
 
-		// CompositeLayoutAlgorithm layout = new
-		// CompositeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING,
-		// new LayoutAlgorithm[] { new
-		// HorizontalTreeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING),
-		// new HorizontalShift(LayoutStyles.NO_LAYOUT_NODE_RESIZING) });
-
-		HorizontalTreeLayoutAlgorithm layout = new HorizontalTreeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING);
-		// GridLayoutAlgorithm layout = new
-		// GridLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING);
-		// RadialLayoutAlgorithm layout = new
-		// RadialLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING);
-		// DirectedGraphLayoutAlgorithm layout = new
-		// DirectedGraphLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING);
+		ExtendedDirectedGraphLayoutAlgorithm layout = new ExtendedDirectedGraphLayoutAlgorithm(
+				LayoutStyles.NO_LAYOUT_NODE_RESIZING | SWT.HORIZONTAL);
 
 		viewer.setLayoutAlgorithm(layout);
 		viewer.applyLayout();
