@@ -35,9 +35,9 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 
-
 /**
  * @author Leo Dos Santos
+ * @author Tomasz Zarna
  * @since 2.5.2
  */
 public class StsShowBeansGraphAction extends AbstractNavigatorAction {
@@ -48,8 +48,8 @@ public class StsShowBeansGraphAction extends AbstractNavigatorAction {
 
 	public StsShowBeansGraphAction(ICommonActionExtensionSite site) {
 		super(site);
-		setText("Open Dependency &Graph"); // TODO externalize text
-		setToolTipText("Open the Bean Dependency Graph");
+		setText(Messages.getString("StsShowBeansGraphAction.TEXT")); //$NON-NLS-1$
+		setToolTipText(Messages.getString("StsShowBeansGraphAction.TOOLTIP")); //$NON-NLS-1$
 		setImageDescriptor(BeansGraphImages.DESC_OBJS_BEANS_GPRAH);
 	}
 
