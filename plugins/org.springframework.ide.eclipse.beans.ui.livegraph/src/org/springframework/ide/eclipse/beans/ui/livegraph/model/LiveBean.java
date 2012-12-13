@@ -107,4 +107,8 @@ public class LiveBean implements IAdaptable {
 		return attributes.get(ATTR_RESOURCE);
 	}
 
+	public String getScope() {
+		return attributes.get(ATTR_SCOPE);
+	}
+
 }

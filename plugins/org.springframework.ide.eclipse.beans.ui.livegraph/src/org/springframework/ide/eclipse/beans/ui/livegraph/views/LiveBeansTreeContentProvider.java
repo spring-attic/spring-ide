@@ -10,27 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.views;
 
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.zest.core.viewers.IGraphEntityContentProvider;
-import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansGroup;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 
 /**
- * A content provider for the Live Beans Graph
+ * A content provider for the Live Beans tree display
  * 
  * @author Leo Dos Santos
  */
-public class LiveBeansGraphContentProvider implements IGraphEntityContentProvider {
+public class LiveBeansTreeContentProvider implements ITreeContentProvider {
 
 	public void dispose() {
 		// TODO Auto-generated method stub
 
 	}
 
-	public Object[] getConnectedTo(Object entity) {
-		if (entity instanceof LiveBean) {
-			LiveBean bean = (LiveBean) entity;
-			return bean.getDependencies().toArray();
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof LiveBeansGroup) {
+			LiveBeansGroup group = (LiveBeansGroup) parentElement;
+			return group.getBeans().toArray();
 		}
 		return null;
 	}
@@ -38,9 +38,22 @@ public class LiveBeansGraphContentProvider implements IGraphEntityContentProvide
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof LiveBeansModel) {
 			LiveBeansModel model = (LiveBeansModel) inputElement;
-			return model.getBeans().toArray();
+			return model.getBeansByContext().toArray();
+			// return model.getBeansByResource().toArray();
 		}
 		return null;
+	}
+
+	public Object getParent(Object element) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public boolean hasChildren(Object element) {
+		if (element instanceof LiveBeansGroup) {
+			return true;
+		}
+		return false;
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {

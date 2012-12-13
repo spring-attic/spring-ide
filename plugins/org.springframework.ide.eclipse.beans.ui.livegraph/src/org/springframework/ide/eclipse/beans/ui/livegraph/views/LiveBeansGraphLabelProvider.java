@@ -15,12 +15,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.zest.core.viewers.EntityConnectionData;
 import org.eclipse.zest.core.viewers.ISelfStyleProvider;
 import org.eclipse.zest.core.widgets.GraphConnection;
-import org.eclipse.zest.core.widgets.GraphContainer;
 import org.eclipse.zest.core.widgets.GraphNode;
-import org.eclipse.zest.layouts.LayoutStyles;
-import org.eclipse.zest.layouts.algorithms.HorizontalTreeLayoutAlgorithm;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
-import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansGroup;
 
 /**
  * A label provider for the Live Beans Graph
@@ -33,9 +29,6 @@ public class LiveBeansGraphLabelProvider extends LabelProvider implements ISelfS
 	public String getText(Object element) {
 		if (element instanceof LiveBean) {
 			return ((LiveBean) element).getDisplayName();
-		}
-		else if (element instanceof LiveBeansGroup) {
-			return ((LiveBeansGroup) element).getLabel();
 		}
 		else if (element instanceof EntityConnectionData) {
 			return "";
@@ -50,10 +43,6 @@ public class LiveBeansGraphLabelProvider extends LabelProvider implements ISelfS
 
 	public void selfStyleNode(Object element, GraphNode node) {
 		setTooltip(element, node);
-		if (node instanceof GraphContainer) {
-			GraphContainer container = (GraphContainer) node;
-			container.setLayoutAlgorithm(new HorizontalTreeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING), true);
-		}
 	}
 
 	private void setTooltip(Object element, GraphNode node) {
