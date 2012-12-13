@@ -90,12 +90,20 @@
     </quickAssistProcessor>
  </extension>
  <extension
+       id="com.springsource.sts.quickfix.springAnnotationProposals"
+       point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+       name="Spring Annotation Proposals">
+    <proposalCategory
+          icon="icons/full/obj16/annotation_obj.gif">
+    </proposalCategory>
+ </extension>
+ <extension
        id="com.springsource.sts.quickfix.jdt.proposal.computer"
        point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
        name="Spring Annotation Proposal">
     <javaCompletionProposalComputer
           activate="true"
-          categoryId="com.springsource.sts.quickfix.jdt.proposal.computer"
+          categoryId="com.springsource.sts.quickfix.springAnnotationProposals"
           class="org.springframework.ide.eclipse.quickfix.jdt.computers.AnnotationArgumentProposalComputer">
           <partition type="__java_string"/>
           <partition
