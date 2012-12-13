@@ -33,9 +33,11 @@ import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutStyles;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToApplicationAction;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.LoadModelAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanDefinitionAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.RefreshApplicationAction;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ToggleViewModeAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelCollection;
 
@@ -46,32 +48,19 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelCo
  */
 public class LiveBeansGraphView extends ViewPart {
 
-	private class LoadModelAction extends Action {
-
-		private final LiveBeansModel model;
-
-		public LoadModelAction(LiveBeansModel model) {
-			super(model.getApplicationName(), Action.AS_RADIO_BUTTON);
-			this.model = model;
-		}
-
-		@Override
-		public boolean isChecked() {
-			return model.equals(graphViewer.getInput());
-		}
-
-		@Override
-		public void run() {
-			setInput(model);
-		}
-
-	}
-
 	public static final String VIEW_ID = "org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView";
+
+	public static final int DISPLAY_MODE_GRAPH = 0;
+
+	public static final int DISPLAY_MODE_TREE = 1;
+
+	private ToggleViewModeAction[] displayModeActions;
 
 	private BaseSelectionListenerAction openBeanClassAction;
 
 	private BaseSelectionListenerAction openBeanDefAction;
+
+	private LiveBeansModel activeInput;
 
 	private Action connectApplicationAction;
 
@@ -80,27 +69,6 @@ public class LiveBeansGraphView extends ViewPart {
 	private GraphViewer graphViewer;
 
 	private TreeViewer treeViewer;
-
-	@Override
-	public void createPartControl(Composite parent) {
-		pagebook = new PageBook(parent, SWT.NONE);
-
-		makeActions();
-		hookPullDownMenu();
-
-		createGraphViewer();
-		createTreeViewer();
-
-		pagebook.showPage(graphViewer.getControl());
-	}
-
-	private void createTreeViewer() {
-		treeViewer = new TreeViewer(pagebook, SWT.NONE);
-		treeViewer.setContentProvider(new LiveBeansTreeContentProvider());
-		treeViewer.setLabelProvider(new LiveBeansTreeLabelProvider());
-		treeViewer.setSorter(new ViewerSorter());
-		getSite().setSelectionProvider(treeViewer);
-	}
 
 	private void createGraphViewer() {
 		graphViewer = new GraphViewer(pagebook, SWT.NONE);
@@ -131,6 +99,28 @@ public class LiveBeansGraphView extends ViewPart {
 	}
 
 	@Override
+	public void createPartControl(Composite parent) {
+		pagebook = new PageBook(parent, SWT.NONE);
+
+		makeActions();
+		hookPullDownMenu();
+		hookToolBar();
+
+		createGraphViewer();
+		createTreeViewer();
+
+		setDisplayMode(DISPLAY_MODE_GRAPH);
+	}
+
+	private void createTreeViewer() {
+		treeViewer = new TreeViewer(pagebook, SWT.NONE);
+		treeViewer.setContentProvider(new LiveBeansTreeContentProvider());
+		treeViewer.setLabelProvider(new LiveBeansTreeLabelProvider());
+		treeViewer.setSorter(new ViewerSorter());
+		getSite().setSelectionProvider(treeViewer);
+	}
+
+	@Override
 	public void dispose() {
 		if (graphViewer != null) {
 			graphViewer.removeSelectionChangedListener(openBeanClassAction);
@@ -152,18 +142,12 @@ public class LiveBeansGraphView extends ViewPart {
 			menuManager.add(new Separator());
 		}
 		for (LiveBeansModel model : collection) {
-			menuManager.add(new LoadModelAction(model));
+			menuManager.add(new LoadModelAction(this, model));
 		}
 	}
 
 	public LiveBeansModel getInput() {
-		if (graphViewer != null) {
-			Object obj = graphViewer.getInput();
-			if (obj instanceof LiveBeansModel) {
-				return (LiveBeansModel) obj;
-			}
-		}
-		return null;
+		return activeInput;
 	}
 
 	private void hookContextMenu() {
@@ -181,6 +165,16 @@ public class LiveBeansGraphView extends ViewPart {
 		graphViewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuManager, graphViewer);
 
+	}
+
+	private void hookToolBar() {
+		IActionBars bars = getViewSite().getActionBars();
+		IToolBarManager toolbar = bars.getToolBarManager();
+		for (ToggleViewModeAction displayModeAction : displayModeActions) {
+			toolbar.add(displayModeAction);
+		}
+		toolbar.add(new Separator());
+		toolbar.add(new RefreshApplicationAction(this));
 	}
 
 	private void hookPullDownMenu() {
@@ -205,9 +199,20 @@ public class LiveBeansGraphView extends ViewPart {
 
 		connectApplicationAction = new ConnectToApplicationAction(this);
 
-		IActionBars bars = getViewSite().getActionBars();
-		IToolBarManager toolbar = bars.getToolBarManager();
-		toolbar.add(new RefreshApplicationAction(this));
+		displayModeActions = new ToggleViewModeAction[] { new ToggleViewModeAction(this, DISPLAY_MODE_GRAPH),
+				new ToggleViewModeAction(this, DISPLAY_MODE_TREE) };
+	}
+
+	public void setDisplayMode(int mode) {
+		if (mode == DISPLAY_MODE_GRAPH) {
+			pagebook.showPage(graphViewer.getControl());
+		}
+		else if (mode == DISPLAY_MODE_TREE) {
+			pagebook.showPage(treeViewer.getControl());
+		}
+		for (ToggleViewModeAction action : displayModeActions) {
+			action.setChecked(mode == action.getDisplayMode());
+		}
 	}
 
 	@Override
@@ -217,11 +222,12 @@ public class LiveBeansGraphView extends ViewPart {
 	}
 
 	public void setInput(LiveBeansModel model) {
+		activeInput = model;
 		if (graphViewer != null) {
-			graphViewer.setInput(model);
+			graphViewer.setInput(activeInput);
 		}
 		if (treeViewer != null) {
-			treeViewer.setInput(model);
+			treeViewer.setInput(activeInput);
 		}
 	}
 

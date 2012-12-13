@@ -38,8 +38,8 @@ public class LiveBeansTreeContentProvider implements ITreeContentProvider {
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof LiveBeansModel) {
 			LiveBeansModel model = (LiveBeansModel) inputElement;
-			return model.getBeansByContext().toArray();
-			// return model.getBeansByResource().toArray();
+			// return model.getBeansByContext().toArray();
+			return model.getBeansByResource().toArray();
 		}
 		return null;
 	}
