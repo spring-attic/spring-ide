@@ -48,11 +48,10 @@ public class LiveBeansTreeLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof LiveBean) {
-			LiveBean bean = (LiveBean) element;
-			return bean.getDisplayName();
+			return ((LiveBean) element).getDisplayName();
 		}
 		else if (element instanceof LiveBeansGroup) {
-			return ((LiveBeansGroup) element).getLabel();
+			return ((LiveBeansGroup) element).getDisplayName();
 		}
 		return super.getText(element);
 	}

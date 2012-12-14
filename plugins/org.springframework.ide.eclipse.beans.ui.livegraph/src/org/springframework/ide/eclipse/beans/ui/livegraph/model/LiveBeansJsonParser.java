@@ -45,7 +45,7 @@ public class LiveBeansJsonParser {
 				group.addBean(bean);
 			}
 			else {
-				LiveBeansGroup group = new LiveBeansGroup(resource);
+				LiveBeansGroup group = new LiveBeansResource(resource);
 				group.addBean(bean);
 				resourceMap.put(resource, group);
 			}

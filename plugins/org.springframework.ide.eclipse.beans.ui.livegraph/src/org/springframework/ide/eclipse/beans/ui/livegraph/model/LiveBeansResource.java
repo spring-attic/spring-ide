@@ -13,19 +13,11 @@ package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 /**
  * @author Leo Dos Santos
  */
-public class LiveBeansContext extends LiveBeansGroup {
-
-	public static final String ATTR_CONTEXT = "context";
-
-	public static final String ATTR_PARENT = "parent";
-
-	public static final String ATTR_BEANS = "beans";
+public class LiveBeansResource extends LiveBeansGroup {
 
 	private String displayName;
 
-	private LiveBeansContext parent;
-
-	public LiveBeansContext(String label) {
+	public LiveBeansResource(String label) {
 		super(label);
 	}
 
@@ -34,23 +26,24 @@ public class LiveBeansContext extends LiveBeansGroup {
 		// compute the display name the first time it's needed
 		if (displayName == null) {
 			String label = getLabel();
-			int indexStart = label.lastIndexOf(":");
-			if (indexStart > -1 && indexStart < label.length()) {
-				displayName = label.substring(indexStart + 1, label.length());
+			if (label.equalsIgnoreCase("null")) {
+				displayName = "Container Generated";
+			}
+			else {
+				// Expecting the label to contain some form of
+				// "[file/path/to/resource.ext]" so we're going to parse out the
+				// last segment of the file path.
+				int indexStart = label.lastIndexOf("/");
+				int indexEnd = label.lastIndexOf("]");
+				if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd) {
+					displayName = label.substring(indexStart + 1, indexEnd);
+				}
 			}
 			if (displayName == null) {
 				displayName = label;
 			}
 		}
 		return displayName;
-	}
-
-	public LiveBeansContext getParent() {
-		return parent;
-	}
-
-	public void setParent(LiveBeansContext parent) {
-		this.parent = parent;
 	}
 
 }

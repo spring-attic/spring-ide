@@ -35,6 +35,10 @@ public class LiveBeansGroup {
 		return beans;
 	}
 
+	public String getDisplayName() {
+		return getLabel();
+	}
+
 	public String getLabel() {
 		return label;
 	}
