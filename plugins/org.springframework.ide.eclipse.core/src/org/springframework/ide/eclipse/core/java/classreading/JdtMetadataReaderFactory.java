@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Spring IDE Developers
+ * Copyright (c) 2009, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,17 +18,23 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 
 /**
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.2.5
  */
 public class JdtMetadataReaderFactory implements MetadataReaderFactory {
 
 	private final IJavaProject project;
+	private final ClassLoader classloader;
+	private final CachingClassReaderFactory classReaderFactory;
 
 	public JdtMetadataReaderFactory(IJavaProject project) {
 		this.project = project;
+		this.classloader = JdtUtils.getClassLoader(this.project.getProject(), null);
+		this.classReaderFactory = new CachingClassReaderFactory(this.classloader);
 	}
 
 	public MetadataReader getMetadataReader(String className) throws IOException {
@@ -43,7 +49,10 @@ public class JdtMetadataReaderFactory implements MetadataReaderFactory {
 		if (type == null) {
 			throw new IOException("Could not find " + className);
 		}
-		return new JdtMetadataReader(type);
+
+//		return new JdtMetadataReader(type);
+		return new JdtMetadataReaderAdaper(type, classReaderFactory, classloader);
+//		return new SimpleMetadataReaderFactory(classloader).getMetadataReader(className);
 	}
 
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
