@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,9 @@ import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 /**
  * Abstract base {@link IBeanMetadataProvider} that uses a {@link AnnotationMetadataReadingVisitor} to load annotation
  * meta data from the {@link IBean}'s bean class.
+ * 
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.5
  */
 public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMetadataProviderAdapter implements
@@ -115,6 +117,7 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 						&& !type.isBinary()) {
 					ClassReader classReader = classReaderFactory.getClassReader(className);
 					((AnnotationMetadataReadingVisitor) visitor).setType(type);
+					((AnnotationMetadataReadingVisitor) visitor).setClassloader(JdtUtils.getClassLoader(project, null));
 					classReader.accept((ClassVisitor) visitor, false);
 					className = ((AnnotationMetadataReadingVisitor) visitor).getSuperClassName();
 					type = JdtUtils.getJavaType(bean.getElementResource().getProject(), className);

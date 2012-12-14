@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Spring IDE Developers
+ * Copyright (c) 2008, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,9 @@ import java.util.Set;
 
 /**
  * Holder for annotation meta data.
+ * 
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.5
  */
 public class Annotation {
@@ -31,6 +33,15 @@ public class Annotation {
 
 	public void addMember(AnnotationMemberValuePair member) {
 		this.members.add(member);
+	}
+	
+	public boolean hasMember(String name) {
+		for (AnnotationMemberValuePair pair : this.members) {
+			if (name != null && name.equals(pair.getName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public String getAnnotationClass() {

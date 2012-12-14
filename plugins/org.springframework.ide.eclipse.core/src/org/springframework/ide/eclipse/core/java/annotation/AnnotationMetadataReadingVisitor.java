@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.annotation;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +27,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
@@ -33,13 +36,15 @@ import org.springframework.ide.eclipse.core.type.asm.ClassMetadataReadingVisitor
 import org.springframework.util.ClassUtils;
 
 /**
- * ASM based {@link ClassVisitor} that reads and stores all {@link java.lang.annotation.Annotation}s
- * from classes and methods. Furthermore this implementation saves all annotation members as well.
+ * ASM based {@link ClassVisitor} that reads and stores all
+ * {@link java.lang.annotation.Annotation}s from classes and methods.
+ * Furthermore this implementation saves all annotation members as well.
+ * 
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.5
  */
-public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements
-		IAnnotationMetadata {
+public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements IAnnotationMetadata {
 
 	private static EmptyVisitor EMPTY_VISITOR = new EmptyVisitor();
 
@@ -49,8 +54,14 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	private IType type;
 
+	private ClassLoader classloader;
+
 	public void setType(IType type) {
 		this.type = type;
+	}
+
+	public void setClassloader(ClassLoader classloader) {
+		this.classloader = classloader;
 	}
 
 	public Set<String> getTypeLevelAnnotationClasses() {
@@ -111,12 +122,11 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		final String annotationClass = Type.getType(desc).getClassName();
 		final Annotation annotation = new Annotation(annotationClass);
 		classAnnotations.add(annotation);
-		return new AnnotationMemberVisitor(annotation);
+		return new AnnotationMemberVisitor(annotation, this.classloader);
 	}
 
 	@Override
-	public MethodVisitor visitMethod(final int access, final String name, final String desc,
-			final String signature, String[] exceptions) {
+	public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, String[] exceptions) {
 		return new EmptyVisitor() {
 			@Override
 			public AnnotationVisitor visitAnnotation(final String annotationDesc, boolean visible) {
@@ -127,7 +137,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 					final Set<Annotation> methodAnnotations = getAnnotationSet(method);
 					final Annotation annotation = new Annotation(annotationClass);
 					methodAnnotations.add(annotation);
-					return new AnnotationMemberVisitor(annotation);
+					return new AnnotationMemberVisitor(annotation, classloader);
 				}
 				return EMPTY_VISITOR;
 			}
@@ -150,27 +160,68 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 				parameters.add(parameterType.getClassName());
 			}
 		}
-		final IMethod method = JdtUtils.getMethod(type, name, parameters
-				.toArray(new String[parameters.size()]));
+		
+		final IMethod method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]));
 		return method;
 	}
 
 	private static class AnnotationMemberVisitor extends EmptyVisitor {
 
 		private final Annotation annotation;
+		private final ClassLoader classloader;
 
-		public AnnotationMemberVisitor(Annotation annotation) {
+		public AnnotationMemberVisitor(Annotation annotation, ClassLoader classloader) {
 			this.annotation = annotation;
+			this.classloader = classloader;
+		}
+
+		@Override
+		public void visitEnd() {
+			try {
+				Class<?> annotationClass = this.classloader.loadClass(annotation.getAnnotationClass());
+				this.doVisitEnd(annotationClass);
+			} catch (ClassNotFoundException ex) {
+			}
+		}
+
+		protected void doVisitEnd(Class<?> annotationClass) {
+			registerDefaultValues(annotationClass);
+		}
+
+		private void registerDefaultValues(Class<?> annotationClass) {
+			// Check declared default values of attributes in the annotation
+			// type.
+			Method[] annotationAttributes = annotationClass.getMethods();
+			for (Method annotationAttribute : annotationAttributes) {
+				String attributeName = annotationAttribute.getName();
+				Object defaultValue = annotationAttribute.getDefaultValue();
+
+				if (defaultValue != null && !annotation.hasMember(attributeName)) {
+					// if (defaultValue instanceof Annotation) {
+					// defaultValue = AnnotationAttributes.fromMap(
+					// AnnotationUtils.getAnnotationAttributes((Annotation)defaultValue,
+					// false, true));
+					// }
+					// else if (defaultValue instanceof Annotation[]) {
+					// Annotation[] realAnnotations = (Annotation[])
+					// defaultValue;
+					// AnnotationAttributes[] mappedAnnotations = new
+					// AnnotationAttributes[realAnnotations.length];
+					// for (int i = 0; i < realAnnotations.length; i++) {
+					// mappedAnnotations[i] = AnnotationAttributes.fromMap(
+					// AnnotationUtils.getAnnotationAttributes(realAnnotations[i],
+					// false, true));
+					// }
+					// defaultValue = mappedAnnotations;
+					// }
+					annotation.addMember(new AnnotationMemberValuePair(attributeName, defaultValue.toString(), defaultValue));
+				}
+			}
 		}
 
 		@Override
 		public void visit(String name, Object value) {
-			if ("value".equals(name)) {
-				annotation.addMember(new AnnotationMemberValuePair(null, value.toString()));
-			}
-			else {
-				annotation.addMember(new AnnotationMemberValuePair(name, value.toString()));
-			}
+			annotation.addMember(new AnnotationMemberValuePair(name, value.toString(), value));
 		}
 
 		@Override
@@ -180,46 +231,53 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 		@Override
 		public AnnotationVisitor visitArray(final String name) {
-			final Set<String> values = new LinkedHashSet<String>();
+			final Set<Object> values = new LinkedHashSet<Object>();
 			return new EmptyVisitor() {
 
 				@Override
 				public void visit(String arg0, Object arg1) {
-					values.add(arg1.toString());
+					if (arg1 instanceof Type) {
+						try {
+							Class<?> clazz = classloader.loadClass(((Type) arg1).getClassName());
+							values.add(clazz);
+						} catch (ClassNotFoundException ex) {
+						}
+					} else {
+						values.add(arg1);
+					}
 				}
 
 				/**
-				 * @Controller("/index.htm") 
-				 * -> value = /index.htm
+				 * @Controller("/index.htm") -> value = /index.htm
 				 * 
-				 * @Controller({"/index1.htm" , "/index2.htm"}) 
-				 * -> value = /index1.htm, /index2.htm
+				 * @Controller({"/index1.htm" , "/index2.htm"}) -> value =
+				 *                            /index1.htm, /index2.htm
 				 * 
 				 * @Controller({ RequestMapping.GET, RequestMapping.POST})
-				 * @Controller({ org.swf.RequestMapping.GET, org.swf.RequestMapping.POST}) 
-				 * -> value = RequestMapping.GET, RequestMapping.POST
+				 * @Controller({ org.swf.RequestMapping.GET,
+				 *               org.swf.RequestMapping.POST}) -> value =
+				 *               RequestMapping.GET, RequestMapping.POST
 				 * 
 				 * @Controller(RequestMapping.GET)
-				 * @Controller(org.swf.RequestMapping.GET) 
-				 * -> value = RequestMapping.GET
+				 * @Controller(org.swf.RequestMapping.GET) -> value =
+				 *                                         RequestMapping.GET
 				 */
 				@Override
 				public void visitEnd() {
 					StringBuilder buf = new StringBuilder();
-					for (String value : values) {
-						buf.append(value);
+					Class typeOfArray = null;
+					for (Object value : values) {
+						typeOfArray = value.getClass();
+						buf.append(value.toString());
 						buf.append(", ");
 					}
 					String value = buf.toString();
 					if (value.length() > 0) {
 						value = value.substring(0, value.length() - 2);
 					}
-					if (name.equals("value")) {
-						annotation.addMember(new AnnotationMemberValuePair(null, value));
-					}
-					else {
-						annotation.addMember(new AnnotationMemberValuePair(name, value));
-					}
+
+					annotation.addMember(new AnnotationMemberValuePair(name, value, (Object[]) values.toArray((Object[]) Array.newInstance(
+							typeOfArray, values.size()))));
 				}
 
 				@Override
@@ -233,9 +291,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		@Override
 		public void visitEnum(String name, String type, String enumValue) {
 			String className = Type.getType(type).getClassName();
-			annotation.addMember(new AnnotationMemberValuePair(name, ClassUtils
-					.getShortName(className)
-					+ "." + enumValue));
+			annotation.addMember(new AnnotationMemberValuePair(name, ClassUtils.getShortName(className) + "." + enumValue));
 		}
 	}
 
