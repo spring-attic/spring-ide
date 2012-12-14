@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 public class JdtClassMetadata implements IJdtClassMetadata {
 
 	private final IType type;
+	private String superclassName;
+	private boolean superclassNameInitialized;
 
 	public JdtClassMetadata(IType type) {
 		this.type = type;
@@ -68,16 +70,19 @@ public class JdtClassMetadata implements IJdtClassMetadata {
 	}
 
 	public String getSuperClassName() {
-		try {
-			IType superType = Introspector.getSuperType(type);
-			if (superType != null) {
-				return superType.getFullyQualifiedName();
+		if (!superclassNameInitialized) {
+			try {
+				IType superType = Introspector.getSuperType(type);
+				if (superType != null) {
+					this.superclassName = superType.getFullyQualifiedName();
+				}
+				superclassNameInitialized = true;
+			}
+			catch (JavaModelException e) {
+				throw new JdtMetadataReaderException(e);
 			}
 		}
-		catch (JavaModelException e) {
-			throw new JdtMetadataReaderException(e);
-		}
-		return null;
+		return this.superclassName;
 	}
 
 	public boolean hasEnclosingClass() {
