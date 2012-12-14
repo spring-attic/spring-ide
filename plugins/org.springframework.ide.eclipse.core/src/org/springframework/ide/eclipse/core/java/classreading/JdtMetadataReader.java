@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.core.io.FileResource;
 public class JdtMetadataReader implements MetadataReader {
 
 	private final IType type;
+
 	private AnnotationMetadata annotationMetadata;
 	private ClassMetadata classMetadata;
 
