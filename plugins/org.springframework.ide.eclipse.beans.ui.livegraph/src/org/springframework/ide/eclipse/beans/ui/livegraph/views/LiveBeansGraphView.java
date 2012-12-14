@@ -18,6 +18,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -32,6 +33,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutStyles;
+import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToApplicationAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.LoadModelAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
@@ -49,6 +51,9 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelCo
 public class LiveBeansGraphView extends ViewPart {
 
 	public static final String VIEW_ID = "org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView";
+
+	public static final String PREF_DISPLAY_MODE = LiveGraphUiPlugin.PLUGIN_ID
+			+ ".prefs.displayMode.LiveBeansGraphView";
 
 	public static final int DISPLAY_MODE_GRAPH = 0;
 
@@ -69,6 +74,13 @@ public class LiveBeansGraphView extends ViewPart {
 	private GraphViewer graphViewer;
 
 	private TreeViewer treeViewer;
+
+	private final IPreferenceStore prefStore;
+
+	public LiveBeansGraphView() {
+		super();
+		prefStore = LiveGraphUiPlugin.getDefault().getPreferenceStore();
+	}
 
 	private void createGraphViewer() {
 		graphViewer = new GraphViewer(pagebook, SWT.NONE);
@@ -109,7 +121,7 @@ public class LiveBeansGraphView extends ViewPart {
 		createGraphViewer();
 		createTreeViewer();
 
-		setDisplayMode(DISPLAY_MODE_GRAPH);
+		setDisplayMode(prefStore.getInt(PREF_DISPLAY_MODE));
 	}
 
 	private void createTreeViewer() {
@@ -213,6 +225,7 @@ public class LiveBeansGraphView extends ViewPart {
 		for (ToggleViewModeAction action : displayModeActions) {
 			action.setChecked(mode == action.getDisplayMode());
 		}
+		prefStore.setValue(PREF_DISPLAY_MODE, mode);
 	}
 
 	@Override
