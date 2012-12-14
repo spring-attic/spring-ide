@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Spring IDE Developers
+ * Copyright (c) 2009, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,14 +17,15 @@ import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 
 /**
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.2.5
  */
 public class JdtSourceExtractor implements SourceExtractor {
 
 	public Object extractSource(Object sourceCandidate, Resource definingResource) {
-		if (sourceCandidate instanceof JdtMethodMetadata) {
+		if (sourceCandidate instanceof IJdtMethodMetadata) {
 			try {
-				return new JavaModelSourceLocation(((JdtMethodMetadata) sourceCandidate).getMethod());
+				return new JavaModelSourceLocation(((IJdtMethodMetadata) sourceCandidate).getMethod());
 			}
 			catch (JavaModelException e) {
 				throw new JdtMetadataReaderException(e);

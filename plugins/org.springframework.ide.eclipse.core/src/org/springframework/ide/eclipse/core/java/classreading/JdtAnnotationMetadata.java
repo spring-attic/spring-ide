@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 Spring IDE Developers
+ * Copyright (c) 2009, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,26 +21,30 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
 
 /**
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.2.5
  */
-public class JdtAnnotationMetadata extends JdtClassMetadata implements AnnotationMetadata {
+public class JdtAnnotationMetadata extends JdtClassMetadata implements IJdtAnnotationMetadata {
 
 	private final IType type;
 
 	private Map<String, Map<String, Object>> annotationMap = new HashMap<String, Map<String, Object>>();
-
 	private Set<MethodMetadata> methodMetadata = new HashSet<MethodMetadata>();
 
 	public JdtAnnotationMetadata(IType type) {
+		this(type, true);
+	}
+
+	public JdtAnnotationMetadata(IType type, boolean init) {
 		super(type);
 		this.type = type;
-		init();
+		
+		if (init) init();
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods() {
@@ -98,7 +102,7 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 		return false;
 	}
 
-	private void init() {
+	protected void init() {
 		try {
 			// Only collect the annotations for the given type; don't iterate up the hierarchy 
 			for (IAnnotation annotation : type.getAnnotations()) {
@@ -117,10 +121,6 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements Annotatio
 		catch (JavaModelException e) {
 			throw new JdtMetadataReaderException(e);
 		}
-	}
-
-	public IType getType() {
-		return type;
 	}
 
 	public boolean hasAnnotatedMethods(String annotationType) {

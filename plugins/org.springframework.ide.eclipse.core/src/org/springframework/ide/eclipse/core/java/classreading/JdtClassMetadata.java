@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 Spring IDE Developers
+ * Copyright (c) 2009, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,15 +18,15 @@ import java.util.Set;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.core.type.ClassMetadata;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.2.5
  */
-public class JdtClassMetadata implements ClassMetadata {
+public class JdtClassMetadata implements IJdtClassMetadata {
 
 	private final IType type;
 
@@ -140,6 +140,10 @@ public class JdtClassMetadata implements ClassMetadata {
 			throw new JdtMetadataReaderException(e);
 		}
 		return memberClassNames.toArray(new String[memberClassNames.size()]); 
+	}
+
+	public IType getType() {
+		return this.type;
 	}
 
 }

@@ -40,8 +40,8 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegistrationSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
-import org.springframework.ide.eclipse.core.java.classreading.JdtAnnotationMetadata;
-import org.springframework.ide.eclipse.core.java.classreading.JdtMethodMetadata;
+import org.springframework.ide.eclipse.core.java.classreading.IJdtAnnotationMetadata;
+import org.springframework.ide.eclipse.core.java.classreading.IJdtMethodMetadata;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
@@ -271,12 +271,12 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		}
 
 		private void createProblem(int severity, String message, Object source) {
-			if (source instanceof JdtMethodMetadata) {
-				IJavaElement je = ((JdtMethodMetadata) source).getMethod();
+			if (source instanceof IJdtMethodMetadata) {
+				IJavaElement je = ((IJdtMethodMetadata) source).getMethod();
 				createProblem(severity, postProcessingContext, message, je);
 			}
-			else if (source instanceof JdtAnnotationMetadata) {
-				IJavaElement je = ((JdtAnnotationMetadata) source).getType();
+			else if (source instanceof IJdtAnnotationMetadata) {
+				IJavaElement je = ((IJdtAnnotationMetadata) source).getType();
 				createProblem(severity, postProcessingContext, message, je);
 			}
 		}
