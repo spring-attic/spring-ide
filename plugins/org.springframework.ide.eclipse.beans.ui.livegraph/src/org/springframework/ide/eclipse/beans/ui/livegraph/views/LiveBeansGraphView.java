@@ -21,6 +21,9 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
@@ -61,6 +64,8 @@ public class LiveBeansGraphView extends ViewPart {
 
 	private ToggleViewModeAction[] displayModeActions;
 
+	private final MultiViewerSelectionProvider selectionProvider;
+
 	private BaseSelectionListenerAction openBeanClassAction;
 
 	private BaseSelectionListenerAction openBeanDefAction;
@@ -80,6 +85,7 @@ public class LiveBeansGraphView extends ViewPart {
 	public LiveBeansGraphView() {
 		super();
 		prefStore = LiveGraphUiPlugin.getDefault().getPreferenceStore();
+		selectionProvider = new MultiViewerSelectionProvider();
 	}
 
 	private void createGraphViewer() {
@@ -91,10 +97,8 @@ public class LiveBeansGraphView extends ViewPart {
 
 		ExtendedDirectedGraphLayoutAlgorithm layout = new ExtendedDirectedGraphLayoutAlgorithm(
 				LayoutStyles.NO_LAYOUT_NODE_RESIZING | SWT.HORIZONTAL);
-
 		graphViewer.setLayoutAlgorithm(layout);
 		graphViewer.applyLayout();
-		getSite().setSelectionProvider(graphViewer);
 
 		graphViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
@@ -103,24 +107,20 @@ public class LiveBeansGraphView extends ViewPart {
 				}
 			}
 		});
-
-		graphViewer.addSelectionChangedListener(openBeanClassAction);
-		graphViewer.addSelectionChangedListener(openBeanDefAction);
-
-		hookContextMenu();
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
 		pagebook = new PageBook(parent, SWT.NONE);
-
 		makeActions();
 		hookPullDownMenu();
 		hookToolBar();
-
 		createGraphViewer();
 		createTreeViewer();
-
+		getSite().setSelectionProvider(selectionProvider);
+		selectionProvider.addSelectionChangedListener(openBeanClassAction);
+		selectionProvider.addSelectionChangedListener(openBeanDefAction);
+		hookContextMenu();
 		setDisplayMode(prefStore.getInt(PREF_DISPLAY_MODE));
 	}
 
@@ -129,15 +129,20 @@ public class LiveBeansGraphView extends ViewPart {
 		treeViewer.setContentProvider(new LiveBeansTreeContentProvider());
 		treeViewer.setLabelProvider(new LiveBeansTreeLabelProvider());
 		treeViewer.setSorter(new ViewerSorter());
-		getSite().setSelectionProvider(treeViewer);
+
+		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				if (openBeanDefAction != null && openBeanDefAction.isEnabled()) {
+					openBeanDefAction.run();
+				}
+			}
+		});
 	}
 
 	@Override
 	public void dispose() {
-		if (graphViewer != null) {
-			graphViewer.removeSelectionChangedListener(openBeanClassAction);
-			graphViewer.removeSelectionChangedListener(openBeanDefAction);
-		}
+		selectionProvider.removeSelectionChangedListener(openBeanClassAction);
+		selectionProvider.removeSelectionChangedListener(openBeanDefAction);
 		super.dispose();
 	}
 
@@ -165,28 +170,18 @@ public class LiveBeansGraphView extends ViewPart {
 	private void hookContextMenu() {
 		MenuManager menuManager = new MenuManager();
 		menuManager.setRemoveAllWhenShown(true);
-		fillContextMenu(menuManager);
-
 		menuManager.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
-				fillContextMenu(manager);
+				ISelection selection = selectionProvider.getSelection();
+				if (!selection.isEmpty()) {
+					fillContextMenu(manager);
+				}
 			}
 		});
 
-		Menu menu = menuManager.createContextMenu(graphViewer.getControl());
-		graphViewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuManager, graphViewer);
-
-	}
-
-	private void hookToolBar() {
-		IActionBars bars = getViewSite().getActionBars();
-		IToolBarManager toolbar = bars.getToolBarManager();
-		for (ToggleViewModeAction displayModeAction : displayModeActions) {
-			toolbar.add(displayModeAction);
-		}
-		toolbar.add(new Separator());
-		toolbar.add(new RefreshApplicationAction(this));
+		Menu menu = menuManager.createContextMenu(getViewSite().getShell());
+		getViewSite().getShell().setMenu(menu);
+		getSite().registerContextMenu(menuManager, selectionProvider);
 	}
 
 	private void hookPullDownMenu() {
@@ -202,15 +197,20 @@ public class LiveBeansGraphView extends ViewPart {
 		});
 	}
 
+	private void hookToolBar() {
+		IActionBars bars = getViewSite().getActionBars();
+		IToolBarManager toolbar = bars.getToolBarManager();
+		for (ToggleViewModeAction displayModeAction : displayModeActions) {
+			toolbar.add(displayModeAction);
+		}
+		toolbar.add(new Separator());
+		toolbar.add(new RefreshApplicationAction(this));
+	}
+
 	private void makeActions() {
 		openBeanClassAction = new OpenBeanClassAction();
-		openBeanClassAction.setEnabled(false);
-
 		openBeanDefAction = new OpenBeanDefinitionAction();
-		openBeanDefAction.setEnabled(false);
-
 		connectApplicationAction = new ConnectToApplicationAction(this);
-
 		displayModeActions = new ToggleViewModeAction[] { new ToggleViewModeAction(this, DISPLAY_MODE_GRAPH),
 				new ToggleViewModeAction(this, DISPLAY_MODE_TREE) };
 	}
@@ -242,6 +242,47 @@ public class LiveBeansGraphView extends ViewPart {
 		if (treeViewer != null) {
 			treeViewer.setInput(activeInput);
 		}
+	}
+
+	private class MultiViewerSelectionProvider implements ISelectionProvider {
+
+		public void addSelectionChangedListener(ISelectionChangedListener listener) {
+			if (graphViewer != null) {
+				graphViewer.addSelectionChangedListener(listener);
+			}
+			if (treeViewer != null) {
+				treeViewer.addSelectionChangedListener(listener);
+			}
+		}
+
+		public ISelection getSelection() {
+			if (graphViewer != null && !graphViewer.getControl().isDisposed() && graphViewer.getControl().isVisible()) {
+				return graphViewer.getSelection();
+			}
+			if (treeViewer != null && !treeViewer.getControl().isDisposed() && treeViewer.getControl().isVisible()) {
+				return treeViewer.getSelection();
+			}
+			return null;
+		}
+
+		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+			if (graphViewer != null) {
+				graphViewer.removeSelectionChangedListener(listener);
+			}
+			if (treeViewer != null) {
+				treeViewer.removeSelectionChangedListener(listener);
+			}
+		}
+
+		public void setSelection(ISelection selection) {
+			if (graphViewer != null && !graphViewer.getControl().isDisposed() && graphViewer.getControl().isVisible()) {
+				graphViewer.setSelection(selection);
+			}
+			else if (treeViewer != null && !treeViewer.getControl().isDisposed() && treeViewer.getControl().isVisible()) {
+				treeViewer.setSelection(selection);
+			}
+		}
+
 	}
 
 }
