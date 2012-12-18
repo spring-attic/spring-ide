@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -24,9 +25,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.ui.SharedImages;
+import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 import org.eclipse.jdt.ui.ISharedImages;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -39,6 +43,7 @@ import org.springframework.util.StringUtils;
  * Completion proposal computer to calculate Spring Data query keyword proposals and entity property proposals.
  * 
  * @author Oliver Gierke
+ * @author Tomasz Zarna
  */
 @SuppressWarnings("restriction")
 public class EntityPropertyCompletionProposals extends JavaCompletionProposalComputer {
@@ -73,6 +78,13 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 
 			if (element instanceof SourceMethod) {
 				return computeCompletionProposals((SourceMethod) element, javaContext);
+			} else {
+				if (element != null) {
+					IType type = (IType) element.getAncestor(IJavaElement.TYPE);
+					if (type != null) {
+						return computeCompletionProposals(type, javaContext);
+					}
+				}
 			}
 
 		} catch (JavaModelException e) {
@@ -82,51 +94,72 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 		return Collections.emptyList();
 	}
 
-	/**
-	 * @param element
-	 * @param javaContext
-	 * @return
-	 * @throws JavaModelException
-	 */
 	private List<ICompletionProposal> computeCompletionProposals(SourceMethod element,
 			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-
 		RepositoryInformation information = RepositoryInformation.create(element);
-		if (null == information) {
+		if (information == null) {
 			return Collections.emptyList();
 		}
+		int offset = javaContext.getCoreContext().getOffset();
+		int positionInMethodName = offset - element.getNameRange().getOffset();
+		String elementName = element.getElementName();
+
+		return computeCompletionProposals(javaContext, information, positionInMethodName, elementName);
+	}
+
+	private List<ICompletionProposal> computeCompletionProposals(IType type,
+			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		RepositoryInformation information = RepositoryInformation.create(type);
+		if (information == null)
+			return Collections.emptyList();
+		char[] token = javaContext.getCoreContext().getToken();
+		if (token == null)
+			return Collections.emptyList();
+		String elementName = String.valueOf(token);
+		if (elementName.isEmpty())
+			return Collections.emptyList();
+		int offset = javaContext.getCoreContext().getOffset();
+		int positionInMethodName = offset - javaContext.getCoreContext().getTokenStart();
+
+		return computeCompletionProposals(javaContext, information, positionInMethodName, elementName);
+	}
+
+	private List<ICompletionProposal> computeCompletionProposals(
+			JavaContentAssistInvocationContext javaContext,
+			RepositoryInformation information, int positionInMethodName,
+			String elementName) throws JavaModelException {
 
 		IJavaProject project = javaContext.getProject();
-		
+
 		Class<?> managedDomainClass = information.getManagedDomainClass();
 		if (managedDomainClass == null) {
 			return Collections.emptyList();
 		}
-		
+
 		IType domainType = project.findType(managedDomainClass.getName());
-		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 		int offset = javaContext.getCoreContext().getOffset();
-		int positionInMethodName = offset - element.getNameRange().getOffset();
 
 		KeywordProvider keywordProvider = information.getKeywordProvider(project);
-		QueryMethodCandidate candidate = new QueryMethodCandidate(element.getElementName(),
+		QueryMethodCandidate candidate = new QueryMethodCandidate(elementName,
 				information.getManagedDomainClass());
 		QueryMethodPart part = candidate.getPartAtPosition(positionInMethodName);
 
 		if (part == null) {
-			return proposals;
+			return Collections.emptyList();
 		}
 
 		KeywordProposalsProvider keywordProposalsProvider = new KeywordProposalsProvider(keywordProvider);
 
 		IType type = part.isRoot() ? domainType : project.findType(part.getPathLeaf().getType().getName());
 
-		if (type != null) {
-			proposals.addAll(getProposalsFor(type, part, offset));
-			proposals.addAll(keywordProposalsProvider.getProposalsFor(type, offset, part));
+		if (type == null) {
+			return Collections.emptyList();
 		}
 
+		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+		proposals.addAll(getProposalsFor(type, part, offset));
+		proposals.addAll(keywordProposalsProvider.getProposalsFor(type, offset, part));
 		return proposals;
 	}
 
