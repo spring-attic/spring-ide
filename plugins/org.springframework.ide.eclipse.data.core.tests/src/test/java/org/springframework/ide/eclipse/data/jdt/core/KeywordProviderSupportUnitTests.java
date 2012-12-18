@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.data.jdt.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -28,6 +28,7 @@ import org.springframework.data.repository.query.parser.Part.Type;
  * Unit tests for {@link KeywordProviderSupport}.
  * 
  * @author Oliver Gierke
+ * @author Tomasz Zarna
  */
 @RunWith(MockitoJUnitRunner.class)
 public class KeywordProviderSupportUnitTests {

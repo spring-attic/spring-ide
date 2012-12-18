@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
  * inspected.
  * 
  * @author Oliver Gierke
+ * @author Tomasz Zarna
  */
 public class KeywordProviderSupport implements KeywordProvider {
 
@@ -145,7 +146,7 @@ public class KeywordProviderSupport implements KeywordProvider {
 		Set<Type> keywords = new HashSet<Type>();
 
 		for (String typeKey : keywordSuperset.keySet()) {
-			if (type.getFullyQualifiedName().equals(typeKey) || predicates.typeImplements(type, typeKey)) {
+			if (typeKey.equals(type.getFullyQualifiedName()) || predicates.typeImplements(type, typeKey)) {
 				keywords.addAll(keywordSuperset.get(typeKey));
 			}
 		}
