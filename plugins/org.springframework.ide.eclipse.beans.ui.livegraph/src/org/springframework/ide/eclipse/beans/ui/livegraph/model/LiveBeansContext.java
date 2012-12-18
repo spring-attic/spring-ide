@@ -27,6 +27,7 @@ public class LiveBeansContext extends LiveBeansGroup {
 
 	public LiveBeansContext(String label) {
 		super(label);
+		attributes.put(ATTR_CONTEXT, label);
 	}
 
 	@Override
@@ -51,6 +52,7 @@ public class LiveBeansContext extends LiveBeansGroup {
 
 	public void setParent(LiveBeansContext parent) {
 		this.parent = parent;
+		attributes.put(ATTR_PARENT, parent.getLabel());
 	}
 
 }

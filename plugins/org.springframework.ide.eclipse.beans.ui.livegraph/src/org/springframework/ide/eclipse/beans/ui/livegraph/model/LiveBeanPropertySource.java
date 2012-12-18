@@ -24,12 +24,12 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
  */
 public class LiveBeanPropertySource implements IPropertySource {
 
-	private final LiveBean bean;
+	private final AbstractLiveBeansModelElement model;
 
 	private IPropertyDescriptor[] descriptors;
 
-	public LiveBeanPropertySource(LiveBean bean) {
-		this.bean = bean;
+	public LiveBeanPropertySource(AbstractLiveBeansModelElement model) {
+		this.model = model;
 	}
 
 	public Object getEditableValue() {
@@ -40,7 +40,7 @@ public class LiveBeanPropertySource implements IPropertySource {
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		if (descriptors == null) {
 			List<IPropertyDescriptor> descrList = new ArrayList<IPropertyDescriptor>();
-			Map<String, String> attributes = bean.getAttributes();
+			Map<String, String> attributes = model.getAttributes();
 			Set<String> keys = attributes.keySet();
 			for (String key : keys) {
 				PropertyDescriptor desc = new PropertyDescriptor(key, key);
@@ -52,7 +52,7 @@ public class LiveBeanPropertySource implements IPropertySource {
 	}
 
 	public Object getPropertyValue(Object id) {
-		return bean.getAttributes().get(id);
+		return model.getAttributes().get(id);
 	}
 
 	public boolean isPropertySet(Object id) {

@@ -16,13 +16,14 @@ import java.util.List;
 /**
  * @author Leo Dos Santos
  */
-public class LiveBeansGroup {
+public class LiveBeansGroup extends AbstractLiveBeansModelElement {
 
 	private final String label;
 
 	private final List<LiveBean> beans;
 
 	public LiveBeansGroup(String label) {
+		super();
 		this.label = label;
 		beans = new ArrayList<LiveBean>();
 	}

@@ -19,6 +19,7 @@ public class LiveBeansResource extends LiveBeansGroup {
 
 	public LiveBeansResource(String label) {
 		super(label);
+		attributes.put(LiveBean.ATTR_RESOURCE, label);
 	}
 
 	@Override
