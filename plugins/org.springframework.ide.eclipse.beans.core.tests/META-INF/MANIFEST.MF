@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Tests Plug-in
+Bundle-Name: Spring IDE Beans Core Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.core.tests
 Bundle-Version: 3.2.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.core.tests.Activator
@@ -12,6 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.core,
  org.junit4,
  org.springframework.ide.eclipse.beans.core.autowire,
- org.springsource.ide.eclipse.commons.tests.util
+ org.springsource.ide.eclipse.commons.tests.util,
+ org.springframework.asm
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Vendor: Spring IDE Developers
