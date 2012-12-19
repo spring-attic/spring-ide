@@ -39,6 +39,7 @@ import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutStyles;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToApplicationAction;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.FilterInnerBeansAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.LoadModelAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanDefinitionAction;
@@ -62,6 +63,9 @@ public class LiveBeansGraphView extends ViewPart {
 
 	public static final String PREF_GROUP_MODE = LiveGraphUiPlugin.PLUGIN_ID + ".prefs.groupByMode.LiveBeansGraphView";
 
+	public static final String PREF_FILTER_INNER_BEANS = LiveGraphUiPlugin.PLUGIN_ID
+			+ ".prefs.filterInnerBeans.LiveBeansGraphView";
+
 	public static final int DISPLAY_MODE_GRAPH = 0;
 
 	public static final int DISPLAY_MODE_TREE = 1;
@@ -79,6 +83,10 @@ public class LiveBeansGraphView extends ViewPart {
 	private BaseSelectionListenerAction openBeanClassAction;
 
 	private BaseSelectionListenerAction openBeanDefAction;
+
+	private FilterInnerBeansAction filterInnerBeansAction;
+
+	private final InnerBeansViewerFilter innerBeansFilter;
 
 	private LiveBeansModel activeInput;
 
@@ -100,6 +108,7 @@ public class LiveBeansGraphView extends ViewPart {
 		super();
 		prefStore = LiveGraphUiPlugin.getDefault().getPreferenceStore();
 		selectionProvider = new MultiViewerSelectionProvider();
+		innerBeansFilter = new InnerBeansViewerFilter();
 	}
 
 	private void createGraphViewer() {
@@ -112,7 +121,6 @@ public class LiveBeansGraphView extends ViewPart {
 		ExtendedDirectedGraphLayoutAlgorithm layout = new ExtendedDirectedGraphLayoutAlgorithm(
 				LayoutStyles.NO_LAYOUT_NODE_RESIZING | SWT.HORIZONTAL);
 		graphViewer.setLayoutAlgorithm(layout);
-		graphViewer.applyLayout();
 
 		graphViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
@@ -137,6 +145,7 @@ public class LiveBeansGraphView extends ViewPart {
 		hookContextMenu();
 		setDisplayMode(prefStore.getInt(PREF_DISPLAY_MODE));
 		setGroupByMode(prefStore.getInt(PREF_GROUP_MODE));
+		setFilterInnerBeans(prefStore.getBoolean(PREF_FILTER_INNER_BEANS));
 	}
 
 	private void createTreeViewer() {
@@ -181,6 +190,10 @@ public class LiveBeansGraphView extends ViewPart {
 			for (ToggleGroupByAction action : groupByActions) {
 				menuManager.add(action);
 			}
+		}
+		if (activeDisplayMode == DISPLAY_MODE_GRAPH) {
+			menuManager.add(new Separator());
+			menuManager.add(filterInnerBeansAction);
 		}
 	}
 
@@ -242,6 +255,7 @@ public class LiveBeansGraphView extends ViewPart {
 				new ToggleViewModeAction(this, DISPLAY_MODE_TREE) };
 		groupByActions = new ToggleGroupByAction[] { new ToggleGroupByAction(this, GROUP_BY_RESOURCE),
 				new ToggleGroupByAction(this, GROUP_BY_CONTEXT) };
+		filterInnerBeansAction = new FilterInnerBeansAction(this);
 	}
 
 	public void setDisplayMode(int mode) {
@@ -287,6 +301,20 @@ public class LiveBeansGraphView extends ViewPart {
 		if (treeViewer != null) {
 			treeViewer.setInput(activeInput);
 		}
+	}
+
+	public void setFilterInnerBeans(boolean filtered) {
+		if (graphViewer != null) {
+			if (filtered) {
+				graphViewer.addFilter(innerBeansFilter);
+			}
+			else {
+				graphViewer.removeFilter(innerBeansFilter);
+			}
+			graphViewer.applyLayout();
+		}
+		filterInnerBeansAction.setChecked(filtered);
+		prefStore.setValue(PREF_FILTER_INNER_BEANS, filtered);
 	}
 
 	private class MultiViewerSelectionProvider implements ISelectionProvider {

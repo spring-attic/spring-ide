@@ -1,0 +1,31 @@
+/*******************************************************************************
+ *  Copyright (c) 2012 VMware, Inc.
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  Contributors:
+ *      VMware, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.beans.ui.livegraph.views;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
+
+/**
+ * @author Leo Dos Santos
+ */
+public class InnerBeansViewerFilter extends ViewerFilter {
+
+	@Override
+	public boolean select(Viewer viewer, Object parentElement, Object element) {
+		if (element instanceof LiveBean) {
+			LiveBean bean = (LiveBean) element;
+			return !bean.isInnerBean();
+		}
+		return true;
+	}
+
+}

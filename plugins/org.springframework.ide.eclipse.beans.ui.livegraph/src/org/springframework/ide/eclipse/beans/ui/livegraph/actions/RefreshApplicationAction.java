@@ -29,8 +29,7 @@ public class RefreshApplicationAction extends Action {
 	private final LiveBeansGraphView view;
 
 	public RefreshApplicationAction(LiveBeansGraphView view) {
-		super("Refresh Graph");
-		setImageDescriptor(CommonImages.REFRESH);
+		super("Refresh Graph", CommonImages.REFRESH);
 		this.view = view;
 	}
 

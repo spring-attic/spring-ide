@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -30,6 +32,13 @@ public class LiveGraphUiPlugin extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public LiveGraphUiPlugin() {
+	}
+
+	@Override
+	protected void initializeDefaultPreferences(IPreferenceStore store) {
+		store.setDefault(LiveBeansGraphView.PREF_DISPLAY_MODE, LiveBeansGraphView.DISPLAY_MODE_GRAPH);
+		store.setDefault(LiveBeansGraphView.PREF_GROUP_MODE, LiveBeansGraphView.GROUP_BY_RESOURCE);
+		store.setDefault(LiveBeansGraphView.PREF_FILTER_INNER_BEANS, true);
 	}
 
 	/*
