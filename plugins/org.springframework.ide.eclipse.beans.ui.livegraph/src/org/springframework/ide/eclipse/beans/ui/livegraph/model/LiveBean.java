@@ -38,9 +38,16 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 
 	private final Set<LiveBean> dependencies;
 
+	private final boolean innerBean;
+
 	public LiveBean(String id) {
+		this(id, false);
+	}
+
+	public LiveBean(String id, boolean innerBean) {
 		super();
 		this.beanId = id;
+		this.innerBean = innerBean;
 		dependencies = new HashSet<LiveBean>();
 		attributes.put(ATTR_BEAN, id);
 	}
@@ -65,7 +72,7 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 		// compute the display name the first time it's needed
 		if (displayName == null) {
 			// truncate Class names and name with multiple segments
-			if (beanId.contains(getBeanType()) || StringUtils.countMatches(beanId, ".") > 1) {
+			if ((getBeanType() != null && beanId.contains(getBeanType())) || StringUtils.countMatches(beanId, ".") > 1) {
 				int index = beanId.lastIndexOf('.');
 				if (index >= 0) {
 					displayName = beanId.substring(index + 1, beanId.length());
@@ -88,6 +95,10 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 
 	public String getScope() {
 		return attributes.get(ATTR_SCOPE);
+	}
+
+	public boolean isInnerBean() {
+		return innerBean;
 	}
 
 }

@@ -125,6 +125,9 @@ public class LiveBeansJsonParser {
 						if (dependencyBean != null) {
 							bean.addDependency(dependencyBean);
 						}
+						else {
+							bean.addDependency(new LiveBean(dependency, true));
+						}
 					}
 				}
 			}
