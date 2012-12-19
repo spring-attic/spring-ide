@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -42,6 +43,7 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.actions.LoadModelActio
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanDefinitionAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.RefreshApplicationAction;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ToggleGroupByAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ToggleViewModeAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelCollection;
@@ -58,11 +60,19 @@ public class LiveBeansGraphView extends ViewPart {
 	public static final String PREF_DISPLAY_MODE = LiveGraphUiPlugin.PLUGIN_ID
 			+ ".prefs.displayMode.LiveBeansGraphView";
 
+	public static final String PREF_GROUP_MODE = LiveGraphUiPlugin.PLUGIN_ID + ".prefs.groupByMode.LiveBeansGraphView";
+
 	public static final int DISPLAY_MODE_GRAPH = 0;
 
 	public static final int DISPLAY_MODE_TREE = 1;
 
+	public static final int GROUP_BY_RESOURCE = 0;
+
+	public static final int GROUP_BY_CONTEXT = 1;
+
 	private ToggleViewModeAction[] displayModeActions;
+
+	private ToggleGroupByAction[] groupByActions;
 
 	private final MultiViewerSelectionProvider selectionProvider;
 
@@ -81,6 +91,10 @@ public class LiveBeansGraphView extends ViewPart {
 	private TreeViewer treeViewer;
 
 	private final IPreferenceStore prefStore;
+
+	private int activeDisplayMode;
+
+	private int activeGroupByMode;
 
 	public LiveBeansGraphView() {
 		super();
@@ -122,11 +136,12 @@ public class LiveBeansGraphView extends ViewPart {
 		selectionProvider.addSelectionChangedListener(openBeanDefAction);
 		hookContextMenu();
 		setDisplayMode(prefStore.getInt(PREF_DISPLAY_MODE));
+		setGroupByMode(prefStore.getInt(PREF_GROUP_MODE));
 	}
 
 	private void createTreeViewer() {
 		treeViewer = new TreeViewer(pagebook, SWT.NONE);
-		treeViewer.setContentProvider(new LiveBeansTreeContentProvider());
+		treeViewer.setContentProvider(new LiveBeansTreeContentProvider(this));
 		treeViewer.setLabelProvider(new LiveBeansTreeLabelProvider());
 		treeViewer.setSorter(new ViewerSorter());
 
@@ -161,6 +176,16 @@ public class LiveBeansGraphView extends ViewPart {
 		for (LiveBeansModel model : collection) {
 			menuManager.add(new LoadModelAction(this, model));
 		}
+		if (activeDisplayMode == DISPLAY_MODE_TREE) {
+			menuManager.add(new Separator());
+			for (ToggleGroupByAction action : groupByActions) {
+				menuManager.add(action);
+			}
+		}
+	}
+
+	public int getGroupByMode() {
+		return activeGroupByMode;
 	}
 
 	public LiveBeansModel getInput() {
@@ -188,8 +213,6 @@ public class LiveBeansGraphView extends ViewPart {
 		IActionBars bars = getViewSite().getActionBars();
 		IMenuManager menuManager = bars.getMenuManager();
 		menuManager.setRemoveAllWhenShown(true);
-		fillPullDownMenu(bars.getMenuManager());
-
 		menuManager.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
 				fillPullDownMenu(manager);
@@ -207,12 +230,18 @@ public class LiveBeansGraphView extends ViewPart {
 		toolbar.add(new RefreshApplicationAction(this));
 	}
 
+	private boolean isViewerVisible(Viewer viewer) {
+		return viewer != null && !viewer.getControl().isDisposed() && viewer.getControl().isVisible();
+	}
+
 	private void makeActions() {
 		openBeanClassAction = new OpenBeanClassAction();
 		openBeanDefAction = new OpenBeanDefinitionAction();
 		connectApplicationAction = new ConnectToApplicationAction(this);
 		displayModeActions = new ToggleViewModeAction[] { new ToggleViewModeAction(this, DISPLAY_MODE_GRAPH),
 				new ToggleViewModeAction(this, DISPLAY_MODE_TREE) };
+		groupByActions = new ToggleGroupByAction[] { new ToggleGroupByAction(this, GROUP_BY_RESOURCE),
+				new ToggleGroupByAction(this, GROUP_BY_CONTEXT) };
 	}
 
 	public void setDisplayMode(int mode) {
@@ -225,13 +254,29 @@ public class LiveBeansGraphView extends ViewPart {
 		for (ToggleViewModeAction action : displayModeActions) {
 			action.setChecked(mode == action.getDisplayMode());
 		}
+		activeDisplayMode = mode;
 		prefStore.setValue(PREF_DISPLAY_MODE, mode);
 	}
 
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
+		if (isViewerVisible(graphViewer)) {
+			graphViewer.getControl().setFocus();
+		}
+		else if (isViewerVisible(treeViewer)) {
+			treeViewer.getControl().setFocus();
+		}
+	}
 
+	public void setGroupByMode(int mode) {
+		activeGroupByMode = mode;
+		if (isViewerVisible(treeViewer)) {
+			treeViewer.refresh();
+		}
+		for (ToggleGroupByAction action : groupByActions) {
+			action.setChecked(mode == action.getGroupByMode());
+		}
+		prefStore.setValue(PREF_GROUP_MODE, mode);
 	}
 
 	public void setInput(LiveBeansModel model) {
@@ -256,10 +301,10 @@ public class LiveBeansGraphView extends ViewPart {
 		}
 
 		public ISelection getSelection() {
-			if (graphViewer != null && !graphViewer.getControl().isDisposed() && graphViewer.getControl().isVisible()) {
+			if (isViewerVisible(graphViewer)) {
 				return graphViewer.getSelection();
 			}
-			if (treeViewer != null && !treeViewer.getControl().isDisposed() && treeViewer.getControl().isVisible()) {
+			if (isViewerVisible(treeViewer)) {
 				return treeViewer.getSelection();
 			}
 			return null;
@@ -275,10 +320,10 @@ public class LiveBeansGraphView extends ViewPart {
 		}
 
 		public void setSelection(ISelection selection) {
-			if (graphViewer != null && !graphViewer.getControl().isDisposed() && graphViewer.getControl().isVisible()) {
+			if (isViewerVisible(graphViewer)) {
 				graphViewer.setSelection(selection);
 			}
-			else if (treeViewer != null && !treeViewer.getControl().isDisposed() && treeViewer.getControl().isVisible()) {
+			else if (isViewerVisible(treeViewer)) {
 				treeViewer.setSelection(selection);
 			}
 		}

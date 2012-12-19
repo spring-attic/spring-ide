@@ -22,6 +22,12 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
  */
 public class LiveBeansTreeContentProvider implements ITreeContentProvider {
 
+	private final LiveBeansGraphView view;
+
+	public LiveBeansTreeContentProvider(LiveBeansGraphView view) {
+		this.view = view;
+	}
+
 	public void dispose() {
 		// TODO Auto-generated method stub
 
@@ -38,8 +44,12 @@ public class LiveBeansTreeContentProvider implements ITreeContentProvider {
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof LiveBeansModel) {
 			LiveBeansModel model = (LiveBeansModel) inputElement;
-			// return model.getBeansByContext().toArray();
-			return model.getBeansByResource().toArray();
+			if (view.getGroupByMode() == LiveBeansGraphView.GROUP_BY_RESOURCE) {
+				return model.getBeansByResource().toArray();
+			}
+			else if (view.getGroupByMode() == LiveBeansGraphView.GROUP_BY_CONTEXT) {
+				return model.getBeansByContext().toArray();
+			}
 		}
 		return null;
 	}
