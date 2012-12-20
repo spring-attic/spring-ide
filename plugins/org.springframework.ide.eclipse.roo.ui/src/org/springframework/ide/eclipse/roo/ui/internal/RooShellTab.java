@@ -66,7 +66,6 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
 import org.springframework.ide.eclipse.roo.core.model.IRooInstall;
 import org.springframework.ide.eclipse.roo.ui.RooUiActivator;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.roo.shell.eclipse.Bootstrap;
 import org.springframework.roo.shell.eclipse.ProjectRefresher;
 import org.springframework.util.StringUtils;
@@ -75,6 +74,7 @@ import org.springsource.ide.eclipse.commons.core.Entry;
 import org.springsource.ide.eclipse.commons.core.ICommandHistory;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.commands.ICommandListener;
 import org.springsource.ide.eclipse.commons.ui.CommandHistoryPopupList;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 
 /**
@@ -257,7 +257,7 @@ public class RooShellTab {
 		RooShellProposalProvider proposalProvider = new RooShellProposalProvider(text);
 		TextContentAdapter textContentAdapter = new TextContentAdapter();
 		ContentProposalAdapter adapter = new ContentProposalAdapter(text, textContentAdapter, proposalProvider,
-				KeyStroke.getInstance(SWT.CTRL, ' '), null);
+				KeyStroke.getInstance(SWT.CTRL, SWT.SPACE), null);
 		ILabelProvider labelProvider = new LabelProvider();
 		adapter.setLabelProvider(labelProvider);
 		adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
