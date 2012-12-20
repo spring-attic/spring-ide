@@ -38,6 +38,8 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 
 	private final Set<LiveBean> dependencies;
 
+	private final Set<LiveBean> injectedInto;
+
 	private final boolean innerBean;
 
 	public LiveBean(String id) {
@@ -49,11 +51,13 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 		this.beanId = id;
 		this.innerBean = innerBean;
 		dependencies = new HashSet<LiveBean>();
+		injectedInto = new HashSet<LiveBean>();
 		attributes.put(ATTR_BEAN, id);
 	}
 
 	public void addDependency(LiveBean dependency) {
 		dependencies.add(dependency);
+		dependency.injectInto(this);
 	}
 
 	public String getApplicationName() {
@@ -89,12 +93,20 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 		return beanId;
 	}
 
+	public Set<LiveBean> getInjectedInto() {
+		return injectedInto;
+	}
+
 	public String getResource() {
 		return attributes.get(ATTR_RESOURCE);
 	}
 
 	public String getScope() {
 		return attributes.get(ATTR_SCOPE);
+	}
+
+	private void injectInto(LiveBean dependency) {
+		injectedInto.add(dependency);
 	}
 
 	public boolean isInnerBean() {
