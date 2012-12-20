@@ -164,8 +164,7 @@
 
 		<!-- data -->
 		<module>plugins/org.springframework.ide.eclipse.data.core</module>
-		<!-- see STS-3039 -->
-		<!--module>plugins/org.springframework.ide.eclipse.data.core.tests</module-->
+		<module>plugins/org.springframework.ide.eclipse.data.core.tests</module>
 		<module>features/org.springframework.ide.eclipse.data.feature</module>
 
 		<!-- roo -->
@@ -299,7 +298,7 @@
 					<url>http://download.eclipse.org/releases/indigo/</url>
 				</repository>
 				<repository>
-					<id>ajdt-e36</id>
+					<id>ajdt-e37</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/tools/ajdt/37/milestone/</url>
 				</repository>

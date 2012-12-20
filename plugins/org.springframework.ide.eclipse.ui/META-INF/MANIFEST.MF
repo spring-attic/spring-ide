@@ -43,12 +43,10 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.swt.widgets,
  org.eclipse.ui,
  org.eclipse.ui.actions,
- org.eclipse.ui.browser,
  org.eclipse.ui.console,
  org.eclipse.ui.dialogs,
  org.eclipse.ui.ide,
  org.eclipse.ui.internal,
- org.eclipse.ui.internal.browser,
  org.eclipse.ui.internal.dialogs,
  org.eclipse.ui.internal.ide,
  org.eclipse.ui.internal.navigator,
@@ -86,3 +84,4 @@ Export-Package: org.springframework.ide.eclipse.ui,
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.ui.browser
