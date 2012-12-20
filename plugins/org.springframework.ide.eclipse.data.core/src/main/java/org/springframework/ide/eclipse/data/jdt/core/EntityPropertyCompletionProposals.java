@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,19 +25,16 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.ui.SharedImages;
-import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
-import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 import org.eclipse.jdt.ui.ISharedImages;
-import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * Completion proposal computer to calculate Spring Data query keyword proposals and entity property proposals.
@@ -50,7 +47,6 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 
 	private static final ISharedImages IMAGES = new SharedImages();
 	private static final Image KEYWORD = IMAGES.getImage(ISharedImages.IMG_OBJS_ANNOTATION);
-	private static final Image PRIVATE_FIELD = IMAGES.getImage(ISharedImages.IMG_FIELD_PRIVATE);
 
 	/* 
 	 * (non-Javadoc)
@@ -254,17 +250,34 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 	 * Code completion proposal for an entity field.
 	 * 
 	 * @author Oliver Gierke
+	 * @author Tomasz Zarna
 	 */
 	private static class EntityFieldNameCompletionProposal extends JavaCompletionProposal {
 
+		private static final Image DEFAULT_FIELD = IMAGES.getImage(ISharedImages.IMG_FIELD_DEFAULT);
+		private static final Image PRIVATE_FIELD = IMAGES.getImage(ISharedImages.IMG_FIELD_PRIVATE);
+		private static final Image PROTECTED_FIELD = IMAGES.getImage(ISharedImages.IMG_FIELD_PROTECTED);
+		private static final Image PUBLIC_FIELD = IMAGES.getImage(ISharedImages.IMG_FIELD_PUBLIC);
+		
 		public EntityFieldNameCompletionProposal(IField field, int offset, String seed) {
 			super(getReplacement(field.getElementName(), seed), offset, offset + (seed == null ? 0 : seed.length()),
 					getFieldImage(field), field.getElementName(), 500);
 		}
 
 		private static Image getFieldImage(IField field) {
-			// TODO : alter field image based on field modifier
-			return PRIVATE_FIELD;
+			try {
+				if (Flags.isPackageDefault(field.getFlags()))
+					return DEFAULT_FIELD;
+				if (Flags.isPrivate(field.getFlags()))
+					return PRIVATE_FIELD;
+				if (Flags.isProtected(field.getFlags()))
+					return PROTECTED_FIELD;
+				if (Flags.isPublic(field.getFlags()))
+					return PUBLIC_FIELD;
+			} catch (JavaModelException e) {
+				// ignore
+			}
+			return null;
 		}
 	}
 
