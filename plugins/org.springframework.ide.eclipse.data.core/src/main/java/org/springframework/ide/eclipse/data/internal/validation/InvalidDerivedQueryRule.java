@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.data.internal.validation;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -22,6 +23,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.ide.eclipse.data.jdt.core.RepositoryInformation;
 import org.springframework.ide.eclipse.data.jdt.core.SpringDataCompilationParticipant;
 
@@ -104,8 +106,16 @@ public class InvalidDerivedQueryRule implements IValidationRule<CompilationUnit,
 				} catch (PropertyReferenceException e) {
 					element.setElementSourceLocation(new JavaModelSourceLocation(
 							method));
+					ValidationProblemAttribute start = new ValidationProblemAttribute(
+							IMarker.CHAR_START, method.getNameRange()
+									.getOffset());
+					ValidationProblemAttribute end = new ValidationProblemAttribute(
+							IMarker.CHAR_END, method.getSourceRange()
+									.getOffset()
+									+ method.getSourceRange().getLength());
 					context.error(element, "INVALID_DERIVED_QUERY",
-							"Invalid derived query! " + e.getMessage());
+							"Invalid derived query! " + e.getMessage(),
+							new ValidationProblemAttribute[] { start, end });
 				}
 			}
 
