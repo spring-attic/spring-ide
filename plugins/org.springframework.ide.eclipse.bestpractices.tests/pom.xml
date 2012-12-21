@@ -21,7 +21,6 @@
 	<artifactId>tycho-surefire-plugin</artifactId>
         <version>${tycho-version}</version>
 	<configuration>
-	  <skipTests>true</skipTests>
 	  <useUIHarness>true</useUIHarness>
 	  <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 	  <testSuite>org.springframework.ide.eclipse.bestpractices.tests</testSuite>

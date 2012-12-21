@@ -29,7 +29,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.ui.editor,
  org.springsource.ide.eclipse.commons.core,
- org.springframework.ide.eclipse.config.core
+ org.springframework.ide.eclipse.config.core,
+ javax.servlet;bundle-version="2.5.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Activator: org.springframework.ide.eclipse.quickfix.Activator
@@ -45,5 +46,3 @@ Export-Package: org.springframework.ide.eclipse.quickfix,
  org.springframework.ide.eclipse.quickfix.rename,
  org.springframework.ide.eclipse.quickfix.validator,
  org.springframework.ide.eclipse.quickfix.validator.helper
-Import-Package: javax.servlet;version="2.5.0",
- javax.servlet.http;version="2.5.0"
