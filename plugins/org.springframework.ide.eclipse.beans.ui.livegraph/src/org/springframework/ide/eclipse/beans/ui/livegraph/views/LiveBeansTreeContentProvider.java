@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.views;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeanRelation;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansGroup;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 
@@ -38,6 +43,19 @@ public class LiveBeansTreeContentProvider implements ITreeContentProvider {
 			LiveBeansGroup group = (LiveBeansGroup) parentElement;
 			return group.getBeans().toArray();
 		}
+		else if (parentElement instanceof LiveBean) {
+			Set<LiveBeanRelation> children = new HashSet<LiveBeanRelation>();
+			LiveBean bean = (LiveBean) parentElement;
+			Set<LiveBean> dependencies = bean.getDependencies();
+			for (LiveBean child : dependencies) {
+				children.add(new LiveBeanRelation(child, true));
+			}
+			Set<LiveBean> injectInto = bean.getInjectedInto();
+			for (LiveBean child : injectInto) {
+				children.add(new LiveBeanRelation(child));
+			}
+			return children.toArray();
+		}
 		return null;
 	}
 
@@ -62,6 +80,10 @@ public class LiveBeansTreeContentProvider implements ITreeContentProvider {
 	public boolean hasChildren(Object element) {
 		if (element instanceof LiveBeansGroup) {
 			return true;
+		}
+		else if (element instanceof LiveBean) {
+			LiveBean bean = (LiveBean) element;
+			return !bean.getDependencies().isEmpty() || !bean.getInjectedInto().isEmpty();
 		}
 		return false;
 	}

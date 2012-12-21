@@ -105,8 +105,8 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 		return attributes.get(ATTR_SCOPE);
 	}
 
-	private void injectInto(LiveBean dependency) {
-		injectedInto.add(dependency);
+	private void injectInto(LiveBean bean) {
+		injectedInto.add(bean);
 	}
 
 	public boolean isInnerBean() {

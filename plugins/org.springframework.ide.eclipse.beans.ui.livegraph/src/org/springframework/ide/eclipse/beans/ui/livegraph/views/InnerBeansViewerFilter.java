@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.livegraph.views;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeanRelation;
 
 /**
  * @author Leo Dos Santos
@@ -23,6 +24,10 @@ public class InnerBeansViewerFilter extends ViewerFilter {
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof LiveBean) {
 			LiveBean bean = (LiveBean) element;
+			return !bean.isInnerBean();
+		}
+		else if (element instanceof LiveBeanRelation) {
+			LiveBeanRelation bean = (LiveBeanRelation) element;
 			return !bean.isInnerBean();
 		}
 		return true;

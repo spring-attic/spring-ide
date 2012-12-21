@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeanRelation;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansGroup;
 
 /**
@@ -42,6 +43,10 @@ public class LiveBeansTreeLabelProvider extends LabelProvider {
 		else if (element instanceof LiveBeansGroup) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
 		}
+		else if (element instanceof LiveBeanRelation) {
+			// TODO: incoming/outgoing arrow images???
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+		}
 		return super.getImage(element);
 	}
 
@@ -52,6 +57,9 @@ public class LiveBeansTreeLabelProvider extends LabelProvider {
 		}
 		else if (element instanceof LiveBeansGroup) {
 			return ((LiveBeansGroup) element).getDisplayName();
+		}
+		else if (element instanceof LiveBeanRelation) {
+			return ((LiveBeanRelation) element).getDisplayName();
 		}
 		return super.getText(element);
 	}

@@ -191,10 +191,10 @@ public class LiveBeansGraphView extends ViewPart {
 				menuManager.add(action);
 			}
 		}
-		if (activeDisplayMode == DISPLAY_MODE_GRAPH) {
-			menuManager.add(new Separator());
-			menuManager.add(filterInnerBeansAction);
-		}
+		// if (activeDisplayMode == DISPLAY_MODE_GRAPH) {
+		menuManager.add(new Separator());
+		menuManager.add(filterInnerBeansAction);
+		// }
 	}
 
 	public int getGroupByMode() {
@@ -312,6 +312,14 @@ public class LiveBeansGraphView extends ViewPart {
 				graphViewer.removeFilter(innerBeansFilter);
 			}
 			graphViewer.applyLayout();
+		}
+		if (treeViewer != null) {
+			if (filtered) {
+				treeViewer.addFilter(innerBeansFilter);
+			}
+			else {
+				treeViewer.removeFilter(innerBeansFilter);
+			}
 		}
 		filterInnerBeansAction.setChecked(filtered);
 		prefStore.setValue(PREF_FILTER_INNER_BEANS, filtered);
