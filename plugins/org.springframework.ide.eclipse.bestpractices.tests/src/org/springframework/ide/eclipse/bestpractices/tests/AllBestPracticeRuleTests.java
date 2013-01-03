@@ -19,10 +19,10 @@ import org.springframework.ide.eclipse.bestpractices.tests.ruletests.TooManyBean
 import org.springframework.ide.eclipse.bestpractices.tests.ruletests.UnnecessaryValueElementRuleTest;
 import org.springframework.ide.eclipse.bestpractices.tests.ruletests.UseBeanInheritanceRuleTest;
 import org.springframework.ide.eclipse.bestpractices.tests.ruletests.UseDedicatedNamespacesRuleTest;
+import org.springsource.ide.eclipse.commons.tests.util.ManagedTestSuite;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 
 /**
  * {@link TestSuite} for the <code>com.springsource.sts.bestpractices</code> plugin.
@@ -34,7 +34,7 @@ import junit.framework.TestSuite;
 public class AllBestPracticeRuleTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite(AllBestPracticeRuleTests.class.getName());
+		TestSuite suite = new ManagedTestSuite(AllBestPracticeRuleTests.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ImportElementsAtTopRuleTest.class);
 		suite.addTestSuite(ParentBeanSpecifiesAbstractClassRuleTest.class);
