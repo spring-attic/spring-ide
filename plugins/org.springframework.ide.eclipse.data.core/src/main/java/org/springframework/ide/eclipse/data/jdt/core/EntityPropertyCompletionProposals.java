@@ -32,6 +32,7 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.data.internal.DataCoreImages;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
@@ -46,7 +47,7 @@ import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 public class EntityPropertyCompletionProposals extends JavaCompletionProposalComputer {
 
 	private static final ISharedImages IMAGES = new SharedImages();
-	private static final Image KEYWORD = IMAGES.getImage(ISharedImages.IMG_OBJS_ANNOTATION);
+	private static final Image KEYWORD = DataCoreImages.getImage(DataCoreImages.IMG_OBJS_KEY);
 
 	/* 
 	 * (non-Javadoc)
