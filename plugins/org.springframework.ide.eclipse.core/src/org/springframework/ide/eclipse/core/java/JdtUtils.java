@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -259,10 +259,10 @@ public class JdtUtils {
 		return null;
 	}
 
-	public static IField getField(IType type, String fieldName, String parameterType) {
+	public static IField getField(IType type, String fieldName) {
 		try {
-			Set<IField> methods = Introspector.getAllFields(type);
-			for (IField field : methods) {
+			Set<IField> fields = Introspector.getAllFields(type);
+			for (IField field : fields) {
 				if (field.getElementName().equals(fieldName)) {
 					return field;
 				}

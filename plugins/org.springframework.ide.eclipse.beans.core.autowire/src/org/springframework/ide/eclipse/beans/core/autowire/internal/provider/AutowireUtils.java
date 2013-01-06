@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Spring IDE Developers
+ * Copyright (c) 2009, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 /**
  * Utility class for the autowiring support.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.2.7
  */
 public abstract class AutowireUtils {
@@ -34,7 +35,7 @@ public abstract class AutowireUtils {
 			source = JdtUtils.getMethod(type, ((Method) member).getName(), ((Method) member).getParameterTypes());
 		}
 		else if (member instanceof Field) {
-			source = JdtUtils.getField(type, ((Field) member).getName(), ((Field) member).getType().getName());
+			source = JdtUtils.getField(type, ((Field) member).getName());
 		}
 		else if (member instanceof Constructor<?>) {
 			source = JdtUtils.getConstructor(type, ((Constructor<?>) member).getParameterTypes());
