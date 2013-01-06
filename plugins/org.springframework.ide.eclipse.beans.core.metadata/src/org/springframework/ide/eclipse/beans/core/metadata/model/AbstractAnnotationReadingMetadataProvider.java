@@ -101,32 +101,21 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 		IAnnotationMetadata visitor = null;
 
 		// JDT in Eclipse 3.4 supports annotation in the core model
-		if (SpringCoreUtils.isEclipseSameOrNewer(3, 4)) {
-			visitor = new JdtBasedAnnotationMetadata(orginalType);
-		}
-		else {
+//		if (SpringCoreUtils.isEclipseSameOrNewer(3, 4)) {
+//			visitor = new JdtBasedAnnotationMetadata(orginalType);
+//		}
+//		else {
 			// Get the class reader as late as possible
 			ClassReaderFactory classReaderFactory = getClassReaderFactory(project);
+			ClassLoader classLoader = JdtUtils.getClassLoader(project, null);
+			IProject beansProject = bean.getElementResource().getProject();
 
 			// Create new annotation meta data
-			visitor = createAnnotationMetadataReadingVisitor();
+			AnnotationMetadataReadingVisitor annotationVisitor = createAnnotationMetadataReadingVisitor();
+			visitor = annotationVisitor;
 
-			String className = type.getFullyQualifiedName();
-			try {
-				while (className != null && !Object.class.getName().equals(className) && type != null
-						&& !type.isBinary()) {
-					ClassReader classReader = classReaderFactory.getClassReader(className);
-					((AnnotationMetadataReadingVisitor) visitor).setType(type);
-					((AnnotationMetadataReadingVisitor) visitor).setClassloader(JdtUtils.getClassLoader(project, null));
-					classReader.accept((ClassVisitor) visitor, false);
-					className = ((AnnotationMetadataReadingVisitor) visitor).getSuperClassName();
-					type = JdtUtils.getJavaType(bean.getElementResource().getProject(), className);
-				}
-			}
-			catch (IOException e) {
-				BeansCorePlugin.log("Error during AST class visiting", e);
-			}
-		}
+			runAnnotationMetadataVisitor(type, classReaderFactory, classLoader, beansProject, annotationVisitor);
+//		}
 
 		// cache here in case exception was thrown we don't want to retry over and over again
 		if (visitor != null) {
@@ -134,6 +123,28 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 			metadataCache.put(orginalType, visitor);
 		}
 		return visitor;
+	}
+
+	public void runAnnotationMetadataVisitor(IType type, ClassReaderFactory classReaderFactory, ClassLoader classLoader,
+			IProject beansProject, AnnotationMetadataReadingVisitor annotationVisitor) {
+		String className = type.getFullyQualifiedName();
+		try {
+			while (className != null && !Object.class.getName().equals(className) && type != null
+					&& !type.isBinary()) {
+
+				ClassReader classReader = classReaderFactory.getClassReader(className);
+				annotationVisitor.setType(type);
+				annotationVisitor.setClassloader(classLoader);
+
+				classReader.accept((ClassVisitor) annotationVisitor, false);
+
+				className = annotationVisitor.getSuperClassName();
+				type = JdtUtils.getJavaType(beansProject, className);
+			}
+		}
+		catch (IOException e) {
+			BeansCorePlugin.log("Error during AST class visiting", e);
+		}
 	}
 
 	/**

@@ -137,8 +137,8 @@ public class JdtAnnotationMetadataTest {
 		assertTrue(nameArray instanceof Object[]);
 		assertEquals(0, ((Object[]) nameArray).length);
 		
-		assertEquals(Autowire.class.getName(), annotationAttributes.get("autowire").getClass().getName());
-		assertEquals(Autowire.NO.toString(), annotationAttributes.get("autowire").toString());
+		assertEquals(Autowire.class, annotationAttributes.get("autowire").getClass());
+		assertEquals(Autowire.NO, annotationAttributes.get("autowire"));
 		
 		assertTrue(methodMetadata instanceof IJdtMethodMetadata);
 		IType type = JdtUtils.getJavaType(project, "org.test.spring.SimpleBeanClass");
@@ -148,6 +148,40 @@ public class JdtAnnotationMetadataTest {
 		assertNull(methodMetadata.getAnnotationAttributes(Role.class.getName()));
 		
 		assertEquals(0, annotationMetadata.getMemberClassNames().length);
+	}
+
+	@Test
+	public void testSimpleBeanClassWithAutowireAttribute() throws Exception {
+		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
+		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SimpleBeanClassWithAttribute");
+		
+		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+		
+		assertTrue(annotationMetadata.hasAnnotatedMethods(Bean.class.getName()));
+
+		Set<MethodMetadata> methods = annotationMetadata.getAnnotatedMethods(Bean.class.getName());
+		assertEquals(1, methods.size());
+		MethodMetadata methodMetadata = methods.iterator().next();
+		assertTrue(methodMetadata.isAnnotated(Bean.class.getName()));
+		
+		Map<String, Object> annotationAttributes = methodMetadata.getAnnotationAttributes(Bean.class.getName());
+		assertEquals(4, annotationAttributes.size());
+		
+		assertEquals("", annotationAttributes.get("initMethod"));
+		assertEquals("(inferred)", annotationAttributes.get("destroyMethod"));
+		
+		Object nameArray = annotationAttributes.get("name");
+		assertNotNull(nameArray);
+		assertTrue(nameArray instanceof Object[]);
+		assertEquals(0, ((Object[]) nameArray).length);
+		
+		assertEquals(Autowire.class, annotationAttributes.get("autowire").getClass());
+		assertEquals(Autowire.BY_NAME, annotationAttributes.get("autowire"));
+		
+		assertTrue(methodMetadata instanceof IJdtMethodMetadata);
+		IType type = JdtUtils.getJavaType(project, "org.test.spring.SimpleBeanClassWithAttribute");
+		IMethod method = type.getMethods()[0];
+		assertEquals(method, ((IJdtMethodMetadata) methodMetadata).getMethod());
 	}
 
 	@Test
@@ -307,7 +341,47 @@ public class JdtAnnotationMetadataTest {
 		assertEquals("RequestMethod.POST", ((Object[])methodAttributes.get("method"))[1]);
 		assertEquals(0, ((String[])methodAttributes.get("params")).length);
 		assertEquals(0, ((String[])methodAttributes.get("consumes")).length);
+	}
+
+	@Test
+	public void testMethodIdentification() throws Exception {
+		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
+		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.MethodIdentificationSupertype");
 		
+		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+		
+		assertTrue(annotationMetadata.hasAnnotatedMethods(Bean.class.getName()));
+		Set<MethodMetadata> methods = annotationMetadata.getAnnotatedMethods(Bean.class.getName());
+		assertEquals(8, methods.size());
+		
+		IType type = JdtUtils.getJavaType(project, "org.test.spring.MethodIdentificationSupertype");
+		
+		IMethod getInstanceNoArg = type.getMethod("getInstance", new String[0]);
+		IMethod getInstanceObject = type.getMethod("getInstance", new String[] {"QObject;"});
+		IMethod getInstanceString = type.getMethod("getInstance", new String[] {"QString;"});
+		IMethod getInstanceObjectObject = type.getMethod("getInstance", new String[] {"QObject;", "QObject;"});
+		IMethod getInstanceObjectString = type.getMethod("getInstance", new String[] {"QObject;", "QString;"});
+		IMethod getInstanceStringObject = type.getMethod("getInstance", new String[] {"QString;", "QObject;"});
+		IMethod getInstanceStringString = type.getMethod("getInstance", new String[] {"QString;", "QString;"});
+		IMethod getInstanceStringStringString = type.getMethod("getInstance", new String[] {"QString;", "QString;", "QString;"});
+
+		assertTrue(containsMethodReference(methods, getInstanceNoArg));
+		assertTrue(containsMethodReference(methods, getInstanceObject));
+		assertTrue(containsMethodReference(methods, getInstanceString));
+		assertTrue(containsMethodReference(methods, getInstanceObjectObject));
+		assertTrue(containsMethodReference(methods, getInstanceObjectString));
+		assertTrue(containsMethodReference(methods, getInstanceStringObject));
+		assertTrue(containsMethodReference(methods, getInstanceStringString));
+		assertTrue(containsMethodReference(methods, getInstanceStringStringString));
+	}
+
+	private boolean containsMethodReference(Set<MethodMetadata> methods, IMethod method) {
+		for (MethodMetadata methodMetadata : methods) {
+			if (((IJdtMethodMetadata)methodMetadata).getMethod().equals(method)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

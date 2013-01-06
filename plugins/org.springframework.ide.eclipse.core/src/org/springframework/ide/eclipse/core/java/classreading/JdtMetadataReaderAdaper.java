@@ -37,7 +37,7 @@ public class JdtMetadataReaderAdaper implements MetadataReader {
 	public JdtMetadataReaderAdaper(IType type, CachingClassReaderFactory classReaderFactory, ClassLoader classloader) {
 		this.type = type;
 		
-		this.visitor = new AnnotationMetadataReadingVisitor();
+		this.visitor = new AnnotationMetadataReadingVisitor(true);
 		this.visitor.setType(type);
 		this.visitor.setClassloader(classloader);
 

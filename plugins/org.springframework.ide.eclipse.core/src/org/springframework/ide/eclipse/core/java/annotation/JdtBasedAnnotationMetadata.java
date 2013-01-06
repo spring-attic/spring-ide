@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 - 2012 Spring IDE Developers
+ * Copyright (c) 2009, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.core.java.annotation;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -34,13 +34,14 @@ import org.springframework.util.ClassUtils;
  * extracting the metadata.
  * @author Christian Dupuis
  * @author Leo Dos Santos
+ * @author Martin Lippert
  * @since 2.2.2
  */
 public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 
 	private final IType type;
 
-	private Set<Annotation> classAnnotations = new HashSet<Annotation>();
+	private Map<String, Annotation> classAnnotations = new LinkedHashMap<String, Annotation>();
 
 	private Map<IMethod, Set<Annotation>> methodAnnotations = new LinkedHashMap<IMethod, Set<Annotation>>();
 
@@ -68,7 +69,10 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 	private void init() {
 		try {
 			for (IAnnotation annotation : Introspector.getAllAnnotations(type)) {
-				classAnnotations.add(processAnnotation(annotation));
+				Annotation processedAnnotation = processAnnotation(annotation);
+				if (!classAnnotations.containsKey(processedAnnotation.getAnnotationClass())) {
+					classAnnotations.put(processedAnnotation.getAnnotationClass(), processedAnnotation);
+				}
 			}
 			
 			for (IMethod method : Introspector.getAllMethods(type)) {
@@ -116,7 +120,15 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 			modelAnnotation = new Annotation(annotation.getElementName());
 		}
 		else {
-			modelAnnotation = new Annotation(JdtUtils.resolveClassName(annotation.getElementName(), itype));
+			IType type = itype;
+			IJavaElement parent = annotation.getParent();
+			while (parent != null && !(parent instanceof IType)) {
+				parent = parent.getParent();
+			}
+			if (parent != null) {
+				type = (IType) parent;
+			}
+			modelAnnotation = new Annotation(JdtUtils.resolveClassName(annotation.getElementName(), type));
 		}
 		try {
 			for (IMemberValuePair member : annotation.getMemberValuePairs()) {
@@ -193,7 +205,7 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 				String className = JdtUtils.resolveClassName(tempValue, type);
 				if (className != null) {
 					builder.append(ClassUtils.getShortName(className)).append(
-							member.getValue().toString().substring(i));
+							value.substring(i));
 					break;
 				}
 			}
@@ -259,20 +271,11 @@ public class JdtBasedAnnotationMetadata implements IAnnotationMetadata {
 	}
 	
 	public Set<String> getTypeLevelAnnotationClasses() {
-		Set<String> annotationTypes = new LinkedHashSet<String>();
-		for (Annotation annotation : classAnnotations) {
-			annotationTypes.add(annotation.getAnnotationClass());
-		}
-		return annotationTypes;
+		return classAnnotations.keySet();
 	}
 
 	public Annotation getTypeLevelAnnotation(String annotationClass) {
-		for (Annotation annotation : classAnnotations) {
-			if (annotation.getAnnotationClass().equals(annotationClass)) {
-				return annotation;
-			}
-		}
-		return null;
+		return classAnnotations.get(annotationClass);
 	}
 
 	public boolean hasTypeLevelAnnotations(String... annotationClasses) {

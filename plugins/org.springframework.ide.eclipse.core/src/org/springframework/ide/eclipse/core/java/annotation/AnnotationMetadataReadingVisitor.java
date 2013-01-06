@@ -11,10 +11,10 @@
 package org.springframework.ide.eclipse.core.java.annotation;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -26,14 +26,17 @@ import java.util.Set;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.type.asm.ClassMetadataReadingVisitor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * ASM based {@link ClassVisitor} that reads and stores all
@@ -48,13 +51,23 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	private static EmptyVisitor EMPTY_VISITOR = new EmptyVisitor();
 
-	private Set<Annotation> classAnnotations = new HashSet<Annotation>();
-
+	private Map<String, Annotation> classAnnotations = new LinkedHashMap<String, Annotation>();
 	private Map<IMethod, Set<Annotation>> methodAnnotations = new LinkedHashMap<IMethod, Set<Annotation>>();
+	private Map<IField, Set<Annotation>> fieldAnnotations = new LinkedHashMap<IField, Set<Annotation>>();
+	
+	private Set<String> visitedMethods = new HashSet<String>();
 
 	private IType type;
-
 	private ClassLoader classloader;
+	private boolean advancedValueProcessing;
+	
+	public AnnotationMetadataReadingVisitor() {
+		this(false);
+	}
+	
+	public AnnotationMetadataReadingVisitor(boolean advancedValueProcessing) {
+		this.advancedValueProcessing = advancedValueProcessing;
+	}
 
 	public void setType(IType type) {
 		this.type = type;
@@ -65,38 +78,29 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	public Set<String> getTypeLevelAnnotationClasses() {
-		Set<String> annotationTypes = new LinkedHashSet<String>();
-		for (Annotation annotation : classAnnotations) {
-			annotationTypes.add(annotation.getAnnotationClass());
-		}
-		return annotationTypes;
+		return classAnnotations.keySet();
 	}
 
 	public Annotation getTypeLevelAnnotation(String annotationClass) {
-		for (Annotation annotation : classAnnotations) {
-			if (annotation.getAnnotationClass().equals(annotationClass)) {
-				return annotation;
-			}
-		}
-		return null;
+		return classAnnotations.get(annotationClass);
 	}
 
 	public Map<IMethod, Annotation> getMethodLevelAnnotations(String... annotationClasses) {
-		Map<IMethod, Annotation> methodAnnotation = new HashMap<IMethod, Annotation>();
+		Map<IMethod, Annotation> result = new HashMap<IMethod, Annotation>();
 		for (Map.Entry<IMethod, Set<Annotation>> entry : methodAnnotations.entrySet()) {
 			for (Annotation annotation : entry.getValue()) {
 				for (String annotationClass : annotationClasses) {
 					if (annotation.getAnnotationClass().equals(annotationClass)) {
-						methodAnnotation.put(entry.getKey(), annotation);
+						result.put(entry.getKey(), annotation);
 					}
 				}
 			}
 		}
-		return methodAnnotation;
+		return result;
 	}
 
-	public boolean hasMethodLevelAnnotations(String... annotationClass) {
-		List<String> annoatations = Arrays.asList(annotationClass);
+	public boolean hasMethodLevelAnnotations(String... annotationClasses) {
+		List<String> annoatations = Arrays.asList(annotationClasses);
 		for (Map.Entry<IMethod, Set<Annotation>> entry : methodAnnotations.entrySet()) {
 			for (Annotation annotation : entry.getValue()) {
 				if (annoatations.contains(annotation.getAnnotationClass())) {
@@ -117,27 +121,83 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		return false;
 	}
 
+	public Map<IField, Annotation> getFieldLevelAnnotations(String... annotationClasses) {
+		Map<IField, Annotation> result = new HashMap<IField, Annotation>();
+		for (Map.Entry<IField, Set<Annotation>> entry : fieldAnnotations.entrySet()) {
+			for (Annotation annotation : entry.getValue()) {
+				for (String annotationClass : annotationClasses) {
+					if (annotation.getAnnotationClass().equals(annotationClass)) {
+						result.put(entry.getKey(), annotation);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	public boolean hasFieldLevelAnnotations(String... annotationClasses) {
+		List<String> annoatations = Arrays.asList(annotationClasses);
+		for (Map.Entry<IField, Set<Annotation>> entry : fieldAnnotations.entrySet()) {
+			for (Annotation annotation : entry.getValue()) {
+				if (annoatations.contains(annotation.getAnnotationClass())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String annotationClass = Type.getType(desc).getClassName();
-		final Annotation annotation = new Annotation(annotationClass);
-		classAnnotations.add(annotation);
-		return new AnnotationMemberVisitor(annotation, this.classloader);
+		if (!classAnnotations.containsKey(annotationClass)) {
+			final Annotation annotation = new Annotation(annotationClass);
+			classAnnotations.put(annotationClass, annotation);
+			return new AnnotationMemberVisitor(annotation, this.classloader, advancedValueProcessing);
+		}
+		else {
+			return EMPTY_VISITOR;
+		}
 	}
 
 	@Override
 	public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, String[] exceptions) {
+		String methodKey = name + desc;
+		if (!visitedMethods.contains(methodKey)) {
+			visitedMethods.add(methodKey);
+
+			return new EmptyVisitor() {
+				@Override
+				public AnnotationVisitor visitAnnotation(final String annotationDesc, boolean visible) {
+					final String annotationClass = Type.getType(annotationDesc).getClassName();
+					final IMethod method = getMethodFromSignature(name, desc);
+
+					if (method != null) {
+						final Set<Annotation> methodAnnotations = getAnnotationSet(method);
+						final Annotation annotation = new Annotation(annotationClass);
+						methodAnnotations.add(annotation);
+						return new AnnotationMemberVisitor(annotation, classloader, advancedValueProcessing);
+					}
+					return EMPTY_VISITOR;
+				}
+			};
+		}
+		return EMPTY_VISITOR;
+	}
+	
+	@Override
+	public FieldVisitor visitField(final int access, final String name, final String desc, final String signature, Object value) {
 		return new EmptyVisitor() {
 			@Override
 			public AnnotationVisitor visitAnnotation(final String annotationDesc, boolean visible) {
 				final String annotationClass = Type.getType(annotationDesc).getClassName();
-				final IMethod method = getMethodFromSignature(name, desc);
+				final IField field = getFieldFromSignature(name);
 
-				if (method != null) {
-					final Set<Annotation> methodAnnotations = getAnnotationSet(method);
+				if (field != null) {
+					final Set<Annotation> fieldAnnotations = getAnnotationSet(field);
 					final Annotation annotation = new Annotation(annotationClass);
-					methodAnnotations.add(annotation);
-					return new AnnotationMemberVisitor(annotation, classloader);
+					fieldAnnotations.add(annotation);
+					return new AnnotationMemberVisitor(annotation, classloader, advancedValueProcessing);
 				}
 				return EMPTY_VISITOR;
 			}
@@ -152,40 +212,76 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		return methodAnnotations.get(method);
 	}
 
+	private Set<Annotation> getAnnotationSet(IField field) {
+		if (!fieldAnnotations.containsKey(field)) {
+			fieldAnnotations.put(field, new LinkedHashSet<Annotation>());
+		}
+		return fieldAnnotations.get(field);
+	}
+
 	private IMethod getMethodFromSignature(final String name, final String desc) {
 		Type[] parameterTypes = Type.getArgumentTypes(desc);
-		List<String> parameters = new ArrayList<String>();
-		if (parameterTypes != null && parameterTypes.length > 0) {
-			for (Type parameterType : parameterTypes) {
-				parameters.add(parameterType.getClassName());
-			}
-		}
 		
-		final IMethod method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]));
+		IMethod method = quickCheckForMethod(name, parameterTypes);
+		if (method == null) {
+			List<String> parameters = new ArrayList<String>();
+			if (parameterTypes != null && parameterTypes.length > 0) {
+				for (Type parameterType : parameterTypes) {
+					parameters.add(parameterType.getClassName());
+				}
+			}
+			
+			method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]));
+		}
 		return method;
+	}
+
+	private IMethod quickCheckForMethod(String name, Type[] parameterTypes) {
+		IMethod result = null;
+		try {
+			IMethod[] methods = type.getMethods();
+			for (IMethod method : methods) {
+				if (method.getElementName().equals(name) && method.getParameterTypes().length == parameterTypes.length) {
+					if (result == null) {
+						result = method;
+					}
+					else {
+						return null;
+					}
+				}
+				
+			}
+		} catch (JavaModelException e) {
+		}
+		return result;
+	}
+
+	private IField getFieldFromSignature(final String name) {
+		final IField field = JdtUtils.getField(type, name);
+		return field;
 	}
 
 	private static class AnnotationMemberVisitor extends EmptyVisitor {
 
 		private final Annotation annotation;
 		private final ClassLoader classloader;
+		private boolean advancedValueProcessing;
 
-		public AnnotationMemberVisitor(Annotation annotation, ClassLoader classloader) {
+		public AnnotationMemberVisitor(Annotation annotation, ClassLoader classloader, boolean advancedValueProcessing) {
 			this.annotation = annotation;
 			this.classloader = classloader;
+			this.advancedValueProcessing = advancedValueProcessing;
 		}
-
+		
 		@Override
 		public void visitEnd() {
-			try {
-				Class<?> annotationClass = this.classloader.loadClass(annotation.getAnnotationClass());
-				this.doVisitEnd(annotationClass);
-			} catch (ClassNotFoundException ex) {
+			if (this.advancedValueProcessing) {
+				try {
+					Class<?> annotationClass = this.classloader.loadClass(annotation.getAnnotationClass());
+					registerDefaultValues(annotationClass);
+				} catch (ClassNotFoundException ex) {
+				}
 			}
-		}
-
-		protected void doVisitEnd(Class<?> annotationClass) {
-			registerDefaultValues(annotationClass);
 		}
 
 		private void registerDefaultValues(Class<?> annotationClass) {
@@ -195,6 +291,19 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 			for (Method annotationAttribute : annotationAttributes) {
 				String attributeName = annotationAttribute.getName();
 				Object defaultValue = annotationAttribute.getDefaultValue();
+
+				// special case for Enum values, load them from IDE classloader space to avoid conflicts between Spring framework
+				// running in IDE and Spring framework classes from the projects classpath
+				if (defaultValue != null && defaultValue.getClass().isEnum()) {
+					try {
+						Class<?> annotationClassInIdeSpace = this.getClass().getClassLoader().loadClass(annotation.getAnnotationClass());
+						Method annotationAttributeInIdeSpace = annotationClassInIdeSpace.getMethod(annotationAttribute.getName(), annotationAttribute.getParameterTypes());
+						defaultValue = annotationAttributeInIdeSpace.getDefaultValue();
+					} catch (ClassNotFoundException ex) {
+					} catch (SecurityException e) {
+					} catch (NoSuchMethodException e) {
+					}
+				}
 
 				if (defaultValue != null && !annotation.hasMember(attributeName)) {
 					// if (defaultValue instanceof Annotation) {
@@ -221,8 +330,18 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 		@Override
 		public void visit(String name, Object value) {
-			annotation.addMember(new AnnotationMemberValuePair(name, value.toString(), value));
+			if ("value".equals(name)) {
+				annotation.addMember(new AnnotationMemberValuePair(null, value.toString()));
+ 			}
+			else {
+				annotation.addMember(new AnnotationMemberValuePair(name, value.toString()));
+			}
 		}
+
+//		@Override
+//		public void visit(String name, Object value) {
+//			annotation.addMember(new AnnotationMemberValuePair(name, value.toString(), value));
+//		}
 
 		@Override
 		public AnnotationVisitor visitAnnotation(String arg0, String arg1) {
@@ -236,7 +355,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 				@Override
 				public void visit(String arg0, Object arg1) {
-					if (arg1 instanceof Type) {
+					if (arg1 instanceof Type && advancedValueProcessing) {
 						try {
 							Class<?> clazz = classloader.loadClass(((Type) arg1).getClassName());
 							values.add(clazz);
@@ -276,14 +395,21 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 						value = value.substring(0, value.length() - 2);
 					}
 
-					annotation.addMember(new AnnotationMemberValuePair(name, value, (Object[]) values.toArray((Object[]) Array.newInstance(
-							typeOfArray, values.size()))));
+					if (name.equals("value") && !advancedValueProcessing) {
+						annotation.addMember(new AnnotationMemberValuePair(null, value, (Object[]) values.toArray((Object[]) Array.newInstance(
+								typeOfArray, values.size()))));
+					}
+					else {
+						annotation.addMember(new AnnotationMemberValuePair(name, value, (Object[]) values.toArray((Object[]) Array.newInstance(
+								typeOfArray, values.size()))));
+					}
 				}
 
 				@Override
 				public void visitEnum(String enumName, String type, String enumValue) {
 					String className = Type.getType(type).getClassName();
-					values.add(ClassUtils.getShortName(className) + "." + enumValue);
+					Object value = ClassUtils.getShortName(className) + "." + enumValue;
+					values.add(value);
 				}
 			};
 		}
@@ -291,15 +417,21 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		@Override
 		public void visitEnum(String name, String type, String enumValue) {
 			String className = Type.getType(type).getClassName();
-			annotation.addMember(new AnnotationMemberValuePair(name, ClassUtils.getShortName(className) + "." + enumValue));
+			Object valueAsObject = null;
+
+			try {
+				Class<?> enumType = this.getClass().getClassLoader().loadClass(className);
+				Field enumConstant = ReflectionUtils.findField(enumType, enumValue);
+				if (enumConstant != null) {
+					valueAsObject = enumConstant.get(null);
+				}
+			} catch (ClassNotFoundException e) {
+			} catch (IllegalArgumentException e) {
+			} catch (IllegalAccessException e) {
+			}
+			
+			annotation.addMember(new AnnotationMemberValuePair(name, ClassUtils.getShortName(className) + "." + enumValue, valueAsObject));
 		}
 	}
 
-	public Map<IField, Annotation> getFieldLevelAnnotations(String... annotationClasses) {
-		return Collections.emptyMap();
-	}
-
-	public boolean hasFieldLevelAnnotations(String... annotationClasses) {
-		return false;
-	}
 }
