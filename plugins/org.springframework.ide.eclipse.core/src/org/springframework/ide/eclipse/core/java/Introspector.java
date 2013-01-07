@@ -390,17 +390,17 @@ public final class Introspector {
 	 * @throws JavaModelException
 	 */
 	public static Set<IField> getAllFields(IType type) throws JavaModelException {
-		Map<String, IField> allMethods = new HashMap<String, IField>();
+		Map<String, IField> allFields = new HashMap<String, IField>();
 		while (type != null) {
 			for (IField method : type.getFields()) {
 				String key = method.getHandleIdentifier();
-				if (!allMethods.containsKey(key)) {
-					allMethods.put(key, method);
+				if (!allFields.containsKey(key)) {
+					allFields.put(key, method);
 				}
 			}
 			type = getSuperType(type);
 		}
-		return new HashSet<IField>(allMethods.values());
+		return new HashSet<IField>(allFields.values());
 	}
 
 	public static IMethod getReadableProperty(IType type, String propertyName) throws JavaModelException {
