@@ -293,8 +293,16 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	private IField getFieldFromSignature(final String name) {
-		final IField field = JdtUtils.getField(type, name);
+		IField field = quickCheckForField(name);
+		if (field == null) {
+			field = JdtUtils.getField(type, name);
+		}
 		return field;
+	}
+	
+	private IField quickCheckForField(String name) {
+		IField field = type.getField(name);
+		return field != null && field.exists() ? field : null;
 	}
 
 	private static class AnnotationMemberVisitor extends EmptyVisitor {
