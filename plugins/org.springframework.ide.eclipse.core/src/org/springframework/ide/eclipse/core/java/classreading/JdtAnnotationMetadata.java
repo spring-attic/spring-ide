@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 Spring IDE Developers
+ * Copyright (c) 2009, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,12 +110,12 @@ public class JdtAnnotationMetadata extends JdtClassMetadata implements IJdtAnnot
 			}
 			// Only collect the methods for the given type; don't iterate up the hierarchy 
 			for (IMethod method : type.getMethods()) {
-				if (!method.isConstructor()) {
+//				if (!method.isConstructor()) {
 					JdtMethodMetadata metadata = new JdtMethodMetadata(type, method);
 					if (metadata.getAnnotationTypes().size() > 0) {
 						methodMetadata.add(metadata);
 					}
-				}
+//				}
 			}
 		}
 		catch (JavaModelException e) {

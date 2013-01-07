@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.springframework.ide.core.classreading.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -25,22 +24,15 @@ import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.MethodMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.ide.eclipse.beans.core.metadata.internal.model.DelegatingAnnotationReadingMetadataProvider;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.annotation.Annotation;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
-import org.springframework.ide.eclipse.core.java.annotation.JdtBasedAnnotationMetadata;
-import org.springframework.ide.eclipse.core.java.classreading.IJdtMethodMetadata;
-import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -294,6 +286,19 @@ public class JdtBasedAnnotationMetadataTest {
 		assertTrue(beanMethodAnnotations.containsKey(getInstanceStringObject));
 		assertTrue(beanMethodAnnotations.containsKey(getInstanceStringString));
 		assertTrue(beanMethodAnnotations.containsKey(getInstanceStringStringString));
+	}
+
+	@Test
+	public void testAutowiredConstructor() throws Exception {
+		IType type = JdtUtils.getJavaType(project, "org.test.spring.AutowiredConstructorClass");
+		IAnnotationMetadata metadata = getAnnotationMetadata(type);
+
+		Map<IMethod, Annotation> beanMethodAnnotations = metadata.getMethodLevelAnnotations(Autowired.class.getName());
+		assertEquals(1, beanMethodAnnotations.size());
+		
+		IMethod constructor = type.getMethod("AutowiredConstructorClass", new String[] {"QString;"});
+		Annotation annotation = beanMethodAnnotations.get(constructor);
+		assertEquals(Autowired.class.getName(), annotation.getAnnotationClass());
 	}
 
 }

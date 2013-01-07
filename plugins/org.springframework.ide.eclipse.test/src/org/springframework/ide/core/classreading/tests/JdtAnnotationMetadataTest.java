@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,6 +125,8 @@ public class JdtAnnotationMetadataTest {
 		assertEquals(1, methods.size());
 		MethodMetadata methodMetadata = methods.iterator().next();
 		assertTrue(methodMetadata.isAnnotated(Bean.class.getName()));
+		assertEquals("getInstanceOfBean", methodMetadata.getMethodName());
+		assertEquals("org.test.spring.SimpleBeanClass", methodMetadata.getDeclaringClassName());
 		
 		Map<String, Object> annotationAttributes = methodMetadata.getAnnotationAttributes(Bean.class.getName());
 		assertEquals(4, annotationAttributes.size());
@@ -373,6 +375,25 @@ public class JdtAnnotationMetadataTest {
 		assertTrue(containsMethodReference(methods, getInstanceStringObject));
 		assertTrue(containsMethodReference(methods, getInstanceStringString));
 		assertTrue(containsMethodReference(methods, getInstanceStringStringString));
+	}
+
+	@Test
+	public void testAutowiredConstructor() throws Exception {
+		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
+		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.AutowiredConstructorClass");
+		
+		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+		
+		assertTrue(annotationMetadata.hasAnnotatedMethods(Autowired.class.getName()));
+		Set<MethodMetadata> methods = annotationMetadata.getAnnotatedMethods(Autowired.class.getName());
+		assertEquals(1, methods.size());
+		
+		MethodMetadata methodMetadata = methods.iterator().next();
+		assertEquals("org.test.spring.AutowiredConstructorClass", methodMetadata.getDeclaringClassName());
+		
+		IType type = JdtUtils.getJavaType(project, "org.test.spring.AutowiredConstructorClass");
+		IMethod constructor = type.getMethod("AutowiredConstructorClass", new String[] {"QString;"});
+		assertEquals(constructor, ((IJdtMethodMetadata)methodMetadata).getMethod());
 	}
 
 	private boolean containsMethodReference(Set<MethodMetadata> methods, IMethod method) {

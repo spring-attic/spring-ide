@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 Spring IDE Developers
+ * Copyright (c) 2008, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -222,7 +222,14 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	private IMethod getMethodFromSignature(final String name, final String desc) {
 		Type[] parameterTypes = Type.getArgumentTypes(desc);
 		
-		IMethod method = quickCheckForMethod(name, parameterTypes);
+		IMethod method = null;
+		if (isConstructor(name)) {
+			method = quickCheckForConstructor(parameterTypes);
+		}
+		else {
+			method = quickCheckForMethod(name, parameterTypes);
+		}
+		
 		if (method == null) {
 			List<String> parameters = new ArrayList<String>();
 			if (parameterTypes != null && parameterTypes.length > 0) {
@@ -230,10 +237,19 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 					parameters.add(parameterType.getClassName());
 				}
 			}
-			
-			method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]));
+
+			if (isConstructor(name)) {
+				method = JdtUtils.getConstructor(type, parameters.toArray(new String[parameters.size()]));
+			}
+			else {
+				method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]));
+			}
 		}
 		return method;
+	}
+
+	private boolean isConstructor(String name) {
+		return "<init>".equals(name);
 	}
 
 	private IMethod quickCheckForMethod(String name, Type[] parameterTypes) {
@@ -242,6 +258,26 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 			IMethod[] methods = type.getMethods();
 			for (IMethod method : methods) {
 				if (method.getElementName().equals(name) && method.getParameterTypes().length == parameterTypes.length) {
+					if (result == null) {
+						result = method;
+					}
+					else {
+						return null;
+					}
+				}
+				
+			}
+		} catch (JavaModelException e) {
+		}
+		return result;
+	}
+
+	private IMethod quickCheckForConstructor(Type[] parameterTypes) {
+		IMethod result = null;
+		try {
+			IMethod[] methods = type.getMethods();
+			for (IMethod method : methods) {
+				if (method.isConstructor() && method.getParameterTypes().length == parameterTypes.length) {
 					if (result == null) {
 						result = method;
 					}
