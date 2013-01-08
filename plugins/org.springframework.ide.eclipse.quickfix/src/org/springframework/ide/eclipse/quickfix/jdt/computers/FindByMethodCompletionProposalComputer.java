@@ -6,18 +6,11 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -38,12 +31,32 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
  * Completion proposal computer for adding template methods for findBy...
  * methods.
  * 
+ * @since 3.2
+ * 
  */
 public class FindByMethodCompletionProposalComputer extends JavaCompletionProposalComputer {
 
 	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
+
+		if (!(context instanceof JavaContentAssistInvocationContext)) {
+			return super.computeCompletionProposals(context, monitor);
+		}
+
+		JavaContentAssistInvocationContext javaContext = (JavaContentAssistInvocationContext) context;
+
+		CompletionContext coreContext = javaContext.getCoreContext();
+		if (coreContext != null) {
+			int tokenLocation = coreContext.getTokenLocation();
+			if ((tokenLocation & CompletionContext.TL_MEMBER_START) == 0) {
+				return super.computeCompletionProposals(context, monitor);
+			}
+		}
+
+		if (!SpringCoreUtils.isSpringProject(javaContext.getProject().getProject())) {
+			return super.computeCompletionProposals(context, monitor);
+		}
 
 		ITextViewer viewer = context.getViewer();
 		IDocument document = viewer.getDocument();
@@ -57,111 +70,63 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 				start--;
 			}
 
-			if (start >= 0) {
-				String prefix = document.get(start, end - start);
-				if ("findby".startsWith(prefix.toLowerCase())) {
-					if (viewer instanceof ISourceViewer && context instanceof JavaContentAssistInvocationContext) {
-						JavaContentAssistInvocationContext javaContext = (JavaContentAssistInvocationContext) context;
-						if (!SpringCoreUtils.isSpringProject(javaContext.getProject().getProject())) {
-							return super.computeCompletionProposals(context, monitor);
+			if (start < 0) {
+				return super.computeCompletionProposals(context, monitor);
+			}
+
+			String prefix = document.get(start, end - start);
+			if (!"findby".startsWith(prefix.toLowerCase())) {
+				return super.computeCompletionProposals(context, monitor);
+			}
+
+			if (!(viewer instanceof ISourceViewer)) {
+				return super.computeCompletionProposals(context, monitor);
+			}
+
+			IType expectedType = javaContext.getExpectedType();
+
+			if (expectedType == null) {
+				expectedType = javaContext.getCompilationUnit().findPrimaryType();
+			}
+			if (expectedType == null) {
+				return super.computeCompletionProposals(javaContext, monitor);
+			}
+			if (!isSpringDataRepository(expectedType, javaContext.getProject())) {
+				return super.computeCompletionProposals(javaContext, monitor);
+			}
+
+			List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+
+			RepositoryInformation repositoryInfo = new RepositoryInformation(expectedType);
+			Class<?> domainClass = repositoryInfo.getManagedDomainClass();
+			if (domainClass != null) {
+				Method[] methods = domainClass.getMethods();
+
+				for (Method method : methods) {
+					Class<?> returnType = method.getReturnType();
+					if ("void".equals(returnType.getName())) {
+						continue;
+					}
+					if (method.getParameterTypes().length > 0) {
+						continue;
+					}
+
+					String methodName = method.getName();
+					if (methodName.startsWith("get")) {
+						String propertyName = methodName.substring(3, methodName.length());
+						if ("Class".equals(propertyName)) {
+							continue;
 						}
-
-						AssistContext assistContext = new AssistContext(javaContext.getCompilationUnit(),
-								(ISourceViewer) viewer, start, end - start);
-
-						ASTNode coveredNode = assistContext.getCoveredNode();
-						ASTNode coveringNode = assistContext.getCoveringNode();
-
-						FieldDeclaration stubFieldDecl = null;
-						TypeDeclaration typeDecl = null;
-
-						if (coveredNode == null && coveringNode instanceof TypeDeclaration) {
-							typeDecl = (TypeDeclaration) coveringNode;
+						if (!containsMethodName(FindByMethodCompletionProposal.getMethodName(propertyName),
+								expectedType)) {
+							proposals.add(new FindByMethodCompletionProposal(propertyName, returnType, domainClass,
+									start, end, javaContext));
 						}
-						else {
-							if (coveredNode instanceof SimpleName) {
-								ASTNode parent = coveredNode.getParent();
-								if (parent instanceof SimpleType) {
-									parent = parent.getParent();
-									if (parent instanceof FieldDeclaration) {
-										FieldDeclaration fieldDecl = (FieldDeclaration) parent;
-										@SuppressWarnings("unchecked")
-										List<VariableDeclarationFragment> fragments = fieldDecl.fragments();
-										if (fragments.isEmpty() || fragments.size() == 1) {
-											typeDecl = getParentTypeDeclaration(fieldDecl);
-											if (typeDecl != null) {
-												@SuppressWarnings("unchecked")
-												List<BodyDeclaration> bodyDecls = typeDecl.bodyDeclarations();
-												BodyDeclaration nextSibling = null;
-												for (int i = 0; i < bodyDecls.size(); i++) {
-													BodyDeclaration bodyDecl = bodyDecls.get(i);
-													if (bodyDecl == fieldDecl && i + 1 < bodyDecls.size()) {
-														nextSibling = bodyDecls.get(i + 1);
-														break;
-													}
-												}
-
-												if (nextSibling instanceof MethodDeclaration) {
-													if (((MethodDeclaration) nextSibling).getReturnType2() == null) {
-														stubFieldDecl = fieldDecl;
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-
-							if (stubFieldDecl == null) {
-								return super.computeCompletionProposals(context, monitor);
-							}
-						}
-
-						List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-
-						IType expectedType = javaContext.getExpectedType();
-
-						if (expectedType == null) {
-							expectedType = javaContext.getCompilationUnit().findPrimaryType();
-						}
-
-						if (expectedType != null || stubFieldDecl != null
-								&& isSpringDataRepository(expectedType, javaContext.getProject())) {
-							RepositoryInformation repositoryInfo = new RepositoryInformation(expectedType);
-							Class<?> domainClass = repositoryInfo.getManagedDomainClass();
-							if (domainClass != null) {
-								Method[] methods = domainClass.getMethods();
-
-								for (Method method : methods) {
-									Class<?> returnType = method.getReturnType();
-									if ("void".equals(returnType.getName())) {
-										continue;
-									}
-									if (method.getParameterTypes().length > 0) {
-										continue;
-									}
-
-									String methodName = method.getName();
-									if (methodName.startsWith("get")) {
-										String propertyName = methodName.substring(3, methodName.length());
-										if ("Class".equals(propertyName)) {
-											continue;
-										}
-										if (!containsMethodName(
-												FindByMethodCompletionProposal.getMethodName(propertyName),
-												getParentTypeDeclaration(coveringNode))) {
-											proposals.add(new FindByMethodCompletionProposal(propertyName, returnType,
-													domainClass, typeDecl, start, end, javaContext, stubFieldDecl));
-										}
-									}
-								}
-							}
-						}
-
-						return proposals;
 					}
 				}
 			}
+
+			return proposals;
 		}
 		catch (BadLocationException e) {
 			StatusHandler.log(new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
@@ -172,23 +137,17 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 		return super.computeCompletionProposals(context, monitor);
 	}
 
-	private TypeDeclaration getParentTypeDeclaration(ASTNode node) {
-		if (node instanceof TypeDeclaration || node == null) {
-			return (TypeDeclaration) node;
-		}
-		return getParentTypeDeclaration(node.getParent());
-	}
-
-	private boolean containsMethodName(String methodName, TypeDeclaration typeDecl) {
-		@SuppressWarnings("unchecked")
-		List<BodyDeclaration> bodyDecls = typeDecl.bodyDeclarations();
-		for (BodyDeclaration bodyDecl : bodyDecls) {
-			if (bodyDecl instanceof MethodDeclaration) {
-				MethodDeclaration methodDecl = (MethodDeclaration) bodyDecl;
-				if (methodDecl.getName().getIdentifier().equals(methodName)) {
+	private boolean containsMethodName(String methodName, IType expectedType) {
+		try {
+			IMethod[] methods = expectedType.getMethods();
+			for (IMethod method : methods) {
+				if (method.getElementName().equals(methodName)) {
 					return true;
 				}
 			}
+		}
+		catch (JavaModelException e) {
+			StatusHandler.log(new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
 		}
 
 		return false;
@@ -208,6 +167,9 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 		for (String extendedInterface : interfaces) {
 			if (extendedInterface.contains("Repository")) {
 				String[][] resolvedInterfaceTypes = type.resolveType(extendedInterface);
+				if (resolvedInterfaceTypes == null) {
+					continue;
+				}
 				for (String[] match : resolvedInterfaceTypes) {
 					if (match != null && match.length == 2) {
 						if (isSpringDataRepository(project.findType(match[0] + "." + match[1]), project)) {

@@ -1,33 +1,37 @@
 package org.springframework.ide.eclipse.quickfix.jdt.proposals;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.ParameterizedType;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.springframework.ide.eclipse.quickfix.Activator;
-import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
-import org.springsource.ide.eclipse.commons.core.StatusHandler;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 
-public class FindByMethodCompletionProposal extends LinkedCorrectionProposal {
+/**
+ * @author Terry Denney
+ * @since 3.2
+ */
+public class FindByMethodCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 
 	private final String propertyName;
 
@@ -35,113 +39,24 @@ public class FindByMethodCompletionProposal extends LinkedCorrectionProposal {
 
 	private final Class<?> domainClass;
 
-	private final TypeDeclaration parentNode;
-
 	private final int startOffset;
 
 	private final int endOffset;
 
-	private final FieldDeclaration stubFieldDecl;
+	private IRegion selectedRegion;
 
 	private final ICompilationUnit cu;
 
 	public FindByMethodCompletionProposal(String propertyName, Class<?> propertyClass, Class<?> domainClass,
-			TypeDeclaration parentNode, int startOffset, int endOffset, JavaContentAssistInvocationContext javaContext,
-			FieldDeclaration stubFieldDecl) {
-		super(getMethodSignature(propertyName, propertyClass.getSimpleName(), domainClass.getSimpleName()), javaContext
-				.getCompilationUnit(), null, 0, null);
+			int startOffset, int endOffset, JavaContentAssistInvocationContext javaContext) {
 		this.propertyName = propertyName;
 		this.propertyClass = propertyClass;
 		this.domainClass = domainClass;
-		this.parentNode = parentNode;
 		this.startOffset = startOffset;
 		this.endOffset = endOffset;
-		this.stubFieldDecl = stubFieldDecl;
-		this.cu = javaContext.getCompilationUnit();
-	}
 
-	private ImportRewrite getImportRewriteHelper(CompilationUnit astRoot) {
-		if (getImportRewrite() == null) {
-			createImportRewrite(astRoot);
-		}
-		return getImportRewrite();
-	}
-
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		AST ast = parentNode.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-
-		CompilationUnit astRoot = ASTResolving.findParentCompilationUnit(parentNode);
-		if (!ProposalCalculatorUtil.containsImport(cu, propertyClass.getCanonicalName())) {
-			getImportRewriteHelper(astRoot).addImport(propertyClass.getCanonicalName());
-		}
-		if (!ProposalCalculatorUtil.containsImport(cu, domainClass.getCanonicalName())) {
-			getImportRewriteHelper(astRoot).addImport(domainClass.getCanonicalName());
-		}
-		if (!ProposalCalculatorUtil.containsImport(cu, "java.util.List")) {
-			getImportRewriteHelper(astRoot).addImport("java.util.List");
-		}
-
-		if (stubFieldDecl != null) {
-			return rewrite;
-		}
-
-		MethodDeclaration methodDecl = ast.newMethodDeclaration();
-
-		SimpleName methodNameSimpleName = ast.newSimpleName(getMethodName(propertyName));
-		methodDecl.setName(methodNameSimpleName);
-
-		SimpleName domainTypeName = ast.newSimpleName(domainClass.getSimpleName());
-		SimpleType domainType = ast.newSimpleType(domainTypeName);
-		SimpleName listTypeName = ast.newSimpleName("List");
-		SimpleType listType = ast.newSimpleType(listTypeName);
-		ParameterizedType returnType = ast.newParameterizedType(listType);
-
-		ListRewrite returnTypeRewrite = rewrite.getListRewrite(returnType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-		returnTypeRewrite.insertFirst(domainType, null);
-
-		methodDecl.setReturnType2(returnType);
-
-		ListRewrite methodParamRewrite = rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
-
-		SingleVariableDeclaration paramDecl = ast.newSingleVariableDeclaration();
-
-		SimpleName paramTypeName = ast.newSimpleName(propertyClass.getSimpleName());
-		SimpleType paramType = ast.newSimpleType(paramTypeName);
-		paramDecl.setType(paramType);
-
-		SimpleName paramName = ast.newSimpleName(propertyName.toLowerCase());
-		paramDecl.setName(paramName);
-		methodParamRewrite.insertFirst(paramDecl, null);
-
-		addLinkedPosition(rewrite.track(returnType), true, "returnType");
-		addLinkedPosition(rewrite.track(methodNameSimpleName), false, "methodName");
-		addLinkedPosition(rewrite.track(paramType), false, "paramType");
-		addLinkedPosition(rewrite.track(paramName), false, "paramName");
-
-		@SuppressWarnings("unchecked")
-		List<BodyDeclaration> bodyDecls = parentNode.bodyDeclarations();
-		BodyDeclaration nextSibling = null;
-		boolean found = false;
-		for (BodyDeclaration bodyDecl : bodyDecls) {
-			nextSibling = bodyDecl;
-			if (bodyDecl.getStartPosition() > startOffset) {
-				found = true;
-				break;
-			}
-		}
-
-		ListRewrite listRewrite = rewrite.getListRewrite(parentNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-
-		if (nextSibling == null || !found) {
-			listRewrite.insertLast(methodDecl, null);
-		}
-		else {
-			listRewrite.insertBefore(methodDecl, nextSibling, null);
-		}
-
-		return rewrite;
+		this.selectedRegion = new Region(startOffset, endOffset);
+		cu = javaContext.getCompilationUnit();
 	}
 
 	public static String getMethodName(String propertyName) {
@@ -156,54 +71,198 @@ public class FindByMethodCompletionProposal extends LinkedCorrectionProposal {
 		return name.toString();
 	}
 
-	private static String getMethodSignature(String propertyName, String propertyType, String domainType) {
-		StringBuilder name = new StringBuilder();
-
-		name.append(getMethodName(propertyName));
-		name.append("(");
-		name.append(propertyType);
-		name.append(" ");
-		name.append(propertyName.toLowerCase());
-		name.append(")");
-		name.append(" : ");
-		name.append("List<");
-		name.append(domainType);
-		name.append(">");
-
-		return name.toString();
-	}
-
 	private String getMethodString() {
 		StringBuilder str = new StringBuilder();
 
-		str.append("List<");
-		str.append(domainClass.getSimpleName());
-		str.append("> ");
 		str.append(getMethodName(propertyName));
 		str.append("(");
 		str.append(propertyClass.getSimpleName());
 		str.append(" ");
 		str.append(propertyName.toLowerCase());
-		str.append(");");
+		str.append(") : ");
+		str.append("List<");
+		str.append(domainClass.getSimpleName());
+		str.append(">");
 
 		return str.toString();
 	}
 
-	@Override
-	public void apply(IDocument document) {
+	public Point getSelection(IDocument document) {
+		return new Point(selectedRegion.getOffset(), selectedRegion.getLength());
+	}
+
+	public String getAdditionalProposalInfo() {
+		return null;
+	}
+
+	public String getDisplayString() {
+		return getMethodString();
+	}
+
+	public Image getImage() {
+		return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+	}
+
+	public IContextInformation getContextInformation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public int getRelevance() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	private void beginCompoundChange(ITextViewer viewer) {
+		if (viewer instanceof ITextViewerExtension) {
+			ITextViewerExtension extension = (ITextViewerExtension) viewer;
+			IRewriteTarget rewriteTarget = extension.getRewriteTarget();
+			rewriteTarget.beginCompoundChange();
+		}
+	}
+
+	private void endCompoundChange(ITextViewer viewer) {
+		if (viewer instanceof ITextViewerExtension) {
+			ITextViewerExtension extension = (ITextViewerExtension) viewer;
+			IRewriteTarget rewriteTarget = extension.getRewriteTarget();
+			rewriteTarget.beginCompoundChange();
+		}
+	}
+
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+		IDocument document = viewer.getDocument();
+
 		try {
-			if (stubFieldDecl != null) {
-				document.replace(startOffset, endOffset - startOffset, getMethodString() + "\n");
-			}
-			else {
-				document.replace(startOffset, endOffset - startOffset, "");
+			beginCompoundChange(viewer);
+
+			int oldImportPos = getLastImportEndPosition();
+
+			if (cu.getImport(propertyClass.getCanonicalName()) != null) {
+				cu.createImport(propertyClass.getCanonicalName(), null, null);
 			}
 
+			if (cu.getImport(domainClass.getCanonicalName()) != null) {
+				cu.createImport(domainClass.getCanonicalName(), null, null);
+			}
+
+			if (cu.getImport("java.util.List") != null) {
+				cu.createImport("java.util.List", null, null);
+			}
+
+			int importOffset = getLastImportEndPosition() - oldImportPos;
+
+			LinkedModeModel model = new LinkedModeModel();
+			StringBuilder methodStr = new StringBuilder();
+
+			int startPos, length;
+			List<LinkedPositionGroup> groups = new ArrayList<LinkedPositionGroup>();
+			LinkedPositionGroup group;
+
+			group = new LinkedPositionGroup();
+			startPos = startOffset + importOffset + methodStr.length();
+			methodStr.append("List<");
+			methodStr.append(domainClass.getSimpleName());
+			methodStr.append(">");
+			length = methodStr.length();
+			group.addPosition(new LinkedPosition(document, startPos, length));
+			groups.add(group);
+
+			methodStr.append(" ");
+
+			group = new LinkedPositionGroup();
+			startPos = startOffset + importOffset + methodStr.length();
+			String methodName = getMethodName(propertyName);
+			methodStr.append(methodName);
+			length = methodName.length();
+			group.addPosition(new LinkedPosition(document, startPos, length));
+			groups.add(group);
+
+			methodStr.append("(");
+
+			group = new LinkedPositionGroup();
+			startPos = startOffset + importOffset + methodStr.length();
+			String paramTypeName = propertyClass.getSimpleName();
+			length = paramTypeName.length();
+			methodStr.append(paramTypeName);
+			group.addPosition(new LinkedPosition(document, startPos, length));
+			groups.add(group);
+
+			methodStr.append(" ");
+
+			group = new LinkedPositionGroup();
+			startPos = startOffset + importOffset + methodStr.length();
+			String paramName = propertyName.toLowerCase();
+			length = paramName.length();
+			methodStr.append(paramName);
+			group.addPosition(new LinkedPosition(document, startPos, length));
+			groups.add(group);
+
+			methodStr.append(");");
+
+			document.replace(startOffset + importOffset, endOffset - startOffset, methodStr.toString());
+
+			for (LinkedPositionGroup currGroup : groups) {
+				model.addGroup(currGroup);
+			}
+			model.forceInstall();
+			LinkedModeUI ui = new LinkedModeUI(model, viewer);
+			ui.setExitPosition(viewer, startOffset + importOffset + methodStr.length(), 0, Integer.MAX_VALUE);
+			ui.enter();
+
+			selectedRegion = ui.getSelectedRegion();
 		}
 		catch (BadLocationException e) {
-			StatusHandler.log(new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally {
+			endCompoundChange(viewer);
+		}
+	}
 
-		super.apply(document);
+	private int getLastImportEndPosition() {
+		try {
+			IImportDeclaration[] imports = cu.getImports();
+			int lastPos = -1;
+			for (IImportDeclaration currImport : imports) {
+				ISourceRange sourceRange = currImport.getSourceRange();
+				if (sourceRange != null) {
+					int currPos = sourceRange.getOffset() + sourceRange.getLength();
+					if (currPos > lastPos) {
+						lastPos = currPos;
+					}
+				}
+			}
+
+			return lastPos;
+		}
+		catch (JavaModelException e) {
+			return -1;
+		}
+	}
+
+	public void selected(ITextViewer viewer, boolean smartToggle) {
+	}
+
+	public void unselected(ITextViewer viewer) {
+	}
+
+	public boolean validate(IDocument document, int offset, DocumentEvent event) {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @deprecated This method is no longer called by the framework and clients
+	 * should overwrite {@link #apply(ITextViewer, char, int, int)} instead
+	 */
+	@Deprecated
+	public void apply(IDocument document) {
+		// not called anymore
 	}
 }
