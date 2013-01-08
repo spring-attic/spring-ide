@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -353,6 +353,18 @@ public final class Introspector {
 	 * @throws JavaModelException
 	 */
 	public static Set<IMethod> getAllMethods(IType type) throws JavaModelException {
+		return getAllMethods(type, true);
+	}
+
+	/**
+	 * Returns <strong>all</strong> methods of the given {@link IType} instance.
+	 * @param type the type
+	 * @param includeHierarchy indicates if methods from superclasses should be included
+	 * @return set of {@link IMethod}
+	 * @throws JavaModelException
+	 * @since 3.2.0
+	 */
+	public static Set<IMethod> getAllMethods(IType type, boolean includeHierarchy) throws JavaModelException {
 		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
 		while (type != null) {
 			for (IMethod method : getMethods(type)) {
@@ -361,6 +373,7 @@ public final class Introspector {
 					allMethods.put(key, method);
 				}
 			}
+			if (!includeHierarchy) break;
 			type = getSuperType(type);
 		}
 		return new HashSet<IMethod>(allMethods.values());
@@ -390,6 +403,18 @@ public final class Introspector {
 	 * @throws JavaModelException
 	 */
 	public static Set<IField> getAllFields(IType type) throws JavaModelException {
+		return getAllFields(type, true);
+	}
+
+	/**
+	 * Returns <strong>all</strong> fields of the given {@link IType} instance.
+	 * @param type the type
+	 * @param includeHierarchy should include fields from superclasses or not
+	 * @return set of {@link IMethod}
+	 * @throws JavaModelException
+	 * @since 3.2.0
+	 */
+	public static Set<IField> getAllFields(IType type, boolean includeHierarchy) throws JavaModelException {
 		Map<String, IField> allFields = new HashMap<String, IField>();
 		while (type != null) {
 			for (IField method : type.getFields()) {
@@ -398,6 +423,7 @@ public final class Introspector {
 					allFields.put(key, method);
 				}
 			}
+			if (!includeHierarchy) break;
 			type = getSuperType(type);
 		}
 		return new HashSet<IField>(allFields.values());

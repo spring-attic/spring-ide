@@ -242,7 +242,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 				method = JdtUtils.getConstructor(type, parameters.toArray(new String[parameters.size()]));
 			}
 			else {
-				method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]));
+				method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]), false);
 			}
 		}
 		return method;
@@ -295,7 +295,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	private IField getFieldFromSignature(final String name) {
 		IField field = quickCheckForField(name);
 		if (field == null) {
-			field = JdtUtils.getField(type, name);
+			field = JdtUtils.getField(type, name, false);
 		}
 		return field;
 	}

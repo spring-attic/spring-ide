@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -260,8 +260,15 @@ public class JdtUtils {
 	}
 
 	public static IField getField(IType type, String fieldName) {
+		return getField(type, fieldName, true);
+	}
+
+	/**
+	 * @since 3.2.0
+	 */
+	public static IField getField(IType type, String fieldName, boolean includeHierarchy) {
 		try {
-			Set<IField> fields = Introspector.getAllFields(type);
+			Set<IField> fields = Introspector.getAllFields(type, includeHierarchy);
 			for (IField field : fields) {
 				if (field.getElementName().equals(fieldName)) {
 					return field;
@@ -494,12 +501,19 @@ public class JdtUtils {
 	}
 
 	public static IMethod getMethod(IType type, String methodName, String[] parameterTypes) {
+		return getMethod(type, methodName, parameterTypes, true);
+	}
+
+	/**
+	 * @since 3.2.0
+	 */
+	public static IMethod getMethod(IType type, String methodName, String[] parameterTypes, boolean includeHierarchy) {
 		int index = methodName.indexOf('(');
 		if (index >= 0) {
 			methodName = methodName.substring(0, index);
 		}
 		try {
-			Set<IMethod> methods = Introspector.getAllMethods(type);
+			Set<IMethod> methods = Introspector.getAllMethods(type, includeHierarchy);
 			for (IMethod method : methods) {
 				if (method.getElementName().equals(methodName)
 						&& method.getParameterTypes().length == parameterTypes.length) {
