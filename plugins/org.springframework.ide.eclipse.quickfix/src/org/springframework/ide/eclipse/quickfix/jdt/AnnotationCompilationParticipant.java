@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 import org.springframework.ide.eclipse.quickfix.jdt.util.UriTemplateVariable;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
-import org.springsource.ide.eclipse.commons.core.StatusHandler;
 
 /**
  * Compilation participant to display warning in Spring annotation definitions
@@ -129,79 +128,74 @@ public class AnnotationCompilationParticipant extends CompilationParticipant {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void reconcile(ReconcileContext context) {
-		try {
-			CompilationUnit cuAST = context.getAST3();
-			ICompilationUnit cu = context.getWorkingCopy();
-			IFile file = (IFile) cu.getResource();
+		CompilationUnit cuAST = context.getDelta().getCompilationUnitAST();
+		ICompilationUnit cu = context.getWorkingCopy();
+		IFile file = (IFile) cu.getResource();
 
-			List<MissingPathVariableWarning> problems = new ArrayList<MissingPathVariableWarning>();
+		List<MissingPathVariableWarning> problems = new ArrayList<MissingPathVariableWarning>();
 
-			if (cuAST != null) {
-				List<AbstractTypeDeclaration> typeDecls = cuAST.types();
-				for (AbstractTypeDeclaration typeDecl : typeDecls) {
-					List<BodyDeclaration> bodyDecls = typeDecl.bodyDeclarations();
-					for (BodyDeclaration bodyDecl : bodyDecls) {
-						if (bodyDecl instanceof MethodDeclaration) {
-							MethodDeclaration methodDecl = (MethodDeclaration) bodyDecl;
-							List<String> currentPathVariables = findPathVariables(methodDecl);
+		if (cuAST != null) {
+			List<AbstractTypeDeclaration> typeDecls = cuAST.types();
+			for (AbstractTypeDeclaration typeDecl : typeDecls) {
+				List<BodyDeclaration> bodyDecls = typeDecl.bodyDeclarations();
+				for (BodyDeclaration bodyDecl : bodyDecls) {
+					if (bodyDecl instanceof MethodDeclaration) {
+						MethodDeclaration methodDecl = (MethodDeclaration) bodyDecl;
+						List<String> currentPathVariables = findPathVariables(methodDecl);
 
-							Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("RequestMapping",
-									methodDecl);
-							for (Annotation annotation : annotations) {
-								List<UriTemplateVariable> variables = ProposalCalculatorUtil
-										.getUriTemplatVariables(annotation);
-								for (UriTemplateVariable variable : variables) {
-									boolean found = false;
-									for (String currentPathVariable : currentPathVariables) {
-										if (Pattern.matches(variable.getVariableName(), currentPathVariable)) {
-											found = true;
-											break;
-										}
+						Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("RequestMapping",
+								methodDecl);
+						for (Annotation annotation : annotations) {
+							List<UriTemplateVariable> variables = ProposalCalculatorUtil
+									.getUriTemplatVariables(annotation);
+							for (UriTemplateVariable variable : variables) {
+								boolean found = false;
+								for (String currentPathVariable : currentPathVariables) {
+									if (Pattern.matches(variable.getVariableName(), currentPathVariable)) {
+										found = true;
+										break;
 									}
+								}
 
-									if (!found) {
-										problems.add(new MissingPathVariableWarning(annotation, variable, file, cuAST
-												.getLineNumber(variable.getOffset())));
-									}
+								if (!found) {
+									problems.add(new MissingPathVariableWarning(annotation, variable, file, cuAST
+											.getLineNumber(variable.getOffset())));
 								}
 							}
 						}
 					}
+				}
 
-					List<String> pathVariables;
-					if (context.isResolvingBindings()) {
-						pathVariables = new ArrayList<String>();
+				List<String> pathVariables;
+				if (context.isResolvingBindings()) {
+					pathVariables = new ArrayList<String>();
 
-						ITypeBinding typeBinding = typeDecl.resolveBinding();
-						while (typeBinding != null
-								&& !typeDecl.getAST().resolveWellKnownType("java.lang.Object").equals(typeBinding)) {
-							pathVariables.addAll(findPathVariables(typeBinding));
-							typeBinding = typeBinding.getSuperclass();
-						}
+					ITypeBinding typeBinding = typeDecl.resolveBinding();
+					while (typeBinding != null
+							&& !typeDecl.getAST().resolveWellKnownType("java.lang.Object").equals(typeBinding)) {
+						pathVariables.addAll(findPathVariables(typeBinding));
+						typeBinding = typeBinding.getSuperclass();
 					}
-					else {
-						pathVariables = findPathVariables(typeDecl);
-					}
+				}
+				else {
+					pathVariables = findPathVariables(typeDecl);
+				}
 
-					Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("RequestMapping", typeDecl);
-					for (Annotation annotation : annotations) {
-						List<UriTemplateVariable> variables = ProposalCalculatorUtil.getUriTemplatVariables(annotation);
-						for (UriTemplateVariable variable : variables) {
-							if (!pathVariables.contains(variable.getVariableName())) {
-								problems.add(new MissingPathVariableWarning(annotation, variable, file, cuAST
-										.getLineNumber(variable.getOffset())));
-							}
+				Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("RequestMapping", typeDecl);
+				for (Annotation annotation : annotations) {
+					List<UriTemplateVariable> variables = ProposalCalculatorUtil.getUriTemplatVariables(annotation);
+					for (UriTemplateVariable variable : variables) {
+						if (!pathVariables.contains(variable.getVariableName())) {
+							problems.add(new MissingPathVariableWarning(annotation, variable, file, cuAST
+									.getLineNumber(variable.getOffset())));
 						}
 					}
 				}
 			}
+		}
 
-			context.putProblems(MissingPathVariableWarning.MARKER_TYPE,
-					problems.toArray(new CategorizedProblem[problems.size()]));
-		}
-		catch (JavaModelException e) {
-			StatusHandler.log(e.getStatus());
-		}
+		context.putProblems(MissingPathVariableWarning.MARKER_TYPE,
+				problems.toArray(new CategorizedProblem[problems.size()]));
 	}
 
 	@Override
