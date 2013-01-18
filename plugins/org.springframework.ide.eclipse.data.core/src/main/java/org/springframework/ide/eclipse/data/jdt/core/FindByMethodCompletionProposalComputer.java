@@ -1,4 +1,4 @@
-package org.springframework.ide.eclipse.quickfix.jdt.computers;
+package org.springframework.ide.eclipse.data.jdt.core;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,9 +19,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.springframework.ide.eclipse.data.internal.DataCorePlugin;
 import org.springframework.ide.eclipse.data.jdt.core.RepositoryInformation;
-import org.springframework.ide.eclipse.quickfix.Activator;
-import org.springframework.ide.eclipse.quickfix.jdt.proposals.FindByMethodCompletionProposal;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 
@@ -34,6 +33,7 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
  * @since 3.2
  * 
  */
+@SuppressWarnings("restriction")
 public class FindByMethodCompletionProposalComputer extends JavaCompletionProposalComputer {
 
 	@Override
@@ -129,10 +129,10 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 			return proposals;
 		}
 		catch (BadLocationException e) {
-			StatusHandler.log(new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+			StatusHandler.log(new Status(Status.ERROR, DataCorePlugin.PLUGIN_ID, e.getMessage(), e));
 		}
 		catch (JavaModelException e) {
-			StatusHandler.log(new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+			StatusHandler.log(new Status(Status.ERROR, DataCorePlugin.PLUGIN_ID, e.getMessage(), e));
 		}
 		return super.computeCompletionProposals(context, monitor);
 	}
@@ -147,7 +147,7 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 			}
 		}
 		catch (JavaModelException e) {
-			StatusHandler.log(new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+			StatusHandler.log(new Status(Status.ERROR, DataCorePlugin.PLUGIN_ID, e.getMessage(), e));
 		}
 
 		return false;

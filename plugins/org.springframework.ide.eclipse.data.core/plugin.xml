@@ -82,6 +82,14 @@
             <partition type="__java_string" />
             <partition type="__dftl_partition_content_type" />
           </javaCompletionProposalComputer>
+
+          <javaCompletionProposalComputer
+            
+            class="org.springframework.ide.eclipse.data.jdt.core.FindByMethodCompletionProposalComputer"
+            activate="true">
+            <partition type="__java_string" />
+            <partition type="__dftl_partition_content_type" />
+          </javaCompletionProposalComputer>
     </extension>
 	
 	<extension

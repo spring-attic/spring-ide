@@ -21,6 +21,5 @@ public class AnnotationComputerRegistry {
 	public static JavaCompletionProposalComputer[] computers = new JavaCompletionProposalComputer[] {
 			new QualifierArgumentProposalComputer(), new QualifierCompletionProposalComputer(),
 			new RequestMappingVariableProposalComputer(), new RequestMappingParamTypeProposalComputer(),
-			new ConfigurationLocationProposalComputer(), new FindByMethodCompletionProposalComputer() };
-
+			new ConfigurationLocationProposalComputer() };
 }

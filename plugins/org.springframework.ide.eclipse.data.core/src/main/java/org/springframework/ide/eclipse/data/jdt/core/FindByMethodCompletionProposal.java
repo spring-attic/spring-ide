@@ -1,8 +1,9 @@
-package org.springframework.ide.eclipse.quickfix.jdt.proposals;
+package org.springframework.ide.eclipse.data.jdt.core;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
@@ -26,11 +27,15 @@ import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.springframework.ide.eclipse.core.StringUtils;
+import org.springframework.ide.eclipse.data.internal.DataCorePlugin;
+import org.springsource.ide.eclipse.commons.core.StatusHandler;
 
 /**
  * @author Terry Denney
  * @since 3.2
  */
+@SuppressWarnings("restriction")
 public class FindByMethodCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 
 	private final String propertyName;
@@ -60,15 +65,7 @@ public class FindByMethodCompletionProposal implements IJavaCompletionProposal, 
 	}
 
 	public static String getMethodName(String propertyName) {
-		StringBuilder name = new StringBuilder("findBy");
-		if (propertyName.length() > 0) {
-			name.append(propertyName.substring(0, 1).toUpperCase());
-		}
-		if (propertyName.length() > 1) {
-			name.append(propertyName.substring(1));
-		}
-
-		return name.toString();
+		return "findBy" + StringUtils.capitalize(propertyName);
 	}
 
 	private String getMethodString() {
@@ -104,12 +101,10 @@ public class FindByMethodCompletionProposal implements IJavaCompletionProposal, 
 	}
 
 	public IContextInformation getContextInformation() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public int getRelevance() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -212,12 +207,10 @@ public class FindByMethodCompletionProposal implements IJavaCompletionProposal, 
 			selectedRegion = ui.getSelectedRegion();
 		}
 		catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			StatusHandler.log(new Status(Status.ERROR, DataCorePlugin.PLUGIN_ID, e.getMessage(), e));
 		}
 		catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			StatusHandler.log(new Status(Status.ERROR, DataCorePlugin.PLUGIN_ID, e.getMessage(), e));
 		}
 		finally {
 			endCompoundChange(viewer);
