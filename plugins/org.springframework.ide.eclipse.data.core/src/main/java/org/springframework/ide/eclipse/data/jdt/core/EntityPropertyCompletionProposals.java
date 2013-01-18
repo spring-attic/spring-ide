@@ -260,9 +260,12 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 		private static final Image PROTECTED_FIELD = IMAGES.getImage(ISharedImages.IMG_FIELD_PROTECTED);
 		private static final Image PUBLIC_FIELD = IMAGES.getImage(ISharedImages.IMG_FIELD_PUBLIC);
 		
+		private String fieldName;
+		
 		public EntityFieldNameCompletionProposal(IField field, int offset, String seed) {
 			super(getReplacement(field.getElementName(), seed), offset, offset + (seed == null ? 0 : seed.length()),
 					getFieldImage(field), field.getElementName(), 500);
+			this.fieldName = field.getElementName();
 		}
 
 		private static Image getFieldImage(IField field) {
@@ -279,6 +282,11 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 				// ignore
 			}
 			return null;
+		}
+		
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return "findBy" + StringUtils.capitalize(fieldName);
 		}
 	}
 
