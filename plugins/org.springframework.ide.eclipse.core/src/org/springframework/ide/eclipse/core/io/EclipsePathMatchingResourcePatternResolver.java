@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Spring IDE Developers
+ * Copyright (c) 2008, 2012 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -53,6 +54,7 @@ import org.springframework.util.ClassUtils;
  * <p>
  * See the later for a comprehensive description of the supported patterns and semantics.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.3
  * @see PathMatchingResourcePatternResolver
  */
@@ -229,8 +231,27 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 			JavaModelException {
 		if (resource instanceof FileSystemResource) {
 			// This can only be something in the Eclipse workspace
-			IResource[] allResourcesFor = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(
-					resource.getURI());
+			
+			// first check the location in the project that this pattern resolver is associated with (most likely path)
+			Path path = new Path(((FileSystemResource) resource).getPath());
+			IPath projectLocation = this.project.getLocation();
+			if (projectLocation.isPrefixOf(path)) {
+				int segmentsToRemove = projectLocation.segmentCount();
+				IPath projectRelativePath = path.removeFirstSegments(segmentsToRemove);
+				IFile file = this.project.getFile(projectRelativePath);
+				if (file != null && file.exists()) {
+					return new FileResource(file);
+				}
+			}
+
+			// then check the simple getFileForLocation (faster in case it is not a linked resource)
+			IFile fileForLocation = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
+			if (fileForLocation != null) {
+				return new FileResource(fileForLocation);
+			}
+
+			// fall back to full resolution via findFilesForLocationURI
+			IResource[] allResourcesFor = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(resource.getURI());
 			for (IResource res : allResourcesFor) {
 				return new FileResource((IFile) res);
 			}
