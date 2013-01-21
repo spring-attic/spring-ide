@@ -175,7 +175,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.springsource.javax.jms.source"
+         id="javax.jms.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -183,6 +183,13 @@
 
    <plugin
          id="org.apache.commons.collections.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.io.source"
          download-size="0"
          install-size="0"
          version="0.0.0"

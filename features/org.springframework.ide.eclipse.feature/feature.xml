@@ -196,7 +196,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.springsource.javax.jms"
+         id="javax.jms"
          download-size="0"
          install-size="0"
          version="0.0.0"
