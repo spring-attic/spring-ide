@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * Handles creation and modification of the {@link AopReferenceModel}.
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Leo Dos Santos
  * @since 2.0
  */
 public class AopReferenceModelBuilderJob extends Job {
@@ -207,7 +208,17 @@ public class AopReferenceModelBuilderJob extends Job {
 			this.classLoaderSupport.executeCallback(new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
 
 				public void doWithActiveProjectClassLoader() throws Throwable {
-					Class<?> targetClass = ClassUtils.loadClass(className);
+					Class<?> targetClass = null;
+					// If the given file is from an external project (for example when one config imports another),
+					// then we need to resolve the class against the external project otherwise we may end up with
+					// bogus error markers from ClassNotFoundExceptions
+					// STS-2533: https://issuetracker.springsource.com/browse/STS-2533
+					if (project != null && project.equals(file.getProject())) {
+						targetClass = ClassUtils.loadClass(className);
+					} else {
+						ClassLoader loader = JdtUtils.getClassLoader(file.getProject(), null);
+						targetClass = ClassUtils.loadClass(className, loader);
+					}
 
 					// handle introductions first
 					if (info instanceof BeanIntroductionDefinition) {

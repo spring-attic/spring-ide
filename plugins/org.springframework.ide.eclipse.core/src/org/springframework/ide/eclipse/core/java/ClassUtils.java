@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
  * Utility class that provides several helper methods for working with java
  * reflect components.
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  * @since 2.0
  */
 public class ClassUtils {
@@ -143,6 +144,14 @@ public class ClassUtils {
 	public static Class<?> loadClass(String className)
 			throws ClassNotFoundException {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		return loadClass(className, loader);
+	}
+
+	public static Class<?> loadClass(Class clazz) throws ClassNotFoundException {
+		return loadClass(clazz.getName());
+	}
+	
+	public static Class<?> loadClass(String className, ClassLoader loader) throws ClassNotFoundException {
 		try {
 			return loader.loadClass(className);
 		}
@@ -160,8 +169,5 @@ public class ClassUtils {
 			throw ex;
 		}
 	}
-
-	public static Class<?> loadClass(Class clazz) throws ClassNotFoundException {
-		return loadClass(clazz.getName());
-	}
+	
 }
