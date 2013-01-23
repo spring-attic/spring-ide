@@ -13,7 +13,12 @@ Require-Bundle: org.eclipse.ui,
  org.junit4,
  org.springframework.ide.eclipse.beans.core.autowire,
  org.springsource.ide.eclipse.commons.tests.util,
- org.springframework.asm
+ org.springframework.asm,
+ org.springframework.core,
+ org.springframework.beans,
+ org.springframework.context,
+ org.springframework.web,
+ org.springframework.ide.eclipse.beans.core.metadata
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Spring IDE Developers
