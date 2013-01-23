@@ -181,6 +181,14 @@
              name="%dataValidator.rule.invalidDerivedQuery.name">
           <message id="INVALID_DERIVED_QUERY" label="%dataValidator.rule.invalidDerivedQuery.message" severity="ERROR" />
        </rule>
+       <rule
+             class="org.springframework.ide.eclipse.data.internal.validation.InvalidParameterTypeRule"
+             description="%dataValidator.rule.invalidParameterType.description"
+             enabledByDefault="true"
+             id="invalidParameterType"
+             name="%dataValidator.rule.invalidParameterType.name">
+          <message id="INVALID_PARAMETER_TYPE" label="%dataValidator.rule.invalidParameterType.message" severity="WARNING" />
+       </rule>
     </rules>
  </extension>
 
