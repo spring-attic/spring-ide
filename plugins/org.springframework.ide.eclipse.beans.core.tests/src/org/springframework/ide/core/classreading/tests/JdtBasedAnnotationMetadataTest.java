@@ -50,7 +50,7 @@ public class JdtBasedAnnotationMetadataTest {
 
 	@Before
 	public void createProject() throws Exception {
-		project = StsTestUtil.createPredefinedProject("jdt-annotation-tests", "org.springframework.ide.eclipse.test");
+		project = StsTestUtil.createPredefinedProject("jdt-annotation-tests", "org.springframework.ide.eclipse.beans.core.tests");
 		classReaderFactory = new CachingClassReaderFactory(JdtUtils.getClassLoader(project, null));
 		classLoader = JdtUtils.getClassLoader(project, null);
 	}
