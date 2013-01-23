@@ -17,13 +17,10 @@ package org.springframework.ide.eclipse.core.java;
 public interface IProjectClassLoaderSupport {
 
 	interface IProjectClassLoaderAwareCallback {
-
 		void doWithActiveProjectClassLoader() throws Throwable;
-
 	}
 
-	void executeCallback(IProjectClassLoaderAwareCallback callback)
-			throws Throwable;
+	void executeCallback(IProjectClassLoaderAwareCallback callback) throws Throwable;
 
 	ClassLoader getProjectClassLoader();
 }
