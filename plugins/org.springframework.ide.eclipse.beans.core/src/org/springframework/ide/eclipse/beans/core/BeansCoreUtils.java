@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,10 @@ import org.eclipse.core.resources.IResource;
 
 /**
  * Some helper methods for the Spring IDE core model.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class BeansCoreUtils {
 
@@ -35,13 +37,13 @@ public class BeansCoreUtils {
 	 * Returns <code>true</code> if given resource is a Spring bean factory
 	 * config file. If <code>includeImported</code> is provided as
 	 * <code>true</code> the imported configs are queried as well.
+	 * 
 	 * @since 2.0.3
 	 */
-	public static boolean isBeansConfig(IResource resource,
-			boolean includeImported) {
+	public static boolean isBeansConfig(IResource resource, boolean includeImported) {
 		if (resource instanceof IFile) {
-			return BeansCorePlugin.getModel().getConfig((IFile) resource,
-					includeImported) != null;
+//			return BeansCorePlugin.getModel().getConfig((IFile) resource, includeImported) != null;
+			return BeansCorePlugin.getModel().isConfig((IFile) resource, includeImported);
 		}
 		return false;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
@@ -239,6 +240,36 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 		return null;
+	}
+
+	public boolean isConfig(IFile configFile, boolean includeImported) {
+		if (configFile != null) {
+			IBeansProject project = getProject(configFile.getProject());
+			
+			// check the project of the file itself first
+			String configName = null;
+			if (project != null) {
+				if (!(configFile instanceof ExternalFile)) {
+					configName = configFile.getProjectRelativePath().toString();
+				}
+				else {
+					configName = configFile.getFullPath().toString();
+				}
+
+				if (project.hasConfig(configFile, configName, includeImported)) {
+					return true;
+				}
+			}
+			
+			// then check all the other projects
+			configName = configFile.getFullPath().toString();
+			for (IBeansProject p : getProjects()) {
+				if (p.hasConfig(configFile, configName, includeImported)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public Set<IBeansConfig> getConfigs(IFile configFile, boolean includeImported) {

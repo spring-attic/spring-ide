@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * @author Torsten Juergeleit
  * @author Dave Watkins
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public interface IBeansProject extends IBeansModelElement, IResourceModelElement, IBeanClassAware {
 
@@ -80,6 +81,13 @@ public interface IBeansProject extends IBeansModelElement, IResourceModelElement
 	 * description.
 	 */
 	boolean hasConfig(String configName);
+
+	/**
+	 * Returns true if given file belongs to the list of Spring bean config files which are stored in the project
+	 * description, including imported beans, if includeImported is set to true.
+	 * @since 3.2.0
+	 */
+	boolean hasConfig(IFile configFile, String configName, boolean includeImported);
 
 	/**
 	 * Returns <code>IBeansConfig</code> for given config file.

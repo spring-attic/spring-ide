@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,13 +34,13 @@ import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectD
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigEventListener;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
@@ -62,6 +62,7 @@ import org.springframework.util.ObjectUtils;
  * @author Torsten Juergeleit
  * @author Dave Watkins
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class BeansProject extends AbstractResourceModelElement implements IBeansProject, ILazyInitializedModelElement {
 
@@ -408,6 +409,27 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			r.unlock();
 		}
 	}
+	
+	public boolean hasConfig(IFile configFile, String configName, boolean includeImported) {
+		if (hasConfig(configName)) {
+			return true;
+		}
+		
+		if (isImportsEnabled() && includeImported) {
+			try {
+				r.lock();
+				for (IBeansConfig bc : getConfigs()) {
+					if (hasImportedBeansConfig(configFile, bc)) {
+						return true;
+					}
+				}
+			}
+			finally {
+				r.unlock();
+			}
+		}
+		return false;
+	}
 
 	public IBeansConfig getConfig(IFile configFile, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = getConfigs(configFile, includeImported);
@@ -459,6 +481,28 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 				}
 			}
 		}
+	}
+
+	private boolean hasImportedBeansConfig(IFile file, IBeansConfig bc) {
+		if (bc.getElementResource() != null && bc.getElementResource().equals(file)) {
+			return true;
+		}
+
+		for (IBeansImport bi : bc.getImports()) {
+			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
+				if (importedBc.getElementResource() != null && importedBc.getElementResource().equals(file)) {
+					return true;
+				}
+				for (IBeansImport iBi : importedBc.getImports()) {
+					for (IBeansConfig iBc : iBi.getImportedBeansConfigs()) {
+						if (hasImportedBeansConfig(file, iBc)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

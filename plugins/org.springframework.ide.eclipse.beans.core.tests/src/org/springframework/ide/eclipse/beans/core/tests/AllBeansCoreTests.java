@@ -34,18 +34,20 @@ import org.springframework.ide.eclipse.core.java.IntrospectorTest;
  * @since 2.0.3
  */
 @RunWith(Suite.class)
-@SuiteClasses({ BeanClassRuleTest.class, //
-	BeanConstructorArgumentRuleTest.class, //
-	BeanPropertyRuleTest.class, //
-	BeanInitDestroyMethodRuleTest.class, //
-	RequiredPropertyRuleTest.class, //
-	NamespaceElementsRuleTest.class, //
-	IntrospectorTest.class, //
-	AutowiredAnnotationInjectionMetadataProviderTests.class, //
-	CommonAnnotationInjectionMetadataProviderTests.class, //
-	JdtAnnotationMetadataTest.class, //
-	JdtBasedAnnotationMetadataTest.class, //
-	JdtClassMetadataTest.class //
+@SuiteClasses({
+	BeansCoreUtilsTest.class,
+	BeanClassRuleTest.class,
+	BeanConstructorArgumentRuleTest.class,
+	BeanPropertyRuleTest.class,
+	BeanInitDestroyMethodRuleTest.class,
+	RequiredPropertyRuleTest.class,
+	NamespaceElementsRuleTest.class,
+	IntrospectorTest.class,
+	AutowiredAnnotationInjectionMetadataProviderTests.class,
+	CommonAnnotationInjectionMetadataProviderTests.class,
+	JdtAnnotationMetadataTest.class,
+	JdtBasedAnnotationMetadataTest.class,
+	JdtClassMetadataTest.class
 })
 public class AllBeansCoreTests {
 	// goofy junit4, no class body needed
