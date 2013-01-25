@@ -33,6 +33,7 @@
    <requires>
       <import feature="org.eclipse.wst.xml_ui.feature" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.3.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.ajdt" version="2.2.2.qualifier"/>
    </requires>
 
    <plugin
@@ -132,6 +133,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
    <plugin
          id="org.springframework.ide.eclipse.bestpractices"
          download-size="0"
