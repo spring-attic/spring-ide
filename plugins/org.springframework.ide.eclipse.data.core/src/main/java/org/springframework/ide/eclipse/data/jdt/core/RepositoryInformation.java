@@ -79,7 +79,6 @@ public class RepositoryInformation {
 	private final Class<?> repositoryBaseInterface;
 
 	public RepositoryInformation(IType type) {
-
 		try {
 			this.type = type;
 
@@ -118,8 +117,10 @@ public class RepositoryInformation {
 		Assert.notNull(type);
 
 		try {
-			return type.isInterface() ? new RepositoryInformation(type) : null;
+			return type.isInterface()  && type.exists() ? new RepositoryInformation(type) : null;
 		} catch (JavaModelException e) {
+			return null;
+		} catch (IllegalArgumentException e) {
 			return null;
 		}
 	}
