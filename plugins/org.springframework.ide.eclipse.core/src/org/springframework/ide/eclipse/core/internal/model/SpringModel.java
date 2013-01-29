@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.ISpringResourceChangeEvents;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -40,6 +39,7 @@ import org.springframework.ide.eclipse.core.model.ISpringModel;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * This model manages instances of {@link IProject}s. It's populated from Eclipse's current workspace and receives
@@ -48,6 +48,7 @@ import org.springframework.util.ObjectUtils;
  * The single instance of {@link ISpringModel} is available from the static method {@link SpringCore#getModel()}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 public class SpringModel extends AbstractModel implements ISpringModel {
@@ -314,9 +315,12 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 				if ((delta.getFlags() & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0
 						|| (delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
 					boolean addedOrRemoved = false;
+					
 					for (IJavaElementDelta classpathDelta : delta.getAffectedChildren()) {
 						if ((classpathDelta.getFlags() & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0
-								|| (classpathDelta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) {
+								|| (classpathDelta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0
+								|| (classpathDelta.getKind() & IJavaElementDelta.ADDED) != 0
+								|| (classpathDelta.getKind() & IJavaElementDelta.REMOVED) != 0) {
 							addedOrRemoved = true;
 							break;
 						}
@@ -328,6 +332,9 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 									&& (javaProject.equals(delta.getElement().getJavaProject()) || javaProject
 											.isOnClasspath(delta.getElement()))) {
 								SpringCoreUtils.buildProject(project.getProject());
+								
+								// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=375365
+								SpringCoreUtils.buildProject(project.getProject(), "org.eclipse.wst.validation.validationbuilder");
 							}
 						}
 					}
