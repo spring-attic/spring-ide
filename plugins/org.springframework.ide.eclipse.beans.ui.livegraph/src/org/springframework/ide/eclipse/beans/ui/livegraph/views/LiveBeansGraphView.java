@@ -208,6 +208,8 @@ public class LiveBeansGraphView extends ViewPart {
 	private void hookContextMenu() {
 		MenuManager menuManager = new MenuManager();
 		menuManager.setRemoveAllWhenShown(true);
+		fillContextMenu(menuManager);
+
 		menuManager.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
 				ISelection selection = selectionProvider.getSelection();
@@ -219,7 +221,7 @@ public class LiveBeansGraphView extends ViewPart {
 
 		Menu menu = menuManager.createContextMenu(getViewSite().getShell());
 		getViewSite().getShell().setMenu(menu);
-		getSite().registerContextMenu(menuManager, selectionProvider);
+		getViewSite().registerContextMenu(menuManager, selectionProvider);
 	}
 
 	private void hookPullDownMenu() {
