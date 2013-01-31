@@ -29,7 +29,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.part.PageBook;
@@ -212,15 +211,15 @@ public class LiveBeansGraphView extends ViewPart {
 
 		menuManager.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
-				ISelection selection = selectionProvider.getSelection();
+				ISelection selection = getViewSite().getSelectionProvider().getSelection();
 				if (!selection.isEmpty()) {
 					fillContextMenu(manager);
 				}
 			}
 		});
 
-		Menu menu = menuManager.createContextMenu(pagebook);
-		pagebook.setMenu(menu);
+		graphViewer.getControl().setMenu(menuManager.createContextMenu(graphViewer.getControl()));
+		treeViewer.getControl().setMenu(menuManager.createContextMenu(treeViewer.getControl()));
 		getViewSite().registerContextMenu(menuManager, selectionProvider);
 	}
 
