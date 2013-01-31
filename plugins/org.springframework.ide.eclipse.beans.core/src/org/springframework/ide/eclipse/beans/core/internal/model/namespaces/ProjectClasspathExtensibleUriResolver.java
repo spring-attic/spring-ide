@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 Spring IDE Developers
+ * Copyright (c) 2010, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -61,10 +60,11 @@ public class ProjectClasspathExtensibleUriResolver implements
 
 	private static final String KEY_DISABLE_CACHING_PREFERENCE = BeansCorePlugin.PLUGIN_ID + "."
 			+ BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID;
+	
+	public static final String PROJECT_AWARE_PROTOCOL = "project-aware://";
 
 //	private static Map<IProject, ProjectClasspathUriResolver> projectResolvers = new ConcurrentHashMap<IProject, ProjectClasspathUriResolver>();
 	private static ConcurrentMap<IProject, Future<ProjectClasspathUriResolver>> projectResolvers = new ConcurrentHashMap<IProject, Future<ProjectClasspathUriResolver>>();
-	private ThreadLocal<IPath> previousFile = new ThreadLocal<IPath>();
 
 	public ProjectClasspathExtensibleUriResolver() {
 		JavaCore.addElementChangedListener(this,
@@ -90,33 +90,36 @@ public class ProjectClasspathExtensibleUriResolver implements
 		if (systemId == null && publicId == null) {
 			return null;
 		}
-
-		if (file == null) {
-			IPath prevFile = previousFile.get();
-			if (prevFile != null) {
-				file = ResourcesPlugin.getWorkspace().getRoot()
-						.getFile(prevFile);
-			} else {
-				return null;
-			}
-		} else {
-			previousFile.set(file.getFullPath());
+		
+		IProject project = null;
+		if (file != null) {
+			project = file.getProject();
 		}
-
-		ProjectClasspathUriResolver resolver = getProjectResolver(file);
+		else if (baseLocation.startsWith(PROJECT_AWARE_PROTOCOL)) {
+			String nameAndLocation = baseLocation.substring(PROJECT_AWARE_PROTOCOL.length());
+			String projectName = nameAndLocation.substring(0, nameAndLocation.indexOf('/'));
+			project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		}
+		
+		if (project == null) {
+			return null;
+		}
+		
+		ProjectClasspathUriResolver resolver = getProjectResolver(file, project);
 		if (resolver != null) {
-			return resolver.resolveOnClasspath(publicId, systemId);
+			String resolved = resolver.resolveOnClasspath(publicId, systemId);
+			if (resolved != null) {
+				resolved = PROJECT_AWARE_PROTOCOL + project.getName() + "/" + resolved;
+			}
+			return resolved;
 		}
 
 		return null;
 	}
 
-	private ProjectClasspathUriResolver getProjectResolver(IFile file) {
-		final IProject project = file.getProject();
-
+	private ProjectClasspathUriResolver getProjectResolver(final IFile file, final IProject project) {
 		// no project resolver if not a spring project
-		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
-				project);
+		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(project);
 		if (beansProject == null) {
 			return null;
 		}
@@ -125,7 +128,7 @@ public class ProjectClasspathExtensibleUriResolver implements
 			return null;
 		}
 
-		if (!checkFileExtension(file, beansProject)) {
+		if (file != null && !checkFileExtension(file, beansProject)) {
 			return null;
 		}
 
