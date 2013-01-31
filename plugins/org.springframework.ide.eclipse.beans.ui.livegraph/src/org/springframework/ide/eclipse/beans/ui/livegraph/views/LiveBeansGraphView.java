@@ -134,15 +134,15 @@ public class LiveBeansGraphView extends ViewPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		pagebook = new PageBook(parent, SWT.NONE);
+		getViewSite().setSelectionProvider(selectionProvider);
 		makeActions();
-		hookPullDownMenu();
-		hookToolBar();
 		createGraphViewer();
 		createTreeViewer();
-		getSite().setSelectionProvider(selectionProvider);
+		hookToolBar();
+		hookPullDownMenu();
+		hookContextMenu();
 		selectionProvider.addSelectionChangedListener(openBeanClassAction);
 		selectionProvider.addSelectionChangedListener(openBeanDefAction);
-		hookContextMenu();
 		setDisplayMode(prefStore.getInt(PREF_DISPLAY_MODE));
 		setGroupByMode(prefStore.getInt(PREF_GROUP_MODE));
 		setFilterInnerBeans(prefStore.getBoolean(PREF_FILTER_INNER_BEANS));
@@ -219,8 +219,8 @@ public class LiveBeansGraphView extends ViewPart {
 			}
 		});
 
-		Menu menu = menuManager.createContextMenu(getViewSite().getShell());
-		getViewSite().getShell().setMenu(menu);
+		Menu menu = menuManager.createContextMenu(pagebook);
+		pagebook.setMenu(menu);
 		getViewSite().registerContextMenu(menuManager, selectionProvider);
 	}
 
