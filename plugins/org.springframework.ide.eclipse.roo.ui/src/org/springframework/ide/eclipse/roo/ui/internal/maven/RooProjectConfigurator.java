@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -15,14 +15,17 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
+import org.eclipse.m2e.core.internal.project.LifecycleMappingConfiguration;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
+import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.maven.AbstractSpringProjectConfigurator;
 import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
 import org.springframework.ide.eclipse.roo.ui.internal.actions.OpenShellJob;
-
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * M2Eclipse project configuration extension that configures a project to get
@@ -67,6 +70,18 @@ public class RooProjectConfigurator extends AbstractSpringProjectConfigurator {
 			else {
 				// open the Roo Shell for the project
 				new OpenShellJob(project).schedule();
+			}
+		}
+	}
+
+	@Override
+	public void mavenProjectChanged(MavenProjectChangedEvent event, IProgressMonitor monitor) throws CoreException {
+		IMavenProjectFacade facade = event.getMavenProject();
+		if (facade != null) {
+			LifecycleMappingConfiguration oldConfiguration = LifecycleMappingConfiguration.restore(facade, monitor);
+			if (oldConfiguration != null
+					&& LifecycleMappingFactory.isLifecycleMappingChanged(facade, oldConfiguration, monitor)) {
+				new UpdateMavenProjectJob(new IProject[] { facade.getProject() }).schedule();
 			}
 		}
 	}
