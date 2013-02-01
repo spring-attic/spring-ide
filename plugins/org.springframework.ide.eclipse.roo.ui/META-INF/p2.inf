@@ -23,3 +23,8 @@ requires.4.namespace=osgi.bundle
 requires.4.name=org.eclipse.m2e.maven.runtime
 requires.4.greedy=false
 requires.4.optional=true
+
+requires.5.namespace=osgi.bundle
+requires.5.name=org.eclipse.m2e.core.ui
+requires.5.greedy=false
+requires.5.optional=true
