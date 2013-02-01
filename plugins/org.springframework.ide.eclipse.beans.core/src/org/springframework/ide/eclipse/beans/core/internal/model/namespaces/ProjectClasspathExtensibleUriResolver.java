@@ -82,26 +82,28 @@ public class ProjectClasspathExtensibleUriResolver implements
 		if (systemId != null && systemId.startsWith("jar:")) {
 			return null;
 		}
+		
+		// identify the correct project
+		IProject project = null;
+		if (file != null) {
+			project = getBestMatchingProject(file);
+		}
+		else if (baseLocation != null && baseLocation.startsWith(PROJECT_AWARE_PROTOCOL)) {
+			String nameAndLocation = baseLocation.substring(PROJECT_AWARE_PROTOCOL.length());
+			String projectName = nameAndLocation.substring(0, nameAndLocation.indexOf('/'));
+			project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		}
+		
+		// continue just for identified Spring projects
+		if (project == null || BeansCorePlugin.getModel().getProject(project) == null) {
+			return null;
+		}
 
 		if (systemId == null && file != null) {
 			systemId = findSystemIdFromFile(file, publicId);
 		}
 
 		if (systemId == null && publicId == null) {
-			return null;
-		}
-		
-		IProject project = null;
-		if (file != null) {
-			project = file.getProject();
-		}
-		else if (baseLocation.startsWith(PROJECT_AWARE_PROTOCOL)) {
-			String nameAndLocation = baseLocation.substring(PROJECT_AWARE_PROTOCOL.length());
-			String projectName = nameAndLocation.substring(0, nameAndLocation.indexOf('/'));
-			project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		}
-		
-		if (project == null) {
 			return null;
 		}
 		
@@ -115,6 +117,29 @@ public class ProjectClasspathExtensibleUriResolver implements
 		}
 
 		return null;
+	}
+
+	private IProject getBestMatchingProject(IFile file) {
+		IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(file.getLocationURI());
+		if (files != null && files.length == 1) {
+			return files[0].getProject();
+		}
+		else if (files != null && files.length > 1) {
+			IFile shortestPathFile = files[0];
+			int shortestPathSegmentCount = shortestPathFile.getFullPath().segmentCount();
+
+			for (int i = 1; i < files.length; i++) {
+				int segmentCount = files[i].getFullPath().segmentCount();
+				if (segmentCount < shortestPathSegmentCount) {
+					shortestPathFile = files[i];
+					shortestPathSegmentCount = segmentCount;
+				}
+			}
+			return shortestPathFile.getProject();
+		}
+		else {
+			return null;
+		}
 	}
 
 	private ProjectClasspathUriResolver getProjectResolver(final IFile file, final IProject project) {
