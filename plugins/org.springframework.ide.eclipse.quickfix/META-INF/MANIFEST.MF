@@ -30,7 +30,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.ui.editor,
  org.springsource.ide.eclipse.commons.core,
  org.springframework.ide.eclipse.config.core,
- org.springframework.ide.eclipse.data.core,
  javax.servlet;bundle-version="2.5.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

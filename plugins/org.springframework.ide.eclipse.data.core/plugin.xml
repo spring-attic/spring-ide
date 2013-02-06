@@ -191,5 +191,11 @@
        </rule>
     </rules>
  </extension>
+ <extension
+       point="org.eclipse.ui.ide.markerResolution">
+    <markerResolutionGenerator
+          class="org.springframework.ide.eclipse.data.jdt.core.InvalidParameterTypeMarkerResolutionGenerator">
+    </markerResolutionGenerator>
+ </extension>
 
 </plugin>

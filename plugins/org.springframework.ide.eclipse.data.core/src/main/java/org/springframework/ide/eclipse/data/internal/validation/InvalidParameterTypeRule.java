@@ -27,6 +27,10 @@ import org.springframework.ide.eclipse.data.jdt.core.RepositoryInformation;
  */
 public class InvalidParameterTypeRule implements
 		IValidationRule<CompilationUnit, SpringDataValidationContext> {
+	
+	public static final String PROBLEM_ID = "INVALID_PARAMETER_TYPE";
+	public static final String PROPERTY_TYPE_ATTR = "PROPERTY_TYPE_ATTR";
+	public static final String PROPERTY_TYPE_PACKAGE_ATTR = "PROPERTY_TYPE_PACKAGE_ATTR";
 
 	public boolean supports(IModelElement element, IValidationContext context) {
 		if (!(context instanceof SpringDataValidationContext)) {
@@ -118,9 +122,12 @@ public class InvalidParameterTypeRule implements
 										IMarker.CHAR_START,	paramSourceRange.getOffset());
 								ValidationProblemAttribute end = new ValidationProblemAttribute(
 										IMarker.CHAR_END, paramSourceRange.getOffset() + paramSourceRange.getLength());
-								context.warning(element, "INVALID_PARAMETER_TYPE",
+								ValidationProblemAttribute problemId = new ValidationProblemAttribute(IMarker.PROBLEM, PROBLEM_ID);
+								ValidationProblemAttribute propertyType = new ValidationProblemAttribute(PROPERTY_TYPE_ATTR, propertyReturnType.getSimpleName());
+								ValidationProblemAttribute propertyTypePackage = new ValidationProblemAttribute(PROPERTY_TYPE_PACKAGE_ATTR, propertyReturnType.getPackage().getName());
+								context.warning(element, "SpringDataProbleMarker",
 										"Parameter type (" + paramSimpleType + ") does not match domain class property definition (" + propertySimpleType + ").",
-										new ValidationProblemAttribute[] {start, end });
+										new ValidationProblemAttribute[] {start, end, problemId, propertyType, propertyTypePackage});
 							}
 						}
 					}
