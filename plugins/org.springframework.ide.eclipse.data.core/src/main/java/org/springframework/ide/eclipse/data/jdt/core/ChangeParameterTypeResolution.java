@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IMarkerResolution;
 import org.springframework.ide.eclipse.data.internal.DataCorePlugin;
@@ -24,7 +24,7 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
  *
  */
 @SuppressWarnings("restriction")
-public class ChangeParameterTypeResolution extends ASTRewriteCorrectionProposal implements IMarkerResolution {
+public class ChangeParameterTypeResolution extends LinkedCorrectionProposal implements IMarkerResolution {
 
 	private SingleVariableDeclaration param;
 	
@@ -33,7 +33,7 @@ public class ChangeParameterTypeResolution extends ASTRewriteCorrectionProposal 
 	private String paramTypePackage;
 
 	public ChangeParameterTypeResolution(SingleVariableDeclaration param, String paramType, String paramTypePackage, ICompilationUnit cu) {
-		super("Change Parameter Type", cu, null, 0);
+		super("Change Parameter Type", cu, null, 0, null);
 		this.param = param;
 		this.paramType = paramType;
 		this.paramTypePackage = paramTypePackage;
