@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,7 +34,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
@@ -46,7 +46,7 @@ import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springsource.ide.eclipse.commons.core.FileUtil;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 
-public class ExampleProjectsImporterJob extends Job implements IOverwriteQuery {
+public class ExampleProjectsImporterJob extends WorkspaceJob implements IOverwriteQuery {
 
 	private final String projectName;
 
@@ -64,7 +64,7 @@ public class ExampleProjectsImporterJob extends Job implements IOverwriteQuery {
 	}
 
 	@Override
-	public IStatus run(IProgressMonitor monitor) {
+	public IStatus runInWorkspace(IProgressMonitor monitor) {
 
 		File archiveFile = getArchiveFile(projectName);
 		File targetDirectory = new File(projectName);

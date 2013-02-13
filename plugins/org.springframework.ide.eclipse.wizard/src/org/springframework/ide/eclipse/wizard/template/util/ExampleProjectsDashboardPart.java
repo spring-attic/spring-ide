@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -48,7 +49,6 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
-
 
 /**
  * @author Kaitlin Duck Sherwood
@@ -207,6 +207,7 @@ public class ExampleProjectsDashboardPart extends AbstractDashboardPart {
 								if (promptForDownload(shell, uri)) {
 									ExampleProjectsImporterJob job = new ExampleProjectsImporterJob(uri, projectName,
 											shell);
+									job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 									job.schedule();
 								}
 							}
