@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -47,7 +47,6 @@ import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
  */
 public class AnnotationCompilationParticipant extends CompilationParticipant {
 
-	@SuppressWarnings("unchecked")
 	private List<String> findPathVariables(AbstractTypeDeclaration typeDecl) {
 		List<String> pathVariables = new ArrayList<String>();
 		List<BodyDeclaration> bodyDecls = typeDecl.bodyDeclarations();
@@ -112,7 +111,6 @@ public class AnnotationCompilationParticipant extends CompilationParticipant {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<String> findPathVariables(MethodDeclaration methodDecl) {
 		List<String> pathVariables = new ArrayList<String>();
 		List<SingleVariableDeclaration> params = methodDecl.parameters();
@@ -125,9 +123,12 @@ public class AnnotationCompilationParticipant extends CompilationParticipant {
 		return pathVariables;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void reconcile(ReconcileContext context) {
+		if (context.getDelta() == null) {
+			return;
+		}
+
 		CompilationUnit cuAST = context.getDelta().getCompilationUnitAST();
 		ICompilationUnit cu = context.getWorkingCopy();
 		IFile file = (IFile) cu.getResource();
