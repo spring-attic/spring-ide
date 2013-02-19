@@ -50,11 +50,11 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * Utility class that provides several helper methods for working with Eclipse's JDT.
@@ -406,7 +406,6 @@ public class JdtUtils {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static final List<IType> getJavaTypesForMethodParameterTypes(IMethod method, IType contextType) {
 		if (method == null || method.getParameterTypes() == null || method.getParameterTypes().length == 0) {
 			return Collections.EMPTY_LIST;

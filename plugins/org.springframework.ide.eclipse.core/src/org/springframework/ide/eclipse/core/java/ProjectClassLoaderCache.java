@@ -299,7 +299,6 @@ public class ProjectClassLoaderCache {
 	/**
 	 * Returns a {@link ClassLoader} for the given project.
 	 */
-	@SuppressWarnings({ "unchecked" })
 	protected static ClassLoader getClassLoader(IProject project, ClassLoader parentClassLoader) {
 		synchronized (ProjectClassLoaderCache.class) {
 			// Setup the root class loader to be used when no explicit parent class loader is given
