@@ -22,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
@@ -52,7 +54,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * Object that caches instances of {@link TypeStructure}. Furthermore this implementation is able to answer if a given
@@ -283,15 +285,29 @@ public class TypeStructureCache implements ITypeStructureCache {
 				if (uri != null) {
 					String scheme = uri.getScheme();
 					if (SpringCoreUtils.FILE_SCHEME.equalsIgnoreCase(scheme)) {
-						return new File(uri);
+						return toLocalFile(uri);
 					}
 					else {
 						IPathVariableManager variableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
-						return new File(variableManager.resolveURI(uri));
+						return toLocalFile(variableManager.resolveURI(uri));
 					}
 				}
 			}
 		}
+		return null;
+	}
+	
+	private static File toLocalFile(URI locationURI) {
+		if (locationURI == null)
+			return null;
+
+		try {
+			IFileStore store = EFS.getStore(locationURI);
+			return store.toLocalFile(0, null);
+		} catch (CoreException ex) {
+			SpringCore.log("Error while converting URI to local file: " + locationURI.toString(), ex);
+		}
+		
 		return null;
 	}
 
