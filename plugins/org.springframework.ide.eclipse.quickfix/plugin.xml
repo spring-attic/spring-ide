@@ -119,7 +119,7 @@
 			class="org.springframework.ide.eclipse.quickfix.jdt.AutowireMarkerResolutionGenerator">
 		</markerResolutionGenerator>
 	</extension>
-  <extension
+  <!--extension
         point="org.eclipse.jdt.core.compilationParticipant">
      <compilationParticipant
            class="org.springframework.ide.eclipse.quickfix.jdt.AnnotationCompilationParticipant"
@@ -127,7 +127,7 @@
            id="com.springsource.sts.quickfix.jdt.compilationParticipant"
            modifiesEnvironment="false">
      </compilationParticipant>
-  </extension>
+  </extension-->
   <extension
         id="org.springframework.ide.eclipse.core.annotation.problemmarker"
         name="Spring Problems"
