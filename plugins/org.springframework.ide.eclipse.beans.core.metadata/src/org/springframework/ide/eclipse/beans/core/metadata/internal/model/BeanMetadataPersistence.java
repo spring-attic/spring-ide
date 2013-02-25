@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 /**
  * Stores and loads the {@link IBeanMetadata}s from the persisted file.
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.5
  */
 public class BeanMetadataPersistence {
@@ -79,7 +80,7 @@ public class BeanMetadataPersistence {
 		File f = BeansMetadataPlugin.getDefault().getStateLocation().append(METADATA_FOLDER_NAME + STATE_FILE_NAME)
 				.toFile();
 		Map<String, BeanMetadataHolder> metaData = load(f, Map.class);
-		if (metaData != null) {
+		if (metaData != null && metaData.size() > 0) {
 			return metaData;
 		}
 		// create new empty model
@@ -91,14 +92,13 @@ public class BeanMetadataPersistence {
 		File f = BeansMetadataPlugin.getDefault().getStateLocation().append(BEANPROPERTIES_FOLDER_NAME + STATE_FILE_NAME)
 				.toFile();
 		Map<String, BeanPropertyDataHolder> metaData = load(f, Map.class);
-		if (metaData != null) {
+		if (metaData != null && metaData.size() > 0) {
 			return metaData;
 		}
 		// create new empty model
 		return new ConcurrentHashMap<String, BeanPropertyDataHolder>();
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T> T load(File file, Class<T> clazz) {
 		ObjectInputStream in = null;
 
