@@ -35,6 +35,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.DelegatingSourceExtractor;
 import org.springframework.ide.eclipse.beans.core.internal.model.ProfileAwareCompositeComponentDefinition;
+import org.springframework.ide.eclipse.beans.core.internal.model.ToolingAwareEnvironment;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessingContext;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegistrationSupport;
@@ -64,6 +65,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		}
 
 		ConfigurationClassPostProcessor processor = new ConfigurationClassPostProcessor();
+		processor.setEnvironment(new ToolingAwareEnvironment());
 		processor.setSourceExtractor(new DelegatingSourceExtractor(project.getProject()));
 		processor.setMetadataReaderFactory(new CachingJdtMetadataReaderFactory(project));
 		processor.setProblemReporter(new JdtAnnotationMetadataProblemReporter(postProcessingContext));
