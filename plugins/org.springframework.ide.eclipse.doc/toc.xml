@@ -1,13 +1,67 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<toc label="Spring Documentation">
+<toc label="Spring Documentation" topic="http://www.springsource.org/documentation">
+	<!-- 
 	<anchor id="spring_additions" />
-	<!-- insert link to Spring IDE Wiki -->
-	<topic label="Spring IDE - Documentation"
-		href="http://springide.org">
-		<topic label="Getting started" href="http://springide.org/project/wiki/SpringideGuide" />
-		<topic label="Beans Support" href="http://springide.org/doc/BEANS" />
-		<topic label="AOP Support" href="http://springide.org/doc/AOP" />
-		<topic label="Web Flow Support" href="http://springide.org/doc/SWF" />
-	</topic>
 	<anchor id="additions" />
+	-->
+  <topic href="http://www.springsource.org/spring-framework" label="Spring Framework">
+    <topic href="http://static.springsource.org/spring/docs/current/spring-framework-reference/html/" label="Reference Documentation" />
+    <topic href="http://static.springsource.org/spring/docs/current/javadoc-api/" label="Javadoc" />
+    <topic href="http://static.springsource.org/spring/docs/current/changelog.txt" label="Change Log" />
+  </topic>
+  <topic href="http://www.springsource.org/spring-batch" label="Spring Batch">
+     <topic href="http://static.springsource.org/spring-batch/reference/html/index.html" label="Reference Documentation" />
+     <topic href="http://static.springsource.org/spring-batch/apidocs/index.html" label="Javadoc" />
+     <topic href="http://static.springsource.org/spring-batch/faq.html" label="FAQ" />
+  </topic>
+  <topic href="http://www.springsource.org/spring-data" label="Spring Data">
+     <topic href="http://www.springsource.org/spring-data/mongodb" label="MongoDB">
+        <topic href="http://static.springsource.org/spring-data/data-mongodb/docs/current/reference/html/" label="Reference Documentation" />
+        <topic href="http://static.springsource.org/spring-data/data-mongodb/docs/current/api/" label="Javadoc" />
+        <topic href="http://static.springsource.org/spring-data/data-mongodb/docs/current/changelog.txt" label="Change Log" />
+     </topic>
+     <topic href="http://www.springsource.org/spring-data/neo4j" label="Neo4j">
+        <topic href="http://static.springsource.org/spring-data/data-neo4j/docs/current/reference/html/" label="Good Relationships - The Spring Data Neo4j Guide Book" />
+        <topic href="http://static.springsource.org/spring-data/data-neo4j/docs/current/api/" label="Javadoc" />
+        <topic href="http://static.springsource.org/spring-data/data-neo4j/docs/current/changelog.txt" label="Change Log" />
+     </topic>
+     <topic href="http://www.springsource.org/spring-data/redis" label="Redis">
+        <topic href="http://static.springsource.org/spring-data/data-redis/docs/current/reference/html/" label="Reference Documentation" />
+        <topic href="http://static.springsource.org/spring-data/data-redis/docs/current/api/" label="Javadoc" />
+        <topic href="http://static.springsource.org/spring-data/data-redis/docs/current/changelog.txt" label="Change Log" />
+     </topic>
+     <topic href="http://www.springsource.org/spring-data/jdbc-extensions" label="JDBC Extensions">
+        <topic href="http://static.springsource.org/spring-data/data-jdbc/docs/current/reference/html/" label="Reference Documentation" />
+        <topic href="http://static.springsource.org/spring-data/data-jdbc/docs/current/api/" label="Javadoc" />
+        <topic href="http://static.springsource.org/spring-data/data-jdbc/docs/current/changelog.txt" label="Change Log" />
+     </topic>
+     <topic href="http://www.springsource.org/spring-data/jpa" label="JPA">
+        <topic href="http://static.springsource.org/spring-data/data-jpa/docs/current/reference/html/" label="Reference Documentation" />
+        <topic href="http://static.springsource.org/spring-data/data-jpa/docs/current/api/" label="Javadoc" />
+        <topic href="http://static.springsource.org/spring-data/data-jpa/docs/current/changelog.txt" label="Change Log" />
+     </topic>
+     <topic href="http://www.springsource.org/spring-data/rest" label="REST" />
+     <topic href="http://www.springsource.org/spring-data/commons" label="Commons">
+        <topic href="http://static.springsource.org/spring-data/commons/docs/current/reference/html/" label="Reference Documentation" />
+        <topic href="http://static.springsource.org/spring-data/commons/docs/current/api/" label="Javadoc" />
+        <topic href="http://static.springsource.org/spring-data/commons/docs/current/changelog.txt" label="Change Log" />
+     </topic>
+  </topic>
+  <topic href="http://www.springsource.org/spring-integration" label="Spring Integration">
+     <topic href="http://static.springsource.org/spring-integration/reference/html/" label="Reference Manual" />
+     <topic href="http://static.springsource.org/spring-integration/api/" label="Javadoc" />
+  </topic>
+  <topic href="http://www.springsource.org/spring-security" label="Spring Security">
+     <topic href="http://static.springsource.org/spring-security/site/docs/current/reference/springsecurity.html" label="Reference Documentation" />
+     <topic href="http://static.springsource.org/spring-security/site/docs/current/apidocs/" label="Javadoc" />
+     <topic href="http://static.springsource.org/spring-security/site/docs/current/faq/faq.html" label="FAQ" />
+  </topic>
+  <topic href="http://www.springsource.org/spring-web-flow" label="Spring Web Flow">
+     <topic href="http://static.springsource.org/spring-webflow/docs/current/reference/html/" label="Reference Guide" />
+     <topic href="http://static.springsource.org/spring-webflow/docs/current/javadoc-api/" label="Javadoc" />
+     <topic href="http://static.springsource.org/spring-webflow/docs/current/changelog.txt" label="Change Log" />
+  </topic>
+  <topic href="http://www.springsource.org/spring-roo" label="Spring Roo">
+     <topic href="http://static.springsource.org/spring-roo/reference/html/index.html" label="Reference Documentation" />
+  </topic>
 </toc>
