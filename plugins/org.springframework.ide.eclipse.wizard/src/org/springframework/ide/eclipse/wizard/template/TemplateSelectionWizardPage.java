@@ -35,8 +35,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -349,6 +351,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 				if (selectedTemplate != null) {
 					setDescription(selectedTemplate);
+					setWarning(selectedTemplate);
 					if (TemplateSelectionWizardPage.this.equals(wizard.getContainer().getCurrentPage())) {
 						wizard.getContainer().updateButtons();
 					}
@@ -670,6 +673,40 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			descriptionLabel.setVisible(false);
 		}
 		descriptionText.redraw();
+	}
+
+	private void setWarning(Template template) {
+		String requiredBundleStr = null;
+		ContentItem contentItem = template.getItem();
+		if (contentItem.getLocalDescriptor() != null) {
+			requiredBundleStr = contentItem.getLocalDescriptor().getRequiresBundle();
+		}
+		if (requiredBundleStr == null && contentItem.getRemoteDescriptor() != null) {
+			requiredBundleStr = contentItem.getRemoteDescriptor().getRequiresBundle();
+		}
+
+		StringBuilder missingBundleStr = new StringBuilder();
+		if (requiredBundleStr != null) {
+			String[] requiredBundles = requiredBundleStr.split(",");
+			for (String requiredBundle : requiredBundles) {
+				if (Platform.getBundle(requiredBundle.trim()) == null) {
+					if (missingBundleStr.length() > 0) {
+						missingBundleStr.append(", ");
+					}
+					missingBundleStr.append(requiredBundle.trim());
+				}
+			}
+		}
+
+		if (missingBundleStr.length() > 0) {
+			String message = NLS.bind("To ensure project compiles properly, please install bundle(s) {0}.",
+					missingBundleStr);
+			setMessage(message, DialogPage.WARNING);
+		}
+		else {
+			setMessage(null, DialogPage.WARNING);
+		}
+
 	}
 
 	public void downloadDescriptors() {
