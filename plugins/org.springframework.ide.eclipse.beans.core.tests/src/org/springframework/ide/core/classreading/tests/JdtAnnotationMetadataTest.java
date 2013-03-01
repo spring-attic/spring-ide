@@ -28,11 +28,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.annotation.AnnotationScopeMetadataResolver;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Role;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -394,6 +399,45 @@ public class JdtAnnotationMetadataTest {
 		IType type = JdtUtils.getJavaType(project, "org.test.spring.AutowiredConstructorClass");
 		IMethod constructor = type.getMethod("AutowiredConstructorClass", new String[] {"QString;"});
 		assertEquals(constructor, ((IJdtMethodMetadata)methodMetadata).getMethod());
+	}
+
+	@Test
+	public void testComponentScanAnnotation() throws Exception {
+		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
+		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.ComponentScanClass");
+		
+		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+
+		assertTrue(annotationMetadata.isAnnotated(ComponentScan.class.getName()));
+		assertTrue(annotationMetadata.hasAnnotation(ComponentScan.class.getName()));
+		Set<String> types = annotationMetadata.getAnnotationTypes();
+		assertEquals(1, types.size());
+		assertEquals(ComponentScan.class.getName(), types.iterator().next());
+		
+		Map<String, Object> attributes = annotationMetadata.getAnnotationAttributes(ComponentScan.class.getName());
+		assertEquals(10, attributes.size());
+		
+		assertTrue(attributes.get("value") instanceof String[]);
+		assertEquals(0, ((String[])attributes.get("value")).length);
+		
+		assertTrue(attributes.get("basePackageClasses") instanceof Class[]);
+		assertEquals(0, ((Class[])attributes.get("basePackageClasses")).length);
+		
+		assertTrue(attributes.get("basePackages") instanceof String[]);
+		assertEquals(0, ((String[])attributes.get("basePackages")).length);
+		
+		assertEquals(AnnotationScopeMetadataResolver.class, attributes.get("scopeResolver"));
+		assertEquals(ScopedProxyMode.DEFAULT, attributes.get("scopedProxy"));
+		assertEquals(Boolean.TRUE, attributes.get("useDefaultFilters"));
+		
+		assertTrue(attributes.get("excludeFilters") instanceof AnnotationAttributes[]);
+		assertEquals(0, ((AnnotationAttributes[])attributes.get("excludeFilters")).length);
+		
+		assertTrue(attributes.get("includeFilters") instanceof AnnotationAttributes[]);
+		assertEquals(0, ((AnnotationAttributes[])attributes.get("includeFilters")).length);
+		
+		assertEquals(BeanNameGenerator.class, attributes.get("nameGenerator"));
+		assertEquals("**/*.class", attributes.get("resourcePattern"));
 	}
 
 	private boolean containsMethodReference(Set<MethodMetadata> methods, IMethod method) {

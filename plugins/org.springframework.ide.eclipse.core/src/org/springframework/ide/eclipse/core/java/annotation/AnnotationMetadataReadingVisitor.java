@@ -33,6 +33,8 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.type.asm.ClassMetadataReadingVisitor;
 import org.springframework.util.ClassUtils;
@@ -54,17 +56,17 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	private Map<String, Annotation> classAnnotations = new LinkedHashMap<String, Annotation>();
 	private Map<IMethod, Set<Annotation>> methodAnnotations = new LinkedHashMap<IMethod, Set<Annotation>>();
 	private Map<IField, Set<Annotation>> fieldAnnotations = new LinkedHashMap<IField, Set<Annotation>>();
-	
+
 	private Set<String> visitedMethods = new HashSet<String>();
 
 	private IType type;
 	private ClassLoader classloader;
 	private boolean advancedValueProcessing;
-	
+
 	public AnnotationMetadataReadingVisitor() {
 		this(false);
 	}
-	
+
 	public AnnotationMetadataReadingVisitor(boolean advancedValueProcessing) {
 		this.advancedValueProcessing = advancedValueProcessing;
 	}
@@ -154,8 +156,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 			final Annotation annotation = new Annotation(annotationClass);
 			classAnnotations.put(annotationClass, annotation);
 			return new AnnotationMemberVisitor(annotation, this.classloader, advancedValueProcessing);
-		}
-		else {
+		} else {
 			return EMPTY_VISITOR;
 		}
 	}
@@ -184,7 +185,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		}
 		return EMPTY_VISITOR;
 	}
-	
+
 	@Override
 	public FieldVisitor visitField(final int access, final String name, final String desc, final String signature, Object value) {
 		return new EmptyVisitor() {
@@ -221,15 +222,14 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	private IMethod getMethodFromSignature(final String name, final String desc) {
 		Type[] parameterTypes = Type.getArgumentTypes(desc);
-		
+
 		IMethod method = null;
 		if (isConstructor(name)) {
 			method = quickCheckForConstructor(parameterTypes);
-		}
-		else {
+		} else {
 			method = quickCheckForMethod(name, parameterTypes);
 		}
-		
+
 		if (method == null) {
 			List<String> parameters = new ArrayList<String>();
 			if (parameterTypes != null && parameterTypes.length > 0) {
@@ -240,8 +240,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 			if (isConstructor(name)) {
 				method = JdtUtils.getConstructor(type, parameters.toArray(new String[parameters.size()]));
-			}
-			else {
+			} else {
 				method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]), false);
 			}
 		}
@@ -260,12 +259,11 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 				if (method.getElementName().equals(name) && method.getParameterTypes().length == parameterTypes.length) {
 					if (result == null) {
 						result = method;
-					}
-					else {
+					} else {
 						return null;
 					}
 				}
-				
+
 			}
 		} catch (JavaModelException e) {
 		}
@@ -280,12 +278,11 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 				if (method.isConstructor() && method.getParameterTypes().length == parameterTypes.length) {
 					if (result == null) {
 						result = method;
-					}
-					else {
+					} else {
 						return null;
 					}
 				}
-				
+
 			}
 		} catch (JavaModelException e) {
 		}
@@ -299,7 +296,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		}
 		return field;
 	}
-	
+
 	private IField quickCheckForField(String name) {
 		IField field = type.getField(name);
 		return field != null && field.exists() ? field : null;
@@ -316,7 +313,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 			this.classloader = classloader;
 			this.advancedValueProcessing = advancedValueProcessing;
 		}
-		
+
 		@Override
 		public void visitEnd() {
 			if (this.advancedValueProcessing) {
@@ -336,12 +333,15 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 				String attributeName = annotationAttribute.getName();
 				Object defaultValue = annotationAttribute.getDefaultValue();
 
-				// special case for Enum values, load them from IDE classloader space to avoid conflicts between Spring framework
-				// running in IDE and Spring framework classes from the projects classpath
+				// special case for Enum values, load them from IDE classloader
+				// space to avoid conflicts between Spring framework
+				// running in IDE and Spring framework classes from the projects
+				// classpath
 				if (defaultValue != null && defaultValue.getClass().isEnum()) {
 					try {
 						Class<?> annotationClassInIdeSpace = this.getClass().getClassLoader().loadClass(annotation.getAnnotationClass());
-						Method annotationAttributeInIdeSpace = annotationClassInIdeSpace.getMethod(annotationAttribute.getName(), annotationAttribute.getParameterTypes());
+						Method annotationAttributeInIdeSpace = annotationClassInIdeSpace.getMethod(annotationAttribute.getName(),
+								annotationAttribute.getParameterTypes());
 						defaultValue = annotationAttributeInIdeSpace.getDefaultValue();
 					} catch (ClassNotFoundException ex) {
 					} catch (SecurityException e) {
@@ -350,23 +350,18 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 				}
 
 				if (defaultValue != null && !annotation.hasMember(attributeName)) {
-					// if (defaultValue instanceof Annotation) {
-					// defaultValue = AnnotationAttributes.fromMap(
-					// AnnotationUtils.getAnnotationAttributes((Annotation)defaultValue,
-					// false, true));
-					// }
-					// else if (defaultValue instanceof Annotation[]) {
-					// Annotation[] realAnnotations = (Annotation[])
-					// defaultValue;
-					// AnnotationAttributes[] mappedAnnotations = new
-					// AnnotationAttributes[realAnnotations.length];
-					// for (int i = 0; i < realAnnotations.length; i++) {
-					// mappedAnnotations[i] = AnnotationAttributes.fromMap(
-					// AnnotationUtils.getAnnotationAttributes(realAnnotations[i],
-					// false, true));
-					// }
-					// defaultValue = mappedAnnotations;
-					// }
+					if (defaultValue instanceof java.lang.annotation.Annotation) {
+						defaultValue = AnnotationAttributes.fromMap(AnnotationUtils.getAnnotationAttributes(
+								(java.lang.annotation.Annotation) defaultValue, false, true));
+					} else if (defaultValue instanceof java.lang.annotation.Annotation[]) {
+						java.lang.annotation.Annotation[] realAnnotations = (java.lang.annotation.Annotation[]) defaultValue;
+						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
+						for (int i = 0; i < realAnnotations.length; i++) {
+							mappedAnnotations[i] = AnnotationAttributes.fromMap(AnnotationUtils.getAnnotationAttributes(realAnnotations[i], false,
+									true));
+						}
+						defaultValue = mappedAnnotations;
+					}
 					annotation.addMember(new AnnotationMemberValuePair(attributeName, defaultValue.toString(), defaultValue));
 				}
 			}
@@ -376,16 +371,16 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		public void visit(String name, Object value) {
 			if ("value".equals(name)) {
 				annotation.addMember(new AnnotationMemberValuePair(null, value.toString()));
- 			}
-			else {
+			} else {
 				annotation.addMember(new AnnotationMemberValuePair(name, value.toString()));
 			}
 		}
 
-//		@Override
-//		public void visit(String name, Object value) {
-//			annotation.addMember(new AnnotationMemberValuePair(name, value.toString(), value));
-//		}
+		// @Override
+		// public void visit(String name, Object value) {
+		// annotation.addMember(new AnnotationMemberValuePair(name,
+		// value.toString(), value));
+		// }
 
 		@Override
 		public AnnotationVisitor visitAnnotation(String arg0, String arg1) {
@@ -442,8 +437,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 					if (name.equals("value") && !advancedValueProcessing) {
 						annotation.addMember(new AnnotationMemberValuePair(null, value, (Object[]) values.toArray((Object[]) Array.newInstance(
 								typeOfArray, values.size()))));
-					}
-					else {
+					} else {
 						annotation.addMember(new AnnotationMemberValuePair(name, value, (Object[]) values.toArray((Object[]) Array.newInstance(
 								typeOfArray, values.size()))));
 					}
@@ -473,7 +467,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 			} catch (IllegalArgumentException e) {
 			} catch (IllegalAccessException e) {
 			}
-			
+
 			annotation.addMember(new AnnotationMemberValuePair(name, ClassUtils.getShortName(className) + "." + enumValue, valueAsObject));
 		}
 	}
