@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.core.project.IProjectContributorStateAwar
  * classes.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 public abstract class AbstractValidator implements IValidator, IProjectContributorStateAware {
@@ -80,7 +81,9 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 		SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, affectedResources.size());
 		try {
 			for (IResource resource : affectedResources) {
-				reportProgress("Validating '%s'", subMonitor, resource.getFullPath().toString().substring(1));
+				String progressMessage = "Validating '" + resource.getFullPath().toString().substring(1) + "'";
+				reportProgress(progressMessage, subMonitor);
+
 				cleanup(resource, subMonitor);
 				if (subMonitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -193,6 +196,13 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 	 * Report the progress against the given <code>monitor</code>.
 	 */
 	protected void reportProgress(String message, IProgressMonitor monitor, Object... args) {
+		reportProgress(String.format(message, args), monitor);
+	}
+
+	/**
+	 * Report the progress against the given <code>monitor</code>.
+	 */
+	protected void reportProgress(String message, IProgressMonitor monitor) {
 		ValidationProgressState progress = getProjectContributorState().get(ValidationProgressState.class);
 		if (progress != null) {
 			
@@ -211,14 +221,14 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 					builder.append(warningCount).append((warningCount > 1 ? " warnings" : " warning"));
 				}
 				builder.append(") ").append(message);
-				monitor.subTask(String.format(builder.toString(), args));
+				monitor.subTask(builder.toString());
 			}
 			else {
-				monitor.subTask(String.format(message, args));
+				monitor.subTask(message);
 			}
 		}
 		else {
-			monitor.subTask(String.format(message, args));
+			monitor.subTask(message);
 		}
 	}
 
@@ -250,8 +260,9 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 						if (subMonitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						reportProgress("Validating element '%s' with rule '%s'", subMonitor, element.getElementName(),
-								ruleDefinition.getName());
+						String progressMessage = "Validating element '" + element.getElementName() + "' with rule '" + ruleDefinition.getName() + "'";
+						reportProgress(progressMessage, subMonitor);
+
 						IValidationRule rule = ruleDefinition.getRule();
 						if (rule.supports(element, context)) {
 							context.setCurrentRuleDefinition(ruleDefinition);
