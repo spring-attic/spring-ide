@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -181,21 +181,23 @@ public class Bootstrap {
 
 	public void addCommand(ICommandListener listener) {
 		try {
-			ServiceReference[] references = framework.getBundleContext().getAllServiceReferences(
-					"org.springframework.roo.shell.CommandMarker", null);
-			ServiceReference fieldConverterReference = framework.getBundleContext().getServiceReference(
-					"org.springframework.roo.shell.converters.StaticFieldConverter");
-			if (references != null && fieldConverterReference != null) {
+			if (framework != null) {
+				ServiceReference[] references = framework.getBundleContext().getAllServiceReferences(
+						"org.springframework.roo.shell.CommandMarker", null);
+				ServiceReference fieldConverterReference = framework.getBundleContext().getServiceReference(
+						"org.springframework.roo.shell.converters.StaticFieldConverter");
+				if (references != null && fieldConverterReference != null) {
 
-				Object fieldConverter = framework.getBundleContext().getService(fieldConverterReference);
+					Object fieldConverter = framework.getBundleContext().getService(fieldConverterReference);
 
-				for (ServiceReference commandReference : references) {
-					Object command = framework.getBundleContext().getService(commandReference);
-					extractCommand(command, listener, fieldConverter);
-					ungetService(commandReference);
+					for (ServiceReference commandReference : references) {
+						Object command = framework.getBundleContext().getService(commandReference);
+						extractCommand(command, listener, fieldConverter);
+						ungetService(commandReference);
+					}
+
+					ungetService(fieldConverterReference);
 				}
-
-				ungetService(fieldConverterReference);
 			}
 		}
 		catch (Throwable e) {
@@ -381,12 +383,15 @@ public class Bootstrap {
 	}
 
 	private ServiceReference getAddOnService(ServiceReference addOnServiceReference) throws InvalidSyntaxException {
-		ServiceReference[] references = framework.getBundleContext().getAllServiceReferences(
-				"org.springframework.roo.shell.CommandMarker", null);
-		if (references != null) {
-			for (ServiceReference reference : references) {
-				if ("org.springframework.roo.addon.roobot.eclipse.client.AddOnEclipseCommands".equals(reference.getProperty("component.name"))) {
-					addOnServiceReference = reference;
+		if (framework != null) {
+			ServiceReference[] references = framework.getBundleContext().getAllServiceReferences(
+					"org.springframework.roo.shell.CommandMarker", null);
+			if (references != null) {
+				for (ServiceReference reference : references) {
+					if ("org.springframework.roo.addon.roobot.eclipse.client.AddOnEclipseCommands".equals(reference
+							.getProperty("component.name"))) {
+						addOnServiceReference = reference;
+					}
 				}
 			}
 		}
