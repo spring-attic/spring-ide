@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -136,11 +136,13 @@ public class RooShellView extends ViewPart {
 			CTabItem tabItem = tab.addTab(folder);
 			tabItems.put(project, tabItem);
 			openRooCommandWizardAction.update();
+			openRooAddOnManagerAction.update();
 			return tab;
 		}
 		else {
 			folder.setSelection(tabItems.get(project));
 			openRooCommandWizardAction.update();
+			openRooAddOnManagerAction.update();
 			return tabs.get(project);
 		}
 	}
@@ -191,5 +193,6 @@ public class RooShellView extends ViewPart {
 			item.dispose();
 		}
 		openRooCommandWizardAction.update();
+		openRooAddOnManagerAction.update();
 	}
 }
