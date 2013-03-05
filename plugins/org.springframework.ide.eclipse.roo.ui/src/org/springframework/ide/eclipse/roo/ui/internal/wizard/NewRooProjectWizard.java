@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -62,10 +62,12 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 		ROO_JAVA_VERSION_MAPPING = new HashMap<String, String>();
 		ROO_JAVA_VERSION_MAPPING.put("1.5", "5");
 		ROO_JAVA_VERSION_MAPPING.put("1.6", "6");
+		ROO_JAVA_VERSION_MAPPING.put("1.7", "7");
 
 		FACET_JAVA_VERSION_MAPPING = new HashMap<String, String>();
 		FACET_JAVA_VERSION_MAPPING.put("1.5", "5.0");
 		FACET_JAVA_VERSION_MAPPING.put("1.6", "6.0");
+		FACET_JAVA_VERSION_MAPPING.put("1.7", "7.0");
 	}
 
 	private static final String CLASSPATH_FILE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
