@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.webflow.mylyn;singleton:=true
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.3.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.webflow.mylyn.Activator
 Bundle-Localization: plugin
 Import-Package: org.eclipse.core.resources,
