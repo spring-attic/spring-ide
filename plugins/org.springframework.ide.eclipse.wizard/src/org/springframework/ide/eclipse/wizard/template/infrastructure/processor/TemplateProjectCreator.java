@@ -236,7 +236,7 @@ public class TemplateProjectCreator {
 
 			unzipFolder.mkdir();
 
-			if (archiveFile.getProtocol().equals("file") && !new File(archiveFile.getPath()).isDirectory()) {
+			if (archiveFile.getProtocol().equals("file") && !new File(archiveFile.toURI()).isDirectory()) {
 				ZipFileUtil.unzip(archiveFile, unzipFolder, monitor);
 			}
 			else {
