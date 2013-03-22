@@ -33,6 +33,7 @@ import org.springframework.context.annotation.AnnotationScopeMetadataResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Role;
@@ -45,7 +46,9 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.IJdtMethodMetadata;
 import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
@@ -240,11 +243,17 @@ public class JdtAnnotationMetadataTest {
 
 		Map<String, Object> importAttributesAsStrings = annotationMetadata.getAnnotationAttributes(Import.class.getName(), true);
 		assertEquals(1, importAttributesAsStrings.size());
-		assertEquals("org.test.spring.SimpleConfigurationClass", ((String[])importAttributesAsStrings.get("value"))[0]);
+		String[] importStrings = ((String[])importAttributesAsStrings.get("value"));
+		assertEquals(2, importStrings.length);
+		assertEquals("org.test.spring.SimpleConfigurationClass", importStrings[0]);
+		assertEquals("org.test.spring.SimpleBeanClass", importStrings[1]);
 		
 		Map<String, Object> importAttributesAsObjects = annotationMetadata.getAnnotationAttributes(Import.class.getName(), false);
 		assertEquals(1, importAttributesAsObjects.size());
-		assertEquals("org.test.spring.SimpleConfigurationClass", ((Class[])importAttributesAsObjects.get("value"))[0].getName());
+		Class<?>[] importClasses = ((Class[])importAttributesAsObjects.get("value"));
+		assertEquals(2, importClasses.length);
+		assertEquals("org.test.spring.SimpleConfigurationClass", importClasses[0].getName());
+		assertEquals("org.test.spring.SimpleBeanClass", importClasses[1].getName());
 	}
 
 	@Test
@@ -344,8 +353,8 @@ public class JdtAnnotationMetadataTest {
 		assertEquals(0, ((String[])methodAttributes.get("value")).length);
 		assertEquals(0, ((String[])methodAttributes.get("produces")).length);
 		assertEquals(2, ((Object[])methodAttributes.get("method")).length);
-		assertEquals("RequestMethod.GET", ((Object[])methodAttributes.get("method"))[0]);
-		assertEquals("RequestMethod.POST", ((Object[])methodAttributes.get("method"))[1]);
+		assertEquals(RequestMethod.GET, ((Object[])methodAttributes.get("method"))[0]);
+		assertEquals(RequestMethod.POST, ((Object[])methodAttributes.get("method"))[1]);
 		assertEquals(0, ((String[])methodAttributes.get("params")).length);
 		assertEquals(0, ((String[])methodAttributes.get("consumes")).length);
 	}
@@ -438,6 +447,32 @@ public class JdtAnnotationMetadataTest {
 		
 		assertEquals(BeanNameGenerator.class, attributes.get("nameGenerator"));
 		assertEquals("**/*.class", attributes.get("resourcePattern"));
+	}
+
+	@Test
+	public void testAdvancedComponentScanAnnotation() throws Exception {
+		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
+		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.AdvancedComponentScanClass");
+		
+		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+
+		Map<String, Object> attributes = annotationMetadata.getAnnotationAttributes(ComponentScan.class.getName());
+		assertEquals(AnnotationAttributes[].class, attributes.get("excludeFilters").getClass());
+		AnnotationAttributes[] excludeFilters = (AnnotationAttributes[]) attributes.get("excludeFilters");
+		assertEquals(1, excludeFilters.length);
+		assertEquals(2, excludeFilters[0].size());
+		assertEquals(FilterType.ANNOTATION, excludeFilters[0].get("type"));
+		Class<?>[] filterTypes = (Class[]) excludeFilters[0].get("value");
+		assertEquals(3, filterTypes.length);
+		assertTrue(filterTypes[0].equals(Service.class)
+				|| filterTypes[1].equals(Service.class)
+				|| filterTypes[2].equals(Service.class));
+		assertTrue(filterTypes[0].equals(Configuration.class)
+				|| filterTypes[1].equals(Configuration.class)
+				|| filterTypes[2].equals(Configuration.class));
+		assertTrue(filterTypes[0].getName().equals("org.test.spring.SimpleBeanClass")
+				|| filterTypes[1].getName().equals("org.test.spring.SimpleBeanClass")
+				|| filterTypes[2].getName().equals("org.test.spring.SimpleBeanClass"));
 	}
 
 	private boolean containsMethodReference(Set<MethodMetadata> methods, IMethod method) {
