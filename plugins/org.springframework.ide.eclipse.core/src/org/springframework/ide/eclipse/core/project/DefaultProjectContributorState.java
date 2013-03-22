@@ -30,7 +30,6 @@ public class DefaultProjectContributorState implements IProjectContributorState 
 
 	private Map<Dictionary<String, String>, Object> managedObjectsWithFilters = new HashMap<Dictionary<String, String>, Object>();
 
-	@SuppressWarnings("unchecked")
 	public <T> T get(Class<T> clazz) {
 		if (managedObjects.containsKey(clazz)) {
 			return (T) managedObjects.get(clazz);
@@ -53,7 +52,6 @@ public class DefaultProjectContributorState implements IProjectContributorState 
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T get(Class<T> clazz, String filterText) {
 		if (!StringUtils.hasLength(filterText)) {
 			return null;
