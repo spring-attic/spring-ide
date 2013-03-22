@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.ide.eclipse.core.java.annotation.Annotation;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
@@ -120,7 +121,7 @@ public class JdtAnnotationMetadataAdapter implements IJdtAnnotationMetadata {
 		
 		if (annotation == null) return null;
 		
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new AnnotationAttributes();
 		Set<AnnotationMemberValuePair> members = annotation.getMembers();
 		for (AnnotationMemberValuePair pair : members) {
 			
