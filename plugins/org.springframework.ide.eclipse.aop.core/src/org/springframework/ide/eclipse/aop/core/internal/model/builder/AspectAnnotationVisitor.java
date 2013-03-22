@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aspectj.lang.annotation.Aspect;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.MethodVisitor;
+import org.springframework.asm.Type;
+import org.springframework.asm.commons.EmptyVisitor;
 
 /**
  * ASM-based visitor that checks if a certain class has the

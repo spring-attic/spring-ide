@@ -14,9 +14,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.Type;
+import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.ide.eclipse.core.type.AnnotationMetadata;
 
 /**

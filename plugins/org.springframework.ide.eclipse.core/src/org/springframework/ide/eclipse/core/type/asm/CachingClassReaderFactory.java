@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectweb.asm.ClassReader;
-
+import org.springframework.asm.ClassReader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 

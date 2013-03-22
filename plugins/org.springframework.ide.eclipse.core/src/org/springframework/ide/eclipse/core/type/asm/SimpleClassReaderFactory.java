@@ -13,8 +13,7 @@ package org.springframework.ide.eclipse.core.type.asm;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.objectweb.asm.ClassReader;
-
+import org.springframework.asm.ClassReader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
