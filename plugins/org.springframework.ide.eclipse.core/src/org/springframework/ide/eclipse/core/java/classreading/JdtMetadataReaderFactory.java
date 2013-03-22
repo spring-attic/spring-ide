@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 
@@ -54,6 +53,7 @@ public class JdtMetadataReaderFactory implements MetadataReaderFactory {
 //		return new JdtMetadataReader(type);
 		return new JdtMetadataReaderAdaper(type, classReaderFactory, classloader);
 //		return new SimpleMetadataReaderFactory(classloader).getMetadataReader(className);
+//		return new JdtConnectedMetadataReader(type, classReaderFactory, classloader);
 	}
 
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {

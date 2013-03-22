@@ -1,0 +1,125 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Spring IDE Developers
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Spring IDE Developers - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.core.java.classreading;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.asm.MethodVisitor;
+import org.springframework.asm.Type;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.classreading.framework.AnnotationMetadataReadingVisitor;
+
+/**
+ * Addition to the standard metadata reading visitor that connects this class metadata to the corresponding
+ * JDT IType and the methods to IMethods
+ *
+ * @author Martin Lippert
+ * @since 3.3.0
+ */
+public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMetadataReadingVisitor implements IJdtAnnotationMetadata {
+
+	private final IType type;
+
+	public JdtConnectedAnnotationMetadataReadingVisitor(ClassLoader classloader, IType type) {
+		super(classloader);
+		this.type = type;
+	}
+
+	public IType getType() {
+		return this.type;
+	}
+
+	@Override
+	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+		IMethod method = getMethodFromSignature(name, desc);
+		return new JdtConnectedMethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap, method);
+	}
+
+	@Override
+	public boolean isAnnotated(String annotationType) {
+		return !ImportResource.class.getName().equals(annotationType) && super.isAnnotated(annotationType);
+	}
+
+	private IMethod getMethodFromSignature(final String name, final String desc) {
+		Type[] parameterTypes = Type.getArgumentTypes(desc);
+
+		IMethod method = null;
+		if (isConstructor(name)) {
+			method = quickCheckForConstructor(parameterTypes);
+		} else {
+			method = quickCheckForMethod(name, parameterTypes);
+		}
+
+		if (method == null) {
+			List<String> parameters = new ArrayList<String>();
+			if (parameterTypes != null && parameterTypes.length > 0) {
+				for (Type parameterType : parameterTypes) {
+					parameters.add(parameterType.getClassName());
+				}
+			}
+
+			if (isConstructor(name)) {
+				method = JdtUtils.getConstructor(getType(), parameters.toArray(new String[parameters.size()]));
+			} else {
+				method = JdtUtils.getMethod(getType(), name, parameters.toArray(new String[parameters.size()]), false);
+			}
+		}
+		return method;
+	}
+
+	private boolean isConstructor(String name) {
+		return "<init>".equals(name);
+	}
+
+	private IMethod quickCheckForMethod(String name, Type[] parameterTypes) {
+		IMethod result = null;
+		try {
+			IMethod[] methods = getType().getMethods();
+			for (IMethod method : methods) {
+				if (method.getElementName().equals(name) && method.getParameterTypes().length == parameterTypes.length) {
+					if (result == null) {
+						result = method;
+					} else {
+						return null;
+					}
+				}
+
+			}
+		} catch (JavaModelException e) {
+		}
+		return result;
+	}
+
+	private IMethod quickCheckForConstructor(Type[] parameterTypes) {
+		IMethod result = null;
+		try {
+			IMethod[] methods = getType().getMethods();
+			for (IMethod method : methods) {
+				if (method.isConstructor() && method.getParameterTypes().length == parameterTypes.length) {
+					if (result == null) {
+						result = method;
+					} else {
+						return null;
+					}
+				}
+
+			}
+		} catch (JavaModelException e) {
+		}
+		return result;
+	}
+
+}
