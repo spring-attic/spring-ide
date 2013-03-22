@@ -312,8 +312,9 @@ public class ProjectClassLoaderCache {
 						paths.add(SpringCore.getDefault().getBundle().getEntry(lib));
 					}
 				}
-				paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.aspectj.weaver"));
-				paths.addAll(JdtUtils.getBundleClassPath("com.springsource.org.objectweb.asm"));
+				paths.addAll(JdtUtils.getBundleClassPath("org.aspectj.runtime"));
+				paths.addAll(JdtUtils.getBundleClassPath("org.aspectj.weaver"));
+				paths.addAll(JdtUtils.getBundleClassPath("org.objectweb.asm"));
 				paths.addAll(JdtUtils.getBundleClassPath("org.aopalliance"));
 				cachedParentClassLoader = new URLClassLoader(paths.toArray(new URL[paths.size()]));
 			}

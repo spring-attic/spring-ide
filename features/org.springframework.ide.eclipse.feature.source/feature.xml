@@ -203,21 +203,21 @@
          unpack="false"/>
 
    <plugin
-         id="com.springsource.org.aspectj.weaver.source"
+         id="org.aspectj.runtime.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.springsource.org.objectweb.asm.source"
+         id="org.aspectj.weaver.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.springsource.org.objectweb.asm.commons.source"
+         id="org.objectweb.asm.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
