@@ -217,13 +217,6 @@
          unpack="false"/>
 -->
    <plugin
-         id="org.objectweb.asm.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.springframework.aop.source"
          download-size="0"
          install-size="0"
@@ -302,6 +295,13 @@
 
    <plugin
          id="org.springframework.transaction.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.springsource.util.common.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
