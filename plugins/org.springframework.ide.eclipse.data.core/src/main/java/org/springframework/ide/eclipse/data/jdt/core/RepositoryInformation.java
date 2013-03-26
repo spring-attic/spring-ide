@@ -134,8 +134,9 @@ public class RepositoryInformation {
 					if (resolvedInterfaceTypes != null) {
 						for (String[] match : resolvedInterfaceTypes) {
 							if (match != null && match.length == 2 && match[0] != null && match[1] != null) {
-								if ("org.springframework.data.repository".equals(match[0])
+								if (("org.springframework.data.repository".equals(match[0])
 										|| "org.springframework.data.jpa.repository".equals(match[0])
+										|| "org.springframework.data.neo4j.repository".equals(match[0]))
 										&&	match[1].contains("Repository")) {
 									return true;
 								}
