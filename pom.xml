@@ -421,6 +421,7 @@
 							<files>
 								<file>${project.build.directory}/git.properties</file>
 							</files>
+							<quiet>true</quiet>
 						</configuration>
 					</execution>
 				</executions>
