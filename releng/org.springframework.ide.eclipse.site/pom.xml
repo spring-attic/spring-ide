@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>org.springframework.ide.eclipse.site</artifactId>
-	<packaging>eclipse-update-site</packaging>
+	<packaging>eclipse-repository</packaging>
 
 	<build>
 		<plugins>
@@ -99,7 +99,7 @@
 									<patternset>
 										<include name="META-INF/MANIFEST.MF" />
 									</patternset>
-									<fileset dir="${site.target.dir}/site">
+									<fileset dir="${site.target.dir}/repository">
 										<include name="plugins/org.springframework.ide.eclipse_*.jar" />
 									</fileset>
 								</unzip>
@@ -119,11 +119,11 @@
 								</loadfile>
 
 								<property name="dist.file.name" value="${dist.project}-${dist.full.version}-updatesite.zip" />
-								<property name="dist.full.path" value="${site.target.dir}/site/${dist.file.name}" />
+								<property name="dist.full.path" value="${site.target.dir}/repository/${dist.file.name}" />
 
 								<delete file="${dist.full.path}" />
 								<zip zipfile="${dist.full.path}" filesonly="true">
-									<zipfileset dir="${site.target.dir}/site">
+									<zipfileset dir="${site.target.dir}/repository">
 										<exclude name="*.zip" />
 										<exclude name="**/*.gz" />
 									</zipfileset>
@@ -144,7 +144,7 @@
 									</delete>
 
 									<upload bucketName="${dist.bucket}" toDir="${dist.path}" publicRead="true">
-										<fileset dir="${site.target.dir}/site">
+										<fileset dir="${site.target.dir}/repository">
 											<include name="**/*" />
 											<include name="**" />
 											<exclude name="*.zip" />
@@ -171,12 +171,12 @@
 					<dependency>
 						<groupId>org.springframework.build</groupId>
 						<artifactId>org.springframework.build.aws.ant</artifactId>
-						<version>3.0.5.RELEASE</version>
+						<version>3.0.6.RELEASE</version>
 					</dependency>
 					<dependency>
 						<groupId>net.java.dev.jets3t</groupId>
 						<artifactId>jets3t</artifactId>
-						<version>0.7.2</version>
+						<version>0.8.1</version>
 					</dependency>
 					<dependency>
 						<groupId>ant-contrib</groupId>
