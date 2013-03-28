@@ -196,7 +196,7 @@
 		
 		<bundle id="org.aspectj.runtime" version="0.0.0"/>
 		<bundle id="org.aspectj.runtime.source" version="0.0.0"/>
-		<bundle id="org.eclipse.weaver" version="0.0.0"/>
+		<bundle id="org.aspectj.weaver" version="0.0.0"/>
 <!--		<bundle id="org.eclipse.weaver.source" version="0.0.0"/> -->
 
 </site>
