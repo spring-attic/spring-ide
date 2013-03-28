@@ -76,7 +76,7 @@
 		<dist.path>${dist.type}/${dist.key}/${dist.pathpostfix}</dist.path>
 		<dist.bucket>dist.springframework.org</dist.bucket>
 
-		<tycho-version>0.14.1</tycho-version>
+		<tycho-version>0.17.0</tycho-version>
 		<test.skip>${maven.test.skip}</test.skip>
 		<maven.test.error.ignore>false</maven.test.error.ignore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>

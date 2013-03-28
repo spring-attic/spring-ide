@@ -237,7 +237,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
+<!--
    <plugin
          id="org.aspectj.runtime"
          download-size="0"
@@ -251,7 +251,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
+-->
    <plugin
          id="org.springframework.aop"
          download-size="0"

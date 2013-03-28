@@ -193,4 +193,10 @@
 		<category-def name="Extensions (Incubation) / Spring IDE" label="Extensions (Incubation) / Spring IDE" />
 		<category-def name="Integrations / Spring IDE" label="Integrations / Spring IDE" />
 		<category-def name="Resources / Spring IDE" label="Resources / Spring IDE" />
+		
+		<bundle id="org.aspectj.runtime" version="0.0.0"/>
+		<bundle id="org.aspectj.runtime.source" version="0.0.0"/>
+		<bundle id="org.eclipse.weaver" version="0.0.0"/>
+<!--		<bundle id="org.eclipse.weaver.source" version="0.0.0"/> -->
+
 </site>
