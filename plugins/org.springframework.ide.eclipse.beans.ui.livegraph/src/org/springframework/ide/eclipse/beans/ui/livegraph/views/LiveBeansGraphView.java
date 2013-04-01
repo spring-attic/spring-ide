@@ -123,8 +123,8 @@ public class LiveBeansGraphView extends ViewPart {
 
 		graphViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				if (openBeanDefAction != null && openBeanDefAction.isEnabled()) {
-					openBeanDefAction.run();
+				if (openBeanClassAction != null && openBeanClassAction.isEnabled()) {
+					openBeanClassAction.run();
 				}
 			}
 		});
