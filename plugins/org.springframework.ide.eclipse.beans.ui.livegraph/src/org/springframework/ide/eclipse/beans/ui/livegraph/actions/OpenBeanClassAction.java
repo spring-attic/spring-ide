@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -12,25 +12,13 @@ package org.springframework.ide.eclipse.beans.ui.livegraph.actions;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.actions.BaseSelectionListenerAction;
-import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
-import org.springsource.ide.eclipse.commons.core.JdtUtils;
-import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
-import org.springsource.ide.eclipse.commons.core.StatusHandler;
-import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * @author Leo Dos Santos
  */
-public class OpenBeanClassAction extends BaseSelectionListenerAction {
+public class OpenBeanClassAction extends AbstractOpenResourceAction {
 
 	public OpenBeanClassAction() {
 		super("Open Bean Class");
@@ -46,16 +34,7 @@ public class OpenBeanClassAction extends BaseSelectionListenerAction {
 				String appName = bean.getApplicationName();
 				String beanClass = bean.getBeanType();
 				if (beanClass != null && beanClass.trim().length() > 0 && appName != null) {
-					// find the class files in the workspace and open them
-					try {
-						IProject project = SpringCoreUtils.createProject(appName, null, new NullProgressMonitor());
-						IType type = JdtUtils.getJavaType(project, beanClass);
-						SpringUIUtils.openInEditor(type);
-					}
-					catch (CoreException e) {
-						StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
-								"An error occurred while attempting to open a class file.", e));
-					}
+					openInEditor(appName, beanClass);
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -20,22 +20,17 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
-import org.springsource.ide.eclipse.commons.core.JdtUtils;
-import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * @author Leo Dos Santos
  */
-public class OpenBeanDefinitionAction extends BaseSelectionListenerAction {
+public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 
 	public OpenBeanDefinitionAction() {
 		super("Open Bean Definition File");
@@ -83,16 +78,7 @@ public class OpenBeanDefinitionAction extends BaseSelectionListenerAction {
 										resourceStr.lastIndexOf(".class"));
 								String beanType = bean.getBeanType();
 								if (beanType != null && beanType.endsWith(className) && appName != null) {
-									try {
-										IProject project = SpringCoreUtils.createProject(appName, null,
-												new NullProgressMonitor());
-										IType type = JdtUtils.getJavaType(project, beanType);
-										SpringUIUtils.openInEditor(type);
-									}
-									catch (CoreException e) {
-										StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
-												"An error occurred while attempting to open a class file.", e));
-									}
+									openInEditor(appName, beanType);
 								}
 							}
 						}
@@ -104,20 +90,22 @@ public class OpenBeanDefinitionAction extends BaseSelectionListenerAction {
 		if (appName != null) {
 			// find the XML files in the workspace and open them
 			try {
-				IProject project = SpringCoreUtils.createProject(appName, null, new NullProgressMonitor());
-				project.accept(new IResourceVisitor() {
-					public boolean visit(final IResource resource) throws CoreException {
-						if (resource instanceof IFile) {
-							for (String appContext : contexts) {
-								if (appContext.equals(resource.getName().trim())) {
-									SpringUIUtils.openInEditor((IFile) resource, 0);
+				IProject[] projects = findProjects(appName);
+				for (IProject project : projects) {
+					project.accept(new IResourceVisitor() {
+						public boolean visit(final IResource resource) throws CoreException {
+							if (resource instanceof IFile) {
+								for (String appContext : contexts) {
+									if (appContext.equals(resource.getName().trim())) {
+										SpringUIUtils.openInEditor((IFile) resource, 0);
+									}
 								}
+								return false;
 							}
-							return false;
+							return true;
 						}
-						return true;
-					}
-				});
+					});
+				}
 			}
 			catch (CoreException e) {
 				StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
