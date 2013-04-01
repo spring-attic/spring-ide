@@ -33,8 +33,16 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 				LiveBean bean = (LiveBean) obj;
 				String appName = bean.getApplicationName();
 				String beanClass = bean.getBeanType();
-				if (beanClass != null && beanClass.trim().length() > 0 && appName != null) {
-					openInEditor(appName, beanClass);
+				if (appName != null) {
+					if (beanClass != null && beanClass.trim().length() > 0) {
+						openInEditor(appName, beanClass);
+					}
+					else {
+						String beanId = bean.getId();
+						if (beanId != null && beanId.trim().length() > 0) {
+							openInEditor(appName, beanId);
+						}
+					}
 				}
 			}
 		}
@@ -50,6 +58,12 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 					String beanClass = bean.getBeanType();
 					if (beanClass != null && beanClass.trim().length() > 0) {
 						return true;
+					}
+					else {
+						String beanId = bean.getId();
+						if (beanId != null && beanId.trim().length() > 0) {
+							return hasType(bean.getApplicationName(), beanId);
+						}
 					}
 				}
 			}

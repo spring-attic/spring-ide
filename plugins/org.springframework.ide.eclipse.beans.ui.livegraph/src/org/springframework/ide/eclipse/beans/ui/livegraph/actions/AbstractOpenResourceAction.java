@@ -32,16 +32,22 @@ public abstract class AbstractOpenResourceAction extends BaseSelectionListenerAc
 		super(text);
 	}
 
-	protected String cleanClassName(final String className) {
+	protected String cleanClassName(String className) {
 		String cleanClassName = className;
 		int ix = className.indexOf('$');
 		if (ix > 0) {
 			cleanClassName = className.substring(0, ix);
 		}
+		else {
+			ix = className.indexOf('#');
+			if (ix > 0) {
+				cleanClassName = className.substring(0, ix);
+			}
+		}
 		return cleanClassName;
 	}
 
-	protected IProject[] findProjects(final String contextRoot) {
+	protected IProject[] findProjects(String contextRoot) {
 		Set<IProject> projects = new HashSet<IProject>();
 		IModule[] modules = ServerUtil.getModules("jst.web");
 		for (IModule module : modules) {
@@ -54,6 +60,17 @@ public abstract class AbstractOpenResourceAction extends BaseSelectionListenerAc
 			}
 		}
 		return projects.toArray(new IProject[projects.size()]);
+	}
+
+	protected boolean hasType(String appName, String className) {
+		IProject[] projects = findProjects(appName);
+		for (IProject project : projects) {
+			IType type = JdtUtils.getJavaType(project, cleanClassName(className));
+			if (type != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected void openInEditor(String appName, String className) {
