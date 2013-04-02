@@ -36,6 +36,31 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 		super("Open Bean Definition File");
 	}
 
+	private void openXmlFiles(final List<String> contexts, String appName) {
+		try {
+			IProject[] projects = findProjects(appName);
+			for (IProject project : projects) {
+				project.accept(new IResourceVisitor() {
+					public boolean visit(final IResource resource) throws CoreException {
+						if (resource instanceof IFile) {
+							for (String appContext : contexts) {
+								if (appContext.equals(resource.getName().trim())) {
+									SpringUIUtils.openInEditor((IFile) resource, 0);
+								}
+							}
+							return false;
+						}
+						return true;
+					}
+				});
+			}
+		}
+		catch (CoreException e) {
+			StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
+					"An error occurred while attempting to open an application context file.", e));
+		}
+	}
+
 	@Override
 	public void run() {
 		IStructuredSelection selection = getStructuredSelection();
@@ -46,71 +71,29 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
 				appName = bean.getApplicationName();
-				final String appContext = bean.getResource();
-				if (appContext != null && appContext.trim().length() > 0 && !appContext.equalsIgnoreCase("null")) {
-					String resourceStr = null;
-
-					// extract the resource path out of the descriptive text
-					int indexStart = appContext.indexOf("[");
-					int indexEnd = appContext.indexOf("]");
-					if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd) {
-						resourceStr = appContext.substring(indexStart + 1, indexEnd);
+				String resource = bean.getResource();
+				if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
+					String resourcePath = extractResourcePath(resource);
+					if (resourcePath.endsWith(".xml")) {
+						// Strip the path until we can map it properly to a
+						// project resource. For now we're going to traverse
+						// the project structure to open XML files
+						if (resourcePath.contains(File.separator)) {
+							int pathSeparator = resourcePath.lastIndexOf(File.separator);
+							resourcePath = resourcePath.substring(pathSeparator + 1);
+							contexts.add(resourcePath);
+						}
 					}
-
-					if (resourceStr != null) {
-						if (resourceStr.endsWith(".xml")) {
-							// Strip the path until we can map it properly to a
-							// project resource. For new we're going to traverse
-							// the project structure to open XML files
-							if (resourceStr.contains(File.separator)) {
-								int pathSeparator = resourceStr.lastIndexOf(File.separator);
-								resourceStr = resourceStr.substring(pathSeparator + 1);
-								contexts.add(resourceStr);
-							}
-						}
-						else if (resourceStr.endsWith(".class")) {
-							// Strip the path until we can map it properly to a
-							// project resource. For now if the .class file name
-							// matches the bean type, open the bean type.
-							if (resourceStr.contains(File.separator)) {
-								int pathSeparator = resourceStr.lastIndexOf(File.separator);
-								String className = resourceStr.substring(pathSeparator + 1,
-										resourceStr.lastIndexOf(".class"));
-								String beanType = bean.getBeanType();
-								if (beanType != null && beanType.endsWith(className) && appName != null) {
-									openInEditor(appName, beanType);
-								}
-							}
-						}
+					else if (resourcePath.endsWith(".class")) {
+						openInEditor(appName, extractClassName(resourcePath));
 					}
 				}
 			}
 		}
 
 		if (appName != null) {
-			// find the XML files in the workspace and open them
-			try {
-				IProject[] projects = findProjects(appName);
-				for (IProject project : projects) {
-					project.accept(new IResourceVisitor() {
-						public boolean visit(final IResource resource) throws CoreException {
-							if (resource instanceof IFile) {
-								for (String appContext : contexts) {
-									if (appContext.equals(resource.getName().trim())) {
-										SpringUIUtils.openInEditor((IFile) resource, 0);
-									}
-								}
-								return false;
-							}
-							return true;
-						}
-					});
-				}
-			}
-			catch (CoreException e) {
-				StatusHandler.log(new Status(IStatus.ERROR, LiveGraphUiPlugin.PLUGIN_ID,
-						"An error occurred while attempting to open an application context file.", e));
-			}
+			// Find the XML files in the workspace and open them
+			openXmlFiles(contexts, appName);
 		}
 	}
 
@@ -121,8 +104,8 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 			for (Object obj : elements) {
 				if (obj instanceof LiveBean) {
 					LiveBean bean = (LiveBean) obj;
-					String appContext = bean.getResource();
-					if (appContext != null && appContext.trim().length() > 0 && !appContext.equalsIgnoreCase("null")) {
+					String resource = bean.getResource();
+					if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
 						return true;
 					}
 				}

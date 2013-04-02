@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.actions;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,27 +35,50 @@ public abstract class AbstractOpenResourceAction extends BaseSelectionListenerAc
 
 	protected String cleanClassName(String className) {
 		String cleanClassName = className;
-		int ix = className.indexOf('$');
-		if (ix > 0) {
-			cleanClassName = className.substring(0, ix);
-		}
-		else {
-			ix = className.indexOf('#');
+		if (className != null) {
+			int ix = className.indexOf('$');
 			if (ix > 0) {
 				cleanClassName = className.substring(0, ix);
+			}
+			else {
+				ix = className.indexOf('#');
+				if (ix > 0) {
+					cleanClassName = className.substring(0, ix);
+				}
 			}
 		}
 		return cleanClassName;
 	}
 
-	protected IProject[] findProjects(String contextRoot) {
+	protected String extractClassName(String resourcePath) {
+		int index = resourcePath.lastIndexOf("/WEB-INF/classes/");
+		int length = "/WEB-INF/classes/".length();
+		if (index >= 0) {
+			resourcePath = resourcePath.substring(index + length);
+		}
+		resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf(".class"));
+		resourcePath = resourcePath.replace(File.separator, ".");
+		return resourcePath;
+	}
+
+	protected String extractResourcePath(String resourceStr) {
+		// Extract the resource path out of the descriptive text
+		int indexStart = resourceStr.indexOf("[");
+		int indexEnd = resourceStr.indexOf("]");
+		if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd) {
+			resourceStr = resourceStr.substring(indexStart + 1, indexEnd);
+		}
+		return resourceStr;
+	}
+
+	protected IProject[] findProjects(String appName) {
 		Set<IProject> projects = new HashSet<IProject>();
 		IModule[] modules = ServerUtil.getModules("jst.web");
 		for (IModule module : modules) {
 			Object obj = module.loadAdapter(IWebModule.class, new NullProgressMonitor());
 			if (obj instanceof IWebModule) {
 				IWebModule webModule = (IWebModule) obj;
-				if (contextRoot.equals(webModule.getContextRoot())) {
+				if (appName.equals(webModule.getContextRoot())) {
 					projects.add(module.getProject());
 				}
 			}
@@ -62,7 +86,7 @@ public abstract class AbstractOpenResourceAction extends BaseSelectionListenerAc
 		return projects.toArray(new IProject[projects.size()]);
 	}
 
-	protected boolean hasType(String appName, String className) {
+	protected boolean hasTypeInProject(String appName, String className) {
 		IProject[] projects = findProjects(appName);
 		for (IProject project : projects) {
 			IType type = JdtUtils.getJavaType(project, cleanClassName(className));

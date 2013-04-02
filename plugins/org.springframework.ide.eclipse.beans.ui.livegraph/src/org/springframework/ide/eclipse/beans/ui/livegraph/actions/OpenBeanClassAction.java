@@ -35,13 +35,24 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 				String beanClass = bean.getBeanType();
 				if (appName != null) {
 					if (beanClass != null && beanClass.trim().length() > 0) {
-						openInEditor(appName, beanClass);
+						if (beanClass.startsWith("com.sun.proxy")) {
+							// Special case for proxy beans, extract the type
+							// from the resource field
+							String resource = bean.getResource();
+							if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase(null)) {
+								String resourcePath = extractResourcePath(resource);
+								if (resourcePath.endsWith(".class")) {
+									openInEditor(appName, extractClassName(resourcePath));
+								}
+							}
+						}
+						else {
+							openInEditor(appName, beanClass);
+						}
 					}
 					else {
-						String beanId = bean.getId();
-						if (beanId != null && beanId.trim().length() > 0) {
-							openInEditor(appName, beanId);
-						}
+						// No type field, so infer class from bean ID
+						openInEditor(appName, bean.getId());
 					}
 				}
 			}
@@ -60,10 +71,7 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 						return true;
 					}
 					else {
-						String beanId = bean.getId();
-						if (beanId != null && beanId.trim().length() > 0) {
-							return hasType(bean.getApplicationName(), beanId);
-						}
+						return hasTypeInProject(bean.getApplicationName(), bean.getId());
 					}
 				}
 			}
