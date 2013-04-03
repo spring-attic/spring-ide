@@ -14,14 +14,18 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jst.ws.internal.common.ResourceUtils;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
@@ -36,23 +40,22 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 		super("Open Bean Definition File");
 	}
 
-	private void openXmlFiles(final List<String> contexts, String appName) {
+	private void openXmlFiles(List<String> contexts, String appName) {
 		try {
 			IProject[] projects = findProjects(appName);
 			for (IProject project : projects) {
-				project.accept(new IResourceVisitor() {
-					public boolean visit(final IResource resource) throws CoreException {
-						if (resource instanceof IFile) {
-							for (String appContext : contexts) {
-								if (appContext.equals(resource.getName().trim())) {
-									SpringUIUtils.openInEditor((IFile) resource, 0);
-								}
-							}
-							return false;
+				IPath[] paths = ResourceUtils.getAllJavaSourceLocations(project);
+				if (paths.length > 0) {
+					for (IPath path : paths) {
+						IResource resource = ResourceUtils.findResource(path);
+						if (resource.exists()) {
+							resource.accept(new ResourceProxyVisitor(contexts), IContainer.EXCLUDE_DERIVED);
 						}
-						return true;
 					}
-				});
+				}
+				else {
+					project.accept(new ResourceProxyVisitor(contexts), IContainer.EXCLUDE_DERIVED);
+				}
 			}
 		}
 		catch (CoreException e) {
@@ -112,6 +115,28 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 			}
 		}
 		return false;
+	}
+
+	private class ResourceProxyVisitor implements IResourceProxyVisitor {
+
+		private final List<String> contexts;
+
+		private ResourceProxyVisitor(List<String> contexts) {
+			this.contexts = contexts;
+		}
+
+		public boolean visit(IResourceProxy proxy) throws CoreException {
+			if (IResource.FILE == proxy.getType()) {
+				for (String appContext : contexts) {
+					if (appContext.equals(proxy.getName().trim())) {
+						SpringUIUtils.openInEditor((IFile) proxy.requestResource(), 0);
+					}
+				}
+				return false;
+			}
+			return true;
+		}
+
 	}
 
 }
