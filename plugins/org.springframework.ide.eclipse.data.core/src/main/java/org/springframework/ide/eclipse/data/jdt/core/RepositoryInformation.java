@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.Repository;
@@ -105,6 +106,20 @@ public class RepositoryInformation {
 		IType type = element.getDeclaringType();
 		return create(type);
 	}
+	
+	/**
+	 * Returns just the type name without the parameterized type
+	 * @param typeName
+	 * @return
+	 */
+	private static String removeParameterizedType(String typeName) {
+		if (typeName.contains("<")) {
+			int pos = typeName.indexOf("<");
+			return typeName.substring(0, pos);
+		}
+	
+		return typeName;
+	}
 
 	/**
 	 * Returns a {@link RepositoryInformation} for the given {@link IType} if it is a Spring Data repository.
@@ -126,22 +141,56 @@ public class RepositoryInformation {
 	}
 
 	public static boolean isSpringDataRepository(IType type) {
+		if (type == null) {
+			return false;
+		}
+		
+		String fullyQualifiedName = type.getFullyQualifiedName();
+		if ("org.springframework.data.repository.Repository".equals(fullyQualifiedName)) {
+			return true;
+		}
+		
 		try {
-			String[] interfaces = type.getSuperInterfaceNames();
-			for (String extendedInterface : interfaces) {
-				if (extendedInterface.contains("Repository")) {
-					String[][] resolvedInterfaceTypes = type.resolveType(extendedInterface);
-					if (resolvedInterfaceTypes != null) {
-						for (String[] match : resolvedInterfaceTypes) {
-							if (match != null && match.length == 2 && match[0] != null && match[1] != null) {
-								if (("org.springframework.data.repository".equals(match[0])
-										|| "org.springframework.data.jpa.repository".equals(match[0])
-										|| "org.springframework.data.neo4j.repository".equals(match[0]))
-										&&	match[1].contains("Repository")) {
+			String[] superInterfaces = type.getSuperInterfaceTypeSignatures();
+			for(String superInterface: superInterfaces) {
+				if (superInterface.length() > 1) {
+					
+					// resolved type
+					if (superInterface.startsWith("L")) {
+						String packageName = Signature.getSignatureQualifier(superInterface);
+						String simpleName = removeParameterizedType(Signature.getSimpleName(superInterface));
+						if (packageName != null && simpleName != null) {
+							IType interfaceType = type.getJavaProject().findType(packageName + "." + simpleName);
+							if (isSpringDataRepository(interfaceType)) {
+								return true;
+							}
+						}
+						
+					// unresolved type
+					} else if (superInterface.startsWith("Q")) {
+						String simpleName = removeParameterizedType(superInterface.substring(1));
+						
+						String[][] resolveTypes = type.resolveType(simpleName);
+						if (resolveTypes != null) {
+							for(String[] resolveType: resolveTypes) {
+								StringBuilder qualifiedTypeName = new StringBuilder();
+								if (resolveType.length == 2) {
+									if (resolveType[0] != null) {
+										qualifiedTypeName.append(resolveType[0]);
+									}
+									if (resolveType[1] != null) {
+										qualifiedTypeName.append(".");
+										qualifiedTypeName.append(resolveType[1]);
+									}
+								}
+								
+								IType interfaceType = type.getJavaProject().findType(qualifiedTypeName.toString());
+								if (isSpringDataRepository(interfaceType)) {
 									return true;
 								}
 							}
 						}
+						
 					}
 				}
 			}
