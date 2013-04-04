@@ -43,7 +43,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.core.java.classreading.IJdtMethodMetadata;
+import org.springframework.ide.eclipse.core.java.classreading.JdtConnectedMetadata;
 import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -150,10 +150,10 @@ public class JdtAnnotationMetadataTest {
 		assertEquals(Autowire.class, annotationAttributes.get("autowire").getClass());
 		assertEquals(Autowire.NO, annotationAttributes.get("autowire"));
 		
-		assertTrue(methodMetadata instanceof IJdtMethodMetadata);
+		assertTrue(methodMetadata instanceof JdtConnectedMetadata);
 		IType type = JdtUtils.getJavaType(project, "org.test.spring.SimpleBeanClass");
 		IMethod method = type.getMethods()[0];
-		assertEquals(method, ((IJdtMethodMetadata) methodMetadata).getMethod());
+		assertEquals(method, ((JdtConnectedMetadata) methodMetadata).getJavaElement());
 		
 		assertNull(methodMetadata.getAnnotationAttributes(Role.class.getName()));
 		
@@ -188,10 +188,10 @@ public class JdtAnnotationMetadataTest {
 		assertEquals(Autowire.class, annotationAttributes.get("autowire").getClass());
 		assertEquals(Autowire.BY_NAME, annotationAttributes.get("autowire"));
 		
-		assertTrue(methodMetadata instanceof IJdtMethodMetadata);
+		assertTrue(methodMetadata instanceof JdtConnectedMetadata);
 		IType type = JdtUtils.getJavaType(project, "org.test.spring.SimpleBeanClassWithAttribute");
 		IMethod method = type.getMethods()[0];
-		assertEquals(method, ((IJdtMethodMetadata) methodMetadata).getMethod());
+		assertEquals(method, ((JdtConnectedMetadata) methodMetadata).getJavaElement());
 	}
 
 	@Test
@@ -407,7 +407,7 @@ public class JdtAnnotationMetadataTest {
 		
 		IType type = JdtUtils.getJavaType(project, "org.test.spring.AutowiredConstructorClass");
 		IMethod constructor = type.getMethod("AutowiredConstructorClass", new String[] {"QString;"});
-		assertEquals(constructor, ((IJdtMethodMetadata)methodMetadata).getMethod());
+		assertEquals(constructor, ((JdtConnectedMetadata)methodMetadata).getJavaElement());
 	}
 
 	@Test
@@ -477,7 +477,7 @@ public class JdtAnnotationMetadataTest {
 
 	private boolean containsMethodReference(Set<MethodMetadata> methods, IMethod method) {
 		for (MethodMetadata methodMetadata : methods) {
-			if (((IJdtMethodMetadata)methodMetadata).getMethod().equals(method)) {
+			if (((JdtConnectedMetadata)methodMetadata).getJavaElement().equals(method)) {
 				return true;
 			}
 		}

@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
 
@@ -29,7 +30,7 @@ import org.springframework.util.ClassUtils;
  * @author Martin Lippert
  * @since 2.2.5
  */
-public class JdtAnnotationMetadata extends JdtClassMetadata implements IJdtAnnotationMetadata {
+public class JdtAnnotationMetadata extends JdtClassMetadata implements AnnotationMetadata {
 
 	private final IType type;
 

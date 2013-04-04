@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.java.classreading;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -29,7 +30,7 @@ import org.springframework.ide.eclipse.core.java.classreading.framework.Annotati
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMetadataReadingVisitor implements IJdtAnnotationMetadata {
+public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMetadataReadingVisitor implements JdtConnectedMetadata {
 
 	private final IType type;
 
@@ -38,7 +39,7 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 		this.type = type;
 	}
 
-	public IType getType() {
+	public IJavaElement getJavaElement() {
 		return this.type;
 	}
 
@@ -72,9 +73,9 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 			}
 
 			if (isConstructor(name)) {
-				method = JdtUtils.getConstructor(getType(), parameters.toArray(new String[parameters.size()]));
+				method = JdtUtils.getConstructor(type, parameters.toArray(new String[parameters.size()]));
 			} else {
-				method = JdtUtils.getMethod(getType(), name, parameters.toArray(new String[parameters.size()]), false);
+				method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]), false);
 			}
 		}
 		return method;
@@ -87,7 +88,7 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 	private IMethod quickCheckForMethod(String name, Type[] parameterTypes) {
 		IMethod result = null;
 		try {
-			IMethod[] methods = getType().getMethods();
+			IMethod[] methods = type.getMethods();
 			for (IMethod method : methods) {
 				if (method.getElementName().equals(name) && method.getParameterTypes().length == parameterTypes.length) {
 					if (result == null) {
@@ -106,7 +107,7 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 	private IMethod quickCheckForConstructor(Type[] parameterTypes) {
 		IMethod result = null;
 		try {
-			IMethod[] methods = getType().getMethods();
+			IMethod[] methods = type.getMethods();
 			for (IMethod method : methods) {
 				if (method.isConstructor() && method.getParameterTypes().length == parameterTypes.length) {
 					if (result == null) {

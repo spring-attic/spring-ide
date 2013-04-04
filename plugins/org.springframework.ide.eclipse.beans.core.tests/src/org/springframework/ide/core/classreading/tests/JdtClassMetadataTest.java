@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.core.java.classreading.IJdtClassMetadata;
+import org.springframework.ide.eclipse.core.java.classreading.JdtConnectedMetadata;
 import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -63,9 +63,9 @@ public class JdtClassMetadataTest {
 		assertTrue(metadata.hasSuperClass());
 		assertEquals("java.lang.Object", metadata.getSuperClassName());
 		
-		assertTrue(metadata instanceof IJdtClassMetadata);
+		assertTrue(metadata instanceof JdtConnectedMetadata);
 		IType type = JdtUtils.getJavaType(project, "org.test.spring.NoAnnotations");
-		assertEquals(type, ((IJdtClassMetadata)metadata).getType());
+		assertEquals(type, ((JdtConnectedMetadata)metadata).getJavaElement());
 	}
 
 	@Test

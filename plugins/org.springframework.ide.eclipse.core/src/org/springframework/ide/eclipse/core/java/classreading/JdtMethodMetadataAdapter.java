@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.ide.eclipse.core.java.annotation.Annotation;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
 
@@ -24,7 +26,7 @@ import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValu
  * @author Martin Lippert
  * @since 3.2.0
  */
-public class JdtMethodMetadataAdapter implements IJdtMethodMetadata {
+public class JdtMethodMetadataAdapter implements MethodMetadata, JdtConnectedMetadata {
 	
 	private IMethod method;
 	private Annotation annotation;
@@ -34,7 +36,7 @@ public class JdtMethodMetadataAdapter implements IJdtMethodMetadata {
 		this.annotation = annotation;
 	}
 
-	public IMethod getMethod() {
+	public IJavaElement getJavaElement() {
 		return this.method;
 	}
 

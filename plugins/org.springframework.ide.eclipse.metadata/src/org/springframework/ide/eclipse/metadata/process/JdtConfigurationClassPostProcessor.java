@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -41,8 +41,7 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegistrationSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
-import org.springframework.ide.eclipse.core.java.classreading.IJdtAnnotationMetadata;
-import org.springframework.ide.eclipse.core.java.classreading.IJdtMethodMetadata;
+import org.springframework.ide.eclipse.core.java.classreading.JdtConnectedMetadata;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
@@ -273,12 +272,8 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		}
 
 		private void createProblem(int severity, String message, Object source) {
-			if (source instanceof IJdtMethodMetadata) {
-				IJavaElement je = ((IJdtMethodMetadata) source).getMethod();
-				createProblem(severity, postProcessingContext, message, je);
-			}
-			else if (source instanceof IJdtAnnotationMetadata) {
-				IJavaElement je = ((IJdtAnnotationMetadata) source).getType();
+			if (source instanceof JdtConnectedMetadata) {
+				IJavaElement je = ((JdtConnectedMetadata) source).getJavaElement();
 				createProblem(severity, postProcessingContext, message, je);
 			}
 		}

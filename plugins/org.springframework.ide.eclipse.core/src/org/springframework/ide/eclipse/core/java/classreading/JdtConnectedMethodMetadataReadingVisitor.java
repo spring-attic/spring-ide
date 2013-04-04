@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.classreading;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.ide.eclipse.core.java.classreading.framework.MethodMetadataReadingVisitor;
@@ -22,7 +23,7 @@ import org.springframework.util.MultiValueMap;
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class JdtConnectedMethodMetadataReadingVisitor extends MethodMetadataReadingVisitor implements IJdtMethodMetadata {
+public class JdtConnectedMethodMetadataReadingVisitor extends MethodMetadataReadingVisitor implements JdtConnectedMetadata {
 
 	private final IMethod method;
 
@@ -32,7 +33,7 @@ public class JdtConnectedMethodMetadataReadingVisitor extends MethodMetadataRead
 		this.method = method;
 	}
 
-	public IMethod getMethod() {
+	public IJavaElement getJavaElement() {
 		return this.method;
 	}
 
