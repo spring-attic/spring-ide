@@ -82,11 +82,10 @@
 			<category name="Extensions / Spring IDE" />
 		</feature>	
 
-		<!-- Extensions (Incubation) features -->	
 		<feature
 			url="features/org.springframework.ide.eclipse.autowire.feature_3.3.0.qualifier.jar"
 			id="org.springframework.ide.eclipse.autowire.feature" version="3.3.0.qualifier">
-			<category name="Extensions (Incubation) / Spring IDE" />
+			<category name="Extensions / Spring IDE" />
 		</feature>
 
 		<!-- Integration features -->
