@@ -15,7 +15,7 @@ import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 
 /**
- * Utility class tha adapts a given {@link IBeansModelElement} to be
+ * Utility class that adapts a given {@link IBeansModelElement} to be
  * {@link IPersistableElement}.
  * @author Christian Dupuis
  * @since 2.0
