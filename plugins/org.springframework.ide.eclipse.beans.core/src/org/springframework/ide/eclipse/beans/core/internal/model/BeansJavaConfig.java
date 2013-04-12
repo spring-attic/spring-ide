@@ -63,7 +63,7 @@ public class BeansJavaConfig extends AbstractBeansConfig {
 	private ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry registry;
 
 	public BeansJavaConfig(IBeansProject project, IType configClass, Type type) {
-		super(project, configClass.getElementName(), type);
+		super(project, configClass.getFullyQualifiedName(), type);
 		this.configClass = configClass;
 	}
 	

@@ -24,6 +24,8 @@ import org.springframework.ide.eclipse.beans.core.internal.model.validation.rule
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRuleTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigDescriptionWriterTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigIdentifierTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaConfigTest;
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
@@ -51,7 +53,9 @@ import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 	JdtBasedAnnotationMetadataTest.class,
 	JdtClassMetadataTest.class,
 	BeansConfigTest.class,
-	BeansJavaConfigTest.class
+	BeansJavaConfigTest.class,
+	BeansConfigIdentifierTest.class,
+	BeansConfigDescriptionWriterTest.class
 })
 public class AllBeansCoreTests {
 	// goofy junit4, no class body needed
