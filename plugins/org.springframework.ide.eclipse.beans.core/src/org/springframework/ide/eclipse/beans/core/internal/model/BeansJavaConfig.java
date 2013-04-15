@@ -16,10 +16,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -52,11 +59,14 @@ import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
+import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
 /**
  * This class defines a Spring beans configuration based on a Spring JavaConfig class.
@@ -118,23 +128,56 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 				w.unlock();
 				return;
 			}
-			try {
-				// Create special ReaderEventListener that essentially just passes through component definitions
-				ReaderEventListener eventListener = new BeansConfigPostProcessorReaderEventListener();
-				problemReporter = new BeansConfigProblemReporter();
-				beanNameGenerator = new UniqueBeanNameGenerator(this);
-				registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
+			
+			IBeansProject beansProject = (IBeansProject) getElementParent();
+			final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
 
-				try {
-					registerBean(eventListener);
+			Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
+				public Integer call() throws Exception {
+					// Obtain thread context classloader and override with the project classloader
+					ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
+					Thread.currentThread().setContextClassLoader(cl);
 
-					IBeansConfigPostProcessor[] postProcessors = BeansConfigPostProcessorFactory.createPostProcessor(ConfigurationClassPostProcessor.class.getName());
-					for (IBeansConfigPostProcessor postProcessor : postProcessors) {
-						executePostProcessor(postProcessor, eventListener);
+					// Create special ReaderEventListener that essentially just passes through component definitions
+					ReaderEventListener eventListener = new BeansConfigPostProcessorReaderEventListener();
+					problemReporter = new BeansConfigProblemReporter();
+					beanNameGenerator = new UniqueBeanNameGenerator(BeansJavaConfig.this);
+					registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
+
+					try {
+						registerBean(eventListener);
+
+						IBeansConfigPostProcessor[] postProcessors = BeansConfigPostProcessorFactory.createPostProcessor(ConfigurationClassPostProcessor.class.getName());
+						for (IBeansConfigPostProcessor postProcessor : postProcessors) {
+							executePostProcessor(postProcessor, eventListener);
+						}
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
+					finally {
+						// Reset the context classloader
+						Thread.currentThread().setContextClassLoader(threadClassLoader);
+					}
+					return 0;
 				}
+			};
+
+			try {
+				FutureTask<Integer> task = new FutureTask<Integer>(loadBeanDefinitionOperation);
+				BeansCorePlugin.getExecutorService().submit(task);
+				task.get(BeansCorePlugin.getDefault().getPreferenceStore().getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID),
+						TimeUnit.SECONDS);
+			}
+			catch (TimeoutException e) {
+				problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, "Loading of configuration '"
+						+ this.configClass.getFullyQualifiedName() + "' took more than "
+						+ BeansCorePlugin.getDefault().getPreferenceStore()
+						.getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID) + "sec",
+						file, 1));
+			}
+			catch (Exception e) {
+				problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, String.format(
+						"Error occured processing Java config '%s'. See Error Log for more details", e.getCause().getMessage()), this.configClass.getResource()));
+				BeansCorePlugin.log(new Status(IStatus.INFO, BeansCorePlugin.PLUGIN_ID, String.format(
+						"Error occured processing '%s'", this.configClass.getFullyQualifiedName()), e.getCause()));
 			}
 			finally {
 				// Prepare the internal cache of all children for faster access
