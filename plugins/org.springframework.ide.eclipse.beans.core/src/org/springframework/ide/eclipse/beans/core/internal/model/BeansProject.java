@@ -278,7 +278,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			// Create new list of configs
 			configs.clear();
 			for (String configName : configNames) {
-				configs.put(configName, new BeansConfig(this, configName, Type.MANUAL));
+				configs.put(configName, BeansConfigFactory.create(this, configName, Type.MANUAL));
 			}
 		}
 		finally {
@@ -319,7 +319,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			w.lock();
 			if (configName.length() > 0 && !configs.containsKey(configName)) {
 				if (type == IBeansConfig.Type.MANUAL) {
-					IBeansConfig config = new BeansConfig(this, configName, type);
+					IBeansConfig config = BeansConfigFactory.create(this, configName, type);
 					addConfig(config);
 					return true;
 				}
@@ -342,7 +342,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * @param config the config to add
 	 * @return <code>true</code> if config file was added to this project
 	 */
-	public boolean addConfig(IBeansConfig config) {
+	private boolean addConfig(IBeansConfig config) {
 		String configName = config.getElementName();
 
 		if (configs.containsKey(configName)) {

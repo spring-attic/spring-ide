@@ -25,9 +25,10 @@ import org.springframework.ide.eclipse.beans.core.internal.model.validation.rule
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigDescriptionWriterTest;
-import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigIdentifierTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigFactoryTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaConfigTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectTest;
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 
 /**
@@ -54,7 +55,8 @@ import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 	JdtClassMetadataTest.class,
 	BeansConfigTest.class,
 	BeansJavaConfigTest.class,
-	BeansConfigIdentifierTest.class,
+	BeansProjectTest.class,
+	BeansConfigFactoryTest.class,
 	BeansConfigDescriptionWriterTest.class
 })
 public class AllBeansCoreTests {

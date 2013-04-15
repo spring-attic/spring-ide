@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model.tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -20,12 +22,11 @@ import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -33,7 +34,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class BeansConfigDescriptionWriterTest {
+public class BeansProjectTest {
 	
 	private IProject project;
 	private BeansModel model;
@@ -55,36 +56,48 @@ public class BeansConfigDescriptionWriterTest {
 	}
 
 	@Test
-	public void testBeansProjectDescriptionWriterWithXMLConfigsOnly() throws Exception {
+	public void testBeansProjectXMLConfig() throws Exception {
 		beansProject.addConfig("basic-bean-config.xml", IBeansConfig.Type.MANUAL);
 		
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		XMLWriter writer = new XMLWriter(os);
-		BeansProjectDescriptionWriter.write(beansProject, writer);
-		writer.flush();
-		writer.close();
-		
-		String description = os.toString();
-		
-		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+		Set<IBeansConfig> configs = beansProject.getConfigs();
+		assertEquals(1, configs.size());
+		IBeansConfig config = configs.iterator().next();
+		assertEquals("basic-bean-config.xml", config.getElementName());
+		assertTrue(config instanceof BeansConfig);
 	}
 	
 	@Test
-	public void testBeansProjectDescriptionWriterWithMixedConfigs() throws Exception {
-		beansProject.addConfig("basic-bean-config.xml", IBeansConfig.Type.MANUAL);
+	public void testBeansProjectJavaConfig() throws Exception {
 		beansProject.addConfig("java:org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
 		
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		XMLWriter writer = new XMLWriter(os);
-		BeansProjectDescriptionWriter.write(beansProject, writer);
-		writer.flush();
-		writer.close();
+		Set<IBeansConfig> configs = beansProject.getConfigs();
+		assertEquals(1, configs.size());
+		IBeansConfig config = configs.iterator().next();
+		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
+		assertTrue(config instanceof BeansJavaConfig);
 		
-		String description = os.toString();
+		IType type = javaProject.findType("org.test.spring.SimpleConfigurationClass");
+		assertEquals(type, ((BeansJavaConfig)config).getConfigClass());
+	}
+	
+	@Test
+	public void testBeansProjectMixedConfigs() throws Exception {
+		Set<String> configs = new HashSet<String>();
+		configs.add("basic-bean-config.xml");
+		configs.add("java:org.test.spring.SimpleConfigurationClass");
+		beansProject.setConfigs(configs);
 		
-		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t\t<config>java:org.test.spring.SimpleConfigurationClass</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+		IBeansConfig xmlConfig = beansProject.getConfig("basic-bean-config.xml");
+		IBeansConfig javaConfig = beansProject.getConfig("java:org.test.spring.SimpleConfigurationClass");
+		
+		assertEquals("basic-bean-config.xml", xmlConfig.getElementName());
+		assertEquals("java:org.test.spring.SimpleConfigurationClass", javaConfig.getElementName());
+
+		assertTrue(xmlConfig instanceof BeansConfig);
+		assertTrue(javaConfig instanceof BeansJavaConfig);
+		
+		IType type = javaProject.findType("org.test.spring.SimpleConfigurationClass");
+		assertEquals(type, ((BeansJavaConfig)javaConfig).getConfigClass());
 	}
 	
 }

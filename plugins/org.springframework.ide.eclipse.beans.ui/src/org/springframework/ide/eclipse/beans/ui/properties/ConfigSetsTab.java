@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProje
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * Property page tab for defining the beans config sets.

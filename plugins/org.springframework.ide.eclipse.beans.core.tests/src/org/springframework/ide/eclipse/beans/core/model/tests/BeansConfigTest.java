@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
@@ -61,6 +62,9 @@ public class BeansConfigTest {
 
 		IBean bean = beans.iterator().next();
 		assertEquals("simpleBean", bean.getElementName());
+		
+		IModelElement[] children = config.getElementChildren();
+		assertEquals(1, children.length);
 	}
 
 	@Test

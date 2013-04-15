@@ -14,24 +14,20 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class BeansConfigIdentifier {
+public class BeansConfigFactory {
 	
-	private static final String JAVA_CONFIG_TYPE = "java:";
+	public static final String JAVA_CONFIG_TYPE = "java:";
 
-	public static String serialize(IBeansConfig beansConfig) {
-		String configName = beansConfig.getElementName();
-		return beansConfig instanceof BeansJavaConfig ? JAVA_CONFIG_TYPE + configName : configName;
-	}
-
-	public static IBeansConfig deserialize(String serialized, BeansProject project) {
-		if (serialized != null && serialized.startsWith(JAVA_CONFIG_TYPE)) {
-			String className = serialized.substring(JAVA_CONFIG_TYPE.length());
+	public static IBeansConfig create(IBeansProject project, String name, IBeansConfig.Type type) {
+		if (name != null && name.startsWith(JAVA_CONFIG_TYPE)) {
+			String className = name.substring(JAVA_CONFIG_TYPE.length());
 			IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
 
 			try {
@@ -45,15 +41,14 @@ public class BeansConfigIdentifier {
 
 		}
 		else {
-			String config = serialized;
-			if (config.length() > 0 && config.charAt(0) == '/') {
+			if (name.length() > 0 && name.charAt(0) == '/') {
 				String projectPath = '/' + project.getElementName() + '/';
-				if (config.startsWith(projectPath)) {
-					config = config.substring(projectPath.length());
+				if (name.startsWith(projectPath)) {
+					name = name.substring(projectPath.length());
 				}
 			}
 				
-			return new BeansConfig(project, config, IBeansConfig.Type.MANUAL);
+			return new BeansConfig(project, name, IBeansConfig.Type.MANUAL);
 		}
 		
 		return null;

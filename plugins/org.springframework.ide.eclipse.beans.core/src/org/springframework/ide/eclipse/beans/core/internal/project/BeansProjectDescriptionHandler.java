@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigIdentifier;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -183,19 +183,14 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 
 				// If given config is a full path within this Spring
 				// project then convert it to a project relative path
-				IBeansConfig deserializedConfig = BeansConfigIdentifier.deserialize(config, project);
-				project.addConfig(deserializedConfig);
+				if (config.length() > 0 && config.charAt(0) == '/') {
+					String projectPath = '/' + project.getElementName() + '/';
+					if (config.startsWith(projectPath)) {
+						config = config.substring(projectPath.length());
+					}
+				}
+				project.addConfig(config, IBeansConfig.Type.MANUAL);
 				state = State.CONFIGS;
-				
-				
-//				if (config.length() > 0 && config.charAt(0) == '/') {
-//					String projectPath = '/' + project.getElementName() + '/';
-//					if (config.startsWith(projectPath)) {
-//						config = config.substring(projectPath.length());
-//					}
-//				}
-//				project.addConfig(config, IBeansConfig.Type.MANUAL);
-//				state = State.CONFIGS;
 			}
 		} else if (state == State.CONFIG_SETS) {
 			if (elementName.equals(CONFIG_SETS)) {

@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.beans.core.internal.project;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -21,9 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigIdentifier;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -83,23 +80,9 @@ public class BeansProjectDescriptionWriter implements IBeansProjectDescriptionCo
 		writer.printCDataTag(PLUGIN_VERSION, BeansCorePlugin.getPluginVersion());
 		writeCData(CONFIG_SUFFIXES, CONFIG_SUFFIX, project.getConfigSuffixes(), writer);
 		writer.printCDataTag(ENABLE_IMPORTS, project.isImportsEnabled());
-		writeConfigs(project, writer);
+		write(CONFIGS, CONFIG, project.getManualConfigNames(), writer);
 		write(CONFIG_SETS, project.getConfigSets(), writer);
 		writer.endTag(PROJECT_DESCRIPTION);
-	}
-
-	protected static void writeConfigs(BeansProject project, XMLWriter writer) {
-		Set<String> serializedConfigs = new LinkedHashSet<String>();
-		for (String configName : project.getManualConfigNames()) {
-			IBeansConfig beansConfig = project.getConfig(configName);
-			
-			String serializeName = BeansConfigIdentifier.serialize(beansConfig);
-			if (serializeName != null) {
-				serializedConfigs.add(serializeName);
-			}
-		}
-		
-		write(CONFIGS, CONFIG, serializedConfigs, writer);
 	}
 
 	protected static void write(IBeansConfigSet configSet, XMLWriter writer) {
