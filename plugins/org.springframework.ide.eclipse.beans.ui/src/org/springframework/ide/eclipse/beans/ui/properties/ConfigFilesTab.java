@@ -80,6 +80,7 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
@@ -502,7 +503,21 @@ public class ConfigFilesTab {
 					dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
 					dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
 					if (dialog.open() == Window.OK) {
-
+						Object[] selection = dialog.getResult();
+						if (selection != null && selection.length > 0) {
+							for (Object element : selection) {
+								String config = null;
+								if (element instanceof IType) {
+									IType type = (IType) element;
+									config = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
+								}
+								if (config != null) {
+									project.addConfig(config, IBeansConfig.Type.MANUAL);
+								}
+							}
+						}
+						configsViewer.refresh(false);
+						hasUserMadeChanges = true;
 					}
 				}
 			} catch (CoreException e) {
