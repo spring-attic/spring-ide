@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegi
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.java.classreading.JdtConnectedMetadata;
+import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
@@ -74,7 +75,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		processor.setMetadataReaderFactory(new CachingJdtMetadataReaderFactory(project));
 		processor.setProblemReporter(new JdtAnnotationMetadataProblemReporter(postProcessingContext));
 		
-		ClassLoader classLoader = JdtUtils.getClassLoader(postProcessingContext.getBeansConfig().getElementResource().getProject(), BeansCorePlugin.getClassLoader());
+		ClassLoader classLoader = JdtUtils.getClassLoader(project.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
 		processor.setResourceLoader(new DefaultResourceLoader(classLoader));
 
 		ReaderEventListenerForwardingBeanDefinitionRegistry registry = new ReaderEventListenerForwardingBeanDefinitionRegistry(
