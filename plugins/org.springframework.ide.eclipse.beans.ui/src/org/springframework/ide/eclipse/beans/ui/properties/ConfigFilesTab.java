@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 Spring IDE Developers
+ * Copyright (c) 2004 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.ui.properties;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -18,15 +19,31 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
+import org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor;
+import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -57,8 +74,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -74,6 +93,7 @@ import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -86,6 +106,7 @@ import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
  * Property page tab for defining the list of beans config file extensions and the selected beans config files.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Leo Dos Santos
  */
 @SuppressWarnings({ "deprecation", "restriction" })
 public class ConfigFilesTab {
@@ -130,7 +151,7 @@ public class ConfigFilesTab {
 
 	private Label errorLabel;
 
-	private Button addButton, removeButton, scanButton;
+	private Button addButton, addJavaConfigButton, removeButton, scanButton;
 
 	private Button enableImportText;
 
@@ -273,6 +294,7 @@ public class ConfigFilesTab {
 		buttonArea.setLayout(layout);
 		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		addButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin.getResourceString(ADD_BUTTON), buttonListener);
+		addJavaConfigButton = SpringUIUtils.createButton(buttonArea, "Add JavaConfig...", buttonListener);
 		removeButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin.getResourceString(REMOVE_BUTTON),
 				buttonListener, 0, false);
 		scanButton = SpringUIUtils.createButton(buttonArea, "Scan...", buttonListener);
@@ -375,6 +397,8 @@ public class ConfigFilesTab {
 	private void handleButtonPressed(Button button) {
 		if (button == addButton) {
 			handleAddButtonPressed();
+		} else if (button == addJavaConfigButton) {
+			handleJavaConfigButtonPressed();
 		}
 		else if (button == removeButton) {
 			handleRemoveButtonPressed();
@@ -429,6 +453,65 @@ public class ConfigFilesTab {
 		}
 	}
 
+	private void handleJavaConfigButtonPressed() {
+		IJavaProject javaProj = JdtUtils.getJavaProject(project.getProject());
+		if (javaProj != null) {
+			final Set<String> annotatedTypes = new HashSet<String>();
+			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj });
+			SearchPattern pattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
+					IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+					SearchPattern.R_EXACT_MATCH	| SearchPattern.R_CASE_SENSITIVE);
+
+			SearchRequestor requestor = new SearchRequestor() {
+				@Override
+				public void acceptSearchMatch(SearchMatch match) throws CoreException {
+					if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
+						Object element = match.getElement();
+						if (element instanceof IType) {
+							IType type = (IType) element;
+							annotatedTypes.add(type.getPackageFragment().getElementName() + "/" + type.getTypeQualifiedName('.'));
+						}
+					}
+				}
+			};
+
+			try {
+				new SearchEngine().search(pattern,
+						new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, scope, requestor, null);
+				SelectionDialog dialog = JavaUI.createTypeDialog(SpringUIUtils.getStandardDisplay().getActiveShell(), 
+						PlatformUI.getWorkbench().getProgressService(), scope, IJavaElementSearchConstants.CONSIDER_ALL_TYPES, 
+						true, "**", new TypeSelectionExtension() {
+							@Override
+							public ITypeInfoFilterExtension getFilterExtension() {
+								return new ITypeInfoFilterExtension() {
+									public boolean select(ITypeInfoRequestor typeInfoRequestor) {
+										StringBuffer buffer = new StringBuffer();
+										buffer.append(typeInfoRequestor.getPackageName()).append('/');
+										String enclosingName = typeInfoRequestor.getEnclosingName();
+										if (enclosingName.length() > 0) {
+											buffer.append(enclosingName).append('.');
+										}
+										buffer.append(typeInfoRequestor.getTypeName());
+										return annotatedTypes.contains(buffer.toString());
+									}
+								};
+							}
+						});
+
+				if (dialog != null) {
+					dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
+					dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
+					if (dialog.open() == Window.OK) {
+
+					}
+				}
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	/**
 	 * The user has pressed the add button. Opens the configuration selection dialog and adds the selected
 	 * configuration.
