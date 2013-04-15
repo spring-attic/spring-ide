@@ -104,4 +104,6 @@ Export-Package: org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.ui.wizards
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.springframework.ide.eclipse.beans.core
+Require-Bundle: org.springframework.ide.eclipse.beans.core,
+ org.springsource.ide.eclipse.commons.ui,
+ org.springsource.ide.eclipse.commons.core

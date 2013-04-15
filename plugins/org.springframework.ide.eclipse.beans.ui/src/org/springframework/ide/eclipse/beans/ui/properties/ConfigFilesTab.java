@@ -22,7 +22,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -90,18 +92,19 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.dialogs.FilteredElementTreeSelectionDialog;
 import org.springframework.ide.eclipse.ui.dialogs.StorageSelectionValidator;
 import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
+import org.springsource.ide.eclipse.commons.core.SpringCorePreferences;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
+import org.springsource.ide.eclipse.commons.core.StatusHandler;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * Property page tab for defining the list of beans config file extensions and the selected beans config files.
@@ -455,33 +458,36 @@ public class ConfigFilesTab {
 	}
 
 	private void handleJavaConfigButtonPressed() {
-		IJavaProject javaProj = JdtUtils.getJavaProject(project.getProject());
-		if (javaProj != null) {
-			final Set<String> annotatedTypes = new HashSet<String>();
-			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj });
-			SearchPattern pattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
-					IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-					SearchPattern.R_EXACT_MATCH	| SearchPattern.R_CASE_SENSITIVE);
-
-			SearchRequestor requestor = new SearchRequestor() {
-				@Override
-				public void acceptSearchMatch(SearchMatch match) throws CoreException {
-					if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
-						Object element = match.getElement();
-						if (element instanceof IType) {
-							IType type = (IType) element;
-							annotatedTypes.add(type.getPackageFragment().getElementName() + "/" + type.getTypeQualifiedName('.'));
-						}
+		SelectionDialog dialog = createFilteredTypesDialog();
+		if (dialog != null && dialog.open() == Window.OK) {
+			Object[] selection = dialog.getResult();
+			if (selection != null && selection.length > 0) {
+				for (Object element : selection) {
+					String config = null;
+					if (element instanceof IType) {
+						IType type = (IType) element;
+						config = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
+					}
+					if (config != null) {
+						project.addConfig(config, IBeansConfig.Type.MANUAL);
 					}
 				}
-			};
-
+			}
+			configsViewer.refresh(false);
+			hasUserMadeChanges = true;
+		}
+	}
+	
+	private SelectionDialog createFilteredTypesDialog() {
+		SelectionDialog dialog = null;
+		IJavaProject javaProj = JdtUtils.getJavaProject(project.getProject());
+		if (javaProj != null) {
+			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj });
+			final Set<String> annotatedTypes = searchForJavaConfigs(scope);
 			try {
-				new SearchEngine().search(pattern,
-						new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, scope, requestor, null);
-				SelectionDialog dialog = JavaUI.createTypeDialog(SpringUIUtils.getStandardDisplay().getActiveShell(), 
-						PlatformUI.getWorkbench().getProgressService(), scope, IJavaElementSearchConstants.CONSIDER_ALL_TYPES, 
-						true, "**", new TypeSelectionExtension() {
+				dialog = JavaUI.createTypeDialog(SpringUIUtils.getStandardDisplay().getActiveShell(), PlatformUI.getWorkbench()
+						.getProgressService(), scope, IJavaElementSearchConstants.CONSIDER_ALL_TYPES, true, "**",
+						new TypeSelectionExtension() {
 							@Override
 							public ITypeInfoFilterExtension getFilterExtension() {
 								return new ITypeInfoFilterExtension() {
@@ -498,33 +504,44 @@ public class ConfigFilesTab {
 								};
 							}
 						});
-
-				if (dialog != null) {
-					dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
-					dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
-					if (dialog.open() == Window.OK) {
-						Object[] selection = dialog.getResult();
-						if (selection != null && selection.length > 0) {
-							for (Object element : selection) {
-								String config = null;
-								if (element instanceof IType) {
-									IType type = (IType) element;
-									config = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
-								}
-								if (config != null) {
-									project.addConfig(config, IBeansConfig.Type.MANUAL);
-								}
-							}
-						}
-						configsViewer.refresh(false);
-						hasUserMadeChanges = true;
-					}
-				}
-			} catch (CoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
+				dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
+			} catch (JavaModelException e) {
+				StatusHandler.log(new Status(IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 
+						"An error occurred while opening dialog.", e));
 			}
 		}
+		return dialog;
+	}
+	
+	private Set<String> searchForJavaConfigs(IJavaSearchScope scope) {
+		final Set<String> annotatedTypes = new HashSet<String>();
+		SearchPattern pattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+
+		SearchRequestor requestor = new SearchRequestor() {
+			@Override
+			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
+					Object element = match.getElement();
+					if (element instanceof IType) {
+						IType type = (IType) element;
+						annotatedTypes.add(type.getPackageFragment().getElementName()+ "/" 
+						+ type.getTypeQualifiedName('.'));
+					}
+				}
+			}
+		};
+		
+		try {
+			new SearchEngine().search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, 
+					scope, requestor, null);
+		} catch (CoreException e) {
+			StatusHandler.log(new Status(IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 
+					"An error occurred while searching for Java config files.", e));
+		}
+		return annotatedTypes;
 	}
 	
 	/**
@@ -630,8 +647,12 @@ public class ConfigFilesTab {
 				context.run(true, true, runnable);
 			}
 			catch (InvocationTargetException e) {
+				StatusHandler.log(new Status(IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 
+						"An error occurred while scanning for config files.", e));
 			}
 			catch (InterruptedException e) {
+				StatusHandler.log(new Status(IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 
+						"An error occurred while scanning for config files.", e));
 			}
 			scannedFiles = files.toArray();
 
@@ -715,6 +736,8 @@ public class ConfigFilesTab {
 						return resource == null || resource.getProject().equals(project.getProject());
 					}
 					catch (JavaModelException e) {
+						StatusHandler.log(new Status(IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 
+								"An error occurred while searching for config files.", e));
 					}
 				}
 				return true;
