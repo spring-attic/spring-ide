@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
@@ -115,9 +116,12 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 			for (IBeansConfig config : configs) {
 				subMonitor.subTask("Loading '" + config.getElementResource().getFullPath().toString().substring(1)
 						+ "'");
-				((BeansConfig) config).reload();
-				config.getBeans();
-				subMonitor.worked(1);
+				
+				if (config instanceof IReloadableBeansConfig) {
+					((IReloadableBeansConfig) config).reload();
+					config.getBeans();
+					subMonitor.worked(1);
+				}
 			}
 			subMonitor.done();
 		}

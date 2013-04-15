@@ -96,6 +96,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigEventListene
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
@@ -134,7 +135,7 @@ import org.xml.sax.SAXParseException;
  * @author Christian Dupuis
  * @author Martin Lippert
  */
-public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement {
+public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement, IReloadableBeansConfig {
 
 	private static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/loading/debug";
 
