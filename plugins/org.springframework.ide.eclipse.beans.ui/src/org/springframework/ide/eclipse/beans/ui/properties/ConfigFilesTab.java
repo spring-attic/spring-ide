@@ -483,7 +483,11 @@ public class ConfigFilesTab {
 		IJavaProject javaProj = JdtUtils.getJavaProject(project.getProject());
 		if (javaProj != null) {
 			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj });
-			final Set<String> annotatedTypes = searchForJavaConfigs(scope);
+			Set<IType> annotatedTypes = searchForJavaConfigs(scope);
+			final Set<String> filteredResults = new HashSet<String>();
+			for (IType type : annotatedTypes) {
+				filteredResults.add(type.getPackageFragment().getElementName() + "/" + type.getTypeQualifiedName('.'));
+			}
 			try {
 				dialog = JavaUI.createTypeDialog(SpringUIUtils.getStandardDisplay().getActiveShell(), PlatformUI.getWorkbench()
 						.getProgressService(), scope, IJavaElementSearchConstants.CONSIDER_ALL_TYPES, true, "**",
@@ -499,7 +503,7 @@ public class ConfigFilesTab {
 											buffer.append(enclosingName).append('.');
 										}
 										buffer.append(typeInfoRequestor.getTypeName());
-										return annotatedTypes.contains(buffer.toString());
+										return filteredResults.contains(buffer.toString());
 									}
 								};
 							}
@@ -514,8 +518,8 @@ public class ConfigFilesTab {
 		return dialog;
 	}
 	
-	private Set<String> searchForJavaConfigs(IJavaSearchScope scope) {
-		final Set<String> annotatedTypes = new HashSet<String>();
+	private Set<IType> searchForJavaConfigs(IJavaSearchScope scope) {
+		final Set<IType> annotatedTypes = new HashSet<IType>();
 		SearchPattern pattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
 				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
@@ -526,9 +530,7 @@ public class ConfigFilesTab {
 				if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
 					Object element = match.getElement();
 					if (element instanceof IType) {
-						IType type = (IType) element;
-						annotatedTypes.add(type.getPackageFragment().getElementName()+ "/" 
-						+ type.getTypeQualifiedName('.'));
+						annotatedTypes.add((IType) element);
 					}
 				}
 			}
