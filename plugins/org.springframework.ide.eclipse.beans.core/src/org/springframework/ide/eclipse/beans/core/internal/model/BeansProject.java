@@ -946,14 +946,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 	 * project-relative path of the given file otherwise it's the workspace-relative path with a leading '/'.
 	 */
 	private String getConfigName(IFile file) {
-		String configName;
-		if (file.getProject().equals(project.getProject()) && !(file instanceof ExternalFile)) {
-			configName = file.getProjectRelativePath().toString();
-		}
-		else {
-			configName = file.getFullPath().toString();
-		}
-		return configName;
+		return BeansConfigFactory.getConfigName(file, this.project);
 	}
 
 	/**

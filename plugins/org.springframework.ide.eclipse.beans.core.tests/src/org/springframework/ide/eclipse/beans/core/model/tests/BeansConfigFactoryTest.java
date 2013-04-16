@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -82,6 +83,28 @@ public class BeansConfigFactoryTest {
 	public void testCreateBeansJavaConfigTypeError() throws Exception {
 		IBeansConfig config = BeansConfigFactory.create(beansProject, "java:org.test.spring.SimpleConfigurationClassError", IBeansConfig.Type.MANUAL);
 		assertNull(config);
+	}
+	
+	@Test
+	public void testConfigNameXMLRelative() throws Exception {
+		IFile file = project.getFile("/basic-bean-config.xml");
+		assertEquals("basic-bean-config.xml", BeansConfigFactory.getConfigName(file, project));
+	}
+	
+	@Test
+	public void testConfigNameFullPath() throws Exception {
+		IProject extraProject = StsTestUtil.createPredefinedProject("jdt-annotation-tests", "org.springframework.ide.eclipse.beans.core.tests");
+
+		IFile file = extraProject.getFile("/test.xml");
+		assertEquals("/jdt-annotation-tests/test.xml", BeansConfigFactory.getConfigName(file, project));
+		
+		extraProject.delete(true, null);
+	}
+	
+	@Test
+	public void testConfigNameJavaFile() throws Exception {
+		IFile file = project.getFile("/src/org/test/spring/SimpleConfigurationClass.java");
+		assertEquals("java:org.test.spring.SimpleConfigurationClass", BeansConfigFactory.getConfigName(file, project));
 	}
 	
 }
