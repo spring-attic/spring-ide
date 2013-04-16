@@ -43,6 +43,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
@@ -582,16 +583,16 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		public void configChanged(IFile file, int eventType) {
-			Set<BeansConfig> configs = new LinkedHashSet<BeansConfig>();
+			Set<IReloadableBeansConfig> configs = new LinkedHashSet<IReloadableBeansConfig>();
 			try {
 				r.lock();
 				Set<IBeansConfig> bcs = getConfigs(file, true);
 				for (IBeansConfig bc : bcs) {
 					if (bc instanceof IImportedBeansConfig) {
-						configs.add(BeansModelUtils.getParentOfClass(bc, BeansConfig.class));
+						configs.add(BeansModelUtils.getParentOfClass(bc, IReloadableBeansConfig.class));
 					}
-					else {
-						configs.add((BeansConfig) bc);
+					else if (bc instanceof IReloadableBeansConfig) {
+						configs.add((IReloadableBeansConfig) bc);
 					}
 				}
 			}
@@ -602,14 +603,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				if (DEBUG) {
 					System.out.println("Config '" + file.getFullPath() + "' changed");
 				}
-				for (BeansConfig config : configs) {
+				for (IReloadableBeansConfig config : configs) {
 					notifyListeners(config, Type.CHANGED);
 				}
 			}
 			else {
 				// Reset corresponding BeansConfig BEFORE the project builder
 				// starts validating this BeansConfig
-				for (BeansConfig config : configs) {
+				for (IReloadableBeansConfig config : configs) {
 					config.reload();
 				}
 			}
@@ -635,7 +636,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 				// Before removing the config from it's project keep a copy for
 				// notifying the listeners
-				BeansConfig config = (BeansConfig) project.getConfig(file);
+				IBeansConfig config = project.getConfig(file);
 				if (project.removeConfig(file)) {
 					project.saveDescription();
 				}

@@ -14,7 +14,7 @@ package org.springframework.ide.eclipse.beans.core.model;
  * @author Martin Lippert
  * @since 3.3.0
  */
-public interface IReloadableBeansConfig {
+public interface IReloadableBeansConfig extends IBeansConfig {
 
 	public void reload();
 
