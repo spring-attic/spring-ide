@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
+import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.Opcodes;
 import org.springframework.ide.eclipse.aop.core.Activator;
@@ -28,49 +28,41 @@ import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionB
 import org.springframework.ide.eclipse.aop.core.model.builder.IDocumentFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansList;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansTypedString;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * {@link IAspectDefinitionBuilder} implementation that creates {@link IAspectDefinition} from
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @AspectJ-style aspects.
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder implements
 		IAspectDefinitionBuilder {
 
 	private static final String AJC_MAGIC = "ajc$";
 
-	private static final String AOP_NAMESPACE_URI = "http://www.springframework.org/schema/aop";
+	private static final String PROXY_TARGET_CLASS = "proxyTargetClass";
 
-	private static final String ASPECTJ_AUTOPROXY_ELEMENT = "aspectj-autoproxy";
-
-	private static final String INCLUDE_ELEMENT = "include";
-
-	private static final String NAME_ATTRIBUTE = "name";
-
-	private static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
+	private static final String INCLUDE_PATTERNS = "includePatterns";
 
 	private ClassReaderFactory classReaderFactory = null;
-
-	private IDocumentFactory documentFactory = null;
 
 	public void buildAspectDefinitions(List<IAspectDefinition> aspectInfos, IFile file,
 			IProjectClassLoaderSupport classLoaderSupport, IDocumentFactory factory) {
 		if (BeansCoreUtils.isBeansConfig(file, true)) {
-			this.documentFactory = factory;
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(file, true);
-			parseAnnotationAspects(factory.createDocument(file), beansConfig, aspectInfos, classLoaderSupport);
+			parseAnnotationAspects(beansConfig, aspectInfos, classLoaderSupport);
 		}
 	}
 
@@ -136,13 +128,9 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		}
 	}
 
-	private void parseAnnotationAspects(IDOMDocument document, IBeansConfig beansConfig,
+	private void parseAnnotationAspects(IBeansConfig beansConfig,
 			List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport) {
-		if (document == null || document.getStructuredDocument() == null) {
-			return;
-		}
-		
-		AspectJAutoProxyConfiguration configuration = getAspectJAutoProxyConfiguration(beansConfig, document);
+		AspectJAutoProxyConfiguration configuration = getAspectJAutoProxyConfiguration(beansConfig);
 
 		// not configured for auto proxing
 		if (!configuration.isAutoProxy()) {
@@ -165,22 +153,17 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		aspectInfos.addAll(aspectDefinitions);
 	}
 
-	private AspectJAutoProxyConfiguration getAspectJAutoProxyConfiguration(IBeansConfig beansConfig,
-			IDOMDocument document) {
-
+	private AspectJAutoProxyConfiguration getAspectJAutoProxyConfiguration(IBeansConfig beansConfig) {
 		AspectJAutoProxyConfiguration configuration = new AspectJAutoProxyConfiguration();
-
+		
 		// Firstly check the current document for precedence of an <aop:aspectj-autoroxy> element
-		getAspectJConfigurationForDocument(document, configuration);
+		getAspectJConfigurationForBeansConfig(beansConfig, configuration);
 
 		// Secondly check any config sets that the given beans config is a member in
 		for (IBeansConfigSet configSet : BeansModelUtils.getConfigSets(beansConfig)) {
 			for (IBeansConfig config : configSet.getConfigs()) {
 				if (!config.equals(beansConfig)) {
-					document = documentFactory.createDocument((IFile) config.getElementResource());
-					if (document != null && document.getDocumentElement() != null) {
-						getAspectJConfigurationForDocument(document, configuration);
-					}
+					getAspectJConfigurationForBeansConfig(beansConfig, configuration);
 				}
 			}
 		}
@@ -188,28 +171,35 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 		return configuration;
 	}
 
-	private void getAspectJConfigurationForDocument(IDOMDocument document, AspectJAutoProxyConfiguration configuration) {
-		NodeList list = getAspectJAutoProxyNodes(document);
-
-		if (list.getLength() > 0) {
+	private void getAspectJConfigurationForBeansConfig(IBeansConfig beansConfig, AspectJAutoProxyConfiguration configuration) {
+		IBean autoproxyBean = BeansModelUtils.getBean(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME, beansConfig);
+		
+		if (autoproxyBean != null) {
 			configuration.setAutoProxy(true);
-		}
-
-		for (int i = 0; i < list.getLength(); i++) {
-			Node node = list.item(i);
-			configuration.addIncludePattern(node);
-			if (node.getAttributes() != null && node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE) != null) {
-				boolean proxyTargetClass = Boolean.valueOf(
-						node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE).getNodeValue()).booleanValue();
+			
+			IBeanProperty targetProxyClassProperty = autoproxyBean.getProperty(PROXY_TARGET_CLASS);
+			if (targetProxyClassProperty != null && targetProxyClassProperty.getValue() != null) {
+				String value = ((BeansTypedString)targetProxyClassProperty.getValue()).getString();
+				boolean proxyTargetClass = Boolean.valueOf(value).booleanValue();
 				if (proxyTargetClass) {
 					configuration.setProxyTargetClass(proxyTargetClass);
+				}				
+			}
+			
+			IBeanProperty includes = autoproxyBean.getProperty(INCLUDE_PATTERNS);
+			if (includes != null && includes.getValue() != null) {
+				List<Pattern> patterns = new ArrayList<Pattern>();
+				BeansList includesList = (BeansList) includes.getValue();
+				List<Object> includePatterns = includesList.getList();
+				for (Object includePattern : includePatterns) {
+					String pattern = ((BeansTypedString)includePattern).getString();
+					if (StringUtils.hasText(pattern)) {
+						patterns.add(Pattern.compile(pattern));
+					}
 				}
+				configuration.setIncluldePatterns(patterns);
 			}
 		}
-	}
-
-	private NodeList getAspectJAutoProxyNodes(IDOMDocument document) {
-		return document.getDocumentElement().getElementsByTagNameNS(AOP_NAMESPACE_URI, ASPECTJ_AUTOPROXY_ELEMENT);
 	}
 
 	private boolean validateAspect(String className) throws Throwable {
@@ -293,19 +283,8 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 			return isAutoProxy;
 		}
 
-		public void addIncludePattern(Node autoproxyNode) {
-			NodeList include = autoproxyNode.getChildNodes();
-			for (int j = 0; j < include.getLength(); j++) {
-				if (INCLUDE_ELEMENT.equals(include.item(j).getLocalName())) {
-					if (includePatterns == null) {
-						includePatterns = new ArrayList<Pattern>();
-					}
-					String pattern = getAttribute(include.item(j), NAME_ATTRIBUTE);
-					if (StringUtils.hasText(pattern)) {
-						includePatterns.add(Pattern.compile(pattern));
-					}
-				}
-			}
+		public void setIncluldePatterns(List<Pattern> includePatterns) {
+			this.includePatterns = includePatterns;
 		}
 
 		/**
