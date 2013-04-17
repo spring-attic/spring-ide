@@ -59,18 +59,20 @@ public class BeansConfigFactory {
 	
 	public static String getConfigName(IFile file, IProject project) {
 		String configName;
-		
-		IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
-		if (javaProject != null) {
-			IJavaElement element = JavaCore.create(file, javaProject);
-			if (element != null && element.getPrimaryElement() instanceof ICompilationUnit) {
-				IType[] types;
-				try {
-					types = ((ICompilationUnit) element.getPrimaryElement()).getTypes();
-					if (types != null && types.length > 0) {
-						return JAVA_CONFIG_TYPE + types[0].getFullyQualifiedName();
+	
+		if (!"xml".equals(file.getFileExtension())) {
+			IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
+			if (javaProject != null) {
+				IJavaElement element = JavaCore.create(file, javaProject);
+				if (element != null && element.getPrimaryElement() instanceof ICompilationUnit) {
+					IType[] types;
+					try {
+						types = ((ICompilationUnit) element.getPrimaryElement()).getTypes();
+						if (types != null && types.length > 0) {
+							return JAVA_CONFIG_TYPE + types[0].getFullyQualifiedName();
+						}
+					} catch (JavaModelException e) {
 					}
-				} catch (JavaModelException e) {
 				}
 			}
 		}
