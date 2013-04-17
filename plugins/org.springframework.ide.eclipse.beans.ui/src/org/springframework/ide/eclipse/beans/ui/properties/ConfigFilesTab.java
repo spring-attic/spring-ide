@@ -430,8 +430,8 @@ public class ConfigFilesTab {
 		};
 		dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
 		dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
-		dialog.addFilter(new ConfigFileFilter(project.getConfigSuffixes()));
-		dialog.setValidator(new StorageSelectionValidator(true));
+		dialog.addFilter(new ScannedFilesFilter(project.getConfigSuffixes()));
+		dialog.setValidator(new ScannedFilesValidator(true));
 		dialog.setInput(project.getProject());
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setInitialSelections(contentProvider.getElements(project.getProject()));
@@ -441,7 +441,11 @@ public class ConfigFilesTab {
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
 					String config;
-					if (element instanceof ZipEntryStorage) {
+					if (element instanceof IType) {
+						IType type = (IType) element;
+						config = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
+					}
+					else if (element instanceof ZipEntryStorage) {
 						ZipEntryStorage storage = (ZipEntryStorage) element;
 						config = storage.getFullName();
 					}
@@ -635,11 +639,18 @@ public class ConfigFilesTab {
 		private Object[] scannedFiles = null;
 
 		public ScannedFilesContentProvider(final String fileSuffixes) {
-			final Set<IFile> files = new LinkedHashSet<IFile>();
+			final Set<Object> files = new HashSet<Object>();
 			IRunnableWithProgress runnable = new IRunnableWithProgress() {
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					ProjectScanningBeansConfigLocator locator = new ProjectScanningBeansConfigLocator(fileSuffixes);
 					files.addAll(locator.locateBeansConfigs(project.getProject(), monitor));
+					
+					IJavaProject javaProj = JdtUtils.getJavaProject(project.getProject());
+					if (javaProj != null) {
+						IJavaSearchScope sources = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj }, 
+								IJavaSearchScope.SOURCES);
+						files.addAll(searchForJavaConfigs(sources));
+					}
 				}
 			};
 
@@ -655,9 +666,8 @@ public class ConfigFilesTab {
 			catch (InterruptedException e) {
 				StatusHandler.log(new Status(IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 
 						"An error occurred while scanning for config files.", e));
-			}
+			}			
 			scannedFiles = files.toArray();
-
 		}
 
 		public void dispose() {
@@ -762,6 +772,29 @@ public class ConfigFilesTab {
 			return false;
 		}
 	}
+	
+	private class ScannedFilesFilter extends ConfigFileFilter {
+
+		public ScannedFilesFilter(Set<String> allowedFileExtensions) {
+			super(allowedFileExtensions);
+		}
+
+		@Override
+		public boolean select(Viewer viewer, Object parent, Object element) {
+			if (element instanceof IType) {
+				IBeansProject beansProj = BeansCorePlugin.getModel().getProject(project.getProject());
+				if (beansProj != null) {
+					IType type = (IType) element;
+					IBeansConfig beansConfig = project.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE 
+							+ type.getFullyQualifiedName());
+					return beansConfig == null;
+				}
+				return true;
+			}
+			return super.select(viewer, parent, element);
+		}
+		
+	}
 
 	private class LabelProvider extends JavaElementLabelProvider implements IColorProvider {
 
@@ -808,12 +841,31 @@ public class ConfigFilesTab {
 
 		@Override
 		public String getText(Object element) {
+			if (element instanceof IType) {
+				return ((IType) element).getFullyQualifiedName();
+			}
 			if (element instanceof IFile) {
 				return ((IFile) element).getProjectRelativePath().toString();
 			}
 			return super.getText(element);
 		}
 
+	}
+	
+	private class ScannedFilesValidator extends StorageSelectionValidator {
+
+		public ScannedFilesValidator(boolean multiSelect) {
+			super(multiSelect);
+		}
+
+		@Override
+		public boolean isValid(Object selection) {
+			if (selection instanceof IType) {
+				return true;
+			}
+			return super.isValid(selection);
+		}
+		
 	}
 
 }
