@@ -125,7 +125,9 @@ public class ConfigFilesTab {
 
 	private static final String ERROR_INVALID_SUFFIXES = PREFIX + "error.invalidSuffixes";
 
-	private static final String ADD_BUTTON = PREFIX + "addButton";
+	private static final String ADD_XML_CONFIG_BUTTON = PREFIX + "addXMLConfigButton";
+
+	private static final String ADD_JAVA_CONFIG_BUTTON = PREFIX + "addJavaConfigButton";
 
 	private static final String REMOVE_BUTTON = PREFIX + "removeButton";
 
@@ -297,8 +299,8 @@ public class ConfigFilesTab {
 		layout.marginWidth = 0;
 		buttonArea.setLayout(layout);
 		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		addButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin.getResourceString(ADD_BUTTON), buttonListener);
-		addJavaConfigButton = SpringUIUtils.createButton(buttonArea, "Add JavaConfig...", buttonListener);
+		addButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin.getResourceString(ADD_XML_CONFIG_BUTTON), buttonListener);
+		addJavaConfigButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin.getResourceString(ADD_JAVA_CONFIG_BUTTON), buttonListener);
 		removeButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin.getResourceString(REMOVE_BUTTON),
 				buttonListener, 0, false);
 		scanButton = SpringUIUtils.createButton(buttonArea, "Scan...", buttonListener);
