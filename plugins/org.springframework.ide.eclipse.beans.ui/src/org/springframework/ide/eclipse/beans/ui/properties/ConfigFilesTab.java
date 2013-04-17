@@ -754,6 +754,10 @@ public class ConfigFilesTab {
 								"An error occurred while searching for config files.", e));
 					}
 				}
+				else if (element instanceof JarEntryFile) {
+					String name = ((JarEntryFile) element).getName();
+					return !"pom.xml".equals(name);
+				}
 				return true;
 			}
 			return false;
