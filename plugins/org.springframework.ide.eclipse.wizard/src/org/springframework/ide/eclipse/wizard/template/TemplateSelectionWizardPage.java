@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -117,11 +117,11 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 	private Template selectedTemplate;
 
-	private NewTemplateWizardPage firstPage;
+	private NewTemplateWizardPage templateWizardPage;
 
 	private final List<Template> templates;
 
-	private final TemplateWizard wizard;
+	private NewSpringProjectWizard wizard;
 
 	private String[] topLevelPackageTokens;
 
@@ -141,24 +141,25 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 	private Button refreshButton;
 
-	protected TemplateSelectionWizardPage(TemplateWizard wizard) {
+	protected TemplateSelectionWizardPage() {
 		super("Template Selection Wizard Page"); //$NON-NLS-1$
 
 		setTitle(Messages.getString("TemplateSelectionWizardPage.PAGE_TITLE")); //$NON-NLS-1$
 		setDescription(Messages.getString("TemplateSelectionWizardPage.PAGE_DESCRIPTION")); //$NON-NLS-1$
 
 		templates = new ArrayList<Template>();
-		this.wizard = wizard;
-
 	}
 
 	@Override
 	public boolean canFlipToNextPage() {
-		return treeViewer.getSelection() != null && !treeViewer.getSelection().isEmpty();
+		return treeViewer != null && treeViewer.getSelection() != null && !treeViewer.getSelection().isEmpty();
 	}
 
 	public void createControl(Composite parent) {
 		initializeTemplates();
+
+		wizard = (NewSpringProjectWizard) getWizard();
+
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -347,7 +348,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 						}
 					}
 				}
-				firstPage = null;
+				templateWizardPage = null;
 
 				if (selectedTemplate != null) {
 					setDescription(selectedTemplate);
@@ -389,8 +390,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 	public IWizardPage getNextPage() {
 		setErrorMessage(null);
 
-		if (firstPage != null) {
-			return firstPage;
+		if (templateWizardPage != null) {
+			return templateWizardPage;
 		}
 
 		if (!canFlipToNextPage()) {
@@ -488,20 +489,20 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 		projectNameToken = info.getProjectNameToken();
 
-		firstPage = null;
+		templateWizardPage = null;
 		ITemplateWizardPage previousPage = null;
 		ITemplateWizardPage page = null;
 
 		try {
 			for (int i = 0; i < info.getPageCount(); i++) {
-				if (firstPage == null) {
-					firstPage = new NewTemplateWizardPage(info.getPage(i).getDescription(), info.getElementsForPage(i),
-							selectedTemplate.getName(), wizard, selectedTemplate.getIcon());
-					page = firstPage;
+				if (templateWizardPage == null) {
+					templateWizardPage = new NewTemplateWizardPage(info.getPage(i).getDescription(),
+							info.getElementsForPage(i), selectedTemplate.getName(), selectedTemplate.getIcon());
+					page = templateWizardPage;
 				}
 				else {
 					page = new TemplateWizardPage(info.getPage(i).getDescription(), info.getElementsForPage(i),
-							selectedTemplate.getName(), wizard, selectedTemplate.getIcon());
+							selectedTemplate.getName(), selectedTemplate.getIcon());
 				}
 				page.setWizard(getWizard());
 				if (previousPage != null) {
@@ -517,8 +518,8 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			return null;
 		}
 
-		wizard.setFirstPage(firstPage);
-		return firstPage;
+		// wizard.setFirstPage(firstPage);
+		return templateWizardPage;
 	}
 
 	public URL getProjectLocation() throws CoreException {
@@ -628,7 +629,11 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 	@Override
 	public boolean isPageComplete() {
-		return false;
+		boolean canFinish = canFlipToNextPage();
+		if (canFinish && templateWizardPage != null) {
+			canFinish = templateWizardPage.isPageComplete();
+		}
+		return canFinish;
 	}
 
 	private void refreshPage() {

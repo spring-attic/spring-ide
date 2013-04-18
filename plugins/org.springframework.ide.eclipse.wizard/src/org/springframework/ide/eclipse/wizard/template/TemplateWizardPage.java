@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoElement;
 
-
 /**
  * @author Terry Denney
  */
@@ -49,16 +48,13 @@ public class TemplateWizardPage extends WizardPage implements ITemplateWizardPag
 
 	private final String wizardTitle;
 
-	private final TemplateWizard wizard;
-
 	private static final String DEFAULT_DESCRIPTION = Messages.getString("TemplateWizardPage.DEFAULT_DESCRIPTION"); //$NON-NLS-1$
 
 	protected TemplateWizardPage(String pageTitle, List<WizardUIInfoElement> elements, String wizardTitle,
-			TemplateWizard wizard, ImageDescriptor icon) {
+			ImageDescriptor icon) {
 		super("Template Wizard Page"); //$NON-NLS-1$
 		this.elements = elements;
 		this.wizardTitle = wizardTitle;
-		this.wizard = wizard;
 
 		this.controls = new HashMap<String, Control>();
 		this.errorMessages = new String[elements.size()];
@@ -105,7 +101,7 @@ public class TemplateWizardPage extends WizardPage implements ITemplateWizardPag
 		controlLayout.verticalSpacing = 10;
 		control.setLayout(controlLayout);
 
-		wizard.setWindowTitle("New " + wizardTitle); //$NON-NLS-1$
+		//		wizard.setWindowTitle("New " + wizardTitle); //$NON-NLS-1$
 
 		Composite container = new Composite(control, SWT.NONE);
 		container.setLayout(new GridLayout());

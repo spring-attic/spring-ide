@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -26,16 +27,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoElement;
 
-
 /**
+ * 
+ * Given a Spring project template, this page will generate the UI for the
+ * template properties and prompt the user for any template values. This page
+ * only gets opened after a user selects a template from the New Spring Project
+ * wizard
  * @author Terry Denney
  * @author Leo Dos Santos
  * @author Christian Dupuis
  */
-public class NewTemplateWizardPage extends WizardNewProjectCreationPage implements ITemplateWizardPage {
+public class NewTemplateWizardPage extends WizardPage implements ITemplateWizardPage {
 
 	private IWizardPage nextPage;
 
@@ -51,16 +55,13 @@ public class NewTemplateWizardPage extends WizardNewProjectCreationPage implemen
 
 	private final String wizardTitle;
 
-	private final TemplateWizard wizard;
-
 	private static final String DEFAULT_DESCRIPTION = Messages.getString("TemplateWizardPage.DEFAULT_DESCRIPTION"); //$NON-NLS-1$
 
 	protected NewTemplateWizardPage(String pageTitle, List<WizardUIInfoElement> elements, String wizardTitle,
-			TemplateWizard wizard, ImageDescriptor icon) {
+			ImageDescriptor icon) {
 		super("Template Wizard Page"); //$NON-NLS-1$
 		this.elements = elements;
 		this.wizardTitle = wizardTitle;
-		this.wizard = wizard;
 
 		this.controls = new HashMap<String, Control>();
 		this.errorMessages = new String[elements.size()];
@@ -101,15 +102,15 @@ public class NewTemplateWizardPage extends WizardNewProjectCreationPage implemen
 		}
 	}
 
-	@Override
 	public void createControl(Composite parent) {
-		super.createControl(parent);
-		Composite control = (Composite) getControl();
+
+		Composite control = new Composite(parent, SWT.NONE);
 		GridLayout controlLayout = new GridLayout();
 		controlLayout.verticalSpacing = 10;
 		control.setLayout(controlLayout);
 
-		wizard.setWindowTitle("New " + wizardTitle); //$NON-NLS-1$
+		//
+		//		getWizard().setWindowTitle("New " + wizardTitle); //$NON-NLS-1$
 
 		Composite container = new Composite(control, SWT.NONE);
 		container.setLayout(new GridLayout());
@@ -181,6 +182,8 @@ public class NewTemplateWizardPage extends WizardNewProjectCreationPage implemen
 
 		setControl(control);
 		updateMessage();
+
+		setPageComplete(validatePage());
 	}
 
 	public String[] getErrorMessages() {
@@ -201,9 +204,7 @@ public class NewTemplateWizardPage extends WizardNewProjectCreationPage implemen
 	}
 
 	private boolean hasErrors() {
-		if (getProjectName() == null || getProjectName().length() == 0 || getProjectName().contains(" ")) {
-			return true;
-		}
+
 		for (String errorMessage : errorMessages) {
 			if (errorMessage != null) {
 				return true;
@@ -244,15 +245,6 @@ public class NewTemplateWizardPage extends WizardNewProjectCreationPage implemen
 	}
 
 	public void updateMessage() {
-		if (getProjectName() == null || getProjectName().length() == 0) {
-			setMessage(null, "Enter project name.");
-			return;
-		}
-
-		if (getProjectName().contains(" ")) {
-			setErrorMessage("Project name can not contain spaces.");
-			return;
-		}
 
 		for (String errorMsg : errorMessages) {
 			if (errorMsg != null) {
@@ -271,11 +263,7 @@ public class NewTemplateWizardPage extends WizardNewProjectCreationPage implemen
 		setMessage(null, DEFAULT_DESCRIPTION);
 	}
 
-	@Override
 	protected boolean validatePage() {
-		if (!super.validatePage()) {
-			return false;
-		}
 
 		for (WizardTextKeyValidator validator : validators) {
 			validator.validate();
