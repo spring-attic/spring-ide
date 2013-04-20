@@ -46,7 +46,6 @@ import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocato
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
