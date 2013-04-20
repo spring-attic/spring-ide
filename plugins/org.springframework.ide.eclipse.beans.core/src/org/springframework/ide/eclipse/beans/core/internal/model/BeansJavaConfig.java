@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -77,6 +78,8 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement, IReloadableBeansConfig {
 
 	private IType configClass;
+	private String configClassName;
+
 	private BeansConfigProblemReporter problemReporter;
 	private UniqueBeanNameGenerator beanNameGenerator;
 	private ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry registry;
@@ -84,18 +87,33 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 	/** Internal cache for all children */
 	private transient IModelElement[] children;
 	
-	public BeansJavaConfig(IBeansProject project, IType configClass, Type type) {
-		super(project, BeansConfigFactory.JAVA_CONFIG_TYPE + configClass.getFullyQualifiedName(), type);
+	public BeansJavaConfig(IBeansProject project, IType configClass, String configClassName, Type type) {
+		super(project, BeansConfigFactory.JAVA_CONFIG_TYPE + configClassName, type);
+		
 		this.configClass = configClass;
+		this.configClassName = configClassName;
+		if (this.configClass != null) {
+			modificationTimestamp = this.configClass.getResource().getModificationStamp();
+		}
+		else {
+			modificationTimestamp = IResource.NULL_STAMP;
+			String msg = "Beans Java config class '" + configClassName + "' not accessible";
+			problems = new CopyOnWriteArraySet<ValidationProblem>();
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
+		}
 	}
 
 	public IType getConfigClass() {
 		return this.configClass;
 	}
+	
+	public String getConfigClassName() {
+		return this.configClassName;
+	}
 
 	@Override
 	public IResource getElementResource() {
-		return this.configClass.getResource();
+		return this.configClass != null ? this.configClass.getResource() : null;
 	}
 
 	public boolean isInitialized() {
@@ -129,38 +147,42 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 				return;
 			}
 			
-			IBeansProject beansProject = (IBeansProject) getElementParent();
-			final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
-
-			Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
-				public Integer call() throws Exception {
-					// Obtain thread context classloader and override with the project classloader
-					ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
-					Thread.currentThread().setContextClassLoader(cl);
-
-					// Create special ReaderEventListener that essentially just passes through component definitions
-					ReaderEventListener eventListener = new BeansConfigPostProcessorReaderEventListener();
-					problemReporter = new BeansConfigProblemReporter();
-					beanNameGenerator = new UniqueBeanNameGenerator(BeansJavaConfig.this);
-					registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
-
-					try {
-						registerBean(eventListener);
-
-						IBeansConfigPostProcessor[] postProcessors = BeansConfigPostProcessorFactory.createPostProcessor(ConfigurationClassPostProcessor.class.getName());
-						for (IBeansConfigPostProcessor postProcessor : postProcessors) {
-							executePostProcessor(postProcessor, eventListener);
-						}
-					}
-					finally {
-						// Reset the context classloader
-						Thread.currentThread().setContextClassLoader(threadClassLoader);
-					}
-					return 0;
-				}
-			};
-
 			try {
+				if (this.configClass == null) {
+					return;
+				}
+				
+				IBeansProject beansProject = (IBeansProject) getElementParent();
+				final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
+	
+				Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
+					public Integer call() throws Exception {
+						// Obtain thread context classloader and override with the project classloader
+						ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
+						Thread.currentThread().setContextClassLoader(cl);
+	
+						// Create special ReaderEventListener that essentially just passes through component definitions
+						ReaderEventListener eventListener = new BeansConfigPostProcessorReaderEventListener();
+						problemReporter = new BeansConfigProblemReporter();
+						beanNameGenerator = new UniqueBeanNameGenerator(BeansJavaConfig.this);
+						registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
+	
+						try {
+							registerBean(eventListener);
+	
+							IBeansConfigPostProcessor[] postProcessors = BeansConfigPostProcessorFactory.createPostProcessor(ConfigurationClassPostProcessor.class.getName());
+							for (IBeansConfigPostProcessor postProcessor : postProcessors) {
+								executePostProcessor(postProcessor, eventListener);
+							}
+						}
+						finally {
+							// Reset the context classloader
+							Thread.currentThread().setContextClassLoader(threadClassLoader);
+						}
+						return 0;
+					}
+				};
+
 				FutureTask<Integer> task = new FutureTask<Integer>(loadBeanDefinitionOperation);
 				BeansCorePlugin.getExecutorService().submit(task);
 				task.get(BeansCorePlugin.getDefault().getPreferenceStore().getInt(BeansCorePlugin.TIMEOUT_CONFIG_LOADING_PREFERENCE_ID),

@@ -32,9 +32,7 @@ public class PropertiesConfigFactory {
 
 			try {
 				IType configClass = javaProject.findType(className);
-				if (configClass != null) {
-					return new PropertiesJavaConfig(project, configClass, IBeansConfig.Type.MANUAL);
-				}
+				return new PropertiesJavaConfig(project, configClass, className, IBeansConfig.Type.MANUAL);
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}
@@ -62,9 +60,7 @@ public class PropertiesConfigFactory {
 
 			try {
 				IType configClass = javaProject.findType(className);
-				if (configClass != null) {
-					return new PropertiesJavaConfig(set, configClass, IBeansConfig.Type.MANUAL);
-				}
+				return new PropertiesJavaConfig(set, configClass, className, IBeansConfig.Type.MANUAL);
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}

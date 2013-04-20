@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.model.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Set;
 
@@ -57,11 +58,24 @@ public class BeansJavaConfigTest {
 	public void deleteProject() throws Exception {
 		project.delete(true, null);
 	}
+	
+	@Test
+	public void testConfigWithoutClass() throws Exception {
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, null, "org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
+		
+		assertNull(config.getConfigClass());
+		assertEquals("org.test.spring.SimpleConfigurationClass", config.getConfigClassName());
+		
+		IModelElement[] children = config.getElementChildren();
+		assertEquals(0, children.length);
+
+		assertNull(config.getElementResource());
+	}
 
 	@Test
 	public void testBasicConfigBeans() throws Exception {
 		IType configClass = javaProject.findType("org.test.spring.SimpleConfigurationClass");
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, IBeansConfig.Type.MANUAL);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, "org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
 		
 		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
 		
@@ -81,7 +95,7 @@ public class BeansJavaConfigTest {
 	@Test
 	public void testComponentScanningWithEnableAnnotations() throws Exception {
 		IType configClass = javaProject.findType("org.test.advanced.AdvancedConfigurationClass");
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, IBeansConfig.Type.MANUAL);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, "org.test.advanced.AdvancedConfigurationClass", IBeansConfig.Type.MANUAL);
 		
 		assertEquals("java:org.test.advanced.AdvancedConfigurationClass", config.getElementName());
 

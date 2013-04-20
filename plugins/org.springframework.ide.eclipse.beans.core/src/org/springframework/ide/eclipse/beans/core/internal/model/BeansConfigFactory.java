@@ -38,9 +38,7 @@ public class BeansConfigFactory {
 
 			try {
 				IType configClass = javaProject.findType(className);
-				if (configClass != null) {
-					return new BeansJavaConfig(project, configClass, IBeansConfig.Type.MANUAL);
-				}
+				return new BeansJavaConfig(project, configClass, className, IBeansConfig.Type.MANUAL);
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}

@@ -20,12 +20,12 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
  */
 public class PropertiesJavaConfig extends BeansJavaConfig {
 
-	public PropertiesJavaConfig(PropertiesProject project, IType configClass, Type type) {
-		super(project, configClass, type);
+	public PropertiesJavaConfig(PropertiesProject project, IType configClass, String configClassName, Type type) {
+		super(project, configClass, configClassName, type);
 	}
 
-	public PropertiesJavaConfig(PropertiesConfigSet configSet, IType configClass, Type type) {
-		super((IBeansProject) configSet.getElementParent(), configClass, type);
+	public PropertiesJavaConfig(PropertiesConfigSet configSet, IType configClass, String configClassName, Type type) {
+		super((IBeansProject) configSet.getElementParent(), configClass, configClassName, type);
 
 		// After initializing the config with the corresponding project
 		// (required for retrieving the file) change the parent to the given

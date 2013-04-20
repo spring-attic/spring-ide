@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.properties.model;
 
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Color;
@@ -39,7 +40,13 @@ public class PropertiesModelLabelProvider extends BeansModelLabelProvider implem
 				text = text.substring(IBeansConfig.EXTERNAL_FILE_NAME_PREFIX.length());
 			}
 			if (element instanceof BeansJavaConfig) {
-				text = ((BeansJavaConfig) element).getConfigClass().getElementName();
+				IType configClass = ((BeansJavaConfig) element).getConfigClass();
+				if (configClass != null) {
+					text = ((BeansJavaConfig) element).getConfigClass().getElementName();
+				}
+				else {
+					text = ((BeansJavaConfig) element).getConfigClassName();
+				}
 			}
 			return text;
 		}

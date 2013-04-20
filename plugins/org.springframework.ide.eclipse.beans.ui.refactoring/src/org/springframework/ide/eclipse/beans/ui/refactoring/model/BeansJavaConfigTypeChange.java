@@ -74,7 +74,7 @@ public class BeansJavaConfigTypeChange extends Change {
 				for (IBeansConfig config : configs) {
 					if (config instanceof BeansJavaConfig) {
 						IType configClass = ((BeansJavaConfig) config).getConfigClass();
-						if (configClass.equals(type)) {
+						if (type.equals(configClass)) {
 							((BeansConfigSet) configSet).removeConfig(config.getElementName());
 							((BeansConfigSet) configSet).addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newName);
 						}
@@ -86,7 +86,7 @@ public class BeansJavaConfigTypeChange extends Change {
 			String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
 			if (project.hasConfig(configName)) {
 				IBeansConfig config = project.getConfig(configName);
-				if (config instanceof BeansJavaConfig && ((BeansJavaConfig) config).getConfigClass().equals(type)) {
+				if (config instanceof BeansJavaConfig && type.equals(((BeansJavaConfig) config).getConfigClass())) {
 					((BeansProject) project).removeConfig(configName);
 					((BeansProject) project).addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newName, IBeansConfig.Type.MANUAL);
 //					removeMarkers(config);

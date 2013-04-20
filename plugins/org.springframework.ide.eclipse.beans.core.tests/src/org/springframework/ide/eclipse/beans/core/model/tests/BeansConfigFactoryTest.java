@@ -82,7 +82,9 @@ public class BeansConfigFactoryTest {
 	@Test
 	public void testCreateBeansJavaConfigTypeError() throws Exception {
 		IBeansConfig config = BeansConfigFactory.create(beansProject, "java:org.test.spring.SimpleConfigurationClassError", IBeansConfig.Type.MANUAL);
-		assertNull(config);
+		assertTrue(config instanceof BeansJavaConfig);
+		assertNull(((BeansJavaConfig)config).getConfigClass());
+		assertEquals("org.test.spring.SimpleConfigurationClassError", ((BeansJavaConfig)config).getConfigClassName());
 	}
 	
 	@Test
