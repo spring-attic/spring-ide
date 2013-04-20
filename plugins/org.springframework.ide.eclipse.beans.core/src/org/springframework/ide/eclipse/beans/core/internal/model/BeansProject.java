@@ -433,6 +433,12 @@ I	 * Removes the given beans config from the list of configs and from all config
 			return true;
 		}
 		
+		for (IBeansConfig config : getConfigs()) {
+			if (config.getElementResource() != null && config.getElementResource().equals(configFile)) {
+				return true;
+			}
+		}
+		
 		if (isImportsEnabled() && includeImported) {
 			try {
 				r.lock();
