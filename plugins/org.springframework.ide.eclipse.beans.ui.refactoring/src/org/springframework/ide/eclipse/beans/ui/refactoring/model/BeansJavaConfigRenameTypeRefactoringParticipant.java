@@ -60,7 +60,7 @@ public class BeansJavaConfigRenameTypeRefactoringParticipant extends RenameParti
 			newName = type.getDeclaringType().getFullyQualifiedName() + "$" + newName;
 		}
 		else if (!type.getPackageFragment().isDefaultPackage()) {
-			newName = type.getPackageFragment() + "." + newName;
+			newName = type.getPackageFragment().getElementName() + "." + newName;
 		}
 		
 		return new BeansJavaConfigTypeChange(type, newName);
