@@ -18,15 +18,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
+import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
 
 /**
- * refactoring participant to rename java-based bean configs in case the referenced Java type is renamed
+ * refactoring participant to rename java-based bean configs in case the referenced Java type is moved
  * 
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class BeansJavaConfigRenameRefactoringParticipant extends RenameParticipant {
+public class BeansJavaConfigMoveTypeRefactoringParticipant extends MoveParticipant {
 
 	private IType type;
 
@@ -54,12 +54,18 @@ public class BeansJavaConfigRenameRefactoringParticipant extends RenameParticipa
 		if (!getArguments().getUpdateReferences()) {
 			return null;
 		}
-		String newName = getArguments().getNewName();
-		IPackageFragment packageFragment = type.getPackageFragment();
-		if (!packageFragment.isDefaultPackage()) {
-			newName = packageFragment.getElementName() + "." + newName;
-		}
+		Object destination = getArguments().getDestination();
 		
+		String newName = type.getFullyQualifiedName();
+		if (destination instanceof IPackageFragment) {
+			if (((IPackageFragment) destination).isDefaultPackage()) {
+				newName = type.getElementName();
+			}
+			else {
+				newName = ((IPackageFragment) destination).getElementName() + "." + type.getElementName();
+			}
+		}
+
 		return new BeansJavaConfigTypeChange(type, newName);
 	}
 

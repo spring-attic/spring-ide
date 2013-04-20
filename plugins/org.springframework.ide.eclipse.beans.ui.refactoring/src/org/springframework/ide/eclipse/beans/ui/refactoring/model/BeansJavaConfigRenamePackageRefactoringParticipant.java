@@ -14,26 +14,25 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 
 /**
- * refactoring participant to rename java-based bean configs in case the referenced Java type is moved
+ * refactoring participant to rename java-based bean configs in case the referenced Java type is renamed
  * 
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class BeansJavaConfigMoveRefactoringParticipant extends MoveParticipant {
+public class BeansJavaConfigRenamePackageRefactoringParticipant extends RenameParticipant {
 
-	private IType type;
+	private IPackageFragment packageFragment;
 
 	@Override
 	protected boolean initialize(Object element) {
-		if (element instanceof IType) {
-			type = (IType) element;
+		if (element instanceof IPackageFragment) {
+			packageFragment = (IPackageFragment) element;
 			return true;
 		}
 		return false;
@@ -54,14 +53,11 @@ public class BeansJavaConfigMoveRefactoringParticipant extends MoveParticipant {
 		if (!getArguments().getUpdateReferences()) {
 			return null;
 		}
-		Object destination = getArguments().getDestination();
 		
-		String newName = type.getFullyQualifiedName();
-		if (destination instanceof IPackageFragment) {
-			newName = ((IPackageFragment) destination).getElementName() + "." + type.getElementName();
-		}
-
-		return new BeansJavaConfigTypeChange(type, newName);
+		String newPackageName = getArguments().getNewName();
+		String oldPackageName = packageFragment.getElementName();
+		
+		return new BeansJavaConfigPackageChange(oldPackageName, newPackageName);
 	}
 
 }

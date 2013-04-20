@@ -35,13 +35,22 @@
 			</enablement>
 		</renameParticipant>
 		<renameParticipant
-			class="org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigRenameRefactoringParticipant"
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigRenameTypeRefactoringParticipant"
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.beansJavaConfigRenameRefactoringParticipant"
 			name="%beansJavaConfigRenameParticipant.name">
 			<enablement>
 				<with variable="element">
-					<instanceof value="org.eclipse.jdt.core.IType">
-					</instanceof>
+					<instanceof value="org.eclipse.jdt.core.IType"/>
+				</with>
+			</enablement>
+		</renameParticipant>
+		<renameParticipant
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigRenamePackageRefactoringParticipant"
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.beansJavaConfigRenamePackageRefactoringParticipant"
+			name="%beansJavaConfigRenameParticipant.name">
+			<enablement>
+				<with variable="element">
+					<instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
 				</with>
 			</enablement>
 		</renameParticipant>
@@ -133,7 +142,7 @@
 			</enablement>
 		</moveParticipant>
 		<moveParticipant
-			class="org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigMoveRefactoringParticipant"
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigMoveTypeRefactoringParticipant"
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.beansJavaConfigMoveRefactoringParticipant"
 			name="%beansJavaConfigMoveParticipant.name">
 			<enablement>
