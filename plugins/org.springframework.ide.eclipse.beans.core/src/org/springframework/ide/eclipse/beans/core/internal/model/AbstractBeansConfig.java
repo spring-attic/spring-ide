@@ -567,7 +567,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	 * {@inheritDoc}
 	 */
 	public boolean resourceChanged() {
-		return modificationTimestamp < file.getModificationStamp() || changedImportedBeansConfig();
+		return modificationTimestamp < getElementResource().getModificationStamp() || changedImportedBeansConfig();
 	}
 
 	/**
