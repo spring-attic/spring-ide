@@ -78,19 +78,32 @@ public class BeansJavaConfigTypeChange extends Change {
 							((BeansConfigSet) configSet).removeConfig(config.getElementName());
 							((BeansConfigSet) configSet).addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newName);
 						}
+						else if (configClass != null && type.equals(configClass.getDeclaringType())) {
+							beansProject.removeConfig(config.getElementName());
+							String newConfigClassName = newName + "$" + configClass.getElementName();
+							beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newConfigClassName, IBeansConfig.Type.MANUAL);
+						}
 					}
 				}
 			}
 
 			// Secondly rename configs
-			String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
-			if (project.hasConfig(configName)) {
-				IBeansConfig config = project.getConfig(configName);
-				if (config instanceof BeansJavaConfig && type.equals(((BeansJavaConfig) config).getConfigClass())) {
-					((BeansProject) project).removeConfig(configName);
-					((BeansProject) project).addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newName, IBeansConfig.Type.MANUAL);
-//					removeMarkers(config);
-					updated = true;
+			for (IBeansConfig config : beansProject.getConfigs()) {
+				if (config instanceof BeansJavaConfig) {
+					IType configClass = ((BeansJavaConfig) config).getConfigClass();
+					if (type.equals(configClass)) {
+						beansProject.removeConfig(config.getElementName());
+						beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newName, IBeansConfig.Type.MANUAL);
+//						removeMarkers(config);
+						updated = true;
+					}
+					else if (configClass != null && type.equals(configClass.getDeclaringType())) {
+						beansProject.removeConfig(config.getElementName());
+						String newConfigClassName = newName + "$" + configClass.getElementName();
+						beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newConfigClassName, IBeansConfig.Type.MANUAL);
+//						removeMarkers(config);
+						updated = true;
+					}
 				}
 			}
 
