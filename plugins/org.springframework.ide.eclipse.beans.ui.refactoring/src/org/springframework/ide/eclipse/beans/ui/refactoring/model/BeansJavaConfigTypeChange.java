@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 
@@ -38,15 +39,21 @@ public class BeansJavaConfigTypeChange extends Change {
 
 	private IType type;
 	private String newName;
+	private IBeansModel beansModel;
 
 	public BeansJavaConfigTypeChange(IType type, String newName) {
 		this.type = type;
 		this.newName = newName;
+		setBeansModel(BeansCorePlugin.getModel());
+	}
+	
+	public void setBeansModel(IBeansModel beansModel) {
+		this.beansModel = beansModel;
 	}
 
 	@Override
 	public String getName() {
-		return "Rename references to '" + type.getElementName() + "' in Spring Project Configurations";
+		return "Rename references to '" + type.getElementName() + "' in Spring project configurations";
 	}
 
 	@Override
@@ -64,7 +71,7 @@ public class BeansJavaConfigTypeChange extends Change {
 			return null;
 		}
 
-		for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
+		for (IBeansProject project : this.beansModel.getProjects()) {
 			boolean updated = false;
 			BeansProject beansProject = (BeansProject) project;
 
@@ -91,16 +98,9 @@ public class BeansJavaConfigTypeChange extends Change {
 			for (IBeansConfig config : beansProject.getConfigs()) {
 				if (config instanceof BeansJavaConfig) {
 					IType configClass = ((BeansJavaConfig) config).getConfigClass();
-					if (type.equals(configClass)) {
+					if (configClass != null && getNewConfigName(newName, type, configClass) != null) {
 						beansProject.removeConfig(config.getElementName());
-						beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newName, IBeansConfig.Type.MANUAL);
-//						removeMarkers(config);
-						updated = true;
-					}
-					else if (configClass != null && type.equals(configClass.getDeclaringType())) {
-						beansProject.removeConfig(config.getElementName());
-						String newConfigClassName = newName + "$" + configClass.getElementName();
-						beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newConfigClassName, IBeansConfig.Type.MANUAL);
+						beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + getNewConfigName(newName, type, configClass), IBeansConfig.Type.MANUAL);
 //						removeMarkers(config);
 						updated = true;
 					}
@@ -113,6 +113,32 @@ public class BeansJavaConfigTypeChange extends Change {
 			}
 		}
 		
+		
+		return null;
+	}
+	
+	/**
+	 * calculate the name of the new config class
+	 * 
+	 * @param newName The new name of the class (without any package or outer class information)
+	 * @param type The "old" type that is renamed
+	 * @param configClass The type of the config class that might need an update
+	 * @return null, if not matching the config class at all, otherwise the name of the new config class (including inner- and outer-class handling)
+	 */
+	protected String getNewConfigName(String newName, IType type, IType configClass) {
+		if (type.equals(configClass)) {
+			return newName;
+		}
+		
+		IType walkingType = configClass.getDeclaringType();
+		String walkingTypeName = configClass.getElementName();
+		while (walkingType != null) {
+			if (type.equals(walkingType)) {
+				return newName + "$" + walkingTypeName;
+			}
+			walkingTypeName = walkingType.getElementName() + "$" + walkingTypeName;
+			walkingType = walkingType.getDeclaringType();
+		}
 		
 		return null;
 	}

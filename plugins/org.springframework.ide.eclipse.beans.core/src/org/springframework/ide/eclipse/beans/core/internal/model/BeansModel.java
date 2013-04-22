@@ -152,7 +152,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 	}
 
-	protected void addProject(IBeansProject project) {
+	public void addProject(IBeansProject project) {
 		projects.put(project.getProject(), project);
 	}
 

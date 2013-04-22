@@ -76,5 +76,6 @@ Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.beans.ui.refactoring.actions,
+ org.springframework.ide.eclipse.beans.ui.refactoring.model,
  org.springframework.ide.eclipse.beans.ui.refactoring.util
 Require-Bundle: org.eclipse.ui

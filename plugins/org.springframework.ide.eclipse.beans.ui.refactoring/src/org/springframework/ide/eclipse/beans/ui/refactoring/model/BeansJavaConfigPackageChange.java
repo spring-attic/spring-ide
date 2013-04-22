@@ -46,7 +46,7 @@ public class BeansJavaConfigPackageChange extends Change {
 
 	@Override
 	public String getName() {
-		return "Rename references to package '" + oldPackageName + "' in Spring Project Configurations";
+		return "Rename references to package '" + oldPackageName + "' in Spring project configurations";
 	}
 
 	@Override
