@@ -11,10 +11,10 @@
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -38,7 +38,6 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.springframework.ide.eclipse.quickfix.jdt.proposals.RequestMappingVariableCompletionProposal;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 
-
 /**
  * @author Terry Denney
  * @author Martin Lippert
@@ -47,25 +46,15 @@ import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 public class RequestMappingVariableProposalComputer extends AnnotationProposalComputer {
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method,
+	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method, IAnnotation annotation,
 			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		if (ProposalCalculatorUtil.hasAnnotation(method, "RequestMapping")) {
-			return computeCompletionProposalsHelper(method, javaContext);
-		}
-		else {
-			return Collections.emptyList();
-		}
+		return computeCompletionProposalsHelper(method, javaContext);
 	}
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceType type,
+	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, IAnnotation annotation,
 			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		if (ProposalCalculatorUtil.hasAnnotation(type, "RequestMapping")) {
-			return computeCompletionProposalsHelper(type, javaContext);
-		}
-		else {
-			return Collections.emptyList();
-		}
+		return computeCompletionProposalsHelper(type, javaContext);
 	}
 
 	private List<ICompletionProposal> computeCompletionProposalsHelper(IMember element,
@@ -140,6 +129,7 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 			int valueOffset, int variableOffset, JavaContentAssistInvocationContext javaContext) {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
+		@SuppressWarnings("unchecked")
 		List<SingleVariableDeclaration> params = methodDecl.parameters();
 		for (SingleVariableDeclaration param : params) {
 			ITypeBinding typeBinding = param.getType().resolveBinding();

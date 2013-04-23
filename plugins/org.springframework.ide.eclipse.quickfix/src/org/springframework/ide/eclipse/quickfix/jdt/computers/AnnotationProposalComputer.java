@@ -11,12 +11,9 @@
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -29,13 +26,9 @@ import org.eclipse.jdt.internal.core.SourceField;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
-import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
-import org.springsource.ide.eclipse.commons.core.StatusHandler;
-
 
 /**
  * @author Terry Denney
@@ -44,46 +37,50 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
  */
 public abstract class AnnotationProposalComputer extends JavaCompletionProposalComputer {
 
-	@Override
-	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
-			IProgressMonitor monitor) {
-		if (context instanceof JavaContentAssistInvocationContext) {
-			JavaContentAssistInvocationContext javaContext = (JavaContentAssistInvocationContext) context;
-
-			// check if project is a spring project
-			if (SpringCoreUtils.isSpringProject(javaContext.getProject().getProject())) {
-
-				ICompilationUnit cu = javaContext.getCompilationUnit();
-
-				try {
-					int invocationOffset = context.getInvocationOffset();
-					IJavaElement element = cu.getElementAt(invocationOffset);
-					if (element instanceof SourceField) {
-						return computeCompletionProposals((SourceField) element, javaContext);
-					}
-					if (element instanceof SourceMethod) {
-						return computeCompletionProposals((SourceMethod) element, javaContext);
-					}
-					if (element instanceof SourceType) {
-						return computeCompletionProposals((SourceType) element, javaContext);
-					}
-				}
-				catch (JavaModelException e) {
-					StatusHandler.log(e.getStatus());
-				}
-			}
-		}
-		return Collections.emptyList();
+	/**
+	 * Default is to return empty list of proposals. Subclass should overwrite
+	 * if proposals are available for methods
+	 * @param method
+	 * @param javaContext
+	 * @return list of completion proposal for the method and javaContext
+	 * @throws JavaModelException
+	 */
+	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method, IAnnotation annotation,
+			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		return new ArrayList<ICompletionProposal>();
 	}
 
-	protected LocationInformation getLocationSourceRange(Annotation annotation, ITextViewer viewer, int invocationOffset) {
-		return getLocationSourceRange(annotation, viewer, invocationOffset, null);
+	/**
+	 * Default is to return empty list of proposals. Subclass should overwrite
+	 * if proposals are available for methods
+	 * @param type
+	 * @param javaContext
+	 * @return list of completion proposal for the method and javaContext
+	 * @throws JavaModelException
+	 */
+	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, IAnnotation annotation,
+			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		return new ArrayList<ICompletionProposal>();
+	}
+
+	/**
+	 * Default is to return empty list of proposals. Subclass should overwrite
+	 * if proposals are available for fields
+	 * @param field
+	 * @param javaContext
+	 * @return list of completion proposal for the field and javaContext
+	 * @throws JavaModelException
+	 */
+	protected List<ICompletionProposal> computeCompletionProposals(SourceField field, IAnnotation annotation,
+			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		return new ArrayList<ICompletionProposal>();
 	}
 
 	protected LocationInformation getLocationSourceRange(Annotation annotation, ITextViewer viewer,
 			int invocationOffset, String valuePairName) {
 		if (annotation instanceof NormalAnnotation) {
 			NormalAnnotation normalAnnotation = (NormalAnnotation) annotation;
+			@SuppressWarnings("unchecked")
 			List<MemberValuePair> pairs = normalAnnotation.values();
 			if (pairs.size() == 0) {
 				int startPos = normalAnnotation.getStartPosition();
@@ -147,43 +144,8 @@ public abstract class AnnotationProposalComputer extends JavaCompletionProposalC
 		return null;
 	}
 
-	/**
-	 * Default is to return empty list of proposals. Subclass should overwrite
-	 * if proposals are available for methods
-	 * @param method
-	 * @param javaContext
-	 * @return list of completion proposal for the method and javaContext
-	 * @throws JavaModelException
-	 */
-	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		return new ArrayList<ICompletionProposal>();
-	}
-
-	/**
-	 * Default is to return empty list of proposals. Subclass should overwrite
-	 * if proposals are available for methods
-	 * @param type
-	 * @param javaContext
-	 * @return list of completion proposal for the method and javaContext
-	 * @throws JavaModelException
-	 */
-	protected List<ICompletionProposal> computeCompletionProposals(SourceType type,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		return new ArrayList<ICompletionProposal>();
-	}
-
-	/**
-	 * Default is to return empty list of proposals. Subclass should overwrite
-	 * if proposals are available for fields
-	 * @param field
-	 * @param javaContext
-	 * @return list of completion proposal for the field and javaContext
-	 * @throws JavaModelException
-	 */
-	protected List<ICompletionProposal> computeCompletionProposals(SourceField field,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		return new ArrayList<ICompletionProposal>();
+	protected LocationInformation getLocationSourceRange(Annotation annotation, ITextViewer viewer, int invocationOffset) {
+		return getLocationSourceRange(annotation, viewer, invocationOffset, null);
 	}
 
 }

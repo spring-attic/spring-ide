@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -34,7 +35,6 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 
-
 /**
  * @author Terry Denney
  * @author Martin Lippert
@@ -43,8 +43,9 @@ import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 public class QualifierArgumentProposalComputer extends AnnotationProposalComputer {
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method,
+	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method, IAnnotation annotation,
 			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 		ITextViewer viewer = javaContext.getViewer();
@@ -61,12 +62,13 @@ public class QualifierArgumentProposalComputer extends AnnotationProposalCompute
 				if (node instanceof MethodDeclaration) {
 					int invocationOffset = javaContext.getInvocationOffset();
 					MethodDeclaration methodDecl = (MethodDeclaration) node;
+					@SuppressWarnings("unchecked")
 					List<SingleVariableDeclaration> parameters = methodDecl.parameters();
 					for (SingleVariableDeclaration parameter : parameters) {
 						Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("Qualifier",
 								invocationOffset, parameter);
-						for (Annotation annotation : annotations) {
-							LocationInformation info = getLocationSourceRange(annotation, javaContext.getViewer(),
+						for (Annotation a : annotations) {
+							LocationInformation info = getLocationSourceRange(a, javaContext.getViewer(),
 									invocationOffset);
 							int locationOffset = info.getOffset();
 							int locationLength = info.getLength();
@@ -86,7 +88,7 @@ public class QualifierArgumentProposalComputer extends AnnotationProposalCompute
 	}
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceField field,
+	protected List<ICompletionProposal> computeCompletionProposals(SourceField field, IAnnotation annotation,
 			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
@@ -102,9 +104,8 @@ public class QualifierArgumentProposalComputer extends AnnotationProposalCompute
 				FieldDeclaration fieldDecl = (FieldDeclaration) node;
 				Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("Qualifier", invocationOffset,
 						fieldDecl);
-				for (Annotation annotation : annotations) {
-					LocationInformation info = getLocationSourceRange(annotation, javaContext.getViewer(),
-							invocationOffset);
+				for (Annotation a : annotations) {
+					LocationInformation info = getLocationSourceRange(a, javaContext.getViewer(), invocationOffset);
 					int locationOffset = info.getOffset();
 					int locationLength = info.getLength();
 					if (invocationOffset >= locationOffset && invocationOffset <= locationOffset + locationLength) {

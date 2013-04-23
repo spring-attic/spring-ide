@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -26,8 +27,8 @@ import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
@@ -43,7 +44,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
  * @author Martin Lippert
  * @author Kaitlin Duck Sherwood
  */
-public class ConfigurationLocationProposalComputer extends JavaCompletionProposalComputer {
+public class ConfigurationLocationProposalComputer extends AnnotationProposalComputer {
 
 	final String ILLEGAL_STRING = ":!\t)";
 
@@ -88,6 +89,19 @@ public class ConfigurationLocationProposalComputer extends JavaCompletionProposa
 			// ignore
 		}
 		return pathPrefixes;
+	}
+
+	@Override
+	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, IAnnotation annotation,
+			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		IMemberValuePair[] memberValuePairs = annotation.getMemberValuePairs();
+		for (IMemberValuePair memberValuePair : memberValuePairs) {
+			if ("locations".equals(memberValuePair.getMemberName()) || "value".equals(memberValuePair.getMemberName())) {
+				return getBeanProposals(javaContext, type.getCompilationUnit(), javaContext.getInvocationOffset(),
+						annotation);
+			}
+		}
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -355,7 +369,7 @@ public class ConfigurationLocationProposalComputer extends JavaCompletionProposa
 					}
 					prefix = comma + "\"";
 
-					String closeParen = "";
+					// String closeParen = "";
 					// if there is a close brace, end with a )
 					if (hasClosingBrace) {
 						postfix = "";
@@ -475,7 +489,8 @@ public class ConfigurationLocationProposalComputer extends JavaCompletionProposa
 			if (invocationIndex >= fileMatcher.start() && invocationIndex <= fileMatcher.end()) {
 				int fileSubgroupIndex = invocationOffsetIsInWhichGroupNumber(fileMatcher, invocationIndex);
 
-				boolean hasOpeningQuote = hasSomethingInField(fileMatcher, CONFIG_OPENING_QUOTE_PATTERN_POSITION);
+				// boolean hasOpeningQuote = hasSomethingInField(fileMatcher,
+				// CONFIG_OPENING_QUOTE_PATTERN_POSITION);
 				boolean hasClosingQuote = hasSomethingInField(fileMatcher, CONFIG_CLOSING_QUOTE_PATTERN_POSITION);
 				boolean hasComma = hasSomethingInField(fileMatcher, CONFIG_COMMA_PATTERN_POSITION);
 				boolean hasFilePattern = hasSomethingInField(fileMatcher, CONFIG_UNQUOTED_FILENAME_PATTERN_POSITION)
