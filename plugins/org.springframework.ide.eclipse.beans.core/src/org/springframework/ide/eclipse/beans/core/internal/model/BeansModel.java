@@ -418,7 +418,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	/**
 	 * Internal resource change event handler.
 	 */
-	private class ResourceChangeEventHandler implements IBeansResourceChangeEvents {
+	public class ResourceChangeEventHandler implements IBeansResourceChangeEvents {
 
 		public boolean isSpringProject(IProject project, int eventType) {
 			return getProject(project) != null;
@@ -562,7 +562,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				finally {
 					r.unlock();
 				}
-				if (project.addConfig(file, type)) {
+				
+				if (!BeansConfigFactory.isJavaConfigFile(file) && project.addConfig(file, type)) {
 					// In case this is a auto detected config make sure to refresh the
 					// project too, as the project description file will not change
 					if (type == IBeansConfig.Type.AUTO_DETECTED) {

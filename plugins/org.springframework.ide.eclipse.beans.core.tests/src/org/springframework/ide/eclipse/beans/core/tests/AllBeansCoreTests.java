@@ -18,6 +18,7 @@ import org.springframework.ide.core.classreading.tests.JdtBasedAnnotationMetadat
 import org.springframework.ide.core.classreading.tests.JdtClassMetadataTest;
 import org.springframework.ide.eclipse.beans.core.autowire.AutowiredAnnotationInjectionMetadataProviderTests;
 import org.springframework.ide.eclipse.beans.core.autowire.CommonAnnotationInjectionMetadataProviderTests;
+import org.springframework.ide.eclipse.beans.core.internal.model.resources.tests.ResourceChangeEventHandlerTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
@@ -59,7 +60,8 @@ import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 	BeansProjectTest.class,
 	BeansConfigFactoryTest.class,
 	BeansConfigDescriptionWriterTest.class,
-	BeansJavaConfigRenameTypeRefactoringParticipantTest.class
+	BeansJavaConfigRenameTypeRefactoringParticipantTest.class,
+	ResourceChangeEventHandlerTest.class
 })
 public class AllBeansCoreTests {
 	// goofy junit4, no class body needed

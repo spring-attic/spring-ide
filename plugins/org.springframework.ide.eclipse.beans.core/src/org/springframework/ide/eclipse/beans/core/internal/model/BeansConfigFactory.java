@@ -84,4 +84,8 @@ public class BeansConfigFactory {
 		return configName;
 	}
 
+	public static boolean isJavaConfigFile(IFile file) {
+		return file != null && (file.getFileExtension().equals("java") || file.getFileExtension().equals("class"));
+	}
+
 }
