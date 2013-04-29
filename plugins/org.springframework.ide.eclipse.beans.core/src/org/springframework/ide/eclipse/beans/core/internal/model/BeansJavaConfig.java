@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.FutureTask;
@@ -45,6 +46,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -168,6 +170,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 						registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
 	
 						try {
+							registerAnnotationProcessors(eventListener);
 							registerBean(eventListener);
 	
 							IBeansConfigPostProcessor[] postProcessors = BeansConfigPostProcessorFactory.createPostProcessor(ConfigurationClassPostProcessor.class.getName());
@@ -335,7 +338,17 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		eventListener.componentRegistered(new BeanComponentDefinition(abd,beanName));
 	}
 
-
+	/**
+	 * register the default annotation processors
+	 */
+	protected void registerAnnotationProcessors(ReaderEventListener eventListener) {
+		Set<BeanDefinitionHolder> processorDefinitions = AnnotationConfigUtils.registerAnnotationConfigProcessors(registry, null);
+		
+		// Nest the concrete beans in the surrounding component.
+		for (BeanDefinitionHolder processorDefinition : processorDefinitions) {
+			eventListener.componentRegistered(new BeanComponentDefinition(processorDefinition));
+		}
+	}
 
 	class BeansConfigPostProcessorReaderEventListener extends EmptyReaderEventListener {
 

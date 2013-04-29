@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -82,7 +83,7 @@ public class BeansJavaConfigTest {
 		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
 		
 		Set<IBean> beans = BeansModelUtils.getBeans(config);
-		assertEquals(2, beans.size());
+		assertEquals(7, beans.size());
 
 		IBean configBean = BeansModelUtils.getBean("simpleConfigurationClass", config);
 		assertEquals("simpleConfigurationClass", configBean.getElementName());
@@ -91,7 +92,22 @@ public class BeansJavaConfigTest {
 		assertEquals("simpleScannedBean", bean.getElementName());
 
 		IModelElement[] children = config.getElementChildren();
-		assertEquals(2, children.length);
+		assertEquals(7, children.length);
+		
+		IBean processor1 = BeansModelUtils.getBean(AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME, config);
+		assertNotNull(processor1);
+		
+		IBean processor2 = BeansModelUtils.getBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, config);
+		assertNotNull(processor2);
+
+		IBean processor3 = BeansModelUtils.getBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME, config);
+		assertNotNull(processor3);
+		
+		IBean processor4 = BeansModelUtils.getBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME, config);
+		assertNotNull(processor4);
+		
+		IBean processor5 = BeansModelUtils.getBean(AnnotationConfigUtils.PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME, config);
+		assertNotNull(processor5);
 	}
 
 	@Test
