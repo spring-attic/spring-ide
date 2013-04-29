@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.model.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -27,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -105,6 +107,34 @@ public class BeansConfigTest {
 		IBean aspectjBean = BeansModelUtils.getBean("org.springframework.aop.config.internalAutoProxyCreator", config);
 		assertNotNull(aspectjBean);
 		assertEquals("org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator", aspectjBean.getClassName());
+	}
+
+	@Test
+	public void testComponentScanningWithProfile() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "profile-component-scanning.xml", IBeansConfig.Type.MANUAL);
+		
+		IBean simpleBean = BeansModelUtils.getBean("simpleScannedBean", config);
+		assertEquals("simpleScannedBean", simpleBean.getElementName());
+
+		IBean configClassBean = BeansModelUtils.getBean("profileConfigurationClass", config);
+		assertEquals("profileConfigurationClass", configClassBean.getElementName());
+		
+		assertEquals(1, getProfiles(simpleBean).size());
+		assertEquals("testProfile", getProfiles(simpleBean).iterator().next());
+		
+		assertEquals(0, getProfiles(configClassBean).size());
+	}
+
+	protected Set<String> getProfiles(IModelElement element) {
+		Set<String> profiles = new HashSet<String>();
+		while (element != null) {
+			if (element instanceof IProfileAwareBeansComponent) {
+				profiles.addAll(((IProfileAwareBeansComponent) element).getProfiles());
+			}
+			element = element.getElementParent();
+		}
+		
+		return profiles;
 	}
 
 }
