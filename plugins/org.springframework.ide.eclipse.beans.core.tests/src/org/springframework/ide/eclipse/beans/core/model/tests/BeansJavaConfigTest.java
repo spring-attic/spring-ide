@@ -82,18 +82,12 @@ public class BeansJavaConfigTest {
 		
 		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
 		
-		Set<IBean> beans = BeansModelUtils.getBeans(config);
-		assertEquals(7, beans.size());
-
 		IBean configBean = BeansModelUtils.getBean("simpleConfigurationClass", config);
 		assertEquals("simpleConfigurationClass", configBean.getElementName());
 		
 		IBean bean = BeansModelUtils.getBean("simpleScannedBean", config);
 		assertEquals("simpleScannedBean", bean.getElementName());
 
-		IModelElement[] children = config.getElementChildren();
-		assertEquals(7, children.length);
-		
 		IBean processor1 = BeansModelUtils.getBean(AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME, config);
 		assertNotNull(processor1);
 		
@@ -108,6 +102,12 @@ public class BeansJavaConfigTest {
 		
 		IBean processor5 = BeansModelUtils.getBean(AnnotationConfigUtils.PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME, config);
 		assertNotNull(processor5);
+
+		Set<IBean> beans = BeansModelUtils.getBeans(config);
+		assertEquals(7, beans.size());
+
+		IModelElement[] children = config.getElementChildren();
+		assertEquals(7, children.length);
 	}
 
 	@Test
