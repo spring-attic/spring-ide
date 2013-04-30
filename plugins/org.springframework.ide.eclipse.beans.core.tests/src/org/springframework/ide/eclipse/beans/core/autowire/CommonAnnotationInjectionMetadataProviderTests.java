@@ -17,17 +17,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IProject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * @author Tomasz Zarna
@@ -35,23 +40,31 @@ import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
  */
 public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTestCase {
 
-	private IResource resource;
+	private IProject project;
+	private IBeansModel model;
+	private IBeansProject beansProject;
 
 	@Before
-	public void setUp() throws Exception {
-		resource = null;
-		Thread.sleep(1500);
+	public void createProject() throws Exception {
+		project = StsTestUtil.createPredefinedProject("autowire", "org.springframework.ide.eclipse.beans.core.tests");
+		
+		model = new BeansModel();
+		beansProject = new BeansProject(model, project);
+	}
+	
+	@After
+	public void deleteProject() throws Exception {
+		project.delete(true, null);
 	}
 
 	@Test
 	public void testResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/context/annotation/testResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
 		allowedRefs.put("testBean2", new Integer[] { 110 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/context/annotation/testResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -70,6 +83,8 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 
 	@Test
 	public void testExtendedResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/context/annotation/testExtendedResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
 		allowedRefs.put("testBean2", new Integer[] { 143 });
@@ -78,9 +93,6 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		allowedRefs.put("xy", new Integer[] { 135, 153, 236 });
 		allowedRefs.put("beanFactory", new Integer[] { 140 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/context/annotation/testExtendedResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -113,6 +125,8 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 
 	@Test
 	public void testExtendedResourceInjectionWithOverriding() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/context/annotation/testExtendedResourceInjectionWithOverriding-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
 		allowedRefs.put("testBean3", new Integer[] { 148 });
@@ -120,9 +134,6 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		allowedRefs.put("xy", new Integer[] { 135, 153 });
 		allowedRefs.put("beanFactory", new Integer[] { 140 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/context/annotation/testExtendedResourceInjectionWithOverriding-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -143,6 +154,8 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 
 	@Test
 	public void testExtendedEjbInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/context/annotation/testExtendedEjbInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
 		allowedRefs.put("testBean2", new Integer[] { 196 });
@@ -151,9 +164,6 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		allowedRefs.put("xy", new Integer[] { 188, 206 });
 		allowedRefs.put("beanFactory", new Integer[] { 193 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/context/annotation/testExtendedEjbInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
