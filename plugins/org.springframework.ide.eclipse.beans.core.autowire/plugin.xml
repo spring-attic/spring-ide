@@ -13,6 +13,7 @@
  *******************************************************************************/
  -->
 <plugin>
+   <extension-point id="factorybeantyperesolvers" name="Factory Bean Type Resolvers" schema="schema/factorybeantyperesolvers.exsd"/>
 
    <!-- As of 2.2.7 this is deprecated in flavor for the new autowiring support -->
    <!--<extension

@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.autowire.internal.provider;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +53,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.IAutowireDependencyResolver;
+import org.springframework.ide.eclipse.beans.core.autowire.IFactoryBeanTypeResolver;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.InjectionMetadata.InjectedElement;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.ValidationRuleUtils;
@@ -321,12 +323,43 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 					if (requiredType.isAssignableFrom(beanClass)) {
 						matchingBeans.add(bean.getElementName());
 					}
+					else if (FactoryBean.class.isAssignableFrom(beanClass) && isFactoryForType(beanClass, requiredType)) {
+						matchingBeans.add(bean.getElementName());
+					}
+					else if (FactoryBean.class.isAssignableFrom(beanClass) && isExtensibleFactoryForType(bean, beanClass, requiredType)) {
+						matchingBeans.add(bean.getElementName());
+					}
 				}
 				catch (ClassNotFoundException e) {
 				}
 			}
 		}
 		return (String[]) matchingBeans.toArray(new String[matchingBeans.size()]);
+	}
+
+	private boolean isFactoryForType(Class<?> beanClass, Class<?> requiredType) {
+		try {
+			Method factoryMethod = beanClass.getMethod("getObject", new Class[] {});
+			if (factoryMethod != null && requiredType.isAssignableFrom(factoryMethod.getReturnType())) {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	private boolean isExtensibleFactoryForType(IBean bean, Class<?> beanClass, Class<?> requiredType) {
+		IFactoryBeanTypeResolver[] resolvers = FactoryBeanTypeResolverExtensions.getFactoryBeanTypeResolvers();
+		
+		for (IFactoryBeanTypeResolver factoryTypeResolver : resolvers) {
+			Class<?> beanType = factoryTypeResolver.resolveBeanTypeFromFactory(bean, beanClass);
+			if (beanType != null && requiredType.isAssignableFrom(beanType)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
