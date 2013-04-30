@@ -16,7 +16,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.ide.core.classreading.tests.JdtAnnotationMetadataTest;
 import org.springframework.ide.core.classreading.tests.JdtBasedAnnotationMetadataTest;
 import org.springframework.ide.core.classreading.tests.JdtClassMetadataTest;
-import org.springframework.ide.eclipse.beans.core.autowire.AutowiredAnnotationInjectionMetadataProviderTests;
+import org.springframework.ide.eclipse.beans.core.autowire.AutowireDependencyProviderTest;
 import org.springframework.ide.eclipse.beans.core.autowire.CommonAnnotationInjectionMetadataProviderTests;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.tests.ResourceChangeEventHandlerTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRuleTest;
@@ -50,7 +50,7 @@ import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 	RequiredPropertyRuleTest.class,
 	NamespaceElementsRuleTest.class,
 	IntrospectorTest.class,
-	AutowiredAnnotationInjectionMetadataProviderTests.class,
+	AutowireDependencyProviderTest.class,
 	CommonAnnotationInjectionMetadataProviderTests.class,
 	JdtAnnotationMetadataTest.class,
 	JdtBasedAnnotationMetadataTest.class,
