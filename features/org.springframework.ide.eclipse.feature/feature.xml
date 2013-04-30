@@ -30,6 +30,11 @@
       %license
    </license>
 
+   <includes
+         id="org.springsource.ide.eclipse.commons.quicksearch.feature"
+         version="0.0.0"
+         optional="true"/>
+
    <requires>
       <import feature="org.eclipse.wst.xml_ui.feature" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.3.0" match="greaterOrEqual"/>
@@ -237,21 +242,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-<!--
-   <plugin
-         id="org.aspectj.runtime"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
-   <plugin
-         id="org.aspectj.weaver"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
--->
    <plugin
          id="org.springframework.aop"
          download-size="0"
