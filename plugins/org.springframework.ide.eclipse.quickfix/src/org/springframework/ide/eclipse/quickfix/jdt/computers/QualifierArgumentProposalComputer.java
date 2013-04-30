@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -43,42 +42,45 @@ import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 public class QualifierArgumentProposalComputer extends AnnotationProposalComputer {
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method, IAnnotation annotation,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method,
+			LocationInformation locationInfo, Annotation annotation, JavaContentAssistInvocationContext javaContext)
+			throws JavaModelException {
 
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 		ITextViewer viewer = javaContext.getViewer();
-		if (viewer instanceof SourceViewer) {
-
-			// check for annotation to avoid performance overhead in all other
-			// cases
-			if (ProposalCalculatorUtil.hasAnnotationInParameters(method, "Qualifier")) {
-				SourceViewer sourceViewer = (SourceViewer) viewer;
-				ISourceRange methodSourceRange = method.getSourceRange();
-				AssistContext assistContext = new AssistContext(javaContext.getCompilationUnit(), sourceViewer,
-						methodSourceRange.getOffset(), methodSourceRange.getLength());
-				ASTNode node = assistContext.getCoveringNode();
-				if (node instanceof MethodDeclaration) {
-					int invocationOffset = javaContext.getInvocationOffset();
-					MethodDeclaration methodDecl = (MethodDeclaration) node;
-					@SuppressWarnings("unchecked")
-					List<SingleVariableDeclaration> parameters = methodDecl.parameters();
-					for (SingleVariableDeclaration parameter : parameters) {
-						Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("Qualifier",
-								invocationOffset, parameter);
-						for (Annotation a : annotations) {
-							LocationInformation info = getLocationSourceRange(a, javaContext.getViewer(),
-									invocationOffset);
-							int locationOffset = info.getOffset();
-							int locationLength = info.getLength();
-							if (invocationOffset >= locationOffset
-									&& invocationOffset <= locationOffset + locationLength) {
-								ITypeBinding typeBinding = parameter.getType().resolveBinding();
-								proposals.addAll(getMatchingBeansProposal(info.getFilter(), typeBinding, methodDecl,
-										javaContext, info));
-							}
-						}
+		// if (viewer instanceof SourceViewer) {
+		//
+		// // check for annotation to avoid performance overhead in all other
+		// // cases
+		// if (ProposalCalculatorUtil.hasAnnotationInParameters(method,
+		// "Qualifier")) {
+		SourceViewer sourceViewer = (SourceViewer) viewer;
+		ISourceRange methodSourceRange = method.getSourceRange();
+		AssistContext assistContext = new AssistContext(javaContext.getCompilationUnit(), sourceViewer,
+				methodSourceRange.getOffset(), methodSourceRange.getLength());
+		ASTNode node = assistContext.getCoveringNode();
+		if (node instanceof MethodDeclaration) {
+			int invocationOffset = javaContext.getInvocationOffset();
+			MethodDeclaration methodDecl = (MethodDeclaration) node;
+			@SuppressWarnings("unchecked")
+			List<SingleVariableDeclaration> parameters = methodDecl.parameters();
+			for (SingleVariableDeclaration parameter : parameters) {
+				Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("Qualifier", invocationOffset,
+						parameter);
+				for (Annotation a : annotations) {
+					if (a.equals(annotation)) {
+						// LocationInformation info = getLocationSourceRange(a,
+						// javaContext.getViewer(),
+						// invocationOffset);
+						// int locationOffset = info.getOffset();
+						// int locationLength = info.getLength();
+						// if (invocationOffset >= locationOffset
+						// && invocationOffset <= locationOffset +
+						// locationLength) {
+						ITypeBinding typeBinding = parameter.getType().resolveBinding();
+						proposals.addAll(getMatchingBeansProposal(locationInfo.getFilter(), typeBinding, methodDecl,
+								javaContext, locationInfo));
 					}
 				}
 			}
@@ -88,8 +90,8 @@ public class QualifierArgumentProposalComputer extends AnnotationProposalCompute
 	}
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceField field, IAnnotation annotation,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+	protected List<ICompletionProposal> computeCompletionProposals(SourceField field, LocationInformation locationInfo,
+			Annotation annotation, JavaContentAssistInvocationContext javaContext) throws JavaModelException {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 		ITextViewer viewer = javaContext.getViewer();
@@ -100,21 +102,22 @@ public class QualifierArgumentProposalComputer extends AnnotationProposalCompute
 					fieldSourceRange.getOffset(), fieldSourceRange.getLength());
 			ASTNode node = assistContext.getCoveringNode();
 			if (node instanceof FieldDeclaration) {
-				int invocationOffset = javaContext.getInvocationOffset();
+				// int invocationOffset = javaContext.getInvocationOffset();
 				FieldDeclaration fieldDecl = (FieldDeclaration) node;
-				Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("Qualifier", invocationOffset,
-						fieldDecl);
-				for (Annotation a : annotations) {
-					LocationInformation info = getLocationSourceRange(a, javaContext.getViewer(), invocationOffset);
-					int locationOffset = info.getOffset();
-					int locationLength = info.getLength();
-					if (invocationOffset >= locationOffset && invocationOffset <= locationOffset + locationLength) {
-						ITypeBinding typeBinding = fieldDecl.getType().resolveBinding();
-						proposals.addAll(getMatchingBeansProposal(info.getFilter(), typeBinding, fieldDecl,
-								javaContext, info));
-					}
-				}
-
+				// Set<Annotation> annotations =
+				// ProposalCalculatorUtil.findAnnotations("Qualifier",
+				// invocationOffset,
+				// fieldDecl);
+				// for (Annotation a : annotations) {
+				// LocationInformation info = getLocationSourceRange(a,
+				// javaContext.getViewer(), invocationOffset);
+				// int locationOffset = info.getOffset();
+				// int locationLength = info.getLength();
+				// if (invocationOffset >= locationOffset && invocationOffset <=
+				// locationOffset + locationLength) {
+				ITypeBinding typeBinding = fieldDecl.getType().resolveBinding();
+				proposals.addAll(getMatchingBeansProposal(locationInfo.getFilter(), typeBinding, fieldDecl,
+						javaContext, locationInfo));
 			}
 		}
 

@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -46,19 +45,21 @@ import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 public class RequestMappingVariableProposalComputer extends AnnotationProposalComputer {
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method, IAnnotation annotation,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		return computeCompletionProposalsHelper(method, javaContext);
+	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method,
+			LocationInformation locationInfo, Annotation annotation, JavaContentAssistInvocationContext javaContext)
+			throws JavaModelException {
+		return computeCompletionProposalsHelper(method, locationInfo, annotation, javaContext);
 	}
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, IAnnotation annotation,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		return computeCompletionProposalsHelper(type, javaContext);
+	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, LocationInformation locationInfo,
+			Annotation annotation, JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		return computeCompletionProposalsHelper(type, locationInfo, annotation, javaContext);
 	}
 
 	private List<ICompletionProposal> computeCompletionProposalsHelper(IMember element,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+			LocationInformation locationInfo, Annotation annotation, JavaContentAssistInvocationContext javaContext)
+			throws JavaModelException {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 		ITextViewer viewer = javaContext.getViewer();
@@ -74,48 +75,42 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 			}
 
 			int invocationOffset = javaContext.getInvocationOffset();
+			int locationOffset = locationInfo.getOffset();
+			int locationLength = locationInfo.getLength();
+			String content = locationInfo.getFilter();
 
-			Set<Annotation> annotations = ProposalCalculatorUtil.findAnnotations("RequestMapping", invocationOffset,
-					node);
-
-			for (Annotation annotation : annotations) {
-				LocationInformation info = getLocationSourceRange(annotation, javaContext.getViewer(),
-						invocationOffset, "value");
-				int locationOffset = info.getOffset();
-				int locationLength = info.getLength();
-				String content = info.getFilter();
-
-				if (invocationOffset >= locationOffset && invocationOffset <= locationOffset + locationLength) {
-					int startIndex;
-					int index = 0;
-					boolean found = false;
-					while (!found) {
-						startIndex = content.indexOf("{");
-						if (startIndex < 0 || startIndex + locationOffset >= invocationOffset) {
-							break;
-						}
-
-						content = content.substring(startIndex + 1);
-						index += startIndex + 1;
-						if (!(content.contains("{") || content.contains("}"))) {
-							found = true;
-						}
+			if (invocationOffset >= locationOffset && invocationOffset <= locationOffset + locationLength) {
+				int startIndex;
+				int index = 0;
+				boolean found = false;
+				while (!found) {
+					startIndex = content.indexOf("{");
+					if (startIndex < 0 || startIndex + locationOffset >= invocationOffset) {
+						break;
 					}
 
-					if (found) {
-						if (node instanceof MethodDeclaration) {
-							MethodDeclaration methodDecl = (MethodDeclaration) node;
+					content = content.substring(startIndex + 1);
+					index += startIndex + 1;
+					if (!(content.contains("{") || content.contains("}"))) {
+						found = true;
+					}
+				}
+
+				locationOffset += 1; // ignore opening quote
+
+				if (found) {
+					if (node instanceof MethodDeclaration) {
+						MethodDeclaration methodDecl = (MethodDeclaration) node;
+						proposals.addAll(getProposals(methodDecl, annotation, content, locationOffset, index,
+								javaContext));
+					}
+
+					else if (node instanceof TypeDeclaration) {
+						TypeDeclaration typeDecl = (TypeDeclaration) node;
+						MethodDeclaration[] methodDecls = typeDecl.getMethods();
+						for (MethodDeclaration methodDecl : methodDecls) {
 							proposals.addAll(getProposals(methodDecl, annotation, content, locationOffset, index,
 									javaContext));
-						}
-
-						else if (node instanceof TypeDeclaration) {
-							TypeDeclaration typeDecl = (TypeDeclaration) node;
-							MethodDeclaration[] methodDecls = typeDecl.getMethods();
-							for (MethodDeclaration methodDecl : methodDecls) {
-								proposals.addAll(getProposals(methodDecl, annotation, content, locationOffset, index,
-										javaContext));
-							}
 						}
 					}
 				}
@@ -161,16 +156,6 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 						}
 					}
 				}
-				// if (!differentVariableName) {
-				// if
-				// (param.getName().getFullyQualifiedName().startsWith(filter))
-				// {
-				// proposals.add(new
-				// RequestMappingVariableCompletionProposal(param, valueOffset +
-				// variableOffset,
-				// filter.length(), annotation, methodDecl, javaContext));
-				// }
-				// }
 			}
 		}
 

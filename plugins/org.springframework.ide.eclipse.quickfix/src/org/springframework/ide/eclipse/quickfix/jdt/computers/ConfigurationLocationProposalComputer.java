@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -27,6 +26,8 @@ import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
@@ -92,16 +93,28 @@ public class ConfigurationLocationProposalComputer extends AnnotationProposalCom
 	}
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, IAnnotation annotation,
-			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		IMemberValuePair[] memberValuePairs = annotation.getMemberValuePairs();
-		for (IMemberValuePair memberValuePair : memberValuePairs) {
-			if ("locations".equals(memberValuePair.getMemberName()) || "value".equals(memberValuePair.getMemberName())) {
-				return getBeanProposals(javaContext, type.getCompilationUnit(), javaContext.getInvocationOffset(),
-						annotation);
-			}
-		}
-		return Collections.emptyList();
+	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, LocationInformation locationInfo,
+			Annotation annotation, JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		// // TODO Auto-generated method stub
+		// return super.computeCompletionProposals(type, locationInfo,
+		// annotation, javaContext);
+		// }
+		// @Override
+		// protected List<ICompletionProposal>
+		// computeCompletionProposals(SourceType type, IAnnotation annotation,
+		// JavaContentAssistInvocationContext javaContext) throws
+		// JavaModelException {
+		// IMemberValuePair[] memberValuePairs =
+		// annotation.getMemberValuePairs();
+		// for (IMemberValuePair memberValuePair : memberValuePairs) {
+		// if ("locations".equals(memberValuePair.getMemberName()) ||
+		// "value".equals(memberValuePair.getMemberName())) {
+		Name typeName = annotation.getTypeName();
+		return getBeanProposals(javaContext, type.getCompilationUnit(), javaContext.getInvocationOffset(),
+				typeName.getFullyQualifiedName(), typeName.getStartPosition(), typeName.getLength());
+		// }
+		// }
+		// return Collections.emptyList();
 	}
 
 	@Override
@@ -126,7 +139,10 @@ public class ConfigurationLocationProposalComputer extends AnnotationProposalCom
 							for (IMemberValuePair memberValuePair : memberValuePairs) {
 								if ("locations".equals(memberValuePair.getMemberName())
 										|| "value".equals(memberValuePair.getMemberName())) {
-									return getBeanProposals(context, cu, invocationOffset, annotation);
+									return getBeanProposals(context, cu, invocationOffset,
+											getAnnotationText(annotation, context.getViewer(), invocationOffset),
+											annotation.getNameRange().getOffset(), annotation.getNameRange()
+													.getLength());
 								}
 							}
 						}
@@ -141,24 +157,29 @@ public class ConfigurationLocationProposalComputer extends AnnotationProposalCom
 	}
 
 	private List<ICompletionProposal> getBeanProposals(ContentAssistInvocationContext context, ICompilationUnit cu,
-			int invocationOffset, IAnnotation annotation) {
+			int invocationOffset, String annotationText, int annotationOffset, int annotationLength) {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-		String annotationText = getAnnotationText(annotation, context.getViewer(), invocationOffset);
+		// String annotationText = getAnnotationText(annotation,
+		// context.getViewer(), invocationOffset);
 		String prefix = "";
 		String postfix = "";
 		String filter = "";
 
-		try {
-			ProposalAssemblyInformation assemblyInfo = createProposalAssemblyInformation(annotationText,
-					invocationOffset - annotation.getNameRange().getOffset() - annotation.getNameRange().getLength());
-			prefix = assemblyInfo.getPrefix();
-			postfix = assemblyInfo.getPostfix();
-			filter = assemblyInfo.getFilter();
-		}
-		catch (JavaModelException e) {
-			prefix = "";
-			postfix = "";
-		}
+		// try {
+		ProposalAssemblyInformation assemblyInfo = createProposalAssemblyInformation(annotationText, invocationOffset
+				- annotationOffset - annotationLength);
+		// ProposalAssemblyInformation assemblyInfo =
+		// createProposalAssemblyInformation(annotationText,
+		// invocationOffset - annotation.getNameRange().getOffset() -
+		// annotation.getNameRange().getLength());
+		prefix = assemblyInfo.getPrefix();
+		postfix = assemblyInfo.getPostfix();
+		filter = assemblyInfo.getFilter();
+		// }
+		// catch (JavaModelException e) {
+		// prefix = "";
+		// postfix = "";
+		// }
 
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(cu.getJavaProject().getProject());
 		List<String> classpathPrefixes = getPathPrefixes(cu.getJavaProject());

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
+import org.eclipse.jdt.core.dom.StringLiteral;
+
 /**
  * @author Terry Denney
  */
@@ -23,15 +25,18 @@ public class LocationInformation {
 
 	private final boolean quoted;
 
-	public LocationInformation(int offset, int length, String filter) {
-		this(offset, length, filter, false);
+	private final StringLiteral stringLiteral;
+
+	public LocationInformation(int offset, int length, String filter, StringLiteral stringLiteral) {
+		this(offset, length, filter, false, stringLiteral);
 	}
 
-	public LocationInformation(int offset, int length, String filter, boolean quoted) {
+	public LocationInformation(int offset, int length, String filter, boolean quoted, StringLiteral stringLiteral) {
 		this.offset = offset;
 		this.length = length;
 		this.filter = filter;
 		this.quoted = quoted;
+		this.stringLiteral = stringLiteral;
 	}
 
 	public String getFilter() {
@@ -48,6 +53,10 @@ public class LocationInformation {
 
 	public int getLength() {
 		return length;
+	}
+
+	public StringLiteral getStringLiteral() {
+		return stringLiteral;
 	}
 
 	public boolean isQuoted() {
