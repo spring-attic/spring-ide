@@ -85,7 +85,6 @@ public class AutowiredAnnotationInjectionMetadataProvider implements IInjectionM
 	 * <p>
 	 * Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
 	 */
-	@SuppressWarnings("unchecked")
 	public AutowiredAnnotationInjectionMetadataProvider(ClassLoader cl) {
 		this.autowiredAnnotationTypes.add(Autowired.class);
 		this.autowiredAnnotationTypes.add(Value.class);
