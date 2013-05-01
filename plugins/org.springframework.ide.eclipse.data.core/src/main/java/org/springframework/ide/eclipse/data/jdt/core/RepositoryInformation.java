@@ -151,6 +151,18 @@ public class RepositoryInformation {
 		}
 		
 		try {
+			IAnnotation[] annotations = type.getAnnotations();
+			for (IAnnotation annotation : annotations) {
+				if (annotation.getElementName().equals("org.springframework.data.repository.RepositoryDefinition") ||
+						annotation.getElementName().equals("RepositoryDefinition")) {
+					return true;
+				}
+				if (annotation.getElementName().equals("org.springframework.data.repository.NoRepositoryBean") ||
+						annotation.getElementName().equals("NoRepositoryBean")) {
+					return false;
+				}
+			}
+			
 			String[] superInterfaces = type.getSuperInterfaceTypeSignatures();
 			for(String superInterface: superInterfaces) {
 				if (superInterface.length() > 1) {
@@ -195,13 +207,6 @@ public class RepositoryInformation {
 				}
 			}
 
-			IAnnotation[] annotations = type.getAnnotations();
-			for (IAnnotation annotation : annotations) {
-				if (annotation.getElementName().equals("org.springframework.data.repository.RepositoryDefinition") ||
-						annotation.getElementName().equals("RepositoryDefinition")) {
-					return true;
-				}
-			}
 		} catch (JavaModelException e) {
 		}
 		
