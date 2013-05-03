@@ -10,36 +10,34 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
-import java.util.List;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.springframework.ide.eclipse.wizard.template.ProjectWizardDescriptor.BuildType;
-import org.springframework.ide.eclipse.wizard.template.ProjectWizardDescriptor.ProjectType;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 
 /**
  * Creates a base Spring project based on a Java project creation.
  * 
  */
-public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne {
+public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne implements IWizardPageStatusHandler {
 
-	private BuildType buildType = BuildType.Maven;
-
-	private ProjectType projectType = ProjectType.TEMPLATE;
+	// private final BuildType buildType = BuildType.Maven;
 
 	private SpringVersion version;
+
+	private Composite mainArea;
+
+	private TemplateSelectionPart part;
 
 	public SpringVersion getVersion() {
 		return version;
@@ -49,99 +47,111 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		final Composite composite = new Composite(parent, SWT.NULL);
-		composite.setFont(parent.getFont());
-		composite.setLayout(initGridLayout(new GridLayout(1, false), true));
-		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		mainArea = new Composite(parent, SWT.NULL);
+		mainArea.setFont(parent.getFont());
+		mainArea.setLayout(initGridLayout(new GridLayout(1, false), true));
+		mainArea.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		// create UI elements
-		Control nameControl = createNameControl(composite);
+		Control nameControl = createNameControl(mainArea);
 		nameControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control locationControl = createLocationControl(composite);
+		Control locationControl = createLocationControl(mainArea);
 		locationControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		createSpringSelectionControl(composite);
+		// createSpringSelectionControl(mainArea);
 
-		createTemplateSelectionControl(composite);
+		part = new TemplateSelectionPart((NewSpringProjectWizard) getWizard(), this);
+		Control control = part.createControl(mainArea);
+		control.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control jreControl = createJRESelectionControl(composite);
-		jreControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		Control layoutControl = createProjectLayoutControl(composite);
-		layoutControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		Control workingSetControl = createWorkingSetControl(composite);
+		Control workingSetControl = createWorkingSetControl(mainArea);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control infoControl = createInfoControl(composite);
-		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		setControl(composite);
-	}
-
-	protected void createSpringSelectionControl(Composite parent) {
-
-		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout());
-		GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).applyTo(composite);
-		GridDataFactory.fillDefaults().grab(false, false).applyTo(composite);
-
-		final Combo springVersion = createLabeledCombo(composite, "Select Spring version:");
-		List<SpringVersion> versions = SpringVersion.getVersions();
-		int length = versions.size();
-		String[] versionValues = new String[length];
-		int i = 0;
-		for (SpringVersion version : versions) {
-			if (i < length) {
-				versionValues[i++] = version.getVersion() + "";
-			}
-		}
-
-		springVersion.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				// should always parse correctly
-				int selectionIndex = springVersion.getSelectionIndex();
-				if (selectionIndex != -1) {
-					List<SpringVersion> versions = SpringVersion.getVersions();
-					if (selectionIndex < versions.size()) {
-						version = versions.get(selectionIndex);
-					}
-				}
-			}
-		});
-
-		springVersion.setItems(versionValues);
-		springVersion.select(0);
-
-		length = BuildType.values().length;
-		String[] buildValues = new String[length];
-		i = 0;
-		for (BuildType type : BuildType.values()) {
-			if (i < length) {
-				buildValues[i++] = type.name();
-			}
-		}
-
-		final Combo buildTypeCombo = createLabeledCombo(composite, "Select Build type:");
-
-		buildTypeCombo.setItems(buildValues);
-		buildTypeCombo.select(0);
-
-		buildTypeCombo.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				// should always parse correctly
-				int selectionIndex = buildTypeCombo.getSelectionIndex();
-				if (selectionIndex != -1 && selectionIndex < BuildType.values().length) {
-					buildType = BuildType.values()[selectionIndex];
-				}
-				update();
-			}
-		});
+		setControl(mainArea);
 
 	}
+
+	/**
+	 * 
+	 * @return the currently selected template, without processing the template
+	 * contents.
+	 */
+	public Template getSelectedTemplate() {
+		return part != null ? part.getTemplate() : null;
+	}
+
+	public void downloadTemplateContent() throws CoreException {
+		if (part != null) {
+			part.downloadTemplateData();
+		}
+	}
+
+	// protected void createSpringSelectionControl(Composite parent) {
+	//
+	// Composite composite = new Composite(parent, SWT.NONE);
+	// composite.setLayout(new GridLayout());
+	// GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).applyTo(composite);
+	// GridDataFactory.fillDefaults().grab(false, false).applyTo(composite);
+	//
+	// final Combo springVersion = createLabeledCombo(composite,
+	// "Select Spring version:");
+	// List<SpringVersion> versions = SpringVersion.getVersions();
+	// int length = versions.size();
+	// String[] versionValues = new String[length];
+	// int i = 0;
+	// for (SpringVersion version : versions) {
+	// if (i < length) {
+	// versionValues[i++] = version.getVersion() + "";
+	// }
+	// }
+	//
+	// springVersion.addSelectionListener(new SelectionAdapter() {
+	// @Override
+	// public void widgetSelected(SelectionEvent event) {
+	// // should always parse correctly
+	// int selectionIndex = springVersion.getSelectionIndex();
+	// if (selectionIndex != -1) {
+	// List<SpringVersion> versions = SpringVersion.getVersions();
+	// if (selectionIndex < versions.size()) {
+	// version = versions.get(selectionIndex);
+	// }
+	// }
+	// }
+	// });
+	//
+	// springVersion.setItems(versionValues);
+	// springVersion.select(0);
+	//
+	// length = BuildType.values().length;
+	// String[] buildValues = new String[length];
+	// i = 0;
+	// for (BuildType type : BuildType.values()) {
+	// if (i < length) {
+	// buildValues[i++] = type.name();
+	// }
+	// }
+	//
+	// final Combo buildTypeCombo = createLabeledCombo(composite,
+	// "Select Build type:");
+	//
+	// buildTypeCombo.setItems(buildValues);
+	// buildTypeCombo.select(0);
+	//
+	// buildTypeCombo.addSelectionListener(new SelectionAdapter() {
+	// @Override
+	// public void widgetSelected(SelectionEvent event) {
+	// // should always parse correctly
+	// int selectionIndex = buildTypeCombo.getSelectionIndex();
+	// if (selectionIndex != -1 && selectionIndex < BuildType.values().length) {
+	// buildType = BuildType.values()[selectionIndex];
+	// }
+	// update();
+	//
+	// }
+	// });
+	//
+	// }
 
 	protected Combo createLabeledCombo(Composite parent, String labelValue) {
 		Label label = new Label(parent, SWT.NONE);
@@ -153,55 +163,6 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		combo.setEnabled(true);
 
 		return combo;
-	}
-
-	protected void createTemplateSelectionControl(Composite parent) {
-
-		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout());
-		GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).applyTo(composite);
-		GridDataFactory.fillDefaults().grab(false, false).applyTo(composite);
-
-		projectType = ProjectType.TEMPLATE;
-
-		final Button simple = new Button(composite, SWT.RADIO);
-		simple.setText("Simple");
-		simple.setToolTipText("Create a simple project");
-		simple.setSelection(projectType == ProjectType.SIMPLE);
-
-		simple.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (simple.getSelection()) {
-					projectType = ProjectType.SIMPLE;
-				}
-				else {
-					projectType = null;
-				}
-				update();
-			}
-		});
-
-		final Button templateButton = new Button(composite, SWT.RADIO);
-		templateButton.setText("Template");
-		templateButton.setToolTipText("Create a project from a template");
-		templateButton.setSelection(projectType == ProjectType.TEMPLATE);
-
-		templateButton.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (templateButton.getSelection()) {
-					projectType = ProjectType.TEMPLATE;
-				}
-				else {
-					projectType = null;
-				}
-				update();
-			}
-		});
-
 	}
 
 	protected GridLayout initGridLayout(GridLayout layout, boolean margins) {
@@ -219,11 +180,67 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 	}
 
 	protected void update() {
+		// This will trigger validation of all wizard pages
 		getWizard().getContainer().updateButtons();
+
 	}
 
 	public ProjectWizardDescriptor getDescriptor() {
-		return new ProjectWizardDescriptor(projectType, buildType);
+		return new ProjectWizardDescriptor(part.getTemplate());
 	}
 
+	public void setStatus(IStatus status, boolean validateWizardPages) {
+		if (status == null) {
+			setErrorMessage(null);
+			setMessage(null);
+		}
+		else if (status.getSeverity() == IStatus.ERROR) {
+			setErrorMessage(status.getMessage());
+		}
+		else {
+			if (status.isOK()) {
+				setErrorMessage(null);
+				// Only display a message if it is not the default OK status
+				// message
+				if (status.getMessage() == null || !status.getMessage().equals(Status.OK_STATUS.getMessage())) {
+					setMessage(status.getMessage());
+				}
+			}
+			else if (status.getSeverity() == IStatus.WARNING) {
+				setErrorMessage(null);
+				setMessage(status.getMessage(), WARNING);
+			}
+
+			// Only validate other wizard pages if requested to do so and status
+			// is OK or Warning. No need to do so in error
+			// case as that will disable the Finish button, which won't require
+			// further validation of other pages
+			if (validateWizardPages) {
+				update();
+			}
+
+		}
+
+	}
+
+	@Override
+	public boolean isPageComplete() {
+
+		boolean isComplete = super.isPageComplete();
+		if (isComplete) {
+			if (part == null) {
+				isComplete = false;
+			}
+			else {
+				IStatus status = part.getStatus();
+				// Don't force validation of other pages, as it may cause a
+				// infinite
+				// loop since most likely
+				// isPageComplete was called due to another wizard validation.
+				setStatus(status, false);
+				isComplete = part.isValid();
+			}
+		}
+		return isComplete;
+	}
 }
