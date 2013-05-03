@@ -437,7 +437,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 												WizardPlugin.PLUGIN_ID,
 												NLS.bind(
 														"Error downloading template - possibly the network connection went down",
-														null))));
+														null), e)));
 					}
 					finally {
 						monitor.done();
