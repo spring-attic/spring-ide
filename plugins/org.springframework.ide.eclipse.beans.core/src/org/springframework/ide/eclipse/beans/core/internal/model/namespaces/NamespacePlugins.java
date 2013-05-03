@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 Spring IDE Developers
+ * Copyright (c) 2009, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
-import org.springframework.osgi.util.BundleDelegatingClassLoader;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -34,6 +33,7 @@ import org.xml.sax.SAXException;
  * same library (which support the same schema) are available.
  * Additionally, lazy handlers are supported so that they are checked (and thus loaded) only if no previous handler has
  * been able to satisfy the request.
+ * 
  * @author Christian Dupuis
  * @author Hal Hildebrand
  * @author Costin Leau

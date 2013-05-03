@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.core.java.classreading;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.ide.eclipse.core.java.classreading.framework.MethodMetadataReadingVisitor;
+import org.springframework.core.type.classreading.MethodMetadataReadingVisitor;
 import org.springframework.util.MultiValueMap;
 
 /**

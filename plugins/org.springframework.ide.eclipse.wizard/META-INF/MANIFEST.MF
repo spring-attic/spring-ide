@@ -47,4 +47,4 @@ Export-Package: org.springframework.ide.eclipse.wizard,
  org.springframework.ide.eclipse.wizard.template.newproject,
  org.springframework.ide.eclipse.wizard.ui
 Bundle-ActivationPolicy: lazy
-Import-Package: org.springframework.util;version="[3.0.5.RELEASE,3.2.0)"
+Import-Package: org.springframework.util;version="[3.0.5.RELEASE,4.1.0)"

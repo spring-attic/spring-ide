@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,27 +16,27 @@ import java.util.Set;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.Type;
-import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.ide.eclipse.core.type.AnnotationMetadata;
 
 /**
  * ASM class visitor which looks for the class name and implemented types as
  * well as for the annotations defined on the class, exposing them through the
  * {@link org.springframework.ide.eclipse.core.type.AnnotationMetadata}interface.
+ * 
  * @author Christian Dupuis
  * @author Juergen Hoeller
+ * @author Martin Lippert
  * @since 2.0.2
  * @see ClassMetadataReadingVisitor
  */
-public class AnnotationMetadataReadingVisitor extends
-		ClassMetadataReadingVisitor implements AnnotationMetadata {
+public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
 	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
 
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String className = Type.getType(desc).getClassName();
 		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
-		return new EmptyVisitor() {
+		return new EmptyAnnotationVisitor() {
 			public void visit(String name, Object value) {
 				attributes.put(name, value);
 			}

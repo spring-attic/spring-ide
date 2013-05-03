@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.FieldVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
-import org.springframework.asm.commons.EmptyVisitor;
+import org.springframework.asm.SpringAsmInfo;
 import org.springframework.ide.eclipse.core.type.ClassMetadata;
 import org.springframework.util.ClassUtils;
 
@@ -32,9 +32,10 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @author Mark Fisher
  * @author Ramnivas Laddad
+ * @author Martin Lippert
  * @since 2.5
  */
-public class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
+public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata {
 
 	private String className;
 
@@ -54,6 +55,9 @@ public class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata 
 
 	private Set<String> memberClassNames = new LinkedHashSet<String>();
 
+	public ClassMetadataReadingVisitor() {
+		super(SpringAsmInfo.ASM_VERSION);
+	}
 
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
@@ -93,7 +97,7 @@ public class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata 
 
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		// no-op
-		return new EmptyVisitor();
+		return new EmptyAnnotationVisitor();
 	}
 
 	public void visitAttribute(Attribute attr) {
@@ -102,12 +106,12 @@ public class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata 
 
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
 		// no-op
-		return new EmptyVisitor();
+		return new EmptyFieldVisitor();
 	}
 
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		// no-op
-		return new EmptyVisitor();
+		return new EmptyMethodVisitor();
 	}
 
 	public void visitEnd() {

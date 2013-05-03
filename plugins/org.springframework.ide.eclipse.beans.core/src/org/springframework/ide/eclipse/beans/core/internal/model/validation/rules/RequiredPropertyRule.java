@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.MethodVisitor;
-import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.annotation.Required;
@@ -41,11 +40,15 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.ide.eclipse.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
+import org.springframework.ide.eclipse.core.type.asm.EmptyAnnotationVisitor;
+import org.springframework.ide.eclipse.core.type.asm.EmptyMethodVisitor;
 
 /**
  * Validates a given {@link IBean}'s if all {@link Required} annotated properties are configured.
+ * 
  * @author Christian Dupuis
  * @author Terry Denney
+ * @author Martin Lippert
  * @since 2.0.1
  */
 public class RequiredPropertyRule extends AbstractBeanValidationRule {
@@ -123,7 +126,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 		try {
 			while (className != null && !Object.class.getName().equals(className)) {
 				ClassReader classReader = classReaderFactory.getClassReader(className);
-				classReader.accept(visitor, false);
+				classReader.accept(visitor, 0);
 				className = visitor.getSuperClassName();
 			}
 		}
@@ -152,17 +155,17 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 		@Override
 		public MethodVisitor visitMethod(int modifier, final String name, String params, String arg3, String[] arg4) {
 			if (name.startsWith("set")) {
-				return new EmptyVisitor() {
+				return new EmptyMethodVisitor() {
 					@Override
 					public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 						if (requiredAnnotationTypes.contains(desc)) {
 							requiredPropertyNames.add(java.beans.Introspector.decapitalize(name.substring(3)));
 						}
-						return new EmptyVisitor();
+						return new EmptyAnnotationVisitor();
 					}
 				};
 			}
-			return new EmptyVisitor();
+			return new EmptyMethodVisitor();
 		}
 
 		public boolean isRequiredProperty(String propertyName) {

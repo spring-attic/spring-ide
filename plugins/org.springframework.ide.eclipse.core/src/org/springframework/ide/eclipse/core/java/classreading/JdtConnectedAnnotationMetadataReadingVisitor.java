@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.core.java.classreading.framework.AnnotationMetadataReadingVisitor;
 
 /**
  * Addition to the standard metadata reading visitor that connects this class metadata to the corresponding

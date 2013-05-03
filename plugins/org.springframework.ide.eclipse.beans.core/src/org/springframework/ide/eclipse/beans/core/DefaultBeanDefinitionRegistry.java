@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader
  * specific bean definition formats are typically implemented separately rather than as bean factory subclasses.
  * <p>
  * <b>Creation of bean instances is not supported!!!</b>
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -177,8 +178,7 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory implement
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public void registerQualifierType(Class cls) {
+	public void registerQualifierType(Class<?> cls) {
 	}
 
 	public <T> T getBean(Class<T> requiredType) throws BeansException {

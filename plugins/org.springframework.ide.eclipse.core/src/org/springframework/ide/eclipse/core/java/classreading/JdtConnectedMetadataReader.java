@@ -39,7 +39,7 @@ public class JdtConnectedMetadataReader implements MetadataReader {
 
 		try {
 			ClassReader classReader = classReaderFactory.getClassReader(type.getFullyQualifiedName());
-			classReader.accept(this.visitor, false);
+			classReader.accept(this.visitor, 0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

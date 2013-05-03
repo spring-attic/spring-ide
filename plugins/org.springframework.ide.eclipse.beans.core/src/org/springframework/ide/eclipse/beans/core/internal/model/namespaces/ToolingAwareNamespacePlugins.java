@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 Spring IDE Developers
+ * Copyright (c) 2009, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 /**
  * Extension to Spring DM's {@link NamespacePlugins} class that handles registering of XSDs in Eclipse' XML Catalog and
  * builds an internal representation of {@link INamespaceDefinition}s.
+ * 
  * @author Christian Dupuis
  * @author Martin Lippert
  * @since 2.2.5
@@ -89,7 +90,6 @@ public class ToolingAwareNamespacePlugins extends NamespacePlugins implements IN
 	/**
 	 * Register the XML namespace catalog and build the {@link INamespaceDefinition}s.
 	 */
-	@SuppressWarnings("unchecked")
 	private void addNamespaceDefinition(Bundle bundle) {
 
 		Set<NamespaceDefinition> namespaceDefinitions = new HashSet<NamespaceDefinition>();
