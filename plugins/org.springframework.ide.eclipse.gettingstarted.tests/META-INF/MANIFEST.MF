@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests to Verify Getting Started Materials
+Bundle-SymbolicName: org.springframework.ide.eclipse.gettingstarted.tests
+Bundle-Version: 3.3.0.qualifier
+Bundle-Activator: org.springframework.ide.eclipse.gettingstarted.tests.GettingStartedTestActivator
+Bundle-Vendor: SpringSource
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.junit4,
+ org.springframework.ide.eclipse.wizard,
+ org.springsource.ide.eclipse.dashboard.ui,
+ org.springsource.ide.eclipse.commons.frameworks.test.util,
+ org.springsource.ide.eclipse.commons.tests.util,
+ org.eclipse.core.resources
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy

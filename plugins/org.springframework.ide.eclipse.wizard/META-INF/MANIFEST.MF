@@ -45,6 +45,7 @@ Export-Package: org.springframework.ide.eclipse.wizard,
  org.springframework.ide.eclipse.wizard.template.infrastructure.processor,
  org.springframework.ide.eclipse.wizard.template.infrastructure.ui,
  org.springframework.ide.eclipse.wizard.template.newproject,
+ org.springframework.ide.eclipse.wizard.template.util,
  org.springframework.ide.eclipse.wizard.ui
 Bundle-ActivationPolicy: lazy
 Import-Package: org.springframework.util;version="[3.0.5.RELEASE,4.1.0)"
