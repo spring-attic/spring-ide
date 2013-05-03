@@ -23,7 +23,7 @@ import org.eclipse.osgi.util.NLS;
 import org.springframework.util.Assert;
 import org.springsource.ide.eclipse.commons.core.ResourceProvider;
 
-class NameUrlPair {
+public class NameUrlPair {
 
 	private String urlString;
 
