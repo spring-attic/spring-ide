@@ -18,9 +18,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -45,7 +46,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * @author Leo Dos Santos
  */
 @SuppressWarnings({ "deprecation", "restriction" })
-public class NewSpringProjectCreationPage extends WizardPage {
+public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 
 	private static final String CONFIG_PROPERTY_PREFIX = "ConfigurationPropertyPage." + "tabConfigFiles.";
 
@@ -70,10 +71,11 @@ public class NewSpringProjectCreationPage extends WizardPage {
 
 	private Button versionCheckbox;
 
-	public NewSpringProjectCreationPage(String pageName) {
-		super(pageName);
+	public NewSpringProjectCreationPage() {
+
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -87,11 +89,30 @@ public class NewSpringProjectCreationPage extends WizardPage {
 		createFacetsGroup(composite);
 		setPageComplete(validatePage());
 
+		Control jreControl = createJRESelectionControl(composite);
+		jreControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
 		// Show description on opening
 		setErrorMessage(null);
 		setMessage(null);
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
+
+		setTitle("Spring Configuration");
+
+		refreshProjectValues();
+	}
+
+	protected void refreshProjectValues() {
+		NewSpringProjectWizard wizard = (NewSpringProjectWizard) getWizard();
+		NewSpringProjectWizardMainPage mainPage = wizard.getMainPage();
+
+		setProjectName(mainPage.getProjectName());
+		setProjectLocationURI(mainPage.getProjectLocationURI());
+	}
+
+	public void performFinish() {
+		refreshProjectValues();
 	}
 
 	public boolean enableImports() {

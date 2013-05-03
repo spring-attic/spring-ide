@@ -53,15 +53,11 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 
 	private final Set<WizardTextKeyValidator> validators;
 
-	private final String wizardTitle;
-
 	private static final String DEFAULT_DESCRIPTION = Messages.getString("TemplateWizardPage.DEFAULT_DESCRIPTION"); //$NON-NLS-1$
 
-	protected NewTemplateWizardPage(String pageTitle, List<WizardUIInfoElement> elements, String wizardTitle,
-			ImageDescriptor icon) {
+	protected NewTemplateWizardPage(String pageTitle, List<WizardUIInfoElement> elements, ImageDescriptor icon) {
 		super("Template Wizard Page"); //$NON-NLS-1$
 		this.elements = elements;
-		this.wizardTitle = wizardTitle;
 
 		this.controls = new HashMap<String, Control>();
 		this.errorMessages = new String[elements.size()];
@@ -109,12 +105,9 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 		controlLayout.verticalSpacing = 10;
 		control.setLayout(controlLayout);
 
-		//
-		//		getWizard().setWindowTitle("New " + wizardTitle); //$NON-NLS-1$
-
 		Composite container = new Composite(control, SWT.NONE);
 		container.setLayout(new GridLayout());
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		for (int i = 0; i < elements.size(); i++) {
 			final WizardUIInfoElement element = elements.get(i);
@@ -158,7 +151,7 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 			else {
 				Label descriptionLabel = new Label(container, SWT.NONE);
 				descriptionLabel.setText(description);
-				descriptionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
+				descriptionLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 				final Text text = new Text(container, SWT.BORDER);
 				text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

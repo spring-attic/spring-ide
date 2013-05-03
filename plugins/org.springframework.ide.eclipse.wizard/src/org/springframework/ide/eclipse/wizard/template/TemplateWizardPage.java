@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -31,7 +31,11 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardU
 
 /**
  * @author Terry Denney
+ * @deprecated This was a near duplicate of {@link NewTemplateWizardPage} and
+ * may no longer be needed
+ * @see NewTemplateWizardPage
  */
+@Deprecated
 public class TemplateWizardPage extends WizardPage implements ITemplateWizardPage {
 
 	private IWizardPage nextPage;
@@ -46,15 +50,12 @@ public class TemplateWizardPage extends WizardPage implements ITemplateWizardPag
 
 	private final Set<WizardTextKeyValidator> validators;
 
-	private final String wizardTitle;
-
 	private static final String DEFAULT_DESCRIPTION = Messages.getString("TemplateWizardPage.DEFAULT_DESCRIPTION"); //$NON-NLS-1$
 
 	protected TemplateWizardPage(String pageTitle, List<WizardUIInfoElement> elements, String wizardTitle,
 			ImageDescriptor icon) {
 		super("Template Wizard Page"); //$NON-NLS-1$
 		this.elements = elements;
-		this.wizardTitle = wizardTitle;
 
 		this.controls = new HashMap<String, Control>();
 		this.errorMessages = new String[elements.size()];

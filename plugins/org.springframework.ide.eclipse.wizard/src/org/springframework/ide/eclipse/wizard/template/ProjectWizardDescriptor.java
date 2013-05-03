@@ -1,5 +1,7 @@
 package org.springframework.ide.eclipse.wizard.template;
 
+import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
+
 /**
  * Describes the type of Spring project that the New Spring Project wizard
  * should create.
@@ -7,29 +9,13 @@ package org.springframework.ide.eclipse.wizard.template;
  */
 public class ProjectWizardDescriptor {
 
-	static enum ProjectType {
-		SIMPLE(), TEMPLATE()
+	private final Template template;
+
+	public ProjectWizardDescriptor(Template template) {
+		this.template = template;
 	}
 
-	static enum BuildType {
-		Maven, Java
+	public Template getTemplate() {
+		return template;
 	}
-
-	private final ProjectType projectType;
-
-	private final BuildType buildType;
-
-	public ProjectWizardDescriptor(ProjectType projectType, BuildType buildType) {
-		this.projectType = projectType;
-		this.buildType = buildType;
-	}
-
-	public ProjectType getProjectType() {
-		return projectType;
-	}
-
-	public BuildType getBuildType() {
-		return buildType;
-	}
-
 }

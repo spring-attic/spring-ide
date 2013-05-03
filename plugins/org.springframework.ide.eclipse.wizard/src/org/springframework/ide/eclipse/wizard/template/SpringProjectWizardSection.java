@@ -14,7 +14,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.swt.widgets.Control;
 
 /**
  * Provides a section to the New Spring Project Wizard, with two primary
@@ -29,6 +28,11 @@ import org.eclipse.swt.widgets.Control;
  * 
  * In addition, the section can also contribute additional UI to both the main
  * page of the New Spring Project Wizard or additional pages to the wizard.
+ * 
+ * <p/>
+ * 
+ * The project creation and configuration are separated, as they may occur at
+ * different stages in the lifecycle of the New Spring Project wizard.
  * 
  */
 public abstract class SpringProjectWizardSection {
@@ -47,26 +51,7 @@ public abstract class SpringProjectWizardSection {
 		// Default is to do nothing
 	}
 
-	/**
-	 * Optional. Control that should be added to the main page with project
-	 * creation and configuration UI specific to the project type handled by
-	 * this section.
-	 * @return Control for main page in New Spring Project wizard, or null;
-	 */
-	public Control getMainPageControl() {
-		return null;
-	}
-
-	/**
-	 * 
-	 * Optional implementation. If further wizard UI is needed to create and
-	 * configure a project, return the next page of the wizard, or null if no
-	 * additional pages are needed. Subclasses must ensure that pages are added
-	 * to the wizard via IWizardPage.setWizard(..).
-	 * @return next page in the wizard. The page MUST have already been added to
-	 * the wizard prior to returning it.
-	 */
-	public IWizardPage getNextPage(IWizardPage page) {
+	public IWizardPage getNextPage(IWizardPage currentPage) {
 		return null;
 	}
 
@@ -81,17 +66,6 @@ public abstract class SpringProjectWizardSection {
 	public abstract IProject createProject(IProgressMonitor monitor) throws CoreException;
 
 	/**
-	 * Configure a project after it has been successfully created. The
-	 * configuration implementation can launch jobs to configure the project as
-	 * it is only invoked when the wizard finishes.
-	 * @param project
-	 * @return true if configuration succeeded, or configuration is deferred
-	 * after wizard finishes. False if configuration failed and the wizard
-	 * should remain open.
-	 */
-	public abstract boolean configureProject(IProject project);
-
-	/**
 	 * Determine if this section can create a project and optionally provide UI
 	 * for the project creation and configuration.
 	 * @param descriptor with the project and build types that was selected in
@@ -101,12 +75,23 @@ public abstract class SpringProjectWizardSection {
 	public abstract boolean canProvide(ProjectWizardDescriptor descriptor);
 
 	/**
-	 * If this section contributes additional UI, iterate through the pages and
-	 * additional UI to tell the wizard whether it can finish or not.
-	 * @return true if it can finish. False otherwise.
+	 * Configuration occurs after a project has been created, and it may not
+	 * occur right after the project has been created. Therefore the reason that
+	 * the project creation and configuration are separate.
+	 * @return A project configuration, if necessary. The configuration only
+	 * occurs after a project has been created.
+	 * @throws CoreException if error occurs during configuration
 	 */
-	public boolean canFinish() {
-		return true;
-	}
+	public abstract ProjectConfiguration getProjectConfiguration() throws CoreException;
+
+	/**
+	 * If this section contributes additional pages, tell the wizard whether it
+	 * can finish or not based on the state of the pages. Note that this only
+	 * pertains to the state of the pages, not whether the project was
+	 * successfully created or configured.
+	 * @return true if pages contributed by this section can finish. False
+	 * otherwise.
+	 */
+	public abstract boolean canFinish();
 
 }

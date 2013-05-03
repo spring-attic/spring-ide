@@ -112,12 +112,16 @@ import com.thoughtworks.xstream.XStreamException;
  * @author Leo Dos Santos
  * @author Christian Dupuis
  * @author Kaitlin Duck Sherwood
+ * @deprecated This has been converted into a part that is independent of a
+ * wizard
+ * @see TemplateSelectionPart
  */
+@Deprecated
 public class TemplateSelectionWizardPage extends WizardPage {
 
 	private Template selectedTemplate;
 
-	private NewTemplateWizardPage templateWizardPage;
+	private ITemplateWizardPage templateWizardPage;
 
 	private final List<Template> templates;
 
@@ -495,15 +499,13 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 		try {
 			for (int i = 0; i < info.getPageCount(); i++) {
+				page = new NewTemplateWizardPage(info.getPage(i).getDescription(), info.getElementsForPage(i),
+						selectedTemplate.getIcon());
 				if (templateWizardPage == null) {
-					templateWizardPage = new NewTemplateWizardPage(info.getPage(i).getDescription(),
-							info.getElementsForPage(i), selectedTemplate.getName(), selectedTemplate.getIcon());
-					page = templateWizardPage;
+
+					templateWizardPage = page;
 				}
-				else {
-					page = new TemplateWizardPage(info.getPage(i).getDescription(), info.getElementsForPage(i),
-							selectedTemplate.getName(), selectedTemplate.getIcon());
-				}
+
 				page.setWizard(getWizard());
 				if (previousPage != null) {
 					previousPage.setNextPage(page);
