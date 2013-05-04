@@ -24,8 +24,10 @@ import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.asm.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ide.eclipse.beans.core.metadata.internal.model.DelegatingAnnotationReadingMetadataProvider;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -35,6 +37,7 @@ import org.springframework.ide.eclipse.core.java.annotation.AnnotationMetadataRe
 import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -299,6 +302,40 @@ public class JdtBasedAnnotationMetadataTest {
 		IMethod constructor = type.getMethod("AutowiredConstructorClass", new String[] {"QString;"});
 		Annotation annotation = beanMethodAnnotations.get(constructor);
 		assertEquals(Autowired.class.getName(), annotation.getAnnotationClass());
+	}
+
+	@Test
+	public void testAdvancedComponentScanCase() throws Exception {
+		IType type = JdtUtils.getJavaType(project, "org.test.spring.AdvancedComponentScanClass");
+		IAnnotationMetadata metadata = getAnnotationMetadata(type);
+
+		Annotation annotationMetadata = metadata.getTypeLevelAnnotation(ComponentScan.class.getName());
+		assertEquals(ComponentScan.class.getName(), annotationMetadata.getAnnotationClass());
+		
+		Set<AnnotationMemberValuePair> members = annotationMetadata.getMembers();
+		assertEquals(1, members.size());
+		
+		AnnotationMemberValuePair values = members.iterator().next();
+		assertEquals("excludeFilters", values.getName());
+		assertTrue(values.getValueAsObject() instanceof Type[]);
+		Type[] filterTypes = (Type[]) values.getValueAsObject();
+		
+		assertEquals(3, filterTypes.length);
+		assertEquals(Service.class.getName(), filterTypes[0].getClassName());
+		assertEquals(Configuration.class.getName(), filterTypes[1].getClassName());
+		assertEquals("org.test.spring.SimpleBeanClass", filterTypes[2].getClassName());
+	}
+
+	@Test
+	public void testAdvancedComponentScanWithEmptyArrayCase() throws Exception {
+		IType type = JdtUtils.getJavaType(project, "org.test.spring.AdvancedComponentScanClassWithEmptyArray");
+		IAnnotationMetadata metadata = getAnnotationMetadata(type);
+
+		Annotation annotationMetadata = metadata.getTypeLevelAnnotation(ComponentScan.class.getName());
+		assertEquals(ComponentScan.class.getName(), annotationMetadata.getAnnotationClass());
+		
+		Set<AnnotationMemberValuePair> members = annotationMetadata.getMembers();
+		assertEquals(0, members.size());
 	}
 
 }

@@ -475,6 +475,21 @@ public class JdtAnnotationMetadataTest {
 				|| filterTypes[2].getName().equals("org.test.spring.SimpleBeanClass"));
 	}
 
+	@Test
+	public void testAdvancedComponentScanAnnotationWithEmptyArray() throws Exception {
+		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
+		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.AdvancedComponentScanClassWithEmptyArray");
+		
+		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+
+		Map<String, Object> attributes = annotationMetadata.getAnnotationAttributes(ComponentScan.class.getName());
+		assertEquals(AnnotationAttributes[].class, attributes.get("excludeFilters").getClass());
+		AnnotationAttributes[] excludeFilters = (AnnotationAttributes[]) attributes.get("excludeFilters");
+		assertEquals(1, excludeFilters.length);
+		assertEquals(1, excludeFilters[0].size());
+		assertEquals(FilterType.ANNOTATION, excludeFilters[0].get("type"));
+	}
+
 	private boolean containsMethodReference(Set<MethodMetadata> methods, IMethod method) {
 		for (MethodMetadata methodMetadata : methods) {
 			if (((JdtConnectedMetadata)methodMetadata).getJavaElement().equals(method)) {

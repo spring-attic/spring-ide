@@ -26,4 +26,14 @@ public class EmptyAnnotationVisitor extends AnnotationVisitor {
 		super(SpringAsmInfo.ASM_VERSION);
 	}
 
+	@Override
+	public AnnotationVisitor visitAnnotation(String name, String desc) {
+		return this;
+	}
+
+	@Override
+	public AnnotationVisitor visitArray(String name) {
+		return this;
+	}
+
 }

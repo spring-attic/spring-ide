@@ -152,15 +152,16 @@ public class AnnotationMemberVisitor extends AnnotationVisitor {
 					buf.append(value.toString());
 					buf.append(", ");
 				}
+				
 				String value = buf.toString();
 				if (value.length() > 0) {
 					value = value.substring(0, value.length() - 2);
 				}
 
-				if (name.equals("value") && !advancedValueProcessing) {
+				if (typeOfArray != null && name.equals("value") && !advancedValueProcessing) {
 					annotation.addMember(new AnnotationMemberValuePair(null, value, (Object[]) values.toArray((Object[]) Array.newInstance(
 							typeOfArray, values.size()))));
-				} else {
+				} else if (typeOfArray != null && !annotation.hasMember(name)) {
 					annotation.addMember(new AnnotationMemberValuePair(name, value, (Object[]) values.toArray((Object[]) Array.newInstance(
 							typeOfArray, values.size()))));
 				}
