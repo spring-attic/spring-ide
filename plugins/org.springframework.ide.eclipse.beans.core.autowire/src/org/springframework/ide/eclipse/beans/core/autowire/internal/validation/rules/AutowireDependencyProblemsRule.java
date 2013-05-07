@@ -44,7 +44,7 @@ public class AutowireDependencyProblemsRule implements IValidationRule<IBeansCon
 	public void validate(IBeansConfig element, IBeansValidationContext context, IProgressMonitor monitor) {
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(element, (IBeansModelElement) context
 				.getContextElement());
-		provider.seProjectClassLoaderSupport(context.getProjectClassLoaderSupport());
+		provider.setProjectClassLoaderSupport(context.getProjectClassLoaderSupport());
 		
 		provider.resolveAutowiredDependencies();
 		for (ValidationProblem problem : provider.getValidationProblems()) {

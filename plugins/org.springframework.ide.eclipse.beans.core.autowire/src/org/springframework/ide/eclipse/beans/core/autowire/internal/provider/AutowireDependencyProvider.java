@@ -446,7 +446,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 		}
 	}
 
-	public void seProjectClassLoaderSupport(IProjectClassLoaderSupport classLoaderSupport) {
+	public void setProjectClassLoaderSupport(IProjectClassLoaderSupport classLoaderSupport) {
 		this.classLoaderSupport = classLoaderSupport;
 	}
 
