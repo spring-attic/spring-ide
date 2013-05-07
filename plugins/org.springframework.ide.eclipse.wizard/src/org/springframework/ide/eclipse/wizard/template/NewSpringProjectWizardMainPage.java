@@ -72,6 +72,17 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 
 	}
 
+	@Override
+	public boolean canFlipToNextPage() {
+		// Override the default behaviour so that instead of asking the wizard
+		// to get the next page, which may
+		// involve downloading a template content, ask the wizard if there are
+		// further pages
+		// which may rely on template metadata rather than actual
+		// downloaded template content.
+		return isPageComplete() && ((NewSpringProjectWizard) getWizard()).hasPages(this);
+	}
+
 	/**
 	 * 
 	 * @return the currently selected template, without processing the template
@@ -200,9 +211,11 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		else {
 			if (status.isOK()) {
 				setErrorMessage(null);
-				// Only display a message if it is not the default OK status
-				// message
-				if (status.getMessage() == null || !status.getMessage().equals(Status.OK_STATUS.getMessage())) {
+				// If the message is OK, set message to null
+				if (status.getMessage().equals(Status.OK_STATUS.getMessage())) {
+					setMessage(null);
+				}
+				else {
 					setMessage(status.getMessage());
 				}
 			}
@@ -218,29 +231,20 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 			if (validateWizardPages) {
 				update();
 			}
-
 		}
-
 	}
 
 	@Override
 	public boolean isPageComplete() {
-
-		boolean isComplete = super.isPageComplete();
-		if (isComplete) {
-			if (part == null) {
-				isComplete = false;
-			}
-			else {
-				IStatus status = part.getStatus();
-				// Don't force validation of other pages, as it may cause a
-				// infinite
-				// loop since most likely
-				// isPageComplete was called due to another wizard validation.
-				setStatus(status, false);
-				isComplete = part.isValid();
-			}
-		}
-		return isComplete;
+		return super.isPageComplete() && part != null && part.isValid();
 	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (part != null) {
+			part.dispose();
+		}
+	}
+
 }

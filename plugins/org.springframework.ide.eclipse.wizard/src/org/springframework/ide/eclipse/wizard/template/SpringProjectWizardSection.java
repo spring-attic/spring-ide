@@ -56,6 +56,15 @@ public abstract class SpringProjectWizardSection {
 	}
 
 	/**
+	 * True if the section contributes more pages after the current one. False
+	 * otherwise. This is meant to be a light-weight alternative to actually
+	 * creating a page given a current page.
+	 */
+	public boolean hasNextPage(IWizardPage currentPage) {
+		return false;
+	}
+
+	/**
 	 * Creates a project. This is may be invoked by the New Spring Project
 	 * wizard framework as a workspace job.
 	 * @param monitor

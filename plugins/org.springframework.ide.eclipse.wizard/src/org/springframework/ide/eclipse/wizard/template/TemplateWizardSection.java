@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.wizard.template;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,10 +20,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
@@ -37,7 +34,14 @@ import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 import com.thoughtworks.xstream.XStreamException;
 
 /**
- * Section responsible for creating a Spring project from a template.
+ * Section responsible for creating a Spring project from a template. Note that
+ * the actual template contents are not downloaded until a user clicks the
+ * "Next" button in the wizard, which in turn requests this section for
+ * additional pages. The "Next" button is enabled/disabled by a lighter weight
+ * calculation that does not require to download the contents of the template to
+ * determine if additional pages are present or not. Other metadata related to
+ * the template determines if the "Next" button in the wizard should be enabled.
+ * See the Template API.
  * 
  */
 public class TemplateWizardSection extends SpringProjectWizardSection {
@@ -52,6 +56,32 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 		super(wizard);
 	}
 
+	@Override
+	public boolean hasNextPage(IWizardPage currentPage) {
+		// This check is performed to enable/disable the Next button without
+		// having to download the contents of the template
+		// Only check if there is one more page after the main page. Any
+		// subsequent pages after the second page are
+		// indicated within the implementation of the second page.
+		if (currentPage == getWizard().getMainPage()) {
+			Template template = getWizard().getMainPage().getSelectedTemplate();
+			if (template == null) {
+				return false;
+			}
+
+			if (template instanceof SimpleProject) {
+				return ((SimpleProject) template).hasWizardPages();
+			}
+			else {
+				// Assume it does have wizard pages, and that the wizard pages
+				// will be populated once the
+				// template content is downloaded
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * 
 	 * @param template
@@ -63,8 +93,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 		if (template == null) {
 			return null;
 		}
-		URL jsonWizardUIDescriptor;
-		jsonWizardUIDescriptor = template.getTemplateLocation();
+		URL jsonWizardUIDescriptor = template.getTemplateLocation();
 
 		if (jsonWizardUIDescriptor == null) {
 			return null;
@@ -107,53 +136,72 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				// itself.
 				return null;
 			}
-
-			// Download the template contents
-			try {
-				getWizard().getMainPage().downloadTemplateContent();
+			else if (template instanceof SimpleProject) {
+				// Handle the special case templates with no pages
+				SimpleProject simpleProject = (SimpleProject) template;
+				if (!simpleProject.hasWizardPages()) {
+					return null;
+				}
 			}
-			catch (CoreException ce) {
-				handleError(ce.getStatus());
-				return null;
-			}
-
-			WizardUIInfo info;
-			try {
-				info = getUIInfo(template);
-			}
-			catch (CoreException e1) {
-				handleError(e1.getStatus());
-				return null;
-			}
-
-			ITemplateWizardPage previousPage = null;
-
-			ITemplateWizardPage templatePage = null;
-
-			try {
-				for (int i = 0; i < info.getPageCount(); i++) {
-
-					templatePage = new NewTemplateWizardPage(info.getPage(i).getDescription(),
-							info.getElementsForPage(i), template.getIcon());
-					templatePage.setWizard(getWizard());
-
-					if (firstTemplatePage == null) {
-						firstTemplatePage = templatePage;
-					}
-
-					if (previousPage != null) {
-						previousPage.setNextPage(templatePage);
-					}
-
-					previousPage = templatePage;
+			else {
+				// Download the template contents
+				try {
+					getWizard().getMainPage().downloadTemplateContent();
+				}
+				catch (CoreException ce) {
+					handleError(ce.getStatus());
+					return null;
 				}
 
+				WizardUIInfo info;
+				try {
+					info = getUIInfo(template);
+				}
+				catch (CoreException e1) {
+					handleError(e1.getStatus());
+					return null;
+				}
+
+				ITemplateWizardPage previousPage = null;
+
+				ITemplateWizardPage templatePage = null;
+
+				ITemplateWizardPage firstPage = null;
+
+				try {
+					for (int i = 0; i < info.getPageCount(); i++) {
+
+						templatePage = new NewTemplateWizardPage(info.getPage(i).getDescription(),
+								info.getElementsForPage(i), template.getIcon());
+						templatePage.setWizard(getWizard());
+
+						// Always set a new first template page, as the template
+						// selection may have changed and may
+						// have a different associated template page
+						if (firstPage == null) {
+							firstPage = templatePage;
+						}
+
+						if (previousPage != null) {
+							previousPage.setNextPage(templatePage);
+						}
+
+						previousPage = templatePage;
+					}
+				}
+				catch (Exception e) {
+					handleError(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
+							"Failed to load wizard page for project template for " + template.getName(), e));
+				}
+
+				// Regardless of whether wizard pages where successfully
+				// resolved for the given template, update
+				// the first page value, even if it is null so that the wizard
+				// does not display a previous first page of another
+				// template for the current template.
+				firstTemplatePage = firstPage;
+
 				return firstTemplatePage;
-			}
-			catch (Exception e) {
-				handleError(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-						"Failed to load wizard page for project template for " + info.getProjectNameToken(), e));
-				return null;
 			}
 		}
 		return null;
@@ -174,18 +222,10 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 		UiStatusHandler.logAndDisplay(status);
 	}
 
-	protected IPath getLocationPath() {
-		URI uri = getWizard().getMainPage().getProjectLocationURI();
-		if (uri != null) {
-			return new Path(uri.toString());
-		}
-		return null;
-	}
-
 	@Override
 	public boolean canProvide(ProjectWizardDescriptor descriptor) {
 		return descriptor != null && descriptor.getTemplate() != null
-				&& !"Simple Java".equals(descriptor.getTemplate().getName());
+				&& !TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
 	}
 
 	public void selectAndReveal(final IResource newResource) {

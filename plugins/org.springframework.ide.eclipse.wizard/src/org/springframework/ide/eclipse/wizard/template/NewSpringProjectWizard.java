@@ -86,6 +86,21 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 		addPage(mainPage);
 	}
 
+	/**
+	 * 
+	 * @param page current page
+	 * @return true if the template section contributes more pages to the wizard
+	 * given a current page. False otherwise
+	 */
+	public boolean hasPages(IWizardPage page) {
+		SpringProjectWizardSection section = getSection();
+
+		if (section != null) {
+			return section.hasNextPage(page);
+		}
+		return false;
+	}
+
 	// @Override
 	@Override
 	public boolean canFinish() {

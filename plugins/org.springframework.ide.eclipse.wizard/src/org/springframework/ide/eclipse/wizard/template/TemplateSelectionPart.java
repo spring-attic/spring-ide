@@ -48,7 +48,6 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -129,12 +128,12 @@ public class TemplateSelectionPart {
 
 	private Button refreshButton;
 
-	private final IWizardPageStatusHandler validator;
+	private final IWizardPageStatusHandler statusHandler;
 
-	public TemplateSelectionPart(NewSpringProjectWizard wizard, IWizardPageStatusHandler validator) {
+	public TemplateSelectionPart(NewSpringProjectWizard wizard, IWizardPageStatusHandler statusHandler) {
 		this.wizard = wizard;
 		templates = new ArrayList<Template>();
-		this.validator = validator;
+		this.statusHandler = statusHandler;
 	}
 
 	public Control createControl(Composite parent) {
@@ -318,16 +317,26 @@ public class TemplateSelectionPart {
 
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection = treeViewer.getSelection();
-				Template template = null;
 				if (selection instanceof TreeSelection) {
 					Object element = ((TreeSelection) selection).getFirstElement();
 					if (element instanceof Template) {
-						if (element != null) {
-							template = ((Template) element);
-						}
+						setSeletectedTemplate((Template) element);
+					}
+					else if (element instanceof TemplateCategory) {
+						// Note: ONLY clear the selected template if the
+						// selection is a template category.
+						// Do not clear the template if there is an empty
+						// selection in the tree, as there
+						// are times when the viewer
+						// will set an empty selection in the tree due to a
+						// refresh operation, and if
+						// a template was already selected prior to that refresh
+						// request, it should not be
+						// overwritten with null as other operations will
+						// require that the selected template not be changed
+						setSeletectedTemplate(null);
 					}
 				}
-				setSeletectedTemplate(template);
 			}
 
 		});
@@ -362,12 +371,11 @@ public class TemplateSelectionPart {
 		if (selectedTemplate != null) {
 			setDescription(selectedTemplate);
 		}
-		setStatus();
+		handleChanged();
 	}
 
 	public boolean isValid() {
-		return getStatus().getSeverity() != IStatus.ERROR && getTemplate() != null
-				&& getTemplate().getTemplateData() != null;
+		return getStatus().getSeverity() != IStatus.ERROR && getTemplate() != null;
 	}
 
 	public IStatus getStatus() {
@@ -389,15 +397,15 @@ public class TemplateSelectionPart {
 	}
 
 	protected void setError(String error) {
-		if (validator != null) {
-			validator.setStatus(new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, error), false);
+		if (statusHandler != null) {
+			statusHandler.setStatus(new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, error), false);
 		}
 	}
 
-	protected void setStatus() {
+	protected void handleChanged() {
 		IStatus status = getStatus();
-		if (validator != null) {
-			validator.setStatus(status, true);
+		if (statusHandler != null) {
+			statusHandler.setStatus(status, true);
 		}
 	}
 
@@ -460,23 +468,6 @@ public class TemplateSelectionPart {
 					catch (OperationCanceledException e) {
 						throw new InterruptedException();
 					}
-					// Check the exact nature of the NPE to log a more
-					// accurate error, as this may not necessarily be network
-					// related. This code was retained from older
-					// implementations of the template wizard (STS 3.2.0 and
-					// earlier) therefore can't be
-					// discarded
-					// until the issue that caused this is investigated further
-					catch (NullPointerException e) {
-						throw new InvocationTargetException(
-								new CoreException(
-										new Status(
-												IStatus.ERROR,
-												WizardPlugin.PLUGIN_ID,
-												NLS.bind(
-														"Error downloading template - possibly the network connection went down",
-														null))));
-					}
 					finally {
 						monitor.done();
 					}
@@ -526,7 +517,20 @@ public class TemplateSelectionPart {
 		for (ContentItem item : sortedItems) {
 			String templateId = item.getId();
 			if (!templateIds.contains(templateId)) {
-				templates.add(new Template(item, null));
+				Template template = null;
+				// Handle the special cases: Simple Java and Simple Maven, as
+				// they are not true templates.
+				if (TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(templateId)) {
+					template = new SimpleProject(item, null, true);
+				}
+				else if (TemplateConstants.SIMPLE_MAVEN_TEMPLATE_ID.equals(templateId)) {
+					template = new SimpleProject(item, null, false);
+				}
+				else {
+					template = new Template(item, null);
+				}
+
+				templates.add(template);
 				templateIds.add(templateId);
 			}
 		}
@@ -588,10 +592,8 @@ public class TemplateSelectionPart {
 	}
 
 	private void refreshPage() {
-		// selectedTemplate = null;
 
 		treeViewer.refresh(true);
-		treeViewer.setSelection(new StructuredSelection());
 
 		boolean needsDownload = false;
 		for (Template template : templates) {
@@ -605,8 +607,6 @@ public class TemplateSelectionPart {
 		legendText.setVisible(needsDownload);
 		descriptionText.setText(""); //$NON-NLS-1$
 		refreshButton.setEnabled(true);
-		//
-		// setPageComplete(false);
 	}
 
 	private void setDescription(Template template) {

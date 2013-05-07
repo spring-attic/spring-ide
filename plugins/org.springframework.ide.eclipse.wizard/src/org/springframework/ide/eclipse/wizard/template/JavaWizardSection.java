@@ -57,9 +57,13 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 
 	@Override
 	public boolean canProvide(ProjectWizardDescriptor descriptor) {
-
 		return descriptor != null && descriptor.getTemplate() != null
-				&& "Simple Java".equals(descriptor.getTemplate().getName());
+				&& TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
+	}
+
+	@Override
+	public boolean hasNextPage(IWizardPage currentPage) {
+		return currentPage == getWizard().getMainPage() || currentPage == springCreationPage;
 	}
 
 	@Override
