@@ -209,13 +209,22 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 	@Override
 	public boolean canFinish() {
-		if (firstTemplatePage != null) {
-			return firstTemplatePage.isPageComplete();
+
+		Template template = getWizard().getMainPage().getSelectedTemplate();
+		if (template == null) {
+			return false;
 		}
-		// Not all templates contribute pages to the wizard, therefore by
-		// default assume the wizard can be completed if no template page is
-		// set.
-		return true;
+		else if (!(template instanceof SimpleProject)) {
+			// Non-simple project templates should always have a template page,
+			// therefore inquire finish state from the template page
+			return firstTemplatePage != null && firstTemplatePage.isPageComplete();
+		}
+		else {
+			// if it is a simple project, let the simple project pages determine
+			// if the wizard can complete.
+			return true;
+		}
+
 	}
 
 	protected void handleError(IStatus status) {

@@ -14,10 +14,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -30,17 +31,16 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.wizard.WizardImages;
-import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 
 /**
  * @author Terry Denney
  * @author Leo Dos Santos
  * @author Christian Dupuis
  * @author Martin Lippert
+ * @author Nieraj Singh
  */
 @SuppressWarnings("restriction")
 // TODO: remove dependency to NewElementWizard? Finish page functionality that
@@ -149,54 +149,32 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 			// configuration on the project, which
 			// may involve workspace modification operations, if the section
 			// implementation specifies it
-			SpringProjectWizardSection section = getSection();
+			final SpringProjectWizardSection section = getSection();
 
 			if (section != null) {
-
+				CoreException coreException = null;
 				try {
-					project = section.createProject(new NullProgressMonitor());
-					final ProjectConfiguration configuration = section.getProjectConfiguration();
+					// Creating and configuring projects are separate steps for
+					// now
+					// as creating projects may need to be run in the UI thread
+					// to access
+					// wizard page widgets
+					// while configuring the project does not.
+					IProject project = createProject(section);
 
-					if (configuration != null) {
-						WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
-							@Override
-							protected void execute(IProgressMonitor monitor) throws CoreException,
-									InvocationTargetException, InterruptedException {
-
-								configuration.configureProject(project, monitor);
-							}
-						};
-						getContainer().run(true, true, op);
-
-					}
-
+					configureProject(project, section);
 				}
 				catch (InterruptedException e) {
 					return false;
 				}
 				catch (InvocationTargetException error) {
-					// FIXNS: Different ways of displaying error are
-					// retained from older implementations (STS 3.2.0 and
-					// older). Check if only
-					// one version can be used
 
 					Throwable t = error.getTargetException();
 					if (t instanceof CoreException) {
-						if (((CoreException) t).getStatus().getCode() == IResourceStatus.CASE_VARIANT_EXISTS) {
-							MessageDialog.openError(
-									getShell(),
-									NewSpringProjectWizardMessages.NewProject_errorMessage,
-									NLS.bind(NewSpringProjectWizardMessages.NewProject_caseVariantExistsError,
-											project.getName()));
-						}
-						else {
-							// no special message
-							ErrorDialog.openError(getShell(), NewSpringProjectWizardMessages.NewProject_errorMessage,
-									null, ((CoreException) t).getStatus());
-						}
+						coreException = (CoreException) t;
 					}
 					else {
-						// CoreExceptions are handled above, but unexpected
+						// CoreExceptions are handled separately, but unexpected
 						// runtime
 						// exceptions and errors may still occur.
 						BeansUIPlugin.getDefault().getLog()
@@ -206,23 +184,92 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 					}
 				}
 				catch (CoreException ce) {
-					UiStatusHandler.logAndDisplay(ce.getStatus());
+					coreException = ce;
 				}
 
-				// Add to working sets even if there were configuration
-				// errors
-				IWorkingSet[] workingSets = getWorkingSets();
-				if (workingSets.length > 0) {
-					PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
+				if (coreException != null) {
+					handleError(coreException);
 				}
+
 			}
-
-			// The project was created , even if there are errors, still
-			// select and reveal it
-			selectAndReveal(project);
 
 		}
 		return finish;
+	}
+
+	protected IProject createProject(final SpringProjectWizardSection section) throws InterruptedException,
+			InvocationTargetException, CoreException {
+
+		// Prevent workspace builds when first creating project to avoid error
+		// markers
+		// from appearing, as the project will later be configured and built
+		// again.
+		enableWorkspaceBuild(false);
+
+		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+			@Override
+			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
+					InterruptedException {
+				project = section.createProject(monitor);
+
+			}
+		};
+
+		// Do not fork. Run in UI thread as project creation may
+		// require access to widgets in wizard pages
+		getContainer().run(false, true, op);
+		return project;
+	}
+
+	protected void configureProject(final IProject project, final SpringProjectWizardSection section)
+			throws InterruptedException, InvocationTargetException, CoreException {
+		enableWorkspaceBuild(true);
+
+		// Add to working sets even if there were configuration
+		// errors
+		final IWorkingSet[] workingSets = getWorkingSets();
+
+		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+			@Override
+			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
+					InterruptedException {
+
+				new ProjectConfigurationOperation(project, section.getProjectConfiguration(), workingSets).run(monitor);
+
+				// The project was created , even if there are
+				// errors, still
+				// select and reveal it
+				selectAndReveal(project);
+
+			}
+		};
+
+		// Fork into non-UI thread as project configuration will
+		// require building
+		getContainer().run(true, true, op);
+
+	}
+
+	protected void enableWorkspaceBuild(boolean enable) throws CoreException {
+		IWorkspaceDescription wsd = ResourcesPlugin.getWorkspace().getDescription();
+		if (!wsd.isAutoBuilding() == enable) {
+			wsd.setAutoBuilding(enable);
+			ResourcesPlugin.getWorkspace().setDescription(wsd);
+		}
+	}
+
+	protected void handleError(CoreException coreException) {
+		if (coreException != null) {
+			if (coreException.getStatus().getCode() == IResourceStatus.CASE_VARIANT_EXISTS) {
+				MessageDialog.openError(getShell(), NewSpringProjectWizardMessages.NewProject_errorMessage,
+						NLS.bind(NewSpringProjectWizardMessages.NewProject_caseVariantExistsError, project.getName()));
+			}
+			else {
+				// no special message
+				ErrorDialog.openError(getShell(), NewSpringProjectWizardMessages.NewProject_errorMessage, null,
+						coreException.getStatus());
+			}
+		}
 	}
 
 	public IWorkingSet[] getWorkingSets() {
