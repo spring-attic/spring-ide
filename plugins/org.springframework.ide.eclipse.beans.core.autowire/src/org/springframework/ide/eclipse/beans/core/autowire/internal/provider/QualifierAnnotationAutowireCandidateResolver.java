@@ -27,7 +27,6 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -48,20 +47,20 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 
 	private final Set<Class<? extends Annotation>> qualifierTypes = new LinkedHashSet<Class<? extends Annotation>>();
 
-	private Class<? extends Annotation> valueAnnotationType = Value.class;
-	
 	private IInjectionMetadataProviderProblemReporter problemReporter = new PassThroughProblemReporter();
+
+	private Class<? extends Annotation> valueAnnotationType;
 
 	/**
 	 * Create a new QualifierAnnotationAutowireCandidateResolver
 	 * for Spring's standard {@link Qualifier} annotation.
 	 * <p>Also supports JSR-330's {@link javax.inject.Qualifier} annotation, if available.
 	 */
-	public QualifierAnnotationAutowireCandidateResolver() {
-		this.qualifierTypes.add(Qualifier.class);
-		ClassLoader cl = QualifierAnnotationAutowireCandidateResolver.class.getClassLoader();
+	public QualifierAnnotationAutowireCandidateResolver(ClassLoader cl) {
 		try {
+			this.qualifierTypes.add((Class<? extends Annotation>) cl.loadClass(Qualifier.class.getName()));
 			this.qualifierTypes.add((Class<? extends Annotation>) cl.loadClass("javax.inject.Qualifier"));
+			this.valueAnnotationType = (Class<? extends Annotation>) cl.loadClass(Value.class.getName());
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
@@ -71,27 +70,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	public void setProblemReporter(IInjectionMetadataProviderProblemReporter problemReporter) {
 		this.problemReporter = problemReporter;
 	}
-
-	/**
-	 * Create a new QualifierAnnotationAutowireCandidateResolver
-	 * for the given qualifier annotation type.
-	 * @param qualifierType the qualifier annotation to look for
-	 */
-	public QualifierAnnotationAutowireCandidateResolver(Class<? extends Annotation> qualifierType) {
-		Assert.notNull(qualifierType, "'qualifierType' must not be null");
-		this.qualifierTypes.add(qualifierType);
-	}
-
-	/**
-	 * Create a new QualifierAnnotationAutowireCandidateResolver
-	 * for the given qualifier annotation types.
-	 * @param qualifierTypes the qualifier annotations to look for
-	 */
-	public QualifierAnnotationAutowireCandidateResolver(Set<Class<? extends Annotation>> qualifierTypes) {
-		Assert.notNull(qualifierTypes, "'qualifierTypes' must not be null");
-		this.qualifierTypes.addAll(qualifierTypes);
-	}
-
 
 	/**
 	 * Register the given type to be used as a qualifier when autowiring.
@@ -105,19 +83,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 */
 	public void addQualifierType(Class<? extends Annotation> qualifierType) {
 		this.qualifierTypes.add(qualifierType);
-	}
-
-	/**
-	 * Set the 'value' annotation type, to be used on fields, method parameters
-	 * and constructor parameters.
-	 * <p>The default value annotation type is the Spring-provided
-	 * {@link Value} annotation.
-	 * <p>This setter property exists so that developers can provide their own
-	 * (non-Spring-specific) annotation type to indicate a default value
-	 * expression for a specific argument.
-	 */
-	public void setValueAnnotationType(Class<? extends Annotation> valueAnnotationType) {
-		this.valueAnnotationType = valueAnnotationType;
 	}
 
 	/**
