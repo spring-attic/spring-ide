@@ -1413,7 +1413,7 @@ public abstract class BeansModelUtils {
 	public static IType resolveBeanType(IBean bean) {
 		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils.getMergedBeanDefinition(bean, null);
 		String mergedClassName = mergedBd.getBeanClassName();
-		return extractBeanClass(mergedBd, bean, mergedClassName, getParentOfClass(bean, BeansConfig.class));
+		return extractBeanClass(mergedBd, bean, mergedClassName, getParentOfClass(bean, IBeansConfig.class));
 	}
 
 	/**
