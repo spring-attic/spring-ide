@@ -71,6 +71,22 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 
 	private Button versionCheckbox;
 
+	private boolean enableImports;
+
+	private boolean enableProjectFacets;
+
+	private String suffixes;
+
+	private boolean ignoreMissingNamespaceHandlers;
+
+	private boolean loadHandlerFromClasspath;
+
+	private boolean useHighestXsdVersion;
+
+	private boolean disableNamespaceCaching;
+
+	private boolean useProjectSettings;
+
 	public NewSpringProjectCreationPage() {
 
 	}
@@ -116,35 +132,35 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 	}
 
 	public boolean enableImports() {
-		return enableImportButton.getSelection();
+		return enableImports;
 	}
 
 	public boolean enableProjectFacets() {
-		return enableProjectFacetsButton.getSelection();
+		return enableProjectFacets;
 	}
 
 	public Set<String> getConfigSuffixes() {
-		return StringUtils.commaDelimitedListToSet(suffixesText.getText());
+		return StringUtils.commaDelimitedListToSet(suffixes);
 	}
 
 	public boolean ignoreMissingNamespaceHandlers() {
-		return ignoreMissingNamespaceHandlerButton.getSelection();
+		return ignoreMissingNamespaceHandlers;
 	}
 
 	public boolean loadHandlerFromClasspath() {
-		return classpathCheckbox.getSelection();
+		return loadHandlerFromClasspath;
 	}
 
 	public boolean disableNamespaceCaching() {
-		return disableNamespaceCachingCheckbox.getSelection();
+		return disableNamespaceCaching;
 	}
 
 	public boolean useHighestXsdVersion() {
-		return versionCheckbox.getSelection();
+		return useHighestXsdVersion;
 	}
 
 	public boolean useProjectSettings() {
-		return useProjectSettingsButton.isSelected();
+		return useProjectSettings;
 	}
 
 	private Button createButton(Composite container, int style, int span, int indent) {
@@ -165,11 +181,12 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		// Create enable import checkbox
 		enableImportButton = SpringUIUtils.createCheckBox(springGroup,
 				BeansUIPlugin.getResourceString(ENABLE_IMPORT_LABEL));
-		enableImportButton.setSelection(IBeansProject.DEFAULT_IMPORTS_ENABLED);
+		enableImportButton.setSelection(enableImports = IBeansProject.DEFAULT_IMPORTS_ENABLED);
 		enableImportButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setPageComplete(validatePage());
+				enableImports = enableImportButton.getSelection();
 			}
 		});
 
@@ -177,21 +194,23 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		ignoreMissingNamespaceHandlerButton = SpringUIUtils.createCheckBox(springGroup,
 				BeansUIPlugin.getResourceString(IGNORE_MISSING_NAMESPACEHANDLER_LABEL));
 		ignoreMissingNamespaceHandlerButton
-				.setSelection(BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT);
+				.setSelection(ignoreMissingNamespaceHandlers = BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT);
 		ignoreMissingNamespaceHandlerButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setPageComplete(validatePage());
+				ignoreMissingNamespaceHandlers = ignoreMissingNamespaceHandlerButton.getSelection();
 			}
 		});
 
 		// Create suffix text field
 		suffixesText = SpringUIUtils.createTextField(springGroup,
 				NewSpringProjectWizardMessages.NewProjectPage_suffixes);
-		suffixesText.setText(IBeansProject.DEFAULT_CONFIG_SUFFIX);
+		suffixesText.setText(suffixes = IBeansProject.DEFAULT_CONFIG_SUFFIX);
 		suffixesText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				setPageComplete(validatePage());
+				suffixes = suffixesText.getText();
 			}
 		});
 	}
@@ -207,7 +226,15 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 
 		enableProjectFacetsButton = createButton(facetsGroup, SWT.CHECK, 1, 0);
 		enableProjectFacetsButton.setText(NewSpringProjectWizardMessages.NewProjectPage_enableProjectFacets);
-		enableProjectFacetsButton.setSelection(false);
+		enableProjectFacetsButton.setSelection(enableProjectFacets = false);
+
+		enableProjectFacetsButton.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				enableProjectFacets = enableProjectFacetsButton.getSelection();
+			}
+		});
 	}
 
 	private void createNamespaceSettingsGroup(Composite container) {
@@ -236,8 +263,8 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 
 		Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
 		boolean versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
-		boolean useClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
-		boolean disableCachingNamespaces = prefs.getBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
+		loadHandlerFromClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
+		disableNamespaceCaching = prefs.getBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
 
 		versionCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, convertHorizontalDLUsToPixels(5));
 		versionCheckbox.setText(NewSpringProjectWizardMessages.NewProjectPage_highestXsdVersion);
@@ -245,23 +272,32 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 
 		classpathCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, convertHorizontalDLUsToPixels(5));
 		classpathCheckbox.setText(NewSpringProjectWizardMessages.NewProjectPage_loadXsdsFromClasspath);
-		classpathCheckbox.setSelection(useClasspath);
+		classpathCheckbox.setSelection(loadHandlerFromClasspath);
 		classpathCheckbox.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				loadHandlerFromClasspath = classpathCheckbox.getSelection();
 				disableNamespaceCachingCheckbox.setEnabled(classpathCheckbox.getSelection());
 			}
 		});
 
 		disableNamespaceCachingCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, convertHorizontalDLUsToPixels(15));
 		disableNamespaceCachingCheckbox.setText(NewSpringProjectWizardMessages.NewProjectPage_disableNamespaceCaching);
-		disableNamespaceCachingCheckbox.setSelection(disableCachingNamespaces);
-		disableNamespaceCachingCheckbox.setEnabled(useClasspath);
+		disableNamespaceCachingCheckbox.setSelection(disableNamespaceCaching);
+		disableNamespaceCachingCheckbox.setEnabled(loadHandlerFromClasspath);
+
+		disableNamespaceCachingCheckbox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				disableNamespaceCaching = classpathCheckbox.getSelection();
+			}
+		});
 
 		enableProjectSpecificSettings(false);
 	}
 
 	private void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		this.useProjectSettings = useProjectSpecificSettings;
 		versionCheckbox.setEnabled(useProjectSpecificSettings);
 		classpathCheckbox.setEnabled(useProjectSpecificSettings);
 		disableNamespaceCachingCheckbox.setEnabled(useProjectSpecificSettings && classpathCheckbox.getSelection());

@@ -1,0 +1,13 @@
+<template>
+	<descriptor id="org.springframework.templates.mvc"
+		name="Spring MVC Project"
+		kind="template"
+		requiresbundle="org.eclipse.m2e.core"
+		version="3.2.2">
+		<description>
+			A new Spring MVC web application development project
+		</description>
+	</descriptor>
+	<project path="template.zip"/>
+	<json path="wizard.json"/>
+</template>

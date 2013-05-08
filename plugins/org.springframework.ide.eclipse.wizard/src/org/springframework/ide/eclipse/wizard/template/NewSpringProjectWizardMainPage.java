@@ -98,6 +98,7 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		}
 	}
 
+	// TODO: enable when spring versions are supported in templates
 	// protected void createSpringSelectionControl(Composite parent) {
 	//
 	// Composite composite = new Composite(parent, SWT.NONE);

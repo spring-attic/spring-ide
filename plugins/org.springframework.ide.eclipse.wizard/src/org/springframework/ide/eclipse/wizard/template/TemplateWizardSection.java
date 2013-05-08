@@ -68,14 +68,11 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 			if (template == null) {
 				return false;
 			}
-
-			if (template instanceof SimpleProject) {
+			else if (template instanceof SimpleProject) {
 				return ((SimpleProject) template).hasWizardPages();
 			}
 			else {
-				// Assume it does have wizard pages, and that the wizard pages
-				// will be populated once the
-				// template content is downloaded
+				// Non-simple project templates should always have a wizard page
 				return true;
 			}
 		}
@@ -260,9 +257,26 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 	@Override
 	public IProject createProject(IProgressMonitor monitor) throws CoreException {
 
+		Template template = getWizard().getMainPage().getSelectedTemplate();
 		collectedInput = new HashMap<String, Object>();
 		inputKinds = new HashMap<String, String>();
-		collectInput(collectedInput, inputKinds);
+
+		if (template instanceof SimpleProject && !((SimpleProject) template).hasWizardPages()) {
+			// If it is not a simple project and does not have additional pages,
+			// get the contents prior
+			// to creating project
+			try {
+				getWizard().getMainPage().downloadTemplateContent();
+			}
+			catch (CoreException ce) {
+				handleError(ce.getStatus());
+			}
+
+		}
+		else {
+			// Otherwise collect the template inputs
+			collectInput(collectedInput, inputKinds);
+		}
 
 		String projectName = getWizard().getMainPage().getProjectName();
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);

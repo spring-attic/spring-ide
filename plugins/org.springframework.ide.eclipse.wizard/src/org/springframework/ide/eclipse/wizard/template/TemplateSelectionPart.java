@@ -676,7 +676,7 @@ public class TemplateSelectionPart {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
 							try {
-								IStatus results = manager.refresh(monitor, true);
+								IStatus results = manager.refresh(monitor, true, WizardPlugin.getDefault().getBundle());
 								if (results.isOK()) {
 									return;
 								}

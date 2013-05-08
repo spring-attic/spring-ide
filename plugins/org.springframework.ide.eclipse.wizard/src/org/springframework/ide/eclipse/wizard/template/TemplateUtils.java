@@ -32,6 +32,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.BundleTemplateLoader;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateProjectData;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateProjectData;
@@ -62,7 +63,7 @@ public class TemplateUtils {
 				}
 			});
 			if (response[0]) {
-				TemplateDownloader downloader = manager.createDownloader(item);
+				TemplateDownloader downloader = getTemplateDownloader(finalItem);
 				IStatus status = downloader.downloadTemplate(monitor);
 				if (!status.isOK()) {
 					String message = NLS.bind("Download of template ''{0}'' failed: {1}", id, status.getMessage());
@@ -97,6 +98,18 @@ public class TemplateUtils {
 
 		File projectDir = new File(baseDir, item.getPath());
 		return projectDir;
+	}
+
+	private static TemplateDownloader getTemplateDownloader(ContentItem item) {
+		ContentManager manager = ContentPlugin.getDefault().getManager();
+		// Templates for simple projects are located in the bundle
+		if (item.getId().equals(TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID)
+				|| item.getId().equals(TemplateConstants.SIMPLE_MAVEN_TEMPLATE_ID)) {
+			return new BundleTemplateLoader(item, WizardPlugin.getDefault().getBundle());
+		}
+		else {
+			return manager.createDownloader(item);
+		}
 	}
 
 	private static void copyFolder(File source, File destination) {
