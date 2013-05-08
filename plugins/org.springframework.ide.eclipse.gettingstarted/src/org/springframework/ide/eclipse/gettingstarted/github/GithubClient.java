@@ -19,6 +19,7 @@ import java.util.Properties;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.springframework.ide.eclipse.gettingstarted.github.auth.BasicAuthCredentials;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.Credentials;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.NullCredentials;
 import org.springframework.web.client.RestTemplate;

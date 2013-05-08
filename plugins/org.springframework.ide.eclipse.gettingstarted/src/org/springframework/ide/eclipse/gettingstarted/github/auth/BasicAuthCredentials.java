@@ -8,7 +8,7 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.github;
+package org.springframework.ide.eclipse.gettingstarted.github.auth;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,7 +19,6 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.ide.eclipse.gettingstarted.github.auth.Credentials;
 import org.springframework.web.client.RestTemplate;
 
 /**
