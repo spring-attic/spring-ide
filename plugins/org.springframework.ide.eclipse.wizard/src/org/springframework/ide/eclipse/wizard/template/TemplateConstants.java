@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.wizard.template;
 
 public class TemplateConstants {
 
-	public static final String SIMPLE_MAVEN_TEMPLATE_ID = "org.springframework.ide.eclipse.simple.maven";
+	public static final String SIMPLE_MAVEN_TEMPLATE_ID = "org.springframework.templates.simple.maven";
 
-	public static final String SIMPLE_JAVA_TEMPLATE_ID = "org.springframework.ide.eclipse.simple.java";
+	public static final String SIMPLE_JAVA_TEMPLATE_ID = "org.springframework.templates.simple.java";
 
 }
