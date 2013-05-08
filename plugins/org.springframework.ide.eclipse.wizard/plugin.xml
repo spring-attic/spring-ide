@@ -150,7 +150,7 @@
     </perspectiveExtension>
  </extension>
  
-     <extension
+<!--     <extension
           point="com.springsource.sts.ide.ui.dashboard">
        <part
              class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsDashboardPart"
@@ -158,7 +158,7 @@
              page="com.springsource.sts.ide.ui.new.dashboard.page.overview"
              path="com.springsource.sts.ide.ui.dashboard.doc">
        </part>
-    </extension>
+    </extension> -->
     
   <extension
        point="com.springsource.sts.ide.ui.dashboard">

@@ -12,6 +12,7 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.dashboard.ui,
  org.springsource.ide.eclipse.commons.frameworks.test.util,
  org.springsource.ide.eclipse.commons.tests.util,
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ org.springframework.ide.gettingstarted
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

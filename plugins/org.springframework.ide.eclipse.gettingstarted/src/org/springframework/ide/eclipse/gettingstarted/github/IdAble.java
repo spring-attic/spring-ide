@@ -8,19 +8,24 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.tests;
+package org.springframework.ide.eclipse.gettingstarted.github;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class AllSampleTests {
+/**
+ * Abstract subperclass for enities that have an 'id'. This is pretty much every JSon object
+ * returned from github rest API.
+ *  
+ * @author Kris De Volder
+ */
+public abstract class IdAble {
 	
-	public static Test suite() throws Exception {
-		TestSuite suite = new TestSuite(AllSampleTests.class.getName());
-		suite.addTestSuite(SampleTests.class);
-		suite.addTest(BuildSampleTest.suite());
-		
-		return suite;
+	private String id;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

@@ -31,7 +31,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * A BuildSample test checks that a particular sample project builds properly
  * when it gets imported into STS.
  * 
- * This test class is intendended to be instantiated with data about a particular
+ * This test class is intended to be instantiated with data about a particular
  * sample project. It provides a static suite method fetches the samples
  * and creates one test for each sample.
  * 

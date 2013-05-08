@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+  <extension
+       point="com.springsource.sts.ide.ui.dashboard">
+    <part
+          class="org.springframework.ide.gettingstarted.guides.GettingStartedGuidesDashboardPart"
+          id="com.springsource.sts.ide.help.dashboard.part.guides"
+          page="com.springsource.sts.ide.ui.dashboard.page.overview"
+          path="com.springsource.sts.ide.ui.dashboard.doc">
+    </part>
+ </extension>
+
+</plugin>
