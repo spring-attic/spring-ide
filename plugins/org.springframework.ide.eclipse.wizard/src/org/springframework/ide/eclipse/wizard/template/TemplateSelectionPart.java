@@ -14,9 +14,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +36,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -51,13 +48,10 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -69,6 +63,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
@@ -84,8 +79,6 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateP
 import org.springframework.ide.eclipse.wizard.template.infrastructure.RuntimeTemplateProjectData;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateCategory;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoLoader;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencesModel;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
@@ -94,46 +87,36 @@ import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.ContentUtil;
 import org.springsource.ide.eclipse.commons.content.core.util.Descriptor;
 import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
-import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
-import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.thoughtworks.xstream.XStreamException;
-
 /**
- * Wizard page in template wizard for selecting which template to create project
- * from
+ * Part that displays templates available when creating a project. Templates are
+ * displayed in the part viewer based on metadata, but the actual contents of
+ * the template are not download unless explicitly requested through the
+ * download API. Selecting templates in the part viewer does not automatically
+ * download the contents.
  * @author Terry Denney
  * @author Leo Dos Santos
  * @author Christian Dupuis
  * @author Kaitlin Duck Sherwood
- * @deprecated This has been converted into a part that is independent of a
- * wizard
- * @see TemplateSelectionPart
+ * @author Nieraj Singh
  */
-@Deprecated
-public class TemplateSelectionWizardPage extends WizardPage {
+public class TemplateSelectionPart {
 
 	private Template selectedTemplate;
 
-	private ITemplateWizardPage templateWizardPage;
-
 	private final List<Template> templates;
 
-	private NewSpringProjectWizard wizard;
-
-	private String[] topLevelPackageTokens;
+	private final NewSpringProjectWizard wizard;
 
 	private Label descriptionLabel;
 
 	private StyledText descriptionText;
-
-	private String projectNameToken;
 
 	private TreeViewer treeViewer;
 
@@ -145,24 +128,16 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 	private Button refreshButton;
 
-	protected TemplateSelectionWizardPage() {
-		super("Template Selection Wizard Page"); //$NON-NLS-1$
+	private final IWizardPageStatusHandler statusHandler;
 
-		setTitle(Messages.getString("TemplateSelectionWizardPage.PAGE_TITLE")); //$NON-NLS-1$
-		setDescription(Messages.getString("TemplateSelectionWizardPage.PAGE_DESCRIPTION")); //$NON-NLS-1$
-
+	public TemplateSelectionPart(NewSpringProjectWizard wizard, IWizardPageStatusHandler statusHandler) {
+		this.wizard = wizard;
 		templates = new ArrayList<Template>();
+		this.statusHandler = statusHandler;
 	}
 
-	@Override
-	public boolean canFlipToNextPage() {
-		return treeViewer != null && treeViewer.getSelection() != null && !treeViewer.getSelection().isEmpty();
-	}
-
-	public void createControl(Composite parent) {
+	public Control createControl(Composite parent) {
 		initializeTemplates();
-
-		wizard = (NewSpringProjectWizard) getWizard();
 
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout());
@@ -285,7 +260,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null,
 						TemplatesPreferencePage.EXAMPLE_PREFERENCES_PAGE_ID, null, null);
 				refreshButton.setEnabled(false);
-				setErrorMessage(null);
 
 				dialog.open();
 				if (ContentPlugin.getDefault().getManager().isDirty()) {
@@ -307,7 +281,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		refreshButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setErrorMessage(null);
+
 				// under most circumstances, we don't want to download templates
 				// if there has not been any change. However, when the user
 				// presses Refresh, they really do want to see something happen.
@@ -343,22 +317,24 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection = treeViewer.getSelection();
-
 				if (selection instanceof TreeSelection) {
 					Object element = ((TreeSelection) selection).getFirstElement();
 					if (element instanceof Template) {
-						if (element != null) {
-							selectedTemplate = ((Template) element);
-						}
+						setSeletectedTemplate((Template) element);
 					}
-				}
-				templateWizardPage = null;
-
-				if (selectedTemplate != null) {
-					setDescription(selectedTemplate);
-					setWarning(selectedTemplate);
-					if (TemplateSelectionWizardPage.this.equals(wizard.getContainer().getCurrentPage())) {
-						wizard.getContainer().updateButtons();
+					else if (element instanceof TemplateCategory) {
+						// Note: ONLY clear the selected template if the
+						// selection is a template category.
+						// Do not clear the template if there is an empty
+						// selection in the tree, as there
+						// are times when the viewer
+						// will set an empty selection in the tree due to a
+						// refresh operation, and if
+						// a template was already selected prior to that refresh
+						// request, it should not be
+						// overwritten with null as other operations will
+						// require that the selected template not be changed
+						setSeletectedTemplate(null);
 					}
 				}
 			}
@@ -386,32 +362,84 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			downloadDescriptors();
 		}
 
-		setControl(container);
+		return container;
 
 	}
 
-	@Override
-	public IWizardPage getNextPage() {
-		setErrorMessage(null);
-
-		if (templateWizardPage != null) {
-			return templateWizardPage;
+	protected void setSeletectedTemplate(Template template) {
+		selectedTemplate = template;
+		if (selectedTemplate != null) {
+			setDescription(selectedTemplate);
 		}
+		handleChanged();
+	}
 
-		if (!canFlipToNextPage()) {
-			return null;
+	public boolean isValid() {
+		return getStatus().getSeverity() != IStatus.ERROR && getTemplate() != null;
+	}
+
+	public IStatus getStatus() {
+		if (selectedTemplate != null) {
+
+			String warning = getWarning(selectedTemplate);
+			if (warning != null) {
+				return new Status(IStatus.WARNING, WizardPlugin.PLUGIN_ID, warning);
+			}
+			else {
+				return Status.OK_STATUS;
+			}
+		}
+		else {
+			// Do not treat as an error. That way the template requirement
+			// message will show in the wizard, but not as an error.
+			return new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, "Please select a template.");
+		}
+	}
+
+	protected void setError(String error) {
+		if (statusHandler != null) {
+			statusHandler.setStatus(new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, error), false);
+		}
+	}
+
+	protected void handleChanged() {
+		IStatus status = getStatus();
+		if (statusHandler != null) {
+			statusHandler.setStatus(status, true);
+		}
+	}
+
+	public Template getTemplate() {
+		return selectedTemplate;
+	}
+
+	public boolean hasSelection() {
+		return selectedTemplate != null;
+	}
+
+	/**
+	 * If there is a selected template, download its contents. This method will
+	 * always attempt to download the latest contents of the template, therefore
+	 * this should only be called if the latest contents of the template need to
+	 * be fetched.
+	 */
+	public void downloadTemplateData() throws CoreException {
+
+		if (!hasSelection()) {
+			return;
 		}
 
 		ContentItem selectedItem = selectedTemplate.getItem();
 		if (!selectedItem.isLocal() && selectedItem.getRemoteDescriptor().getUrl() == null) {
 			String message = NLS.bind("In the descriptor file for ''{0}'', the URL to the project ZIP is missing.",
 					selectedItem.getName());
-			MessageDialog.openError(getShell(), NLS.bind("URL missing", null), message);
-			return null;
+			MessageDialog.openError(wizard.getShell(), NLS.bind("URL missing", null), message);
+			return;
 		}
 
+		// Otherwise download the data
 		try {
-			ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(wizard.getShell());
 			dialog.run(true, true, new IRunnableWithProgress() {
 
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -423,26 +451,22 @@ public class TemplateSelectionWizardPage extends WizardPage {
 							data = new RuntimeTemplateProjectData(selectedTemplate.getItem().getRuntimeProject());
 						}
 						else {
-							data = TemplateUtils.importTemplate(selectedTemplate, getContainer().getShell(),
+							data = TemplateUtils.importTemplate(selectedTemplate, wizard.getShell(),
 									new SubProgressMonitor(monitor, 1));
 						}
 						selectedTemplate.setTemplateData(data);
+						if (data == null) {
+							throw new InvocationTargetException(
+									new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, NLS.bind(
+											"Template data missing. Please check the template "
+													+ selectedTemplate.getName() + " to verify it has content.", null))));
+						}
 					}
 					catch (CoreException e) {
 						throw new InvocationTargetException(e);
 					}
 					catch (OperationCanceledException e) {
 						throw new InterruptedException();
-					}
-					catch (NullPointerException e) {
-						throw new InvocationTargetException(
-								new CoreException(
-										new Status(
-												IStatus.ERROR,
-												WizardPlugin.PLUGIN_ID,
-												NLS.bind(
-														"Error downloading template - possibly the network connection went down",
-														null), e)));
 					}
 					finally {
 						monitor.done();
@@ -451,93 +475,18 @@ public class TemplateSelectionWizardPage extends WizardPage {
 			});
 		}
 		catch (InterruptedException e) {
-			return null;
+			// do nothing
 		}
 		catch (InvocationTargetException e) {
-			UiStatusHandler.logAndDisplay(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getTargetException()
-					.getLocalizedMessage(), e));
-			return null;
-		}
-
-		if (selectedTemplate.getTemplateData() == null) {
-			return null;
-		}
-
-		URL jsonWizardUIDescriptor;
-		try {
-			jsonWizardUIDescriptor = selectedTemplate.getTemplateLocation();
-		}
-		catch (CoreException e) {
-			StatusHandler.log(e.getStatus());
-			return null;
-		}
-
-		WizardUIInfo info;
-		try {
-			WizardUIInfoLoader infoLoader = new WizardUIInfoLoader();
-			InputStream jsonDescriptionInputStream = jsonWizardUIDescriptor.openStream();
-			info = infoLoader.load(jsonDescriptionInputStream);
-		}
-		catch (IOException ex) {
-			UiStatusHandler.logAndDisplay(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Failed to load json descriptor for wizard page"));
-			return null;
-		}
-		catch (XStreamException ex) {
-			UiStatusHandler.logAndDisplay(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Failed to load json descriptor for wizard page"));
-			return null;
-		}
-
-		topLevelPackageTokens = info.getTopLevelPackageTokens();
-
-		projectNameToken = info.getProjectNameToken();
-
-		templateWizardPage = null;
-		ITemplateWizardPage previousPage = null;
-		ITemplateWizardPage page = null;
-
-		try {
-			for (int i = 0; i < info.getPageCount(); i++) {
-				page = new NewTemplateWizardPage(info.getPage(i).getDescription(), info.getElementsForPage(i),
-						selectedTemplate.getIcon());
-				if (templateWizardPage == null) {
-
-					templateWizardPage = page;
-				}
-
-				page.setWizard(getWizard());
-				if (previousPage != null) {
-					previousPage.setNextPage(page);
-				}
-
-				previousPage = page;
+			Throwable target = e.getTargetException();
+			if (target instanceof CoreException) {
+				throw (CoreException) target;
+			}
+			else {
+				throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getMessage(), e));
 			}
 		}
-		catch (Exception e) {
-			UiStatusHandler.logAndDisplay(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Failed to read json descriptor for wizard page"));
-			return null;
-		}
 
-		// wizard.setFirstPage(firstPage);
-		return templateWizardPage;
-	}
-
-	public URL getProjectLocation() throws CoreException {
-		if (selectedTemplate == null) {
-			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Unable to find template project location"));
-		}
-		return selectedTemplate.getZippedLocation();
-	}
-
-	public String getProjectNameToken() {
-		return projectNameToken;
-	}
-
-	public String[] getTopLevelPackage() {
-		return topLevelPackageTokens;
 	}
 
 	private void initializeTemplates() {
@@ -568,7 +517,20 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		for (ContentItem item : sortedItems) {
 			String templateId = item.getId();
 			if (!templateIds.contains(templateId)) {
-				templates.add(new Template(item, null));
+				Template template = null;
+				// Handle the special cases: Simple Java and Simple Maven, as
+				// they are not true templates.
+				if (TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(templateId)) {
+					template = new SimpleProject(item, null, true);
+				}
+				else if (TemplateConstants.SIMPLE_MAVEN_TEMPLATE_ID.equals(templateId)) {
+					template = new SimpleProject(item, null, false);
+				}
+				else {
+					template = new Template(item, null);
+				}
+
+				templates.add(template);
 				templateIds.add(templateId);
 			}
 		}
@@ -606,17 +568,17 @@ public class TemplateSelectionWizardPage extends WizardPage {
 					catch (CoreException e) {
 						String message = NLS.bind("Error getting and parsing descriptors file in background {0}",
 								e.getMessage());
-						MessageDialog.openWarning(getShell(), "Warning", message);
+						MessageDialog.openWarning(wizard.getShell(), "Warning", message);
 					}
 					catch (SAXException e) {
 						String message = NLS.bind("Error parsing tmp descriptors file at {0} in background.\n{1}",
 								file, e.getMessage());
-						MessageDialog.openWarning(getShell(), "Warning", message);
+						MessageDialog.openWarning(wizard.getShell(), "Warning", message);
 					}
 					catch (IOException e) {
 						String message = NLS.bind("IO error on file at {0} opened in background.\n{1}", file,
 								e.getMessage());
-						MessageDialog.openWarning(getShell(), "Warning", message);
+						MessageDialog.openWarning(wizard.getShell(), "Warning", message);
 					}
 
 				}
@@ -629,20 +591,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		});
 	}
 
-	@Override
-	public boolean isPageComplete() {
-		boolean canFinish = canFlipToNextPage();
-		if (canFinish && templateWizardPage != null) {
-			canFinish = templateWizardPage.isPageComplete();
-		}
-		return canFinish;
-	}
-
 	private void refreshPage() {
-		// selectedTemplate = null;
 
 		treeViewer.refresh(true);
-		treeViewer.setSelection(new StructuredSelection());
 
 		boolean needsDownload = false;
 		for (Template template : templates) {
@@ -656,8 +607,6 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		legendText.setVisible(needsDownload);
 		descriptionText.setText(""); //$NON-NLS-1$
 		refreshButton.setEnabled(true);
-
-		setPageComplete(false);
 	}
 
 	private void setDescription(Template template) {
@@ -682,7 +631,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		descriptionText.redraw();
 	}
 
-	private void setWarning(Template template) {
+	private String getWarning(Template template) {
 		String requiredBundleStr = null;
 		ContentItem contentItem = template.getItem();
 		if (contentItem.getLocalDescriptor() != null) {
@@ -708,12 +657,9 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		if (missingBundleStr.length() > 0) {
 			String message = NLS.bind("To ensure project compiles properly, please install bundle(s) {0}.",
 					missingBundleStr);
-			setMessage(message, DialogPage.WARNING);
+			return message;
 		}
-		else {
-			setMessage(null, DialogPage.WARNING);
-		}
-
+		return null;
 	}
 
 	public void downloadDescriptors() {
@@ -725,12 +671,12 @@ public class TemplateSelectionWizardPage extends WizardPage {
 				try {
 					final ContentManager manager = ContentPlugin.getDefault().getManager();
 
-					getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
+					wizard.getContainer().run(true, true, new IRunnableWithProgress() {
 
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
 							try {
-								IStatus results = manager.refresh(monitor, true);
+								IStatus results = manager.refresh(monitor, true, WizardPlugin.getDefault().getBundle());
 								if (results.isOK()) {
 									return;
 								}
@@ -738,7 +684,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 								if (!results.isOK()) {
 									PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 										public void run() {
-											setErrorMessage(message);
+											setError(message);
 										}
 									});
 
@@ -749,7 +695,7 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 								PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 									public void run() {
-										setErrorMessage(message);
+										setError(message);
 									}
 								});
 							}
@@ -761,18 +707,16 @@ public class TemplateSelectionWizardPage extends WizardPage {
 							.getLocalizedMessage());
 				}
 				catch (InterruptedException e1) {
-					MessageDialog.openWarning(getShell(), NLS.bind("Warning", null), refreshErrorMessage);
+					MessageDialog.openWarning(wizard.getShell(), NLS.bind("Warning", null), refreshErrorMessage);
 				}
 			}
 		});
 	}
 
-	@Override
 	public void dispose() {
 		Assert.isNotNull(contentManagerListener);
 		ContentPlugin.getDefault().getManager().removeListener(contentManagerListener);
 
-		super.dispose();
 	}
 
 	private boolean isRefreshing() {

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<descriptors>
+	<descriptor
+		id="org.springframework.ide.eclipse.simple.maven"
+		name="Spring Maven - Simple"
+		kind="template"
+		version="1.0.0.0"
+		local="false"
+		requires="2.8.0"
+		requiresbundle="org.eclipse.m2e.core"
+		size="8412"
+		url="file:///template/simple-maven/simple_maven_1.0.0.0.zip">
+		<description>Creates simple Spring Maven project without a top-level package.</description>
+	</descriptor>
+	<descriptor
+		id="org.springframework.ide.eclipse.simple.java"
+		name="Spring Java - Simple"
+		kind="template"
+		version="1.0.0.0"
+		local="false"
+		size="6723"
+		url="file:///template/simple-spring/simple_spring_1.0.0.0.zip">
+		<description>Creates simple Spring Java project without a top-level package.</description>
+	</descriptor>
+</descriptors>

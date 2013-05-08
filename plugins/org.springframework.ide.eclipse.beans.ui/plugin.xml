@@ -104,6 +104,7 @@
       <category
             id="org.springframework.ide.eclipse.beans.ui.wizards.category"
             name="%wizards.category"/>
+      <!--FIXNS: Commented out for now while merging both New Spring and Spring Template project wizards
       <wizard
             id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject"
             category="org.springframework.ide.eclipse.beans.ui.wizards.category"
@@ -118,6 +119,7 @@
          	%wizards.newProject.description
          </description>
       </wizard>
+      -->
       <wizard
             id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig"
             name="%wizards.newConfig.name"
