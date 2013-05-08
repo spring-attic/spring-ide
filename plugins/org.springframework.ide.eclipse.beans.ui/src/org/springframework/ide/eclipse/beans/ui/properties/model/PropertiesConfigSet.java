@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,10 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class PropertiesConfigSet extends BeansConfigSet {
 
@@ -92,7 +94,7 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	public Set<IBeansConfig> getConfigs() {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
 		for (String configName : configNames) {
-			IBeansConfig config = new PropertiesConfig(this, configName, IBeansConfig.Type.MANUAL);
+			IBeansConfig config = PropertiesConfigFactory.create(this, configName, IBeansConfig.Type.MANUAL);
 			if (config != null) {
 				configs.add(config);
 			}

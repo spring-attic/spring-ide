@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
@@ -67,7 +68,7 @@ import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfi
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -474,9 +475,9 @@ public class ConfigSetDialog extends Dialog {
 					// Create the full qualified path of the config
 					// (with support for configs stored in JAR files)
 					// as long as its not the initiating project
-					String name = addProjectPath ? projectPath + "/" + config.getElementName() : config.getElementName();
+					String name = addProjectPath && (config instanceof BeansConfig) ? projectPath + "/" + config.getElementName() : config.getElementName();
 					if (!configSet.hasConfig(name)) {
-						configs.add(new BeansConfig(beansProject, name, Type.MANUAL));
+						configs.add(BeansConfigFactory.create(beansProject, name, Type.MANUAL));
 					}
 				}
 			}

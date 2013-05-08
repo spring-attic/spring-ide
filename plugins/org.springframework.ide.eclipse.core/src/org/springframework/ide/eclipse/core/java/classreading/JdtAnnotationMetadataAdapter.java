@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.ide.eclipse.core.java.annotation.Annotation;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
@@ -29,7 +32,7 @@ import org.springframework.util.ClassUtils;
  * @author Martin Lippert
  * @since 3.2.0
  */
-public class JdtAnnotationMetadataAdapter implements IJdtAnnotationMetadata {
+public class JdtAnnotationMetadataAdapter implements ClassMetadata, AnnotationMetadata, JdtConnectedMetadata {
 
 	private final AnnotationMetadataReadingVisitor visitor;
 	private final IType type;
@@ -39,7 +42,7 @@ public class JdtAnnotationMetadataAdapter implements IJdtAnnotationMetadata {
 		this.visitor = visitor;
 	}
 
-	public IType getType() {
+	public IJavaElement getJavaElement() {
 		return this.type;
 	}
 

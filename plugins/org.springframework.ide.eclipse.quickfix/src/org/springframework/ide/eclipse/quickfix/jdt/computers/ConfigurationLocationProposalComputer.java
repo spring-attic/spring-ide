@@ -26,8 +26,10 @@ import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
@@ -43,7 +45,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
  * @author Martin Lippert
  * @author Kaitlin Duck Sherwood
  */
-public class ConfigurationLocationProposalComputer extends JavaCompletionProposalComputer {
+public class ConfigurationLocationProposalComputer extends AnnotationProposalComputer {
 
 	final String ILLEGAL_STRING = ":!\t)";
 
@@ -91,6 +93,31 @@ public class ConfigurationLocationProposalComputer extends JavaCompletionProposa
 	}
 
 	@Override
+	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, LocationInformation locationInfo,
+			Annotation annotation, JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		// // TODO Auto-generated method stub
+		// return super.computeCompletionProposals(type, locationInfo,
+		// annotation, javaContext);
+		// }
+		// @Override
+		// protected List<ICompletionProposal>
+		// computeCompletionProposals(SourceType type, IAnnotation annotation,
+		// JavaContentAssistInvocationContext javaContext) throws
+		// JavaModelException {
+		// IMemberValuePair[] memberValuePairs =
+		// annotation.getMemberValuePairs();
+		// for (IMemberValuePair memberValuePair : memberValuePairs) {
+		// if ("locations".equals(memberValuePair.getMemberName()) ||
+		// "value".equals(memberValuePair.getMemberName())) {
+		Name typeName = annotation.getTypeName();
+		return getBeanProposals(javaContext, type.getCompilationUnit(), javaContext.getInvocationOffset(),
+				typeName.getFullyQualifiedName(), typeName.getStartPosition(), typeName.getLength());
+		// }
+		// }
+		// return Collections.emptyList();
+	}
+
+	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
 
@@ -112,7 +139,10 @@ public class ConfigurationLocationProposalComputer extends JavaCompletionProposa
 							for (IMemberValuePair memberValuePair : memberValuePairs) {
 								if ("locations".equals(memberValuePair.getMemberName())
 										|| "value".equals(memberValuePair.getMemberName())) {
-									return getBeanProposals(context, cu, invocationOffset, annotation);
+									return getBeanProposals(context, cu, invocationOffset,
+											getAnnotationText(annotation, context.getViewer(), invocationOffset),
+											annotation.getNameRange().getOffset(), annotation.getNameRange()
+													.getLength());
 								}
 							}
 						}
@@ -127,24 +157,29 @@ public class ConfigurationLocationProposalComputer extends JavaCompletionProposa
 	}
 
 	private List<ICompletionProposal> getBeanProposals(ContentAssistInvocationContext context, ICompilationUnit cu,
-			int invocationOffset, IAnnotation annotation) {
+			int invocationOffset, String annotationText, int annotationOffset, int annotationLength) {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-		String annotationText = getAnnotationText(annotation, context.getViewer(), invocationOffset);
+		// String annotationText = getAnnotationText(annotation,
+		// context.getViewer(), invocationOffset);
 		String prefix = "";
 		String postfix = "";
 		String filter = "";
 
-		try {
-			ProposalAssemblyInformation assemblyInfo = createProposalAssemblyInformation(annotationText,
-					invocationOffset - annotation.getNameRange().getOffset() - annotation.getNameRange().getLength());
-			prefix = assemblyInfo.getPrefix();
-			postfix = assemblyInfo.getPostfix();
-			filter = assemblyInfo.getFilter();
-		}
-		catch (JavaModelException e) {
-			prefix = "";
-			postfix = "";
-		}
+		// try {
+		ProposalAssemblyInformation assemblyInfo = createProposalAssemblyInformation(annotationText, invocationOffset
+				- annotationOffset - annotationLength);
+		// ProposalAssemblyInformation assemblyInfo =
+		// createProposalAssemblyInformation(annotationText,
+		// invocationOffset - annotation.getNameRange().getOffset() -
+		// annotation.getNameRange().getLength());
+		prefix = assemblyInfo.getPrefix();
+		postfix = assemblyInfo.getPostfix();
+		filter = assemblyInfo.getFilter();
+		// }
+		// catch (JavaModelException e) {
+		// prefix = "";
+		// postfix = "";
+		// }
 
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(cu.getJavaProject().getProject());
 		List<String> classpathPrefixes = getPathPrefixes(cu.getJavaProject());
@@ -355,7 +390,7 @@ public class ConfigurationLocationProposalComputer extends JavaCompletionProposa
 					}
 					prefix = comma + "\"";
 
-					String closeParen = "";
+					// String closeParen = "";
 					// if there is a close brace, end with a )
 					if (hasClosingBrace) {
 						postfix = "";
@@ -475,7 +510,8 @@ public class ConfigurationLocationProposalComputer extends JavaCompletionProposa
 			if (invocationIndex >= fileMatcher.start() && invocationIndex <= fileMatcher.end()) {
 				int fileSubgroupIndex = invocationOffsetIsInWhichGroupNumber(fileMatcher, invocationIndex);
 
-				boolean hasOpeningQuote = hasSomethingInField(fileMatcher, CONFIG_OPENING_QUOTE_PATTERN_POSITION);
+				// boolean hasOpeningQuote = hasSomethingInField(fileMatcher,
+				// CONFIG_OPENING_QUOTE_PATTERN_POSITION);
 				boolean hasClosingQuote = hasSomethingInField(fileMatcher, CONFIG_CLOSING_QUOTE_PATTERN_POSITION);
 				boolean hasComma = hasSomethingInField(fileMatcher, CONFIG_COMMA_PATTERN_POSITION);
 				boolean hasFilePattern = hasSomethingInField(fileMatcher, CONFIG_UNQUOTED_FILENAME_PATTERN_POSITION)

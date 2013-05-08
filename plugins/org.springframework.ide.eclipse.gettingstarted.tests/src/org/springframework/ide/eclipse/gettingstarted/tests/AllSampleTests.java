@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -8,17 +8,19 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.core.java.classreading;
+package org.springframework.ide.eclipse.gettingstarted.tests;
 
-import org.eclipse.jdt.core.IMethod;
-import org.springframework.core.type.MethodMetadata;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-/**
- * @author Martin Lippert
- * @since 3.2.0
- */
-public interface IJdtMethodMetadata extends MethodMetadata {
-
-	IMethod getMethod();
+public class AllSampleTests {
+	
+	public static Test suite() throws Exception {
+		TestSuite suite = new TestSuite(AllSampleTests.class.getName());
+		suite.addTestSuite(SampleTests.class);
+		suite.addTest(BuildSampleTest.suite());
+		
+		return suite;
+	}
 
 }

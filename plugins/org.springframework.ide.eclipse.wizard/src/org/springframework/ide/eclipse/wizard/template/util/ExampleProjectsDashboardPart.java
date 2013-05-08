@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -146,6 +147,22 @@ public class ExampleProjectsDashboardPart extends AbstractDashboardPart {
 
 	}
 
+	/**
+	 * This is the method that gets called to import sample project into the
+	 * workspace when a sample project link is clicked. It has been separated
+	 * into a public static method to make it easily accessible to testing code.
+	 * 
+	 * @return Job that is performing the import. The job has already been
+	 * Scheduled. Testing code may want to wait for the Job to finish before
+	 * proceeding to do stuff with the imported project.
+	 */
+	public static Job importSample(String projectName, URI uri, final Shell shell) {
+		ExampleProjectsImporterJob job = new ExampleProjectsImporterJob(uri, projectName, shell);
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.schedule();
+		return job;
+	}
+
 	private void createSampleLinks() {
 		FormToolkit toolkit = getToolkit();
 		if (composite.isDisposed()) {
@@ -205,13 +222,11 @@ public class ExampleProjectsDashboardPart extends AbstractDashboardPart {
 								String projectName = link.getLabel();
 
 								if (promptForDownload(shell, uri)) {
-									ExampleProjectsImporterJob job = new ExampleProjectsImporterJob(uri, projectName,
-											shell);
-									job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-									job.schedule();
+									importSample(projectName, uri, shell);
 								}
 							}
 						}
+
 					});
 				}
 			}

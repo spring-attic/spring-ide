@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.quickfix.QuickfixImages;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 /**
  * @author Terry Denney
  * @since 2.6
@@ -66,7 +65,8 @@ public class RequestMappingVariableCompletionProposal extends AnnotationCompleti
 
 		setUpProposal(startPos, length, annotation);
 
-		// give higher priority to method parameter that has @PathVariable annotation
+		// give higher priority to method parameter that has @PathVariable
+		// annotation
 		if (param != null && ProposalCalculatorUtil.hasAnnotation("PathVariable", param)) {
 			setRelevance(100);
 		}
@@ -187,8 +187,9 @@ public class RequestMappingVariableCompletionProposal extends AnnotationCompleti
 		rewrite.replace(oldTemplate, newTemplate, null);
 
 		if (isLinked) {
-			addLinkedPosition(new StringLiteralTrackedPosition(trackTemplateVariable, cursorOffset, variableName
-					.length(), false), false, "PathVariable");
+			addLinkedPosition(
+					new StringLiteralTrackedPosition(trackTemplateVariable, cursorOffset, variableName.length(), false),
+					false, "PathVariable");
 		}
 		else {
 			setTrackPosition(new StringLiteralTrackedPosition(trackTemplateVariable, cursorOffset

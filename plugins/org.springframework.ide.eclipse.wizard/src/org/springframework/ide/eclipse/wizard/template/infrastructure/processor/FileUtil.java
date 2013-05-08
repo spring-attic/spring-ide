@@ -22,15 +22,18 @@ import java.nio.channels.FileChannel;
  * @author Christian Dupuis
  */
 public abstract class FileUtil {
-	private static String[] BINARY_EXTENSIONS = new String[] { "jar", "gif", "jpg", "jpeg", ".class" };
-
+	private static String[] BINARY_EXTENSIONS = new String[] { "jar", "gif", "jpg", "jpeg", ".class", "png" };
 
 	public static void copy(File source, File target) throws IOException {
-		FileChannel sourceChannel = new FileInputStream(source).getChannel();
-		FileChannel targetChannel = new FileOutputStream(target).getChannel();
+		FileInputStream sourceOutStream = new FileInputStream(source);
+		FileOutputStream targetOutStream = new FileOutputStream(target);
+		FileChannel sourceChannel = sourceOutStream.getChannel();
+		FileChannel targetChannel = targetOutStream.getChannel();
 		sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
 		sourceChannel.close();
 		targetChannel.close();
+		sourceOutStream.close();
+		targetOutStream.close();
 	}
 
 	public static boolean isBinaryFile(File file) {

@@ -1,57 +1,71 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 Spring IDE Developers
+ * Copyright (c) 2005, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.autowire;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IProject;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
+import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.FactoryBeanTypeResolverExtensions;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * @author Tomasz Zarna
- *
+ * @author Martin Lippert
+ * @since 3.3.0
  */
-public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCoreTestCase {
-
-	private IResource resource;
+public class AutowireDependencyProviderTest {
+	
+	private IProject project;
+	private IBeansModel model;
+	private IBeansProject beansProject;
 
 	@Before
-	public void setUp() throws Exception {
-		resource = null;
-		Thread.sleep(1500);
+	public void createProject() throws Exception {
+		project = StsTestUtil.createPredefinedProject("autowire", "org.springframework.ide.eclipse.beans.core.tests");
+		
+		model = new BeansModel();
+		beansProject = new BeansProject(model, project);
+	}
+	
+	@After
+	public void deleteProject() throws Exception {
+		project.delete(true, null);
 	}
 
 	@Test
 	public void testResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+		
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 48 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -70,14 +84,13 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testExtendedResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testExtendedResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 68, 82, 87, 93 });
 		allowedRefs.put("nestedTestBean", new Integer[] { 87 });
 		allowedRefs.put("beanFactory", new Integer[] { 98 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testExtendedResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -97,14 +110,13 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testExtendedResourceInjectionWithOverriding() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testExtendedResourceInjectionWithOverriding-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 68, 87, 93 });
 		allowedRefs.put("nestedTestBean", new Integer[] { 87 });
 		allowedRefs.put("beanFactory", new Integer[] { 98 });
 		
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testExtendedResourceInjectionWithOverriding-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -124,14 +136,12 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testExtendedResourceInjectionWithSkippedOverriddenMethods() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testExtendedResourceInjectionWithSkippedOverriddenMethods-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 68, 87, 93, 140 });
 		allowedRefs.put("nestedTestBean", new Integer[] { 87 });
 
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testExtendedResourceInjectionWithSkippedOverriddenMethods-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -151,15 +161,14 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testOptionalResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testOptionalResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 149, 161, 166 });
 		allowedRefs.put("nestedTestBean1", new Integer[] { 156, 166 });
 		allowedRefs.put("nestedTestBean2", new Integer[] { 156, 166 });
 		allowedRefs.put("indexedTestBean", new Integer[] { 166 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testOptionalResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -180,9 +189,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testOptionalResourceInjectionWithNoDependencies() throws Exception {
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testOptionalResourceInjectionWithNoDependencies-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testOptionalResourceInjectionWithNoDependencies-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 
@@ -191,14 +199,13 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testConstructorResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testConstructorResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 42, 244, 262, 278 });
 		allowedRefs.put("nestedTestBean", new Integer[] { 262 });
 		allowedRefs.put("beanFactory", new Integer[] { 262 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testConstructorResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -218,14 +225,13 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidates() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testConstructorResourceInjectionWithMultipleCandidates-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 312, 317 });
 		allowedRefs.put("nestedTestBean1", new Integer[] { 317 });
 		allowedRefs.put("nestedTestBean2", new Integer[] { 317 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testConstructorResourceInjectionWithMultipleCandidates-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -245,15 +251,13 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidatesAsCollection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testConstructorResourceInjectionWithMultipleCandidatesAsCollection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 356, 361 });
 		allowedRefs.put("nestedTestBean1", new Integer[] { 361 });
 		allowedRefs.put("nestedTestBean2", new Integer[] { 361 });
 
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testConstructorResourceInjectionWithMultipleCandidatesAsCollection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -272,46 +276,13 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 	}
 
 	@Test
-	@Ignore
-	public void testConstructorResourceInjectionWithMultipleCandidatesAndFallback() {
-		// DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		// AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
-		// bpp.setBeanFactory(bf);
-		// bf.addBeanPostProcessor(bpp);
-		// bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsResourceInjectionBean.class));
-		// TestBean tb = new TestBean();
-		// bf.registerSingleton("testBean", tb);
-		//
-		// ConstructorsResourceInjectionBean bean = (ConstructorsResourceInjectionBean) bf.getBean("annotatedBean");
-		// assertSame(tb, bean.getTestBean3());
-		// assertNull(bean.getTestBean4());
-		// bf.destroySingletons();
-	}
-
-	@Test
-	@Ignore
-	public void testConstructorResourceInjectionWithMultipleCandidatesAndDefaultFallback() {
-		// DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		// AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
-		// bpp.setBeanFactory(bf);
-		// bf.addBeanPostProcessor(bpp);
-		// bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsResourceInjectionBean.class));
-		//
-		// ConstructorsResourceInjectionBean bean = (ConstructorsResourceInjectionBean) bf.getBean("annotatedBean");
-		// assertNull(bean.getTestBean3());
-		// assertNull(bean.getTestBean4());
-		// bf.destroySingletons();
-	}
-
-	@Test
 	public void testConstructorInjectionWithMap() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testConstructorInjectionWithMap-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean1", new Integer[] { 394 });
 		allowedRefs.put("testBean2", new Integer[] { 394 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testConstructorInjectionWithMap-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -331,13 +302,12 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testFieldInjectionWithMap() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testFieldInjectionWithMap-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean1", new Integer[] { 407 });
 		allowedRefs.put("testBean2", new Integer[] { 407 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testFieldInjectionWithMap-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -357,12 +327,11 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testMethodInjectionWithMap() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testMethodInjectionWithMap-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 423 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testMethodInjectionWithMap-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -382,13 +351,12 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testMethodInjectionWithMapAndMultipleMatches() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndMultipleMatches-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean1", new Integer[] { 423 });
 		allowedRefs.put("testBean2", new Integer[] { 423 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndMultipleMatches-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -410,13 +378,11 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testMethodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean2", new Integer[] { 423 });
 
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -436,9 +402,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testMethodInjectionWithMapAndNoMatches() throws Exception {
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndNoMatches-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndNoMatches-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		assertTrue(references.size() == 0);
@@ -446,12 +411,11 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testObjectFactoryInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testObjectFactoryInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 441 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testObjectFactoryInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -471,12 +435,11 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testObjectFactoryQualifierInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testObjectFactoryQualifierInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 453 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testObjectFactoryQualifierInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
@@ -496,12 +459,11 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredFieldResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 464 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredFieldResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("customBean", config);
@@ -521,10 +483,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjectionFailsWhenNoDependencyFound() throws Exception {
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredFieldResourceInjectionFailsWhenNoDependencyFound-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredFieldResourceInjectionFailsWhenNoDependencyFound-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		assertTrue(references.size() == 0);
@@ -534,12 +494,11 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 477 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("customBean", config);
@@ -559,10 +518,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenNoDependencyFound() throws Exception {
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjectionFailsWhenNoDependencyFound-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjectionFailsWhenNoDependencyFound-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		assertTrue(references.size() == 0);
@@ -573,10 +530,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenMultipleDependenciesFound()
 			throws Exception {
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjectionFailsWhenMultipleDependenciesFound-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjectionFailsWhenMultipleDependenciesFound-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		assertTrue(references.size() == 0);
@@ -586,9 +541,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationOptionalFieldResourceInjection() throws Exception {
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalFieldResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalFieldResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		assertTrue(references.size() == 0);
@@ -596,10 +550,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationOptionalFieldResourceInjectionWhenNoDependencyFound() throws Exception {
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalFieldResourceInjectionWhenNoDependencyFound-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalFieldResourceInjectionWhenNoDependencyFound-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		assertTrue(references.size() == 0);
@@ -609,12 +561,11 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 504 });
 
-		resource = createPredefinedProjectAndGetResource("autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjection-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("customBean", config);
@@ -634,10 +585,8 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjectionWhenNoDependencyFound() throws Exception {
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjectionWhenNoDependencyFound-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjectionWhenNoDependencyFound-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		assertTrue(references.size() == 0);
@@ -647,14 +596,86 @@ public class AutowiredAnnotationInjectionMetadataProviderTests extends BeansCore
 
 	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjectionWhenMultipleDependenciesFound() throws Exception {
-		resource = createPredefinedProjectAndGetResource(
-				"autowire",
-				"src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjectionWhenMultipleDependenciesFound-context.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) resource);
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjectionWhenMultipleDependenciesFound-context.xml", IBeansConfig.Type.MANUAL);
+
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		assertTrue(references.size() == 0);
 
 		assertTrue(provider.getValidationProblems().size() == 1);
 	}
+
+	@Test
+	public void testStringFactoryInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testStringTypeFactoryBean-context.xml", IBeansConfig.Type.MANUAL);
+		
+		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
+		allowedRefs.put("testBean", new Integer[] { 554 });
+
+		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
+		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
+		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
+
+		assertTrue(references.size() == 1);
+		assertTrue(references.containsKey(bean));
+
+		Set<IBeanReference> refs = references.get(bean);
+		assertTrue(refs.size() == 1);
+		for (IBeanReference ref : refs) {
+			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
+			assertTrue(Arrays.asList(allowedRefs.get(ref.getBeanName())).contains(
+					ref.getElementSourceLocation().getStartLine()));
+		}
+	}
+
+	@Test
+	public void testUnknownFactoryInjectionWithoutSpecificExtension() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testUnknownTypeFactoryBean-context.xml", IBeansConfig.Type.MANUAL);
+		
+		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
+		allowedRefs.put("unknownFactoryBean", new Integer[] { 580 });
+
+		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
+		FactoryBeanTypeResolverExtensions.setFactoryBeanTypeResolvers(new IFactoryBeanTypeResolver[0]);
+		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
+		assertTrue(references.size() == 0);
+	}
+
+	@Test
+	public void testUnknownFactoryInjectionWithSpecificExtension() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testUnknownTypeFactoryBean-context.xml", IBeansConfig.Type.MANUAL);
+		
+		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
+		allowedRefs.put("unknownFactoryBean", new Integer[] { 580 });
+
+		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
+		IFactoryBeanTypeResolver testFactoryBeanTypeResolver = new IFactoryBeanTypeResolver() {
+			public Class<?> resolveBeanTypeFromFactory(IBean factoryBean, Class<?> factoryBeanClass) {
+				if (factoryBeanClass.getName().equals("org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessorTests$UnknownFactoryBean")) {
+					try {
+						return factoryBeanClass.getClassLoader().loadClass("test.beans.TestBean");
+					} catch (ClassNotFoundException e) {
+						fail(e.getMessage());
+					}
+				}
+				return null;
+			}
+		};
+		FactoryBeanTypeResolverExtensions.setFactoryBeanTypeResolvers(new IFactoryBeanTypeResolver[] {testFactoryBeanTypeResolver});
+
+		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
+		IBean bean = BeansModelUtils.getBean("autowiredBeanWithUnknownType", config);
+
+		assertTrue(references.size() == 1);
+		assertTrue(references.containsKey(bean));
+
+		Set<IBeanReference> refs = references.get(bean);
+		assertTrue(refs.size() == 1);
+		for (IBeanReference ref : refs) {
+			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
+			assertTrue(Arrays.asList(allowedRefs.get(ref.getBeanName())).contains(
+					ref.getElementSourceLocation().getStartLine()));
+		}
+	}
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
+import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -28,9 +29,11 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.DelegatingSourceExtractor;
@@ -41,8 +44,8 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegistrationSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
-import org.springframework.ide.eclipse.core.java.classreading.IJdtAnnotationMetadata;
-import org.springframework.ide.eclipse.core.java.classreading.IJdtMethodMetadata;
+import org.springframework.ide.eclipse.core.java.classreading.JdtConnectedMetadata;
+import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
@@ -65,14 +68,21 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		}
 
 		ConfigurationClassPostProcessor processor = new ConfigurationClassPostProcessor();
+		DelegatingSourceExtractor sourceExtractor = new DelegatingSourceExtractor(project.getProject());
+
 		processor.setEnvironment(new ToolingAwareEnvironment());
-		processor.setSourceExtractor(new DelegatingSourceExtractor(project.getProject()));
+		processor.setSourceExtractor(sourceExtractor);
 		processor.setMetadataReaderFactory(new CachingJdtMetadataReaderFactory(project));
 		processor.setProblemReporter(new JdtAnnotationMetadataProblemReporter(postProcessingContext));
+		
+		ClassLoader classLoader = JdtUtils.getClassLoader(project.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
+		processor.setResourceLoader(new DefaultResourceLoader(classLoader));
 
-		processor.processConfigBeanDefinitions(new ReaderEventListenerForwardingBeanDefinitionRegistry(
+		ReaderEventListenerForwardingBeanDefinitionRegistry registry = new ReaderEventListenerForwardingBeanDefinitionRegistry(
 				postProcessingContext.getBeanDefinitionRegistry(), postProcessingContext
-						.getBeansConfigRegistrySupport()));
+						.getBeansConfigRegistrySupport(), sourceExtractor);
+		
+		processor.processConfigBeanDefinitions(registry);
 	}
 
 	/**
@@ -104,10 +114,13 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		
 		private final Set<String> profileDefinedBeans;
 
+		private final SourceExtractor sourceExtractor;
+
 		public ReaderEventListenerForwardingBeanDefinitionRegistry(BeanDefinitionRegistry registry,
-				IBeansConfigRegistrationSupport beansConfigRegistrationSupport) {
+				IBeansConfigRegistrationSupport beansConfigRegistrationSupport, SourceExtractor sourceExtractor) {
 			this.registry = registry;
 			this.beansConfigRegistrationSupport = beansConfigRegistrationSupport;
+			this.sourceExtractor = sourceExtractor;
 			this.profileDefinedBeans = new HashSet<String>();
 		}
 
@@ -172,15 +185,21 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		 */
 		public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 				throws BeanDefinitionStoreException {
+			
+			Object source = beanDefinition.getSource();
+			if (!(source instanceof JavaModelSourceLocation)) {
+				source = sourceExtractor.extractSource(beanDefinition.getSource(), null);
+			}
 
 			// Convert the Bean definition to a bean definition with concrete class and id
-			if (beanDefinition.getSource() instanceof JavaModelSourceLocation) {
-				IMethod method = (IMethod) JavaCore.create(((JavaModelSourceLocation) beanDefinition.getSource())
-						.getHandleIdentifier(), DefaultWorkingCopyOwner.PRIMARY);
-				if (method != null && beanDefinition instanceof AnnotatedBeanDefinition) {
+			if (source instanceof JavaModelSourceLocation) {
+				
+				IJavaElement javaElement = JavaCore.create(((JavaModelSourceLocation) source).getHandleIdentifier(), DefaultWorkingCopyOwner.PRIMARY);
+				if (javaElement instanceof IMethod && beanDefinition instanceof AnnotatedBeanDefinition) {
+					IMethod method = (IMethod) javaElement;
 					JdtAnnotationBeanDefinition newBeanDefinition = new JdtAnnotationBeanDefinition(
 							((AnnotatedBeanDefinition) beanDefinition).getMetadata());
-					newBeanDefinition.setSource(beanDefinition.getSource());
+					newBeanDefinition.setSource(source);
 					String className = JdtUtils.resolveClassName(JdtUtils.getReturnTypeString(method, false), method
 							.getDeclaringType());
 					newBeanDefinition.setBeanClassName(className);
@@ -202,12 +221,24 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 					}
 				}
 				else {
+					if (beanDefinition instanceof BeanMetadataAttributeAccessor && beanDefinition.getSource() != source) {
+						((BeanMetadataAttributeAccessor) beanDefinition).setSource(source);
+					}
+					
 					registry.registerBeanDefinition(beanName, beanDefinition);
 					beansConfigRegistrationSupport.registerComponent(new BeanComponentDefinition(beanDefinition,
 							beanName));
 				}
 			}
-
+			else {
+				if (beanDefinition instanceof BeanMetadataAttributeAccessor && beanDefinition.getSource() != source) {
+					((BeanMetadataAttributeAccessor) beanDefinition).setSource(source);
+				}
+				
+				registry.registerBeanDefinition(beanName, beanDefinition);
+				beansConfigRegistrationSupport.registerComponent(new BeanComponentDefinition(beanDefinition,
+						beanName));
+			}
 		}
 
 		/**
@@ -273,12 +304,8 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		}
 
 		private void createProblem(int severity, String message, Object source) {
-			if (source instanceof IJdtMethodMetadata) {
-				IJavaElement je = ((IJdtMethodMetadata) source).getMethod();
-				createProblem(severity, postProcessingContext, message, je);
-			}
-			else if (source instanceof IJdtAnnotationMetadata) {
-				IJavaElement je = ((IJdtAnnotationMetadata) source).getType();
+			if (source instanceof JdtConnectedMetadata) {
+				IJavaElement je = ((JdtConnectedMetadata) source).getJavaElement();
 				createProblem(severity, postProcessingContext, message, je);
 			}
 		}

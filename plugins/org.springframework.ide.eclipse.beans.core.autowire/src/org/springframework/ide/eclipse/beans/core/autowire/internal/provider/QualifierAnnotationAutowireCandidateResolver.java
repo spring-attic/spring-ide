@@ -57,7 +57,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 * for Spring's standard {@link Qualifier} annotation.
 	 * <p>Also supports JSR-330's {@link javax.inject.Qualifier} annotation, if available.
 	 */
-	@SuppressWarnings("unchecked")
 	public QualifierAnnotationAutowireCandidateResolver() {
 		this.qualifierTypes.add(Qualifier.class);
 		ClassLoader cl = QualifierAnnotationAutowireCandidateResolver.class.getClassLoader();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Spring IDE Developers
+ * Copyright (c) 2008, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -422,7 +422,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	/**
 	 * {@inheritDoc}
 	 */
-	public final IResource getElementResource() {
+	public IResource getElementResource() {
 		return file;
 	}
 
@@ -567,7 +567,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	 * {@inheritDoc}
 	 */
 	public boolean resourceChanged() {
-		return modificationTimestamp < file.getModificationStamp() || changedImportedBeansConfig();
+		return modificationTimestamp < getElementResource().getModificationStamp() || changedImportedBeansConfig();
 	}
 
 	/**

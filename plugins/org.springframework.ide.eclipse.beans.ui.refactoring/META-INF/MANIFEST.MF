@@ -70,10 +70,12 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.core.java,
  org.springframework.ide.eclipse.core.model,
  org.springframework.util;version="[3.1.0,3.2.0)",
+ org.springsource.ide.eclipse.commons.core,
  org.w3c.dom
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.beans.ui.refactoring.actions,
+ org.springframework.ide.eclipse.beans.ui.refactoring.model,
  org.springframework.ide.eclipse.beans.ui.refactoring.util
 Require-Bundle: org.eclipse.ui

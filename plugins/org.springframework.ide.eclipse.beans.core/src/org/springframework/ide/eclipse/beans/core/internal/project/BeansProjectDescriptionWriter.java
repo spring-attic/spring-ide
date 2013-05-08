@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
  * This class saves the description of a Spring Beans project to an XML file.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class BeansProjectDescriptionWriter implements IBeansProjectDescriptionConstants {
 
@@ -71,7 +72,7 @@ public class BeansProjectDescriptionWriter implements IBeansProjectDescriptionCo
 		}
 	}
 
-	protected static void write(BeansProject project, XMLWriter writer) {
+	public static void write(BeansProject project, XMLWriter writer) {
 		writer.startTag(PROJECT_DESCRIPTION, null);
 		// add version number
 		writer.printSimpleTag(VERSION, CURRENT_VERSION);

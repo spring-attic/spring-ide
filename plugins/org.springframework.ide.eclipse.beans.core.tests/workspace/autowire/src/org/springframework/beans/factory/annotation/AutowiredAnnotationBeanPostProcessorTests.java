@@ -547,5 +547,42 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 			return true;
 		}
 	}
+	
+	public static class StringInjectionBean {
+
+		@Autowired
+		private String testBean;
+
+		public String getTestBean() {
+			return this.testBean;
+		}
+
+	}
+
+	public static class UnknownFactoryBean<T> implements FactoryBean<T> {
+
+		public T getObject() throws Exception {
+			return null;
+		}
+
+		public Class<T> getObjectType() {
+			return null;
+		}
+
+		public boolean isSingleton() {
+			return true;
+		}
+	}
+
+	public static class AutowiredWithUknownTypeBean {
+
+		@Autowired
+		private TestBean testBean;
+
+		public TestBean getTestBean() {
+			return this.testBean;
+		}
+
+	}
 
 }

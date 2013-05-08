@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.core.type.ClassMetadata;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
@@ -26,7 +28,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * @author Martin Lippert
  * @since 2.2.5
  */
-public class JdtClassMetadata implements IJdtClassMetadata {
+public class JdtClassMetadata implements ClassMetadata, JdtConnectedMetadata {
 
 	private final IType type;
 	private String superclassName;
@@ -147,7 +149,7 @@ public class JdtClassMetadata implements IJdtClassMetadata {
 		return memberClassNames.toArray(new String[memberClassNames.size()]); 
 	}
 
-	public IType getType() {
+	public IJavaElement getJavaElement() {
 		return this.type;
 	}
 

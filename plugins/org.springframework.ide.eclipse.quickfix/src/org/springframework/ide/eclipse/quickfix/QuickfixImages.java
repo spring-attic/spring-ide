@@ -35,6 +35,8 @@ public class QuickfixImages {
 
 	public static final ImageDescriptor CLASS = create(OBJ, "class_obj.gif");
 
+	public static final ImageDescriptor PACKAGE = create(OBJ, "package_obj.gif");
+
 	private static ImageRegistry imageRegistry;
 
 	public static ImageDescriptor create(String prefix, String name) {

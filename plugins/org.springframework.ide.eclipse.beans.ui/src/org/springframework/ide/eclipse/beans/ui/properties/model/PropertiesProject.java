@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,8 +26,10 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
  * given Spring Beans project instead being read from the corresponding project description XML file
  * defined in {@link IBeansProject#DESCRIPTION_FILE}. The information can be persisted by calling
  * the method {@link #saveDescription()}.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class PropertiesProject extends BeansProject {
 
@@ -53,11 +55,11 @@ public class PropertiesProject extends BeansProject {
 		autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
 		for (IBeansConfig config : project.getConfigs()) {
 			if (config.getType() == IBeansConfig.Type.MANUAL) {
-				configs.put(config.getElementName(), new PropertiesConfig(this, config
+				configs.put(config.getElementName(), PropertiesConfigFactory.create(this, config
 						.getElementName(), config.getType()));
 			}
 			else {
-				autoDetectedConfigs.put(config.getElementName(), new PropertiesConfig(this, config
+				autoDetectedConfigs.put(config.getElementName(), PropertiesConfigFactory.create(this, config
 						.getElementName(), config.getType()));
 			}
 		}

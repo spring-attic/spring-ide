@@ -2,7 +2,7 @@
 <?eclipse version="3.0"?>
 <!--
 /*******************************************************************************
- * Copyright (c) 2005, 2012 Spring IDE Developers
+ * Copyright (c) 2005, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -338,7 +338,6 @@
 			<actionSet id="org.eclipse.debug.ui.launchActionSet" />
 			<actionSet id="org.eclipse.wst.server.ui.internal.webbrowser.actionSet" />
 			<actionSet id="org.eclipse.debug.ui.breakpointActionSet" />
-			<actionSet id="com.springsource.sts.roo.ui.actionSet" />
 		</perspectiveExtension>
 	</extension>
 

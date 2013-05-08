@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.classreading;
 
-import org.springframework.core.type.AnnotationMetadata;
+import org.eclipse.jdt.core.IJavaElement;
 
 /**
  * @author Martin Lippert
- * @since 3.2.0
+ * @since 3.3.0
  */
-public interface IJdtAnnotationMetadata extends IJdtClassMetadata, AnnotationMetadata {
+public interface JdtConnectedMetadata {
+
+	IJavaElement getJavaElement();
+
 }

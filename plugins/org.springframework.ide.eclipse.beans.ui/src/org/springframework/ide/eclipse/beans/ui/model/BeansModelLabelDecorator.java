@@ -64,10 +64,12 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements IL
 	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID + ".model.beansModelLabelDecorator";
 
 	public static void update() {
-		IBaseLabelProvider provider = PlatformUI.getWorkbench().getDecoratorManager()
-				.getBaseLabelProvider(DECORATOR_ID);
-		if (provider instanceof BeansModelLabelDecorator) {
-			((BeansModelLabelDecorator) provider).internalUpdate();
+		if (PlatformUI.isWorkbenchRunning()) {
+			IBaseLabelProvider provider = PlatformUI.getWorkbench().getDecoratorManager()
+					.getBaseLabelProvider(DECORATOR_ID);
+			if (provider instanceof BeansModelLabelDecorator) {
+				((BeansModelLabelDecorator) provider).internalUpdate();
+			}
 		}
 	}
 

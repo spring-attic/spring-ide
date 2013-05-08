@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,7 +70,7 @@ public class WebflowValidationContext extends AbstractValidationContext {
 				IDOMAttr schemaLocationNode = (IDOMAttr) attributes.getNamedItemNS(
 						"http://www.w3.org/2001/XMLSchema-instance", "schemaLocation");
 				String content = schemaLocationNode.getValue();
-				isVersion1 = !content.contains("spring-webflow-2.0.xsd");
+				isVersion1 = content.contains("spring-webflow-1");
 			}
 		}
 		catch (Exception e) {

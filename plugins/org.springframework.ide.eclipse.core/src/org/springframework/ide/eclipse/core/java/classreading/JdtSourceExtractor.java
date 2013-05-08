@@ -23,13 +23,13 @@ import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 public class JdtSourceExtractor implements SourceExtractor {
 
 	public Object extractSource(Object sourceCandidate, Resource definingResource) {
-		if (sourceCandidate instanceof IJdtMethodMetadata) {
-			try {
-				return new JavaModelSourceLocation(((IJdtMethodMetadata) sourceCandidate).getMethod());
+		try {
+			if (sourceCandidate instanceof JdtConnectedMetadata) {
+				return new JavaModelSourceLocation(((JdtConnectedMetadata) sourceCandidate).getJavaElement());
 			}
-			catch (JavaModelException e) {
-				throw new JdtMetadataReaderException(e);
-			}
+		}
+		catch (JavaModelException e) {
+			throw new JdtMetadataReaderException(e);
 		}
 		return sourceCandidate;
 	}

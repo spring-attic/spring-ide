@@ -46,7 +46,6 @@ import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocato
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -278,7 +277,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			// Create new list of configs
 			configs.clear();
 			for (String configName : configNames) {
-				configs.put(configName, new BeansConfig(this, configName, Type.MANUAL));
+				configs.put(configName, BeansConfigFactory.create(this, configName, Type.MANUAL));
 			}
 		}
 		finally {
@@ -301,9 +300,9 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * @return <code>true</code> if config file was added to this project
 	 */
 	public boolean addConfig(IFile file, IBeansConfig.Type type) {
-		return addConfig(getConfigName(file), type);
+		return addConfig(this.getConfigName(file), type);
 	}
-
+	
 	/**
 	 * Adds the given beans config to the list of configs.
 	 * <p>
@@ -319,17 +318,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			w.lock();
 			if (configName.length() > 0 && !configs.containsKey(configName)) {
 				if (type == IBeansConfig.Type.MANUAL) {
-					IBeansConfig config = new BeansConfig(this, configName, type);
-					configs.put(configName, config);
-					config.registerEventListener(eventListener);
-
-					if (autoDetectedConfigs.containsKey(configName)) {
-						autoDetectedConfigs.remove(configName);
-						String locatorId = locatorByAutoDetectedConfig.remove(configName);
-						if (locatorId != null && autoDetectedConfigsByLocator.containsKey(locatorId)) {
-							autoDetectedConfigsByLocator.get(locatorId).remove(configName);
-						}
-					}
+					IBeansConfig config = BeansConfigFactory.create(this, configName, type);
+					addConfig(config);
 					return true;
 				}
 				else if (type == IBeansConfig.Type.AUTO_DETECTED && !autoDetectedConfigs.containsKey(configName)) {
@@ -345,7 +335,34 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	}
 
 	/**
-	 * Removes the given beans config from the list of configs and from all config sets.
+	 * Adds the given beans config to the list of configs.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
+	 * @param config the config to add
+	 * @return <code>true</code> if config file was added to this project
+	 */
+	private boolean addConfig(IBeansConfig config) {
+		String configName = config.getElementName();
+
+		if (configs.containsKey(configName)) {
+			return false;
+		}
+		
+		configs.put(configName, config);
+		config.registerEventListener(eventListener);
+
+		if (autoDetectedConfigs.containsKey(configName)) {
+			autoDetectedConfigs.remove(configName);
+			String locatorId = locatorByAutoDetectedConfig.remove(configName);
+			if (locatorId != null && autoDetectedConfigsByLocator.containsKey(locatorId)) {
+				autoDetectedConfigsByLocator.get(locatorId).remove(configName);
+			}
+		}
+		return true;
+	}
+
+	/**
+I	 * Removes the given beans config from the list of configs and from all config sets.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
 	 * @param file the config file to remove
@@ -413,6 +430,12 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	public boolean hasConfig(IFile configFile, String configName, boolean includeImported) {
 		if (hasConfig(configName)) {
 			return true;
+		}
+		
+		for (IBeansConfig config : getConfigs()) {
+			if (config.getElementResource() != null && config.getElementResource().equals(configFile)) {
+				return true;
+			}
 		}
 		
 		if (isImportsEnabled() && includeImported) {
@@ -928,14 +951,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * project-relative path of the given file otherwise it's the workspace-relative path with a leading '/'.
 	 */
 	private String getConfigName(IFile file) {
-		String configName;
-		if (file.getProject().equals(project.getProject()) && !(file instanceof ExternalFile)) {
-			configName = file.getProjectRelativePath().toString();
-		}
-		else {
-			configName = file.getFullPath().toString();
-		}
-		return configName;
+		return BeansConfigFactory.getConfigName(file, this.project);
 	}
 
 	/**

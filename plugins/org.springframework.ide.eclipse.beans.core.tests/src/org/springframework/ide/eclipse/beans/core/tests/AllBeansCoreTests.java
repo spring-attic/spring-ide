@@ -16,14 +16,21 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.ide.core.classreading.tests.JdtAnnotationMetadataTest;
 import org.springframework.ide.core.classreading.tests.JdtBasedAnnotationMetadataTest;
 import org.springframework.ide.core.classreading.tests.JdtClassMetadataTest;
-import org.springframework.ide.eclipse.beans.core.autowire.AutowiredAnnotationInjectionMetadataProviderTests;
+import org.springframework.ide.eclipse.beans.core.autowire.AutowireDependencyProviderTest;
 import org.springframework.ide.eclipse.beans.core.autowire.CommonAnnotationInjectionMetadataProviderTests;
+import org.springframework.ide.eclipse.beans.core.internal.model.resources.tests.ResourceChangeEventHandlerTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRuleTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigDescriptionWriterTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigFactoryTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaConfigTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectTest;
+import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfigRenameTypeRefactoringParticipantTest;
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 
 /**
@@ -43,11 +50,18 @@ import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 	RequiredPropertyRuleTest.class,
 	NamespaceElementsRuleTest.class,
 	IntrospectorTest.class,
-	AutowiredAnnotationInjectionMetadataProviderTests.class,
+	AutowireDependencyProviderTest.class,
 	CommonAnnotationInjectionMetadataProviderTests.class,
 	JdtAnnotationMetadataTest.class,
 	JdtBasedAnnotationMetadataTest.class,
-	JdtClassMetadataTest.class
+	JdtClassMetadataTest.class,
+	BeansConfigTest.class,
+	BeansJavaConfigTest.class,
+	BeansProjectTest.class,
+	BeansConfigFactoryTest.class,
+	BeansConfigDescriptionWriterTest.class,
+	BeansJavaConfigRenameTypeRefactoringParticipantTest.class,
+	ResourceChangeEventHandlerTest.class
 })
 public class AllBeansCoreTests {
 	// goofy junit4, no class body needed
