@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="lib/org.springframework.beans-3.0.0.M3.jar"/>
-	<classpathentry kind="lib" path="lib/org.springframework.context-3.0.0.M3.jar"/>
-	<classpathentry kind="lib" path="lib/org.springframework.core-3.0.0.M3.jar"/>
 	<classpathentry kind="lib" path="lib/com.springsource.javax.annotation-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/com.springsource.javax.ejb-3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.beans_3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.context_3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.core_3.1.4.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

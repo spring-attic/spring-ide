@@ -1,11 +1,10 @@
 <template>
-	<descriptor id="org.springframework.templates.mvc"
-		name="Spring MVC Project"
+	<descriptor id="org.springframework.templates.simple.java"
+		name="Simple Spring Java"
 		kind="template"
-		requiresbundle="org.eclipse.m2e.core"
-		version="3.2.2">
+		version="1.0.0">
 		<description>
-			A new Spring MVC web application development project
+			A new simple Spring Java project.
 		</description>
 	</descriptor>
 	<project path="template.zip"/>

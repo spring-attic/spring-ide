@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 Spring IDE Developers
+ * Copyright (c) 2005, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,7 +61,6 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
@@ -469,7 +468,7 @@ public class BeansEditorUtils {
 		Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(file, true);
 		for (IBeansConfig config : allConfigs) {
 			if (config instanceof IImportedBeansConfig) {
-				BeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config, BeansConfig.class);
+				IBeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config, IBeansConfig.class);
 				configs.add(rootBeansConfig);
 			}
 		}
@@ -495,7 +494,7 @@ public class BeansEditorUtils {
 		if (BeansCoreUtils.isBeansConfig(file, true)) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
 			if (config instanceof IImportedBeansConfig) {
-				configs.add(BeansModelUtils.getParentOfClass(config, BeansConfig.class));
+				configs.add(BeansModelUtils.getParentOfClass(config, IBeansConfig.class));
 			}
 			else {
 				configs.add(config);

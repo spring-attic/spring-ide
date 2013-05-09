@@ -75,6 +75,7 @@
 		<dist.pathpostfix>nightly</dist.pathpostfix>
 		<dist.path>${dist.type}/${dist.key}/${dist.pathpostfix}</dist.path>
 		<dist.bucket>dist.springframework.org</dist.bucket>
+		<dist.properties>dist.properties</dist.properties>
 
 		<tycho-version>0.17.0</tycho-version>
 		<test.skip>${maven.test.skip}</test.skip>
