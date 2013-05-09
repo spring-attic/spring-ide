@@ -10,16 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.tests;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.ide.eclipse.wizard.template.util.NameUrlPair;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuides;
-
+import java.io.File;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import junit.framework.TestCase;
+
+import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
+import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.gettingstarted.guides.GettingStartedGuides;
 
 /**
  * @author Kris De Volder
@@ -79,6 +79,28 @@ public class GuidesTests extends TestCase {
 		};
 
 		assertAtLeast(expected, guides);
+	}
+	
+	public void testDownloadZips() throws Exception {
+		GettingStartedGuide[] guides = getGuides();
+		
+		for (GettingStartedGuide guide : guides) {
+			System.out.println("=== guide: "+guide.getName()+" ====");
+			DownloadableItem zip = guide.getZip();
+			File zipFile = zip.getFile();
+			assertTrue(zipFile.exists());
+			ZipFile zipper = new ZipFile(zipFile);
+			try {
+				Enumeration<? extends ZipEntry> entries = zipper.entries();
+				while (entries.hasMoreElements()) {
+					ZipEntry e = entries.nextElement();
+					System.out.println(e.getName());
+				}
+			} finally {
+				zipper.close();
+			}
+		}
+		
 	}
 
 	private GettingStartedGuide[] getGuides() {

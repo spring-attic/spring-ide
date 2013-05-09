@@ -11,6 +11,9 @@
 package org.springframework.ide.eclipse.gettingstarted.github.auth;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
@@ -19,6 +22,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -41,6 +45,13 @@ public class BasicAuthCredentials extends Credentials {
 		return "BasicAuthCredentials("+username+")";
 	}
 
+	private String computeAuthString() throws UnsupportedEncodingException {
+		String authorisation = username + ":" + passwd;
+		byte[] encodedAuthorisation = Base64.encodeBase64(authorisation.getBytes("utf8"));
+		String authString = "Basic " + new String(encodedAuthorisation);
+		return authString;
+	}
+	
 	@Override
 	public RestTemplate apply(RestTemplate rest) {
 		List<ClientHttpRequestInterceptor> interceptors = rest.getInterceptors();
@@ -49,14 +60,24 @@ public class BasicAuthCredentials extends Credentials {
 					ClientHttpRequestExecution execution) throws IOException {
 				HttpHeaders headers = request.getHeaders();
 				if (!headers.containsKey("Authorization")) {
-					String authorisation = username + ":" + passwd;
-					byte[] encodedAuthorisation = Base64.encodeBase64(authorisation.getBytes("utf8"));
-					headers.add("Authorization", "Basic " + new String(encodedAuthorisation));
+					String authString = computeAuthString();
+					headers.add("Authorization", authString);
 				}
 				return execution.execute(request, body);
 			}
+
 		});
 		return rest;
+	}
+
+	@Override
+	public void apply(URLConnection conn) {
+		try {
+			conn.setRequestProperty("Authorization", computeAuthString());
+		} catch (UnsupportedEncodingException e) {
+			//Shouldn't really be possible...
+			GettingStartedActivator.log(e);
+		}
 	}
 
 }

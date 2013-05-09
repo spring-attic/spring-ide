@@ -12,11 +12,23 @@ package org.springframework.ide.eclipse.gettingstarted.github;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.BasicAuthCredentials;
@@ -35,6 +47,8 @@ import org.springframework.core.NestedRuntimeException;
  */
 public class GithubClient {
 	
+	private static final boolean DEBUG = false;
+	
 	private Credentials credentials;
 	private RestTemplate client;
 
@@ -52,7 +66,7 @@ public class GithubClient {
 		this.client= createRestTemplate();
 	}
 
-	private static Credentials createDefaultCredentials() {
+	public static Credentials createDefaultCredentials() {
 		InputStream stream = GithubClient.class.getResourceAsStream("user.properties");
 		if (stream!=null) {
 			try {
@@ -110,9 +124,48 @@ public class GithubClient {
 		//Add authentication
 		rest = credentials.apply(rest);
 		
-		///Add json parsing capability using Jackson mapper.
+		//Add json parsing capability using Jackson mapper.
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 		messageConverters.add(new MappingJacksonHttpMessageConverter());
+
+// The code below doesn't work because by the time we get to use the inputstream RestTemplate will
+// have closed it already. A message converter must read the input it is interested in before
+// returning... Too bad :-(
+		
+//		//Add capability to get raw data as an InputStream
+//		messageConverters.add(new HttpMessageConverter<InputStream>() {
+//
+//			@Override
+//			public boolean canRead(Class<?> klass, MediaType mt) {
+//				return InputStream.class.isAssignableFrom(klass);
+//			}
+//
+//			@Override
+//			public boolean canWrite(Class<?> arg0, MediaType mt) {
+//				//This message converter is only for getting data not sending.
+//				return false;
+//			}
+//
+//			@Override
+//			public List<MediaType> getSupportedMediaTypes() {
+//				return Arrays.asList(MediaType.ALL);
+//			}
+//
+//			@Override
+//			public InputStream read(Class<? extends InputStream> arg0,
+//					HttpInputMessage response) throws IOException,
+//					HttpMessageNotReadableException {
+//				return response.getBody();
+//			}
+//
+//			@Override
+//			public void write(InputStream arg0, MediaType arg1,
+//					HttpOutputMessage arg2) throws IOException,
+//					HttpMessageNotWritableException {
+//				throw new HttpMessageNotWritableException("This message converter is only for reading");
+//			}
+//			
+//		});
 		rest.setMessageConverters(messageConverters); 
 
 		return rest;
@@ -141,8 +194,56 @@ public class GithubClient {
 		//TODO: this implementation makes a request to get the rate limit remaining.
 		// but github attaches this info to every response in the response headers.
 		// So we could cache it from the last request made through this client instead
-		// of making a request to fetch it.
+		// of making another request to fetch it.
 		return get("/rate_limit", RateLimit.class);
+	}
+
+	
+    private void pipe(InputStream input, OutputStream output) throws IOException {
+        byte[] buf = new byte[1024*4];
+        int n = input.read(buf);
+        while (n >= 0) {
+          output.write(buf, 0, n);
+          n = input.read(buf);
+        }
+        output.flush();        
+    }
+	
+    /**
+     * Download content from a url and save to an outputstream. Use same credentials as
+     * other operations in this client. May need to use this to download stuff like
+     * zip file from github if the repo it comes from is private.
+     */
+	public void fetch(URL url, OutputStream writeTo) throws IOException {
+		URLConnection conn = null;
+		InputStream input = null;
+		try {
+			conn = url.openConnection();
+			credentials.apply(conn);
+			conn.connect();
+			if (DEBUG) {
+				System.out.println(">>> "+url);
+				Map<String, List<String>> headers = conn.getHeaderFields();
+				for (Entry<String, List<String>> header : headers.entrySet()) {
+					System.out.println(header.getKey()+":");
+					for (String value : header.getValue()) {
+						System.out.println("   "+value);
+					}
+				}
+				System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+			}
+			
+			input = conn.getInputStream();
+			pipe(input, writeTo);
+		} finally {
+			if (input!=null) {
+				try {
+					input.close();
+				} catch (Throwable e) {
+					//ignore.
+				}
+			}
+		}
 	}
 
 	

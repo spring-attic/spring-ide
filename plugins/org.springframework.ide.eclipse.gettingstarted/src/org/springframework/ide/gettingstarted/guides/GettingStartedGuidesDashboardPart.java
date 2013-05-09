@@ -11,8 +11,8 @@
 package org.springframework.ide.gettingstarted.guides;
 
 import java.net.URI;
+import java.net.URL;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -32,7 +32,6 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
-import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.springsource.ide.eclipse.dashboard.internal.ui.IdeUiPlugin;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
 //import org.springframework.ide.eclipse.wizard.WizardPlugin;
@@ -126,7 +125,6 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 			guidesComposite = toolkit.createComposite(composite, SWT.WRAP);
 			TableWrapLayout layout = new TableWrapLayout();
 			guidesComposite.setLayout(layout);
-			//GridDataFactory.fillDefaults().grab(true, false).applyTo(guidesComposite);
 		}
 		else {
 			// clear the old links out
@@ -139,7 +137,9 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 		}
 		
 		
-
+		//TODO: running this in UI thread may be a bad idea. E.g. slow network connection
+		// may make UI thread hang. Should popuplate contents of guides section with
+		// a background job.
 		GettingStartedGuide[] guides = GettingStartedGuides.getInstance().getAll();
 		for (final GettingStartedGuide guide : guides) {
 			displayGuide(guidesComposite, guide);
@@ -185,7 +185,6 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 		final ImageHyperlink link = toolkit.createImageHyperlink(composite, SWT.NONE);
 		link.setText(name);
 		link.setHref(guide.getHomePage());
-//		link.setImage(StsUiImages.getImage(StsUiImages.DOWNLOAD_OVERLAY));
 		link.setImage(IdeUiPlugin.getImage(SMALL_ARROW_IMAGE));
 		TableWrapData tableWrapData = new TableWrapData(TableWrapData.FILL_GRAB, TableWrapData.MIDDLE);
 		link.setLayoutData(tableWrapData);
@@ -208,7 +207,7 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 			public void linkActivated(HyperlinkEvent evt) {
 				try {
 					System.out.println(guide.getHomePage());
-					URI url = guide.getHomePage();
+					URL url = guide.getHomePage();
 					System.out.println("url="+url);
 					if (url!=null) {
 						//PlatformUI.getWorkbench().getBrowserSupport().createBrowser(BROWSER_ID).openURL(url.toURL());
@@ -216,7 +215,7 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 						//Also internal browser is unable to open the url because the repos are still private.
 						//External browser works if already logged in to github as a user that has access to the
 						// private repos.
-						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url.toURL());
+						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
 					}
 				} catch (Exception e) {
 					GettingStartedActivator.log(e);

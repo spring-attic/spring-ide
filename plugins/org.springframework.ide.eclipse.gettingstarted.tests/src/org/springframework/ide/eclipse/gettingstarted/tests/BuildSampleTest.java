@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.gettingstarted.tests;
 
 import static org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsDashboardPart.importSample;
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.*;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.assertNoErrors;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.getProject;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.setAutoBuilding;
 
 import java.util.ArrayList;
 
@@ -25,14 +27,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.wizard.template.util.NameUrlPair;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * A BuildSample test checks that a particular sample project builds properly
  * when it gets imported into STS.
  * 
  * This test class is intended to be instantiated with data about a particular
- * sample project. It provides a static suite method fetches the samples
+ * sample project. It provides a static suite method that fetches the samples
  * and creates one test for each sample.
  * 
  * @author Kris De Volder
@@ -64,7 +65,7 @@ public class BuildSampleTest extends TestCase {
 			}
 		}.waitFor(3*MINUTE);
 		IProject project = getProject(sample.getName());
-		StsTestUtil.assertNoErrors(project);
+		assertNoErrors(project);
 	}
 	
 	public static Test suite() throws Exception {
@@ -73,7 +74,7 @@ public class BuildSampleTest extends TestCase {
 		ArrayList<NameUrlPair> samples = new ArrayList<NameUrlPair>(SampleTests.getSamples());
 		//The next one is a 'meta-test'. We do not have pet-clinic in the list of official samples yet.
 		// And the current version has errors. so the test should fail.
-		samples.add(new NameUrlPair("spring-pet-clinic", "https://github.com/SpringSource/spring-petclinic"));
+		//samples.add(new NameUrlPair("spring-pet-clinic", "https://github.com/SpringSource/spring-petclinic"));
 		for (NameUrlPair sample : samples) {
 			suite.addTest(new BuildSampleTest(sample));
 		}

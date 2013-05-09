@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.gettingstarted.guides;
 
-import java.util.List;
+import java.io.File;
 
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
+import org.springframework.ide.eclipse.gettingstarted.github.auth.AuthenticatedDownloader;
+import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 
 /**
  * An instance of this class provides access to Getting started content of type 'Guide'
@@ -25,6 +28,13 @@ public class GettingStartedGuides {
 	private static GettingStartedGuides instance;
 	
 	private GettingStartedGuide[] guides;
+	
+	private DownloadManager downloader = new DownloadManager(new AuthenticatedDownloader(), 
+			new File(
+					GettingStartedActivator.getDefault().getStateLocation().toFile(),
+					"guides"
+			)
+	);
 	
 	//TODO: anticipate a need to have content for guides provided in different ways.
 	
@@ -45,11 +55,11 @@ public class GettingStartedGuides {
 	/**
 	 * Called to fetch the guides from wherever we are getting them from. 
 	 */
-	private static GettingStartedGuide[] fetchGuides() {
+	private GettingStartedGuide[] fetchGuides() {
 		Repo[] repos = new GithubClient().getGuidesRepos();
 		GettingStartedGuide[] guides = new GettingStartedGuide[repos.length];
 		for (int i = 0; i < guides.length; i++) {
-			guides[i] = new GettingStartedGuide(repos[i]);
+			guides[i] = new GettingStartedGuide(repos[i], downloader);
 		}
 		return guides;
 	}

@@ -16,4 +16,5 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.dashboard.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.gettingstarted.guides
+Export-Package: org.springframework.ide.eclipse.gettingstarted.util,
+ org.springframework.ide.gettingstarted.guides

@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.gettingstarted.guides;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
+import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
+import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 
 /**
  * Content for a GettingStartedGuide provided via a Github Repo
@@ -24,11 +26,13 @@ import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 public class GettingStartedGuide {
 
 	private Repo repo;
+	private DownloadManager downloader;
 
-	public GettingStartedGuide(Repo repo) {
+	public GettingStartedGuide(Repo repo, DownloadManager downloader) {
 		this.repo = repo;
+		this.downloader = downloader;
 	}
-	
+
 	public String getName() {
 		return repo.getName();
 	}
@@ -37,10 +41,28 @@ public class GettingStartedGuide {
 		return repo.getDescription();
 	}
 	
-	public URI getHomePage() {
+	public URL getHomePage() {
 		try {
-			return new URI(repo.getHtmlUrl());
-		} catch (URISyntaxException e) {
+			return new URL(repo.getHtmlUrl());
+		} catch (MalformedURLException e) {
+			GettingStartedActivator.log(e);
+			return null;
+		}
+	}
+	
+	/**
+	 * Get a URL pointing to zip file where the entire contents of this
+	 * guide can be downloaded. 
+	 */
+	public DownloadableItem getZip() {
+		String repoUrl = repo.getHtmlUrl(); 
+		//repoUrl is something like "https://github.com/springframework-meta/gs-consuming-rest-android"
+		//zipUrl is something like  "https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip" 
+		try {
+			DownloadableItem item = new DownloadableItem(new URL(repoUrl+"/archive/master.zip"), downloader);
+			item.setFileName(getName());
+			return item;
+		} catch (MalformedURLException e) {
 			GettingStartedActivator.log(e);
 			return null;
 		}

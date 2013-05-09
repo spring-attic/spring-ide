@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.github.auth;
 
+import java.net.URLConnection;
+
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -37,5 +39,10 @@ public abstract class Credentials {
 	 * RestTemplate.
 	 */
 	public abstract RestTemplate apply(RestTemplate rest);
+
+	/**
+	 * Add authentication headers to a url connection.
+	 */
+	public abstract void apply(URLConnection conn);
 
 }
