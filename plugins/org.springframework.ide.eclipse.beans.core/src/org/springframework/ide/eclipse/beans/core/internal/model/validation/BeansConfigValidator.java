@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -99,7 +98,7 @@ public class BeansConfigValidator extends AbstractValidator {
 				for (IBeansConfig beansConfig : configs) {
 					// Resolve imported config files to their root importing one
 					if (beansConfig instanceof IImportedBeansConfig) {
-						IBeansConfig importingConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
+						IBeansConfig importingConfig = BeansModelUtils.getParentOfClass(beansConfig, IBeansConfig.class);
 						if (importingConfig != null) {
 							resources.add(importingConfig.getElementResource());
 							addBeans(importingConfig);
@@ -139,7 +138,7 @@ public class BeansConfigValidator extends AbstractValidator {
 							// Resolve imported config files to their root importing one
 							if (beansConfig instanceof IImportedBeansConfig) {
 								IBeansConfig importingConfig = BeansModelUtils.getParentOfClass(beansConfig,
-										BeansConfig.class);
+										IBeansConfig.class);
 								if (importingConfig != null) {
 									resources.add(importingConfig.getElementResource());
 									affectedBeans.add(bean.getElementID());

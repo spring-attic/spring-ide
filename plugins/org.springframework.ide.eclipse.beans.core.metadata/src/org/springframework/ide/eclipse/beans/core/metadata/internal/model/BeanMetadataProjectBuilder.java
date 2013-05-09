@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansTypeHierachyState;
 import org.springframework.ide.eclipse.beans.core.metadata.BeansMetadataPlugin;
@@ -115,7 +114,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
 			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils.getResourceModelElement(resource);
 			if (beansConfig instanceof IImportedBeansConfig) {
-				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, BeansConfig.class);
+				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, IBeansConfig.class);
 			}
 			for (IBeansImport beansImport : beansConfig.getImports()) {
 				for (IImportedBeansConfig importedBeansConfig : beansImport.getImportedBeansConfigs()) {
