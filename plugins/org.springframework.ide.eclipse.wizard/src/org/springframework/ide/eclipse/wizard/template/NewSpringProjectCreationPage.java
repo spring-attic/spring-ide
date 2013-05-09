@@ -93,6 +93,7 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 
 	@Override
 	public void createControl(Composite parent) {
+
 		initializeDialogUnits(parent);
 
 		Composite composite = new Composite(parent, SWT.NULL);
@@ -105,8 +106,7 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		createFacetsGroup(composite);
 		setPageComplete(validatePage());
 
-		Control jreControl = createJRESelectionControl(composite);
-		jreControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		createJRESection(composite);
 
 		// Show description on opening
 		setErrorMessage(null);
@@ -117,6 +117,15 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		setTitle("Spring Configuration");
 
 		refreshProjectValues();
+	}
+
+	protected void createJRESection(Composite parent) {
+		Control jreControl = createJRESelectionControl(parent);
+		jreControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		// Info Control is needed as a dependency of JRE control
+		Control infoControl = createInfoControl(parent);
+		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
 	protected void refreshProjectValues() {
@@ -262,13 +271,20 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		horizontalLine.setFont(namespacesGroup.getFont());
 
 		Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
-		boolean versionClasspath = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
+		useHighestXsdVersion = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 		loadHandlerFromClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
 		disableNamespaceCaching = prefs.getBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
 
 		versionCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, convertHorizontalDLUsToPixels(5));
 		versionCheckbox.setText(NewSpringProjectWizardMessages.NewProjectPage_highestXsdVersion);
-		versionCheckbox.setSelection(versionClasspath);
+		versionCheckbox.setSelection(useHighestXsdVersion);
+
+		versionCheckbox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				useHighestXsdVersion = versionCheckbox.getSelection();
+			}
+		});
 
 		classpathCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, convertHorizontalDLUsToPixels(5));
 		classpathCheckbox.setText(NewSpringProjectWizardMessages.NewProjectPage_loadXsdsFromClasspath);
@@ -289,7 +305,7 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		disableNamespaceCachingCheckbox.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				disableNamespaceCaching = classpathCheckbox.getSelection();
+				disableNamespaceCaching = disableNamespaceCachingCheckbox.getSelection();
 			}
 		});
 
@@ -298,6 +314,8 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 
 	private void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
 		this.useProjectSettings = useProjectSpecificSettings;
+
+		// Enable related controls
 		versionCheckbox.setEnabled(useProjectSpecificSettings);
 		classpathCheckbox.setEnabled(useProjectSpecificSettings);
 		disableNamespaceCachingCheckbox.setEnabled(useProjectSpecificSettings && classpathCheckbox.getSelection());

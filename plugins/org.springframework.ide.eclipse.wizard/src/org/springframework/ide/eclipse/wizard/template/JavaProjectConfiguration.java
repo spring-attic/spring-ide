@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -18,7 +17,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -60,32 +58,25 @@ public class JavaProjectConfiguration extends ProjectConfiguration {
 
 		configuredProject = project;
 
-		// configure the new Spring project operation
-		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
-			@Override
-			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
-					InterruptedException {
-				monitor.beginTask(NewSpringProjectWizardMessages.NewProject_createNewProject, 1000);
-				configureSpringProject(configuredProject, configExtensions, enableImports, new SubProgressMonitor(
-						monitor, 1000));
+		// configure the new Spring project
+		monitor.beginTask(NewSpringProjectWizardMessages.NewProject_createNewProject, 1000);
+		configureSpringProject(configuredProject, configExtensions, enableImports,
+				new SubProgressMonitor(monitor, 1000));
 
-				if (useProjectSettings) {
-					prefs.putBoolean(BeansCorePlugin.PROJECT_PROPERTY_ID, useProjectSettings);
-					prefs.putBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, useHighestXsdVersion);
-					prefs.putBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, loadHandlerFromClasspath);
-					prefs.putBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, disableNamespaceCaching);
-				}
-				prefs.putBoolean(BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
-						ignoreMissingNamespaceHandlers);
+		if (useProjectSettings) {
+			prefs.putBoolean(BeansCorePlugin.PROJECT_PROPERTY_ID, useProjectSettings);
+			prefs.putBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, useHighestXsdVersion);
+			prefs.putBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, loadHandlerFromClasspath);
+			prefs.putBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, disableNamespaceCaching);
+		}
+		prefs.putBoolean(BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY, ignoreMissingNamespaceHandlers);
 
-				// add project facet nature to enable corresponding
-				// functionality
-				if (enableProjectFacets) {
-					SpringCoreUtils.addProjectNature(configuredProject, FacetedProjectNature.NATURE_ID, monitor);
-				}
-				monitor.done();
-			}
-		};
+		// add project facet nature to enable corresponding
+		// functionality
+		if (enableProjectFacets) {
+			SpringCoreUtils.addProjectNature(configuredProject, FacetedProjectNature.NATURE_ID, monitor);
+		}
+		monitor.done();
 
 	}
 
