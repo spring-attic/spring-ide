@@ -181,6 +181,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 					addResolvableClass("org.springframework.core.io.ResourceLoader");
 					addResolvableClass("org.springframework.context.ApplicationEventPublisher");
 					addResolvableClass("org.springframework.context.ApplicationContext");
+					addResolvableClass("org.springframework.core.env.Environment", "environment");
 
 					addResolvableClass("javax.servlet.ServletConfig");
 					addResolvableClass("javax.servlet.ServletRequest", "requestObjectFactory");

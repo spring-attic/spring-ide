@@ -677,5 +677,30 @@ public class AutowireDependencyProviderTest {
 					ref.getElementSourceLocation().getStartLine()));
 		}
 	}
+	
+	@Test
+	public void testEnvironmentInjection() throws Exception {
+		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/beans/factory/annotation/testEnvironmentInjection-context.xml", IBeansConfig.Type.MANUAL);
+		
+		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
+		allowedRefs.put("environment", new Integer[] { 591 });
+
+		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
+		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
+		IBean bean = BeansModelUtils.getBean("environmentAutowiredBean", config);
+
+//		assertTrue(references.size() == 1);
+//		assertTrue(references.containsKey(bean));
+
+		Set<IBeanReference> refs = references.get(bean);
+		assertTrue(refs.size() == 1);
+		for (IBeanReference ref : refs) {
+			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
+			assertTrue(Arrays.asList(allowedRefs.get(ref.getBeanName())).contains(
+					ref.getElementSourceLocation().getStartLine()));
+		}
+	}
+
+
 
 }

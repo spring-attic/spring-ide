@@ -584,5 +584,12 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 	}
+	
+	public static class AutowiredEnvironmentBean {
+
+		@Autowired
+		private org.springframework.core.env.Environment env;
+
+	}
 
 }
