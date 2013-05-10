@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,10 +51,48 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 
 	@Override
 	public boolean canFinish() {
+		refreshProjectValues();
 		if (springCreationPage.isPageComplete()) {
 			return javaPageTwo.isPageComplete();
 		}
 		return false;
+	}
+
+	protected void refreshProjectValues() {
+		// Note to prevent infinite event triggering, do not set values if no
+		// changes have occurred.
+		if (springCreationPage != null) {
+			String projectName = getWizard().getMainPage().getProjectName();
+			URI projectLocationURI = getWizard().getMainPage().getProjectLocationURI();
+			String projectNameInSpringPage = springCreationPage.getProjectName();
+			URI projectLocationInSpringURI = springCreationPage.getProjectLocationURI();
+
+			if (!areEqual(projectLocationURI, projectLocationInSpringURI, projectName, projectNameInSpringPage)) {
+				springCreationPage.setProjectLocationURI(projectLocationURI);
+				springCreationPage.setProjectName(projectName);
+			}
+		}
+	}
+
+	protected boolean areEqual(URI actualURI, URI uriInSpringPage, String actualName, String inSpringPageName) {
+		boolean equals = false;
+		if (actualName == inSpringPageName) {
+			equals = true;
+		}
+		else {
+			equals = (actualName != null) ? actualName.equals(inSpringPageName) : false;
+		}
+
+		if (equals) {
+			if (actualURI == uriInSpringPage) {
+				equals = true;
+			}
+			else {
+				equals = (actualURI != null) ? actualURI.equals(uriInSpringPage) : false;
+			}
+		}
+
+		return equals;
 	}
 
 	@Override
@@ -102,7 +142,11 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 	public ProjectConfiguration getProjectConfiguration() {
 
 		if (springCreationPage != null) {
-			JavaProjectConfigurationDescriptor descriptor = new JavaProjectConfigurationDescriptor(springCreationPage);
+			JavaProjectConfigurationDescriptor descriptor = new JavaProjectConfigurationDescriptor(
+					springCreationPage.getConfigSuffixes(), springCreationPage.enableImports(),
+					springCreationPage.enableProjectFacets(), springCreationPage.ignoreMissingNamespaceHandlers(),
+					springCreationPage.disableNamespaceCaching(), springCreationPage.useHighestXsdVersion(),
+					springCreationPage.useProjectSettings(), springCreationPage.loadHandlerFromClasspath());
 
 			return new JavaProjectConfiguration(descriptor);
 		}

@@ -55,14 +55,12 @@ public class NamespaceElementsRuleTest extends BeansCoreTestCase {
 	public void testNamespaceValidation() throws Exception {
 
 		MarkerAssertion[] assertions = new MarkerAssertion[] {
-				new MarkerAssertion("'java.lang.String' is not a sub type of 'java.util.List'", 14),
-				new MarkerAssertion("Class 'java.lang.NoSuchClass' not found", 15),
-				new MarkerAssertion("Method 'nosuchmethod' not found in class 'java.lang.String'", 21),
-				new MarkerAssertion("Referenced bean 'target2' not found", 22, IMarker.SEVERITY_WARNING),
-				new MarkerAssertion("Class 'java.lang.NoSuchClass' not found", 29),
-				new MarkerAssertion("'java.util.ArrayList' specifies a class where an interface is required", 30),
-				new MarkerAssertion("Field 'NO_SUCH_FIELD' not found on class 'org.springframework.core.Ordered'", 35),
-				new MarkerAssertion("Class 'org.springframework.core.NoSuchClass' not found", 36) };
+				new MarkerAssertion("'java.lang.String' is not a sub type of 'java.util.List'", 13),
+				new MarkerAssertion("Class 'java.lang.NoSuchClass' not found", 14),
+				new MarkerAssertion("Method 'nosuchmethod' not found in class 'java.lang.String'", 20),
+				new MarkerAssertion("Referenced bean 'target2' not found", 21, IMarker.SEVERITY_WARNING),
+				new MarkerAssertion("Field 'NO_SUCH_FIELD' not found on class 'org.springframework.core.Ordered'", 25),
+				new MarkerAssertion("Class 'org.springframework.core.NoSuchClass' not found", 26) };
 
 		IMarker[] markers = resource.findMarkers(BeansCorePlugin.PLUGIN_ID + ".problemmarker", false,
 				IResource.DEPTH_ZERO);

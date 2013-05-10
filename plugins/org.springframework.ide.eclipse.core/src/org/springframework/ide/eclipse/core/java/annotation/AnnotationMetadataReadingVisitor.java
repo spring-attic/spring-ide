@@ -29,9 +29,11 @@ import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.FieldVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
-import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.type.asm.ClassMetadataReadingVisitor;
+import org.springframework.ide.eclipse.core.type.asm.EmptyAnnotationVisitor;
+import org.springframework.ide.eclipse.core.type.asm.EmptyFieldVisitor;
+import org.springframework.ide.eclipse.core.type.asm.EmptyMethodVisitor;
 
 /**
  * ASM based {@link ClassVisitor} that reads and stores all
@@ -44,7 +46,9 @@ import org.springframework.ide.eclipse.core.type.asm.ClassMetadataReadingVisitor
  */
 public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements IAnnotationMetadata {
 
-	static EmptyVisitor EMPTY_VISITOR = new EmptyVisitor();
+	public static AnnotationVisitor EMPTY_ANNOTATION_VISITOR = new EmptyAnnotationVisitor();
+	public static MethodVisitor EMPTY_METHOD_VISITOR = new EmptyMethodVisitor();
+	public static FieldVisitor EMPTY_FIELD_VISITOR = new EmptyFieldVisitor();
 
 	private Map<String, Annotation> classAnnotations = new LinkedHashMap<String, Annotation>();
 	private Map<IMethod, Set<Annotation>> methodAnnotations = new LinkedHashMap<IMethod, Set<Annotation>>();
@@ -150,7 +154,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 			classAnnotations.put(annotationClass, annotation);
 			return new AnnotationMemberVisitor(annotation, this.classloader, advancedValueProcessing);
 		} else {
-			return EMPTY_VISITOR;
+			return EMPTY_ANNOTATION_VISITOR;
 		}
 	}
 
@@ -160,7 +164,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		if (!visitedMethods.contains(methodKey)) {
 			visitedMethods.add(methodKey);
 
-			return new EmptyVisitor() {
+			return new EmptyMethodVisitor() {
 				@Override
 				public AnnotationVisitor visitAnnotation(final String annotationDesc, boolean visible) {
 					final String annotationClass = Type.getType(annotationDesc).getClassName();
@@ -172,16 +176,16 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 						methodAnnotations.add(annotation);
 						return new AnnotationMemberVisitor(annotation, classloader, advancedValueProcessing);
 					}
-					return EMPTY_VISITOR;
+					return EMPTY_ANNOTATION_VISITOR;
 				}
 			};
 		}
-		return EMPTY_VISITOR;
+		return EMPTY_METHOD_VISITOR;
 	}
 
 	@Override
 	public FieldVisitor visitField(final int access, final String name, final String desc, final String signature, Object value) {
-		return new EmptyVisitor() {
+		return new EmptyFieldVisitor() {
 			@Override
 			public AnnotationVisitor visitAnnotation(final String annotationDesc, boolean visible) {
 				final String annotationClass = Type.getType(annotationDesc).getClassName();
@@ -193,9 +197,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 					fieldAnnotations.add(annotation);
 					return new AnnotationMemberVisitor(annotation, classloader, advancedValueProcessing);
 				}
-				return EMPTY_VISITOR;
+				return EMPTY_ANNOTATION_VISITOR;
 			}
-
 		};
 	}
 

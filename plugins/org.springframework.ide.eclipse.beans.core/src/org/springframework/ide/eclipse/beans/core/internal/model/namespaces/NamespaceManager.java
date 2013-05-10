@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Spring IDE Developers
+ * Copyright (c) 2009, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,15 +18,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
-import org.springframework.osgi.util.OsgiBundleUtils;
-import org.springframework.osgi.util.OsgiServiceUtils;
 import org.springframework.util.Assert;
 import org.xml.sax.EntityResolver;
 
 /**
  * Support class that deals with namespace parsers discovered inside Spring bundles.
+ * 
  * @author Christian Dupuis
  * @author Costin Leau
+ * @author Martin Lippert
  */
 public class NamespaceManager {
 
@@ -37,9 +37,9 @@ public class NamespaceManager {
 	 * ServiceRegistration object returned by OSGi when registering the NamespacePlugins instance as
 	 * a service
 	 */
-	private ServiceRegistration nsResolverRegistration, enResolverRegistration = null;
+	private ServiceRegistration<?> nsResolverRegistration, enResolverRegistration = null;
 
-	private ServiceRegistration ndResolverRegistration;
+	private ServiceRegistration<?> ndResolverRegistration;
 
 	/** OSGi Environment */
 	private final BundleContext context;
@@ -74,7 +74,7 @@ public class NamespaceManager {
 	 */
 	public void maybeAddNamespaceHandlerFor(Bundle bundle, boolean isLazyBundle) {
 		// Ignore system bundle
-		if (OsgiBundleUtils.isSystemBundle(bundle)) {
+		if (isSystemBundle(bundle)) {
 			return;
 		}
 
@@ -124,6 +124,11 @@ public class NamespaceManager {
 		}
 	}
 
+	private boolean isSystemBundle(Bundle bundle) {
+		Assert.notNull(bundle);
+		return (bundle.getBundleId() == 0);
+	}
+
 	private boolean hasCompatibleNamespaceType(Bundle bundle) {
 		return namespacePlugins.isTypeCompatible(bundle);
 	}
@@ -159,16 +164,28 @@ public class NamespaceManager {
 	 */
 	private void unregisterResolverService() {
 
-		OsgiServiceUtils.unregisterService(nsResolverRegistration);
-		OsgiServiceUtils.unregisterService(enResolverRegistration);
-		OsgiServiceUtils.unregisterService(ndResolverRegistration);
+		unregisterService(nsResolverRegistration);
+		unregisterService(enResolverRegistration);
+		unregisterService(ndResolverRegistration);
 		
 		this.nsResolverRegistration = null;
 		this.enResolverRegistration = null;
 		this.ndResolverRegistration = null;
 	}
 
-	public ToolingAwareNamespacePlugins getNamespacePlugins() {
+	public boolean unregisterService(ServiceRegistration<?> registration) {
+		try {
+			if (registration != null) {
+				registration.unregister();
+				return true;
+			}
+		}
+		catch (IllegalStateException alreadyUnregisteredException) {
+		}
+		return false;
+	}
+
+    public ToolingAwareNamespacePlugins getNamespacePlugins() {
 		return namespacePlugins;
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
-import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
@@ -45,12 +44,16 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.ide.eclipse.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
+import org.springframework.ide.eclipse.core.type.asm.EmptyAnnotationVisitor;
+import org.springframework.ide.eclipse.core.type.asm.EmptyMethodVisitor;
 
 /**
  * Validates a given {@link IBean}'s constructor argument. Skips abstract beans and those beans that use a
  * <code>factory-bean</code> and/or <code>factory-method</code> attributes.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
@@ -153,7 +156,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		final AnnotationMetadata visitor = new AnnotationMetadata();
 		try {
 			ClassReader classReader = classReaderFactory.getClassReader(className);
-			classReader.accept(visitor, false);
+			classReader.accept(visitor, 0);
 		}
 		catch (IOException e) {
 			// ignore any missing files here as this will be
@@ -178,7 +181,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		@Override
 		public MethodVisitor visitMethod(int modifier, String name, String params, String arg3, String[] arg4) {
 			if (CONSTRUCTOR_NAME.equals(name)) {
-				return new EmptyVisitor() {
+				return new EmptyMethodVisitor() {
 					@Override
 					public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 						if (AUTOWIRED_NAME.equals(desc)) {
@@ -187,11 +190,11 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 						else if (INJECT_NAME.equals(desc)) {
 							isConstructorAutowired = true;
 						}
-						return new EmptyVisitor();
+						return new EmptyAnnotationVisitor();
 					}
 				};
 			}
-			return new EmptyVisitor();
+			return new EmptyMethodVisitor();
 		}
 
 		public boolean isConstructorAutowired() {

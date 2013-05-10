@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core;
 
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -46,14 +47,15 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
 import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.core.MessageUtils;
-import org.springframework.osgi.util.OsgiBundleUtils;
 
 /**
  * Central access point for the Spring Framework Core plug-in (id
  * <code>"org.springframework.ide.eclipse.beans.core"</code>).
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Tomasz Zarna
+ * @author Martin Lippert
  */
 public class BeansCorePlugin extends AbstractUIPlugin {
 
@@ -319,7 +321,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	public static String getPluginVersion() {
 		Bundle bundle = getDefault().getBundle();
-		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+		return bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 
 	protected void maybeAddNamespaceHandlerFor(Bundle bundle, boolean isLazy) {
@@ -341,16 +343,31 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 		for (int i = 0; i < previousBundles.length; i++) {
 			Bundle bundle = previousBundles[i];
-			if (OsgiBundleUtils.isBundleResolved(bundle)) {
+			if (isBundleResolved(bundle)) {
 				nsManager.maybeAddNamespaceHandlerFor(bundle, false);
 			}
-			else if (OsgiBundleUtils.isBundleLazyActivated(bundle)) {
+			else if (isBundleLazyActivated(bundle)) {
 				nsManager.maybeAddNamespaceHandlerFor(bundle, true);
 			}
 		}
 
 		// discovery finished, publish the resolvers/parsers in the OSGi space
 		nsManager.afterPropertiesSet();
+	}
+
+	public boolean isBundleResolved(Bundle bundle) {
+		return (bundle.getState() >= Bundle.RESOLVED);
+	}
+
+	public boolean isBundleLazyActivated(Bundle bundle) {
+		if (bundle.getState() == Bundle.STARTING) {
+			Dictionary<String, String> headers = bundle.getHeaders();
+			if (headers != null && headers.get(Constants.BUNDLE_ACTIVATIONPOLICY) != null) {
+				String value = headers.get(Constants.BUNDLE_ACTIVATIONPOLICY).trim();
+				return (value.startsWith(Constants.ACTIVATION_LAZY));
+			}
+		}
+		return false;
 	}
 
 	/**

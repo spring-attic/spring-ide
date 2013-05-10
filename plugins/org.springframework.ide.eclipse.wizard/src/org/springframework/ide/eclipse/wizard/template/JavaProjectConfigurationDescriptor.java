@@ -14,41 +14,65 @@ import java.util.Set;
 
 public class JavaProjectConfigurationDescriptor implements IProjectConfigurationDescriptor {
 
-	private final NewSpringProjectCreationPage page;
+	private final Set<String> suffixes;
 
-	public JavaProjectConfigurationDescriptor(NewSpringProjectCreationPage page) {
-		this.page = page;
+	private final boolean enableImports;
+
+	private final boolean enableProjectFacets;
+
+	private final boolean ignoreMissingNamespaceHandlers;
+
+	private final boolean disableNamespaceCaching;
+
+	private final boolean useHighestXsdVersion;
+
+	private final boolean useProjectSettings;
+
+	private final boolean loadHandlerFromClasspath;
+
+	public JavaProjectConfigurationDescriptor(Set<String> suffixes, boolean enableImports, boolean enableProjectFacets,
+			boolean ignoreMissingNamespaceHandlers, boolean disableNamespaceCaching, boolean useHighestXsdVersion,
+			boolean useProjectSettings, boolean loadHandlerFromClasspath) {
+		this.suffixes = suffixes;
+		this.enableImports = enableImports;
+		this.enableProjectFacets = enableProjectFacets;
+		this.ignoreMissingNamespaceHandlers = ignoreMissingNamespaceHandlers;
+		this.disableNamespaceCaching = disableNamespaceCaching;
+		this.useHighestXsdVersion = useHighestXsdVersion;
+		this.useProjectSettings = useProjectSettings;
+		this.loadHandlerFromClasspath = loadHandlerFromClasspath;
+
 	}
 
 	public Set<String> getConfigSuffixes() {
-		return page.getConfigSuffixes();
+		return suffixes;
 	}
 
 	public boolean enableImports() {
-		return page.enableImports();
+		return enableImports;
 	}
 
 	public boolean enableProjectFacets() {
-		return page.enableProjectFacets();
+		return enableProjectFacets;
 	}
 
 	public boolean ignoreMissingNamespaceHandlers() {
-		return page.ignoreMissingNamespaceHandlers();
+		return ignoreMissingNamespaceHandlers;
 	}
 
 	public boolean loadHandlerFromClasspath() {
-		return page.loadHandlerFromClasspath();
+		return loadHandlerFromClasspath;
 	}
 
 	public boolean disableNamespaceCaching() {
-		return page.disableNamespaceCaching();
+		return disableNamespaceCaching;
 	}
 
 	public boolean useHighestXsdVersion() {
-		return page.useHighestXsdVersion();
+		return useHighestXsdVersion;
 	}
 
 	public boolean useProjectSettings() {
-		return page.useProjectSettings();
+		return useProjectSettings;
 	}
 }

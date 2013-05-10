@@ -22,8 +22,8 @@ Require-Bundle: org.eclipse.ui,
  org.maven.ide.eclipse.maven_embedder;bundle-version="0.12.0.20101115-1102";resolution:=optional,
  org.maven.ide.eclipse.jdt;bundle-version="0.12.0.20101115-1102";resolution:=optional,
  org.datanucleus.ide.eclipse;resolution:=optional,
- org.springframework.core;bundle-version="[3.0.5.RELEASE,3.2.0)",
- org.springframework.beans;bundle-version="[3.0.5.RELEASE,3.2.0)"
+ org.springframework.core;bundle-version="[3.0.5.RELEASE,4.1.0)",
+ org.springframework.beans;bundle-version="[3.0.5.RELEASE,4.1.0)"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
