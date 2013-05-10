@@ -17,10 +17,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
-import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.ide.eclipse.core.type.asm.EmptyAnnotationVisitor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -29,13 +30,14 @@ import org.springframework.util.ReflectionUtils;
  * @author Martin Lippert
  * @since 3.2.0
  */
-public class AnnotationMemberVisitor extends EmptyVisitor {
+public class AnnotationMemberVisitor extends AnnotationVisitor {
 
 	private final Annotation annotation;
 	private final ClassLoader classloader;
 	private boolean advancedValueProcessing;
 
 	public AnnotationMemberVisitor(Annotation annotation, ClassLoader classloader, boolean advancedValueProcessing) {
+		super(SpringAsmInfo.ASM_VERSION);
 		this.annotation = annotation;
 		this.classloader = classloader;
 		this.advancedValueProcessing = advancedValueProcessing;
@@ -105,13 +107,13 @@ public class AnnotationMemberVisitor extends EmptyVisitor {
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String arg0, String arg1) {
-		return AnnotationMetadataReadingVisitor.EMPTY_VISITOR;
+		return AnnotationMetadataReadingVisitor.EMPTY_ANNOTATION_VISITOR;
 	}
 
 	@Override
 	public AnnotationVisitor visitArray(final String name) {
 		final Set<Object> values = new LinkedHashSet<Object>();
-		return new EmptyVisitor() {
+		return new EmptyAnnotationVisitor() {
 
 			@Override
 			public void visit(String arg0, Object arg1) {
@@ -150,15 +152,16 @@ public class AnnotationMemberVisitor extends EmptyVisitor {
 					buf.append(value.toString());
 					buf.append(", ");
 				}
+				
 				String value = buf.toString();
 				if (value.length() > 0) {
 					value = value.substring(0, value.length() - 2);
 				}
 
-				if (name.equals("value") && !advancedValueProcessing) {
+				if (typeOfArray != null && name.equals("value") && !advancedValueProcessing) {
 					annotation.addMember(new AnnotationMemberValuePair(null, value, (Object[]) values.toArray((Object[]) Array.newInstance(
 							typeOfArray, values.size()))));
-				} else {
+				} else if (typeOfArray != null && !annotation.hasMember(name)) {
 					annotation.addMember(new AnnotationMemberValuePair(name, value, (Object[]) values.toArray((Object[]) Array.newInstance(
 							typeOfArray, values.size()))));
 				}

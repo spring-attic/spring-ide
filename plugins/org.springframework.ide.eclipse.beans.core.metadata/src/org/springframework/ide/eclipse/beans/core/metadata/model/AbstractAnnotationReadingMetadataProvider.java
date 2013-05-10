@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 Spring IDE Developers
+ * Copyright (c) 2010, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,11 +26,9 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.metadata.internal.model.BeanMetadataModel;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
-import org.springframework.ide.eclipse.core.java.annotation.JdtBasedAnnotationMetadata;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 
@@ -136,7 +134,7 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 				annotationVisitor.setType(type);
 				annotationVisitor.setClassloader(classLoader);
 
-				classReader.accept((ClassVisitor) annotationVisitor, false);
+				classReader.accept((ClassVisitor) annotationVisitor, 0);
 
 				className = annotationVisitor.getSuperClassName();
 				type = JdtUtils.getJavaType(beansProject, className);

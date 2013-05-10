@@ -50,9 +50,6 @@ public class JdtMetadataReaderFactory implements MetadataReaderFactory {
 			throw new IOException("Could not find " + className);
 		}
 
-//		return new JdtMetadataReader(type);
-//		return new JdtMetadataReaderAdaper(type, classReaderFactory, classloader);
-//		return new SimpleMetadataReaderFactory(classloader).getMetadataReader(className);
 		return new JdtConnectedMetadataReader(type, classReaderFactory, classloader);
 	}
 

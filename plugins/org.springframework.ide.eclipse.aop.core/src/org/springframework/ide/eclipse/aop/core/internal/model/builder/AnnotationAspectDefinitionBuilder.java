@@ -41,10 +41,10 @@ import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link IAspectDefinitionBuilder} implementation that creates {@link IAspectDefinition} from
+ * {@link IAspectDefinitionBuilder} implementation that creates {@link IAspectDefinition} from  @AspectJ-style aspects.
+ * 
  * @author Christian Dupuis
  * @author Martin Lippert
- * @AspectJ-style aspects.
  * @since 2.0
  */
 public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder implements
@@ -81,7 +81,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 
 		AdviceAnnotationVisitor v = new AdviceAnnotationVisitor(id, className, bean.getElementStartLine(), bean
 				.getElementEndLine());
-		classReader.accept(v, false);
+		classReader.accept(v, 0);
 
 		List<IAspectDefinition> aspectDefinitions = v.getAspectDefinitions();
 		for (IAspectDefinition def : aspectDefinitions) {
@@ -209,7 +209,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 			return false;
 		}
 		AspectAnnotationVisitor v = new AspectAnnotationVisitor();
-		classReader.accept(v, false);
+		classReader.accept(v, 0);
 
 		if (!v.getClassInfo().hasAspectAnnotation()) {
 			return false;
@@ -245,7 +245,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 				}
 
 				AspectAnnotationVisitor sv = new AspectAnnotationVisitor();
-				classReader.accept(sv, false);
+				classReader.accept(sv, 0);
 
 				if (sv.getClassInfo().getAspectAnnotation() != null
 						&& !((sv.getClassInfo().getModifier() & Opcodes.ACC_ABSTRACT) != 0)) {

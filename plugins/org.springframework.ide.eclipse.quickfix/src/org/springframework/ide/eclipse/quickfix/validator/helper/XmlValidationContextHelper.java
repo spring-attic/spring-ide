@@ -41,7 +41,6 @@ import org.springframework.ide.eclipse.quickfix.BeansEditorValidator;
 import org.springframework.ide.eclipse.quickfix.processors.QuickfixProcessorFactory;
 import org.w3c.dom.Node;
 
-
 /**
  * @author Terry Denney
  * @author Christian Dupuis
@@ -81,8 +80,8 @@ public class XmlValidationContextHelper extends AbstractValidationContext implem
 
 		this.project = file.getProject();
 		this.file = file;
-		this.delegateContext = new BeansValidationContext(config, new SpringProject(SpringCore.getModel(), file
-				.getProject()));
+		this.delegateContext = new BeansValidationContext(config, new SpringProject(SpringCore.getModel(),
+				file.getProject()));
 
 		this.errorFound = false;
 	}
@@ -115,8 +114,8 @@ public class XmlValidationContextHelper extends AbstractValidationContext implem
 
 	public ClassReaderFactory getClassReaderFactory() {
 		if (this.classReaderFactory == null) {
-			this.classReaderFactory = new CachingClassReaderFactory(JdtUtils.getClassLoader(project, BeansCorePlugin
-					.getClassLoader()));
+			this.classReaderFactory = new CachingClassReaderFactory(JdtUtils.getClassLoader(project,
+					BeansCorePlugin.getClassLoader()));
 		}
 		return this.classReaderFactory;
 	}
@@ -140,8 +139,7 @@ public class XmlValidationContextHelper extends AbstractValidationContext implem
 
 	public IProjectClassLoaderSupport getProjectClassLoaderSupport() {
 		if (this.projectClassLoaderSupport == null) {
-			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project, BeansCorePlugin
-					.getClassLoader());
+			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project, null);
 		}
 		return this.projectClassLoaderSupport;
 	}

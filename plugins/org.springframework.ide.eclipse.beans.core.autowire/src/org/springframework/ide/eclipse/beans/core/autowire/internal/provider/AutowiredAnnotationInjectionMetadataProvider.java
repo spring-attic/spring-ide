@@ -86,9 +86,9 @@ public class AutowiredAnnotationInjectionMetadataProvider implements IInjectionM
 	 * Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
 	 */
 	public AutowiredAnnotationInjectionMetadataProvider(ClassLoader cl) {
-		this.autowiredAnnotationTypes.add(Autowired.class);
-		this.autowiredAnnotationTypes.add(Value.class);
 		try {
+			this.autowiredAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass(Autowired.class.getName()));
+			this.autowiredAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass(Value.class.getName()));
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.inject.Inject"));
 		}
 		catch (ClassNotFoundException ex) {

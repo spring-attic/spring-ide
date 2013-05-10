@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,9 @@ import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
  * A {@link SourceExtractor} implementation which retrieves
  * {@link DefaultModelSourceLocation} from a given
  * {@link FileSystemResource}.
+ * 
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 public class JavaSourceExtractor implements SourceExtractor {
@@ -50,7 +52,7 @@ public class JavaSourceExtractor implements SourceExtractor {
 				ClassReader	reader = classReaderFactory.
 					getClassReader((FileSystemResource) sourceCandidate);
 				ClassMetadataReadingVisitor v = new ClassMetadataReadingVisitor();
-				reader.accept(v, true);
+				reader.accept(v, ClassReader.SKIP_DEBUG);
 				String className = v.getClassName();
 				IType type = JdtUtils.getJavaType(project, className);
 				if (type != null) {

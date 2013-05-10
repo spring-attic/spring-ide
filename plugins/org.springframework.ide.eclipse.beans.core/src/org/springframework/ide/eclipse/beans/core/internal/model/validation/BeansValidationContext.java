@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -110,8 +109,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 	 */
 	public synchronized IProjectClassLoaderSupport getProjectClassLoaderSupport() {
 		if (this.projectClassLoaderSupport == null) {
-			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(getRootElementProject(),
-					BeansCorePlugin.getClassLoader());
+			this.projectClassLoaderSupport = JdtUtils.getProjectClassLoaderSupport(getRootElementProject(), null);
 		}
 		return this.projectClassLoaderSupport;
 	}

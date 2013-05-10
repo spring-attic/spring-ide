@@ -313,6 +313,16 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 		}
 		return null;
 	}
+	
+	public String[] getBeansForType(String requiredTypeName) {
+		try {
+			Class<?> requiredType = ClassUtils.loadClass(requiredTypeName);
+			return getBeansForType(requiredType);
+		}
+		catch (ClassNotFoundException e) {
+		}
+		return new String[0];
+	}
 
 	public String[] getBeansForType(Class<?> requiredType) {
 		Set<String> matchingBeans = new HashSet<String>();
@@ -324,10 +334,10 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 					if (requiredType.isAssignableFrom(beanClass)) {
 						matchingBeans.add(bean.getElementName());
 					}
-					else if (FactoryBean.class.isAssignableFrom(beanClass) && isFactoryForType(beanClass, requiredType)) {
+					else if (ClassUtils.loadClass(FactoryBean.class.getName()).isAssignableFrom(beanClass) && isFactoryForType(beanClass, requiredType)) {
 						matchingBeans.add(bean.getElementName());
 					}
-					else if (FactoryBean.class.isAssignableFrom(beanClass) && isExtensibleFactoryForType(bean, beanClass, requiredType)) {
+					else if (ClassUtils.loadClass(FactoryBean.class.getName()).isAssignableFrom(beanClass) && isExtensibleFactoryForType(bean, beanClass, requiredType)) {
 						matchingBeans.add(bean.getElementName());
 					}
 				}
@@ -345,6 +355,8 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 				return true;
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
+		} catch (Error e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -367,8 +379,14 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			throws NoSuchBeanDefinitionException {
 
 		// Consider FactoryBeans as autowiring candidates.
-		boolean isFactoryBean = (descriptor != null && descriptor.getDependencyType() != null && FactoryBean.class
-				.isAssignableFrom(descriptor.getDependencyType()));
+		boolean isFactoryBean = false;
+		try {
+			isFactoryBean = (descriptor != null && descriptor.getDependencyType() != null && ClassUtils.loadClass(FactoryBean.class.getName())
+					.isAssignableFrom(descriptor.getDependencyType()));
+		}
+		catch (ClassNotFoundException e) {
+		}
+
 		if (isFactoryBean) {
 			beanName = BeanFactoryUtils.transformedBeanName(beanName);
 		}
@@ -384,7 +402,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 
 	private Set<IInjectionMetadataProvider> createInjectionMetadataProviders() {
 		Set<IInjectionMetadataProvider> providers = new HashSet<IInjectionMetadataProvider>();
-		String[] autowiredAnnotationBeanPostProcessorNames = getBeansForType(AutowiredAnnotationBeanPostProcessor.class);
+		String[] autowiredAnnotationBeanPostProcessorNames = getBeansForType(AutowiredAnnotationBeanPostProcessor.class.getName());
 		for (String autowiredAnnotationBeanPostProcessorName : autowiredAnnotationBeanPostProcessorNames) {
 			AutowiredAnnotationInjectionMetadataProvider provider = new AutowiredAnnotationInjectionMetadataProvider(
 					this.classLoaderSupport.getProjectClassLoader());
@@ -408,7 +426,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			providers.add(provider);
 		}
 
-		String[] commonAnnotationBeanPostProcessorNames = getBeansForType(CommonAnnotationBeanPostProcessor.class);
+		String[] commonAnnotationBeanPostProcessorNames = getBeansForType(CommonAnnotationBeanPostProcessor.class.getName());
 		for (String commonAnnotationBeanPostProcessorName : commonAnnotationBeanPostProcessorNames) {
 			CommonAnnnotationInjectionMetadataProvider provider = new CommonAnnnotationInjectionMetadataProvider();
 
@@ -435,19 +453,19 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 	}
 
 	private AutowireCandidateResolver getAutowireCandidateResolver() {
-		QualifierAnnotationAutowireCandidateResolver resolver = new QualifierAnnotationAutowireCandidateResolver();
+		QualifierAnnotationAutowireCandidateResolver resolver = new QualifierAnnotationAutowireCandidateResolver(
+				this.classLoaderSupport.getProjectClassLoader());
 		resolver.setProblemReporter(problemReporter);
 		return resolver;
 	}
 
 	protected void createProjectClassLoaderSupport() {
 		if (this.classLoaderSupport == null) {
-			this.classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project.getProject(), BeansCorePlugin
-					.getClassLoader());
+			this.classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project.getProject(), BeansCorePlugin.getClassLoader());
 		}
 	}
 
-	public void seProjectClassLoaderSupport(IProjectClassLoaderSupport classLoaderSupport) {
+	public void setProjectClassLoaderSupport(IProjectClassLoaderSupport classLoaderSupport) {
 		this.classLoaderSupport = classLoaderSupport;
 	}
 
@@ -627,9 +645,13 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 	public void resolveDependency(DependencyDescriptor descriptor, Class<?> type, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 		descriptor.initParameterNameDiscovery(this.parameterNameDiscoverer);
-		if (descriptor.getDependencyType().equals(ObjectFactory.class) || descriptor.getDependencyType().equals(Provider.class)) {
-			descriptor.increaseNestingLevel();
-			type = descriptor.getDependencyType();
+		try {
+			if (descriptor.getDependencyType().equals(ClassUtils.loadClass(ObjectFactory.class.getName())) || descriptor.getDependencyType().equals(
+					ClassUtils.loadClass(Provider.class.getName()))) {
+				descriptor.increaseNestingLevel();
+				type = descriptor.getDependencyType();
+			}
+		} catch (ClassNotFoundException e) {
 		}
 		
 		try {
