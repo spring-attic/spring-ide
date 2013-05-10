@@ -73,7 +73,7 @@ public class BuildSampleTest extends TestCase {
 		
 		ArrayList<NameUrlPair> samples = new ArrayList<NameUrlPair>(SampleTests.getSamples());
 		//The next one is a 'meta-test'. We do not have pet-clinic in the list of official samples yet.
-		// And the current version has errors. so the test should fail.
+		// And the current version has errors so the test should fail.
 		//samples.add(new NameUrlPair("spring-pet-clinic", "https://github.com/SpringSource/spring-petclinic"));
 		for (NameUrlPair sample : samples) {
 			suite.addTest(new BuildSampleTest(sample));

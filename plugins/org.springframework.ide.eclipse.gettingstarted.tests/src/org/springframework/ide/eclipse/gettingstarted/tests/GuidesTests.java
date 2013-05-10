@@ -27,7 +27,7 @@ import org.springframework.ide.gettingstarted.guides.GettingStartedGuides;
 public class GuidesTests extends TestCase {
 
 	/** 
-	 * Expected Guide instances represent some expected data about a Guide than can be
+	 * EG (Expected Guide) instances represent some expected data about a Guide than can be
 	 * compared to an actual Guide data instance.
 	 */
 	private class EG {
@@ -55,15 +55,13 @@ public class GuidesTests extends TestCase {
 	}
 
 	/**
-	 * Check that at least some expected samples are available in default, non-modified
-	 * STS. There may be more samples than the ones we check for. That should not
-	 * cause a test failure (in anticipation more samples will be added.
+	 * Check that at least some expected guides are available in default, non-modified
+	 * STS. There may be more than the ones we check for. That should not
+	 * cause a test failure (in anticipation more guides will be added.
 	 *  
 	 * @throws Exception
 	 */
-	public void testGetSamples() throws Exception {
-		
-		//TODO: samples should have a short description blurb.
+	public void testGetGuides() throws Exception {
 		
 		GettingStartedGuide[] guides = getGuides();
 		
@@ -81,29 +79,28 @@ public class GuidesTests extends TestCase {
 		assertAtLeast(expected, guides);
 	}
 	
-	public void testDownloadZips() throws Exception {
-		GettingStartedGuide[] guides = getGuides();
-		
-		for (GettingStartedGuide guide : guides) {
-			System.out.println("=== guide: "+guide.getName()+" ====");
-			DownloadableItem zip = guide.getZip();
-			File zipFile = zip.getFile();
-			assertTrue(zipFile.exists());
-			ZipFile zipper = new ZipFile(zipFile);
-			try {
-				Enumeration<? extends ZipEntry> entries = zipper.entries();
-				while (entries.hasMoreElements()) {
-					ZipEntry e = entries.nextElement();
-					System.out.println(e.getName());
-				}
-			} finally {
-				zipper.close();
-			}
-		}
-		
-	}
-
-	private GettingStartedGuide[] getGuides() {
+//	public void testDownloadZips() throws Exception {
+//		GettingStartedGuide[] guides = getGuides();
+//		
+//		for (GettingStartedGuide guide : guides) {
+//			System.out.println("=== guide: "+guide.getName()+" ====");
+//			DownloadableItem zip = guide.getZip();
+//			File zipFile = zip.getFile();
+//			assertTrue(zipFile.exists());
+//			ZipFile zipper = new ZipFile(zipFile);
+//			try {
+//				Enumeration<? extends ZipEntry> entries = zipper.entries();
+//				while (entries.hasMoreElements()) {
+//					ZipEntry e = entries.nextElement();
+//					System.out.println(e.getName());
+//				}
+//			} finally {
+//				zipper.close();
+//			}
+//		}
+//	}
+	
+	public static GettingStartedGuide[] getGuides() {
 		return GettingStartedGuides.getInstance().getAll();
 	}
 

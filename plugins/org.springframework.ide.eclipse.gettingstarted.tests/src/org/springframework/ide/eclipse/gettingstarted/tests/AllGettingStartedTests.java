@@ -20,6 +20,8 @@ public class AllGettingStartedTests {
 		
 		//Guides content validation
 		suite.addTestSuite(GuidesTests.class);
+		suite.addTest(GuidesZipStructureTest.suite());
+		
 		//TODO: test import / build
 
 		//Sample content validation

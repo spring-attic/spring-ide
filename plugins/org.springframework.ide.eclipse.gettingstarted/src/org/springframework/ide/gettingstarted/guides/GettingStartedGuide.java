@@ -12,11 +12,16 @@ package org.springframework.ide.gettingstarted.guides;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
+import org.springframework.ide.gettingstarted.content.CodeSet;
 
 /**
  * Content for a GettingStartedGuide provided via a Github Repo
@@ -66,6 +71,33 @@ public class GettingStartedGuide {
 			GettingStartedActivator.log(e);
 			return null;
 		}
+	}
+	
+	public List<CodeSet> getCodeSets() {
+		return Arrays.asList(
+				CodeSet.fromZip("initial", getZip(), getRootPath().append("initial")),
+				CodeSet.fromZip("complete", getZip(), getRootPath().append("complete"))
+		);
+	}
+	
+	/**
+	 * Defines the location of the 'root' relative to the zip file. The interesting contents
+	 * of the zip file may not be directly at the root of the archive.
+	 * <p>
+	 * Note this method is made public for testing purposes only. Clients shouldn't really
+	 * need to get at this information. Rather they should rely on the 'CodeSets' to
+	 * access this data.
+	 */
+	public IPath getRootPath() {
+		return new Path(getName()+"-master");
+	}
+
+	public CodeSet getInitialCodeSet() {
+		return getCodeSets().get(0);
+	}
+	
+	public CodeSet getCompleteCodeSet() {
+		return getCodeSets().get(1);
 	}
 	
 }
