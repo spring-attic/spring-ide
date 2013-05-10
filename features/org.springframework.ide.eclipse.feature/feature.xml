@@ -174,20 +174,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.osgi.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.osgi.io"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="edu.emory.mathcs.backport"
          download-size="0"
          install-size="0"
@@ -245,13 +231,6 @@
 
    <plugin
          id="org.springframework.aop"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.asm"
          download-size="0"
          install-size="0"
          version="0.0.0"
