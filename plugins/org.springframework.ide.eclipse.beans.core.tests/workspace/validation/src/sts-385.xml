@@ -4,8 +4,7 @@
 	xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:task="http://www.springframework.org/schema/task"
 	xmlns:osgi="http://www.springframework.org/schema/osgi"
-	xsi:schemaLocation="http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
-		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
@@ -21,16 +20,7 @@
  		<task:scheduled ref="target1" method="nosuchmethod" fixed-rate="1"/>
  		<task:scheduled ref="target2" method="toString" fixed-rate="1"/>
  	</task:scheduled-tasks>
-	
-	
-	<osgi:reference id="test4" > 
-		<osgi:interfaces>
-			<value>java.util.List</value>	
-			<value>java.lang.NoSuchClass</value>	
-			<value>java.util.ArrayList</value>	
-		</osgi:interfaces>
-	</osgi:reference>   
-	 
+		 
 	<util:constant static-field="org.springframework.core.Ordered.HIGHEST_PRECEDENCE"/> 
 	<util:constant static-field="org.springframework.core.Ordered.NO_SUCH_FIELD"/> 
 	<util:constant static-field="org.springframework.core.NoSuchClass.NO_SUCH_FIELD"/> 
