@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.java.classreading.JdtConnectedMetadata;
 import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
+import org.springframework.ide.eclipse.core.model.java.JavaModelMethodSourceLocation;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
@@ -195,14 +196,15 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 			if (source instanceof JavaModelSourceLocation) {
 				
 				IJavaElement javaElement = JavaCore.create(((JavaModelSourceLocation) source).getHandleIdentifier(), DefaultWorkingCopyOwner.PRIMARY);
-				if (javaElement instanceof IMethod && beanDefinition instanceof AnnotatedBeanDefinition) {
-					IMethod method = (IMethod) javaElement;
-					JdtAnnotationBeanDefinition newBeanDefinition = new JdtAnnotationBeanDefinition(
-							((AnnotatedBeanDefinition) beanDefinition).getMetadata());
+				if (javaElement instanceof IMethod && beanDefinition instanceof AnnotatedBeanDefinition
+						&& source instanceof JavaModelMethodSourceLocation) {
+
+					JdtAnnotationBeanDefinition newBeanDefinition = new JdtAnnotationBeanDefinition(((AnnotatedBeanDefinition) beanDefinition).getMetadata());
 					newBeanDefinition.setSource(source);
-					String className = JdtUtils.resolveClassName(JdtUtils.getReturnTypeString(method, false), method
-							.getDeclaringType());
+
+					String className = ((JavaModelMethodSourceLocation) source).getReturnType();
 					newBeanDefinition.setBeanClassName(className);
+					
 					registry.registerBeanDefinition(beanName, newBeanDefinition);
 					
 					Map<String, Object> profileAnnotationMetadata = newBeanDefinition.getMetadata().
