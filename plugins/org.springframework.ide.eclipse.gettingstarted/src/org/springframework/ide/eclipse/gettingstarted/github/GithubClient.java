@@ -107,9 +107,16 @@ public class GithubClient {
 	/**
 	 * Fetch info on the official Spring 'guides' repos hosted on github.
 	 */
-	public Repo[] getGuidesRepos() {
+	public List<Repo> getGuidesRepos() {
 		//The guides are all the projects listed under 'springframework-meta' organization.
-		return getOrgRepos("springframework-meta");
+		Repo[] _repos = getOrgRepos("springframework-meta");
+		ArrayList<Repo> repos = new ArrayList<Repo>(_repos.length);
+		for (Repo repo : _repos) {
+			if (repo.getName().startsWith("gs-")) {
+				repos.add(repo);
+			}
+		}
+		return repos;
 	}
 
 	/**
