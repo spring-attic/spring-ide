@@ -86,6 +86,13 @@ public class GithubClient {
 					//throw new Error(e);
 				}
 			}
+		} else {
+			//Try system properties
+			String username = System.getProperty("github.user.name");
+			String password = System.getProperty("github.user.password");
+			if (username!=null && password!=null) {
+				return new BasicAuthCredentials(username, password);
+			}
 		}
 		return new NullCredentials();
 	}
