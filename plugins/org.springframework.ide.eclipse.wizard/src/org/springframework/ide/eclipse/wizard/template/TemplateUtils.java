@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -23,10 +24,14 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.mylyn.commons.core.CoreUtil;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
@@ -34,6 +39,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.BundleTemplateLoader;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateProjectData;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.RuntimeTemplateProjectData;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateProjectData;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
@@ -159,6 +165,81 @@ public class TemplateUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Given a template, download its contents and set the date in the given
+	 * template. This method will always attempt to download the latest contents
+	 * of the template, therefore this should only be called if the latest
+	 * contents of the template need to be fetched.
+	 */
+	public static void downloadTemplateData(Template template, Shell shell) throws CoreException {
+
+		if (template == null) {
+			return;
+		}
+
+		final Template selectedTemplate = template;
+		final Shell dialogueShell = shell;
+
+		ContentItem selectedItem = selectedTemplate.getItem();
+		if (!selectedItem.isLocal() && selectedItem.getRemoteDescriptor().getUrl() == null) {
+			String message = NLS.bind("In the descriptor file for ''{0}'', the URL to the project ZIP is missing.",
+					selectedItem.getName());
+			MessageDialog.openError(dialogueShell, NLS.bind("URL missing", null), message);
+			return;
+		}
+
+		// Otherwise download the data
+		try {
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(dialogueShell);
+			dialog.run(true, true, new IRunnableWithProgress() {
+
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+
+					try {
+						monitor.beginTask("Download template " + selectedTemplate.getName(), 100);
+						ITemplateProjectData data;
+						if (selectedTemplate.getItem().isRuntimeDefined()) {
+							data = new RuntimeTemplateProjectData(selectedTemplate.getItem().getRuntimeProject());
+						}
+						else {
+							data = TemplateUtils.importTemplate(selectedTemplate, dialogueShell,
+									new SubProgressMonitor(monitor, 1));
+						}
+						selectedTemplate.setTemplateData(data);
+						if (data == null) {
+							throw new InvocationTargetException(
+									new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, NLS.bind(
+											"Template data missing. Please check the template "
+													+ selectedTemplate.getName() + " to verify it has content.", null))));
+						}
+					}
+					catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					}
+					catch (OperationCanceledException e) {
+						throw new InterruptedException();
+					}
+					finally {
+						monitor.done();
+					}
+				}
+			});
+		}
+		catch (InterruptedException e) {
+			// do nothing
+		}
+		catch (InvocationTargetException e) {
+			Throwable target = e.getTargetException();
+			if (target instanceof CoreException) {
+				throw (CoreException) target;
+			}
+			else {
+				throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getMessage(), e));
+			}
+		}
+
 	}
 
 	public static ITemplateProjectData importTemplate(Template template, final Shell shell,

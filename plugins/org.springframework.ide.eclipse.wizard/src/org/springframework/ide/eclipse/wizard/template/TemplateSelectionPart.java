@@ -30,16 +30,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
@@ -75,8 +70,6 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateElement;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateProjectData;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.RuntimeTemplateProjectData;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateCategory;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage;
@@ -366,6 +359,25 @@ public class TemplateSelectionPart {
 
 	}
 
+	protected void downloadDescriptors() {
+		try {
+			wizard.getContainer().run(true, true, new DownloadDescriptorJob());
+		}
+		catch (InvocationTargetException e) {
+			Throwable t = e.getTargetException();
+			if (t instanceof CoreException) {
+				setError(((CoreException) t).getStatus());
+			}
+			else {
+				setError("Failed to download descriptors due to " + t.getMessage(), t);
+			}
+		}
+		catch (InterruptedException e) {
+			setError("Download of descriptors interrupted. Please try again.", e);
+
+		}
+	}
+
 	protected void setSeletectedTemplate(Template template) {
 		selectedTemplate = template;
 		if (selectedTemplate != null) {
@@ -396,9 +408,15 @@ public class TemplateSelectionPart {
 		}
 	}
 
-	protected void setError(String error) {
+	protected void setError(String error, Throwable t) {
 		if (statusHandler != null) {
-			statusHandler.setStatus(new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, error), false);
+			statusHandler.setStatus(new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, error, t), false);
+		}
+	}
+
+	protected void setError(IStatus error) {
+		if (statusHandler != null) {
+			statusHandler.setStatus(error, false);
 		}
 	}
 
@@ -415,78 +433,6 @@ public class TemplateSelectionPart {
 
 	public boolean hasSelection() {
 		return selectedTemplate != null;
-	}
-
-	/**
-	 * If there is a selected template, download its contents. This method will
-	 * always attempt to download the latest contents of the template, therefore
-	 * this should only be called if the latest contents of the template need to
-	 * be fetched.
-	 */
-	public void downloadTemplateData() throws CoreException {
-
-		if (!hasSelection()) {
-			return;
-		}
-
-		ContentItem selectedItem = selectedTemplate.getItem();
-		if (!selectedItem.isLocal() && selectedItem.getRemoteDescriptor().getUrl() == null) {
-			String message = NLS.bind("In the descriptor file for ''{0}'', the URL to the project ZIP is missing.",
-					selectedItem.getName());
-			MessageDialog.openError(wizard.getShell(), NLS.bind("URL missing", null), message);
-			return;
-		}
-
-		// Otherwise download the data
-		try {
-			ProgressMonitorDialog dialog = new ProgressMonitorDialog(wizard.getShell());
-			dialog.run(true, true, new IRunnableWithProgress() {
-
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-
-					try {
-						monitor.beginTask("Download template " + selectedTemplate.getName(), 100);
-						ITemplateProjectData data;
-						if (selectedTemplate.getItem().isRuntimeDefined()) {
-							data = new RuntimeTemplateProjectData(selectedTemplate.getItem().getRuntimeProject());
-						}
-						else {
-							data = TemplateUtils.importTemplate(selectedTemplate, wizard.getShell(),
-									new SubProgressMonitor(monitor, 1));
-						}
-						selectedTemplate.setTemplateData(data);
-						if (data == null) {
-							throw new InvocationTargetException(
-									new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, NLS.bind(
-											"Template data missing. Please check the template "
-													+ selectedTemplate.getName() + " to verify it has content.", null))));
-						}
-					}
-					catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
-					catch (OperationCanceledException e) {
-						throw new InterruptedException();
-					}
-					finally {
-						monitor.done();
-					}
-				}
-			});
-		}
-		catch (InterruptedException e) {
-			// do nothing
-		}
-		catch (InvocationTargetException e) {
-			Throwable target = e.getTargetException();
-			if (target instanceof CoreException) {
-				throw (CoreException) target;
-			}
-			else {
-				throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getMessage(), e));
-			}
-		}
-
 	}
 
 	private void initializeTemplates() {
@@ -660,57 +606,6 @@ public class TemplateSelectionPart {
 			return message;
 		}
 		return null;
-	}
-
-	public void downloadDescriptors() {
-		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				String refreshErrorMessage = NLS
-						.bind("There was an error refreshing the template descriptors; possibly the network went down.",
-								null);
-				try {
-					final ContentManager manager = ContentPlugin.getDefault().getManager();
-
-					wizard.getContainer().run(true, true, new IRunnableWithProgress() {
-
-						public void run(IProgressMonitor monitor) throws InvocationTargetException,
-								InterruptedException {
-							try {
-								IStatus results = manager.refresh(monitor, true, WizardPlugin.getDefault().getBundle());
-								if (results.isOK()) {
-									return;
-								}
-								final String message = (results.getChildren()[0]).getMessage();
-								if (!results.isOK()) {
-									PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-										public void run() {
-											setError(message);
-										}
-									});
-
-								}
-							}
-							catch (OperationCanceledException e) {
-								final String message = ("Download of descriptor files cancelled.");
-
-								PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-									public void run() {
-										setError(message);
-									}
-								});
-							}
-						}
-					});
-				}
-				catch (InvocationTargetException e1) {
-					MessageDialog.openError(null, NLS.bind("Download error", null), e1.getTargetException()
-							.getLocalizedMessage());
-				}
-				catch (InterruptedException e1) {
-					MessageDialog.openWarning(wizard.getShell(), NLS.bind("Warning", null), refreshErrorMessage);
-				}
-			}
-		});
 	}
 
 	public void dispose() {

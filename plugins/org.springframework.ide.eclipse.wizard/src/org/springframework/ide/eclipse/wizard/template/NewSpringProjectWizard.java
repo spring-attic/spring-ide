@@ -31,6 +31,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.wizard.WizardImages;
@@ -149,20 +150,23 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 			// configuration on the project, which
 			// may involve workspace modification operations, if the section
 			// implementation specifies it
-			final SpringProjectWizardSection section = getSection();
+			SpringProjectWizardSection section = getSection();
 
 			if (section != null) {
+
 				CoreException coreException = null;
 				try {
+					ProjectConfiguration configuration = section.getProjectConfiguration();
+
 					// Creating and configuring projects are separate steps for
 					// now
 					// as creating projects may need to be run in the UI thread
 					// to access
 					// wizard page widgets
 					// while configuring the project does not.
-					IProject project = createProject(section);
+					IProject project = createProject(configuration);
 
-					configureProject(project, section);
+					configureProject(project, configuration);
 				}
 				catch (InterruptedException e) {
 					return false;
@@ -197,7 +201,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 		return finish;
 	}
 
-	protected IProject createProject(final SpringProjectWizardSection section) throws InterruptedException,
+	protected IProject createProject(final ProjectConfiguration projectConfiguration) throws InterruptedException,
 			InvocationTargetException, CoreException {
 
 		// Prevent workspace builds when first creating project to avoid error
@@ -210,7 +214,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 			@Override
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
 					InterruptedException {
-				project = section.createProject(monitor);
+				project = projectConfiguration.createProject(monitor);
 
 			}
 		};
@@ -221,12 +225,11 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 		return project;
 	}
 
-	protected void configureProject(final IProject project, final SpringProjectWizardSection section)
+	protected void configureProject(final IProject project, final ProjectConfiguration projectConfiguration)
 			throws InterruptedException, InvocationTargetException, CoreException {
+
 		enableWorkspaceBuild(true);
 
-		// Add to working sets even if there were configuration
-		// errors
 		final IWorkingSet[] workingSets = getWorkingSets();
 
 		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
@@ -234,13 +237,16 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
 					InterruptedException {
 
-				new ProjectConfigurationOperation(project, section.getProjectConfiguration(), workingSets).run(monitor);
+				projectConfiguration.configureProject(monitor);
 
 				// The project was created , even if there are
 				// errors, still
 				// select and reveal it
 				selectAndReveal(project);
 
+				if (workingSets != null && workingSets.length > 0) {
+					PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
+				}
 			}
 		};
 
@@ -283,8 +289,17 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 		ExceptionHandler.handle(e, getShell(), title, message);
 	}
 
-	public void selectAndReveal(IProject project) {
+	public void selectAndReveal(final IProject project) {
 		super.selectAndReveal(project);
+		// TODO: Alternative to using the NewElementWizard select and reveal
+		// once NewElementWizard dependency is removed
+		// getContainer().getShell().getDisplay().syncExec(new Runnable() {
+		//
+		// public void run() {
+		// BasicNewResourceWizard.selectAndReveal(project,
+		// getWorkbench().getActiveWorkbenchWindow());
+		// }
+		// });
 	}
 
 	@Override

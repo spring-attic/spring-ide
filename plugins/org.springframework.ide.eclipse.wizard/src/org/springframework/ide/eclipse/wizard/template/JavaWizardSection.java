@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 
 /**
  * Contributes the creation of a Java project with Spring configuration to the
@@ -51,11 +52,16 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 
 	@Override
 	public boolean canFinish() {
-		refreshProjectValues();
-		if (springCreationPage.isPageComplete()) {
-			return javaPageTwo.isPageComplete();
+		boolean canFinish = super.canFinish();
+
+		if (canFinish) {
+			// Set the current project name and location URI in the Java
+			// specific
+			// pages before checking if the Java pages are complete
+			refreshProjectValues();
+			canFinish = springCreationPage.isPageComplete() && javaPageTwo.isPageComplete();
 		}
-		return false;
+		return canFinish;
 	}
 
 	protected void refreshProjectValues() {
@@ -113,24 +119,26 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 			return javaPageTwo;
 		}
 		else if (page == getWizard().getMainPage()) {
+			// Download the Simple Java template if going to the next page
+			// Download the template contents for templates that contribute
+			// additional UI pages, as the
+			// content will determine the UI controls of the additional
+			// pages.
+			try {
+				Template template = getWizard().getMainPage().getSelectedTemplate();
+				TemplateUtils.downloadTemplateData(template, getWizard().getShell());
+			}
+			catch (CoreException ce) {
+				handleError(ce.getStatus());
+				return null;
+			}
+
 			springCreationPage.refreshProjectValues();
 			return springCreationPage;
 		}
 		else {
 			return null;
 		}
-	}
-
-	@Override
-	public IProject createProject(IProgressMonitor monitor) throws CoreException {
-		try {
-			springCreationPage.performFinish();
-			javaPageTwo.performFinish(monitor);
-		}
-		catch (InterruptedException e) {
-			throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getMessage(), e));
-		}
-		return ((IJavaProject) getCreatedElement()).getProject();
 	}
 
 	@Override
@@ -148,7 +156,20 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 					springCreationPage.disableNamespaceCaching(), springCreationPage.useHighestXsdVersion(),
 					springCreationPage.useProjectSettings(), springCreationPage.loadHandlerFromClasspath());
 
-			return new JavaProjectConfiguration(descriptor);
+			return new JavaProjectConfiguration(descriptor) {
+				@Override
+				public IProject createProject(IProgressMonitor monitor) throws CoreException {
+					try {
+						springCreationPage.performFinish();
+						javaPageTwo.performFinish(monitor);
+					}
+					catch (InterruptedException e) {
+						throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getMessage(), e));
+					}
+					project = ((IJavaProject) getCreatedElement()).getProject();
+					return project;
+				}
+			};
 		}
 		else {
 			return null;

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
@@ -68,6 +67,9 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		Control workingSetControl = createWorkingSetControl(mainArea);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+		Control infoControl = createInfoControl(mainArea);
+		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
 		setControl(mainArea);
 
 	}
@@ -90,12 +92,6 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 	 */
 	public Template getSelectedTemplate() {
 		return part != null ? part.getTemplate() : null;
-	}
-
-	public void downloadTemplateContent() throws CoreException {
-		if (part != null) {
-			part.downloadTemplateData();
-		}
 	}
 
 	// TODO: enable when spring versions are supported in templates

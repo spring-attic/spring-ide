@@ -480,12 +480,12 @@ public class TemplateSelectionWizardPage extends WizardPage {
 		}
 		catch (IOException ex) {
 			UiStatusHandler.logAndDisplay(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Failed to load json descriptor for wizard page"));
+					"Failed to load json descriptor for wizard page due to: " + ex.getMessage(), ex));
 			return null;
 		}
 		catch (XStreamException ex) {
 			UiStatusHandler.logAndDisplay(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Failed to load json descriptor for wizard page"));
+					"Failed to load json descriptor for wizard page due to: " + ex.getMessage(), ex));
 			return null;
 		}
 
