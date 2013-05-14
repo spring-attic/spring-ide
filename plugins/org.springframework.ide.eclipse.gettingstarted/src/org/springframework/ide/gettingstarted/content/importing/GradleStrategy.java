@@ -18,12 +18,15 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.util.IOUtil;
 import org.springframework.ide.gettingstarted.content.CodeSet;
 import org.springframework.ide.gettingstarted.content.CodeSet.CodeSetEntry;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
+import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 import org.springsource.ide.eclipse.gradle.core.wizards.NewGradleProjectOperation;
 
 /**
@@ -36,7 +39,41 @@ import org.springsource.ide.eclipse.gradle.core.wizards.NewGradleProjectOperatio
  * @author Kris De Volder
  */
 public class GradleStrategy extends ImportStrategy {
+	
+	private static SampleProject asSample(final String projectName, final CodeSet codeset) {
+		return new SampleProject() {
+			@Override
+			public String getName() {
+				//Probably nobody cares about the name but anyway...
+				return projectName;
+			}
 
+			@Override
+			public void createAt(final File location) throws CoreException {
+				try {
+					codeset.each(new CodeSet.Processor<Void>() {
+						public Void doit(CodeSetEntry e) throws Exception {
+							IPath path = e.getPath();
+							File target = new File(location, path.toString());
+							if (e.isDirectory()) {
+								target.mkdirs();
+							} else {
+								IOUtil.pipe(e.getData(), target);
+							}
+							return null;
+						}
+					});
+				} catch (Exception e) {
+					throw ExceptionUtil.coreException(e);
+				}
+			}
+		};
+	}
+	
+
+	/**
+	 * Implements the import by means of 'NewGradleProjectOperation'
+	 */
 	private static class GradleCodeSetImport implements IRunnableWithProgress {
 
 		private NewGradleProjectOperation op;
@@ -55,37 +92,6 @@ public class GradleStrategy extends ImportStrategy {
 			op.setSampleProjectField(constant(asSample(projectName, codeset)));
 		}
 
-		private SampleProject asSample(final String projectName, final CodeSet codeset) {
-			return new SampleProject() {
-				@Override
-				public String getName() {
-					//Probably nobody cares about the name but anyway...
-					return projectName;
-				}
-
-				@Override
-				public void createAt(final File location) throws CoreException {
-					try {
-						codeset.each(new CodeSet.Processor<Void>() {
-							public Void doit(CodeSetEntry e) throws Exception {
-								IPath path = e.getPath();
-								File target = new File(location, path.toString());
-								if (e.isDirectory()) {
-									target.mkdirs();
-								} else {
-									IOUtil.pipe(e.getData(), target);
-								}
-								return null;
-							}
-						});
-					} catch (Exception e) {
-						throw ExceptionUtil.coreException(e);
-					}
-				}
-			};
-		}
-
-
 
 		@Override
 		public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
@@ -97,10 +103,55 @@ public class GradleStrategy extends ImportStrategy {
 		}
 
 	}
+	
+	/**
+	 * Alternate implementation that uses GradleImportOperation. This is able customise a
+	 * bit more how the guides are getting imported (i.e. disable DSLD and disable
+	 * dependency management. This gives behavior that is more similar to using commandline
+	 * tools to generate metadata. So the behavior is more likely to match what guides
+	 * authors actually do.
+	 */
+	private static class GradleCodeSetImport2 implements IRunnableWithProgress {
+
+		private String location;
+		private String projectName;
+		private CodeSet codeset;
+
+		public GradleCodeSetImport2(ImportConfiguration conf) {
+			this.location = conf.getLocationField().getValue();
+			this.projectName = conf.getProjectNameField().getValue();
+			this.codeset = conf.getCodeSetField().getValue();
+		}
+
+		@Override
+		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			monitor.beginTask("Import "+projectName, 2);
+			try {
+				//1:
+				SampleProject sample = asSample(projectName, codeset);
+				File rootFolder = new File(location);
+				sample.createAt(rootFolder);
+				monitor.worked(1);
+				
+				//2:
+				GradleImportOperation importOp = GradleImportOperation.importAll(rootFolder);
+				importOp.setEnableDependencyManagement(false);
+				importOp.setEnableDSLD(false);
+				
+				ErrorHandler eh = ErrorHandler.forImportWizard();
+				importOp.perform(eh, new SubProgressMonitor(monitor, 1));
+				eh.rethrowAsCore();
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
+			} finally {
+				monitor.done();
+			}
+		}
+	}
 
 	@Override
 	public IRunnableWithProgress createOperation(ImportConfiguration conf) {
-		return new GradleCodeSetImport(conf);
+		return new GradleCodeSetImport2(conf);
 	}
 
 	

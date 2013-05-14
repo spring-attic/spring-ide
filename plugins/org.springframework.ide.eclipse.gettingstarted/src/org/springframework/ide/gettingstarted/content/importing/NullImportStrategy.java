@@ -15,4 +15,9 @@ public class NullImportStrategy extends ImportStrategy {
 		throw new Error("Strategy not implemented for "+buildType);
 	}
 
+	@Override
+	public boolean isSupported() {
+		return false;
+	}
+	
 }

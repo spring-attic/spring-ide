@@ -25,6 +25,7 @@ import org.springframework.ide.gettingstarted.content.CodeSet;
 import org.springframework.ide.gettingstarted.content.importing.ImportConfiguration;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.*;
@@ -52,6 +53,12 @@ public class BuildGuidesTest extends GuidesTestCase {
 		this.buildType = buildType;
 	}
 
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		StsTestUtil.deleteAllProjects();
+	}
+	
 	@Override
 	protected void runTest() throws Throwable {
 		System.out.println("=== codeset build test ===");
@@ -105,10 +112,10 @@ public class BuildGuidesTest extends GuidesTestCase {
 		//	if (g.getName().contains("facebook")) {
 				for (CodeSet cs : g.getCodeSets()) {
 					List<BuildType> buildTypes = cs.getBuildTypes();
-					System.out.println("Skipping (no supported build types): "+cs);
-					//assertFalse("No buildTypes for "+cs, buildTypes.isEmpty());
 					for (BuildType bt : buildTypes) {
-						suite.addTest(new BuildGuidesTest(g, cs, bt));
+						if (bt.getImportStrategy().isSupported()) {
+							suite.addTest(new BuildGuidesTest(g, cs, bt));
+						}
 					}
 				}
 			}

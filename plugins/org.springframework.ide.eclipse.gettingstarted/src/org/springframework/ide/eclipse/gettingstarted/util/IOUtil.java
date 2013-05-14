@@ -21,6 +21,7 @@ public class IOUtil {
 	}
 
 	public static void pipe(InputStream data, File target) throws IOException {
+		target.getParentFile().mkdirs(); //try to create dirs for parent if they don't exist.
 		OutputStream out = new BufferedOutputStream(new FileOutputStream(target));
 		try {
 			pipe(data, out);

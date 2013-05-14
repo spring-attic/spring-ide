@@ -25,4 +25,8 @@ public abstract class ImportStrategy {
 	
 	public abstract IRunnableWithProgress createOperation(ImportConfiguration conf);
 
+	public boolean isSupported() {
+		return true;
+	}
+
 }

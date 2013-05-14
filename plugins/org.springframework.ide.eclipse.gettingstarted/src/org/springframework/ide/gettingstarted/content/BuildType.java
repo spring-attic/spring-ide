@@ -16,8 +16,8 @@ import org.springframework.ide.gettingstarted.content.importing.GradleStrategy;
 import org.springframework.ide.gettingstarted.content.importing.ImportStrategy;
 
 public enum BuildType {
-	GRADLE("build.gradle", ImportStrategy.GRADLE);
-//	MAVEN("pom.xml", ImportStrategy.MAVEN),
+	GRADLE("build.gradle", ImportStrategy.GRADLE),
+	MAVEN("pom.xml", ImportStrategy.MAVEN);
 //	ECLIPSE(".project", ImportStrategy.ECLIPSE);
 
 	private Path buildScriptPath;
