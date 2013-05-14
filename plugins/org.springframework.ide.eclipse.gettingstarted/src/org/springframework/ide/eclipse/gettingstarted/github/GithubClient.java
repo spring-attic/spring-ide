@@ -29,11 +29,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.json.Spring3MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.BasicAuthCredentials;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.Credentials;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.NullCredentials;
+import org.springframework.ide.eclipse.gettingstarted.util.IOUtil;
 import org.springframework.web.client.RestTemplate;
 
 import org.springframework.core.NestedRuntimeException;
@@ -126,7 +128,7 @@ public class GithubClient {
 		
 		//Add json parsing capability using Jackson mapper.
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-		messageConverters.add(new MappingJacksonHttpMessageConverter());
+		messageConverters.add(new Spring3MappingJacksonHttpMessageConverter());
 
 // The code below doesn't work because by the time we get to use the inputstream RestTemplate will
 // have closed it already. A message converter must read the input it is interested in before
@@ -199,16 +201,6 @@ public class GithubClient {
 	}
 
 	
-    private void pipe(InputStream input, OutputStream output) throws IOException {
-        byte[] buf = new byte[1024*4];
-        int n = input.read(buf);
-        while (n >= 0) {
-          output.write(buf, 0, n);
-          n = input.read(buf);
-        }
-        output.flush();        
-    }
-	
     /**
      * Download content from a url and save to an outputstream. Use same credentials as
      * other operations in this client. May need to use this to download stuff like
@@ -234,7 +226,7 @@ public class GithubClient {
 			}
 			
 			input = conn.getInputStream();
-			pipe(input, writeTo);
+			IOUtil.pipe(input, writeTo);
 		} finally {
 			if (input!=null) {
 				try {

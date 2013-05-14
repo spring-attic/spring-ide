@@ -71,7 +71,7 @@ public class GuidesZipStructureTest extends GuidesTestCase {
 			String codesetName = codeset.getName();
 			System.out.println("=== code set: "+codesetName);
 			codeset.each(printEntry);
-			assertTrue("No '"+codeset.getName()+" codeset", codeset.exists());
+			assertTrue("No '"+codeset.getName()+"' codeset", codeset.exists());
 			
 			boolean isGradle = codeset.hasFile("build.gradle");
 			boolean isMaven = codeset.hasFile("pom.xml");

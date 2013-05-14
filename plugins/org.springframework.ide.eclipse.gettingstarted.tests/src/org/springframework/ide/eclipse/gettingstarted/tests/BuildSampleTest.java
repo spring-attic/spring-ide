@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.wizard.template.util.NameUrlPair;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * A BuildSample test checks that a particular sample project builds properly

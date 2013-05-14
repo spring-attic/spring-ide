@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Guides
-Bundle-SymbolicName: org.springframework.ide.gettingstarted;singleton:=true
+Bundle-SymbolicName: org.springframework.ide.eclipse.gettingstarted;singleton:=true
 Bundle-Version: 3.3.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator
 Bundle-Vendor: SpringSource
@@ -10,12 +10,17 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.codec,
  org.springframework.web,
  org.springframework.core,
- org.codehaus.jackson.core,
  org.eclipse.ui.forms,
  org.springsource.ide.eclipse.commons.ui,
- org.springsource.ide.eclipse.dashboard.ui
+ org.springsource.ide.eclipse.dashboard.ui,
+ org.codehaus.jackson.core,
+ org.codehaus.jackson.mapper,
+ org.eclipse.ui.ide,
+ org.springsource.ide.eclipse.gradle.core,
+ org.apache.commons.logging;bundle-version="1.1.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.gettingstarted.util,
  org.springframework.ide.gettingstarted.content,
+ org.springframework.ide.gettingstarted.content.importing,
  org.springframework.ide.gettingstarted.guides

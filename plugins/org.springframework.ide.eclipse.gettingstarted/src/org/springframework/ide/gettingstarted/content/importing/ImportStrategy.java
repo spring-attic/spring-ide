@@ -8,30 +8,21 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.tests;
+package org.springframework.ide.gettingstarted.content.importing;
 
-import junit.framework.TestCase;
-
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 
 /**
- * Some infrastucture shared among different dynamically generated testcases for
- * Guides.
+ * Strategy for importing a certain type of getting started content 
  * 
  * @author Kris De Volder
  */
-public class GuidesTestCase extends TestCase {
-	
-	
-	/**
-	 * The guide under test
-	 */
-	protected GettingStartedGuide guide;
+public abstract class ImportStrategy {
 
-	public GuidesTestCase(GettingStartedGuide guide) {
-		super(guide.getName());
-		this.guide = guide;
-	}
+	public static final ImportStrategy GRADLE = new GradleStrategy();
+	public static final ImportStrategy MAVEN = new NullImportStrategy("Maven");
+	public static final ImportStrategy ECLIPSE = new NullImportStrategy("Eclipse");
 	
+	public abstract IRunnableWithProgress createOperation(ImportConfiguration conf);
 
 }
