@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,17 +27,46 @@ import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.processor.ProcessingInfo;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.processor.Processor;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
 import org.springframework.ide.eclipse.wizard.template.newproject.NewProjectProcessingInfo;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
-public class TemplateProjectConfiguration extends ProjectConfiguration {
+/**
+ * Creates and configures a project based on a selected template. In some cases,
+ * the template data is downloaded when the project is being created. For
+ * example, this would be the case of templates that do not contribute any UI to
+ * the New Spring Wizard, and are therefore downloaded and processed only when a
+ * user clicks "Finish" in the wizard
+ * 
+ */
+public abstract class TemplateProjectConfiguration extends ProjectConfiguration {
 
 	private final Shell shell;
+
+	private final Map<String, Object> collectedInput;
+
+	private final Map<String, String> inputKinds;
+
+	private IProject project;
 
 	public TemplateProjectConfiguration(IProjectConfigurationDescriptor descriptor, Shell shell) {
 		super(descriptor);
 		this.shell = shell;
+		collectedInput = new HashMap<String, Object>();
+		inputKinds = new HashMap<String, String>();
+	}
+
+	/**
+	 * User this constructor if no descriptor is available at the time that a
+	 * request is made for a project configuration.
+	 * @param shell required to display errors or prompt user while creating a
+	 * project.
+	 */
+	public TemplateProjectConfiguration(Shell shell) {
+		this(null, shell);
+	}
+
+	protected Shell getShell() {
+		return shell;
 	}
 
 	protected void handleError(String errorMessage) throws CoreException {
@@ -45,22 +78,17 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 	}
 
 	@Override
-	public void configureProject(IProject project, IProgressMonitor monitor) throws CoreException {
+	public void configureProject(IProgressMonitor monitor) throws CoreException {
 
 		final TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
 
-		WizardUIInfo info = null;
-
 		Template template = null;
 
-		if (descriptor != null) {
-			info = descriptor.getUiInfo();
-			template = descriptor.getTemplate();
-		}
-		else {
+		if (descriptor == null) {
 			handleError("No descriptor to configure the project: " + project.getName() + " is available");
 			return;
 		}
+		template = descriptor.getTemplate();
 
 		if (template == null) {
 			handleError("No project template selected to configure the project: " + project.getName());
@@ -69,8 +97,8 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 
 		IPath newPath = descriptor.getProjectLocationPath();
 
-		String[] topLevelPackageTokens = info != null ? info.getTopLevelPackageTokens() : null;
-		String projectName = info != null ? info.getProjectNameToken() : project.getName();
+		String[] topLevelPackageTokens = descriptor.getTopLevelPackageTokens();
+		String projectName = project.getName();
 
 		try {
 			ProcessingInfo processingInfo = new NewProjectProcessingInfo(template.getZippedLocation(),
@@ -78,7 +106,7 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 
 			Processor processor = new Processor(processingInfo);
 			IProject processedProject = processor.process(project, newPath, topLevelPackageTokens, projectName,
-					descriptor.getCollectedInput(), descriptor.getInputKinds(), shell, monitor);
+					collectedInput, inputKinds, shell, monitor);
 			if (processedProject != null) {
 				processedProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 				SpringCoreUtils.buildFullProject(processedProject);
@@ -89,4 +117,31 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 		}
 	}
 
+	@Override
+	public IProject createProject(IProgressMonitor monitor) throws CoreException {
+
+		final TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
+
+		collectInput(collectedInput, inputKinds);
+
+		String projectName = descriptor.getProjectName();
+		project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+
+		return project;
+	}
+
+	protected void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKind) {
+		final TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
+		if (descriptor != null) {
+			Map<String, String> desInputKinds = descriptor.getInputKinds();
+			if (desInputKinds != null) {
+				inputKind.putAll(desInputKinds);
+			}
+			Map<String, Object> desCollectedInput = descriptor.getCollectedInput();
+			if (desCollectedInput != null) {
+				collectedInput.putAll(desCollectedInput);
+			}
+		}
+
+	}
 }

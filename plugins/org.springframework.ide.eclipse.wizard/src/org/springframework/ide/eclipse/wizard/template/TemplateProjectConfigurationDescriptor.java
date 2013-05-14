@@ -16,41 +16,69 @@ import java.util.Map;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
 
 public class TemplateProjectConfigurationDescriptor implements IProjectConfigurationDescriptor {
 
-	private final WizardUIInfo uiInfo;
-
 	private final Template template;
+
+	private final URI projectLocationURI;
+
+	private final String[] topLevelPackageTokens;
+
+	private final String projectName;
 
 	private final Map<String, Object> collectedInput;
 
 	private final Map<String, String> inputKinds;
 
-	private final URI projectLocationURI;
-
-	public TemplateProjectConfigurationDescriptor(WizardUIInfo uiInfo, Template template,
-			Map<String, Object> collectedInput, Map<String, String> inputKinds, URI projectLocationURI) {
-		this.template = template;
-		this.uiInfo = uiInfo;
-		this.collectedInput = collectedInput;
-		this.inputKinds = inputKinds;
-		this.projectLocationURI = projectLocationURI;
+	public TemplateProjectConfigurationDescriptor(String projectName, String[] topLevelPackageTokens,
+			Template template, URI projectLocationURI) {
+		this(projectName, topLevelPackageTokens, template, projectLocationURI, null, null);
 	}
 
-	public WizardUIInfo getUiInfo() {
-		return uiInfo;
+	public TemplateProjectConfigurationDescriptor(String projectName, String[] topLevelPackageTokens,
+			Template template, URI projectLocationURI, Map<String, Object> collectedInput,
+			Map<String, String> inputKinds) {
+		this.template = template;
+		this.topLevelPackageTokens = topLevelPackageTokens;
+		this.projectName = projectName;
+		this.projectLocationURI = projectLocationURI;
+		this.collectedInput = collectedInput;
+		this.inputKinds = inputKinds;
+	}
+
+	public String[] getTopLevelPackageTokens() {
+		return topLevelPackageTokens;
+	}
+
+	public String getProjectName() {
+		return projectName;
 	}
 
 	public Template getTemplate() {
 		return template;
 	}
 
+	/**
+	 * This may be null. A null collection means that the template values have
+	 * not yet been processed by the time this descriptor is created, perhaps
+	 * because the template data has not yet been downloaded. This is in
+	 * contrast to an empty collection, which means the values were processed,
+	 * but no values were present.
+	 * @return Possibly null collection of input containing template values.
+	 */
 	public Map<String, Object> getCollectedInput() {
 		return collectedInput;
 	}
 
+	/**
+	 * This may be null. A null list of attribute types indicates that the
+	 * template data has not yet been downloaded at the time that this
+	 * descriptor was created. An empty list of attributes means that template
+	 * data has already been downloaded, but it contains no attributes that have
+	 * values.
+	 * @return Possibly null types of attributes defined in the template.
+	 */
 	public Map<String, String> getInputKinds() {
 		return inputKinds;
 	}

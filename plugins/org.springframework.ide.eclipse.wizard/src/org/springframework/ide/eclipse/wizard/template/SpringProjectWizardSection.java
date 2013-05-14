@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoLoader;
+import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 
 /**
  * Provides a section to the New Spring Project Wizard, with two primary
@@ -51,8 +54,21 @@ public abstract class SpringProjectWizardSection {
 		// Default is to do nothing
 	}
 
-	public IWizardPage getNextPage(IWizardPage currentPage) {
-		return null;
+	protected WizardUIInfo getUIInfo(Template template) {
+		try {
+			return new WizardUIInfoLoader().getUIInfo(template);
+		}
+		catch (CoreException e1) {
+			handleError(e1.getStatus());
+			return null;
+		}
+
+	}
+
+	protected void handleError(IStatus status) {
+		// Display error in a separate dialogue as some error messages can get
+		// long.
+		UiStatusHandler.logAndDisplay(status);
 	}
 
 	/**
@@ -61,18 +77,17 @@ public abstract class SpringProjectWizardSection {
 	 * creating a page given a current page.
 	 */
 	public boolean hasNextPage(IWizardPage currentPage) {
+
 		return false;
 	}
 
 	/**
-	 * Creates a project. This is may be invoked by the New Spring Project
-	 * wizard framework as a workspace job.
-	 * @param monitor
-	 * @return created project, or null if project was not created
-	 * @throws CoreException with any errors that resulted in failure to create
-	 * a project
+	 * 
+	 * @param page current page
+	 * @return next page in the wizard, or null if not contributing further
+	 * pages
 	 */
-	public abstract IProject createProject(IProgressMonitor monitor) throws CoreException;
+	public abstract IWizardPage getNextPage(IWizardPage page);
 
 	/**
 	 * Determine if this section can create a project and optionally provide UI
@@ -84,11 +99,13 @@ public abstract class SpringProjectWizardSection {
 	public abstract boolean canProvide(ProjectWizardDescriptor descriptor);
 
 	/**
-	 * Configuration occurs after a project has been created, and it may not
-	 * occur right after the project has been created. Therefore the reason that
-	 * the project creation and configuration are separate.
-	 * @return A project configuration, if necessary. The configuration only
-	 * occurs after a project has been created.
+	 * Creates and configures a project. Note that the project creation and
+	 * configuration may occur as separate steps. The project creation may run
+	 * in the UI thread, and is intended to be light-weight, while the project
+	 * configuration occurs after the project is created, and runs in a non-UI
+	 * thread, intended for long running configurations.
+	 * @return A project configuration that creates and configures a project.
+	 * Must not be null.
 	 * @throws CoreException if error occurs during configuration
 	 */
 	public abstract ProjectConfiguration getProjectConfiguration() throws CoreException;
@@ -101,6 +118,10 @@ public abstract class SpringProjectWizardSection {
 	 * @return true if pages contributed by this section can finish. False
 	 * otherwise.
 	 */
-	public abstract boolean canFinish();
+	public boolean canFinish() {
+
+		return getWizard().getMainPage().getSelectedTemplate() != null;
+
+	}
 
 }

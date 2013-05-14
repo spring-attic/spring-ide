@@ -25,16 +25,20 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
-public class JavaProjectConfiguration extends ProjectConfiguration {
+/**
+ * Creates and configures a Java based project.
+ * 
+ */
+public abstract class JavaProjectConfiguration extends ProjectConfiguration {
 
-	private IProject configuredProject;
+	protected IProject project;
 
 	public JavaProjectConfiguration(IProjectConfigurationDescriptor descriptor) {
 		super(descriptor);
 	}
 
 	@Override
-	public void configureProject(IProject project, IProgressMonitor monitor) throws CoreException {
+	public void configureProject(IProgressMonitor monitor) throws CoreException {
 		IProjectConfigurationDescriptor descriptor = getConfigurationDescriptor();
 		JavaProjectConfigurationDescriptor javaDescriptor = (descriptor instanceof JavaProjectConfigurationDescriptor) ? (JavaProjectConfigurationDescriptor) descriptor
 				: null;
@@ -56,12 +60,9 @@ public class JavaProjectConfiguration extends ProjectConfiguration {
 		final boolean useHighestXsdVersion = javaDescriptor.useHighestXsdVersion();
 		final boolean useProjectSettings = javaDescriptor.useProjectSettings();
 
-		configuredProject = project;
-
 		// configure the new Spring project
 		monitor.beginTask(NewSpringProjectWizardMessages.NewProject_createNewProject, 1000);
-		configureSpringProject(configuredProject, configExtensions, enableImports,
-				new SubProgressMonitor(monitor, 1000));
+		configureSpringProject(project, configExtensions, enableImports, new SubProgressMonitor(monitor, 1000));
 
 		if (useProjectSettings) {
 			prefs.putBoolean(BeansCorePlugin.PROJECT_PROPERTY_ID, useProjectSettings);
@@ -74,7 +75,7 @@ public class JavaProjectConfiguration extends ProjectConfiguration {
 		// add project facet nature to enable corresponding
 		// functionality
 		if (enableProjectFacets) {
-			SpringCoreUtils.addProjectNature(configuredProject, FacetedProjectNature.NATURE_ID, monitor);
+			SpringCoreUtils.addProjectNature(project, FacetedProjectNature.NATURE_ID, monitor);
 		}
 		monitor.done();
 

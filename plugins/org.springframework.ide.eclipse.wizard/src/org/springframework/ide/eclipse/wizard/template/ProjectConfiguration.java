@@ -16,8 +16,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * 
- * Configures a project after it has been created. The framework may run the
- * configuration in a non-UI thread, therefore the configuration should not
+ * Creates and configures a project. The Spring project creation process may run
+ * the configuration in a non-UI thread, therefore the configuration should not
  * contain dialogs and other UI. Configuration of the project is performed on
  * information carried by a configuration descriptor, which decouples the UI
  * from the project configuration. Instead of reading values directly from UI
@@ -26,8 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * 
  */
 public abstract class ProjectConfiguration {
-
-	private final IProjectConfigurationDescriptor projectConfigurationDescriptor;
+	private IProjectConfigurationDescriptor projectConfigurationDescriptor;
 
 	/**
 	 * 
@@ -41,6 +40,29 @@ public abstract class ProjectConfiguration {
 		return projectConfigurationDescriptor;
 	}
 
-	public abstract void configureProject(IProject project, IProgressMonitor monitor) throws CoreException;
+	protected void setConfigurationDescriptor(IProjectConfigurationDescriptor descriptor) {
+		this.projectConfigurationDescriptor = descriptor;
+	}
+
+	/**
+	 * Creates a project. This is invoked in the UI thread, in case UI control
+	 * references are needed. Creating a project should be lighter weight than
+	 * configuring a project, which is performed after a project is created.
+	 * @param monitor
+	 * @return created project, or null if project was not created
+	 * @throws CoreException with any errors that resulted in failure to create
+	 * a project
+	 */
+	public abstract IProject createProject(IProgressMonitor monitor) throws CoreException;
+
+	/**
+	 * Configures a project after a project has been created. This is run in a
+	 * non-UI thread, and is intended to contain longer running configurations
+	 * of a project that may involve a project build.
+	 * @param monitor
+	 * @throws CoreException with errors that resulted during project
+	 * configuration
+	 */
+	public abstract void configureProject(IProgressMonitor monitor) throws CoreException;
 
 }

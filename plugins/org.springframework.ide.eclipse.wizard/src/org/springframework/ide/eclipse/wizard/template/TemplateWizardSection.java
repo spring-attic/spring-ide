@@ -10,114 +10,50 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoLoader;
-import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
-
-import com.thoughtworks.xstream.XStreamException;
 
 /**
  * Section responsible for creating a Spring project from a template. Note that
  * the actual template contents are not downloaded until a user clicks the
  * "Next" button in the wizard, which in turn requests this section for
- * additional pages. The "Next" button is enabled/disabled by a lighter weight
- * calculation that does not require to download the contents of the template to
- * determine if additional pages are present or not. Other metadata related to
- * the template determines if the "Next" button in the wizard should be enabled.
- * See the Template API.
+ * additional pages. However, in some simple template cases that do not
+ * contribute additional wizard pages, the template contents are downloaded only
+ * when a user clicks "Finish" and a project is about to be created. The "Next"
+ * button is enabled/disabled by a lighter weight calculation that does not
+ * require to download the contents of the template to determine if additional
+ * pages are present or not. Other metadata related to the template determines
+ * if the "Next" button in the wizard should be enabled. See the Template API.
  * 
  */
 public class TemplateWizardSection extends SpringProjectWizardSection {
 
-	private ITemplateWizardPage firstTemplatePage = null;
-
-	private Map<String, Object> collectedInput;
-
-	private Map<String, String> inputKinds;
+	protected ITemplateWizardPage firstTemplatePage = null;
 
 	public TemplateWizardSection(NewSpringProjectWizard wizard) {
 		super(wizard);
 	}
 
 	@Override
-	public boolean hasNextPage(IWizardPage currentPage) {
-		// This check is performed to enable/disable the Next button without
-		// having to download the contents of the template
-		// Only check if there is one more page after the main page. Any
-		// subsequent pages after the second page are
-		// indicated within the implementation of the second page.
-		if (currentPage == getWizard().getMainPage()) {
-			Template template = getWizard().getMainPage().getSelectedTemplate();
-			if (template == null) {
-				return false;
-			}
-			else if (template instanceof SimpleProject) {
-				return ((SimpleProject) template).hasWizardPages();
-			}
-			else {
-				// Non-simple project templates should always have a wizard page
-				return true;
-			}
-		}
-		return false;
+	public boolean canProvide(ProjectWizardDescriptor descriptor) {
+		return descriptor != null && descriptor.getTemplate() != null
+				&& !TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
 	}
 
-	/**
-	 * 
-	 * @param template
-	 * @return non-null Wizard ui info, or throws exception if an error occurred
-	 * while resolving the info.
-	 * @throws CoreException
-	 */
-	protected WizardUIInfo getUIInfo(Template template) throws CoreException {
-		if (template == null) {
-			return null;
+	public void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKinds) {
+		IWizardPage page = firstTemplatePage;
+		while (page != null) {
+			if (page instanceof NewTemplateWizardPage) {
+				((NewTemplateWizardPage) page).collectInput(collectedInput, inputKinds);
+			}
+			page = page.getNextPage();
 		}
-		URL jsonWizardUIDescriptor = template.getTemplateLocation();
-
-		if (jsonWizardUIDescriptor == null) {
-			return null;
-		}
-
-		WizardUIInfo info;
-		try {
-			WizardUIInfoLoader infoLoader = new WizardUIInfoLoader();
-			InputStream jsonDescriptionInputStream = jsonWizardUIDescriptor.openStream();
-			info = infoLoader.load(jsonDescriptionInputStream);
-		}
-		catch (IOException ex) {
-			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Failed to load json descriptor for wizard page"));
-
-		}
-		catch (XStreamException ex) {
-			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Failed to load json descriptor for wizard page"));
-		}
-
-		if (info == null) {
-			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-					"Unable to find template project location"));
-		}
-
-		return info;
 	}
 
 	@Override
@@ -129,35 +65,29 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 			if (template == null) {
 				// no need to inform the wizard that a template was not
-				// selected, template validation occurs in the part
+				// selected, template validation occurs in the template
+				// selection part
 				// itself.
 				return null;
 			}
-			else if (template instanceof SimpleProject) {
+			else if (template instanceof SimpleProject && !((SimpleProject) template).hasWizardPages()) {
 				// Handle the special case templates with no pages
-				SimpleProject simpleProject = (SimpleProject) template;
-				if (!simpleProject.hasWizardPages()) {
-					return null;
-				}
+				return null;
 			}
 			else {
-				// Download the template contents
+				// Download the template contents for templates that contribute
+				// additional UI pages, as the
+				// content will determine the UI controls of the additional
+				// pages.
 				try {
-					getWizard().getMainPage().downloadTemplateContent();
+					TemplateUtils.downloadTemplateData(template, getWizard().getShell());
 				}
 				catch (CoreException ce) {
 					handleError(ce.getStatus());
 					return null;
 				}
 
-				WizardUIInfo info;
-				try {
-					info = getUIInfo(template);
-				}
-				catch (CoreException e1) {
-					handleError(e1.getStatus());
-					return null;
-				}
+				WizardUIInfo info = getUIInfo(template);
 
 				ITemplateWizardPage previousPage = null;
 
@@ -188,7 +118,8 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				}
 				catch (Exception e) {
 					handleError(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-							"Failed to load wizard page for project template for " + template.getName(), e));
+							"Failed to load wizard page for project template for " + template.getName() + " due to "
+									+ e.getMessage(), e));
 				}
 
 				// Regardless of whether wizard pages where successfully
@@ -206,89 +137,101 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 	@Override
 	public boolean canFinish() {
+		boolean canFinish = super.canFinish();
 
-		Template template = getWizard().getMainPage().getSelectedTemplate();
-		if (template == null) {
-			return false;
-		}
-		else if (!(template instanceof SimpleProject)) {
-			// Non-simple project templates should always have a template page,
-			// therefore inquire finish state from the template page
-			return firstTemplatePage != null && firstTemplatePage.isPageComplete();
-		}
-		else {
-			// if it is a simple project, let the simple project pages determine
-			// if the wizard can complete.
-			return true;
+		if (canFinish) {
+			Template template = getWizard().getMainPage().getSelectedTemplate();
+			if (!(template instanceof SimpleProject)) {
+				// Non-simple project templates should always have a template
+				// page,
+				// therefore inquire finish state from the template page
+				canFinish = firstTemplatePage != null && firstTemplatePage.isPageComplete();
+			}
+			// For now, any simple template project can complete from the first
+			// wizard page.
 		}
 
-	}
+		return canFinish;
 
-	protected void handleError(IStatus status) {
-		UiStatusHandler.logAndDisplay(status);
 	}
 
 	@Override
-	public boolean canProvide(ProjectWizardDescriptor descriptor) {
-		return descriptor != null && descriptor.getTemplate() != null
-				&& !TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
-	}
-
-	public void selectAndReveal(final IResource newResource) {
-		getWizard().getContainer().getShell().getDisplay().syncExec(new Runnable() {
-
-			public void run() {
-				BasicNewResourceWizard.selectAndReveal(newResource, getWizard().getWorkbench()
-						.getActiveWorkbenchWindow());
+	public boolean hasNextPage(IWizardPage currentPage) {
+		// This check is performed to enable/disable the Next button without
+		// having to download the contents of the template
+		// Only check if there is one more page after the main page. Any
+		// subsequent pages after the second page are
+		// indicated within the implementation of the second page.
+		if (currentPage == getWizard().getMainPage()) {
+			Template template = getWizard().getMainPage().getSelectedTemplate();
+			if (template == null) {
+				return false;
 			}
-		});
-	}
-
-	public void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKinds) {
-		IWizardPage page = firstTemplatePage;
-		while (page != null) {
-			if (page instanceof NewTemplateWizardPage) {
-				((NewTemplateWizardPage) page).collectInput(collectedInput, inputKinds);
+			else if (template instanceof SimpleProject) {
+				return ((SimpleProject) template).hasWizardPages();
 			}
-			page = page.getNextPage();
+			else {
+				// Non-simple template projects should always contribute a new
+				// page
+				return true;
+			}
 		}
-	}
-
-	@Override
-	public IProject createProject(IProgressMonitor monitor) throws CoreException {
-
-		Template template = getWizard().getMainPage().getSelectedTemplate();
-		collectedInput = new HashMap<String, Object>();
-		inputKinds = new HashMap<String, String>();
-
-		if (template instanceof SimpleProject && !((SimpleProject) template).hasWizardPages()) {
-			// If it is not a simple project and does not have additional pages,
-			// get the contents prior
-			// to creating project
-			try {
-				getWizard().getMainPage().downloadTemplateContent();
-			}
-			catch (CoreException ce) {
-				handleError(ce.getStatus());
-			}
-
-		}
-		else {
-			// Otherwise collect the template inputs
-			collectInput(collectedInput, inputKinds);
-		}
-
-		String projectName = getWizard().getMainPage().getProjectName();
-		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		return false;
 	}
 
 	@Override
 	public ProjectConfiguration getProjectConfiguration() throws CoreException {
-		Template template = getWizard().getMainPage().getSelectedTemplate();
-		WizardUIInfo uiInfo = getUIInfo(template);
 
-		TemplateProjectConfigurationDescriptor descriptor = new TemplateProjectConfigurationDescriptor(uiInfo,
-				template, collectedInput, inputKinds, getWizard().getMainPage().getProjectLocationURI());
-		return new TemplateProjectConfiguration(descriptor, getWizard().getShell());
+		return new TemplateProjectConfiguration(getWizard().getShell()) {
+
+			@Override
+			protected void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKinds) {
+				// Override as collecting input is still coupled to reading
+				// directly from UI.
+				TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
+				Template template = descriptor.getTemplate();
+
+				// Only collect input from pages for templates that contributed
+				// wizard pages
+				if (!(template instanceof SimpleProject) || ((SimpleProject) template).hasWizardPages()) {
+					// This collects input for the template directly from the
+					// wizard pages
+					TemplateWizardSection.this.collectInput(collectedInput, inputKinds);
+				}
+			}
+
+			@Override
+			protected IProjectConfigurationDescriptor getConfigurationDescriptor() {
+
+				IProjectConfigurationDescriptor descriptor = super.getConfigurationDescriptor();
+
+				if (descriptor == null) {
+					try {
+						Template template = getWizard().getMainPage().getSelectedTemplate();
+
+						// For simple projects with no additional wizard pages,
+						// download the template data, as the template data only
+						// gets downloaded on project creation time. Otherwise,
+						// the template data should already have
+						// be downloaded prior to reaching to this stage
+						if (template instanceof SimpleProject && !((SimpleProject) template).hasWizardPages()) {
+							TemplateUtils.downloadTemplateData(template, getShell());
+						}
+
+						WizardUIInfo uiInfo = getUIInfo(template);
+
+						descriptor = new TemplateProjectConfigurationDescriptor(getWizard().getMainPage()
+								.getProjectName(), uiInfo.getTopLevelPackageTokens(), template, getWizard()
+								.getMainPage().getProjectLocationURI());
+						setConfigurationDescriptor(descriptor);
+					}
+					catch (CoreException e) {
+						TemplateWizardSection.this.handleError(e.getStatus());
+					}
+				}
+				return descriptor;
+			}
+
+		};
 	}
 }

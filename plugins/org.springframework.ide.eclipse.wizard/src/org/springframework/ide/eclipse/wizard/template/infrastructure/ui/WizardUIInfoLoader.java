@@ -15,8 +15,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
+import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 
 /**
@@ -39,6 +46,49 @@ public class WizardUIInfoLoader {
 
 	public WizardUIInfo load(String jsonDescriptionFile) throws IOException {
 		return load(new FileReader(jsonDescriptionFile));
+	}
+
+	/**
+	 * 
+	 * @param template
+	 * @return non-null Wizard ui info, or throws exception if an error occurred
+	 * while resolving the info.
+	 * @throws CoreException
+	 */
+	public WizardUIInfo getUIInfo(Template template) throws CoreException {
+		if (template == null) {
+			return null;
+		}
+		URL jsonWizardUIDescriptor = template.getTemplateLocation();
+
+		if (jsonWizardUIDescriptor == null) {
+			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
+					"Unable to find json descriptor for template: " + template.getName()
+							+ ". Missing URL to template location."));
+		}
+
+		WizardUIInfo info;
+		try {
+
+			InputStream jsonDescriptionInputStream = jsonWizardUIDescriptor.openStream();
+			info = load(jsonDescriptionInputStream);
+		}
+		catch (IOException ex) {
+			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
+					"Failed to load json descriptor for wizard page due to: " + ex.getMessage(), ex));
+
+		}
+		catch (XStreamException ex) {
+			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
+					"Failed to load json descriptor for wizard page due to: " + ex.getMessage(), ex));
+		}
+
+		if (info == null) {
+			throw new CoreException(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
+					"Unable to find template project location"));
+		}
+
+		return info;
 	}
 
 }
