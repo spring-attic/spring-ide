@@ -1,33 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.ide.eclipse</groupId>
+		<artifactId>org.springframework.ide.eclipse.gettingstarted.parent</artifactId>
+		<version>3.3.0-SNAPSHOT</version>
+		<relativePath>../../releng/org.springframework.ide.eclipse.gettingstarted.parent/pom.xml</relativePath>
+	</parent>
 	<groupId>org.springframework.ide.eclipse</groupId>
-	<artifactId>org.springframework.ide.eclipse.gettingstarted.parent</artifactId>
-	<version>3.3.0-SNAPSHOT</version>
-	<relativePath>../../releng/org.springframework.ide.eclipse.gettingstarted.parent/pom.xml</relativePath> 
-  </parent>
-  <artifactId>org.springframework.ide.eclipse.gettingstarted.tests</artifactId>
-  <packaging>eclipse-test-plugin</packaging>
-  <name>org.springframework.ide.eclipse.gettingstarted.tests</name>
+	<artifactId>org.springframework.ide.eclipse.gettingstarted</artifactId>
+	
+	<packaging>eclipse-plugin</packaging>
 
-	<build>
+    <build>
 		<plugins>
+
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-surefire-plugin</artifactId>
+				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<useUIHarness>true</useUIHarness>
-					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
-					<testSuite>org.springframework.ide.eclipse.gettingstarted.tests</testSuite>
-					<testClass>org.springframework.ide.eclipse.gettingstarted.tests.AllGettingStartedTests</testClass>
-					<argLine>-Xmx1024m</argLine>
+					<resolver>p2</resolver>
+					<pomDependencies>ignore</pomDependencies>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-compiler-plugin</artifactId>
@@ -63,8 +61,8 @@
 					</execution>
 				</executions>
 			</plugin>
-
-    	</plugins>
-  	</build>
-
+	  
+		</plugins>
+	</build>
+	
 </project>
