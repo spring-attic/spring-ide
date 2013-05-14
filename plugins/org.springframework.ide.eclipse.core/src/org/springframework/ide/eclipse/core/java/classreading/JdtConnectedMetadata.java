@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.core.java.classreading;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 
 /**
  * @author Martin Lippert
@@ -19,5 +21,6 @@ import org.eclipse.jdt.core.IJavaElement;
 public interface JdtConnectedMetadata {
 
 	IJavaElement getJavaElement();
+	JavaModelSourceLocation createSourceLocation() throws JavaModelException;
 
 }

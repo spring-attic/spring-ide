@@ -12,8 +12,11 @@ package org.springframework.ide.eclipse.core.java.classreading;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MethodMetadataReadingVisitor;
+import org.springframework.ide.eclipse.core.model.java.JavaModelMethodSourceLocation;
+import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -26,15 +29,21 @@ import org.springframework.util.MultiValueMap;
 public class JdtConnectedMethodMetadataReadingVisitor extends MethodMetadataReadingVisitor implements JdtConnectedMetadata {
 
 	private final IMethod method;
+	private final String returnType;
 
 	public JdtConnectedMethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
-			MultiValueMap<String, MethodMetadata> methodMetadataMap, IMethod method) {
+			MultiValueMap<String, MethodMetadata> methodMetadataMap, IMethod method, String returnType) {
 		super(name, access, declaringClassName, classLoader, methodMetadataMap);
 		this.method = method;
+		this.returnType = returnType;
 	}
 
 	public IJavaElement getJavaElement() {
 		return this.method;
+	}
+	
+	public JavaModelSourceLocation createSourceLocation() throws JavaModelException {
+		return new JavaModelMethodSourceLocation(method, returnType);
 	}
 
 }

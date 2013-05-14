@@ -22,6 +22,7 @@ import org.springframework.asm.Type;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 
 /**
  * Addition to the standard metadata reading visitor that connects this class metadata to the corresponding
@@ -42,11 +43,15 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 	public IJavaElement getJavaElement() {
 		return this.type;
 	}
+	
+	public JavaModelSourceLocation createSourceLocation() throws JavaModelException {
+		return new JavaModelSourceLocation(type);
+	}
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		IMethod method = getMethodFromSignature(name, desc);
-		return new JdtConnectedMethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap, method);
+		return new JdtConnectedMethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap, method, Type.getReturnType(desc).getClassName());
 	}
 
 	@Override
