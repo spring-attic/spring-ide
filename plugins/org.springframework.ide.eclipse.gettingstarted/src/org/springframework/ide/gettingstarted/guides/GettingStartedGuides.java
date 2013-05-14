@@ -11,6 +11,7 @@
 package org.springframework.ide.gettingstarted.guides;
 
 import java.io.File;
+import java.util.List;
 
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
@@ -56,10 +57,10 @@ public class GettingStartedGuides {
 	 * Called to fetch the guides from wherever we are getting them from. 
 	 */
 	private GettingStartedGuide[] fetchGuides() {
-		Repo[] repos = new GithubClient().getGuidesRepos();
-		GettingStartedGuide[] guides = new GettingStartedGuide[repos.length];
+		List<Repo> repos = new GithubClient().getGuidesRepos();
+		GettingStartedGuide[] guides = new GettingStartedGuide[repos.size()];
 		for (int i = 0; i < guides.length; i++) {
-			guides[i] = new GettingStartedGuide(repos[i], downloader);
+			guides[i] = new GettingStartedGuide(repos.get(i), downloader);
 		}
 		return guides;
 	}
