@@ -19,9 +19,10 @@ public class AllGettingStartedTests {
 		TestSuite suite = new TestSuite(AllGettingStartedTests.class.getName());
 		
 		//Guides content validation
-		suite.addTestSuite(GuidesTests.class);
-		suite.addTest(GuidesZipStructureTest.suite());
+		
 		suite.addTest(BuildGuidesTest.suite());
+		suite.addTest(GuidesZipStructureTest.suite());
+		suite.addTestSuite(GuidesTests.class);
 		
 		//TODO: test import / build
 
