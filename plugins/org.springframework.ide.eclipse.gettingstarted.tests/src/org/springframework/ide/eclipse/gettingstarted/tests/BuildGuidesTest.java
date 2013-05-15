@@ -26,6 +26,7 @@ import org.springframework.ide.gettingstarted.content.importing.ImportConfigurat
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.*;
@@ -61,27 +62,32 @@ public class BuildGuidesTest extends GuidesTestCase {
 	
 	@Override
 	protected void runTest() throws Throwable {
-		System.out.println("=== codeset build test ===");
-		System.out.println("guide   : "+guide.getName());
-		System.out.println("codeset : "+codeset.getName());
-		System.out.println("type    : "+buildType);
-		System.out.println();
-		
-		String projectName = guide.getName() + "-" + codeset.getName();
-		IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(importConfig(
-				/*location*/
-				Platform.getLocation().append(projectName),
-				/*name*/
-				projectName,
-				/*codeset*/
-				codeset
-		));
-		
-		importOp.run(new NullProgressMonitor());
-
-		//TODO: we are not checking if there are extra projects beyond the expected one.
-		IProject project = getProject(projectName);
-		assertNoErrors(project);
+		try {
+			System.out.println("=== codeset build test ===");
+			System.out.println("guide   : "+guide.getName());
+			System.out.println("codeset : "+codeset.getName());
+			System.out.println("type    : "+buildType);
+			System.out.println();
+			
+			String projectName = guide.getName() + "-" + codeset.getName();
+			IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(importConfig(
+					/*location*/
+					Platform.getLocation().append(projectName),
+					/*name*/
+					projectName,
+					/*codeset*/
+					codeset
+			));
+			
+			importOp.run(new NullProgressMonitor());
+	
+			//TODO: we are not checking if there are extra projects beyond the expected one.
+			IProject project = getProject(projectName);
+			assertNoErrors(project);
+		} catch (Throwable e) {
+			//Shorter stacktrace for somewhat nicer looking test failures on bamboo
+			throw ExceptionUtil.getDeepestCause(e);
+		}
 		
 	}
 	
@@ -106,22 +112,32 @@ public class BuildGuidesTest extends GuidesTestCase {
 		return conf;
 	}
 
+	static boolean zipLooksOk(GettingStartedGuide g) {
+		try {
+			GuidesZipStructureTest.validateZipStructure(g);
+			return true;
+		} catch (Throwable e) {
+		}
+		return false;
+	}
+	
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(BuildGuidesTest.class.getName());
 		for (GettingStartedGuide g : GuidesTests.getGuides()) {
-		//	if (g.getName().contains("facebook")) {
+			if (zipLooksOk(g)) {
+				//Avoid running build tests for zips that look like they have 'missing parts'
 				for (CodeSet cs : g.getCodeSets()) {
 					List<BuildType> buildTypes = cs.getBuildTypes();
 					for (BuildType bt : buildTypes) {
+						//Don't run tests for things we haven't yet implemented support for.
 						if (bt.getImportStrategy().isSupported()) {
 							suite.addTest(new BuildGuidesTest(g, cs, bt));
 						}
 					}
 				}
 			}
-		//}
+		}
 		return suite;
 	}
-	
 
 }

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.gettingstarted.tests;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import junit.framework.Test;
@@ -41,8 +42,11 @@ public class GuidesZipStructureTest extends GuidesTestCase {
 
 	@Override
 	protected void runTest() throws Throwable {
-		System.out.println("=== guide: "+guide.getName()+" ====");
-		
+		System.out.println("=== validating guide zip structure: "+guide.getName()+" ====");
+		validateZipStructure(guide);
+	}
+
+	public static void validateZipStructure(GettingStartedGuide guide) throws IOException, Exception {
 		File zipFile = guide.getZip().getFile();
 		assertTrue("Could not download "+ guide.getZip(),
 				zipFile!=null && zipFile.exists());
@@ -50,13 +54,13 @@ public class GuidesZipStructureTest extends GuidesTestCase {
 		CodeSet allData = CodeSet.fromZip("all", guide.getZip(), new Path("/"));
 		assertTrue("ZipFile is empty", allData.exists());
 		
-		CodeSet.Processor<Void> printEntry = new CodeSet.Processor<Void>() {
-			public Void doit(CodeSetEntry e) {
-				System.out.println(e);
-				return null;
-			};
-		};
-		allData.each(printEntry);
+//		CodeSet.Processor<Void> printEntry = new CodeSet.Processor<Void>() {
+//			public Void doit(CodeSetEntry e) {
+//				System.out.println(e);
+//				return null;
+//			};
+//		};
+//		allData.each(printEntry);
 		
 		assertFolder(allData, guide.getRootPath());
 		assertFile(allData, guide.getRootPath().append("README.md"));
@@ -69,8 +73,6 @@ public class GuidesZipStructureTest extends GuidesTestCase {
 		assertEquals("Guides should provide 2 codesets", 2, codeSets.size());
 		for (CodeSet codeset : codeSets) {
 			String codesetName = codeset.getName();
-			System.out.println("=== code set: "+codesetName);
-			codeset.each(printEntry);
 			assertTrue("No '"+codeset.getName()+"' codeset", codeset.exists());
 			
 			boolean isGradle = codeset.hasFile("build.gradle");
@@ -91,13 +93,12 @@ public class GuidesZipStructureTest extends GuidesTestCase {
 			previousSetIsGradle = isGradle;
 			previousSetIsMaven = isMaven;
 		}
-		
 	}
 	
-	private void assertFolder(CodeSet content, IPath path) {
+	private static void assertFolder(CodeSet content, IPath path) {
 		assertTrue("Folder "+path+" not found in "+content, content.hasFolder(path));
 	}
-	private void assertFile(CodeSet content, IPath path) {
+	private static void assertFile(CodeSet content, IPath path) {
 		assertTrue("File "+path+" not found in "+content, content.hasFile(path));
 	}
 
