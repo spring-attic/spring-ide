@@ -42,12 +42,16 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.*;
  * 
  * @author Kris De Volder
  */
-public class BuildGuidesTest extends GuidesTestCase {
-
+public class ZBuildGuidesTest extends GuidesTestCase {
+	//Note the funny name of this class is an attempt to
+	// show test results at the bottom on bamboo builds.
+	// It looks like the tests reports are getting sorted
+	// alphabetically.
+	
 	private CodeSet codeset;
 	private BuildType buildType;
 
-	public BuildGuidesTest(GettingStartedGuide guide, CodeSet codeset, BuildType buildType) {
+	public ZBuildGuidesTest(GettingStartedGuide guide, CodeSet codeset, BuildType buildType) {
 		super(guide);
 		setName(getName()+"-"+codeset.getName()+"-"+buildType);
 		this.codeset = codeset;
@@ -122,7 +126,7 @@ public class BuildGuidesTest extends GuidesTestCase {
 	}
 	
 	public static Test suite() throws Exception {
-		TestSuite suite = new TestSuite(BuildGuidesTest.class.getName());
+		TestSuite suite = new TestSuite(ZBuildGuidesTest.class.getName());
 		for (GettingStartedGuide g : GuidesTests.getGuides()) {
 			if (zipLooksOk(g)) {
 				//Avoid running build tests for zips that look like they have 'missing parts'
@@ -131,7 +135,7 @@ public class BuildGuidesTest extends GuidesTestCase {
 					for (BuildType bt : buildTypes) {
 						//Don't run tests for things we haven't yet implemented support for.
 						if (bt.getImportStrategy().isSupported()) {
-							suite.addTest(new BuildGuidesTest(g, cs, bt));
+							suite.addTest(new ZBuildGuidesTest(g, cs, bt));
 						}
 					}
 				}

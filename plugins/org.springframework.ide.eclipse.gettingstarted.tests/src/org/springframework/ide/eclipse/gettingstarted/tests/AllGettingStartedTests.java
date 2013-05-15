@@ -22,7 +22,7 @@ public class AllGettingStartedTests {
 		
 		suite.addTestSuite(GuidesTests.class);
 		suite.addTest(GuidesZipStructureTest.suite());
-		suite.addTest(BuildGuidesTest.suite());
+		suite.addTest(ZBuildGuidesTest.suite());
 		
 		//TODO: test import / build
 
