@@ -41,7 +41,7 @@ public class GuidesStructureTest extends GuidesTestCase {
 		System.out.println("=== validating guide zip structure: "+guide.getName()+" ====");
 		validateZipStructure(guide);
 		String description = guide.getDescription();
-		assertTrue("Guide '"+guide.getName()+"' has no description", description!=null && !"".equals(description.trim()));
+		assertTrue("Github repo '"+guide.getName()+"' has no description", description!=null && !"".equals(description.trim()));
 	}
 
 	public static void validateZipStructure(GettingStartedGuide guide) throws IOException, Exception {
