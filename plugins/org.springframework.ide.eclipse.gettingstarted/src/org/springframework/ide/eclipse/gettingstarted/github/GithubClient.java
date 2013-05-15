@@ -187,21 +187,21 @@ public class GithubClient {
 		return rest;
 	}
 
-	/**
-	 * Add hoc testing code. 
-	 */
-	public static void main(String[] args) throws Exception {
-		GithubClient github = new GithubClient();
-		Repo[] resp = github.getGuidesRepos();
-		
-		for (Repo repo : resp) {
-			System.out.println(repo.getName());
-			System.out.println("   "+repo.getDescription());
-			System.out.println("   "+repo.getUrl());
-		}
-		
-		System.out.println(github.getRateLimit());
-	}
+//	/**
+//	 * Add hoc testing code. 
+//	 */
+//	public static void main(String[] args) throws Exception {
+//		GithubClient github = new GithubClient();
+//		Repo[] resp = github.getGuidesRepos();
+//		
+//		for (Repo repo : resp) {
+//			System.out.println(repo.getName());
+//			System.out.println("   "+repo.getDescription());
+//			System.out.println("   "+repo.getUrl());
+//		}
+//		
+//		System.out.println(github.getRateLimit());
+//	}
 
 	/**
 	 * Retrieve info on remaining API rate limit quota for this client.
