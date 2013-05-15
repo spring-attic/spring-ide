@@ -75,6 +75,7 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateCa
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencesModel;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
+import org.springsource.ide.eclipse.commons.content.core.ContentLocation;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.ContentUtil;
@@ -130,6 +131,7 @@ public class TemplateSelectionPart {
 	}
 
 	public Control createControl(Composite parent) {
+
 		initializeTemplates();
 
 		Composite container = new Composite(parent, SWT.NONE);
@@ -139,11 +141,6 @@ public class TemplateSelectionPart {
 		Label label = new Label(container, SWT.NONE);
 		label.setText("Templates:"); //$NON-NLS-1$
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		String[] names = new String[templates.size()];
-		for (int i = 0; i < templates.size(); i++) {
-			names[i] = templates.get(i).getName();
-		}
 
 		Tree tree = new Tree(container, SWT.FULL_SELECTION | SWT.BORDER);
 		tree.setLinesVisible(false);
@@ -255,9 +252,7 @@ public class TemplateSelectionPart {
 				refreshButton.setEnabled(false);
 
 				dialog.open();
-				if (ContentPlugin.getDefault().getManager().isDirty()) {
-					downloadDescriptors();
-				}
+				downloadDescriptors();
 
 				refreshButton.setEnabled(!isRefreshing());
 
@@ -338,6 +333,7 @@ public class TemplateSelectionPart {
 
 			public void propertyChange(PropertyChangeEvent arg0) {
 				initializeTemplates();
+
 				// switch to UI thread
 				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 					public void run() {
@@ -351,14 +347,23 @@ public class TemplateSelectionPart {
 		ContentManager manager = ContentPlugin.getDefault().getManager();
 		manager.addListener(contentManagerListener);
 
-		if (manager.isDirty()) {
-			downloadDescriptors();
-		}
+		// Add the simple project template descriptors from the wizard bundle.
+		ContentLocation location = WizardPlugin.getDefault().getTemplateContentLocation();
+		
+		// It only gets added once if already present
+		manager.addContentLocation(location);
+
+		downloadDescriptors();
 
 		return container;
 
 	}
 
+	/**
+	 * Refreshes list of descriptors, and only refreshes the subset of
+	 * descriptors in the preference store if changes have been made in the
+	 * preference store (i.e., the content manager indicates dirty)
+	 */
 	protected void downloadDescriptors() {
 		try {
 			wizard.getContainer().run(true, true, new DownloadDescriptorJob());
@@ -369,7 +374,9 @@ public class TemplateSelectionPart {
 				setError(((CoreException) t).getStatus());
 			}
 			else {
-				setError("Failed to download descriptors due to " + t.getMessage(), t);
+				setError(
+						"Failed to download descriptors"
+								+ ((t != null && t.getMessage() != null) ? " due to " + t.getMessage() : ""), t);
 			}
 		}
 		catch (InterruptedException e) {
