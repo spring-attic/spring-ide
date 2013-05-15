@@ -15,14 +15,13 @@ import static org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpre
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.commons.io.FileUtils;
+import org.eclipse.core.internal.utils.FileUtil;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.springframework.ide.eclipse.gettingstarted.util.IOUtil;
 import org.springframework.ide.gettingstarted.content.CodeSet;
-import org.springframework.ide.gettingstarted.content.CodeSet.CodeSetEntry;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -50,20 +49,13 @@ public class GradleStrategy extends ImportStrategy {
 
 			@Override
 			public void createAt(final File location) throws CoreException {
+				if (location.exists()) {
+					//Delete anything that is in the way
+					FileUtils.deleteQuietly(location);
+				}
 				try {
-					codeset.each(new CodeSet.Processor<Void>() {
-						public Void doit(CodeSetEntry e) throws Exception {
-							IPath path = e.getPath();
-							File target = new File(location, path.toString());
-							if (e.isDirectory()) {
-								target.mkdirs();
-							} else {
-								IOUtil.pipe(e.getData(), target);
-							}
-							return null;
-						}
-					});
-				} catch (Exception e) {
+					codeset.createAt(location);
+				} catch (Throwable e) {
 					throw ExceptionUtil.coreException(e);
 				}
 			}

@@ -16,6 +16,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -61,7 +63,15 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		StsTestUtil.deleteAllProjects();
+		//Clean stuff from previous test: Delete any projects and their contents.
+		// We need to do this because imported maven and gradle projects will have the same name.
+		// And this cause clashes / errors.
+	
+		IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		for (IProject project : allProjects) {
+			project.refreshLocal(IResource.DEPTH_INFINITE, null);
+			project.delete(/*content*/true, /*force*/true, new NullProgressMonitor());
+		}
 	}
 	
 	@Override
@@ -135,7 +145,10 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 					for (BuildType bt : buildTypes) {
 						//Don't run tests for things we haven't yet implemented support for.
 						if (bt.getImportStrategy().isSupported()) {
-							suite.addTest(new ZBuildGuidesTest(g, cs, bt));
+							ZBuildGuidesTest test = new ZBuildGuidesTest(g, cs, bt);
+							if (test.getName().contains("maven-android-initial-MAVEN")) {
+								suite.addTest(test);
+							}
 						}
 					}
 				}

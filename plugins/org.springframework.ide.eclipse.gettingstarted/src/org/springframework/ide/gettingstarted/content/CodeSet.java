@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.gettingstarted.content;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
+import org.springframework.ide.eclipse.gettingstarted.util.IOUtil;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * A CodeSet represents a bunch of content that can somehow be imported into
@@ -52,8 +58,7 @@ public abstract class CodeSet {
 	public static abstract class Processor<T> {
 		
 		/**
-		 * Do some work an a ZipEntry in a CodeSet. THe method may return true 
-		 * or throw an exception to avoid processing additonal elements in a loop.
+		 * Do some work an a ZipEntry in a CodeSet.
 		 */
 		public abstract T doit(CodeSetEntry e) throws Exception;
 	}
@@ -130,5 +135,28 @@ public abstract class CodeSet {
 	 * stop processing in the middle of the iteration.
 	 */
 	public abstract <T> T each(Processor<T> processor) throws Exception;
+
+	/**
+	 * Copies the contents of codeset to a given filesystem location
+	 */
+	public void createAt(final File location) throws Exception {
+		if (location.exists()) {
+			if (!FileUtils.deleteQuietly(location)) {
+				throw new IOException("Data already exists at location and it could not be deleted: "+location);
+			}
+		}
+		each(new CodeSet.Processor<Void>() {
+			public Void doit(CodeSetEntry e) throws Exception {
+				IPath path = e.getPath();
+				File target = new File(location, path.toString());
+				if (e.isDirectory()) {
+					target.mkdirs();
+				} else {
+					IOUtil.pipe(e.getData(), target);
+				}
+				return null;
+			}
+		});
+	}
 	
 }

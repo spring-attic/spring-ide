@@ -20,7 +20,14 @@ public enum BuildType {
 	MAVEN("pom.xml", ImportStrategy.MAVEN);
 //	ECLIPSE(".project", ImportStrategy.ECLIPSE);
 
-	private Path buildScriptPath;
+	/**
+	 * Location of the 'build script' relative to codeset (project) root.
+	 * This also serves as a way to recognize if a BuildType is
+	 * supported by a CodeSet. I.e. if the buildScript file
+	 * exists in the code set then it is assumed the codeset can
+	 * be imported with the corresponding ImportStrategy.
+	 */
+	private Path buildScriptPath; 
 	private ImportStrategy importStrategy;
 
 	private BuildType(String buildScriptPath, ImportStrategy importStrategy) {
