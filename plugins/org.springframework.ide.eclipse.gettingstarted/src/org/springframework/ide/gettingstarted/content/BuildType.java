@@ -17,8 +17,8 @@ import org.springframework.ide.gettingstarted.content.importing.NullImportStrate
 
 public enum BuildType {
 	GRADLE("build.gradle", ImportStrategy.GRADLE),
-//	MAVEN("pom.xml", ImportStrategy.MAVEN);
-	MAVEN("pom.xml", new NullImportStrategy("Maven"));
+	MAVEN("pom.xml", ImportStrategy.MAVEN);
+//	MAVEN("pom.xml", new NullImportStrategy("Maven"));
 //	ECLIPSE(".project", ImportStrategy.ECLIPSE);
 
 	/**
