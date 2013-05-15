@@ -66,6 +66,10 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 		if (!SpringCoreUtils.isSpringProject(javaContext.getProject().getProject())) {
 			return Collections.emptyList();
 		}
+		
+		if (javaContext.getCoreContext() == null) {
+			return Collections.emptyList();
+		}
 
 		ICompilationUnit cu = javaContext.getCompilationUnit();
 
@@ -93,10 +97,12 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 
 	private List<ICompletionProposal> computeCompletionProposals(SourceMethod element,
 			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+
 		RepositoryInformation information = RepositoryInformation.create(element);
 		if (information == null) {
 			return Collections.emptyList();
 		}
+		
 		int offset = javaContext.getCoreContext().getOffset();
 		int positionInMethodName = offset - element.getNameRange().getOffset();
 		String elementName = element.getElementName();
@@ -106,15 +112,22 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 
 	private List<ICompletionProposal> computeCompletionProposals(IType type,
 			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+
 		RepositoryInformation information = RepositoryInformation.create(type);
-		if (information == null)
+		if (information == null) {
 			return Collections.emptyList();
+		}
+
 		char[] token = javaContext.getCoreContext().getToken();
-		if (token == null)
+		if (token == null) {
 			return Collections.emptyList();
+		}
+		
 		String elementName = String.valueOf(token);
-		if (elementName.isEmpty())
+		if (elementName.isEmpty()) {
 			return Collections.emptyList();
+		}
+		
 		int offset = javaContext.getCoreContext().getOffset();
 		int positionInMethodName = offset - javaContext.getCoreContext().getTokenStart();
 
