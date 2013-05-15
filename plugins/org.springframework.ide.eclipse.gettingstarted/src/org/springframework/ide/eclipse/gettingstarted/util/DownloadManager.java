@@ -108,7 +108,7 @@ public class DownloadManager {
 	 * and the download will be tried again. (for a limited number of times)
 	 */
 	public void doWithDownload(DownloadableItem target, DownloadRequestor action) throws Exception {
-		int tries = 2; // try at most X times
+		int tries = 5; // try at most X times
 		Exception e = null;
 		File downloadedFile = null;
 		do {
