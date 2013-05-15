@@ -12,12 +12,13 @@ package org.springframework.ide.gettingstarted.content;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.gettingstarted.content.importing.GradleStrategy;
 import org.springframework.ide.gettingstarted.content.importing.ImportStrategy;
+import org.springframework.ide.gettingstarted.content.importing.NullImportStrategy;
 
 public enum BuildType {
 	GRADLE("build.gradle", ImportStrategy.GRADLE),
-	MAVEN("pom.xml", ImportStrategy.MAVEN);
+//	MAVEN("pom.xml", ImportStrategy.MAVEN);
+	MAVEN("pom.xml", new NullImportStrategy("Maven"));
 //	ECLIPSE(".project", ImportStrategy.ECLIPSE);
 
 	/**

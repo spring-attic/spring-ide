@@ -146,9 +146,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 						//Don't run tests for things we haven't yet implemented support for.
 						if (bt.getImportStrategy().isSupported()) {
 							ZBuildGuidesTest test = new ZBuildGuidesTest(g, cs, bt);
-							if (test.getName().contains("maven-android-initial-MAVEN")) {
-								suite.addTest(test);
-							}
+							suite.addTest(test);
 						}
 					}
 				}

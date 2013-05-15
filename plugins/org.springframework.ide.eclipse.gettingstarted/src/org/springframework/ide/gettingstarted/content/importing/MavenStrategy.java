@@ -50,13 +50,14 @@ public class MavenStrategy extends ImportStrategy {
 		public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 			mon.beginTask("Create maven project "+projectName, 4);
 			try {
-				//1: 1+3 copy codeset data
+				//1: 1 copy codeset data
 				codeset.createAt(location);
 				mon.worked(1);
 				
-				//4: materialize eclipse project from pom.xml
+				//2..4: materialize eclipse project from pom.xml
 				File pomFile = new File(location, "pom.xml");
 				Assert.isTrue(pomFile.isFile(), "No pom file found: "+pomFile);
+				Assert.isTrue(pomFile.length()>0, "Pom file contains no data: "+pomFile);
 				MavenCorePlugin.createEclipseProjectFromExistingMavenProject(pomFile, new SubProgressMonitor(mon, 3));
 			} catch (InterruptedException e) {
 				throw e;
