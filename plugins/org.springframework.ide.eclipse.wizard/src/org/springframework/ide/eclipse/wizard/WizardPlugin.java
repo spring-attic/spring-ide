@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.wizard;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.wizard.template.BundleTemplateLocation;
+import org.springsource.ide.eclipse.commons.content.core.ContentLocation;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -26,6 +28,11 @@ public class WizardPlugin extends AbstractUIPlugin {
 
 	// The shared instance
 	private static WizardPlugin plugin;
+
+	/**
+	 * Location of additional templates inside the bundle
+	 */
+	private BundleTemplateLocation bundleTemplateLocation;
 
 	/**
 	 * The constructor
@@ -68,4 +75,15 @@ public class WizardPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	/**
+	 * Returns one instance of template descriptor location inside the wizard
+	 * bundle per runtime session. This location contains templates for simple
+	 * template projects.
+	 */
+	public ContentLocation getTemplateContentLocation() {
+		if (bundleTemplateLocation == null) {
+			bundleTemplateLocation = new BundleTemplateLocation();
+		}
+		return bundleTemplateLocation;
+	}
 }
