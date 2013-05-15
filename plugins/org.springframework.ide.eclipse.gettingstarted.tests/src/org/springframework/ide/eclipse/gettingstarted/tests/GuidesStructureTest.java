@@ -20,7 +20,6 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.gettingstarted.content.CodeSet;
-import org.springframework.ide.gettingstarted.content.CodeSet.CodeSetEntry;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 
 /**
@@ -31,12 +30,9 @@ import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
  * 
  * @author Kris De Volder
  */
-public class GuidesZipStructureTest extends GuidesTestCase {
+public class GuidesStructureTest extends GuidesTestCase {
 
-	private static final int SECOND = 1000;
-	private static final int MINUTE = 60*SECOND;
-
-	public GuidesZipStructureTest(GettingStartedGuide guide) {
+	public GuidesStructureTest(GettingStartedGuide guide) {
 		super(guide);
 	}
 
@@ -44,6 +40,8 @@ public class GuidesZipStructureTest extends GuidesTestCase {
 	protected void runTest() throws Throwable {
 		System.out.println("=== validating guide zip structure: "+guide.getName()+" ====");
 		validateZipStructure(guide);
+		String description = guide.getDescription();
+		assertTrue("Guide '"+guide.getName()+"' has no description", description!=null && !"".equals(description.trim()));
 	}
 
 	public static void validateZipStructure(GettingStartedGuide guide) throws IOException, Exception {
@@ -103,11 +101,11 @@ public class GuidesZipStructureTest extends GuidesTestCase {
 	}
 
 	public static Test suite() throws Exception {
-		TestSuite suite = new TestSuite(GuidesZipStructureTest.class.getName());
+		TestSuite suite = new TestSuite(GuidesStructureTest.class.getName());
 		
 		GettingStartedGuide[] guides = GuidesTests.getGuides();
 		for (GettingStartedGuide guide : guides) {
-			suite.addTest(new GuidesZipStructureTest(guide));
+			suite.addTest(new GuidesStructureTest(guide));
 		}
 		
 		return suite;

@@ -128,7 +128,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 
 	static boolean zipLooksOk(GettingStartedGuide g) {
 		try {
-			GuidesZipStructureTest.validateZipStructure(g);
+			GuidesStructureTest.validateZipStructure(g);
 			return true;
 		} catch (Throwable e) {
 		}
