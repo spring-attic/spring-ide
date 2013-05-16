@@ -23,15 +23,21 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.PackageFragment;
+import org.eclipse.jdt.internal.core.util.Util;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -62,6 +68,7 @@ import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
@@ -77,6 +84,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  * @author Martin Lippert
  * @since 3.3.0
  */
+@SuppressWarnings("restriction")
 public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement, IReloadableBeansConfig {
 
 	private IType configClass;
@@ -94,15 +102,40 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		
 		this.configClass = configClass;
 		this.configClassName = configClassName;
+
+		modificationTimestamp = IResource.NULL_STAMP;
+		
 		if (this.configClass != null) {
-			modificationTimestamp = this.configClass.getResource().getModificationStamp();
+			IResource resource = this.configClass.getResource();
+			if (resource != null && resource instanceof IFile) {
+				file = (IFile) resource;
+			}
+			else {
+				IClassFile classFile = configClass.getClassFile();
+				
+				PackageFragment pkg = (PackageFragment) configClass.getPackageFragment();
+				IPackageFragmentRoot root = (IPackageFragmentRoot) pkg.getParent();
+
+				if (root.isArchive()) {
+					IPath zipPath = root.getPath();
+
+					String classFileName = classFile.getElementName();
+					String path = Util.concatWith(pkg.names, classFileName, '/');
+					file = new ExternalFile(zipPath.toFile(), path, project.getProject());
+				}
+			}
 		}
-		else {
+		
+		if (file == null || !file.exists()) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans Java config class '" + configClassName + "' not accessible";
 			problems = new CopyOnWriteArraySet<ValidationProblem>();
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
 		}
+		else {
+			modificationTimestamp = file.getModificationStamp();
+		}
+
 	}
 
 	public IType getConfigClass() {
@@ -111,11 +144,6 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 	
 	public String getConfigClassName() {
 		return this.configClassName;
-	}
-
-	@Override
-	public IResource getElementResource() {
-		return this.configClass != null ? this.configClass.getResource() : null;
 	}
 
 	public boolean isInitialized() {
