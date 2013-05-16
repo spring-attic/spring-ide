@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -63,13 +64,21 @@ public class BeansConfigFactory {
 			if (javaProject != null) {
 				IJavaElement element = JavaCore.create(file, javaProject);
 				if (element != null && element.getPrimaryElement() instanceof ICompilationUnit) {
-					IType[] types;
-					try {
-						types = ((ICompilationUnit) element.getPrimaryElement()).getTypes();
-						if (types != null && types.length > 0) {
-							return JAVA_CONFIG_TYPE + types[0].getFullyQualifiedName();
+					String typeName = element.getElementName();
+					String fileExtension = file.getFileExtension();
+					if (fileExtension != null && fileExtension.length() > 0) {
+						typeName = typeName.substring(0, typeName.length() - (fileExtension.length() + 1));
+					}
+					
+					IJavaElement parent = element.getParent();
+					String packageName = "";
+					if (parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+						IPackageFragment packageFragment = (IPackageFragment) parent;
+						if (!packageFragment.isDefaultPackage()) {
+							packageName = packageFragment.getElementName() + ".";
 						}
-					} catch (JavaModelException e) {
+						
+						return JAVA_CONFIG_TYPE + packageName + typeName;
 					}
 				}
 			}

@@ -370,11 +370,11 @@ I	 * Removes the given beans config from the list of configs and from all config
 	 */
 	public boolean removeConfig(IFile file) {
 		if (file.getProject().equals(project)) {
-			return removeConfig(file.getProjectRelativePath().toString());
+			return removeConfig(getConfigName(file));
 		}
 
 		// External configs only remove from all config sets
-		return removeConfigFromConfigSets(file.getFullPath().toString());
+		return removeConfigFromConfigSets(getConfigName(file));
 	}
 
 	/**
