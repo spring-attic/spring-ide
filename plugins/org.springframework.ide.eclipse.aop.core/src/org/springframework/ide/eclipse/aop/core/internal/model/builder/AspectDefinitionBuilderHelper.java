@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Spring IDE Developers
+ * Copyright (c) 2008, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 
 /**
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.3.1
  */
 @SuppressWarnings("restriction")
@@ -106,9 +107,12 @@ class AspectDefinitionBuilderHelper {
 			IStructuredModel model = null;
 			try {
 				if (file instanceof ExternalFile) {
-					if (model == null) {
+					try {
 						model = StructuredModelManager.getModelManager().getModelForRead(file.getName(),
 								file.getContents(), null);
+					}
+					catch (RuntimeException e) {
+						// WTP throws an exception is this is not an XML document
 					}
 				}
 				else {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 Spring IDE Developers
+ * Copyright (c) 2008, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,9 @@ import org.w3c.dom.NodeList;
 
 /**
  * {@link IAspectDefinitionBuilder} for Spring Security's global-method-security element.
+ * 
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0.5
  */
 @SuppressWarnings("restriction")
@@ -63,7 +65,9 @@ public class SecurityXmlAspectDefinitionBuilder extends AbstractAspectDefinition
 
 	public void buildAspectDefinitions(List<IAspectDefinition> aspectInfos, IFile file,
 			IProjectClassLoaderSupport classLoaderSupport, IDocumentFactory factory) {
-		parseGlobalMethodSecurityElement(factory.createDocument(file), file, aspectInfos, classLoaderSupport);
+		if (file.getFileExtension() != null && file.getFileExtension().equals("xml")) {
+			parseGlobalMethodSecurityElement(factory.createDocument(file), file, aspectInfos, classLoaderSupport);
+		}
 	}
 
 	private void addAspectDefinition(IAspectDefinition info, List<IAspectDefinition> aspectInfos) {

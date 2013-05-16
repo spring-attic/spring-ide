@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,9 @@ import org.w3c.dom.NodeList;
 /**
  * Builder implementation that creates {@link IAspectDefinition} from Spring xml definition files.
  * Understands aop:config tags.
+ * 
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 @SuppressWarnings("restriction")
@@ -101,7 +103,9 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder 
 
 	public void buildAspectDefinitions(List<IAspectDefinition> aspectInfos, IFile file,
 			IProjectClassLoaderSupport classLoaderSupport, IDocumentFactory factory) {
-		parseAopConfigElement(factory.createDocument(file), file, aspectInfos, classLoaderSupport);
+		if (file.getFileExtension() != null && file.getFileExtension().equals("xml")) {
+			parseAopConfigElement(factory.createDocument(file), file, aspectInfos, classLoaderSupport);
+		}
 	}
 
 	private void addAspectDefinition(IAspectDefinition info, List<IAspectDefinition> aspectInfos) {
