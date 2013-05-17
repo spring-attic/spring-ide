@@ -22,9 +22,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.springframework.ide.gettingstarted.content.BuildType;
-import org.springframework.ide.gettingstarted.content.CodeSet;
-import org.springframework.ide.gettingstarted.content.importing.ImportConfiguration;
+import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;

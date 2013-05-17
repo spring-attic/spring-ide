@@ -10,16 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.tests;
 
-import java.io.File;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
 import junit.framework.TestCase;
 
-import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
+import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuides;
 
 /**
  * @author Kris De Volder
@@ -101,7 +95,7 @@ public class GuidesTests extends TestCase {
 //	}
 	
 	public static GettingStartedGuide[] getGuides() {
-		return GettingStartedGuides.getInstance().getAll();
+		return GettingStartedContent.getInstance().getGuides();
 	}
 
 	private void assertAtLeast(EG[] expected, GettingStartedGuide[] guides) {

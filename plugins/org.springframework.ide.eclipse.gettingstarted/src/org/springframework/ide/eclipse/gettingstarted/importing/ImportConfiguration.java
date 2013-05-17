@@ -1,6 +1,6 @@
-package org.springframework.ide.gettingstarted.content.importing;
+package org.springframework.ide.eclipse.gettingstarted.importing;
 
-import org.springframework.ide.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 
 /**

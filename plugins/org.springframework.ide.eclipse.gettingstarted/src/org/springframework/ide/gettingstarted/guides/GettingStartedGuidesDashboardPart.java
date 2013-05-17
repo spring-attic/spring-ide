@@ -32,6 +32,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springsource.ide.eclipse.dashboard.internal.ui.IdeUiPlugin;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
 //import org.springframework.ide.eclipse.wizard.WizardPlugin;
@@ -140,7 +141,7 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 		//TODO: running this in UI thread may be a bad idea. E.g. slow network connection
 		// may make UI thread hang. Should popuplate contents of guides section with
 		// a background job.
-		GettingStartedGuide[] guides = GettingStartedGuides.getInstance().getAll();
+		GettingStartedGuide[] guides = GettingStartedContent.getInstance().getGuides();
 		for (final GettingStartedGuide guide : guides) {
 			displayGuide(guidesComposite, guide);
 //				Composite slot = toolkit.createComposite(guidesComposite, SWT.WRAP);

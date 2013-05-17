@@ -8,12 +8,11 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.content;
+package org.springframework.ide.eclipse.gettingstarted.content;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.gettingstarted.content.importing.ImportStrategy;
-import org.springframework.ide.gettingstarted.content.importing.NullImportStrategy;
+import org.springframework.ide.eclipse.gettingstarted.importing.ImportStrategy;
 
 public enum BuildType {
 	GRADLE("build.gradle", ImportStrategy.GRADLE),

@@ -1,4 +1,4 @@
-package org.springframework.ide.gettingstarted.content;
+package org.springframework.ide.eclipse.gettingstarted.content;
 
 import java.io.IOException;
 import java.io.InputStream;

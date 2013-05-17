@@ -8,7 +8,7 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.content.importing;
+package org.springframework.ide.eclipse.gettingstarted.importing;
 
 import static org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression.constant;
 
@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.springframework.ide.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;

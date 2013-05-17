@@ -18,17 +18,17 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
-import org.springframework.ide.gettingstarted.content.CodeSet;
 
 /**
  * Content for a GettingStartedGuide provided via a Github Repo
  * 
  * @author Kris De Volder
  */
-public class GettingStartedGuide {
+public class GettingStartedGuide extends GithubContent {
 
 	private Repo repo;
 	private DownloadManager downloader;

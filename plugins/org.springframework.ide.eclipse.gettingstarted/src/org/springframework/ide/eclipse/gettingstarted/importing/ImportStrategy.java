@@ -8,7 +8,7 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.content.importing;
+package org.springframework.ide.eclipse.gettingstarted.importing;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 

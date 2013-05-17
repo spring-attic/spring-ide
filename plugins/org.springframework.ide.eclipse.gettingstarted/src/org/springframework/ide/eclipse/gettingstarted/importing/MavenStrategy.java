@@ -8,7 +8,7 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.content.importing;
+package org.springframework.ide.eclipse.gettingstarted.importing;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.maven.MavenCorePlugin;
-import org.springframework.ide.gettingstarted.content.CodeSet;
 
 /**
  * Importer strategy implementation for importing CodeSets into the workspace and set them
