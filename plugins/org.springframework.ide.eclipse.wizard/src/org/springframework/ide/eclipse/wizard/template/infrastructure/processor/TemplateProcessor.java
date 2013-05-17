@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.ide.eclipse.wizard.template.SpringVersion;
+import org.springframework.ide.eclipse.wizard.template.SpringVersionProcessor;
 
 /**
  * @author Terry Denney
@@ -34,8 +36,18 @@ public class TemplateProcessor {
 
 	protected Map<String, String> replacementContext = new HashMap<String, String>();
 
+	protected SpringVersionProcessor springProcessor;
+
 	public TemplateProcessor(Map<String, String> replacementContext) {
 		this.replacementContext = replacementContext;
+	}
+
+	public TemplateProcessor(Map<String, String> replacementContext, SpringVersion springVersion) {
+		this.replacementContext = replacementContext;
+
+		if (springVersion != null && !springVersion.equals(SpringVersion.DEFAULT)) {
+			this.springProcessor = new SpringVersionProcessor(springVersion.getVersion());
+		}
 	}
 
 	public void process(File source, File target) throws IOException {
@@ -93,6 +105,12 @@ public class TemplateProcessor {
 			String replacement = replacementContext.get(token);
 			input = input.replace(token, replacement);
 		}
+
+		// Handle the spring version processing separately
+		if (springProcessor != null && springProcessor.isReplacing(input)) {
+			input = springProcessor.replace(input);
+		}
+
 		if (input.indexOf("my") >= 0) {
 			logger.warn("May have failed to replace token " + input);
 		}

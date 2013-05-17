@@ -215,7 +215,7 @@ public class TemplateSelectionPart {
 
 		Composite legendContainer = new Composite(container, SWT.NONE);
 		legendContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		GridLayout headerLayout = new GridLayout(2, false);
+		GridLayout headerLayout = new GridLayout(3, false);
 		headerLayout.marginWidth = 0;
 		headerLayout.marginHeight = 0;
 		legendContainer.setLayout(headerLayout);
@@ -224,21 +224,26 @@ public class TemplateSelectionPart {
 		GridLayout legendLayout = new GridLayout(2, false);
 		legendLayout.verticalSpacing = 0;
 		legendLayout.marginHeight = 0;
-		legendLayout.marginBottom = 5;
+		legendLayout.marginBottom = 0;
+
+		int legendControlVerticalIndent = 5;
 
 		legendComposite.setLayout(legendLayout);
 		legendComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		legendImage = new Label(legendComposite, SWT.NONE);
-		legendImage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+		GridDataFactory.fillDefaults().grab(false, false).indent(0, legendControlVerticalIndent).applyTo(legendImage);
+
 		legendImage.setImage(WizardImages.getImage(StsUiImages.DOWNLOAD_OVERLAY));
 
 		legendText = new Label(legendComposite, SWT.NONE);
-		legendText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		legendText.setText("requires downloading");
 
-		Hyperlink hyperlink = new Hyperlink(container, SWT.WRAP | SWT.TRAIL | SWT.TOP);
-		GridDataFactory.fillDefaults().grab(false, true).align(SWT.END, SWT.BEGINNING).indent(5, 0).applyTo(hyperlink);
+		GridDataFactory.fillDefaults().grab(false, false).indent(0, legendControlVerticalIndent).applyTo(legendText);
+
+		Hyperlink hyperlink = new Hyperlink(legendContainer, SWT.WRAP);
+		GridDataFactory.fillDefaults().grab(false, false).indent(0, legendControlVerticalIndent).applyTo(hyperlink);
 		hyperlink.setText(NLS.bind("Configure templates...", null));
 		Color blue = new Color(null, 0, 0, 255);
 		hyperlink.setForeground(blue);
@@ -287,7 +292,6 @@ public class TemplateSelectionPart {
 		descriptionLabel = new Label(descriptionComposite, SWT.NONE);
 		descriptionLabel.setText("Description:"); //$NON-NLS-1$
 		descriptionLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		descriptionLabel.setVisible(false);
 
 		descriptionText = new StyledText(descriptionComposite, SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
 		// descriptionText.setAlwaysShowScrollBars(false);
@@ -349,7 +353,7 @@ public class TemplateSelectionPart {
 
 		// Add the simple project template descriptors from the wizard bundle.
 		ContentLocation location = WizardPlugin.getDefault().getTemplateContentLocation();
-		
+
 		// It only gets added once if already present
 		manager.addContentLocation(location);
 
@@ -575,11 +579,9 @@ public class TemplateSelectionPart {
 
 		if (description != null) {
 			descriptionText.setText(description);
-			descriptionLabel.setVisible(true);
 		}
 		else {
 			descriptionText.setText(""); //$NON-NLS-1$
-			descriptionLabel.setVisible(false);
 		}
 		descriptionText.redraw();
 	}

@@ -204,12 +204,19 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static BeansCorePlugin getDefault() {
 		return plugin;
 	}
-
+	
 	/**
 	 * Returns the singleton {@link IBeansModel}.
 	 */
 	public static IBeansModel getModel() {
 		return getDefault().model;
+	}
+
+	/**
+	 * only for internal testing purposes
+	 */
+	public static void setModel(BeansModel model) {
+		getDefault().model = model;
 	}
 
 	public static NamespaceHandlerResolver getNamespaceHandlerResolver() {

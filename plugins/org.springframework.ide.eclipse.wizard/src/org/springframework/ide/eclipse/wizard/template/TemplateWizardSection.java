@@ -191,9 +191,9 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
 				Template template = descriptor.getTemplate();
 
-				// Only collect input from pages for templates that contributed
-				// wizard pages
-				if (!(template instanceof SimpleProject) || ((SimpleProject) template).hasWizardPages()) {
+				// Only collect input from pages for non Simple Projects, as
+				// they require UI input for template variables.
+				if (!(template instanceof SimpleProject)) {
 					// This collects input for the template directly from the
 					// wizard pages
 					TemplateWizardSection.this.collectInput(collectedInput, inputKinds);
@@ -209,12 +209,11 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 					try {
 						Template template = getWizard().getMainPage().getSelectedTemplate();
 
-						// For simple projects with no additional wizard pages,
-						// download the template data, as the template data only
-						// gets downloaded on project creation time. Otherwise,
-						// the template data should already have
-						// be downloaded prior to reaching to this stage
-						if (template instanceof SimpleProject && !((SimpleProject) template).hasWizardPages()) {
+						// For simple projects download the template data,
+						// whether they contribute additional
+						// wizard pages or not, as a user can click "Finish" for
+						// simple projects from the first page.
+						if (template instanceof SimpleProject) {
 							TemplateUtils.downloadTemplateData(template, getShell());
 						}
 
@@ -222,7 +221,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 						descriptor = new TemplateProjectConfigurationDescriptor(getWizard().getMainPage()
 								.getProjectName(), uiInfo.getTopLevelPackageTokens(), template, getWizard()
-								.getMainPage().getProjectLocationURI());
+								.getMainPage().getProjectLocationURI(), getWizard().getMainPage().getVersion());
 						setConfigurationDescriptor(descriptor);
 					}
 					catch (CoreException e) {
@@ -234,4 +233,5 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 		};
 	}
+
 }

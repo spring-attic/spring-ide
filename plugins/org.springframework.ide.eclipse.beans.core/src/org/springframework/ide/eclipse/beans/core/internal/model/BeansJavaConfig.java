@@ -228,7 +228,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 			}
 			catch (Exception e) {
 				problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, String.format(
-						"Error occured processing Java config '%s'. See Error Log for more details", e.getCause().getMessage()), this.configClass.getResource()));
+						"Error occured processing Java config '%s'. See Error Log for more details", e.getCause().getMessage()), getElementResource()));
 				BeansCorePlugin.log(new Status(IStatus.INFO, BeansCorePlugin.PLUGIN_ID, String.format(
 						"Error occured processing '%s'", this.configClass.getFullyQualifiedName()), e.getCause()));
 			}

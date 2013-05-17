@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -58,7 +62,8 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		Control locationControl = createLocationControl(mainArea);
 		locationControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		// createSpringSelectionControl(mainArea);
+		Control springControl = createSpringSelectionControl(mainArea);
+		springControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		part = new TemplateSelectionPart((NewSpringProjectWizard) getWizard(), this);
 		Control control = part.createControl(mainArea);
@@ -67,8 +72,14 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		Control workingSetControl = createWorkingSetControl(mainArea);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+		// Create it to avoid NPEs when the superclass attempts to read/write to
+		// the widget,
+		// but don't add it to the layout as its usually empty and takes up
+		// space
 		Control infoControl = createInfoControl(mainArea);
-		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		data.exclude = true;
+		infoControl.setLayoutData(data);
 
 		setControl(mainArea);
 
@@ -94,76 +105,54 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		return part != null ? part.getTemplate() : null;
 	}
 
-	// TODO: enable when spring versions are supported in templates
-	// protected void createSpringSelectionControl(Composite parent) {
-	//
-	// Composite composite = new Composite(parent, SWT.NONE);
-	// composite.setLayout(new GridLayout());
-	// GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).applyTo(composite);
-	// GridDataFactory.fillDefaults().grab(false, false).applyTo(composite);
-	//
-	// final Combo springVersion = createLabeledCombo(composite,
-	// "Select Spring version:");
-	// List<SpringVersion> versions = SpringVersion.getVersions();
-	// int length = versions.size();
-	// String[] versionValues = new String[length];
-	// int i = 0;
-	// for (SpringVersion version : versions) {
-	// if (i < length) {
-	// versionValues[i++] = version.getVersion() + "";
-	// }
-	// }
-	//
-	// springVersion.addSelectionListener(new SelectionAdapter() {
-	// @Override
-	// public void widgetSelected(SelectionEvent event) {
-	// // should always parse correctly
-	// int selectionIndex = springVersion.getSelectionIndex();
-	// if (selectionIndex != -1) {
-	// List<SpringVersion> versions = SpringVersion.getVersions();
-	// if (selectionIndex < versions.size()) {
-	// version = versions.get(selectionIndex);
-	// }
-	// }
-	// }
-	// });
-	//
-	// springVersion.setItems(versionValues);
-	// springVersion.select(0);
-	//
-	// length = BuildType.values().length;
-	// String[] buildValues = new String[length];
-	// i = 0;
-	// for (BuildType type : BuildType.values()) {
-	// if (i < length) {
-	// buildValues[i++] = type.name();
-	// }
-	// }
-	//
-	// final Combo buildTypeCombo = createLabeledCombo(composite,
-	// "Select Build type:");
-	//
-	// buildTypeCombo.setItems(buildValues);
-	// buildTypeCombo.select(0);
-	//
-	// buildTypeCombo.addSelectionListener(new SelectionAdapter() {
-	// @Override
-	// public void widgetSelected(SelectionEvent event) {
-	// // should always parse correctly
-	// int selectionIndex = buildTypeCombo.getSelectionIndex();
-	// if (selectionIndex != -1 && selectionIndex < BuildType.values().length) {
-	// buildType = BuildType.values()[selectionIndex];
-	// }
-	// update();
-	//
-	// }
-	// });
-	//
-	// }
+	protected Control createSpringSelectionControl(Composite parent) {
+
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 2;
+		container.setLayout(layout);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		final Combo springVersion = createLabeledCombo(container, "Select Spring version:");
+		List<SpringVersion> versions = SpringVersion.getVersions();
+		int length = versions.size();
+		String[] versionValues = new String[length];
+		int i = 0;
+		for (SpringVersion version : versions) {
+			if (i < length) {
+				versionValues[i++] = version.getDisplay();
+			}
+		}
+
+		springVersion.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				// should always parse correctly
+				int selectionIndex = springVersion.getSelectionIndex();
+				if (selectionIndex != -1) {
+					List<SpringVersion> versions = SpringVersion.getVersions();
+					if (selectionIndex < versions.size()) {
+						SpringVersion selectedVersion = versions.get(selectionIndex);
+						if (SpringVersion.DEFAULT.equals(selectedVersion)) {
+							version = null;
+						}
+						else {
+							version = selectedVersion;
+						}
+					}
+				}
+			}
+		});
+
+		springVersion.setItems(versionValues);
+		springVersion.select(0);
+		return container;
+
+	}
 
 	protected Combo createLabeledCombo(Composite parent, String labelValue) {
 		Label label = new Label(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(false, false).applyTo(label);
+		GridDataFactory.fillDefaults().grab(false, false).align(SWT.FILL, SWT.CENTER).applyTo(label);
 		label.setText(labelValue);
 
 		final Combo combo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);

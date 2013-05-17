@@ -55,19 +55,23 @@ import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
  */
 public class TemplateUtils {
 
-	public static File importDirectory(ContentItem item, final Shell shell, SubMonitor monitor) throws CoreException,
-			InterruptedException {
+	public static File importDirectory(ContentItem item, final Shell shell, boolean promptForDownload,
+			SubMonitor monitor) throws CoreException, InterruptedException {
 		Assert.isNotNull(item);
 		String id = item.getId();
 		ContentManager manager = ContentPlugin.getDefault().getManager();
 		if (item.needsDownload()) {
 			final ContentItem finalItem = item;
-			final boolean[] response = new boolean[1];
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					response[0] = promptForDownload(shell, finalItem);
-				}
-			});
+			final boolean[] response = { true };
+
+			if (promptForDownload) {
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						response[0] = promptForDownload(shell, finalItem);
+					}
+				});
+			}
+
 			if (response[0]) {
 				TemplateDownloader downloader = getTemplateDownloader(finalItem);
 				IStatus status = downloader.downloadTemplate(monitor);
@@ -245,7 +249,12 @@ public class TemplateUtils {
 	public static ITemplateProjectData importTemplate(Template template, final Shell shell,
 			final IProgressMonitor monitor) throws CoreException, InterruptedException {
 		SubMonitor progress = SubMonitor.convert(monitor, 100);
-		File templateDir = importDirectory(template.getItem(), shell, progress);
+		
+		// Do not prompt for download for Simple Templates, as they are bundled
+		// in the plugin and
+		// do not require download
+		boolean shouldPromptForDownload = !(template instanceof SimpleProject);
+		File templateDir = importDirectory(template.getItem(), shell, shouldPromptForDownload, progress);
 
 		if (templateDir == null) {
 			return null;
