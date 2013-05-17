@@ -26,7 +26,7 @@ public class AnnotationComputerRegistry {
 
 	public static JavaCompletionProposalComputer[] computers = new JavaCompletionProposalComputer[] {
 			new QualifierCompletionProposalComputer(), new RequestMappingParamTypeProposalComputer(),
-			new ConfigurationLocationProposalComputer() };
+			new ConfigurationLocationProposalComputer(), new SimpleClassProposalComputer() };
 
 	public final static String DEFAULT_ATTRIBUTE_NAME = "value";
 

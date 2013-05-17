@@ -2,6 +2,7 @@ package org.springframework.ide.eclipse.quickfix.jdt.proposals;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -15,14 +16,14 @@ public class PackageNameCompletionProposal extends AnnotationCompletionProposal 
 
 	private final Annotation annotation;
 
-	private final StringLiteral oldLiteral;
+	private final ASTNode oldLiteral;
 
-	public PackageNameCompletionProposal(String packageName, Annotation annotation, StringLiteral oldLiteral,
+	public PackageNameCompletionProposal(String packageName, Annotation annotation, ASTNode oldNode,
 			JavaContentAssistInvocationContext javaContext) {
 		super(packageName, javaContext.getCompilationUnit(), QuickfixImages.getImage(QuickfixImages.PACKAGE));
 		this.packageName = packageName;
 		this.annotation = annotation;
-		this.oldLiteral = oldLiteral;
+		this.oldLiteral = oldNode;
 	}
 
 	@Override
