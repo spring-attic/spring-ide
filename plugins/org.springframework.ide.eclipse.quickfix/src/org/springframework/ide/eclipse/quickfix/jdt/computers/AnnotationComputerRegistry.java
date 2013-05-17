@@ -51,6 +51,7 @@ public class AnnotationComputerRegistry {
 		addProposalComputer("ContextConfiguration", "value", new ConfigurationLocationProposalComputer());
 
 		addProposalComputer("ComponentScan", new PackageNameProposalComputer());
+		addProposalComputer("ComponentScan", "basePackages", new PackageNameProposalComputer());
 		addProposalComputerForArrayAttribute("ComponentScan", new PackageNameProposalComputer());
 		addProposalComputerForArrayAttribute("ComponentScan", "basePackages", new PackageNameProposalComputer());
 	}
