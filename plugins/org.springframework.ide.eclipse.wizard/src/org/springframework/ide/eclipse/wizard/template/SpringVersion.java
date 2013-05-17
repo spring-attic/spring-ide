@@ -46,12 +46,14 @@ public class SpringVersion {
 	 */
 	public static List<SpringVersion> getVersions() {
 		List<SpringVersion> versions = new ArrayList<SpringVersion>();
-		// TODO: Hardcoded for now. Externalise, or find a way to read supported
-		// release versions
+		// FIXNS: Hardcoded for now. Externalise, or find a way to read
+		// supported
+		// release versions. Right now only showing the latest releases of each
+		// major release
+		// E.g., for 3.1 -> 3.1.4, for 3.2 -> 3.2.2
 		versions.add(DEFAULT);
 		versions.add(new SpringVersion("3.2.2"));
 		versions.add(new SpringVersion("3.1.4"));
-		versions.add(new SpringVersion("3.1.1"));
 		versions.add(new SpringVersion("3.0.7"));
 		versions.add(new SpringVersion("2.5.6"));
 
