@@ -102,7 +102,7 @@ public abstract class TemplateProjectConfiguration extends ProjectConfiguration 
 
 		try {
 			ProcessingInfo processingInfo = new NewProjectProcessingInfo(template.getZippedLocation(),
-					project.getName());
+					project.getName(), descriptor.getSpringVersion());
 
 			Processor processor = new Processor(processingInfo);
 			IProject processedProject = processor.process(project, newPath, topLevelPackageTokens, projectName,
@@ -130,18 +130,18 @@ public abstract class TemplateProjectConfiguration extends ProjectConfiguration 
 		return project;
 	}
 
-	protected void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKind) {
+	protected void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKinds) {
 		final TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
 		if (descriptor != null) {
 			Map<String, String> desInputKinds = descriptor.getInputKinds();
 			if (desInputKinds != null) {
-				inputKind.putAll(desInputKinds);
+				inputKinds.putAll(desInputKinds);
 			}
 			Map<String, Object> desCollectedInput = descriptor.getCollectedInput();
 			if (desCollectedInput != null) {
 				collectedInput.putAll(desCollectedInput);
 			}
 		}
-
 	}
+
 }

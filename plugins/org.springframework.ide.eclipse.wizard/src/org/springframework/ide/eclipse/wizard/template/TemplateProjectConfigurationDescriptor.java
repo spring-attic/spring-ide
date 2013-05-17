@@ -31,20 +31,23 @@ public class TemplateProjectConfigurationDescriptor implements IProjectConfigura
 
 	private final Map<String, String> inputKinds;
 
+	private final SpringVersion springVersion;
+
 	public TemplateProjectConfigurationDescriptor(String projectName, String[] topLevelPackageTokens,
-			Template template, URI projectLocationURI) {
-		this(projectName, topLevelPackageTokens, template, projectLocationURI, null, null);
+			Template template, URI projectLocationURI, SpringVersion springVersion) {
+		this(projectName, topLevelPackageTokens, template, projectLocationURI, null, null, springVersion);
 	}
 
 	public TemplateProjectConfigurationDescriptor(String projectName, String[] topLevelPackageTokens,
 			Template template, URI projectLocationURI, Map<String, Object> collectedInput,
-			Map<String, String> inputKinds) {
+			Map<String, String> inputKinds, SpringVersion springVersion) {
 		this.template = template;
 		this.topLevelPackageTokens = topLevelPackageTokens;
 		this.projectName = projectName;
 		this.projectLocationURI = projectLocationURI;
 		this.collectedInput = collectedInput;
 		this.inputKinds = inputKinds;
+		this.springVersion = springVersion;
 	}
 
 	public String[] getTopLevelPackageTokens() {
@@ -57,6 +60,10 @@ public class TemplateProjectConfigurationDescriptor implements IProjectConfigura
 
 	public Template getTemplate() {
 		return template;
+	}
+
+	public SpringVersion getSpringVersion() {
+		return springVersion;
 	}
 
 	/**

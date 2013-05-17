@@ -14,6 +14,8 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.ide.eclipse.wizard.template.SpringVersion;
+
 /**
  * Stores user input from template wizard UI elements
  * @author Terry Denney
@@ -31,6 +33,8 @@ public interface ProcessingInfo {
 	Map<String, String> getTemplateReplacementContext();
 
 	URL getTemplateSourceDirectory();
+
+	SpringVersion getSpringVersion();
 
 	void setInputKinds(Map<String, String> inputKinds);
 

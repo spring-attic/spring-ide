@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -14,8 +14,8 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.ide.eclipse.wizard.template.SpringVersion;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.processor.AbstractProcessingInfo;
-
 
 /**
  * @author Terry Denney
@@ -32,9 +32,16 @@ public class NewProjectProcessingInfo extends AbstractProcessingInfo {
 
 	private String projectNameToken;
 
+	private final SpringVersion springVersion;
+
 	public NewProjectProcessingInfo(URL projectSourceLocation, String projectName) {
+		this(projectSourceLocation, projectName, null);
+	}
+
+	public NewProjectProcessingInfo(URL projectSourceLocation, String projectName, SpringVersion springVersion) {
 		this.projectSourceLocation = projectSourceLocation;
 		this.projectName = projectName;
+		this.springVersion = springVersion;
 	}
 
 	@Override
@@ -45,6 +52,10 @@ public class NewProjectProcessingInfo extends AbstractProcessingInfo {
 			exclusionPatterns.add("/**/oracle*.*");
 		}
 		return exclusionPatterns;
+	}
+
+	public SpringVersion getSpringVersion() {
+		return springVersion;
 	}
 
 	public URL getTemplateSourceDirectory() {
