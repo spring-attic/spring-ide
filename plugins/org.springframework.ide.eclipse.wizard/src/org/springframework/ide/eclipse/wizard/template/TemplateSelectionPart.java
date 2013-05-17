@@ -292,7 +292,6 @@ public class TemplateSelectionPart {
 		descriptionLabel = new Label(descriptionComposite, SWT.NONE);
 		descriptionLabel.setText("Description:"); //$NON-NLS-1$
 		descriptionLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		descriptionLabel.setVisible(false);
 
 		descriptionText = new StyledText(descriptionComposite, SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
 		// descriptionText.setAlwaysShowScrollBars(false);
@@ -580,11 +579,9 @@ public class TemplateSelectionPart {
 
 		if (description != null) {
 			descriptionText.setText(description);
-			descriptionLabel.setVisible(true);
 		}
 		else {
 			descriptionText.setText(""); //$NON-NLS-1$
-			descriptionLabel.setVisible(false);
 		}
 		descriptionText.redraw();
 	}

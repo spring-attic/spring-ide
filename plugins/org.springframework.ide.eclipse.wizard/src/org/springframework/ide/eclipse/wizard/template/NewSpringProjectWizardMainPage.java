@@ -72,8 +72,14 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		Control workingSetControl = createWorkingSetControl(mainArea);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+		// Create it to avoid NPEs when the superclass attempts to read/write to
+		// the widget,
+		// but don't add it to the layout as its usually empty and takes up
+		// space
 		Control infoControl = createInfoControl(mainArea);
-		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		data.exclude = true;
+		infoControl.setLayoutData(data);
 
 		setControl(mainArea);
 
