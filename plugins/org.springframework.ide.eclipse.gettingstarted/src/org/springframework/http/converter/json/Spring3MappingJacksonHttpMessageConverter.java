@@ -61,7 +61,10 @@ public class Spring3MappingJacksonHttpMessageConverter extends AbstractHttpMessa
 
 	/** Construct a new {@code BindingJacksonHttpMessageConverter}, */
 	public Spring3MappingJacksonHttpMessageConverter() {
-		super(new MediaType("application", "json", DEFAULT_CHARSET));
+		super(
+				new MediaType("application", "json", DEFAULT_CHARSET),
+				new MediaType("text", "plain", DEFAULT_CHARSET) // download raw github url will give this even if file has json extension.
+		);
 	}
 
 	/**

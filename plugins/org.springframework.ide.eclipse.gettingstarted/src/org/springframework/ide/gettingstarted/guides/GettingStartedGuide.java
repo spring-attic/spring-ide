@@ -10,67 +10,31 @@
  *******************************************************************************/
 package org.springframework.ide.gettingstarted.guides;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
-import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 
 /**
  * Content for a GettingStartedGuide provided via a Github Repo
  * 
  * @author Kris De Volder
  */
-public class GettingStartedGuide extends GithubContent {
+public class GettingStartedGuide extends GithubRepoContent {
 
-	private Repo repo;
-	private DownloadManager downloader;
-
-	public GettingStartedGuide(Repo repo, DownloadManager downloader) {
+	protected Repo repo;
+	
+	public GettingStartedGuide(Repo repo, DownloadManager dl) {
+		super(dl);
 		this.repo = repo;
-		this.downloader = downloader;
-	}
-
-	public String getName() {
-		return repo.getName();
 	}
 	
-	public String getDescription() {
-		return repo.getDescription();
-	}
-	
-	public URL getHomePage() {
-		try {
-			return new URL(repo.getHtmlUrl());
-		} catch (MalformedURLException e) {
-			GettingStartedActivator.log(e);
-			return null;
-		}
-	}
-	
-	/**
-	 * Get a URL pointing to zip file where the entire contents of this
-	 * guide can be downloaded. 
-	 */
-	public DownloadableItem getZip() {
-		String repoUrl = repo.getHtmlUrl(); 
-		//repoUrl is something like "https://github.com/springframework-meta/gs-consuming-rest-android"
-		//zipUrl is something like  "https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip" 
-		try {
-			DownloadableItem item = new DownloadableItem(new URL(repoUrl+"/archive/master.zip"), downloader);
-			item.setFileName(getName());
-			return item;
-		} catch (MalformedURLException e) {
-			GettingStartedActivator.log(e);
-			return null;
-		}
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName()+"("+getName()+")";
 	}
 	
 	public List<CodeSet> getCodeSets() {
@@ -80,24 +44,17 @@ public class GettingStartedGuide extends GithubContent {
 		);
 	}
 	
-	/**
-	 * Defines the location of the 'root' relative to the zip file. The interesting contents
-	 * of the zip file may not be directly at the root of the archive.
-	 * <p>
-	 * Note this method is made public for testing purposes only. Clients shouldn't really
-	 * need to get at this information. Rather they should rely on the 'CodeSets' to
-	 * access this data.
-	 */
-	public IPath getRootPath() {
-		return new Path(getName()+"-master");
-	}
-
 	public CodeSet getInitialCodeSet() {
 		return getCodeSets().get(0);
 	}
 	
 	public CodeSet getCompleteCodeSet() {
 		return getCodeSets().get(1);
+	}
+
+	@Override
+	public Repo getRepo() {
+		return this.repo;
 	}
 	
 }

@@ -20,6 +20,8 @@ import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.AuthenticatedDownloader;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.gettingstarted.guides.ReferenceApp;
+import org.springframework.ide.gettingstarted.guides.ReferenceAppMetaData;
 
 /**
  * Singleton class. The instance of this class provides access to all the
@@ -42,6 +44,7 @@ public class GettingStartedContent extends ContentManager {
 	private GithubClient github = new GithubClient(); 
 	
 	private GettingStartedContent() {
+		//Guides: are discoverable because they are all repos in org on github
 		register(GettingStartedGuide.class, new ContentProvider<GettingStartedGuide>() {
 			@Override
 			public GettingStartedGuide[] fetch(DownloadManager downloader) {
@@ -54,6 +57,30 @@ public class GettingStartedContent extends ContentManager {
 				}
 				return guides.toArray(new GettingStartedGuide[guides.size()]);
 			}
+		});
+		
+		//References apps: are discoverable because we maintain a list of json metadata
+		//that can be downloaded from some external url.
+		register(ReferenceApp.class, new ContentProvider<ReferenceApp>() {
+
+			@Override
+			public ReferenceApp[] fetch(DownloadManager downloader) {
+				ReferenceAppMetaData[] infos = github.get("https://raw.github.com/kdvolder/spring-reference-apps-meta/master/reference-apps.json", ReferenceAppMetaData[].class);
+				ReferenceApp[] apps = new ReferenceApp[infos.length];
+				for (int i = 0; i < apps.length; i++) {
+					//TODO: it could be quite costly to create all these since each one
+					// entails a request to obtain info about github repo.
+					// Maybe this is a good reason to put a bit more info in the
+					// json metadata and thereby avoid querying github to fetch it.
+					apps[i] = create(downloader, infos[i]);
+				}
+				return apps;
+			}
+
+			private ReferenceApp create(DownloadManager dl, ReferenceAppMetaData md) {
+				return new ReferenceApp(md, dl, github);
+			}
+			
 		});
 	}
 	
@@ -75,6 +102,10 @@ public class GettingStartedContent extends ContentManager {
 	 */
 	public GettingStartedGuide[] getGuides() {
 		return get(GettingStartedGuide.class);
+	}
+
+	public ReferenceApp[] getReferenceApps() {
+		return get(ReferenceApp.class);
 	}
 	
 	

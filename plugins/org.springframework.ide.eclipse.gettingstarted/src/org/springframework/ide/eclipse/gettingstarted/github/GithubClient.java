@@ -13,32 +13,22 @@ package org.springframework.ide.eclipse.gettingstarted.github;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.Spring3MappingJacksonHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.BasicAuthCredentials;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.Credentials;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.NullCredentials;
 import org.springframework.ide.eclipse.gettingstarted.util.IOUtil;
 import org.springframework.web.client.RestTemplate;
-
-import org.springframework.core.NestedRuntimeException;
 
 /**
  * A GithubClient instance needs to configured with some credentials and then it is able to
@@ -69,14 +59,21 @@ public class GithubClient {
 	}
 
 	public static Credentials createDefaultCredentials() {
+		//Try system properties
+		String username = System.getProperty("github.user.name");
+		String password = System.getProperty("github.user.password");
+		if (username!=null && password!=null) {
+			return new BasicAuthCredentials(username, password);
+		}
+		//Try properties file..
 		InputStream stream = GithubClient.class.getResourceAsStream("user.properties");
 		if (stream!=null) {
 			try {
 				Properties props = new Properties();
 				props.load(stream);
-				String username = props.getProperty("name");
-				String passwd = props.getProperty("passwd");
-				return new BasicAuthCredentials(username, passwd);
+				username = props.getProperty("name");
+				password = props.getProperty("passwd");
+				return new BasicAuthCredentials(username, password);
 			} catch (Throwable e) {
 				GettingStartedActivator.log(e);
 			} finally {
@@ -86,18 +83,15 @@ public class GithubClient {
 					//throw new Error(e);
 				}
 			}
-		} else {
-			//Try system properties
-			String username = System.getProperty("github.user.name");
-			String password = System.getProperty("github.user.password");
-			if (username!=null && password!=null) {
-				return new BasicAuthCredentials(username, password);
-			}
 		}
+		//No credentials found. Try proceeding without credentials.
 		return new NullCredentials();
 	}
 	
 	private String addHost(String path) {
+		if (path.startsWith("http")) {
+			return path;
+		}
 		if (!path.startsWith("/")) {
 			path = "/"+path;
 		}
@@ -127,10 +121,17 @@ public class GithubClient {
 	}
 
 	/**
+	 * Fetch info about a repo identified by an owner and a name
+	 */
+	public Repo getRepo(String owner, String repo) {
+		return get("/repos/{owner}/{repo}", Repo.class, owner, repo);
+	}
+	
+	/**
 	 * Helper method to fetch json data from some url (or url template) 
 	 * and parse the data into an object of a given type.
 	 */
-	private <T> T get(String url, Class<T> type, Object... vars) {
+	public <T> T get(String url, Class<T> type, Object... vars) {
 		return client.getForObject(addHost(url), type, vars);
 	}
 

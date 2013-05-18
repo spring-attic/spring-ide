@@ -17,7 +17,7 @@ public class AllSampleTests {
 	
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(AllSampleTests.class.getName());
-		suite.addTestSuite(SampleTests.class);
+		suite.addTestSuite(ReferenceAppsTests.class);
 		suite.addTest(BuildSampleTest.suite());
 		
 		return suite;
