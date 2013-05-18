@@ -36,7 +36,7 @@ public class PackageNameProposalComputer extends AnnotationProposalComputer {
 			String packageName = currPackage.getElementName();
 			if (packageName.startsWith(content) && !foundPackages.contains(packageName)) {
 				proposals.add(new PackageNameCompletionProposal(packageName, annotation, locationInfo
-						.getStringLiteral(), javaContext));
+						.getASTNode(), javaContext));
 				foundPackages.add(packageName);
 			}
 		}

@@ -1,11 +1,17 @@
 package org.springframework.ide.eclipse.quickfix.jdt.proposals;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.springframework.ide.eclipse.quickfix.QuickfixImages;
 
@@ -16,18 +22,21 @@ import org.springframework.ide.eclipse.quickfix.QuickfixImages;
  */
 public class ClassCompletionProposal extends AnnotationCompletionProposal {
 
-	private final String classValue;
+	private final String className;
 
 	private final Annotation annotation;
 
-	private final StringLiteral oldLiteral;
+	private final ASTNode oldASTnode;
 
-	public ClassCompletionProposal(String className, Annotation annotation, StringLiteral oldLiteral,
-			JavaContentAssistInvocationContext javaContext) {
+	private final IPackageFragment packageFragment;
+
+	public ClassCompletionProposal(String className, Annotation annotation, ASTNode oldASTNode,
+			IPackageFragment packageFragment, JavaContentAssistInvocationContext javaContext) {
 		super(className + ".class", javaContext.getCompilationUnit(), QuickfixImages.getImage(QuickfixImages.CLASS));
-		this.classValue = className + ".class";
+		this.className = className;
 		this.annotation = annotation;
-		this.oldLiteral = oldLiteral;
+		this.oldASTnode = oldASTNode;
+		this.packageFragment = packageFragment;
 	}
 
 	@Override
@@ -35,13 +44,29 @@ public class ClassCompletionProposal extends AnnotationCompletionProposal {
 		AST ast = annotation.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
 
-		StringLiteral newValue = ast.newStringLiteral();
-		newValue.setLiteralValue(classValue);
-		ITrackedNodePosition newValuePosition = rewrite.track(newValue);
+		SimpleName typeName = ast.newSimpleName(className);
+		SimpleType type = ast.newSimpleType(typeName);
+		TypeLiteral typeLiteral = ast.newTypeLiteral();
+		typeLiteral.setType(type);
+		final ITrackedNodePosition newValuePosition = rewrite.track(typeLiteral);
 
-		rewrite.replace(oldLiteral, newValue, null);
-		setTrackPosition(new StringLiteralTrackedPosition(newValuePosition, newValuePosition.getStartPosition() + 1
-				+ classValue.length(), 0, true));
+		rewrite.replace(oldASTnode, typeLiteral, null);
+
+		if (packageFragment != null) {
+			ImportRewrite importRewrite = createImportRewrite(ASTResolving.findParentCompilationUnit(oldASTnode));
+			importRewrite.addImport(packageFragment.getElementName() + "." + className);
+		}
+
+		setTrackPosition(new ITrackedNodePosition() {
+
+			public int getStartPosition() {
+				return newValuePosition.getStartPosition() + newValuePosition.getLength();
+			}
+
+			public int getLength() {
+				return 0;
+			}
+		});
 
 		return rewrite;
 	}

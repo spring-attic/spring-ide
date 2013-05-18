@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
-import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 /**
  * @author Terry Denney
@@ -25,18 +25,18 @@ public class LocationInformation {
 
 	private final boolean quoted;
 
-	private final StringLiteral stringLiteral;
+	private final ASTNode astNode;
 
-	public LocationInformation(int offset, int length, String filter, StringLiteral stringLiteral) {
-		this(offset, length, filter, false, stringLiteral);
+	public LocationInformation(int offset, int length, String filter, ASTNode astNode) {
+		this(offset, length, filter, false, astNode);
 	}
 
-	public LocationInformation(int offset, int length, String filter, boolean quoted, StringLiteral stringLiteral) {
+	public LocationInformation(int offset, int length, String filter, boolean quoted, ASTNode astNode) {
 		this.offset = offset;
 		this.length = length;
 		this.filter = filter;
 		this.quoted = quoted;
-		this.stringLiteral = stringLiteral;
+		this.astNode = astNode;
 	}
 
 	public String getFilter() {
@@ -55,8 +55,8 @@ public class LocationInformation {
 		return length;
 	}
 
-	public StringLiteral getStringLiteral() {
-		return stringLiteral;
+	public ASTNode getASTNode() {
+		return astNode;
 	}
 
 	public boolean isQuoted() {

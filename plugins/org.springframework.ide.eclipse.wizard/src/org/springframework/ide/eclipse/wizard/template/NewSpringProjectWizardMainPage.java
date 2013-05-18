@@ -53,31 +53,32 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		mainArea = new Composite(parent, SWT.NULL);
 		mainArea.setFont(parent.getFont());
 		mainArea.setLayout(initGridLayout(new GridLayout(1, false), true));
-		mainArea.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(mainArea);
 
 		// create UI elements
 		Control nameControl = createNameControl(mainArea);
-		nameControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(nameControl);
 
 		Control locationControl = createLocationControl(mainArea);
-		locationControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(locationControl);
 
 		Control springControl = createSpringSelectionControl(mainArea);
-		springControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(springControl);
 
 		part = new TemplateSelectionPart((NewSpringProjectWizard) getWizard(), this);
 		Control control = part.createControl(mainArea);
-		control.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(control);
 
 		Control workingSetControl = createWorkingSetControl(mainArea);
-		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(workingSetControl);
 
 		// Create it to avoid NPEs when the superclass attempts to read/write to
 		// the widget,
 		// but don't add it to the layout as its usually empty and takes up
 		// space
 		Control infoControl = createInfoControl(mainArea);
-		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(infoControl);
+		GridData data = (GridData) infoControl.getLayoutData();
 		data.exclude = true;
 		infoControl.setLayoutData(data);
 
