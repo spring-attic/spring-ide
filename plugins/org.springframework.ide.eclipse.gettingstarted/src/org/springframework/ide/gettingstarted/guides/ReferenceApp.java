@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.gettingstarted.guides;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
@@ -18,6 +22,23 @@ import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 
 public class ReferenceApp extends GithubRepoContent {
 
+	/**
+	 * We expect a readme file of sorts, at the root of the 
+	 * project, but the name may vary.
+	 */
+	public static final String[] readmes = { 
+		"README.md",
+		"readme.md",
+		"readme.MD",
+		"README.MD",
+		"readme.txt",
+		"readme.TXT",
+		"README.txt",
+		"README.TXT",
+		"readme",
+		"README"
+	};
+	
 	/**
 	 * Optional additional metadata (if list of content was fetched from a random
 	 * url, it may contain supplementary data. E.g. a name or description that
@@ -35,6 +56,12 @@ public class ReferenceApp extends GithubRepoContent {
 	 * to actually create the repo instance to construct the data.
 	 */
 	private Repo repo;
+	
+	/**
+	 * Lazy intialized reference to the CodeSet with all the content
+	 * of the reference app.
+	 */
+	private CodeSet codeset;
 
 	public ReferenceApp(ReferenceAppMetaData md, DownloadManager dl, GithubClient gh) {
 		super(dl);
@@ -59,6 +86,30 @@ public class ReferenceApp extends GithubRepoContent {
 			this.repo = github.getRepo(metadata.getOwner(), metadata.getRepo());
 		}
 		return this.repo;
+	}
+	
+	public CodeSet getCodeSet() {
+		if (codeset==null) {
+			codeset = CodeSet.fromZip(getName(), getZip(),getRootPath());
+		}
+		return codeset;
+	}
+
+	/**
+	 * @return path to readme file in the codeset. 
+	 */
+	public String getReadme() {
+		CodeSet cs = getCodeSet();
+		for (String name : readmes) {
+			if (cs.hasFile(name)) {
+				return name;
+			}
+		}
+		return null;
+	}
+
+	public List<BuildType> getBuildTypes() {
+		return getCodeSet().getBuildTypes();
 	}
 	
 }

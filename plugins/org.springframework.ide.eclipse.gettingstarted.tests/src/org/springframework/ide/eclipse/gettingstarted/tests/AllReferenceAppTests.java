@@ -13,12 +13,13 @@ package org.springframework.ide.eclipse.gettingstarted.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class AllSampleTests {
+public class AllReferenceAppTests {
 	
 	public static Test suite() throws Exception {
-		TestSuite suite = new TestSuite(AllSampleTests.class.getName());
+		TestSuite suite = new TestSuite(AllReferenceAppTests.class.getName());
 		suite.addTestSuite(ReferenceAppsTests.class);
-		suite.addTest(BuildSampleTest.suite());
+		suite.addTest(ReferenceAppStructureTest.suite());
+		suite.addTest(BuildReferenceAppTest.suite());
 		
 		return suite;
 	}

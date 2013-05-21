@@ -23,7 +23,7 @@ import org.springframework.ide.gettingstarted.guides.ReferenceApp;
  */
 public class ReferenceAppsTests extends TestCase {
 	
-	public static ReferenceApp[] getSamples() {
+	public static ReferenceApp[] getReferenceApps() {
 		return GettingStartedContent.getInstance().getReferenceApps();
 	}
 	
@@ -36,9 +36,7 @@ public class ReferenceAppsTests extends TestCase {
 	 */
 	public void testGetSamples() throws Exception {
 		
-		//TODO: samples should have a short description blurb.
-		
-		ReferenceApp[] samples = getSamples();
+		ReferenceApp[] samples = getReferenceApps();
 		
 		String[] expected = {
 				"spring-mvc-showcase",

@@ -60,7 +60,7 @@ public abstract class GithubRepoContent {
 	 * access this data.
 	 */
 	public IPath getRootPath() {
-		return new Path(getName()+"-master");
+		return new Path(getRepo().getName()+"-master");
 	}
 	
 	public String getDescription() {

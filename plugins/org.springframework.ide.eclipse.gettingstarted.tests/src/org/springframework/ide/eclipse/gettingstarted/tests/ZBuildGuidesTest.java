@@ -18,18 +18,15 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
-import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.*;
 
@@ -84,7 +81,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 			System.out.println();
 			
 			String projectName = guide.getName() + "-" + codeset.getName();
-			IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(importConfig(
+			IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(ImportUtils.importConfig(
 					/*location*/
 					Platform.getLocation().append(projectName),
 					/*name*/
@@ -105,27 +102,6 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 		
 	}
 	
-	private static ImportConfiguration importConfig(final IPath location, final String projectName, final CodeSet codeset) {
-		ImportConfiguration conf = new ImportConfiguration() {
-
-			@Override
-			public LiveExpression<String> getLocationField() {
-				return LiveExpression.constant(location.toString());
-			}
-
-			@Override
-			public LiveExpression<String> getProjectNameField() {
-				return LiveExpression.constant(projectName);
-			}
-
-			@Override
-			public LiveExpression<CodeSet> getCodeSetField() {
-				return LiveExpression.constant(codeset);
-			}
-		};
-		return conf;
-	}
-
 	static boolean zipLooksOk(GettingStartedGuide g) {
 		try {
 			GuidesStructureTest.validateZipStructure(g);
@@ -145,7 +121,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 					for (BuildType bt : buildTypes) {
 						//Don't run tests for things we haven't yet implemented support for.
 						if (bt.getImportStrategy().isSupported()) {
-							ZBuildGuidesTest test = new ZBuildGuidesTest(g, cs, bt);
+							GuidesTestCase test = new ZBuildGuidesTest(g, cs, bt);
 							suite.addTest(test);
 						}
 					}

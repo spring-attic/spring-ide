@@ -22,7 +22,6 @@ import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
  */
 public class GuidesTestCase extends TestCase {
 	
-	
 	/**
 	 * The guide under test
 	 */
