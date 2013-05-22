@@ -51,7 +51,11 @@ public class GettingStartedContent extends ContentManager {
 				Repo[] repos = github.getOrgRepos("springframework-meta");
 				List<GettingStartedGuide> guides = new ArrayList<GettingStartedGuide>();
 				for (Repo repo : repos) {
-					if (repo.getName().startsWith("gs-")) {
+					String name = repo.getName();
+					if (name.startsWith("gs-") && !name.equals("gs-redis-counters")) {
+						//TODO: gs-redis-counters is special. Has no codesets only a readme.md
+						//  can't deal with that right now. What should we do with this? 
+						//  Are there any others like it?
 						guides.add(new GettingStartedGuide(repo, downloader));
 					}
 				}
