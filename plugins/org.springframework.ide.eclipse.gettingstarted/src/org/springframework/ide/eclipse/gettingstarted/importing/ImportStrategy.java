@@ -19,10 +19,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
  */
 public abstract class ImportStrategy {
 
-	public static final ImportStrategy GRADLE = new GradleStrategy();
-	public static final ImportStrategy MAVEN = new MavenStrategy();
-	public static final ImportStrategy ECLIPSE = new NullImportStrategy("Eclipse");
-	
 	public abstract IRunnableWithProgress createOperation(ImportConfiguration conf);
 
 	public boolean isSupported() {

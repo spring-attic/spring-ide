@@ -12,11 +12,19 @@ package org.springframework.ide.eclipse.gettingstarted.content;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportStrategy;
+import org.springframework.ide.eclipse.gettingstarted.importing.NullImportStrategy;
 
 public enum BuildType {
-	GRADLE("build.gradle", ImportStrategy.GRADLE),
-	MAVEN("pom.xml", ImportStrategy.MAVEN);
+	GRADLE("build.gradle", 
+			"org.springframework.ide.eclipse.gettingstarted.importing.GradleStrategy", 
+			"STS Gradle Tooling is not installed"
+	), //Set to null... contributed via extension point.
+	MAVEN("pom.xml", 
+	      "org.springframework.ide.eclipse.gettingstarted.importing.MavenStrategy",
+	      "M2E (Eclipse Maven Tooling) is not installed"
+	);
 //	MAVEN("pom.xml", new NullImportStrategy("Maven"));
 //	ECLIPSE(".project", ImportStrategy.ECLIPSE);
 
@@ -28,11 +36,14 @@ public enum BuildType {
 	 * be imported with the corresponding ImportStrategy.
 	 */
 	private Path buildScriptPath; 
+	private String klass; //Class name for import strategy. May not be able to classload if requisite tooling isn't installed.
+	private String notInstalledMessage; //Message tailored to the particular tooling that is needed for an 
 	private ImportStrategy importStrategy;
 
-	private BuildType(String buildScriptPath, ImportStrategy importStrategy) {
+	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
 		this.buildScriptPath = new Path(buildScriptPath);
-		this.importStrategy = importStrategy;
+		this.klass = importStrategyClass;
+		this.notInstalledMessage = notInstalledMessage;
 	}
 
 	public IPath getBuildScript() {
@@ -40,6 +51,16 @@ public enum BuildType {
 	}
 	
 	public ImportStrategy getImportStrategy() {
-		return importStrategy;
+		if (this.importStrategy==null) {
+			try {
+				this.importStrategy = (ImportStrategy) Class.forName(klass).newInstance();
+			} catch (Throwable e) {
+				//THe most likely cause of this error is that optional dependencies needed to support
+				// this import strategy are not installed.
+				GettingStartedActivator.log(e);
+				this.importStrategy = new NullImportStrategy(name(), notInstalledMessage);
+			}
+		}
+		return this.importStrategy;
 	}
 }

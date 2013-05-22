@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
@@ -22,14 +23,17 @@ import org.springframework.ide.eclipse.maven.MavenCorePlugin;
 
 /**
  * Importer strategy implementation for importing CodeSets into the workspace and set them
- * up to use Gradle Tooling.
- * 
- * TODO: Gradle support should be in a separate 'plugin' that contributes the import strategy
- * as an extension point. So that we can make Gradle support optional.
+ * up to use Maven Tooling.
  * 
  * @author Kris De Volder
  */
 public class MavenStrategy extends ImportStrategy {
+	
+	public MavenStrategy() {
+		//Ensure this strategy can only be instantiated if m2e is installed.
+		//If this fails a default 'NullStrategy' instance will be created instead.
+		Assert.isNotNull(Platform.getBundle("org.eclipse.m2e.core"), "M2E is not installed");
+	}
 	
 	/**
 	 * Implements the import by means of 'NewGradleProjectOperation'
@@ -41,9 +45,9 @@ public class MavenStrategy extends ImportStrategy {
 		private CodeSet codeset;
 
 		public MavenCodeSetImport(ImportConfiguration conf) {
-			this.projectName = conf.getProjectNameField().getValue();
-			this.location = new File(conf.getLocationField().getValue());
-			this.codeset = conf.getCodeSetField().getValue();
+			this.projectName = conf.getProjectName();
+			this.location = new File(conf.getLocation());
+			this.codeset = conf.getCodeSet();
 		}
 
 		@Override

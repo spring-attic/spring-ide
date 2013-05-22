@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.gettingstarted.tests;
 import org.eclipse.core.runtime.IPath;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
-import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 
 /**
  * @author Kris De Volder
@@ -24,18 +23,18 @@ public class ImportUtils {
 		ImportConfiguration conf = new ImportConfiguration() {
 	
 			@Override
-			public LiveExpression<String> getLocationField() {
-				return LiveExpression.constant(location.toString());
+			public String getLocation() {
+				return location.toString();
 			}
 	
 			@Override
-			public LiveExpression<String> getProjectNameField() {
-				return LiveExpression.constant(projectName);
+			public String getProjectName() {
+				return projectName;
 			}
 	
 			@Override
-			public LiveExpression<CodeSet> getCodeSetField() {
-				return LiveExpression.constant(codeset);
+			public CodeSet getCodeSet() {
+				return codeset;
 			}
 		};
 		return conf;

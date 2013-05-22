@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
   <extension
        point="com.springsource.sts.ide.ui.dashboard">
     <part
@@ -11,5 +10,4 @@
           path="com.springsource.sts.ide.ui.dashboard.doc">
     </part>
  </extension>
-
 </plugin>

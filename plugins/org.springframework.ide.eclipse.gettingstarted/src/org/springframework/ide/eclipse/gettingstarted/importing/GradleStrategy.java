@@ -16,7 +16,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.internal.utils.FileUtil;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -38,6 +37,11 @@ import org.springsource.ide.eclipse.gradle.core.wizards.NewGradleProjectOperatio
  * @author Kris De Volder
  */
 public class GradleStrategy extends ImportStrategy {
+	
+	public GradleStrategy() throws ClassNotFoundException {
+		//ensure instantation of this Strategy fails if Gradle tooling is not installed.
+		Class.forName("org.springsource.ide.eclipse.gradle.core.wizards.NewGradleProjectOperation");
+	}
 	
 	private static SampleProject asSample(final String projectName, final CodeSet codeset) {
 		return new SampleProject() {
@@ -74,9 +78,9 @@ public class GradleStrategy extends ImportStrategy {
 			this.op = new NewGradleProjectOperation();
 			
 			//Get the present values from the ImportConfiguration.
-			String location = conf.getLocationField().getValue();
-			final String projectName = conf.getProjectNameField().getValue();
-			final CodeSet codeset = conf.getCodeSetField().getValue();
+			String location = conf.getLocation();
+			final String projectName = conf.getProjectName();
+			final CodeSet codeset = conf.getCodeSet();
 			
 			//Use these values to populate the
 			op.setProjectNameField(constant(projectName));
@@ -110,9 +114,9 @@ public class GradleStrategy extends ImportStrategy {
 		private CodeSet codeset;
 
 		public GradleCodeSetImport2(ImportConfiguration conf) {
-			this.location = conf.getLocationField().getValue();
-			this.projectName = conf.getProjectNameField().getValue();
-			this.codeset = conf.getCodeSetField().getValue();
+			this.location = conf.getLocation();
+			this.projectName = conf.getProjectName();
+			this.codeset = conf.getCodeSet();
 		}
 
 		@Override

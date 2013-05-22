@@ -18,12 +18,9 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 import org.springframework.ide.eclipse.gettingstarted.util.IOUtil;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * A CodeSet represents a bunch of content that can somehow be imported into

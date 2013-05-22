@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.tests;
 
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.assertNoErrors;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.getProject;
+
 import java.util.List;
 
 import junit.framework.Test;
@@ -24,11 +27,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
-
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
-
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.*;
 
 /**
  * An instace of this test verifies that a codesets for a given 
