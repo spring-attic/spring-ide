@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
@@ -46,14 +47,19 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				&& !TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
 	}
 
-	public void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKinds) {
+	public List<TemplateInputCollector> getTemplateInputHandlers() {
+		List<TemplateInputCollector> handlers = new ArrayList<TemplateInputCollector>();
 		IWizardPage page = firstTemplatePage;
 		while (page != null) {
 			if (page instanceof NewTemplateWizardPage) {
-				((NewTemplateWizardPage) page).collectInput(collectedInput, inputKinds);
+				TemplateInputCollector handler = ((NewTemplateWizardPage) page).getInputHandler();
+				if (handler != null) {
+					handlers.add(handler);
+				}
 			}
 			page = page.getNextPage();
 		}
+		return handlers;
 	}
 
 	@Override
@@ -99,7 +105,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 					for (int i = 0; i < info.getPageCount(); i++) {
 
 						templatePage = new NewTemplateWizardPage(info.getPage(i).getDescription(),
-								info.getElementsForPage(i), template.getIcon());
+								new TemplateInputCollector(info.getElementsForPage(i)), template.getIcon());
 						templatePage.setWizard(getWizard());
 
 						// Always set a new first template page, as the template
@@ -182,56 +188,25 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 	@Override
 	public ProjectConfiguration getProjectConfiguration() throws CoreException {
 
-		return new TemplateProjectConfiguration(getWizard().getShell()) {
+		Template template = getWizard().getMainPage().getSelectedTemplate();
 
-			@Override
-			protected void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKinds) {
-				// Override as collecting input is still coupled to reading
-				// directly from UI.
-				TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
-				Template template = descriptor.getTemplate();
+		// For simple projects download the template data,
+		// whether they contribute additional
+		// wizard pages or not, as a user can click "Finish" for
+		// simple projects from the first page, as opposed to other templates
+		// where the
+		// template data gets downloaded when a user clicks "Next"
+		if (template instanceof SimpleProject) {
+			TemplateUtils.downloadTemplateData(template, getWizard().getShell());
+		}
 
-				// Only collect input from pages for non Simple Projects, as
-				// they require UI input for template variables.
-				if (!(template instanceof SimpleProject)) {
-					// This collects input for the template directly from the
-					// wizard pages
-					TemplateWizardSection.this.collectInput(collectedInput, inputKinds);
-				}
-			}
+		final WizardUIInfo uiInfo = getUIInfo(template);
 
-			@Override
-			protected IProjectConfigurationDescriptor getConfigurationDescriptor() {
+		TemplateProjectConfigurationDescriptor descriptor = new TemplateProjectConfigurationDescriptor(getWizard()
+				.getMainPage().getProjectName(), uiInfo.getTopLevelPackageTokens(), template, getWizard().getMainPage()
+				.getProjectLocationURI(), getTemplateInputHandlers(), getWizard().getMainPage().getVersion());
 
-				IProjectConfigurationDescriptor descriptor = super.getConfigurationDescriptor();
-
-				if (descriptor == null) {
-					try {
-						Template template = getWizard().getMainPage().getSelectedTemplate();
-
-						// For simple projects download the template data,
-						// whether they contribute additional
-						// wizard pages or not, as a user can click "Finish" for
-						// simple projects from the first page.
-						if (template instanceof SimpleProject) {
-							TemplateUtils.downloadTemplateData(template, getShell());
-						}
-
-						WizardUIInfo uiInfo = getUIInfo(template);
-
-						descriptor = new TemplateProjectConfigurationDescriptor(getWizard().getMainPage()
-								.getProjectName(), uiInfo.getTopLevelPackageTokens(), template, getWizard()
-								.getMainPage().getProjectLocationURI(), getWizard().getMainPage().getVersion());
-						setConfigurationDescriptor(descriptor);
-					}
-					catch (CoreException e) {
-						TemplateWizardSection.this.handleError(e.getStatus());
-					}
-				}
-				return descriptor;
-			}
-
-		};
+		return new TemplateProjectConfiguration(descriptor, getWizard().getShell());
 	}
 
 }

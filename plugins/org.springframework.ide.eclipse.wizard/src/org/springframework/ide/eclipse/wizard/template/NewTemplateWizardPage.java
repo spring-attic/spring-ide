@@ -10,21 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoElement;
@@ -43,9 +43,7 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 
 	private IWizardPage nextPage;
 
-	private final List<WizardUIInfoElement> elements;
-
-	private final Map<String, Control> controls;
+	private final TemplateInputCollector inputHandler;
 
 	private final String[] errorMessages;
 
@@ -53,13 +51,16 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 
 	private final Set<WizardTextKeyValidator> validators;
 
+	private static final String CONTROL_DATA_KEY = "org.springframework.ide.eclipse.wizard.template.controldatakey";
+
 	private static final String DEFAULT_DESCRIPTION = Messages.getString("TemplateWizardPage.DEFAULT_DESCRIPTION"); //$NON-NLS-1$
 
-	protected NewTemplateWizardPage(String pageTitle, List<WizardUIInfoElement> elements, ImageDescriptor icon) {
+	protected NewTemplateWizardPage(String pageTitle, TemplateInputCollector inputHandler, ImageDescriptor icon) {
 		super("Template Wizard Page"); //$NON-NLS-1$
-		this.elements = elements;
+		this.inputHandler = inputHandler;
 
-		this.controls = new HashMap<String, Control>();
+		List<WizardUIInfoElement> elements = inputHandler.getInfoElements();
+
 		this.errorMessages = new String[elements.size()];
 		this.messages = new String[elements.size()];
 		this.validators = new HashSet<WizardTextKeyValidator>();
@@ -77,25 +78,8 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 		return nextPage != null;
 	}
 
-	public void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKinds) {
-		for (WizardUIInfoElement element : elements) {
-			String elementName = element.getName();
-			Control control = controls.get(elementName);
-			if (control instanceof Button) {
-				collectedInput.put(elementName, ((Button) control).getSelection());
-			}
-			else if (control instanceof Text) {
-				collectedInput.put(elementName, ((Text) control).getText());
-			}
-
-			String replaceKind = element.getReplaceKind();
-			if (replaceKind != null) {
-				inputKinds.put(elementName, replaceKind);
-			}
-			else {
-				inputKinds.put(elementName, WizardUIInfoElement.DEFAULT_KIND);
-			}
-		}
+	public TemplateInputCollector getInputHandler() {
+		return inputHandler;
 	}
 
 	public void createControl(Composite parent) {
@@ -108,6 +92,8 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 		Composite container = new Composite(control, SWT.NONE);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		List<WizardUIInfoElement> elements = inputHandler.getInfoElements();
 
 		for (int i = 0; i < elements.size(); i++) {
 			final WizardUIInfoElement element = elements.get(i);
@@ -133,11 +119,22 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 				label.setText(description);
 				label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-				Button button = new Button(buttonContainer, SWT.CHECK);
+				final Button button = new Button(buttonContainer, SWT.CHECK);
 				button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 				if (i == 0) {
 					button.setFocus();
 				}
+				button.setData(CONTROL_DATA_KEY, element);
+
+				button.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent event) {
+						WizardUIInfoElement element = (WizardUIInfoElement) button.getData(CONTROL_DATA_KEY);
+						if (element != null) {
+							inputHandler.updateInput(element.getName(), button.getSelection());
+						}
+					}
+				});
 
 				if (defaultValue != null && defaultValue.equals("true")) {
 					button.setSelection(true);
@@ -146,7 +143,6 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 					button.setSelection(false);
 				}
 
-				controls.put(element.getName(), button);
 			}
 			else {
 				Label descriptionLabel = new Label(container, SWT.NONE);
@@ -156,14 +152,28 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 				final Text text = new Text(container, SWT.BORDER);
 				text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				text.setEditable(true);
-				controls.put(element.getName(), text);
+
+				text.setData(CONTROL_DATA_KEY, element);
 
 				if (defaultValue != null && defaultValue.length() > 0) {
 					text.setText(defaultValue);
+					inputHandler.updateInput(element.getName(), defaultValue);
 				}
 
-				WizardTextKeyValidator validator = new WizardTextKeyValidator(i, element, text, this);
+				WizardTextKeyValidator validator = new WizardTextKeyValidator(i, element, text, this) {
+
+					@Override
+					public void keyReleased(KeyEvent e) {
+						WizardUIInfoElement element = (WizardUIInfoElement) text.getData(CONTROL_DATA_KEY);
+						if (element != null) {
+							inputHandler.updateInput(element.getName(), text.getText());
+						}
+						super.keyReleased(e);
+					}
+				};
+
 				validator.validate();
+
 				validators.add(validator);
 				text.addKeyListener(validator);
 

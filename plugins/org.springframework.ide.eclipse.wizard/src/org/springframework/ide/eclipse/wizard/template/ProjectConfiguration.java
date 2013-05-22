@@ -26,34 +26,39 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * 
  */
 public abstract class ProjectConfiguration {
-	private IProjectConfigurationDescriptor projectConfigurationDescriptor;
 
-	/**
-	 * 
-	 * @param projectConfigurationDescriptor
-	 */
-	protected ProjectConfiguration(IProjectConfigurationDescriptor projectConfigurationDescriptor) {
-		this.projectConfigurationDescriptor = projectConfigurationDescriptor;
-	}
-
-	protected IProjectConfigurationDescriptor getConfigurationDescriptor() {
-		return projectConfigurationDescriptor;
-	}
-
-	protected void setConfigurationDescriptor(IProjectConfigurationDescriptor descriptor) {
-		this.projectConfigurationDescriptor = descriptor;
-	}
+	private IProject project;
 
 	/**
 	 * Creates a project. This is invoked in the UI thread, in case UI control
-	 * references are needed. Creating a project should be lighter weight than
-	 * configuring a project, which is performed after a project is created.
+	 * references are needed. Creating a project should be lighter weight and
+	 * short running than configuring a project, which is performed after a
+	 * project is created.
 	 * @param monitor
 	 * @return created project, or null if project was not created
 	 * @throws CoreException with any errors that resulted in failure to create
 	 * a project
 	 */
-	public abstract IProject createProject(IProgressMonitor monitor) throws CoreException;
+	public IProject createProject(IProgressMonitor monitor) throws CoreException {
+		project = create(monitor);
+		return project;
+	}
+
+	protected IProject getProject() {
+		return project;
+	}
+
+	/**
+	 * Creates a project. This is invoked in the UI thread, in case UI control
+	 * references are needed. Creating a project should be lighter weight and
+	 * short running than configuring a project, which is performed after a
+	 * project is created.
+	 * @param monitor
+	 * @return created project, or null if project was not created
+	 * @throws CoreException with any errors that resulted in failure to create
+	 * a project
+	 */
+	protected abstract IProject create(IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Configures a project after a project has been created. This is run in a
