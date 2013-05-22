@@ -30,7 +30,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: org.springframework.ide.eclipse.maven,
  org.springframework.ide.eclipse.maven.internal.legacyconversion
-Import-Package: org.apache.maven.artifact,
- org.apache.maven.model,
- org.apache.maven.project,
- org.codehaus.plexus.util.xml
+Import-Package: org.apache.maven.artifact;resolution:=optional,
+ org.apache.maven.model;resolution:=optional,
+ org.apache.maven.project;resolution:=optional,
+ org.codehaus.plexus.util.xml;resolution:=optional
