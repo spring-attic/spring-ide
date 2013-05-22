@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.wizard.template;
 
 import java.util.Set;
 
-public class JavaProjectConfigurationDescriptor implements IProjectConfigurationDescriptor {
+public class JavaProjectConfigurationDescriptor {
 
 	private final Set<String> suffixes;
 

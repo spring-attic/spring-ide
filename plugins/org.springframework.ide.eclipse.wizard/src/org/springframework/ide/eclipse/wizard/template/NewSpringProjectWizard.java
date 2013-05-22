@@ -163,7 +163,11 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 					// as creating projects may need to be run in the UI thread
 					// to access
 					// wizard page widgets
-					// while configuring the project does not.
+					// while configuring the project does not. This is only
+					// required as the wizard
+					// was merged from two prior separate wizards, and the UI
+					// coupling of the project
+					// creation wasn't fully refactored out.
 					IProject project = createProject(configuration);
 
 					configureProject(project, configuration);

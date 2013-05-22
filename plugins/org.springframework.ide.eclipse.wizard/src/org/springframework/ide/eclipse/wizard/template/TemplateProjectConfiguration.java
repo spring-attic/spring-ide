@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.wizard.template;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -38,7 +39,7 @@ import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
  * user clicks "Finish" in the wizard
  * 
  */
-public abstract class TemplateProjectConfiguration extends ProjectConfiguration {
+public class TemplateProjectConfiguration extends ProjectConfiguration {
 
 	private final Shell shell;
 
@@ -46,10 +47,10 @@ public abstract class TemplateProjectConfiguration extends ProjectConfiguration 
 
 	private final Map<String, String> inputKinds;
 
-	private IProject project;
+	private final TemplateProjectConfigurationDescriptor configurationDescriptor;
 
-	public TemplateProjectConfiguration(IProjectConfigurationDescriptor descriptor, Shell shell) {
-		super(descriptor);
+	public TemplateProjectConfiguration(TemplateProjectConfigurationDescriptor configurationDescriptor, Shell shell) {
+		this.configurationDescriptor = configurationDescriptor;
 		this.shell = shell;
 		collectedInput = new HashMap<String, Object>();
 		inputKinds = new HashMap<String, String>();
@@ -80,29 +81,30 @@ public abstract class TemplateProjectConfiguration extends ProjectConfiguration 
 	@Override
 	public void configureProject(IProgressMonitor monitor) throws CoreException {
 
-		final TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
-
-		Template template = null;
-
-		if (descriptor == null) {
-			handleError("No descriptor to configure the project: " + project.getName() + " is available");
-			return;
-		}
-		template = descriptor.getTemplate();
+		Template template = configurationDescriptor.getTemplate();
+		IProject project = getProject();
 
 		if (template == null) {
-			handleError("No project template selected to configure the project: " + project.getName());
+			handleError("No project template selected to configure the project: " + getProject().getName());
 			return;
 		}
 
-		IPath newPath = descriptor.getProjectLocationPath();
+		if (project == null) {
+			handleError("Failed to create a project. No project available to configure.");
+			return;
+		}
 
-		String[] topLevelPackageTokens = descriptor.getTopLevelPackageTokens();
+		// Now collect all the template variable inputs
+		collectInput();
+
+		IPath newPath = configurationDescriptor.getProjectLocationPath();
+
+		String[] topLevelPackageTokens = configurationDescriptor.getTopLevelPackageTokens();
 		String projectName = project.getName();
 
 		try {
-			ProcessingInfo processingInfo = new NewProjectProcessingInfo(template.getZippedLocation(),
-					project.getName(), descriptor.getSpringVersion());
+			ProcessingInfo processingInfo = new NewProjectProcessingInfo(template.getZippedLocation(), getProject()
+					.getName(), configurationDescriptor.getSpringVersion());
 
 			Processor processor = new Processor(processingInfo);
 			IProject processedProject = processor.process(project, newPath, topLevelPackageTokens, projectName,
@@ -118,26 +120,21 @@ public abstract class TemplateProjectConfiguration extends ProjectConfiguration 
 	}
 
 	@Override
-	public IProject createProject(IProgressMonitor monitor) throws CoreException {
-
-		final TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
-
-		collectInput(collectedInput, inputKinds);
-
-		String projectName = descriptor.getProjectName();
-		project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-
-		return project;
+	protected IProject create(IProgressMonitor monitor) throws CoreException {
+		String projectName = configurationDescriptor.getProjectName();
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
 
-	protected void collectInput(Map<String, Object> collectedInput, Map<String, String> inputKinds) {
-		final TemplateProjectConfigurationDescriptor descriptor = (TemplateProjectConfigurationDescriptor) getConfigurationDescriptor();
-		if (descriptor != null) {
-			Map<String, String> desInputKinds = descriptor.getInputKinds();
+	protected void collectInput() {
+		List<TemplateInputCollector> inputHandlers = configurationDescriptor.getInputHandlers();
+
+		for (TemplateInputCollector handler : inputHandlers) {
+			Map<String, String> desInputKinds = handler.getInputKinds();
 			if (desInputKinds != null) {
 				inputKinds.putAll(desInputKinds);
 			}
-			Map<String, Object> desCollectedInput = descriptor.getCollectedInput();
+
+			Map<String, Object> desCollectedInput = handler.getCollectedInput();
 			if (desCollectedInput != null) {
 				collectedInput.putAll(desCollectedInput);
 			}

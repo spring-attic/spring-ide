@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -29,25 +30,35 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * Creates and configures a Java based project.
  * 
  */
-public abstract class JavaProjectConfiguration extends ProjectConfiguration {
+public abstract class JavaProjectConfiguration extends TemplateProjectConfiguration {
 
-	protected IProject project;
+	private final JavaProjectConfigurationDescriptor javaDescriptor;
 
-	public JavaProjectConfiguration(IProjectConfigurationDescriptor descriptor) {
-		super(descriptor);
+	public JavaProjectConfiguration(JavaProjectConfigurationDescriptor javaDescriptor,
+			TemplateProjectConfigurationDescriptor templateDescriptor, Shell shell) {
+		super(templateDescriptor, shell);
+		this.javaDescriptor = javaDescriptor;
 	}
 
 	@Override
 	public void configureProject(IProgressMonitor monitor) throws CoreException {
-		IProjectConfigurationDescriptor descriptor = getConfigurationDescriptor();
-		JavaProjectConfigurationDescriptor javaDescriptor = (descriptor instanceof JavaProjectConfigurationDescriptor) ? (JavaProjectConfigurationDescriptor) descriptor
-				: null;
+		// Configure the template first
+		super.configureProject(monitor);
 
+		// Do additional Java configuration
+		handleJavaConfiguration(monitor);
+	}
+
+	protected void handleJavaConfiguration(IProgressMonitor monitor) throws CoreException {
 		if (javaDescriptor == null) {
 			return;
 		}
 
-		final SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(project,
+		if (getProject() == null) {
+			return;
+		}
+
+		final SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
 				BeansCorePlugin.PLUGIN_ID);
 
 		// get the data from the UI widgets
@@ -62,7 +73,7 @@ public abstract class JavaProjectConfiguration extends ProjectConfiguration {
 
 		// configure the new Spring project
 		monitor.beginTask(NewSpringProjectWizardMessages.NewProject_createNewProject, 1000);
-		configureSpringProject(project, configExtensions, enableImports, new SubProgressMonitor(monitor, 1000));
+		configureSpringProject(getProject(), configExtensions, enableImports, new SubProgressMonitor(monitor, 1000));
 
 		if (useProjectSettings) {
 			prefs.putBoolean(BeansCorePlugin.PROJECT_PROPERTY_ID, useProjectSettings);
@@ -75,10 +86,9 @@ public abstract class JavaProjectConfiguration extends ProjectConfiguration {
 		// add project facet nature to enable corresponding
 		// functionality
 		if (enableProjectFacets) {
-			SpringCoreUtils.addProjectNature(project, FacetedProjectNature.NATURE_ID, monitor);
+			SpringCoreUtils.addProjectNature(getProject(), FacetedProjectNature.NATURE_ID, monitor);
 		}
 		monitor.done();
-
 	}
 
 	/**
