@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.internal.core.AnnotatableInfo;
 import org.eclipse.jdt.internal.core.SourceField;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.core.SourceRefElement;
@@ -67,7 +68,8 @@ public class AnnotationArgumentProposalComputer extends JavaCompletionProposalCo
 
 					// check for type/method/field specific annotation proposal
 					// computers
-					if (element instanceof SourceRefElement) {
+					if (element instanceof SourceRefElement
+							&& ((SourceRefElement) element).getElementInfo() instanceof AnnotatableInfo) {
 						SourceRefElement sourceRefElement = (SourceRefElement) element;
 						IAnnotation[] annotations = sourceRefElement.getAnnotations();
 						for (IAnnotation annotation : annotations) {
