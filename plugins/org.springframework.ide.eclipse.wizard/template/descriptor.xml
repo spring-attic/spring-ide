@@ -2,8 +2,9 @@
 <descriptors>
 	<descriptor
 		id="org.springframework.templates.simple.maven"
-		name="Spring Maven - Simple"
+		name="Simple Maven"
 		kind="template"
+		category="Simple Projects"
 		version="1.0.0"
 		local="false"
 	    requires="[0.0.0,4.0.0)"
@@ -14,8 +15,9 @@
 	</descriptor>
 	<descriptor
 		id="org.springframework.templates.simple.java"
-		name="Spring Java - Simple"
+		name="Simple Java"
 		kind="template"
+		category="Simple Projects"
 		version="1.0.0"
 		requires="[0.0.0,4.0.0)"
 		local="false"

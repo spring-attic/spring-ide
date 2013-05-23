@@ -102,6 +102,8 @@ import org.xml.sax.SAXException;
  */
 public class TemplateSelectionPart {
 
+	public static final String SIMPLE_PROJECTS_CATEGORY = "Simple Projects";
+
 	private Template selectedTemplate;
 
 	private final List<Template> templates;
@@ -203,7 +205,17 @@ public class TemplateSelectionPart {
 				if (e1 instanceof ITemplateElement && e2 instanceof ITemplateElement) {
 					ITemplateElement t1 = (ITemplateElement) e1;
 					ITemplateElement t2 = (ITemplateElement) e2;
-					return t1.getName().compareTo(t2.getName());
+					// Special Case, Simple Projects category is placed above
+					// others
+					if (t1.getName().equals(SIMPLE_PROJECTS_CATEGORY)) {
+						return -1;
+					}
+					else if (t2.getName().equals(SIMPLE_PROJECTS_CATEGORY)) {
+						return 1;
+					}
+					else {
+						return t1.getName().compareTo(t2.getName());
+					}
 				}
 				return super.compare(viewer, e1, e2);
 			}
