@@ -29,8 +29,7 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardU
  * when a user clicks "Finish" and a project is about to be created. The "Next"
  * button is enabled/disabled by a lighter weight calculation that does not
  * require to download the contents of the template to determine if additional
- * pages are present or not. Other metadata related to the template determines
- * if the "Next" button in the wizard should be enabled. See the Template API.
+ * pages are present or not.
  * 
  */
 public class TemplateWizardSection extends SpringProjectWizardSection {
@@ -69,15 +68,19 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 			Template template = getWizard().getMainPage().getSelectedTemplate();
 
+			// First, clear the cached first template page, as to not show the
+			// wrong page
+			firstTemplatePage = null;
+
 			if (template == null) {
-				// no need to inform the wizard that a template was not
+				// no need to log an error that a template was not
 				// selected, template validation occurs in the template
 				// selection part
 				// itself.
 				return null;
 			}
 			else if (template instanceof SimpleProject && !((SimpleProject) template).hasWizardPages()) {
-				// Handle the special case templates with no pages
+				// Handle the special case simple projects with no pages
 				return null;
 			}
 			else {
@@ -94,6 +97,16 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				}
 
 				WizardUIInfo info = getUIInfo(template);
+
+				if (!hasTemplateWizardPages()) {
+					// Update the buttons so that the "Next" button is disabled.
+					// This is done
+					// indirectly by the wizard which calls hasNext().. once
+					// again to determine the button states based on data
+					// already downloaded.
+					getWizard().getContainer().updateButtons();
+					return null;
+				}
 
 				ITemplateWizardPage previousPage = null;
 
@@ -147,14 +160,33 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 		if (canFinish) {
 			Template template = getWizard().getMainPage().getSelectedTemplate();
-			if (!(template instanceof SimpleProject)) {
-				// Non-simple project templates should always have a template
-				// page,
-				// therefore inquire finish state from the template page
-				canFinish = firstTemplatePage != null && firstTemplatePage.isPageComplete();
-			}
 			// For now, any simple template project can complete from the first
 			// wizard page.
+			if (!(template instanceof SimpleProject)) {
+				// Non-simple project templates should already be downloaded by
+				// now, and therefore
+				// either have a template wizard page that can be checked for
+				// completeness or indicate it did not provide pages.
+
+				if (TemplateUtils.hasBeenDownloaded(template)) {
+					WizardUIInfo info = getUIInfo(template);
+
+					if (info == null) {
+						canFinish = false;
+					}
+					else {
+						canFinish = info.getPageCount() == 0 || info.getElementsForPage(0) == null
+								|| info.getElementsForPage(0).isEmpty()
+								|| (firstTemplatePage != null && firstTemplatePage.isPageComplete());
+					}
+
+				}
+				else {
+					canFinish = false;
+				}
+
+			}
+
 		}
 
 		return canFinish;
@@ -166,8 +198,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 		// This check is performed to enable/disable the Next button without
 		// having to download the contents of the template
 		// Only check if there is one more page after the main page. Any
-		// subsequent pages after the second page are
-		// indicated within the implementation of the second page.
+		// subsequent pages after the second page added by the second page.
 		if (currentPage == getWizard().getMainPage()) {
 			Template template = getWizard().getMainPage().getSelectedTemplate();
 			if (template == null) {
@@ -177,12 +208,41 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				return ((SimpleProject) template).hasWizardPages();
 			}
 			else {
-				// Non-simple template projects should always contribute a new
-				// page
-				return true;
+				// Otherwise, determine if the template has been downloaded and
+				// information can be
+				// determined from the wizard ui info.
+				return hasTemplateWizardPages();
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Determines if a non-Simple Project template contributes wizard pages
+	 * based entire on the downloaded wizard UI info. If no data has been
+	 * downloaded yet, and a template is selected, it will assume it does
+	 * contribute pages. This does not handle Simple Projects, which should not
+	 * be contributing wizard pages through the wizard UI info.
+	 */
+	protected boolean hasTemplateWizardPages() {
+		Template template = getWizard().getMainPage().getSelectedTemplate();
+		if (template == null || template instanceof SimpleProject) {
+			return false;
+		}
+		// If it hasn't been download, there is no way to know if the template
+		// contributes pages or not, so
+		// by default assume it does. Later, after its been downloaded, if it
+		// turns out that the template did
+		// not contribute any pages, the wizard buttons will be updated
+		// accordingl.
+		if (TemplateUtils.hasBeenDownloaded(template)) {
+			WizardUIInfo info = getUIInfo(template);
+
+			return info != null && info.getPageCount() > 0 && info.getElementsForPage(0) != null
+					&& !info.getElementsForPage(0).isEmpty();
+		}
+
+		return true;
 	}
 
 	@Override

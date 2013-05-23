@@ -110,6 +110,22 @@ public class TemplateUtils {
 		return projectDir;
 	}
 
+	/**
+	 * Determines if the given template has been downloaded.
+	 * @param template
+	 * @return true if downloaded, false otherwise
+	 */
+	public static boolean hasBeenDownloaded(Template template) {
+		try {
+			return template != null && template.getTemplateLocation() != null;
+		}
+		catch (CoreException e) {
+			// Ignore as retrieving template location will occur at other times
+			// where the error will matter.
+		}
+		return false;
+	}
+
 	private static TemplateDownloader getTemplateDownloader(ContentItem item) {
 		ContentManager manager = ContentPlugin.getDefault().getManager();
 		// Templates for simple projects are located in the bundle
@@ -249,7 +265,7 @@ public class TemplateUtils {
 	public static ITemplateProjectData importTemplate(Template template, final Shell shell,
 			final IProgressMonitor monitor) throws CoreException, InterruptedException {
 		SubMonitor progress = SubMonitor.convert(monitor, 100);
-		
+
 		// Do not prompt for download for Simple Templates, as they are bundled
 		// in the plugin and
 		// do not require download

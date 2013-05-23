@@ -49,6 +49,11 @@ public class WizardUIInfoLoader {
 	}
 
 	/**
+	 * Retrieves the wizard UI info from a template. Note that the template date
+	 * must first be downloaded before attempting to retrieve the wizard UI
+	 * info, otherwise a CoreException is thrown. The download process is meant
+	 * to be separate from the wizard UI info parsing, as they may occur at
+	 * separate stages.
 	 * 
 	 * @param template
 	 * @return non-null Wizard ui info, or throws exception if an error occurred
