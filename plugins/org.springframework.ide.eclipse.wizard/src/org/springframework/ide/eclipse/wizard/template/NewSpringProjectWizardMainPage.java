@@ -53,6 +53,7 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		mainArea = new Composite(parent, SWT.NULL);
 		mainArea.setFont(parent.getFont());
 		mainArea.setLayout(initGridLayout(new GridLayout(1, false), true));
+
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(mainArea);
 
 		// create UI elements
@@ -66,8 +67,7 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(springControl);
 
 		part = new TemplateSelectionPart((NewSpringProjectWizard) getWizard(), this);
-		Control control = part.createControl(mainArea);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(control);
+		part.createControl(mainArea);
 
 		Control workingSetControl = createWorkingSetControl(mainArea);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(workingSetControl);
@@ -112,7 +112,8 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 2;
 		container.setLayout(layout);
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		GridDataFactory.fillDefaults().grab(false, false).applyTo(container);
 
 		final Combo springVersion = createLabeledCombo(container, "Select Spring version:");
 		List<SpringVersion> versions = SpringVersion.getVersions();
@@ -164,8 +165,8 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 	}
 
 	protected GridLayout initGridLayout(GridLayout layout, boolean margins) {
-		layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-		layout.verticalSpacing = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
 		if (margins) {
 			layout.marginWidth = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 			layout.marginHeight = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
