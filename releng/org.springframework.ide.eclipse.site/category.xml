@@ -187,9 +187,7 @@
 		</feature>		
 
 		<category-def name="Core / Spring IDE" label="Core / Spring IDE" />
-		<category-def name="Dependencies / Spring IDE" label="Dependencies / Spring IDE" />
 		<category-def name="Extensions / Spring IDE" label="Extensions / Spring IDE" />
-		<category-def name="Extensions (Incubation) / Spring IDE" label="Extensions (Incubation) / Spring IDE" />
 		<category-def name="Integrations / Spring IDE" label="Integrations / Spring IDE" />
 		<category-def name="Resources / Spring IDE" label="Resources / Spring IDE" />
 		
@@ -197,5 +195,64 @@
 		<bundle id="org.aspectj.runtime.source" version="0.0.0"/>
 		<bundle id="org.aspectj.weaver" version="0.0.0"/>
 <!--		<bundle id="org.eclipse.weaver.source" version="0.0.0"/> -->
+
+		<bundle id="javax.annotation" version="0.0.0"/>
+		<bundle id="javax.annotation.source" version="0.0.0"/>
+		<bundle id="javax.el" version="0.0.0"/>
+		<bundle id="javax.el.source" version="0.0.0"/>
+		<bundle id="javax.inject" version="0.0.0"/>
+		<bundle id="javax.inject.source" version="0.0.0"/>
+		<bundle id="javax.jms" version="0.0.0"/>
+		<bundle id="javax.jms.source" version="0.0.0"/>
+		<bundle id="javax.xml.ws" version="0.0.0"/>
+		<bundle id="javax.xml.bind" version="0.0.0"/>
+		<bundle id="javax.xml.stream" version="0.0.0"/>
+		<bundle id="org.json" version="0.0.0"/>
+		<bundle id="edu.emory.mathcs.backport" version="0.0.0"/>
+		<bundle id="edu.emory.mathcs.backport.source" version="0.0.0"/>
+		<bundle id="org.aopalliance" version="0.0.0"/>
+		<bundle id="org.apache.commons.codec" version="0.0.0"/>
+		<bundle id="org.apache.commons.codec.source" version="0.0.0"/>
+		<bundle id="org.apache.commons.collections" version="0.0.0"/>
+		<bundle id="org.apache.commons.collections.source" version="0.0.0"/>
+		<bundle id="org.apache.commons.io" version="0.0.0"/>
+		<bundle id="org.apache.commons.io.source" version="0.0.0"/>
+		<bundle id="org.apache.commons.logging" version="0.0.0"/>
+		<bundle id="org.apache.commons.logging.source" version="0.0.0"/>
+		<bundle id="org.apache.httpcomponents.httpclient" version="0.0.0"/>
+		<bundle id="org.apache.httpcomponents.httpclient.source" version="0.0.0"/>
+		<bundle id="org.apache.httpcomponents.httpcore" version="0.0.0"/>
+		<bundle id="org.apache.httpcomponents.httpcore.source" version="0.0.0"/>
+
+		<bundle id="org.springframework.aop" version="0.0.0"/>
+		<bundle id="org.springframework.aop.source" version="0.0.0"/>
+		<bundle id="org.springframework.beans" version="0.0.0"/>
+		<bundle id="org.springframework.beans.source" version="0.0.0"/>
+		<bundle id="org.springframework.context" version="0.0.0"/>
+		<bundle id="org.springframework.context.source" version="0.0.0"/>
+		<bundle id="org.springframework.context.support" version="0.0.0"/>
+		<bundle id="org.springframework.context.support.source" version="0.0.0"/>
+		<bundle id="org.springframework.core" version="0.0.0"/>
+		<bundle id="org.springframework.core.source" version="0.0.0"/>
+		<bundle id="org.springframework.data.core" version="0.0.0"/>
+		<bundle id="org.springframework.data.core.source" version="0.0.0"/>
+		<bundle id="org.springframework.expression" version="0.0.0"/>
+		<bundle id="org.springframework.expression.source" version="0.0.0"/>
+		<bundle id="org.springframework.jdbc" version="0.0.0"/>
+		<bundle id="org.springframework.jdbc.source" version="0.0.0"/>
+		<bundle id="org.springframework.jms" version="0.0.0"/>
+		<bundle id="org.springframework.jms.source" version="0.0.0"/>
+		<bundle id="org.springframework.orm" version="0.0.0"/>
+		<bundle id="org.springframework.orm.source" version="0.0.0"/>
+		<bundle id="org.springframework.oxm" version="0.0.0"/>
+		<bundle id="org.springframework.oxm.source" version="0.0.0"/>
+		<bundle id="org.springframework.transaction" version="0.0.0"/>
+		<bundle id="org.springframework.transaction.source" version="0.0.0"/>
+		<bundle id="org.springframework.web" version="0.0.0"/>
+		<bundle id="org.springframework.web.source" version="0.0.0"/>
+		<bundle id="org.springframework.web.servlet" version="0.0.0"/>
+		<bundle id="org.springframework.web.servlet.source" version="0.0.0"/>
+		<bundle id="com.springsource.util.common" version="0.0.0"/>
+		<bundle id="com.springsource.util.common.source" version="0.0.0"/>
 
 </site>
