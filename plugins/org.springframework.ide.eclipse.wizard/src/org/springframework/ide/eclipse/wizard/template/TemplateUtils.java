@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -159,12 +159,19 @@ public class TemplateUtils {
 					}
 				}
 				catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					WizardPlugin
+							.getDefault()
+							.getLog()
+							.log(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, "Failed to copy folder due to: "
+									+ e.getMessage(), e));
 				}
 				catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					WizardPlugin
+							.getDefault()
+							.getLog()
+							.log(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, "I/O error when copying folder: "
+									+ e.getMessage(), e));
+
 				}
 				finally {
 					if (fromStream != null) {
