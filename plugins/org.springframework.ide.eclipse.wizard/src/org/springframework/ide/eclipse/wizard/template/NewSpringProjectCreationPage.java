@@ -26,6 +26,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -96,27 +97,55 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 
 		initializeDialogUnits(parent);
 
-		Composite composite = new Composite(parent, SWT.NULL);
-		composite.setFont(parent.getFont());
-		composite.setLayout(initGridLayout(new GridLayout(), true));
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		setTitle("Spring Configuration");
 
-		createConfigFileGroup(composite);
-		createNamespaceSettingsGroup(composite);
-		createFacetsGroup(composite);
-		setPageComplete(validatePage());
+		Composite mainArea = new Composite(parent, SWT.NULL);
 
-		createJRESection(composite);
+		mainArea.setLayout(initGridLayout(new GridLayout(), true));
+		mainArea.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		Dialog.applyDialogFont(mainArea);
+
+		createConfigFileGroup(mainArea);
+		createNamespaceSettingsGroup(mainArea);
+		createFacetsGroup(mainArea);
+		createJRESection(mainArea);
 
 		// Show description on opening
 		setErrorMessage(null);
 		setMessage(null);
-		setControl(composite);
-		Dialog.applyDialogFont(composite);
 
-		setTitle("Spring Configuration");
+		// Note that child controls may have different fonts, therefore to make
+		// sure all controls have the same
+		// font as the parent, apply to all children.
+		applyParentFont(mainArea);
+
+		setControl(mainArea);
 
 		refreshProjectValues();
+
+		setPageComplete(validatePage());
+	}
+
+	/**
+	 * 
+	 * @param parent whose font should be applied to all of its children.
+	 */
+	protected void applyParentFont(Composite parent) {
+		applyFontToChildren(parent, parent.getFont());
+	}
+
+	protected void applyFontToChildren(Control control, Font font) {
+
+		if (control instanceof Composite) {
+			Control[] children = ((Composite) control).getChildren();
+			if (children != null) {
+				for (Control child : children) {
+					child.setFont(font);
+					applyFontToChildren(child, font);
+				}
+			}
+		}
 	}
 
 	protected void createJRESection(Composite parent) {
@@ -128,6 +157,12 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
+	/**
+	 * Since the Java pages require a project name and location to be set in
+	 * order to properly validate other configuration values, ensure that the
+	 * project name and location from the wizard main page are updated in the
+	 * Java pages.
+	 */
 	protected void refreshProjectValues() {
 		NewSpringProjectWizard wizard = (NewSpringProjectWizard) getWizard();
 		NewSpringProjectWizardMainPage mainPage = wizard.getMainPage();
