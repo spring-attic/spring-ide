@@ -178,9 +178,15 @@ public class TemplateSelectionPart {
 				if (element instanceof Template) {
 					Template template = (Template) element;
 					Image templateImage = WizardImages.getImage(WizardImages.TEMPLATE_ICON);
-					if (template.getItem().isLocal() && !template.getItem().isNewerVersionAvailable()) {
+
+					// Simple Project templates are bundled in the plugin,
+					// therefore do not require download icon, since they are
+					// not downloaded
+					if (template instanceof SimpleProject
+							|| (template.getItem().isLocal() && !template.getItem().isNewerVersionAvailable())) {
 						return templateImage;
 					}
+
 					return WizardImages.getImage(new DecorationOverlayIcon(templateImage, new ImageDescriptor[] {
 							StsUiImages.DOWNLOAD_OVERLAY, null, null, null, null }));
 				}
@@ -248,6 +254,8 @@ public class TemplateSelectionPart {
 		GridDataFactory.fillDefaults().grab(false, false).indent(0, legendControlVerticalIndent).applyTo(legendImage);
 
 		legendImage.setImage(WizardImages.getImage(StsUiImages.DOWNLOAD_OVERLAY));
+		legendImage
+				.setToolTipText("Templates with this icon will be downloaded when navigating to the next page, if the template contributes additional pages, or when completing the wizard.");
 
 		legendText = new Label(legendComposite, SWT.NONE);
 		legendText.setText("requires downloading");
@@ -583,9 +591,9 @@ public class TemplateSelectionPart {
 
 		if (template != null) {
 			description = template.getDescription();
-			if (template.getItem().getRemoteDescriptor() != null) {
+			// Do not show URL for Simple Projects
+			if (!(template instanceof SimpleProject) && template.getItem().getRemoteDescriptor() != null) {
 				description += "\n\nURL:" + template.getItem().getRemoteDescriptor().getUrl();
-
 			}
 		}
 
