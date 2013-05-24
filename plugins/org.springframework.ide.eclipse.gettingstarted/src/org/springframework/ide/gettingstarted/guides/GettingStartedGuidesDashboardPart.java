@@ -13,9 +13,14 @@ package org.springframework.ide.gettingstarted.guides;
 import java.net.URI;
 import java.net.URL;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -31,6 +36,7 @@ import org.eclipse.ui.forms.widgets.ScrolledPageBook;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
+import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springsource.ide.eclipse.dashboard.internal.ui.IdeUiPlugin;
@@ -43,11 +49,13 @@ import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
 public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 
 //	private static final String BROWSER_ID = GettingStartedGuidesDashboardPart.class.getName();
-	
+
 	private static final String SMALL_ARROW_IMAGE = "rss/overlay-incoming.png";
 	
 	private Composite composite;
 	private Composite guidesComposite;
+
+	private RefreshJob refreshJob;
 
 	@Override
 	public Control createPartContent(Composite parent) {
@@ -125,6 +133,7 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 		if (guidesComposite == null) {
 			guidesComposite = toolkit.createComposite(composite, SWT.WRAP);
 			TableWrapLayout layout = new TableWrapLayout();
+			layout.numColumns = 2;
 			guidesComposite.setLayout(layout);
 		}
 		else {
@@ -137,41 +146,12 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 			setMenu(guidesComposite, m);
 		}
 		
+		refreshGuides();
 		
-		//TODO: running this in UI thread may be a bad idea. E.g. slow network connection
-		// may make UI thread hang. Should popuplate contents of guides section with
-		// a background job.
-		GettingStartedGuide[] guides = GettingStartedContent.getInstance().getGuides();
-		for (final GettingStartedGuide guide : guides) {
-			displayGuide(guidesComposite, guide);
-//				Composite slot = toolkit.createComposite(guidesComposite, SWT.WRAP);
-				
-//				TableWrapLayout twl = new TableWrapLayout();
-//				twl.numColumns = 2;
-//				slot.setLayout(twl);
+		refreshUILayout();
+	}
 
-		}
-//
-//
-//					hyperlink.addHyperlinkListener(new HyperlinkAdapter() {
-//						@Override
-//						public void linkActivated(HyperlinkEvent link) {
-//							final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-//							if (link.getHref() instanceof URI) {
-//								URI uri = (URI) link.getHref();
-//								String projectName = link.getLabel();
-//
-//								if (promptForDownload(shell, uri)) {
-//									importSample(projectName, uri, shell);
-//								}
-//							}
-//						}
-//
-//					});
-//				}
-//			}
-//		}
-
+	private void refreshUILayout() {
 		if (composite.getParent() instanceof ScrolledPageBook) {
 			ScrolledPageBook sc = ((ScrolledPageBook) composite.getParent());
 			sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -180,14 +160,67 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 		composite.layout(true, true);
 	}
 
+	/**
+	 * Schedules a job to retrieve getting started content and then once it has the content...
+	 * update the UI with the new content.
+	 */
+	private void refreshGuides() {
+		if (this.refreshJob==null) {
+			this.refreshJob = new RefreshJob();
+		}
+		refreshJob.schedule();
+	}
+	
+	private class RefreshJob extends Job {
+		
+		public RefreshJob() {
+			super("Update Guides");
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			final GettingStartedGuide[] guides = GettingStartedContent.getInstance().getGuides();
+			//Then next bit of work actually needs to run in the UI Thread because it
+			// does widget creation stuff.
+			UIJob uiJob = new UIJob("Display guides") {
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					//TODO: erase prior content if there's any already there.
+					for (final GettingStartedGuide guide : guides) {
+						displayGuide(guidesComposite, guide);
+//							Composite slot = toolkit.createComposite(guidesComposite, SWT.WRAP);
+							
+//							TableWrapLayout twl = new TableWrapLayout();
+//							twl.numColumns = 2;
+//							slot.setLayout(twl);
+
+					}
+//					guidesComposite.layout(true,true);
+					refreshUILayout();
+					return Status.OK_STATUS;
+				}
+			};
+			uiJob.schedule();
+			return Status.OK_STATUS;
+			
+		}
+
+	}
+
+	
+
 	private void displayGuide(Composite composite, final GettingStartedGuide guide) {
 		FormToolkit toolkit = getToolkit();
+		
+		/////////////////
+		// Link
+		
 		String name = guide.getName();
 		final ImageHyperlink link = toolkit.createImageHyperlink(composite, SWT.NONE);
 		link.setText(name);
 		link.setHref(guide.getHomePage());
 		link.setImage(IdeUiPlugin.getImage(SMALL_ARROW_IMAGE));
-		TableWrapData tableWrapData = new TableWrapData(TableWrapData.FILL_GRAB, TableWrapData.MIDDLE);
+		TableWrapData tableWrapData = new TableWrapData(TableWrapData.FILL_GRAB, TableWrapData.TOP);
 		link.setLayoutData(tableWrapData);
 		
 		link.setToolTipText(""+guide.getHomePage());
@@ -196,9 +229,21 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 		if (description==null || "".equals(description.trim())) {
 			description = "<no description>";
 		}
+		
+		////////////////////
+		// import button
+		
+		Button importButton = toolkit.createButton(composite, "Import", SWT.PUSH);
+		TableWrapData importData = new TableWrapData(TableWrapData.RIGHT, TableWrapData.TOP);
+		importButton.setLayoutData(importData);
+		
+		/////////////////
+		//Desecription
+		
 		Label descriptionLabel = toolkit.createLabel(composite, description, SWT.WRAP);
 		//descriptionLabel.setForeground(color);
 		TableWrapData descrData = new TableWrapData(TableWrapData.FILL_GRAB, TableWrapData.MIDDLE);
+		descrData.colspan = 2;
 		descrData.indent = 20;
 		descriptionLabel.setLayoutData(descrData);
 		
