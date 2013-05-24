@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaConfigTes
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectTest;
 import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfigRenameTypeRefactoringParticipantTest;
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
+import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 
 /**
  * Test suite for <code>beans.core</code> plugin.
@@ -61,7 +62,8 @@ import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 	BeansConfigFactoryTest.class,
 	BeansConfigDescriptionWriterTest.class,
 	BeansJavaConfigRenameTypeRefactoringParticipantTest.class,
-	ResourceChangeEventHandlerTest.class
+	ResourceChangeEventHandlerTest.class,
+	TypeHierarchyEngineTest.class
 })
 public class AllBeansCoreTests {
 	// goofy junit4, no class body needed

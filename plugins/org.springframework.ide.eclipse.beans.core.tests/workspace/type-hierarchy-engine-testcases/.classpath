@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/org.springframework.beans_3.1.1.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.context_3.1.1.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.core_3.1.1.RELEASE.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

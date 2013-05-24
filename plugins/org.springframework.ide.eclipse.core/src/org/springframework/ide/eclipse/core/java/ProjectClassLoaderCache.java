@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 Spring IDE Developers
+ * Copyright (c) 2009, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -245,7 +245,7 @@ public class ProjectClassLoaderCache {
 	 * @param useParentClassLoader use the OSGi classloader as parent
 	 * @return a set of {@link URL}s that can be used to construct a {@link URLClassLoader}
 	 */
-	private static List<URL> getClassPathUrls(IProject project, ClassLoader parentClassLoader) {
+	public static List<URL> getClassPathUrls(IProject project, ClassLoader parentClassLoader) {
 
 		// needs to be linked to preserve ordering
 		List<URL> paths = new ArrayList<URL>();
