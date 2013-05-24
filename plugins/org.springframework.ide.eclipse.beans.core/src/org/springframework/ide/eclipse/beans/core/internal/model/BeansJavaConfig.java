@@ -63,6 +63,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigEventListener;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
@@ -150,9 +151,6 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		return isModelPopulated;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public IModelElement[] getElementChildren() {
 		// Lazily initialization of this config
@@ -165,6 +163,11 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		finally {
 			r.unlock();
 		}
+	}
+	
+	@Override
+	public Set<IBeansImport> getImports() {
+		return Collections.emptySet();
 	}
 
 	@Override
