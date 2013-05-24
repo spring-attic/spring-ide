@@ -16,11 +16,11 @@ Require-Bundle: org.eclipse.ui,
  org.codehaus.jackson.core,
  org.codehaus.jackson.mapper,
  org.eclipse.ui.ide,
- org.apache.commons.logging;bundle-version="1.1.1",
  org.springframework.ide.eclipse.maven,
  org.eclipse.core.resources,
  org.apache.commons.io,
- org.springsource.ide.eclipse.gradle.core;resolution:=optional
+ org.springsource.ide.eclipse.gradle.core;resolution:=optional,
+ org.apache.commons.logging
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.gettingstarted.content,
