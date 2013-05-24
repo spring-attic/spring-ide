@@ -108,13 +108,13 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 					case ClassFileConstants.NameAndTypeTag :
 						dis.skip(4);
 						break;
-					case ClassFileConstants.MethodHandleTag :
+					case 15 : // ClassFileConstants.MethodHandleTag
 						dis.skip(3);
 						break;
-					case ClassFileConstants.MethodTypeTag :
+					case 16 : // ClassFileConstants.MethodTypeTag
 						dis.skip(2);
 						break;
-					case ClassFileConstants.InvokeDynamicTag :
+					case 18 : // ClassFileConstants.InvokeDynamicTag
 						dis.skip(4);
 						break;
 				}
