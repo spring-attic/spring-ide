@@ -24,6 +24,8 @@ import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.core.internal.model.SpringModel;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.TypeStructureCache;
+import org.springframework.ide.eclipse.core.java.typehierarchy.BytecodeTypeHierarchyClassReaderFactory;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.ide.eclipse.core.model.ISpringModel;
 
 /**
@@ -79,6 +81,8 @@ public class SpringCore extends Plugin {
 	private ResourceBundle resourceBundle;
 
 	private static TypeStructureCache typeStructureCache;
+	
+	private static TypeHierarchyEngine typeHierarchyEngine;
 
 	/**
 	 * Creates the Spring core plug-in.
@@ -89,6 +93,9 @@ public class SpringCore extends Plugin {
 		plugin = this;
 		model = new SpringModel();
 		typeStructureCache = new TypeStructureCache();
+		typeHierarchyEngine = new TypeHierarchyEngine();
+		typeHierarchyEngine.setClassReaderFactory(new BytecodeTypeHierarchyClassReaderFactory());
+		
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
 		}
@@ -131,6 +138,10 @@ public class SpringCore extends Plugin {
 
 	public static final ITypeStructureCache getTypeStructureCache() {
 		return typeStructureCache;
+	}
+
+	public static final TypeHierarchyEngine getTypeHierarchyEngine() {
+		return typeHierarchyEngine;
 	}
 
 	/**
