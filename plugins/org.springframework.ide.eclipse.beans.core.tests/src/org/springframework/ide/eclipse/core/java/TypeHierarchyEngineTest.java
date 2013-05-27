@@ -178,4 +178,10 @@ public class TypeHierarchyEngineTest {
 		assertEquals("java.lang.Object", engine.getSupertype(type));
 	}
 	
+	@Test
+	public void testAdditionalCase() throws Exception {
+		IType type = javaProject.findType("org.AdditionalCase");
+		assertEquals("java.lang.Object", engine.getSupertype(type));
+	}
+	
 }

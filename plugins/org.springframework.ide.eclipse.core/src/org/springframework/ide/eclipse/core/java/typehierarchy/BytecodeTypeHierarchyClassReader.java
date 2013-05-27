@@ -61,7 +61,7 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 		return null;
 	}
 
-	private TypeHierarchyElement readTypeHierarchy(InputStream stream) {
+	public TypeHierarchyElement readTypeHierarchy(InputStream stream) {
 		try {
 			DataInputStream dis = new DataInputStream(new BufferedInputStream(stream));
 			int magic = dis.readInt(); // magic 0xCAFEBABE
@@ -86,9 +86,11 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 						break;
 					case ClassFileConstants.LongTag :
 						dis.skip(8);
+						i++;
 						break;
 					case ClassFileConstants.DoubleTag :
 						dis.skip(8);
+						i++;
 						break;
 					case ClassFileConstants.ClassTag :
 						constantPoolData[i] = dis.readShort();
