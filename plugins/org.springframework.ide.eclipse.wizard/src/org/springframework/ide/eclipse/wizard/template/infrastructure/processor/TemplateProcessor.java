@@ -106,11 +106,6 @@ public class TemplateProcessor {
 			input = input.replace(token, replacement);
 		}
 
-		// Handle the spring version processing separately
-		if (springProcessor != null && springProcessor.isReplacing(input)) {
-			input = springProcessor.replace(input);
-		}
-
 		if (input.indexOf("my") >= 0) {
 			logger.warn("May have failed to replace token " + input);
 		}

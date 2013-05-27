@@ -22,6 +22,19 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardU
  * require values for a template, this handler collects input values for those
  * variables.
  * 
+ * <p/>
+ * Two components of a template input are:
+ * <p/>
+ * 1. User input, which is a key-value pair , where the key is the original
+ * token that needs to be replaced for when processing templates, and it's
+ * user-defined replacement, as a value.
+ * <p/>
+ * 2. Input kinds. The tokens that need to be replaced can also be assigned an
+ * input kind, which is used to determine if the token requires additional
+ * processing while it is being replaced. For example, top level package tokens
+ * would need the '.' separator replaced with slashes when handling folder name
+ * changes.
+ * 
  */
 public class TemplateInputCollector {
 	private final Map<String, Object> collectedInput;
@@ -65,10 +78,26 @@ public class TemplateInputCollector {
 		return elements;
 	}
 
+	/**
+	 * Inputs are key-value pairs, where the key is the original token that
+	 * needs to be replaced, and the value the user-defined replacement.
+	 * @return
+	 */
 	public Map<String, Object> getCollectedInput() {
 		return collectedInput;
 	}
 
+	/**
+	 * Input kinds are types assigned to tokens values in a file , file name, or
+	 * folder that are to be replaced by user defined tokens . The type of token
+	 * indicates if the token should require additional processing, in
+	 * particular if token is a qualified package name that affects the file
+	 * path segments. For example, if a token "my.company.com" that needs to be
+	 * replaced by a user defined value, would require the '.' separator
+	 * replaced with a slash. Use "token" as the default kind if the token
+	 * should undergo default processing. On the other hand, avoid further
+	 * processing of a token use "fixedToken" as the kind for the token.
+	 */
 	public Map<String, String> getInputKinds() {
 		return inputKinds;
 	}

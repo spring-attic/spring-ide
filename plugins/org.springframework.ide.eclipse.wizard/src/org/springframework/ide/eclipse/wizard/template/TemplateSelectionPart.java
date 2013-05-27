@@ -30,11 +30,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
@@ -389,6 +391,7 @@ public class TemplateSelectionPart {
 	 * preference store (i.e., the content manager indicates dirty)
 	 */
 	protected void downloadDescriptors() {
+
 		try {
 			wizard.getContainer().run(true, true, new DownloadDescriptorJob());
 		}
@@ -407,6 +410,7 @@ public class TemplateSelectionPart {
 			setError("Download of descriptors interrupted. Please try again.", e);
 
 		}
+
 	}
 
 	protected void setSeletectedTemplate(Template template) {
@@ -566,6 +570,47 @@ public class TemplateSelectionPart {
 				return t1.getName().compareTo(t2.getName());
 			}
 		});
+
+		// Also extract the data for the Simple Projects
+		// as they are local in the wizard bundle and
+		// do not require download. Note that if the template
+		// data is already extracted, it still needs to be
+		// added to the template model, as templates can be created
+		// multiple times during the same wizard session.
+		try {
+			wizard.getContainer().run(true, true, new IRunnableWithProgress() {
+
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					for (Template tmpl : templates) {
+						try {
+							if (tmpl instanceof SimpleProject) {
+								tmpl.fetchTemplateData(wizard.getShell(), monitor);
+							}
+						}
+						catch (CoreException e) {
+							setError(
+									"Failed to extract Simple Project template: " + tmpl.getName() + (e.getMessage() != null ? " due to "
+											+ e.getMessage()
+											: ""), e);
+						}
+					}
+				}
+			});
+		}
+		catch (InvocationTargetException e) {
+			MessageDialog.openWarning(wizard.getShell(), "Warning",
+					"Failed to loading Simple Project template contente due to: " + e.getTargetException() != null ? e
+							.getTargetException().getMessage() : e.getMessage());
+		}
+		catch (InterruptedException e) {
+			MessageDialog
+					.openWarning(
+							wizard.getShell(),
+							"Warning",
+							"Failure while loading Simple Project templates due to interrupt exception. Template content may not have been loaded correctly.");
+
+		}
+
 	}
 
 	private void refreshPage() {

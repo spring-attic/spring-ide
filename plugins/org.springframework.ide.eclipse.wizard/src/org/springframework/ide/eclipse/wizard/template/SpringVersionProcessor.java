@@ -10,9 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import org.springframework.ide.eclipse.wizard.template.infrastructure.processor.TemplateProcessor;
+
 /**
  * Processes Spring version that is used during project configuration. Only
  * Supports replacing Spring version in Maven POM.
+ * 
+ * NOTE: This is not used, but leaving it here in case Spring version handling
+ * needs to be changed from its current case where it is handled as any other
+ * template token replacement, and a seperate processor is required for spring
+ * version. The SpringVersionProcessor should be invoked in TemplateProcessor
+ * during token replacement if it is to be used.
+ * @see TemplateProcessor
  * 
  */
 public class SpringVersionProcessor {

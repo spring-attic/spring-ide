@@ -121,20 +121,6 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 			return javaPageTwo;
 		}
 		else if (page == getWizard().getMainPage()) {
-			// Download the Simple Java template if going to the next page
-			// Download the template contents for templates that contribute
-			// additional UI pages, as the
-			// content will determine the UI controls of the additional
-			// pages.
-			try {
-				Template template = getWizard().getMainPage().getSelectedTemplate();
-				TemplateUtils.downloadTemplateData(template, getWizard().getShell());
-			}
-			catch (CoreException ce) {
-				handleError(ce.getStatus());
-				return null;
-			}
-
 			springCreationPage.refreshProjectValues();
 			return springCreationPage;
 		}
@@ -155,17 +141,6 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 			// Handle the template portion
 			Template template = getWizard().getMainPage().getSelectedTemplate();
 
-			// For simple projects download the template data,
-			// whether they contribute additional
-			// wizard pages or not, as a user can click "Finish" for
-			// simple projects from the first page, as opposed to other
-			// templates
-			// where the
-			// template data gets downloaded when a user clicks "Next"
-			if (template instanceof SimpleProject) {
-				TemplateUtils.downloadTemplateData(template, getWizard().getShell());
-			}
-
 			final WizardUIInfo uiInfo = getUIInfo(template);
 
 			// Empty List as there is no input to be entered for Java template.
@@ -183,7 +158,8 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 					springCreationPage.useProjectSettings(), springCreationPage.loadHandlerFromClasspath());
 
 			return new JavaProjectConfiguration(javaDescriptor, templateDescriptor, getWizard().getShell()) {
-				// Commented out for now, to see if creating the Java project through the Java project wizard pages is necessary
+				// Commented out for now, to see if creating the Java project
+				// through the Java project wizard pages is necessary
 				// instead of delegating to the template project creation.
 				// @Override
 				// protected IProject create(IProgressMonitor monitor) throws

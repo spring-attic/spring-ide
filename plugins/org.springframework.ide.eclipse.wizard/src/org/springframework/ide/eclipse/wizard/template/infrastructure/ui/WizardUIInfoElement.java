@@ -17,7 +17,17 @@ package org.springframework.ide.eclipse.wizard.template.infrastructure.ui;
  */
 public class WizardUIInfoElement {
 
+	/**
+	 * Token kind for tokens that may require addition processing, like
+	 * converting '.' to slashes.
+	 */
 	public static final String DEFAULT_KIND = "token";
+
+	/**
+	 * Token kind for tokens that should be replaced as is, and not undergo
+	 * further processing.
+	 */
+	public static final String FIXED_TOKEN_KIND = "fixedtoken";
 
 	public static final String PROJECT_NAME_KIND = "projectName";
 

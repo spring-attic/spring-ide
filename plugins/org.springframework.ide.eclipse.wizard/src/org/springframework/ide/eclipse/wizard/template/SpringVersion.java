@@ -60,6 +60,20 @@ public class SpringVersion {
 		return versions;
 	}
 
+	public static SpringVersion resolveSpringVersion(String springVersion) {
+		if (springVersion == null) {
+			return null;
+		}
+		List<SpringVersion> existingVersions = getVersions();
+		springVersion = springVersion.trim();
+		for (SpringVersion version : existingVersions) {
+			if (version.getVersion().equals(springVersion)) {
+				return version;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

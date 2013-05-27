@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.processor.ProcessingInfo;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.processor.Processor;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoElement;
 import org.springframework.ide.eclipse.wizard.template.newproject.NewProjectProcessingInfo;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
@@ -95,28 +96,38 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 		}
 
 		// Now collect all the template variable inputs
-		collectInput();
+		IStatus status = collectInput();
 
-		IPath newPath = configurationDescriptor.getProjectLocationPath();
+		if (status == null || status.getSeverity() != IStatus.ERROR) {
 
-		String[] topLevelPackageTokens = configurationDescriptor.getTopLevelPackageTokens();
-		String projectName = project.getName();
+			if (status != null && status.getSeverity() == IStatus.WARNING) {
+				WizardPlugin.getDefault().getLog().log(status);
+			}
+			IPath newPath = configurationDescriptor.getProjectLocationPath();
 
-		try {
-			ProcessingInfo processingInfo = new NewProjectProcessingInfo(template.getZippedLocation(), getProject()
-					.getName(), configurationDescriptor.getSpringVersion());
+			String[] topLevelPackageTokens = configurationDescriptor.getTopLevelPackageTokens();
+			String projectName = project.getName();
 
-			Processor processor = new Processor(processingInfo);
-			IProject processedProject = processor.process(project, newPath, topLevelPackageTokens, projectName,
-					collectedInput, inputKinds, shell, monitor);
-			if (processedProject != null) {
-				processedProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-				SpringCoreUtils.buildFullProject(processedProject);
+			try {
+				ProcessingInfo processingInfo = new NewProjectProcessingInfo(template.getZippedLocation(), getProject()
+						.getName(), configurationDescriptor.getSpringVersion());
+
+				Processor processor = new Processor(processingInfo);
+				IProject processedProject = processor.process(project, newPath, topLevelPackageTokens, projectName,
+						collectedInput, inputKinds, shell, monitor);
+				if (processedProject != null) {
+					processedProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+					SpringCoreUtils.buildFullProject(processedProject);
+				}
+			}
+			catch (Exception e) {
+				handleError("Failure while processing template for project: " + projectName, e);
 			}
 		}
-		catch (Exception e) {
-			handleError("Failure while processing template for project: " + projectName, e);
+		else {
+			throw new CoreException(status);
 		}
+
 	}
 
 	@Override
@@ -125,8 +136,19 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
 
-	protected void collectInput() {
+	/**
+	 * Collect user input and input kinds, and return status that indicates
+	 * whether there were clashes or error when collecting input. Note that
+	 * exceptions are not throw as the if there are issues which are just
+	 * warnings, the template processing should still occur with the collected
+	 * input. Error status will halt the template processing
+	 * @return OK status, or warning if template processing should continue, or
+	 * error if template processing should stop
+	 */
+	protected IStatus collectInput() {
 		List<TemplateInputCollector> inputHandlers = configurationDescriptor.getInputHandlers();
+
+		IStatus status = Status.OK_STATUS;
 
 		for (TemplateInputCollector handler : inputHandlers) {
 			Map<String, String> desInputKinds = handler.getInputKinds();
@@ -139,6 +161,34 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 				collectedInput.putAll(desCollectedInput);
 			}
 		}
+
+		// Also handle the Spring version replacement
+		Template template = configurationDescriptor.getTemplate();
+		String templateSpringVersion = template != null && template.getTemplateData() != null
+				&& template.getTemplateData().getDescriptor() != null ? template.getTemplateData().getDescriptor()
+				.getSpringVersion() : null;
+		SpringVersion userDefinedSpringVersion = configurationDescriptor.getSpringVersion();
+		// Check if there is another token that is also using the same value as
+		// the template-defined Spring version.
+		// If so, log a warning that Spring version cannot be replaced as the
+		// token is used by some other token definition
+		if (inputKinds.containsKey(templateSpringVersion)) {
+			status = new Status(
+					IStatus.WARNING,
+					WizardPlugin.PLUGIN_ID,
+					"Unable to replace Spring version: "
+							+ templateSpringVersion
+							+ " with "
+							+ userDefinedSpringVersion
+							+ " as the original Spring version token value is already used by another token definition. Check the token definitions in the template's wizard input definition file.");
+		}
+		else if (templateSpringVersion != null && userDefinedSpringVersion != null) {
+			inputKinds.put(templateSpringVersion, WizardUIInfoElement.FIXED_TOKEN_KIND);
+			collectedInput.put(templateSpringVersion, userDefinedSpringVersion.getVersion());
+		}
+
+		return status;
+
 	}
 
 }

@@ -89,7 +89,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				// content will determine the UI controls of the additional
 				// pages.
 				try {
-					TemplateUtils.downloadTemplateData(template, getWizard().getShell());
+					template.fetchTemplateData(getWizard().getShell(), null);
 				}
 				catch (CoreException ce) {
 					handleError(ce.getStatus());
@@ -234,7 +234,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 		// by default assume it does. Later, after its been downloaded, if it
 		// turns out that the template did
 		// not contribute any pages, the wizard buttons will be updated
-		// accordingl.
+		// accordingly.
 		if (TemplateUtils.hasBeenDownloaded(template)) {
 			WizardUIInfo info = getUIInfo(template);
 
@@ -249,16 +249,6 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 	public ProjectConfiguration getProjectConfiguration() throws CoreException {
 
 		Template template = getWizard().getMainPage().getSelectedTemplate();
-
-		// For simple projects download the template data,
-		// whether they contribute additional
-		// wizard pages or not, as a user can click "Finish" for
-		// simple projects from the first page, as opposed to other templates
-		// where the
-		// template data gets downloaded when a user clicks "Next"
-		if (template instanceof SimpleProject) {
-			TemplateUtils.downloadTemplateData(template, getWizard().getShell());
-		}
 
 		final WizardUIInfo uiInfo = getUIInfo(template);
 

@@ -9,6 +9,7 @@
 		local="false"
 	    requires="[0.0.0,4.0.0)"
 		requiresbundle="org.eclipse.m2e.core"
+		springversion="3.1.1.RELEASE"
 		size="8411"
 		url="file:///template/simple-maven/org.springframework.templates.simple.maven-1.0.0.zip">
 		<description>Creates simple Spring Maven project without a top-level package.</description>

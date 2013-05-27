@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
+import org.springsource.ide.eclipse.commons.content.core.util.Descriptor;
 
 /**
  * Creates a base Spring project based on a Java project creation.
@@ -41,6 +42,8 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 	private Composite mainArea;
 
 	private TemplateSelectionPart part;
+
+	private Combo springVersionCombo;
 
 	public SpringVersion getVersion() {
 		return version;
@@ -84,6 +87,8 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 
 		setControl(mainArea);
 
+		refreshUI();
+
 	}
 
 	@Override
@@ -115,7 +120,10 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 
 		GridDataFactory.fillDefaults().grab(false, false).applyTo(container);
 
-		final Combo springVersion = createLabeledCombo(container, "Select Spring version:");
+		springVersionCombo = createLabeledCombo(
+				container,
+				"Select Spring version:",
+				"Select a Spring version when building the project. Use 'Default' when using the template-defined Spring version. Spring version selection may not be available on all templates.");
 		List<SpringVersion> versions = SpringVersion.getVersions();
 		int length = versions.size();
 		String[] versionValues = new String[length];
@@ -126,11 +134,11 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 			}
 		}
 
-		springVersion.addSelectionListener(new SelectionAdapter() {
+		springVersionCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				// should always parse correctly
-				int selectionIndex = springVersion.getSelectionIndex();
+				int selectionIndex = springVersionCombo.getSelectionIndex();
 				if (selectionIndex != -1) {
 					List<SpringVersion> versions = SpringVersion.getVersions();
 					if (selectionIndex < versions.size()) {
@@ -146,16 +154,21 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 			}
 		});
 
-		springVersion.setItems(versionValues);
-		springVersion.select(0);
+		springVersionCombo.setItems(versionValues);
+		springVersionCombo.select(0);
+
 		return container;
 
 	}
 
-	protected Combo createLabeledCombo(Composite parent, String labelValue) {
+	protected Combo createLabeledCombo(Composite parent, String labelValue, String labelTooltip) {
 		Label label = new Label(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(false, false).align(SWT.FILL, SWT.CENTER).applyTo(label);
 		label.setText(labelValue);
+
+		if (labelTooltip != null) {
+			label.setToolTipText(labelTooltip);
+		}
 
 		final Combo combo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().grab(false, false).applyTo(combo);
@@ -182,6 +195,64 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		// This will trigger validation of all wizard pages
 		getWizard().getContainer().updateButtons();
 
+	}
+
+	protected void refreshUI() {
+		refreshSpringVersion();
+	}
+
+	protected void refreshSpringVersion() {
+		if (springVersionCombo == null || springVersionCombo.isDisposed()) {
+			return;
+		}
+
+		Template template = part != null ? part.getTemplate() : null;
+		int selectionIndex = -1;
+		String descriptorVersion = null;
+
+		if (template != null) {
+			Descriptor descriptor = template.getItem().getLocalDescriptor();
+			if (descriptor == null) {
+				descriptor = template.getItem().getRemoteDescriptor();
+			}
+			if (descriptor != null && descriptor.getSpringVersion() != null) {
+				// if the template has a spring version defined, enable the
+				// spring version widget, as the template spring version can now
+				// be used for string substitution when processing a template.
+				// This allows
+				// a user to select another spring version that should be the
+				// replacement
+				// during the template processing
+				descriptorVersion = descriptor.getSpringVersion();
+
+				SpringVersion resolvedVersion = SpringVersion.resolveSpringVersion(descriptorVersion);
+				if (resolvedVersion != null) {
+
+					String[] comboValues = springVersionCombo.getItems();
+					for (int i = 0; i < comboValues.length; i++) {
+						if (resolvedVersion.getDisplay().equals(comboValues[i])) {
+							selectionIndex = i;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		// Whether the spring version is in the combo list or not, the fact that
+		// there is a spring version in the descriptor should be enouch criteria
+		// to enable
+		// the widget
+		if (descriptorVersion != null) {
+			springVersionCombo.setEnabled(true);
+			if (selectionIndex >= 0) {
+				springVersionCombo.select(selectionIndex);
+			}
+		}
+		else {
+			springVersionCombo.select(0);
+			springVersionCombo.setEnabled(false);
+		}
 	}
 
 	public ProjectWizardDescriptor getDescriptor() {
@@ -220,6 +291,7 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 				update();
 			}
 		}
+		refreshUI();
 	}
 
 	@Override
