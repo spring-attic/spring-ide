@@ -44,6 +44,24 @@ public class TypeHierarchyEngine {
 		this.cache.remove(project);
 	}
 	
+	public String getSupertype(IType type) {
+		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
+		if (ancestor != null && ancestor instanceof IJavaProject) {
+			IProject project = ((IJavaProject)ancestor).getProject();
+			return this.getSupertype(project, type.getFullyQualifiedName());
+		}
+		return null;
+	}
+	
+	public String getSupertype(IProject project, String className) {
+		char[] typeName = className.replace('.', '/').toCharArray();
+		TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+		if (typeElement != null && typeElement.superclassName != null) {
+			return new String(typeElement.superclassName).replace("/", ".");
+		}
+		return null;
+	}
+	
 	public boolean doesExtend(IType type, String className) {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
@@ -143,5 +161,5 @@ public class TypeHierarchyEngine {
 		}
 		return result;
 	}
-	
+
 }

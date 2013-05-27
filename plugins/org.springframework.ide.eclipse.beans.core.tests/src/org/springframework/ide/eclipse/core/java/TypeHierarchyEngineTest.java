@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -61,8 +62,14 @@ public class TypeHierarchyEngineTest {
 	}
 
 	@Test
-	public void testTypeHierarchyExtendsObject() throws Exception {
+	public void testTypeHierarchyClassExtendsObject() throws Exception {
 		IType type = javaProject.findType("org.SimpleClass");
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
+	}
+
+	@Test
+	public void testTypeHierarchyInterfaceExtendsObject() throws Exception {
+		IType type = javaProject.findType("org.SimpleInterface");
 		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 	}
 
@@ -158,6 +165,17 @@ public class TypeHierarchyEngineTest {
 		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 	}
 	
-
+	@Test
+	public void testGetSupertypeOfClass() throws Exception {
+		IType type = javaProject.findType("org.ImplementingInterfaceThroughExtendingTypeFromLibrary");
+		assertEquals("org.springframework.beans.factory.config.AbstractFactoryBean", engine.getSupertype(type));
+		assertEquals("java.lang.Object", engine.getSupertype(project, "org.springframework.beans.factory.config.AbstractFactoryBean"));
+	}
+	
+	@Test
+	public void testGetSupertypeOfInterface() throws Exception {
+		IType type = javaProject.findType("org.SimpleInterface");
+		assertEquals("java.lang.Object", engine.getSupertype(type));
+	}
 	
 }
