@@ -134,4 +134,30 @@ public class TypeHierarchyEngineTest {
 		assertFalse(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean"));
 	}
 	
+	@Test
+	public void testInnerClassImplementingsInterface() throws Exception {
+		IType type = javaProject.findType("org.OuterClassA$InnerClassA");
+		assertTrue(engine.doesImplement(type, "org.SimpleInterface"));
+		assertFalse(engine.doesExtend(type, "org.SimpleClass"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
+	}
+	
+	@Test
+	public void testClassExtendsInnerClass() throws Exception {
+		IType type = javaProject.findType("org.SubclassingInnerClassB");
+		assertFalse(engine.doesImplement(type, "org.OuterClassB$InnerInterfaceB"));
+		assertTrue(engine.doesExtend(type, "org.OuterClassB$InnerClassB"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
+	}
+	
+	@Test
+	public void testClassImplementsInnerInterface() throws Exception {
+		IType type = javaProject.findType("org.ImplementingInnerInterfaceB");
+		assertTrue(engine.doesImplement(type, "org.OuterClassB$InnerInterfaceB"));
+		assertFalse(engine.doesExtend(type, "org.OuterClassB$InnerClassB"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
+	}
+	
+
+	
 }
