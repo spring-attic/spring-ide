@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.BundleTemplateLoader;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateProjectData;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProjectFactory;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateProjectData;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
@@ -123,8 +124,7 @@ public class TemplateUtils {
 	private static TemplateDownloader getTemplateDownloader(ContentItem item) {
 		ContentManager manager = ContentPlugin.getDefault().getManager();
 		// Templates for simple projects are located in the bundle
-		if (item.getId().equals(TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID)
-				|| item.getId().equals(TemplateConstants.SIMPLE_MAVEN_TEMPLATE_ID)) {
+		if (SimpleProjectFactory.isSimpleProject(item)) {
 			return new BundleTemplateLoader(item, WizardPlugin.getDefault().getBundle());
 		}
 		else {

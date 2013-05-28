@@ -10,24 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template.infrastructure;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springframework.ide.eclipse.wizard.template.TemplateUtils;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
 
 /**
@@ -104,91 +93,6 @@ public class Template implements ITemplateElement {
 	 */
 	public ITemplateProjectData getTemplateData() {
 		return data;
-	}
-
-	/**
-	 * Fetches the contents of a template, and set the data in the given
-	 * template. If the data is already local, it will just set it in the
-	 * template. Otherwise it will download the template data. Even if the data
-	 * is already local, if there is a newer version of the template, then a
-	 * download will be performed. Special exceptions like Simple Projects that
-	 * do not require download as they are bundled in the wizard plugin are also
-	 * handled. Regardless of whether template data needs to be downloaded or
-	 * unzipped, any time a new template is created, this method should be
-	 * invoked at least once as to add the latest template data to the template.
-	 * @throws CoreException if failure occurred while either downloading or
-	 * unzipping the template data
-	 */
-	public void fetchTemplateData(Shell shell, IProgressMonitor monitor) throws CoreException {
-
-		final Shell dialogueShell = shell;
-
-		ContentItem selectedItem = getItem();
-		if (!selectedItem.isLocal() && selectedItem.getRemoteDescriptor().getUrl() == null) {
-			String message = NLS.bind("In the descriptor file for ''{0}'', the URL to the project ZIP is missing.",
-					selectedItem.getName());
-			MessageDialog.openError(dialogueShell, NLS.bind("URL missing", null), message);
-			return;
-		}
-
-		// Otherwise fetch the data
-		try {
-			IRunnableWithProgress dataJob = new IRunnableWithProgress() {
-
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-
-					try {
-						monitor.beginTask("Download template " + Template.this.getName(), 100);
-						ITemplateProjectData data;
-						if (Template.this.getItem().isRuntimeDefined()) {
-							data = new RuntimeTemplateProjectData(Template.this.getItem().getRuntimeProject());
-						}
-						else {
-							data = TemplateUtils.importTemplate(Template.this, dialogueShell, new SubProgressMonitor(
-									monitor, 1));
-						}
-						Template.this.setTemplateData(data);
-						if (data == null) {
-							throw new InvocationTargetException(new CoreException(new Status(IStatus.ERROR,
-									WizardPlugin.PLUGIN_ID, NLS.bind(
-											"Template data missing. Please check the template "
-													+ Template.this.getName() + " to verify it has content.", null))));
-						}
-					}
-					catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
-					catch (OperationCanceledException e) {
-						throw new InterruptedException();
-					}
-					finally {
-						monitor.done();
-					}
-				}
-			};
-			if (monitor == null) {
-				// If no monitor is provided, open in a separate dialogue
-				ProgressMonitorDialog dialog = new ProgressMonitorDialog(dialogueShell);
-				dialog.run(true, true, dataJob);
-			}
-			else {
-				dataJob.run(monitor);
-			}
-
-		}
-		catch (InterruptedException e) {
-			// do nothing
-		}
-		catch (InvocationTargetException e) {
-			Throwable target = e.getTargetException();
-			if (target instanceof CoreException) {
-				throw (CoreException) target;
-			}
-			else {
-				throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getMessage(), e));
-			}
-		}
-
 	}
 
 	public URL getTemplateLocation() throws CoreException {

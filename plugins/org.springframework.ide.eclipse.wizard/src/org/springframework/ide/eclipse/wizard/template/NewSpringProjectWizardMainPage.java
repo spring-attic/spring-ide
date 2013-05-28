@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
@@ -259,18 +260,41 @@ public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne 
 		return new ProjectWizardDescriptor(part.getTemplate());
 	}
 
+	protected void handleError(IStatus status) {
+		// Some error messages can be very long which may result in the wizard
+		// expanding. Instead, do the following:
+		// 1. Show full error in a separate dialogue if it is too long
+		// 2. Show shortened error in Wizard
+		// 3. Log the error in Eclipse so that it can be accessed by the user
+		// for bug reports
+		String errorMessage = status.getMessage();
+		if (errorMessage == null) {
+			errorMessage = "Unknown error occurred in template project wizard. Unable to determine the nature of the error.";
+		}
+		if (ErrorUtils.isWithinWizardErrorMaximum(errorMessage)) {
+			setErrorMessage(errorMessage);
+		}
+		else {
+			// No need to pass the error message, as the dialog retrieves the
+			// message from the status
+			ErrorDialog.openError(getShell(), NewSpringProjectWizardMessages.NewProject_errorMessage, null, status);
+		}
+
+	}
+
 	public void setStatus(IStatus status, boolean validateWizardPages) {
 		if (status == null) {
 			setErrorMessage(null);
 			setMessage(null);
 		}
 		else if (status.getSeverity() == IStatus.ERROR) {
-			setErrorMessage(status.getMessage());
+			handleError(status);
 		}
 		else {
 			if (status.isOK()) {
 				setErrorMessage(null);
-				// If the message is OK, set message to null
+				// If the message is "OK", set message to null, so that the "OK"
+				// message doesn't get displayed in the wizard.
 				if (status.getMessage().equals(Status.OK_STATUS.getMessage())) {
 					setMessage(null);
 				}
