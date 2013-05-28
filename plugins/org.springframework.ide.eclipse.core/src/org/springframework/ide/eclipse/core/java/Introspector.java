@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 
 /**
  * Helper methods for examining a Java {@link IType}.
@@ -66,7 +67,12 @@ public final class Introspector {
 	 * @param className the full qualified name of the class we are looking for
 	 */
 	public static boolean doesExtend(IType type, String className) {
-		return hasSuperType(type, className, false);
+		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
+			return SpringCore.getTypeHierarchyEngine().doesExtend(type, className);
+		}
+		else {
+			return hasSuperType(type, className, false);
+		}
 	}
 
 	/**
@@ -75,7 +81,12 @@ public final class Introspector {
 	 * @param interfaceName the full qualified name of the interface we are looking for
 	 */
 	public static boolean doesImplement(IType type, String interfaceName) {
-		return hasSuperType(type, interfaceName, true);
+		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
+			return SpringCore.getTypeHierarchyEngine().doesImplement(type, interfaceName);
+		}
+		else {
+			return hasSuperType(type, interfaceName, true);
+		}
 	}
 
 	/**
@@ -449,9 +460,19 @@ public final class Introspector {
 			if (type.isBinary()) {
 				return type.getJavaProject().findType(name);
 			}
-			String resolvedName = JdtUtils.resolveClassName(name, type);
-			if (resolvedName != null) {
-				return type.getJavaProject().findType(resolvedName);
+			else {
+				if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
+					String supertype = SpringCore.getTypeHierarchyEngine().getSupertype(type);
+					if (supertype != null) {
+						return type.getJavaProject().findType(supertype);
+					}
+				}
+				else {
+					String resolvedName = JdtUtils.resolveClassName(name, type);
+					if (resolvedName != null) {
+						return type.getJavaProject().findType(resolvedName);
+					}
+				}
 			}
 		}
 		return null;

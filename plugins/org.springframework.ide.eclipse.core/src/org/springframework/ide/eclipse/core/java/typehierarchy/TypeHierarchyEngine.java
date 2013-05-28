@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.compiler.CharOperation;
  */
 public class TypeHierarchyEngine {
 	
+	public static final String ENABLE_PROPERTY = "org.springframework.ide.eclipse.core.java.enableTypeHierarchyEngine";
+	
 	private TypeHierarchyClassReaderFactory classReaderFactory;
 	private Map<IProject, TypeHierarchyElementCache> cache;
 	private Map<IProject, TypeHierarchyClassReader> readers;
