@@ -36,8 +36,6 @@ import org.springsource.ide.eclipse.commons.content.core.util.Descriptor;
  */
 public class NewSpringProjectWizardMainPage extends NewJavaProjectWizardPageOne implements IWizardPageStatusHandler {
 
-	// private final BuildType buildType = BuildType.Maven;
-
 	private SpringVersion version;
 
 	private Composite mainArea;
