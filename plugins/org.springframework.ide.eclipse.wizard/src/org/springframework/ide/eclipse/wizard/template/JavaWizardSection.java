@@ -11,15 +11,18 @@
 package org.springframework.ide.eclipse.wizard.template;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
+import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProjectFactory;
 
 /**
  * Contributes the creation of a Java project with Spring configuration to the
@@ -106,7 +109,7 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 	@Override
 	public boolean canProvide(ProjectWizardDescriptor descriptor) {
 		return descriptor != null && descriptor.getTemplate() != null
-				&& TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
+				&& SimpleProjectFactory.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
 	}
 
 	@Override
@@ -138,18 +141,6 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 	public ProjectConfiguration getProjectConfiguration() throws CoreException {
 
 		if (springCreationPage != null) {
-			// Handle the template portion
-			Template template = getWizard().getMainPage().getSelectedTemplate();
-
-			final WizardUIInfo uiInfo = getUIInfo(template);
-
-			// Empty List as there is no input to be entered for Java template.
-			List<TemplateInputCollector> inputHandlers = new ArrayList<TemplateInputCollector>(0);
-
-			TemplateProjectConfigurationDescriptor templateDescriptor = new TemplateProjectConfigurationDescriptor(
-					getWizard().getMainPage().getProjectName(), uiInfo.getTopLevelPackageTokens(), template,
-					getWizard().getMainPage().getProjectLocationURI(), inputHandlers, getWizard().getMainPage()
-							.getVersion());
 
 			JavaProjectConfigurationDescriptor javaDescriptor = new JavaProjectConfigurationDescriptor(
 					springCreationPage.getConfigSuffixes(), springCreationPage.enableImports(),
@@ -157,24 +148,20 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 					springCreationPage.disableNamespaceCaching(), springCreationPage.useHighestXsdVersion(),
 					springCreationPage.useProjectSettings(), springCreationPage.loadHandlerFromClasspath());
 
-			return new JavaProjectConfiguration(javaDescriptor, templateDescriptor, getWizard().getShell()) {
-				// Commented out for now, to see if creating the Java project
-				// through the Java project wizard pages is necessary
-				// instead of delegating to the template project creation.
-				// @Override
-				// protected IProject create(IProgressMonitor monitor) throws
-				// CoreException {
-				//
-				// try {
-				// springCreationPage.performFinish();
-				// javaPageTwo.performFinish(monitor);
-				// }
-				// catch (InterruptedException e) {
-				// throw new CoreException(new Status(IStatus.ERROR,
-				// WizardPlugin.PLUGIN_ID, e.getMessage(), e));
-				// }
-				// return ((IJavaProject) getCreatedElement()).getProject();
-				// }
+			return new JavaProjectConfiguration(javaDescriptor) {
+
+				@Override
+				protected IProject create(IProgressMonitor monitor) throws CoreException {
+
+					try {
+						springCreationPage.performFinish();
+						javaPageTwo.performFinish(monitor);
+					}
+					catch (InterruptedException e) {
+						throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, e.getMessage(), e));
+					}
+					return ((IJavaProject) getCreatedElement()).getProject();
+				}
 			};
 		}
 		else {

@@ -68,7 +68,7 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 			if (magic != 0xCAFEBABE) {
 				throw new IllegalStateException("not bytecode, magic was 0x" + Integer.toString(magic, 16));
 			}
-			dis.skip(4);
+			skip(dis, 4);
 			
 			int constantPoolCount = dis.readShort();
 			Object[] constantPoolData = new Object[constantPoolCount];
@@ -79,50 +79,50 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 						constantPoolData[i] = dis.readUTF();
 						break;
 					case ClassFileConstants.IntegerTag :
-						dis.skip(4);
+						skip(dis, 4);
 						break;
 					case ClassFileConstants.FloatTag :
-						dis.skip(4);
+						skip(dis, 4);
 						break;
 					case ClassFileConstants.LongTag :
-						dis.skip(8);
+						skip(dis, 8);
 						i++;
 						break;
 					case ClassFileConstants.DoubleTag :
-						dis.skip(8);
+						skip(dis, 8);
 						i++;
 						break;
 					case ClassFileConstants.ClassTag :
 						constantPoolData[i] = dis.readShort();
 						break;
 					case ClassFileConstants.StringTag :
-						dis.skip(2);
+						skip(dis, 2);
 						break;
 					case ClassFileConstants.FieldRefTag :
-						dis.skip(4);
+						skip(dis, 4);
 						break;
 					case ClassFileConstants.MethodRefTag :
-						dis.skip(4);
+						skip(dis, 4);
 						break;
 					case ClassFileConstants.InterfaceMethodRefTag :
-						dis.skip(4);
+						skip(dis, 4);
 						break;
 					case ClassFileConstants.NameAndTypeTag :
-						dis.skip(4);
+						skip(dis, 4);
 						break;
 					case 15 : // ClassFileConstants.MethodHandleTag
-						dis.skip(3);
+						skip(dis, 3);
 						break;
 					case 16 : // ClassFileConstants.MethodTypeTag
-						dis.skip(2);
+						skip(dis, 2);
 						break;
 					case 18 : // ClassFileConstants.InvokeDynamicTag
-						dis.skip(4);
+						skip(dis, 4);
 						break;
 				}
 			}
 			
-			dis.skip(2);
+			skip(dis, 2);
 
 			// classname
 			short classNameIndex = dis.readShort();
@@ -155,6 +155,14 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 		}
 		
 		return null;
+	}
+	
+	private void skip(InputStream stream, long n) throws IOException {
+		long bytesToSkip = n;
+		do {
+			long skipped = stream.skip(bytesToSkip);
+			bytesToSkip = bytesToSkip - skipped;
+		} while (bytesToSkip > 0);
 	}
 
 }

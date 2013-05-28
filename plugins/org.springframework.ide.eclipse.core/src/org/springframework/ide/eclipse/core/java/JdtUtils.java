@@ -52,6 +52,7 @@ import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
@@ -117,7 +118,13 @@ public class JdtUtils {
 				// ignore this and fall back to JDT does implement checks
 			}
 		}
-		return doesImplementWithJdt(resource, type, className);
+		
+		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
+			return SpringCore.getTypeHierarchyEngine().doesImplement(type, className) || SpringCore.getTypeHierarchyEngine().doesExtend(type, className);
+		}
+		else {
+			return doesImplementWithJdt(resource, type, className);
+		}
 	}
 
 	public static IType getAjdtType(IProject project, String className) {

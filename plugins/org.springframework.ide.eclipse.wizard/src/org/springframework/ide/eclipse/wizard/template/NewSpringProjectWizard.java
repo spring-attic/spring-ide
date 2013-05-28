@@ -271,8 +271,9 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 	protected void handleError(CoreException coreException) {
 		if (coreException != null) {
 			if (coreException.getStatus().getCode() == IResourceStatus.CASE_VARIANT_EXISTS) {
+				String projectName = project != null ? project.getName() : "";
 				MessageDialog.openError(getShell(), NewSpringProjectWizardMessages.NewProject_errorMessage,
-						NLS.bind(NewSpringProjectWizardMessages.NewProject_caseVariantExistsError, project.getName()));
+						NLS.bind(NewSpringProjectWizardMessages.NewProject_caseVariantExistsError, projectName));
 			}
 			else {
 				// no special message

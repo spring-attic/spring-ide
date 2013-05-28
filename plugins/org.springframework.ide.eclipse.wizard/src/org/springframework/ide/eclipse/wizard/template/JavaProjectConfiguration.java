@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -30,22 +29,16 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * Creates and configures a Java based project.
  * 
  */
-public abstract class JavaProjectConfiguration extends TemplateProjectConfiguration {
+public abstract class JavaProjectConfiguration extends ProjectConfiguration {
 
 	private final JavaProjectConfigurationDescriptor javaDescriptor;
 
-	public JavaProjectConfiguration(JavaProjectConfigurationDescriptor javaDescriptor,
-			TemplateProjectConfigurationDescriptor templateDescriptor, Shell shell) {
-		super(templateDescriptor, shell);
+	public JavaProjectConfiguration(JavaProjectConfigurationDescriptor javaDescriptor) {
 		this.javaDescriptor = javaDescriptor;
 	}
 
 	@Override
 	public void configureProject(IProgressMonitor monitor) throws CoreException {
-		// Configure the template first
-		super.configureProject(monitor);
-
-		// Do additional Java configuration
 		handleJavaConfiguration(monitor);
 	}
 

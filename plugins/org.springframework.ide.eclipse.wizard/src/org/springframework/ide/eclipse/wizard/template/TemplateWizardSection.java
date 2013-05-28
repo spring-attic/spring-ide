@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProjectFactory;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
 
@@ -43,7 +47,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 	@Override
 	public boolean canProvide(ProjectWizardDescriptor descriptor) {
 		return descriptor != null && descriptor.getTemplate() != null
-				&& !TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
+				&& !SimpleProjectFactory.SIMPLE_JAVA_TEMPLATE_ID.equals(descriptor.getTemplate().getItem().getId());
 	}
 
 	public List<TemplateInputCollector> getTemplateInputHandlers() {
@@ -66,7 +70,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 		if (page == getWizard().getMainPage()) {
 
-			Template template = getWizard().getMainPage().getSelectedTemplate();
+			final Template template = getWizard().getMainPage().getSelectedTemplate();
 
 			// First, clear the cached first template page, as to not show the
 			// wrong page
@@ -88,11 +92,30 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				// additional UI pages, as the
 				// content will determine the UI controls of the additional
 				// pages.
-				try {
-					template.fetchTemplateData(getWizard().getShell(), null);
-				}
-				catch (CoreException ce) {
-					handleError(ce.getStatus());
+				final IStatus[] errors = new IStatus[1];
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
+					public void run() {
+
+						try {
+							getWizard().getContainer().run(true, true,
+									new TemplateDataUIJob(template, getWizard().getShell()));
+
+						}
+						catch (InvocationTargetException ce) {
+							String errorMessage = ErrorUtils.getErrorMessage(ce);
+							errors[0] = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, errorMessage, ce);
+						}
+						catch (InterruptedException ie) {
+							errors[0] = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID,
+									"Interrupt exception while downloading data for " + template.getName());
+						}
+
+					}
+				});
+
+				if (errors[0] != null && !errors[0].isOK()) {
+					handleError(errors[0]);
 					return null;
 				}
 
@@ -136,9 +159,9 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 					}
 				}
 				catch (Exception e) {
-					handleError(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID,
-							"Failed to load wizard page for project template for " + template.getName() + " due to "
-									+ e.getMessage(), e));
+					String error = ErrorUtils.getErrorMessage("Failed to load wizard page for project template for "
+							+ template.getName(), e);
+					handleError(new Status(Status.ERROR, WizardPlugin.PLUGIN_ID, error, e));
 				}
 
 				// Regardless of whether wizard pages where successfully

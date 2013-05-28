@@ -30,7 +30,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -72,6 +71,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateElement;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProjectFactory;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateCategory;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage;
@@ -388,29 +388,80 @@ public class TemplateSelectionPart {
 	/**
 	 * Refreshes list of descriptors, and only refreshes the subset of
 	 * descriptors in the preference store if changes have been made in the
-	 * preference store (i.e., the content manager indicates dirty)
+	 * preference store (i.e., the content manager indicates dirty).
 	 */
 	protected void downloadDescriptors() {
+		// Must wrap execute as an async in UI thread to avoid Invalid UI thread
+		// exceptions
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				String error = null;
+				Exception e = null;
+				try {
+					wizard.getContainer().run(true, true, new DownloadDescriptorJob());
+				}
+				catch (InvocationTargetException ie) {
+					e = ie;
+					error = ErrorUtils.getErrorMessage("Failed to download template descriptors", e);
 
-		try {
-			wizard.getContainer().run(true, true, new DownloadDescriptorJob());
-		}
-		catch (InvocationTargetException e) {
-			Throwable t = e.getTargetException();
-			if (t instanceof CoreException) {
-				setError(((CoreException) t).getStatus());
+				}
+				catch (InterruptedException inte) {
+					e = inte;
+					error = "Download of descriptors interrupted";
+				}
+
+				if (error != null && e != null) {
+					final String errorMessage = error;
+					final Exception exception = e;
+					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							setError(errorMessage, exception);
+						}
+					});
+				}
 			}
-			else {
-				setError(
-						"Failed to download descriptors"
-								+ ((t != null && t.getMessage() != null) ? " due to " + t.getMessage() : ""), t);
+
+		});
+
+	}
+
+	protected void downloadSimpleProjectData() {
+		final List<Template> templs = new ArrayList<Template>(templates);
+
+		for (Template tmpl : templs) {
+
+			if (tmpl instanceof SimpleProject) {
+				final Template template = tmpl;
+				final String[] error = new String[1];
+				final Exception[] exception = new Exception[1];
+
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+					public void run() {
+						try {
+							IRunnableWithProgress runnable = new TemplateDataUIJob(template, wizard.getShell());
+							wizard.getContainer().run(true, true, runnable);
+						}
+						catch (InvocationTargetException e) {
+							error[0] = ErrorUtils.getErrorMessage("Failed to load Simple Project template content", e);
+							exception[0] = e;
+						}
+						catch (InterruptedException e) {
+							error[0] = "Failure while loading Simple Project templates due to interrupt exception. Template content may not have been loaded correctly.";
+							exception[0] = e;
+						}
+					}
+
+				});
+				if (error[0] != null && exception[0] != null) {
+
+					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+						public void run() {
+							setError(error[0], exception[0]);
+						}
+					});
+				}
 			}
 		}
-		catch (InterruptedException e) {
-			setError("Download of descriptors interrupted. Please try again.", e);
-
-		}
-
 	}
 
 	protected void setSeletectedTemplate(Template template) {
@@ -445,7 +496,7 @@ public class TemplateSelectionPart {
 
 	protected void setError(String error, Throwable t) {
 		if (statusHandler != null) {
-			statusHandler.setStatus(new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, error, t), false);
+			statusHandler.setStatus(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, error, t), false);
 		}
 	}
 
@@ -470,6 +521,9 @@ public class TemplateSelectionPart {
 		return selectedTemplate != null;
 	}
 
+	/**
+	 * Must be run in the UI thread
+	 */
 	private void initializeTemplates() {
 		templates.clear();
 
@@ -495,19 +549,15 @@ public class TemplateSelectionPart {
 		});
 
 		Set<String> templateIds = new HashSet<String>();
+
 		for (ContentItem item : sortedItems) {
 			String templateId = item.getId();
 			if (!templateIds.contains(templateId)) {
-				Template template = null;
-				// Handle the special cases: Simple Java and Simple Maven, as
-				// they are not true templates.
-				if (TemplateConstants.SIMPLE_JAVA_TEMPLATE_ID.equals(templateId)) {
-					template = new SimpleProject(item, null, true);
-				}
-				else if (TemplateConstants.SIMPLE_MAVEN_TEMPLATE_ID.equals(templateId)) {
-					template = new SimpleProject(item, null, false);
-				}
-				else {
+
+				// Handle templates that are simple project
+				Template template = SimpleProjectFactory.getSimpleProject(item);
+
+				if (template == null) {
 					template = new Template(item, null);
 				}
 
@@ -577,39 +627,8 @@ public class TemplateSelectionPart {
 		// data is already extracted, it still needs to be
 		// added to the template model, as templates can be created
 		// multiple times during the same wizard session.
-		try {
-			wizard.getContainer().run(true, true, new IRunnableWithProgress() {
 
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					for (Template tmpl : templates) {
-						try {
-							if (tmpl instanceof SimpleProject) {
-								tmpl.fetchTemplateData(wizard.getShell(), monitor);
-							}
-						}
-						catch (CoreException e) {
-							setError(
-									"Failed to extract Simple Project template: " + tmpl.getName() + (e.getMessage() != null ? " due to "
-											+ e.getMessage()
-											: ""), e);
-						}
-					}
-				}
-			});
-		}
-		catch (InvocationTargetException e) {
-			MessageDialog.openWarning(wizard.getShell(), "Warning",
-					"Failed to loading Simple Project template contente due to: " + e.getTargetException() != null ? e
-							.getTargetException().getMessage() : e.getMessage());
-		}
-		catch (InterruptedException e) {
-			MessageDialog
-					.openWarning(
-							wizard.getShell(),
-							"Warning",
-							"Failure while loading Simple Project templates due to interrupt exception. Template content may not have been loaded correctly.");
-
-		}
+		downloadSimpleProjectData();
 
 	}
 
