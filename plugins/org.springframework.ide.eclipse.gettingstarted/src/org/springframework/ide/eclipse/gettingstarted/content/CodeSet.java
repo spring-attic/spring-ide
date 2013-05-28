@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 import org.springframework.ide.eclipse.gettingstarted.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 /**
  * A CodeSet represents a bunch of content that can somehow be imported into
@@ -154,6 +156,14 @@ public abstract class CodeSet {
 				return null;
 			}
 		});
+	}
+
+	public ValidationResult validateBuildType(BuildType buildType) {
+		String bs = buildType.getBuildScript().toString();
+		if (!hasFile(bs)) {
+			return ValidationResult.error(buildType.displayName()+" is not supported: there is no '"+bs+"'");
+		}
+		return ValidationResult.OK;
 	}
 	
 }

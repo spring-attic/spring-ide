@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -39,6 +41,7 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
+import org.springframework.ide.gettingstarted.guides.wizard.GuideImportWizard;
 import org.springsource.ide.eclipse.dashboard.internal.ui.IdeUiPlugin;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
 //import org.springframework.ide.eclipse.wizard.WizardPlugin;
@@ -49,6 +52,12 @@ import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
 public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 
 //	private static final String BROWSER_ID = GettingStartedGuidesDashboardPart.class.getName();
+
+	public static final String GUIDE_DESCRIPTION_TEXT = "A guide is a short focussed tutorial "
+			+ "on how to use Spring to accomplish a specific task. " 
+			+ "It has a 'start' code set, a 'complete' code" 
+			+ "set and a readme file explaining how you get from "
+			+ "one to the other.";
 
 	private static final String SMALL_ARROW_IMAGE = "rss/overlay-incoming.png";
 	
@@ -75,11 +84,7 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 
 		section.setClient(pageBook);
 
-		String explanatoryText = NLS.bind("A guide is a short focussed tutorial "
-				+ "on how to use Spring to accomplish a specific task. " 
-				+ "It has a 'start' code set, a 'complete' code" 
-				+ "set and a readme file explaining how you get from "
-				+ "one to the other.",
+		String explanatoryText = NLS.bind(GUIDE_DESCRIPTION_TEXT,
 				null
 		);
 				
@@ -209,7 +214,7 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 
 	
 
-	private void displayGuide(Composite composite, final GettingStartedGuide guide) {
+	private void displayGuide(final Composite composite, final GettingStartedGuide guide) {
 		FormToolkit toolkit = getToolkit();
 		
 		/////////////////
@@ -236,6 +241,12 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 		Button importButton = toolkit.createButton(composite, "Import", SWT.PUSH);
 		TableWrapData importData = new TableWrapData(TableWrapData.RIGHT, TableWrapData.TOP);
 		importButton.setLayoutData(importData);
+		importButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				GuideImportWizard.open(composite.getShell(), guide);
+			}
+		});
 		
 		/////////////////
 		//Desecription

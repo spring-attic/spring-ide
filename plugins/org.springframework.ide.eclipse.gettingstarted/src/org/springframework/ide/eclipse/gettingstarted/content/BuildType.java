@@ -63,4 +63,9 @@ public enum BuildType {
 		}
 		return this.importStrategy;
 	}
+	
+	public String displayName() {
+		String name = name();
+		return name.substring(0,1) + name.substring(1).toLowerCase();
+	}
 }

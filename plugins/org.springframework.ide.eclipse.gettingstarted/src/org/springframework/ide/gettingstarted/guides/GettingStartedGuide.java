@@ -13,10 +13,13 @@ package org.springframework.ide.gettingstarted.guides;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 /**
  * Content for a GettingStartedGuide provided via a Github Repo
@@ -55,6 +58,14 @@ public class GettingStartedGuide extends GithubRepoContent {
 	@Override
 	public Repo getRepo() {
 		return this.repo;
+	}
+
+	/**
+	 * Validates whether a given build type is supported by a project. This only
+	 * consider project content, not whether requisite build tooling is installed.
+	 */
+	public ValidationResult validateBuildType(BuildType bt) {
+		return getInitialCodeSet().validateBuildType(bt);
 	}
 	
 }
