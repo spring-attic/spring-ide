@@ -184,4 +184,11 @@ public class TypeHierarchyEngineTest {
 		assertEquals("java.lang.Object", engine.getSupertype(type));
 	}
 	
+//	@Test
+//	public void testExternalClassFile() throws Exception {
+//		BytecodeTypeHierarchyClassReader reader = new BytecodeTypeHierarchyClassReader(null);
+//		TypeHierarchyElement element = reader.readTypeHierarchy(new FileInputStream("randomclassfile.class"));
+//		assertNotNull(element);
+//	}
+
 }
