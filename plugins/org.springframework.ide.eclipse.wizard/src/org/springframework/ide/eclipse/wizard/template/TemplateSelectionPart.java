@@ -427,41 +427,41 @@ public class TemplateSelectionPart {
 
 	protected void downloadSimpleProjectData() {
 		final List<Template> templs = new ArrayList<Template>(templates);
-		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				for (Template tmpl : templs) {
-					String error = null;
-					Exception exception = null;
 
-					try {
-						if (tmpl instanceof SimpleProject) {
-							IRunnableWithProgress runnable = new TemplateDataUIJob(tmpl, wizard.getShell());
+		for (Template tmpl : templs) {
+
+			if (tmpl instanceof SimpleProject) {
+				final Template template = tmpl;
+				final String[] error = new String[1];
+				final Exception[] exception = new Exception[1];
+
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+					public void run() {
+						try {
+							IRunnableWithProgress runnable = new TemplateDataUIJob(template, wizard.getShell());
 							wizard.getContainer().run(true, true, runnable);
 						}
-					}
-					catch (InvocationTargetException e) {
-						error = ErrorUtils.getErrorMessage("Failed to loading Simple Project template content", e);
-						exception = e;
-					}
-					catch (InterruptedException e) {
-						error = "Failure while loading Simple Project templates due to interrupt exception. Template content may not have been loaded correctly.";
-						exception = e;
+						catch (InvocationTargetException e) {
+							error[0] = ErrorUtils.getErrorMessage("Failed to load Simple Project template content", e);
+							exception[0] = e;
+						}
+						catch (InterruptedException e) {
+							error[0] = "Failure while loading Simple Project templates due to interrupt exception. Template content may not have been loaded correctly.";
+							exception[0] = e;
+						}
 					}
 
-					if (error != null && exception != null) {
-						final String errorMessage = error;
-						final Exception e = exception;
-						PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-							public void run() {
-								setError(errorMessage, e);
-							}
-						});
-					}
+				});
+				if (error[0] != null && exception[0] != null) {
+
+					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+						public void run() {
+							setError(error[0], exception[0]);
+						}
+					});
 				}
 			}
-
-		});
-
+		}
 	}
 
 	protected void setSeletectedTemplate(Template template) {
