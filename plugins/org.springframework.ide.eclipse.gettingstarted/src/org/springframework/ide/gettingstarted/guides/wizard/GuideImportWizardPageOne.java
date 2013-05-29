@@ -34,24 +34,29 @@ public class GuideImportWizardPageOne extends WizardPageWithSections {
 	@Override
 	protected List<WizardPageSection> createSections() {
 		List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
-		sections.add(
-			new ChooseOneSection<GettingStartedGuide>(this, 
-				"Guide", 
-				model.getGuideSelectionModel(),
-				GettingStartedContent.getInstance().getGuides()
-			).setLabelProvider(new LabelProvider() {
-				@Override
-				public String getText(Object element) {
-					if (element instanceof GettingStartedGuide) {
-						GettingStartedGuide gsg = (GettingStartedGuide) element;
-						return gsg.getName();
-					}
-					return super.getText(element);
+		ChooseOneSection<GettingStartedGuide> chooseGuide = new ChooseOneSection<GettingStartedGuide>(this, 
+			"Guide", 
+			model.getGuideSelectionModel(),
+			GettingStartedContent.getInstance().getGuides()
+		).setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof GettingStartedGuide) {
+					GettingStartedGuide gsg = (GettingStartedGuide) element;
+					return gsg.getName();
 				}
-			})
-		);
+				return super.getText(element);
+			}
+		});
+		sections.add(new RowSection(this, new WizardPageSection[] {
+				chooseGuide,
+				new DownloadButtonSection(this, model)
+		}));
 		
+		sections.add(new CodeSetCheckBoxesSection(this, GettingStartedGuide.codesetNames, model.getCodeSetModel()));
 		sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
+		sections.add(new DescriptionSection(this, model.description));
+		
 		return sections;
 	}
 

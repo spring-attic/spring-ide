@@ -1,0 +1,103 @@
+/*******************************************************************************
+ * Copyright (c) 2013 GoPivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.gettingstarted.guides.wizard;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+
+/**
+ * Similar to a 'live variable' but represents a set of values that can be listened
+ * to. At the moment only coarse grained change events are produced. I.e. there
+ * is just one event for "the Set has changed".
+ * <p>
+ * To allow more efficient incemental processing, clients may be interested in 
+ * just knowing about individual elements getting added / removed.
+ * This is not yet supported.
+ */
+public class LiveSet<T> extends LiveExpression<Set<T>> {
+	
+	/**
+	 * To be able to efficiently check that backing collection has changed.
+	 * This assumes the backing collection is owned by the instance and it isn't
+	 * mutated externally.
+	 */
+	private boolean dirty = false;
+
+	public LiveSet() {
+		this(new HashSet<T>());
+	}
+
+	/**
+	 * Instantiate a LiveSet with a specific backing collection. It is assumed that
+	 * the backing collection henceforth is owned by the LiveSet. Clien code should
+	 * not retain references to the backing collection and should only modify the
+	 * collection via liveset operations.
+	 */
+	public LiveSet(Set<T> intialBackingCollection) {
+		this.value = intialBackingCollection;
+	}
+
+	@Override
+	public void refresh() {
+		boolean wasDirty;
+		synchronized (this) {
+			wasDirty = dirty;
+			dirty = false;
+		}
+		//Note... we are being careful here to put the 'changed' call outside synch block.
+		// only keep locks for short time while maniping the collection  / dirty state. 
+		// but notify listeners without holding on to the lock while listeneres are
+		// doing their thing (which could be anything... and lead to deadlocks!)
+		if (wasDirty) {
+			changed();
+		}
+	}
+	
+	@Override
+	protected Set<T> compute() {
+		throw new Error("Shouldn't be reachable because refresh is overridden");
+	}
+
+	public boolean contains(T name) {
+		//TODO: it would be logical if contains actually returned a LiveExp<Boolean>. But we don't need it yet... and implementing this
+		// correctly and efficiently is probably quite tricky.
+		return value.contains(name);
+	}
+
+	public void add(T name) {
+		synchronized (this) {
+			if (value.contains(name)) {
+				//Nothing to do!
+				return;
+			} else {
+				value.add(name);
+				dirty = true;
+			}
+		}
+		//Carefull... this leads to 'change' call, so must have released monitor before calling!
+		refresh();
+	}
+	
+	public void remove(T name) {
+		synchronized (this) {
+			if (!value.contains(name)) {
+				//Nothing to do!
+				return;
+			} else {
+				value.remove(name);
+				dirty = true;
+			}
+		}
+		refresh();
+	}
+}

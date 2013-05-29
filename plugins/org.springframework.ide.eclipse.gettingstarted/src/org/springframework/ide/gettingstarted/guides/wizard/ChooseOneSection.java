@@ -54,7 +54,7 @@ public class ChooseOneSection<T> extends WizardPageSection {
 		if (preselect!=null) {
 			combo.setText(labelProvider.getText(preselect));
 		}
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(combo);
+		GridDataFactory.fillDefaults().applyTo(combo);
 		
 		combo.addModifyListener(new ModifyListener() {
 			@Override

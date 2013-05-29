@@ -56,6 +56,7 @@ public class BuildTypeRadiosSection extends GroupSection {
 			final Button button = new Button(page, SWT.RADIO);
 			button.setText(type.displayName());
 			GridDataFactory.fillDefaults().grab(true, false).applyTo(button);
+			button.setSelection(selection.getValue()==type);
 			button.addSelectionListener(new SelectionListener() {
 				
 				@Override

@@ -20,6 +20,7 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 
 
 /**
@@ -64,16 +65,7 @@ public class DownloadManager {
 	 */
 	@Deprecated
 	public File downloadFile(DownloadableItem item) throws URISyntaxException, FileNotFoundException, CoreException, IOException {
-		URL url = item.getURL();
-		String protocol = url.getProtocol();
-		if ("file".equals(protocol)) {
-			//already local, so don't bother downloading.
-			return new File(url.toURI());
-		}
-		
-		String filename = item.getFileName(); 
-
-		File target = new File(cacheDirectory, filename);
+		File target = getLocalLocation(item);
 		if (target.exists()) {
 			return target;
 		}
@@ -82,9 +74,10 @@ public class DownloadManager {
 			cacheDirectory.mkdirs();
 		}
 
-		File targetPart = new File(cacheDirectory, filename + ".part");
+		File targetPart = new File(target.toString()+".part");
 		FileOutputStream out = new FileOutputStream(targetPart);
 		try {
+			URL url = item.getURL();
 			//System.out.println("Downloading " + url + " to " + target);
 			downloader.fetch(url, out);
 		}
@@ -96,6 +89,20 @@ public class DownloadManager {
 			throw new IOException("Error while renaming " + targetPart + " to " + target);
 		}
 
+		return target;
+	}
+
+	private File getLocalLocation(DownloadableItem item) throws URISyntaxException {
+		URL url = item.getURL();
+		String protocol = url.getProtocol();
+		if ("file".equals(protocol)) {
+			//already local, so don't bother downloading.
+			return new File(url.toURI());
+		}
+		
+		String filename = item.getFileName(); 
+
+		File target = new File(cacheDirectory, filename);
 		return target;
 	}
 
@@ -132,6 +139,16 @@ public class DownloadManager {
 
 	public File getCacheDir() {
 		return cacheDirectory;
+	}
+
+	public boolean isDownloaded(DownloadableItem item) {
+		try {
+			File target = getLocalLocation(item);
+			return target!=null && target.exists();
+		} catch (URISyntaxException e) {
+			GettingStartedActivator.log(e);
+		}
+		return false;
 	}
 
 }

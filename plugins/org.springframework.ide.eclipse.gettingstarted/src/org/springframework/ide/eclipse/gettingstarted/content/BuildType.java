@@ -17,13 +17,13 @@ import org.springframework.ide.eclipse.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.gettingstarted.importing.NullImportStrategy;
 
 public enum BuildType {
-	GRADLE("build.gradle", 
-			"org.springframework.ide.eclipse.gettingstarted.importing.GradleStrategy", 
-			"STS Gradle Tooling is not installed"
-	), //Set to null... contributed via extension point.
 	MAVEN("pom.xml", 
 	      "org.springframework.ide.eclipse.gettingstarted.importing.MavenStrategy",
 	      "M2E (Eclipse Maven Tooling) is not installed"
+	),
+	GRADLE("build.gradle", 
+			"org.springframework.ide.eclipse.gettingstarted.importing.GradleStrategy", 
+			"STS Gradle Tooling is not installed"
 	);
 //	MAVEN("pom.xml", new NullImportStrategy("Maven"));
 //	ECLIPSE(".project", ImportStrategy.ECLIPSE);
@@ -68,4 +68,6 @@ public enum BuildType {
 		String name = name();
 		return name.substring(0,1) + name.substring(1).toLowerCase();
 	}
+	
+	public static final BuildType DEFAULT = MAVEN;
 }

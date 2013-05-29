@@ -8,6 +8,10 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager.DownloadRequestor;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * A DownloadableItem is something that can be downloaded and
@@ -88,6 +92,10 @@ public class DownloadableItem {
 	@Override
 	public String toString() {
 		return url.toString();
+	}
+
+	public boolean isDownloaded() {
+		return downloader.isDownloaded(this);
 	}
 	
 }
