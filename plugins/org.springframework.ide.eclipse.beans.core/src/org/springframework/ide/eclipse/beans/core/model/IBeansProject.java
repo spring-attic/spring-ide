@@ -91,6 +91,7 @@ public interface IBeansProject extends IBeansModelElement, IResourceModelElement
 
 	/**
 	 * Returns <code>IBeansConfig</code> for given config file.
+	 * @deprecated
 	 */
 	IBeansConfig getConfig(IFile configFile);
 

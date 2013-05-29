@@ -465,19 +465,36 @@ I	 * Removes the given beans config from the list of configs and from all config
 
 	public Set<IBeansConfig> getConfigs(IFile file, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
-		IBeansConfig beansConfig = getConfig(file);
-		if (beansConfig != null) {
-			beansConfigs.add(beansConfig);
+		
+		if (file.getProject() != null && !this.project.equals(file.getProject())) {
+			IBeansProject otherBeansProject = BeansCorePlugin.getModel().getProject(file.getProject());
+			if (otherBeansProject != null) {
+				Set<IBeansConfig> otherProjectConfigs = otherBeansProject.getConfigs(file, false);
+				for (IBeansConfig otherProjectConfig : otherProjectConfigs) {
+					beansConfigs.add(otherProjectConfig);
+				}
+			}
 		}
-
+		
+		Set<IBeansConfig> ownConfigs = getConfigs();
+		if (ownConfigs != null) {
+			for (IBeansConfig config : ownConfigs) {
+				if (config.getElementResource() != null && config.getElementResource().equals(file)) {
+					beansConfigs.add(config);
+				}
+			}
+		}
+		
 		// make sure that we run into the next block only if <import> support is enabled
 		// not executing the block will safe lots of execution time as configuration files don't
 		// need to get loaded.
-		if ((isImportsEnabled() && includeImported) && getConfigs() != null) {
+		if ((isImportsEnabled() && includeImported)) {
 			try {
 				r.lock();
-				for (IBeansConfig bc : getConfigs()) {
-					checkForImportedBeansConfig(file, bc, beansConfigs);
+				if (ownConfigs != null) {
+					for (IBeansConfig bc : ownConfigs) {
+						checkForImportedBeansConfig(file, bc, beansConfigs);
+					}
 				}
 			}
 			finally {
