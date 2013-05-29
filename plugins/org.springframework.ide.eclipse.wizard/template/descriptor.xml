@@ -26,7 +26,7 @@
 		springversion="3.2.3.RELEASE"
 		size="10479 "
 		url="file:///template/simple-maven/org.springframework.templates.simple.spring.web.maven-1.0.0.zip">
-		<description>Creates a simple Spring Web project using Maven that contains a basic set of Spring Web libraries.</description>
+		<description>Creates a simple Spring web project using Maven that contains a basic set of Spring web libraries.</description>
 	</descriptor>
 	<descriptor
 		id="org.springframework.templates.simple.java"

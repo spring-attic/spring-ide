@@ -13,6 +13,11 @@ package org.springframework.ide.eclipse.wizard.template.infrastructure;
 import org.springframework.ide.eclipse.wizard.template.SimpleProject;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
 
+/**
+ * Creates Simple Projects from content items, if the content item's id matches
+ * a known simple project ID.
+ * 
+ */
 public class SimpleProjectFactory {
 
 	public static final String SIMPLE_MAVEN_TEMPLATE_ID = "org.springframework.templates.simple.spring.maven";

@@ -23,7 +23,7 @@ import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 
 /**
- * Refreshes the list of template descriptors.
+ * Refreshes the list of remote and self-hosted template descriptors.
  */
 public class DownloadDescriptorJob implements IRunnableWithProgress {
 
@@ -34,6 +34,7 @@ public class DownloadDescriptorJob implements IRunnableWithProgress {
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
 			IStatus result = Status.OK_STATUS;
+
 			// First refresh descriptor locations that are stored in the
 			// preference store. If the content manager is dirty, it means
 			// descriptor locations have been changed in the preference store
