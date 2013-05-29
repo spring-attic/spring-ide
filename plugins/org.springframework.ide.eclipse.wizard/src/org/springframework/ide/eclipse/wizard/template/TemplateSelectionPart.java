@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -379,9 +380,47 @@ public class TemplateSelectionPart {
 		// It only gets added once if already present
 		manager.addContentLocation(location);
 
+		// This does not automatically add the templates to the tree viewer
+		// input.
+		// Rather it downloads templates asynchronously, and the content manager
+		// will then notify the tree viewer when the content is available and at
+		// that time
+		// refresh the tree input
 		downloadDescriptors();
 
+		expandCategory(SIMPLE_PROJECTS_CATEGORY);
+
 		return container;
+
+	}
+
+	protected void expandCategory(final String categoryName) {
+		// Run in UI
+
+		if (treeViewer == null || treeViewer.getTree().isDisposed()) {
+			return;
+		}
+		TreeItem[] items = treeViewer.getTree().getItems();
+		if (items != null) {
+			for (TreeItem item : items) {
+				Object itemObj = item.getData();
+				if (itemObj instanceof TemplateCategory && ((TemplateCategory) itemObj).getName().equals(categoryName)) {
+
+					// Note that calling expand on the tree item itself would
+					// not work, because at this stage
+					// the tree viewer content provider may not have yet
+					// contributed children to the category element
+					// and therefore the category tree item may not have
+					// corresponding tree item children to display.
+					// Instead, expand through the treeViewer rather than
+					// through the tree item, as the treeViewer expand request
+					// will trigger the content provider to create children for
+					// the category tree item.
+					treeViewer.expandToLevel(itemObj, 1);
+					break;
+				}
+			}
+		}
 
 	}
 
@@ -439,7 +478,7 @@ public class TemplateSelectionPart {
 					public void run() {
 						try {
 							IRunnableWithProgress runnable = new TemplateDataUIJob(template, wizard.getShell());
-							wizard.getContainer().run(true, true, runnable);
+							wizard.getContainer().run(false, false, runnable);
 						}
 						catch (InvocationTargetException e) {
 							error[0] = ErrorUtils.getErrorMessage("Failed to load Simple Project template content", e);
@@ -522,7 +561,9 @@ public class TemplateSelectionPart {
 	}
 
 	/**
-	 * Must be run in the UI thread
+	 * Note that is is sometimes run in a worker thread, therefore UI callback
+	 * refreshes that should occur when initialising templates should be
+	 * executed through UI jobs.
 	 */
 	private void initializeTemplates() {
 		templates.clear();
@@ -643,6 +684,8 @@ public class TemplateSelectionPart {
 				break;
 			}
 		}
+
+		expandCategory(SIMPLE_PROJECTS_CATEGORY);
 
 		legendImage.setVisible(needsDownload);
 		legendText.setVisible(needsDownload);
