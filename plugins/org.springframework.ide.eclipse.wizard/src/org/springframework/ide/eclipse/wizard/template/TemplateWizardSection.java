@@ -275,6 +275,12 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 		final WizardUIInfo uiInfo = getUIInfo(template);
 
+		if (uiInfo == null) {
+			throw new CoreException(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID,
+					"Failed to read template wizard UI info file for template: " + template.getName()
+							+ ". Check the template installation location and verify that the files are accessible."));
+		}
+
 		TemplateProjectConfigurationDescriptor descriptor = new TemplateProjectConfigurationDescriptor(getWizard()
 				.getMainPage().getProjectName(), uiInfo.getTopLevelPackageTokens(), template, getWizard().getMainPage()
 				.getProjectLocationURI(), getTemplateInputHandlers(), getWizard().getMainPage().getVersion());

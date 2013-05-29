@@ -50,9 +50,9 @@ public class SpringVersion {
 		// supported
 		// release versions. Right now only showing the latest releases of each
 		// major release
-		// E.g., for 3.1 -> 3.1.4, for 3.2 -> 3.2.2
+		// E.g., for 3.1 -> 3.1.4, for 3.2 -> 3.2.3
 		versions.add(DEFAULT);
-		versions.add(new SpringVersion("3.2.2"));
+		versions.add(new SpringVersion("3.2.3"));
 		versions.add(new SpringVersion("3.1.4"));
 		versions.add(new SpringVersion("3.0.7"));
 		versions.add(new SpringVersion("2.5.6"));

@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -72,7 +73,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateElement;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProjectFactory;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProjectContentManager;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateCategory;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage;
@@ -359,6 +360,7 @@ public class TemplateSelectionPart {
 		this.contentManagerListener = new PropertyChangeListener() {
 
 			public void propertyChange(PropertyChangeEvent arg0) {
+
 				initializeTemplates();
 
 				// switch to UI thread
@@ -373,12 +375,6 @@ public class TemplateSelectionPart {
 
 		ContentManager manager = ContentPlugin.getDefault().getManager();
 		manager.addListener(contentManagerListener);
-
-		// Add the simple project template descriptors from the wizard bundle.
-		ContentLocation location = WizardPlugin.getDefault().getTemplateContentLocation();
-
-		// It only gets added once if already present
-		manager.addContentLocation(location);
 
 		// This does not automatically add the templates to the tree viewer
 		// input.
@@ -416,6 +412,7 @@ public class TemplateSelectionPart {
 					// through the tree item, as the treeViewer expand request
 					// will trigger the content provider to create children for
 					// the category tree item.
+
 					treeViewer.expandToLevel(itemObj, 1);
 					break;
 				}
@@ -430,7 +427,9 @@ public class TemplateSelectionPart {
 	 * preference store (i.e., the content manager indicates dirty).
 	 */
 	protected void downloadDescriptors() {
-		// Must wrap execute as an async in UI thread to avoid Invalid UI thread
+
+		// Must execute as an asynch in UI thread to avoid Invalid UI
+		// thread
 		// exceptions
 		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			public void run() {
@@ -459,48 +458,8 @@ public class TemplateSelectionPart {
 					});
 				}
 			}
-
 		});
 
-	}
-
-	protected void downloadSimpleProjectData() {
-		final List<Template> templs = new ArrayList<Template>(templates);
-
-		for (Template tmpl : templs) {
-
-			if (tmpl instanceof SimpleProject) {
-				final Template template = tmpl;
-				final String[] error = new String[1];
-				final Exception[] exception = new Exception[1];
-
-				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-					public void run() {
-						try {
-							IRunnableWithProgress runnable = new TemplateDataUIJob(template, wizard.getShell());
-							wizard.getContainer().run(false, false, runnable);
-						}
-						catch (InvocationTargetException e) {
-							error[0] = ErrorUtils.getErrorMessage("Failed to load Simple Project template content", e);
-							exception[0] = e;
-						}
-						catch (InterruptedException e) {
-							error[0] = "Failure while loading Simple Project templates due to interrupt exception. Template content may not have been loaded correctly.";
-							exception[0] = e;
-						}
-					}
-
-				});
-				if (error[0] != null && exception[0] != null) {
-
-					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-						public void run() {
-							setError(error[0], exception[0]);
-						}
-					});
-				}
-			}
-		}
 	}
 
 	protected void setSeletectedTemplate(Template template) {
@@ -561,11 +520,12 @@ public class TemplateSelectionPart {
 	}
 
 	/**
-	 * Note that is is sometimes run in a worker thread, therefore UI callback
-	 * refreshes that should occur when initialising templates should be
-	 * executed through UI jobs.
+	 * Note that is is sometimes run in a worker thread, therefore UI refreshes
+	 * that should occur when initialising templates should be executed through
+	 * UI jobs.
 	 */
 	private void initializeTemplates() {
+
 		templates.clear();
 
 		TemplatesPreferencesModel model = TemplatesPreferencesModel.getInstance();
@@ -596,16 +556,16 @@ public class TemplateSelectionPart {
 			if (!templateIds.contains(templateId)) {
 
 				// Handle templates that are simple project
-				Template template = SimpleProjectFactory.getSimpleProject(item);
-
-				if (template == null) {
-					template = new Template(item, null);
-				}
+				Template template = new Template(item, null);
 
 				templates.add(template);
 				templateIds.add(templateId);
 			}
 		}
+
+		// Add the Simple Projects
+		List<SimpleProject> simpleProjects = getSimpleProjects();
+		templates.addAll(simpleProjects);
 
 		if (model.shouldShowSelfHostedProjects()) {
 
@@ -662,14 +622,61 @@ public class TemplateSelectionPart {
 			}
 		});
 
-		// Also extract the data for the Simple Projects
-		// as they are local in the wizard bundle and
-		// do not require download. Note that if the template
-		// data is already extracted, it still needs to be
-		// added to the template model, as templates can be created
-		// multiple times during the same wizard session.
+	}
 
-		downloadSimpleProjectData();
+	/**
+	 * Returns non-null list of Simple Projects. If errors occur while resolving
+	 * simple projects, an empty list is returned, and error logged in the
+	 * container of the part
+	 */
+	public List<SimpleProject> getSimpleProjects() {
+
+		final List<SimpleProject> projects = new ArrayList<SimpleProject>();
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+
+				final String[] error = new String[1];
+				final Exception[] exception = new Exception[1];
+
+				try {
+					IRunnableWithProgress runnable = new IRunnableWithProgress() {
+
+						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+								InterruptedException {
+							try {
+							
+								List<SimpleProject> prj = SimpleProjectContentManager.getManager().getSimpleProjects(
+										monitor);
+								projects.addAll(prj);
+							}
+							catch (CoreException e) {
+								throw new InvocationTargetException(e);
+							}
+						}
+					};
+					wizard.getContainer().run(false, false, runnable);
+				}
+				catch (InvocationTargetException e) {
+					error[0] = ErrorUtils.getErrorMessage("Failed to load Simple Project template content", e);
+					exception[0] = e;
+				}
+				catch (InterruptedException e) {
+					error[0] = "Failure while loading Simple Project templates due to interrupt exception. Template content may not have been loaded correctly.";
+					exception[0] = e;
+				}
+
+				if (error[0] != null && exception[0] != null) {
+
+					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+						public void run() {
+							setError(error[0], exception[0]);
+						}
+					});
+				}
+
+			}
+		});
+		return projects;
 
 	}
 

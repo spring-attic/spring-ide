@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 
 /**
  * @author Terry Denney
@@ -66,7 +65,7 @@ public class TemplateProjectData implements ITemplateProjectData {
 	private File getFileFromPath(Node node) throws SAXException {
 		String filePath = ContentUtil.getAttributeValue(node, ATTRIBUTE_PATH);
 		if (filePath == null) {
-			throw new SAXException("The proejct record is invalid");
+			throw new SAXException("The project record is invalid");
 		}
 
 		return new File(path.getAbsolutePath() + File.separator + filePath);

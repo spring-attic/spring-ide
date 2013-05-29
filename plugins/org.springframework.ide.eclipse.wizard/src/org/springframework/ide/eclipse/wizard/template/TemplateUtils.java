@@ -32,9 +32,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.BundleTemplateLoader;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ITemplateProjectData;
-import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProjectFactory;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateProjectData;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
@@ -124,12 +122,7 @@ public class TemplateUtils {
 	private static TemplateDownloader getTemplateDownloader(ContentItem item) {
 		ContentManager manager = ContentPlugin.getDefault().getManager();
 		// Templates for simple projects are located in the bundle
-		if (SimpleProjectFactory.isSimpleProject(item)) {
-			return new BundleTemplateLoader(item, WizardPlugin.getDefault().getBundle());
-		}
-		else {
-			return manager.createDownloader(item);
-		}
+		return manager.createDownloader(item);
 	}
 
 	private static void copyFolder(File source, File destination) {
