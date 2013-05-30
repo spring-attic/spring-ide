@@ -104,22 +104,6 @@
       <category
             id="org.springframework.ide.eclipse.beans.ui.wizards.category"
             name="%wizards.category"/>
-      <!--FIXNS: Commented out for now while merging both New Spring and Spring Template project wizards
-      <wizard
-            id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject"
-            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
-            class="org.springframework.ide.eclipse.beans.ui.wizards.NewSpringProjectWizard"
-            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
-            hasPages="true"
-            icon="icons/full/etool16/newprj_wiz.gif"
-            name="%wizards.newProject.name"
-            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
-            project="true">
-         <description>
-         	%wizards.newProject.description
-         </description>
-      </wizard>
-      -->
       <wizard
             id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig"
             name="%wizards.newConfig.name"
