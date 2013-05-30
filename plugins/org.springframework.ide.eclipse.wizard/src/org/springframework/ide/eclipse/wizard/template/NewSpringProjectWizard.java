@@ -72,7 +72,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 
 		mainPage = new NewSpringProjectWizardMainPage();
 		mainPage.setTitle(NewSpringProjectWizardMessages.NewProject_title);
-		mainPage.setDescription(NewSpringProjectWizardMessages.NewProject_description);
+		mainPage.setDescription("Create a Spring project by selecting a template or simple project type.");
 
 	}
 
