@@ -8,11 +8,12 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.tests;
+package org.springframework.ide.eclipse.gettingstarted.importing;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
+import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 
 /**
  * @author Kris De Volder
@@ -38,6 +39,22 @@ public class ImportUtils {
 			}
 		};
 		return conf;
+	}
+
+	/**
+	 * Convenience method to create a import configuration that imports a particular codeset for a given guide into the 
+	 * default location in the workspace.
+	 */
+	public static ImportConfiguration importConfig(GettingStartedGuide guide, CodeSet codeset) {
+		String projectName = guide.getName()+"-"+codeset.getName();
+		return importConfig(
+				/*location*/
+				Platform.getLocation().append(projectName),
+				/*name*/
+				projectName,
+				/*codeset*/
+				codeset
+		);
 	}
 
 }

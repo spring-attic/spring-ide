@@ -12,6 +12,7 @@ package org.springframework.ide.gettingstarted.guides;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
@@ -90,6 +91,15 @@ public class GettingStartedGuide extends GithubRepoContent {
 	
 	public boolean isDownloaded() {
 		return getZip().isDownloaded();
+	}
+
+	public CodeSet getCodeSet(String name) {
+		for (CodeSet cs : getCodeSets()) {
+			if (cs.getName().equals(name)) {
+				return cs;
+			}
+		}
+		throw new NoSuchElementException(this+" has no codeset '"+name+"'");
 	}
 	
 }

@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.gettingstarted.guides.wizard;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -100,4 +102,30 @@ public class LiveSet<T> extends LiveExpression<Set<T>> {
 		}
 		refresh();
 	}
+	
+	/**
+	 * Gets the current elements in the set as a list. The returned collection
+	 * is a copy of the backing collection. So it is safe to work with this
+	 * collection while other threads continue to make changes to the 
+	 * liveset.
+	 */
+	public synchronized List<T> getValues() {
+		List<T> l = new ArrayList<T>(value.size());
+		l.addAll(value);
+		return l;
+	}
+
+	/**
+	 * Batch-add a number of elements to the set. Only at most one change event will
+	 * be fired no matter how many elements where actually added.
+	 */
+	public void addAll(T[] elements) {
+		synchronized (this) {
+			for (T e : elements) {
+				dirty = value.add(e) || dirty;
+			}
+		}
+		refresh();
+	}
+
 }

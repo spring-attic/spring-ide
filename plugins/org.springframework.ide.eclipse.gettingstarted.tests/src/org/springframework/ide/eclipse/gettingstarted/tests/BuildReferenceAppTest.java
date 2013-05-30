@@ -28,7 +28,8 @@ import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.gettingstarted.guides.ReferenceApp;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
-import static org.springframework.ide.eclipse.gettingstarted.tests.ImportUtils.*;
+
+import static org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils.*;
 
 /**
  * A BuildSample test checks that a particular sample project builds properly

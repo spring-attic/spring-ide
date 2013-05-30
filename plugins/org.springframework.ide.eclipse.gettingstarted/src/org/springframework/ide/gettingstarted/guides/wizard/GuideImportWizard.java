@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.gettingstarted.guides.wizard;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
  * @author Kris De Volder
@@ -54,17 +60,22 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 
 	@Override
 	public boolean performFinish() {
-//		getPageOne().wizardAboutToFinish();
-//		final GradleImportOperation operation = createOperation();
-//		JobUtil.userJob(new GradleRunnable("Import Gradle projects") {
-//			@Override
-//			public void doit(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-//				ErrorHandler eh = ErrorHandler.forImportWizard();
-//				operation.perform(eh, monitor);
-//				eh.rethrowAsCore();
-//			}
-//		});
-		return true;
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IProgressService ps = wb.getProgressService();
+		try {
+			ps.run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
+					model.performFinish(mon);
+				}
+			});
+			return true;
+		} catch (InvocationTargetException e) {
+			GettingStartedActivator.log(e);
+		} catch (InterruptedException e) {
+			GettingStartedActivator.log(e);
+		}
+		return false;
 	}
 
 	/**

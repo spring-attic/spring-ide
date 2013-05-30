@@ -11,11 +11,17 @@
 package org.springframework.ide.gettingstarted.guides.wizard;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
+import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -29,6 +35,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
  * @author Kris De Volder
  */
 public class GuideImportWizardModel {
+	
+	//TODO: Validation: shouldn't allow importing if something already exists where codeset content
+	// will be downloaded. This will overwrite what's there. At the very least a warning should
+	// appear in the wizard.
+	
+	//TODO: Make guides chooser section use a list/table widget instead of Combo. There are too many
+	// items for a Combo to be nice. Make the list widget 'searchable'.
 
 	public static class CodeSetValidator extends LiveExpression<ValidationResult> {
 
@@ -65,6 +78,9 @@ public class GuideImportWizardModel {
 	 * The names of the codesets selected for import.
 	 */
 	private LiveSet<String> codesets = new LiveSet<String>(new HashSet<String>());
+	{
+		codesets.addAll(GettingStartedGuide.codesetNames); //Select both codesets by default.
+	}
 	
 	/**
 	 * The build type chosen by user
@@ -137,6 +153,33 @@ public class GuideImportWizardModel {
 			}
 		} finally {
 			isDownloaded.refresh();
+			mon.done();
+		}
+	}
+	
+	/**
+	 * Performs the final step of the wizard when user clicks on Finish button.
+	 * @throws InterruptedException 
+	 * @throws InvocationTargetException 
+	 */
+	public boolean performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
+		//The import will be carried out with whatever the currently selected values are
+		// in all the input fields / variables / widgets.
+		GettingStartedGuide g = guide.getValue();
+		BuildType bt = buildType.getValue();
+		Set<String> codesetNames = codesets.getValue();
+		
+		mon.beginTask("Import guide codeset(s)", codesetNames.size());
+		try {
+			for (String name : codesetNames) {
+				IRunnableWithProgress oper = bt.getImportStrategy().createOperation(ImportUtils.importConfig(
+						g, 
+						g.getCodeSet(name)
+				));
+				oper.run(new SubProgressMonitor(mon, 1));
+			}
+			return true;
+		} finally {
 			mon.done();
 		}
 	}
