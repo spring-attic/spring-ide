@@ -19,8 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
-import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -35,6 +33,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
  * @author Kris De Volder
  */
 public class GuideImportWizardModel {
+	
+	//TODO: Validate build system choice against installed tooling. (warn if m2e / gradle tooling is
+	// required but not installed.
 	
 	//TODO: Validation: shouldn't allow importing if something already exists where codeset content
 	// will be downloaded. This will overwrite what's there. At the very least a warning should

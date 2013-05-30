@@ -20,8 +20,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.IProgressService;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 
@@ -33,6 +31,10 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 	private GuideImportWizardModel model = new GuideImportWizardModel();
 	private GuideImportWizardPageOne pageOne;
 //	private IWorkbench workbench;
+	
+	{
+		setNeedsProgressMonitor(true);
+	}
 	
 	public GuideImportWizard() {
 	}
@@ -60,10 +62,8 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 
 	@Override
 	public boolean performFinish() {
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IProgressService ps = wb.getProgressService();
 		try {
-			ps.run(false, false, new IRunnableWithProgress() {
+			getContainer().run(false, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 					model.performFinish(mon);
