@@ -499,10 +499,10 @@ public class TemplateSelectionWizardPage extends WizardPage {
 
 		try {
 			for (int i = 0; i < info.getPageCount(); i++) {
-				page = new NewTemplateWizardPage(info.getPage(i).getDescription(), new TemplateInputCollector(
-						info.getElementsForPage(i)), selectedTemplate.getIcon());
-				if (templateWizardPage == null) {
+				page = new NewTemplateWizardPage(info.getPage(i).getDescription(), selectedTemplate,
+						new TemplateInputCollector(info.getElementsForPage(i)));
 
+				if (templateWizardPage == null) {
 					templateWizardPage = page;
 				}
 

@@ -79,7 +79,6 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateCa
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencesModel;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
-import org.springsource.ide.eclipse.commons.content.core.ContentLocation;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.ContentUtil;
@@ -152,7 +151,10 @@ public class TemplateSelectionPart {
 		tree.setLinesVisible(false);
 		tree.setHeaderVisible(false);
 		tree.setEnabled(true);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		data.heightHint = 170;
+		tree.setLayoutData(data);
 
 		treeViewer = new TreeViewer(tree);
 
@@ -326,7 +328,7 @@ public class TemplateSelectionPart {
 
 		GridData descriptionData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		descriptionData.widthHint = 200;
-		descriptionData.heightHint = 80;
+		descriptionData.heightHint = 60;
 		descriptionText.setLayoutData(descriptionData);
 
 		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -629,7 +631,7 @@ public class TemplateSelectionPart {
 	 * simple projects, an empty list is returned, and error logged in the
 	 * container of the part
 	 */
-	public List<SimpleProject> getSimpleProjects() {
+	protected List<SimpleProject> getSimpleProjects() {
 
 		final List<SimpleProject> projects = new ArrayList<SimpleProject>();
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -644,7 +646,7 @@ public class TemplateSelectionPart {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
 							try {
-							
+
 								List<SimpleProject> prj = SimpleProjectContentManager.getManager().getSimpleProjects(
 										monitor);
 								projects.addAll(prj);
