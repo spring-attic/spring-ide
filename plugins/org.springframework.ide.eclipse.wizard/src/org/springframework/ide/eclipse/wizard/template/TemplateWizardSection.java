@@ -283,9 +283,10 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 							+ ". Check the template installation location and verify that the files are accessible."));
 		}
 
-		TemplateProjectConfigurationDescriptor descriptor = new TemplateProjectConfigurationDescriptor(getWizard()
-				.getMainPage().getProjectName(), uiInfo.getTopLevelPackageTokens(), template, getWizard().getMainPage()
-				.getProjectLocationURI(), getTemplateInputHandlers(), getWizard().getMainPage().getVersion());
+		TemplateProjectConfigurationDescriptor descriptor = new TemplateProjectConfigurationDescriptor(
+				uiInfo.getProjectNameToken(), getWizard().getMainPage().getProjectName(),
+				uiInfo.getTopLevelPackageTokens(), template, getWizard().getMainPage().getProjectLocationURI(),
+				getTemplateInputHandlers(), getWizard().getMainPage().getVersion());
 
 		return new TemplateProjectConfiguration(descriptor, getWizard().getShell());
 	}

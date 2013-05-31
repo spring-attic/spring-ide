@@ -113,8 +113,8 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 						.getName(), configurationDescriptor.getSpringVersion());
 
 				Processor processor = new Processor(processingInfo);
-				IProject processedProject = processor.process(project, newPath, topLevelPackageTokens, projectName,
-						collectedInput, inputKinds, shell, monitor);
+				IProject processedProject = processor.process(project, newPath, topLevelPackageTokens,
+						configurationDescriptor.getProjectNameToken(), collectedInput, inputKinds, shell, monitor);
 				if (processedProject != null) {
 					processedProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 					SpringCoreUtils.buildFullProject(processedProject);
@@ -132,7 +132,7 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 
 	@Override
 	protected IProject create(IProgressMonitor monitor) throws CoreException {
-		String projectName = configurationDescriptor.getProjectName();
+		String projectName = configurationDescriptor.getActualProjectName();
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
 
