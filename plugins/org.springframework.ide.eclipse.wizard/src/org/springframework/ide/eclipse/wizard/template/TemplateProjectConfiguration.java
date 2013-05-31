@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -103,7 +103,7 @@ public class TemplateProjectConfiguration extends ProjectConfiguration {
 			if (status != null && status.getSeverity() == IStatus.WARNING) {
 				WizardPlugin.getDefault().getLog().log(status);
 			}
-			IPath newPath = configurationDescriptor.getProjectLocationPath();
+			URI newPath = configurationDescriptor.getProjectLocationPath();
 
 			String[] topLevelPackageTokens = configurationDescriptor.getTopLevelPackageTokens();
 			String projectName = project.getName();

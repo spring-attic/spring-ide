@@ -11,12 +11,12 @@
 package org.springframework.ide.eclipse.wizard.template.infrastructure.processor;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 
@@ -37,9 +37,9 @@ public class DirectoryProcessor {
 
 	// private final IProjectDescription projectDescription;
 
-	private final IPath projectPath;
+	private final URI projectPath;
 
-	public DirectoryProcessor(ProcessingInfo processingInfo, IProject project, IPath projectPath) {
+	public DirectoryProcessor(ProcessingInfo processingInfo, IProject project, URI projectPath) {
 		this.project = project;
 		this.projectPath = projectPath;
 		// this.projectDescription = projectDescription;

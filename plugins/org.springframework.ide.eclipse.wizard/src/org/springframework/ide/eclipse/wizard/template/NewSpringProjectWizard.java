@@ -236,7 +236,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 
 		final IWorkingSet[] workingSets = getWorkingSets();
 
-		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+		final WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 			@Override
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
 					InterruptedException {
@@ -254,9 +254,8 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 			}
 		};
 
-		// Fork into non-UI thread as project configuration will
-		// require building
-		getContainer().run(true, true, op);
+		// Run in UI thread as some dialogues may open during configuration
+		getContainer().run(false, false, op);
 
 	}
 

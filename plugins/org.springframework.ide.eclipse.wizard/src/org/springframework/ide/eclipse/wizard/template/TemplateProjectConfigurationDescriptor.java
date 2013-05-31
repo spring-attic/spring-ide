@@ -14,8 +14,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 
 public class TemplateProjectConfigurationDescriptor {
@@ -69,11 +67,8 @@ public class TemplateProjectConfigurationDescriptor {
 		return inputHandlers != null ? inputHandlers : new ArrayList<TemplateInputCollector>(0);
 	}
 
-	public IPath getProjectLocationPath() {
-		if (projectLocationURI != null) {
-			return new Path(projectLocationURI.toString());
-		}
-		return null;
+	public URI getProjectLocationPath() {
+		return projectLocationURI;
 	}
 
 }

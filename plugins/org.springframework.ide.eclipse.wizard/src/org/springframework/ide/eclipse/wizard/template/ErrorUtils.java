@@ -105,6 +105,14 @@ public class ErrorUtils {
 		}
 	}
 
+	/**
+	 * Only resolves the error message, if the status has an ERROR status. If
+	 * the status is a multistatus, it will resolve the first error message it
+	 * encounters, recursing through all the children of the multistatus until
+	 * it encounters the first error status.
+	 * @param status
+	 * @return
+	 */
 	public static String getErrorMessage(IStatus status) {
 		String error = null;
 		if (status instanceof MultiStatus) {
