@@ -113,9 +113,6 @@
             class="org.springframework.ide.eclipse.core.java.TypeStructureStateRegisteringEventListener">
       </listener>
       <listener
-            class="org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyResetListener">
-      </listener>
-      <listener
             class="org.springframework.ide.eclipse.core.internal.project.uaa.ProjectContributionUsageMonitor">
       </listener>
    </extension>
