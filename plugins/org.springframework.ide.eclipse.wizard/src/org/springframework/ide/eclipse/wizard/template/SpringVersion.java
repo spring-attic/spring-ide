@@ -55,7 +55,6 @@ public class SpringVersion {
 		versions.add(new SpringVersion("3.2.3"));
 		versions.add(new SpringVersion("3.1.4"));
 		versions.add(new SpringVersion("3.0.7"));
-		versions.add(new SpringVersion("2.5.6"));
 
 		return versions;
 	}

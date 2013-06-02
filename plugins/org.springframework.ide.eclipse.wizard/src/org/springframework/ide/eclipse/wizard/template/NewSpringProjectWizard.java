@@ -144,11 +144,12 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 	public IWizardPage getNextPage(IWizardPage page) {
 		SpringProjectWizardSection section = getSection();
 
+		// Always make sure the sections decide the progression of the pages
 		if (section != null) {
 			return section.getNextPage(page);
 		}
 
-		return super.getNextPage(page);
+		return null;
 	}
 
 	@Override
