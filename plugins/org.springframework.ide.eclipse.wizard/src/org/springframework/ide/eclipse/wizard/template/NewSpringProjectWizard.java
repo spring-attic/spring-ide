@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.wizard.template;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceStatus;
@@ -73,7 +74,6 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 		mainPage = new NewSpringProjectWizardMainPage();
 		mainPage.setTitle(NewSpringProjectWizardMessages.NewProject_title);
 		mainPage.setDescription("Create a Spring project by selecting a template or simple project type.");
-
 	}
 
 	public NewSpringProjectWizardMainPage getMainPage() {
@@ -82,9 +82,24 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 
 	@Override
 	public void addPages() {
-		// Only has one page. Additional pages can be contributed and managed by
-		// wizard sections
+
 		addPage(mainPage);
+
+		// Also preload any section pages that require their controls to be
+		// created
+		// before a user clicks "Next", as some sections may need access to the
+		// controls
+		// if the user clicks "Finish" from the first page without ever going to
+		// the next page
+		List<SpringProjectWizardSection> sections = sectionFactory.loadSections();
+		for (SpringProjectWizardSection section : sections) {
+			List<IWizardPage> pages = section.loadPages();
+			if (pages != null) {
+				for (IWizardPage page : pages) {
+					addPage(page);
+				}
+			}
+		}
 	}
 
 	/**

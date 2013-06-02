@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -110,6 +111,16 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		createNamespaceSettingsGroup(mainArea);
 		createFacetsGroup(mainArea);
 		createJRESection(mainArea);
+
+		// Create it to avoid NPEs when the superclass attempts to read/write to
+		// the widget,
+		// but don't add it to the layout as its usually empty and takes up
+		// space
+		Control infoControl = createInfoControl(mainArea);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(infoControl);
+		GridData data = (GridData) infoControl.getLayoutData();
+		data.exclude = true;
+		infoControl.setLayoutData(data);
 
 		// Show description on opening
 		setErrorMessage(null);

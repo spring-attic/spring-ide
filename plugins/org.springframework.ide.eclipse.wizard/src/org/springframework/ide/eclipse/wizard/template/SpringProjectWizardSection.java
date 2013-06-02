@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -82,7 +84,20 @@ public abstract class SpringProjectWizardSection {
 	}
 
 	/**
-	 * 
+	 * Optional. Sections can also precreate the page controls prior to having
+	 * the wizard making them visible. This may be necessary for some sections
+	 * that require the controls to be created for other pages, in order to read
+	 * control values if finishing the wizard before those pages are shown. The
+	 * pages are then added to the wizard when the wizard is created.
+	 * @param parent
+	 */
+	public List<IWizardPage> loadPages() {
+		return null;
+	}
+
+	/**
+	 * Page controls get created when a request is made for the next page, if it
+	 * already hasn't been created.
 	 * @param page current page
 	 * @return next page in the wizard, or null if not contributing further
 	 * pages

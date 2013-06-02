@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.wizard.template;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -38,17 +40,25 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProj
  */
 public class JavaWizardSection extends SpringProjectWizardSection {
 
-	private final NewJavaProjectWizardPageTwo javaPageTwo;
+	private NewJavaProjectWizardPageTwo javaPageTwo;
 
-	private final NewSpringProjectCreationPage springCreationPage;
+	private NewSpringProjectCreationPage springCreationPage;
 
 	public JavaWizardSection(NewSpringProjectWizard wizard) {
 		super(wizard);
+	}
+
+	@Override
+	public List<IWizardPage> loadPages() {
+		List<IWizardPage> pages = new ArrayList<IWizardPage>();
 		springCreationPage = new NewSpringProjectCreationPage();
-		springCreationPage.setWizard(getWizard());
+
+		pages.add(springCreationPage);
 
 		javaPageTwo = new NewJavaProjectWizardPageTwo(springCreationPage);
-		javaPageTwo.setWizard(getWizard());
+
+		pages.add(javaPageTwo);
+		return pages;
 	}
 
 	public IJavaElement getCreatedElement() {
