@@ -11,12 +11,12 @@
 package org.springframework.ide.eclipse.wizard.template.infrastructure.processor;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,9 +33,9 @@ public class Processor {
 		this.processingInfo = processingInfo;
 	}
 
-	public IProject process(IProject project, IPath projectPath, String[] topLevelPackageTokens,
-			String projectNameToken, Map<String, Object> userInput, Map<String, String> inputKinds, Shell shell,
-			IProgressMonitor progressMonitor) throws IOException, URISyntaxException, CoreException {
+	public IProject process(IProject project, URI projectPath, String[] topLevelPackageTokens, String projectNameToken,
+			Map<String, Object> userInput, Map<String, String> inputKinds, Shell shell, IProgressMonitor progressMonitor)
+			throws IOException, URISyntaxException, CoreException {
 		processingInfo.setInputKinds(inputKinds);
 		processingInfo.setTopLevelPackageTokens(topLevelPackageTokens);
 		processingInfo.setProjectNameToken(projectNameToken);

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -26,15 +27,24 @@ import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.internal.core.SourceRefElement;
 import org.eclipse.jdt.internal.core.SourceType;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -46,6 +56,8 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
  * @author Kaitlin Duck Sherwood
  */
 public class ConfigurationLocationProposalComputer extends AnnotationProposalComputer {
+
+	// TODO: restructure to not find ASTNode in computer but in proposal
 
 	final String ILLEGAL_STRING = ":!\t)";
 
@@ -93,8 +105,15 @@ public class ConfigurationLocationProposalComputer extends AnnotationProposalCom
 	}
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, LocationInformation locationInfo,
-			Annotation annotation, JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, String value, IAnnotation a,
+			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		// }
+		// @Override
+		// protected List<ICompletionProposal>
+		// computeCompletionProposals(SourceType type, LocationInformation
+		// locationInfo,
+		// Annotation annotation, JavaContentAssistInvocationContext
+		// javaContext) throws JavaModelException {
 		// // TODO Auto-generated method stub
 		// return super.computeCompletionProposals(type, locationInfo,
 		// annotation, javaContext);
@@ -109,12 +128,54 @@ public class ConfigurationLocationProposalComputer extends AnnotationProposalCom
 		// for (IMemberValuePair memberValuePair : memberValuePairs) {
 		// if ("locations".equals(memberValuePair.getMemberName()) ||
 		// "value".equals(memberValuePair.getMemberName())) {
-		Name typeName = annotation.getTypeName();
-		return getBeanProposals(javaContext, type.getCompilationUnit(), javaContext.getInvocationOffset(),
-				typeName.getFullyQualifiedName(), typeName.getStartPosition(), typeName.getLength());
+		ITextViewer viewer = javaContext.getViewer();
+		if (viewer instanceof SourceViewer) {
+			ICompilationUnit cu = javaContext.getCompilationUnit();
+			SourceViewer sourceViewer = (SourceViewer) javaContext.getViewer();
+			int invocationOffset = javaContext.getInvocationOffset();
+			AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0);
+			ASTNode node = ((SourceRefElement) a).findNode(assistContext.getASTRoot());
+
+			if (node == null) {
+				node = assistContext.getCoveredNode();
+			}
+
+			if (!(a instanceof Annotation)) {
+				return Collections.emptyList();
+			}
+			Annotation annotation = (Annotation) a;
+
+			LocationInformation locationInfo = null;
+			if (node instanceof NormalAnnotation) {
+				NormalAnnotation normalAnnotation = (NormalAnnotation) node;
+				@SuppressWarnings("unchecked")
+				List<MemberValuePair> pairs = normalAnnotation.values();
+
+				for (MemberValuePair pair : pairs) {
+					Expression expression = pair.getValue();
+					if (expression instanceof StringLiteral) {
+						locationInfo = getLocationInformation((StringLiteral) expression, javaContext);
+					}
+				}
+			}
+			else if (node instanceof SingleMemberAnnotation) {
+				SingleMemberAnnotation singleMemberAnnotation = (SingleMemberAnnotation) node;
+				Expression expression = singleMemberAnnotation.getValue();
+				locationInfo = getLocationInformation((StringLiteral) expression, javaContext);
+			}
+
+			if (locationInfo == null) {
+				return Collections.emptyList();
+			}
+
+			Name typeName = annotation.getTypeName();
+			return getBeanProposals(javaContext, type.getCompilationUnit(), javaContext.getInvocationOffset(),
+					typeName.getFullyQualifiedName(), typeName.getStartPosition(), typeName.getLength());
+		}
+
 		// }
 		// }
-		// return Collections.emptyList();
+		return Collections.emptyList();
 	}
 
 	@Override

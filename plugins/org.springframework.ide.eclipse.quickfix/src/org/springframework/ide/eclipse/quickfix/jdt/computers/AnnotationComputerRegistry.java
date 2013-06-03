@@ -30,8 +30,6 @@ public class AnnotationComputerRegistry {
 
 	public final static String DEFAULT_ATTRIBUTE_NAME = "value";
 
-	// public final static String DEFAULT_ARRAY_ATTRIBUTE = "ARRAY_ATTRIBUTE";
-
 	/**
 	 * annotation name -> attribute name -> proposal computer
 	 */
@@ -52,8 +50,10 @@ public class AnnotationComputerRegistry {
 
 		addProposalComputer("ComponentScan", new PackageNameProposalComputer());
 		addProposalComputer("ComponentScan", "basePackages", new PackageNameProposalComputer());
+		addProposalComputer("ComponentScan", "basePackageClasses", new SimpleClassProposalComputer());
 		addProposalComputerForArrayAttribute("ComponentScan", new PackageNameProposalComputer());
 		addProposalComputerForArrayAttribute("ComponentScan", "basePackages", new PackageNameProposalComputer());
+		addProposalComputerForArrayAttribute("ComponentScan", "basePackageClasses", new SimpleClassProposalComputer());
 	}
 
 	private static void addProposalComputer(String annotationName, AnnotationProposalComputer proposalComputer) {

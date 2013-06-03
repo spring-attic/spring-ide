@@ -10,7 +10,7 @@
 	    requires="[0.0.0,4.0.0)"
 		requiresbundle="org.eclipse.m2e.core"
 		springversion="3.2.3.RELEASE"
-		size="6454"
+		size="2973"
 		url="file:///template/simple-maven/org.springframework.templates.simple.spring.maven-1.0.0.zip">
 		<description>Creates a simple Spring project using Maven that contains a basic set of Spring libraries.</description>
 	</descriptor>
@@ -24,7 +24,7 @@
 	    requires="[0.0.0,4.0.0)"
 		requiresbundle="org.eclipse.m2e.core"
 		springversion="3.2.3.RELEASE"
-		size="10479 "
+		size="4268"
 		url="file:///template/simple-maven/org.springframework.templates.simple.spring.web.maven-1.0.0.zip">
 		<description>Creates a simple Spring web project using Maven that contains a basic set of Spring web libraries.</description>
 	</descriptor>
@@ -36,7 +36,7 @@
 		version="1.0.0"
 		requires="[0.0.0,4.0.0)"
 		local="false"
-		size="1810"
+		size="1560"
 		url="file:///template/simple-spring/org.springframework.templates.simple.java-1.0.0.zip">
 		<description>Creates a simple Spring project using Java build without a top-level package, and with default Spring configuration and project natures.</description>
 	</descriptor>

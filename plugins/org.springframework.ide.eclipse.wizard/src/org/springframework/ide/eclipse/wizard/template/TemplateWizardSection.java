@@ -92,31 +92,33 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				// additional UI pages, as the
 				// content will determine the UI controls of the additional
 				// pages.
-				final IStatus[] errors = new IStatus[1];
-				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+				if (!TemplateUtils.hasBeenDownloaded(template)) {
+					final IStatus[] errors = new IStatus[1];
+					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 
-					public void run() {
+						public void run() {
 
-						try {
-							getWizard().getContainer().run(true, true,
-									new TemplateDataUIJob(template, getWizard().getShell()));
+							try {
+								getWizard().getContainer().run(true, true,
+										new TemplateDataUIJob(template, getWizard().getShell()));
+
+							}
+							catch (InvocationTargetException ce) {
+								String errorMessage = ErrorUtils.getErrorMessage(ce);
+								errors[0] = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, errorMessage, ce);
+							}
+							catch (InterruptedException ie) {
+								errors[0] = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID,
+										"Interrupt exception while downloading data for " + template.getName());
+							}
 
 						}
-						catch (InvocationTargetException ce) {
-							String errorMessage = ErrorUtils.getErrorMessage(ce);
-							errors[0] = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, errorMessage, ce);
-						}
-						catch (InterruptedException ie) {
-							errors[0] = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID,
-									"Interrupt exception while downloading data for " + template.getName());
-						}
+					});
 
+					if (errors[0] != null && !errors[0].isOK()) {
+						handleError(errors[0]);
+						return null;
 					}
-				});
-
-				if (errors[0] != null && !errors[0].isOK()) {
-					handleError(errors[0]);
-					return null;
 				}
 
 				WizardUIInfo info = getUIInfo(template);
@@ -140,8 +142,8 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				try {
 					for (int i = 0; i < info.getPageCount(); i++) {
 
-						templatePage = new NewTemplateWizardPage(info.getPage(i).getDescription(),
-								new TemplateInputCollector(info.getElementsForPage(i)), template.getIcon());
+						templatePage = new NewTemplateWizardPage(info.getPage(i).getDescription(), template,
+								new TemplateInputCollector(info.getElementsForPage(i)));
 						templatePage.setWizard(getWizard());
 
 						// Always set a new first template page, as the template
@@ -281,9 +283,10 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 							+ ". Check the template installation location and verify that the files are accessible."));
 		}
 
-		TemplateProjectConfigurationDescriptor descriptor = new TemplateProjectConfigurationDescriptor(getWizard()
-				.getMainPage().getProjectName(), uiInfo.getTopLevelPackageTokens(), template, getWizard().getMainPage()
-				.getProjectLocationURI(), getTemplateInputHandlers(), getWizard().getMainPage().getVersion());
+		TemplateProjectConfigurationDescriptor descriptor = new TemplateProjectConfigurationDescriptor(
+				uiInfo.getProjectNameToken(), getWizard().getMainPage().getProjectName(),
+				uiInfo.getTopLevelPackageTokens(), template, getWizard().getMainPage().getProjectLocationURI(),
+				getTemplateInputHandlers(), getWizard().getMainPage().getVersion());
 
 		return new TemplateProjectConfiguration(descriptor, getWizard().getShell());
 	}

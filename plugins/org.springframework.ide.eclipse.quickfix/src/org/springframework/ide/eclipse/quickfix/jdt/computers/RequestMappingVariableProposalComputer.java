@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -22,12 +24,15 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.core.SourceMethod;
+import org.eclipse.jdt.internal.core.SourceRefElement;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -44,37 +49,90 @@ import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
  */
 public class RequestMappingVariableProposalComputer extends AnnotationProposalComputer {
 
+	// TODO: clean up code and restructure to not find ASTNode till proposal is
+	// invoked
+
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method,
-			LocationInformation locationInfo, Annotation annotation, JavaContentAssistInvocationContext javaContext)
-			throws JavaModelException {
-		return computeCompletionProposalsHelper(method, locationInfo, annotation, javaContext);
+	protected List<ICompletionProposal> computeCompletionProposals(SourceMethod method, String value,
+			IAnnotation annotation, JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		// // TODO Auto-generated method stub
+		// return super.computeCompletionProposals(type, value, annotation,
+		// javaContext);
+		// }
+		// @Override
+		// protected List<ICompletionProposal>
+		// computeCompletionProposals(SourceMethod method,
+		// LocationInformation locationInfo, Annotation annotation,
+		// JavaContentAssistInvocationContext javaContext)
+		// throws JavaModelException {
+		return computeCompletionProposalsHelper(method, value, annotation, javaContext);
 	}
 
 	@Override
-	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, LocationInformation locationInfo,
-			Annotation annotation, JavaContentAssistInvocationContext javaContext) throws JavaModelException {
-		return computeCompletionProposalsHelper(type, locationInfo, annotation, javaContext);
+	protected List<ICompletionProposal> computeCompletionProposals(SourceType type, String value,
+			IAnnotation annotation, JavaContentAssistInvocationContext javaContext) throws JavaModelException {
+		// // TODO Auto-generated method stub
+		// return super.computeCompletionProposals(type, value, annotation,
+		// javaContext);
+		// }
+		// @Override
+		// protected List<ICompletionProposal>
+		// computeCompletionProposals(SourceType type, LocationInformation
+		// locationInfo,
+		// Annotation annotation, JavaContentAssistInvocationContext
+		// javaContext) throws JavaModelException {
+		return computeCompletionProposalsHelper(type, value, annotation, javaContext);
 	}
 
-	private List<ICompletionProposal> computeCompletionProposalsHelper(IMember element,
-			LocationInformation locationInfo, Annotation annotation, JavaContentAssistInvocationContext javaContext)
-			throws JavaModelException {
+	// private List<ICompletionProposal>
+	// computeCompletionProposalsHelper(IMember element,
+	// LocationInformation locationInfo, Annotation annotation,
+	// JavaContentAssistInvocationContext javaContext)
+	// throws JavaModelException {
+	private List<ICompletionProposal> computeCompletionProposalsHelper(IMember element, String value, IAnnotation a,
+			JavaContentAssistInvocationContext javaContext) throws JavaModelException {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 		ITextViewer viewer = javaContext.getViewer();
 		if (viewer instanceof SourceViewer) {
-			SourceViewer sourceViewer = (SourceViewer) viewer;
-			ISourceRange sourceRange = element.getSourceRange();
-			AssistContext assistContext = new AssistContext(javaContext.getCompilationUnit(), sourceViewer,
-					sourceRange.getOffset(), sourceRange.getLength());
+			ICompilationUnit cu = javaContext.getCompilationUnit();
+			SourceViewer sourceViewer = (SourceViewer) javaContext.getViewer();
+			int invocationOffset = javaContext.getInvocationOffset();
+			AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0);
+			ASTNode node = ((SourceRefElement) a).findNode(assistContext.getASTRoot());
 
-			ASTNode node = assistContext.getCoveringNode();
 			if (node == null) {
 				node = assistContext.getCoveredNode();
 			}
 
-			int invocationOffset = javaContext.getInvocationOffset();
+			if (!(node instanceof Annotation)) {
+				return proposals;
+			}
+			Annotation annotation = (Annotation) node;
+
+			LocationInformation locationInfo = null;
+			if (node instanceof NormalAnnotation) {
+				NormalAnnotation normalAnnotation = (NormalAnnotation) node;
+				@SuppressWarnings("unchecked")
+				List<MemberValuePair> pairs = normalAnnotation.values();
+
+				for (MemberValuePair pair : pairs) {
+					Expression expression = pair.getValue();
+					if (expression instanceof StringLiteral) {
+						locationInfo = getLocationInformation((StringLiteral) expression, javaContext);
+					}
+				}
+			}
+			else if (node instanceof SingleMemberAnnotation) {
+				SingleMemberAnnotation singleMemberAnnotation = (SingleMemberAnnotation) node;
+				Expression expression = singleMemberAnnotation.getValue();
+				locationInfo = getLocationInformation((StringLiteral) expression, javaContext);
+			}
+
+			if (locationInfo == null) {
+				return proposals;
+			}
+
 			int locationOffset = locationInfo.getOffset();
 			int locationLength = locationInfo.getLength();
 			String content = locationInfo.getFilter();
@@ -91,7 +149,7 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 
 					content = content.substring(startIndex + 1);
 					index += startIndex + 1;
-					if (!(content.contains("{") || content.contains("}"))) {
+					if (!(content.contains("{"))) {
 						found = true;
 					}
 				}
@@ -99,6 +157,16 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 				locationOffset += 1; // ignore opening quote
 
 				if (found) {
+					ISourceRange sourceRange = element.getSourceRange();
+					assistContext = new AssistContext(javaContext.getCompilationUnit(), sourceViewer,
+							sourceRange.getOffset(), sourceRange.getLength());
+
+					node = assistContext.getCoveringNode();
+
+					if (content.endsWith("}")) {
+						content = content.substring(0, content.length() - 1);
+					}
+
 					if (node instanceof MethodDeclaration) {
 						MethodDeclaration methodDecl = (MethodDeclaration) node;
 						proposals.addAll(getProposals(methodDecl, annotation, content, locationOffset, index,
@@ -161,4 +229,5 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 
 		return proposals;
 	}
+
 }

@@ -19,18 +19,26 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TypeHierarchyElementCache {
 	
-	private Map<String, TypeHierarchyElement> cache;
+	private Map<Integer, TypeHierarchyElement> cache;
 	
 	public TypeHierarchyElementCache() {
-		this.cache = new ConcurrentHashMap<String, TypeHierarchyElement>();
+		this.cache = new ConcurrentHashMap<Integer, TypeHierarchyElement>();
 	}
 
 	public TypeHierarchyElement get(char[] fullyQualifiedClassName) {
-		return cache.get(new String(fullyQualifiedClassName));
+		return cache.get(charArrayToHashcode(fullyQualifiedClassName));
 	}
 
 	public void put(char[] fullyQualifiedClassName, TypeHierarchyElement typeElement) {
-		cache.put(new String(fullyQualifiedClassName), typeElement);
+		cache.put(charArrayToHashcode(fullyQualifiedClassName), typeElement);
+	}
+	
+	private int charArrayToHashcode(char[] characters) {
+		int h = 0;
+		for (int i = 0; i < characters.length; i++) {
+			h = 31*h + characters[i];
+		}
+        return h;
 	}
 
 }

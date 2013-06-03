@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.wizard.template.infrastructure.processor
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -21,7 +22,6 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -36,6 +36,7 @@ import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.template.ErrorUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.FileSystemUtils;
 import org.springsource.ide.eclipse.commons.content.core.util.IContentConstants;
@@ -44,6 +45,8 @@ import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 
 /**
+ * 
+ * Requires a shell. Should be run as a UI Job.
  * @author Terry Denney
  */
 public class TemplateProjectCreator {
@@ -60,9 +63,9 @@ public class TemplateProjectCreator {
 
 	private final TemplateProcessor fileNameProcessor;
 
-	private final IPath projectPath;
+	private final URI projectPath;
 
-	public TemplateProjectCreator(IProject project, IPath projectPath, URL archiveFile, Shell shell,
+	public TemplateProjectCreator(IProject project, URI projectPath, URL archiveFile, Shell shell,
 			TemplateProcessor templateProcessor, TemplateProcessor fileNameProcessor, ProcessingInfo processingInfo) {
 		this.project = project;
 		this.projectPath = projectPath;
@@ -87,7 +90,12 @@ public class TemplateProjectCreator {
 				Policy.checkCancelled(monitor);
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				IProjectDescription projectDescription = workspace.newProjectDescription(projectName);
-				projectDescription.setLocation(projectPath);
+
+				URI projectLocation = (projectPath != null && !ResourcesPlugin.getWorkspace().getRoot()
+						.getLocationURI().equals(projectPath)) ? projectPath : null;
+
+				projectDescription.setLocationURI(projectLocation);
+
 				project.create(projectDescription, new SubProgressMonitor(monitor, 10));
 				project.open(new SubProgressMonitor(monitor, 20));
 
@@ -134,8 +142,9 @@ public class TemplateProjectCreator {
 			throw new OperationCanceledException();
 		}
 		catch (InvocationTargetException e) {
-			Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, "Error during template project creation",
-					e);
+			String errorMessage = ErrorUtils.getErrorMessage(e);
+			Status status = new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, "Error during template project creation"
+					+ (errorMessage != null ? " due to: " + errorMessage : ""), e);
 			UiStatusHandler.logAndDisplay(status);
 			throw new CoreException(status);
 		}

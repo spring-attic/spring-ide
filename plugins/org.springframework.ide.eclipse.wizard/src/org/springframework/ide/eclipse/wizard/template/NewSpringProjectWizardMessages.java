@@ -20,7 +20,7 @@ import org.eclipse.osgi.util.NLS;
 public final class NewSpringProjectWizardMessages extends NLS {
 
 	private static final String BUNDLE_NAME = "org.springframework.ide."
-			+ "eclipse.beans.ui.wizards.BeansWizardsMessages";
+			+ "eclipse.wizard.template.NewSpringProjectWizardMessages";
 
 	private NewSpringProjectWizardMessages() {
 		// Do not instantiate
@@ -35,8 +35,6 @@ public final class NewSpringProjectWizardMessages extends NLS {
 	public static String NewProject_windowTitle;
 
 	public static String NewProject_title;
-
-	public static String NewProject_description;
 
 	public static String NewProject_springSettingsTitle;
 

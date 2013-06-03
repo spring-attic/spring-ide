@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -198,7 +199,12 @@ public class JdtUtils {
 							paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
 						}
 						else {
-							paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/" + classPathEntry.trim())));
+							try {
+								paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/" + classPathEntry.trim())));
+							}
+							catch (FileNotFoundException e) {
+								SpringCore.log("bundle classpath entry \"" + classPathEntry.trim() + "\" of bundle " + bundle.getSymbolicName() + " not found and therefore ignored", e);
+							}
 						}
 					}
 				}

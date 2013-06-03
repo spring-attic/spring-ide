@@ -104,8 +104,14 @@ public class RuntimeTemplateProjectData implements ITemplateProjectData {
 		return zippedProject;
 	}
 
-	private File createZippedProject(String name) throws IOException, CoreException {
-		File destFile = File.createTempFile(name, ".zip");
+	private File createZippedProject(String projectName) throws IOException, CoreException {
+
+		// Note that the name (prefix) must be at least 3 characters long in
+		// order to create a temp file
+		if (projectName.length() < 3) {
+			projectName += "temp";
+		}
+		File destFile = File.createTempFile(projectName, ".zip");
 		FileOutputStream dest = new FileOutputStream(destFile);
 		ZipOutputStream out = null;
 

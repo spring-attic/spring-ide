@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -27,6 +26,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoElement;
 
 /**
@@ -55,7 +55,7 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 
 	private static final String DEFAULT_DESCRIPTION = Messages.getString("TemplateWizardPage.DEFAULT_DESCRIPTION"); //$NON-NLS-1$
 
-	protected NewTemplateWizardPage(String pageTitle, TemplateInputCollector inputHandler, ImageDescriptor icon) {
+	protected NewTemplateWizardPage(String pageTitle, Template template, TemplateInputCollector inputHandler) {
 		super("Template Wizard Page"); //$NON-NLS-1$
 		this.inputHandler = inputHandler;
 
@@ -65,9 +65,15 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 		this.messages = new String[elements.size()];
 		this.validators = new HashSet<WizardTextKeyValidator>();
 
-		setTitle(pageTitle);
+		String title = (pageTitle != null ? pageTitle + " - " : "") + template.getName();
+
+		setTitle(title);
 		setDescription(DEFAULT_DESCRIPTION);
-		setImageDescriptor(icon);
+
+		if (template.getIcon() != null) {
+			setImageDescriptor(template.getIcon());
+		}
+
 	}
 
 	@Override
@@ -116,7 +122,11 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 				buttonContainer.setLayout(layout);
 
 				Label label = new Label(buttonContainer, SWT.NONE);
-				label.setText(description);
+
+				if (description != null) {
+					label.setText(description);
+				}
+
 				label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 				final Button button = new Button(buttonContainer, SWT.CHECK);
@@ -146,7 +156,11 @@ public class NewTemplateWizardPage extends WizardPage implements ITemplateWizard
 			}
 			else {
 				Label descriptionLabel = new Label(container, SWT.NONE);
-				descriptionLabel.setText(description);
+
+				if (description != null) {
+					descriptionLabel.setText(description);
+				}
+
 				descriptionLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 				final Text text = new Text(container, SWT.BORDER);

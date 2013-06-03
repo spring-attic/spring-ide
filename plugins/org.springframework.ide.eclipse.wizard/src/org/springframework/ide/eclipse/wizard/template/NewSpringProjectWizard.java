@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.wizard.template;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceStatus;
@@ -72,8 +73,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 
 		mainPage = new NewSpringProjectWizardMainPage();
 		mainPage.setTitle(NewSpringProjectWizardMessages.NewProject_title);
-		mainPage.setDescription(NewSpringProjectWizardMessages.NewProject_description);
-
+		mainPage.setDescription("Create a Spring project by selecting a template or simple project type.");
 	}
 
 	public NewSpringProjectWizardMainPage getMainPage() {
@@ -82,9 +82,24 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 
 	@Override
 	public void addPages() {
-		// Only has one page. Additional pages can be contributed and managed by
-		// wizard sections
+
 		addPage(mainPage);
+
+		// Also preload any section pages that require their controls to be
+		// created
+		// before a user clicks "Next", as some sections may need access to the
+		// controls
+		// if the user clicks "Finish" from the first page without ever going to
+		// the next page
+		List<SpringProjectWizardSection> sections = sectionFactory.loadSections();
+		for (SpringProjectWizardSection section : sections) {
+			List<IWizardPage> pages = section.loadPages();
+			if (pages != null) {
+				for (IWizardPage page : pages) {
+					addPage(page);
+				}
+			}
+		}
 	}
 
 	/**
@@ -129,11 +144,12 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 	public IWizardPage getNextPage(IWizardPage page) {
 		SpringProjectWizardSection section = getSection();
 
+		// Always make sure the sections decide the progression of the pages
 		if (section != null) {
 			return section.getNextPage(page);
 		}
 
-		return super.getNextPage(page);
+		return null;
 	}
 
 	@Override
@@ -236,7 +252,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 
 		final IWorkingSet[] workingSets = getWorkingSets();
 
-		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+		final WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 			@Override
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException,
 					InterruptedException {
@@ -254,9 +270,8 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 			}
 		};
 
-		// Fork into non-UI thread as project configuration will
-		// require building
-		getContainer().run(true, true, op);
+		// Run in UI thread as some dialogues may open during configuration
+		getContainer().run(false, false, op);
 
 	}
 

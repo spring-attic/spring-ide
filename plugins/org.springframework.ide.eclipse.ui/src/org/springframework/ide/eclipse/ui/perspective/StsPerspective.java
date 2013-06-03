@@ -72,7 +72,6 @@ public class StsPerspective implements IPerspectiveFactory {
 		layout.addActionSet(IPageLayout.ID_NAVIGATE_ACTION_SET);
 
 		// actions - add AJDT actions
-		layout.addActionSet("ajnavigation");
 		layout.addActionSet("ajelementCreation");
 
 		// views - java

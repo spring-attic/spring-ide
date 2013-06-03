@@ -24,8 +24,11 @@ public class SpringWizardSectionFactory {
 
 	private final NewSpringProjectWizard wizard;
 
-	private List<SpringProjectWizardSection> sections;
+	private List<SpringProjectWizardSection> sections = null;
 
+	/**
+	 * Should be created once per wizard session, as the wizard pages are cached
+	 */
 	public SpringWizardSectionFactory(NewSpringProjectWizard wizard) {
 		this.wizard = wizard;
 	}
@@ -43,10 +46,10 @@ public class SpringWizardSectionFactory {
 		return null;
 	}
 
-	protected void loadSections() {
+	public List<SpringProjectWizardSection> loadSections() {
 		sections = new ArrayList<SpringProjectWizardSection>();
 		sections.add(new JavaWizardSection(wizard));
 		sections.add(new TemplateWizardSection(wizard));
-
+		return sections;
 	}
 }

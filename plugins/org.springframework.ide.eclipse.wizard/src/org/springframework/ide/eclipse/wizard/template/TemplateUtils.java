@@ -109,14 +109,7 @@ public class TemplateUtils {
 	 * @return true if downloaded, false otherwise
 	 */
 	public static boolean hasBeenDownloaded(Template template) {
-		try {
-			return template != null && template.getTemplateLocation() != null;
-		}
-		catch (CoreException e) {
-			// Ignore as retrieving template location will occur at other times
-			// where the error will matter.
-		}
-		return false;
+		return template != null && template.getTemplateData() != null;
 	}
 
 	private static TemplateDownloader getTemplateDownloader(ContentItem item) {

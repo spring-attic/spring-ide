@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -79,7 +80,6 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.TemplateCa
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage;
 import org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencesModel;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
-import org.springsource.ide.eclipse.commons.content.core.ContentLocation;
 import org.springsource.ide.eclipse.commons.content.core.ContentManager;
 import org.springsource.ide.eclipse.commons.content.core.ContentPlugin;
 import org.springsource.ide.eclipse.commons.content.core.util.ContentUtil;
@@ -141,7 +141,7 @@ public class TemplateSelectionPart {
 		initializeTemplates();
 
 		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout());
+		GridLayoutFactory.fillDefaults().margins(0, 0).spacing(0, 0).applyTo(container);
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Label label = new Label(container, SWT.NONE);
@@ -152,7 +152,10 @@ public class TemplateSelectionPart {
 		tree.setLinesVisible(false);
 		tree.setHeaderVisible(false);
 		tree.setEnabled(true);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		data.heightHint = 170;
+		tree.setLayoutData(data);
 
 		treeViewer = new TreeViewer(tree);
 
@@ -258,8 +261,7 @@ public class TemplateSelectionPart {
 		GridDataFactory.fillDefaults().grab(false, false).indent(0, legendControlVerticalIndent).applyTo(legendImage);
 
 		legendImage.setImage(WizardImages.getImage(StsUiImages.DOWNLOAD_OVERLAY));
-		legendImage
-				.setToolTipText("Templates with this icon will be downloaded when navigating to the next page, if the template contributes additional pages, or when completing the wizard.");
+		legendImage.setToolTipText("Templates with this icon will be downloaded after clicking the 'Next' button.");
 
 		legendText = new Label(legendComposite, SWT.NONE);
 		legendText.setText("requires downloading");
@@ -482,7 +484,13 @@ public class TemplateSelectionPart {
 				return new Status(IStatus.WARNING, WizardPlugin.PLUGIN_ID, warning);
 			}
 			else {
-				return Status.OK_STATUS;
+				if (!(selectedTemplate instanceof SimpleProject)) {
+					String message = "Click 'Next' to load the template contents.";
+					return new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, message);
+				}
+				else {
+					return Status.OK_STATUS;
+				}
 			}
 		}
 		else {
@@ -629,7 +637,7 @@ public class TemplateSelectionPart {
 	 * simple projects, an empty list is returned, and error logged in the
 	 * container of the part
 	 */
-	public List<SimpleProject> getSimpleProjects() {
+	protected List<SimpleProject> getSimpleProjects() {
 
 		final List<SimpleProject> projects = new ArrayList<SimpleProject>();
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -644,7 +652,7 @@ public class TemplateSelectionPart {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
 							try {
-							
+
 								List<SimpleProject> prj = SimpleProjectContentManager.getManager().getSimpleProjects(
 										monitor);
 								projects.addAll(prj);
