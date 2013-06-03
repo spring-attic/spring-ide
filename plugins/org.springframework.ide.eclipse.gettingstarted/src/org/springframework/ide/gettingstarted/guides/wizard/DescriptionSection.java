@@ -13,6 +13,8 @@ package org.springframework.ide.gettingstarted.guides.wizard;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -51,7 +53,12 @@ public class DescriptionSection extends WizardPageSection {
 		
 		final Text text = new Text(field, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER | SWT.READ_ONLY);
 		
-		GridDataFactory grab = GridDataFactory.fillDefaults().grab(true, true);
+		//Determine vertical space so there's enough room for about 5 lines of text
+//		GC gc = new GC(text);
+//		FontMetrics fm = gc.getFontMetrics();
+//		int preferredHeight = fm.getHeight()*5;
+		
+		GridDataFactory grab = GridDataFactory.fillDefaults().grab(true, true)/*.hint(SWT.DEFAULT, preferredHeight)*/;
 		grab.applyTo(field);
 		grab.applyTo(text);
 		

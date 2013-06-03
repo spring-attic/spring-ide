@@ -16,7 +16,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
@@ -25,6 +28,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * Core counterpart of GuideImportWizard (essentially this is a 'model' for the wizard
@@ -100,7 +104,8 @@ public class GuideImportWizardModel {
 					//Careful... check if downloaded before doing checks that require access to downloaded content.
 					// otherwise will end up blocking UI thread waiting for download.
 					if (!g.isDownloaded()) {
-						return ValidationResult.error(guide.getValue().getName()+" needs to be downloaded. Click download button to proceed.");
+						scheduleDownloadJob();
+						return ValidationResult.info(g.getName()+" is downloading...");
 					}
 					return g.validateBuildType(bt);
 				}
@@ -108,6 +113,7 @@ public class GuideImportWizardModel {
 			}
 			return ValidationResult.OK;
 		}
+
 	};
 	
 	public LiveExpression<Boolean> isDownloaded = new LiveExpression<Boolean>(false) {
@@ -150,13 +156,29 @@ public class GuideImportWizardModel {
 		try {
 			GettingStartedGuide g = guide.getValue();
 			if (g!=null) {
-				g.getZip().getFile();
+				g.getZip().getFile(); //This forces download
 			}
 		} finally {
 			isDownloaded.refresh();
 			mon.done();
 		}
 	}
+	
+	private void scheduleDownloadJob() {
+		Job job = new Job("Downloading guide content") {
+			protected IStatus run(IProgressMonitor mon) {
+				try {
+					performDownload(mon);
+				} catch (Throwable e) {
+					return ExceptionUtil.status(e);
+				}
+				return Status.OK_STATUS;
+			}
+			
+		};
+		job.schedule();
+	}
+	
 	
 	/**
 	 * Performs the final step of the wizard when user clicks on Finish button.

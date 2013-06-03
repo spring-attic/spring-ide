@@ -10,4 +10,24 @@
           path="com.springsource.sts.ide.ui.dashboard.doc">
     </part>
  </extension>
+ 
+<extension 
+     point="org.eclipse.ui.importWizards"> 
+      <wizard
+            category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
+            class="org.springframework.ide.gettingstarted.guides.wizard.GuideImportWizard"
+            icon="icons/guide-import.png"
+            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.guide"
+            name="Spring Guide Project"> 
+         <description> 
+            An import wizards that imports code associated with a Spring Getting Started Guide
+         </description> 
+         <selection class="org.eclipse.core.resources.IResource"/> 
+      </wizard>
+      <category
+            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
+            name="Spring">
+      </category> 
+</extension>
+ 
 </plugin>

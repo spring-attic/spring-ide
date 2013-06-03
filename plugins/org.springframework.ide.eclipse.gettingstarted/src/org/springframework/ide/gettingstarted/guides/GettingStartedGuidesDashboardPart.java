@@ -215,71 +215,73 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 	
 
 	private void displayGuide(final Composite composite, final GettingStartedGuide guide) {
-		FormToolkit toolkit = getToolkit();
-		
-		/////////////////
-		// Link
-		
-		String name = guide.getName();
-		final ImageHyperlink link = toolkit.createImageHyperlink(composite, SWT.NONE);
-		link.setText(name);
-		link.setHref(guide.getHomePage());
-		link.setImage(IdeUiPlugin.getImage(SMALL_ARROW_IMAGE));
-		TableWrapData tableWrapData = new TableWrapData(TableWrapData.FILL_GRAB, TableWrapData.TOP);
-		link.setLayoutData(tableWrapData);
-		
-		link.setToolTipText(""+guide.getHomePage());
-		
-		String description = guide.getDescription();
-		if (description==null || "".equals(description.trim())) {
-			description = "<no description>";
-		}
-		
-		////////////////////
-		// import button
-		
-		Button importButton = toolkit.createButton(composite, "Import", SWT.PUSH);
-		TableWrapData importData = new TableWrapData(TableWrapData.RIGHT, TableWrapData.TOP);
-		importButton.setLayoutData(importData);
-		importButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				GuideImportWizard.open(composite.getShell(), guide);
+		if (!composite.isDisposed()) {
+			//Avoid errors trying to update content in an already closed dashboard.
+			
+			FormToolkit toolkit = getToolkit();
+			/////////////////
+			// Link
+			
+			String name = guide.getName();
+			final ImageHyperlink link = toolkit.createImageHyperlink(composite, SWT.NONE);
+			link.setText(name);
+			link.setHref(guide.getHomePage());
+			link.setImage(IdeUiPlugin.getImage(SMALL_ARROW_IMAGE));
+			TableWrapData tableWrapData = new TableWrapData(TableWrapData.FILL_GRAB, TableWrapData.TOP);
+			link.setLayoutData(tableWrapData);
+			
+			link.setToolTipText(""+guide.getHomePage());
+			
+			String description = guide.getDescription();
+			if (description==null || "".equals(description.trim())) {
+				description = "<no description>";
 			}
-		});
-		
-		/////////////////
-		//Desecription
-		
-		Label descriptionLabel = toolkit.createLabel(composite, description, SWT.WRAP);
-		//descriptionLabel.setForeground(color);
-		TableWrapData descrData = new TableWrapData(TableWrapData.FILL_GRAB, TableWrapData.MIDDLE);
-		descrData.colspan = 2;
-		descrData.indent = 20;
-		descriptionLabel.setLayoutData(descrData);
-		
-		//Make the link clickable
-		link.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent evt) {
-				try {
-					System.out.println(guide.getHomePage());
-					URL url = guide.getHomePage();
-					System.out.println("url="+url);
-					if (url!=null) {
-						//PlatformUI.getWorkbench().getBrowserSupport().createBrowser(BROWSER_ID).openURL(url.toURL());
-						//Use external browser for now because internal browser crashes eclipse a lot.
-						//Also internal browser is unable to open the url because the repos are still private.
-						//External browser works if already logged in to github as a user that has access to the
-						// private repos.
-						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
-					}
-				} catch (Exception e) {
-					GettingStartedActivator.log(e);
+			
+			////////////////////
+			// import button
+			
+			Button importButton = toolkit.createButton(composite, "Import", SWT.PUSH);
+			TableWrapData importData = new TableWrapData(TableWrapData.RIGHT, TableWrapData.TOP);
+			importButton.setLayoutData(importData);
+			importButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					GuideImportWizard.open(composite.getShell(), guide);
 				}
-			}
-		});
-		
+			});
+			
+			/////////////////
+			//Description
+			
+			Label descriptionLabel = toolkit.createLabel(composite, description, SWT.WRAP);
+			//descriptionLabel.setForeground(color);
+			TableWrapData descrData = new TableWrapData(TableWrapData.FILL_GRAB, TableWrapData.MIDDLE);
+			descrData.colspan = 2;
+			descrData.indent = 20;
+			descriptionLabel.setLayoutData(descrData);
+			
+			//Make the link clickable
+			link.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent evt) {
+					try {
+						System.out.println(guide.getHomePage());
+						URL url = guide.getHomePage();
+						System.out.println("url="+url);
+						if (url!=null) {
+							//PlatformUI.getWorkbench().getBrowserSupport().createBrowser(BROWSER_ID).openURL(url.toURL());
+							//Use external browser for now because internal browser crashes eclipse a lot.
+							//Also internal browser is unable to open the url because the repos are still private.
+							//External browser works if already logged in to github as a user that has access to the
+							// private repos.
+							PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
+						}
+					} catch (Exception e) {
+						GettingStartedActivator.log(e);
+					}
+				}
+			});
+		}
 	}
 
 	public static void setMenu(Composite composite, Menu menu) {

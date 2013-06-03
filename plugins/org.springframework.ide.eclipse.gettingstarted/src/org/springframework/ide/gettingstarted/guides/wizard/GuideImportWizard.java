@@ -1,18 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2013 VMWare, Inc.
+ * Copyright (c) 2013 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * VMWare, Inc. - initial API and implementation
+ *    GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.gettingstarted.guides.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -22,6 +23,7 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * @author Kris De Volder
@@ -63,16 +65,24 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 	@Override
 	public boolean performFinish() {
 		try {
-			getContainer().run(false, false, new IRunnableWithProgress() {
+			//IMPORTANT: fork must be true or invalid thread access will ensue for gradle imports.
+			// This is because the gradle import will send progress events from worker threads.
+			// and the non-forked run will pass a UI-direct progress monitor to the runnable!
+			getContainer().run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 					model.performFinish(mon);
+							//new UIThreadProgressAdapter(getShell().getDisplay(), mon));
 				}
 			});
 			return true;
-		} catch (InvocationTargetException e) {
-			GettingStartedActivator.log(e);
 		} catch (InterruptedException e) {
+			GettingStartedActivator.log(e);
+		} catch (InvocationTargetException e) {
+			String msg = ExceptionUtil.getMessage(e);
+			if (msg!=null && !"".equals(msg)) {
+				MessageDialog.openError(getShell(), "Error performing the import", msg);
+			}
 			GettingStartedActivator.log(e);
 		}
 		return false;

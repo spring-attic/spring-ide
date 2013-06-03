@@ -114,7 +114,7 @@ public class DownloadManager {
 	 * will be presumed to be corrupt. The file will be deleted from the cache
 	 * and the download will be tried again. (for a limited number of times)
 	 */
-	public void doWithDownload(DownloadableItem target, DownloadRequestor action) throws Exception {
+	public synchronized void doWithDownload(DownloadableItem target, DownloadRequestor action) throws Exception {
 		int tries = 5; // try at most X times
 		Exception e = null;
 		File downloadedFile = null;
@@ -127,7 +127,7 @@ public class DownloadManager {
 			} catch (Exception caught) {
 				caught.printStackTrace();
 				//Presume the cache may be corrupt!
-				System.out.println("Delete corrupt download: "+downloadedFile);
+				//System.out.println("Delete corrupt download: "+downloadedFile);
 				downloadedFile.delete();
 				e = caught;
 			}

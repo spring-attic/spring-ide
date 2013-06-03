@@ -13,8 +13,6 @@ package org.springframework.ide.gettingstarted.guides.wizard;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
@@ -34,26 +32,8 @@ public class GuideImportWizardPageOne extends WizardPageWithSections {
 	@Override
 	protected List<WizardPageSection> createSections() {
 		List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
-		
-		ChooseOneSection<GettingStartedGuide> chooseGuide = new ChooseOneSection<GettingStartedGuide>(this, 
-			"Guide", 
-			model.getGuideSelectionModel(),
-			GettingStartedContent.getInstance().getGuides()
-		).setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof GettingStartedGuide) {
-					GettingStartedGuide gsg = (GettingStartedGuide) element;
-					return gsg.getName();
-				}
-				return super.getText(element);
-			}
-		});
-		sections.add(new RowSection(this, new WizardPageSection[] {
-				chooseGuide,
-				new DownloadButtonSection(this, model)
-		}));
-		
+
+		sections.add(new ChooseGuideSection(this, model.getGuideSelectionModel()));
 		sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
 		sections.add(new CodeSetCheckBoxesSection(this, GettingStartedGuide.codesetNames, model.getCodeSetModel()));
 		sections.add(new DescriptionSection(this, model.description));
