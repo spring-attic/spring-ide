@@ -11,13 +11,10 @@
 package org.springframework.ide.gettingstarted.guides.wizard;
 
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -45,24 +42,28 @@ public class DescriptionSection extends WizardPageSection {
 
 	@Override
 	public void createContents(Composite page) {
-		Composite field = new Composite(page, SWT.NONE);
-		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(2).create();
-		field.setLayout(layout);
-		Label fieldNameLabel = new Label(field, SWT.NONE);
-		fieldNameLabel.setText("Description");
+//		Composite field = new Composite(page, SWT.NONE);
+//		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(2).create();
+//		field.setLayout(layout);
+//		Label fieldNameLabel = new Label(field, SWT.NONE);
+//		fieldNameLabel.setText("Description");
 		
-		final Text text = new Text(field, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER | SWT.READ_ONLY);
+		final Text text = new Text(page, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER | SWT.READ_ONLY);
 		
 		//Determine vertical space so there's enough room for about 5 lines of text
-//		GC gc = new GC(text);
-//		FontMetrics fm = gc.getFontMetrics();
-//		int preferredHeight = fm.getHeight()*5;
+		GC gc = new GC(text);
+		FontMetrics fm = gc.getFontMetrics();
+		int preferredHeight = fm.getHeight()*5;
 		
-		GridDataFactory grab = GridDataFactory.fillDefaults().grab(true, true)/*.hint(SWT.DEFAULT, preferredHeight)*/;
-		grab.applyTo(field);
+		GridDataFactory grab = GridDataFactory
+				.fillDefaults().grab(true, true)
+				.minSize(SWT.DEFAULT, preferredHeight)
+				;
+				/*.hint(SWT.DEFAULT, preferredHeight)*/;
+//		grab.applyTo(field);
 		grab.applyTo(text);
 		
-		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
+//		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
 		
 		this.model.addListener(new ValueListener<String>() {
 			@Override

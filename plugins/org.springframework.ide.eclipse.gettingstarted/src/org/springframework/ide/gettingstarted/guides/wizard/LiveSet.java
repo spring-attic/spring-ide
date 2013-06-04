@@ -28,6 +28,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
  */
 public class LiveSet<T> extends LiveExpression<Set<T>> {
 	
+	//TODO: move to commons.
+	
 	/**
 	 * To be able to efficiently check that backing collection has changed.
 	 * This assumes the backing collection is owned by the instance and it isn't

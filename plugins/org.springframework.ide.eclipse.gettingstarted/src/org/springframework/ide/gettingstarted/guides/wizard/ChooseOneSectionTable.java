@@ -17,10 +17,16 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -54,21 +60,39 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 	@Override
 	public void createContents(Composite page) {
 		Composite field = new Composite(page, SWT.NONE);
-		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(2).create();
+		int cols = label==null ? 1 : 2;
+		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
 		field.setLayout(layout);
-		Label fieldNameLabel = new Label(field, SWT.NONE);
-		fieldNameLabel.setText(label);
+		Label fieldNameLabel = null;
+		if (label!=null) {
+			fieldNameLabel = new Label(field, SWT.NONE);
+			fieldNameLabel.setText(label);
+		}
 		
 		final TableViewer tv = new TableViewer(field, SWT.SINGLE|SWT.BORDER|SWT.V_SCROLL);
 		tv.setLabelProvider(labelProvider);
 		tv.setContentProvider(ArrayContentProvider.getInstance());
 		tv.setInput(options);
-
 		
-		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
+		if (fieldNameLabel!=null) {
+			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
+		}
 		GridDataFactory grabHor = GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 150);
 		grabHor.applyTo(field);
 		grabHor.applyTo(tv.getTable());
+		
+		
+		whenVisible(tv.getControl(), new Runnable() {
+			@Override
+			public void run() {
+				T preSelect = selection.selection.getValue();
+				if (preSelect!=null) {
+					tv.setSelection(new StructuredSelection(preSelect));
+				} else {
+					tv.setSelection(StructuredSelection.EMPTY, true);
+				}
+			}
+		});
 		
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
 			@SuppressWarnings("unchecked") @Override
@@ -82,6 +106,17 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 				}
 			}
 		});
+	}
+
+	private void whenVisible(final Control control, final Runnable runnable) {
+		PaintListener l = new PaintListener() {
+			@Override
+			public void paintControl(PaintEvent e) {
+				runnable.run();
+				control.removePaintListener(this);
+			}
+		};
+		control.addPaintListener(l);
 	}
 
 //	private String[] getLabels() {

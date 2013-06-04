@@ -17,11 +17,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
-
 
 /**
  * Manages a cache of downloaded content.
@@ -69,27 +71,38 @@ public class DownloadManager {
 		if (target.exists()) {
 			return target;
 		}
+		
+		//It is important not to lock the UI thread for downloads!!! 
+		//  If the UI thread is well behaved, we assume it will be careful not to call this method unless the
+		//  content is already cached. So once we get past the exists check it is ok to grab the lock.
+		synchronized (this) {
+			//It is possible that multiple thread where waiting to enter here... only one of them should proceed
+			// to actually download. So make sure to retest the target.exists() condition to avoid multiple downloads
+			if (target.exists()) {
+				return target;
+			}
+			if (!cacheDirectory.exists()) {
+				cacheDirectory.mkdirs();
+			}
 
-		if (!cacheDirectory.exists()) {
-			cacheDirectory.mkdirs();
-		}
+			File targetPart = new File(target.toString()+".part");
+			FileOutputStream out = new FileOutputStream(targetPart);
+			try {
+				URL url = item.getURL();
+				//System.out.println("Downloading " + url + " to " + target);
 
-		File targetPart = new File(target.toString()+".part");
-		FileOutputStream out = new FileOutputStream(targetPart);
-		try {
-			URL url = item.getURL();
-			//System.out.println("Downloading " + url + " to " + target);
-			downloader.fetch(url, out);
-		}
-		finally {
-			out.close();
-		}
+				downloader.fetch(url, out);
+			}
+			finally {
+				out.close();
+			}
 
-		if (!targetPart.renameTo(target)) {
-			throw new IOException("Error while renaming " + targetPart + " to " + target);
-		}
+			if (!targetPart.renameTo(target)) {
+				throw new IOException("Error while renaming " + targetPart + " to " + target);
+			}
 
-		return target;
+			return target;
+		}
 	}
 
 	private File getLocalLocation(DownloadableItem item) throws URISyntaxException {
@@ -114,7 +127,7 @@ public class DownloadManager {
 	 * will be presumed to be corrupt. The file will be deleted from the cache
 	 * and the download will be tried again. (for a limited number of times)
 	 */
-	public synchronized void doWithDownload(DownloadableItem target, DownloadRequestor action) throws Exception {
+	public void doWithDownload(DownloadableItem target, DownloadRequestor action) throws Exception {
 		int tries = 5; // try at most X times
 		Exception e = null;
 		File downloadedFile = null;

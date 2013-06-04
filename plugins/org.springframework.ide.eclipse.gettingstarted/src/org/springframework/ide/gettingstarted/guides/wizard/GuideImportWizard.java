@@ -11,6 +11,8 @@
 package org.springframework.ide.gettingstarted.guides.wizard;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -23,6 +25,8 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
@@ -31,16 +35,56 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 public class GuideImportWizard extends Wizard implements IImportWizard {
 
 	private GuideImportWizardModel model = new GuideImportWizardModel();
-	private GuideImportWizardPageOne pageOne;
-//	private IWorkbench workbench;
 	
-	{
+	public GuideImportWizard() {
 		setNeedsProgressMonitor(true);
 	}
 	
-	public GuideImportWizard() {
+	private PageOne pageOne = new PageOne(model);
+	
+	public class PageOne extends WizardPageWithSections {
+
+		private GuideImportWizardModel model;
+
+		protected PageOne(GuideImportWizardModel model) {
+			super("Page One", "Import Getting Started Guide", null);
+			this.model = model;
+		}
+		
+		@Override
+		protected List<WizardPageSection> createSections() {
+			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+
+			sections.add(new ChooseGuideSection(this, model.getGuideSelectionModel()));
+			
+			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
+			sections.add(new CodeSetCheckBoxesSection(this, GettingStartedGuide.codesetNames, model.getCodeSetModel()));
+			
+			sections.add(new DescriptionSection(this, model.description));
+			
+			return sections;
+		}
 	}
 
+//	private PageTwo pageTwo = new PageTwo(model);
+//	
+//	public class PageTwo extends WizardPageWithSections {
+//
+//		private GuideImportWizardModel model;
+//
+//		protected PageTwo(GuideImportWizardModel model) {
+//			super("Page Two", "Import Getting Started Guide", null);
+//			this.model = model;
+//		}
+//		
+//		@Override
+//		protected List<WizardPageSection> createSections() {
+//			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+//
+//			return sections;
+//		}
+//	}
+	
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 //		this.workbench = workbench;
 //		super.init(workbench, selection);
@@ -48,15 +92,16 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 	
 	public void addPages() {
 		super.addPages();
-		addPage(getPageOne());
+		addPage(pageOne);
+//		addPage(pageTwo);
 	}
 
-	private GuideImportWizardPageOne getPageOne() {
-		if (pageOne==null) {
-			pageOne = new GuideImportWizardPageOne(model);
-		}
-		return pageOne;
-	}
+//	private GuideImportWizardPageOne getPageOne() {
+//		if (pageOne==null) {
+//			pageOne = new GuideImportWizardPageOne(model);
+//		}
+//		return pageOne;
+//	}
 	
 //	public GradleImportOperation createOperation() {
 //		return getPageOne().createOperation();
