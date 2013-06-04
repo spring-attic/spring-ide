@@ -1,7 +1,7 @@
 package org;
 
 
-public class AdditionalCase {
+public class CaseWithLongAndDoubleConstants {
 	
 	@SuppressWarnings("unused")
 	private double constant = 45.7954;

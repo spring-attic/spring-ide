@@ -90,7 +90,7 @@ public class TypeHierarchyEngine {
 		return false;
 	}
 	
-	public boolean doesImplement(IType type, String interfaceName) {
+	public boolean doesImplement(final IType type, final String interfaceName) {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
 			IProject project = ((IJavaProject)ancestor).getProject();
@@ -98,22 +98,33 @@ public class TypeHierarchyEngine {
 			char[] classTypeName = type.getFullyQualifiedName().replace('.', '/').toCharArray();
 			char[] interfaceTypeName = interfaceName.replace('.',  '/').toCharArray();
 			
-			do {
-				TypeHierarchyElement classTypeElement = getTypeElement(classTypeName, project);
-				if (classTypeElement != null) {
-					char[][] implementedInterfaces = classTypeElement.interfaces;
-					if (implementedInterfaces != null) {
-						Stack<char[][]> interfaceStack = new Stack<char[][]>();
-						interfaceStack.add(implementedInterfaces);
-						
-						while (!interfaceStack.isEmpty()) {
-							char[][] interfacesToAnalyze = interfaceStack.pop();
-							for (char[] interfaceToAnalyze : interfacesToAnalyze) {
-								if (CharOperation.equals(interfaceToAnalyze, interfaceTypeName)) {
-									return true;
-								}
+			// cached items first
+			boolean result = doesImplement(project, classTypeName, interfaceTypeName, true)
+					|| doesImplement(project, classTypeName, interfaceTypeName, false);
+			
+			return result;
+		}
+		return false;
+	}
+
+	protected boolean doesImplement(IProject project, char[] classTypeName, char[] interfaceTypeName, boolean cachedItemsOnly) {
+		do {
+			TypeHierarchyElement classTypeElement = getTypeElement(classTypeName, project);
+			if (classTypeElement != null) {
+				char[][] implementedInterfaces = classTypeElement.interfaces;
+				if (implementedInterfaces != null) {
+					Stack<char[][]> interfaceStack = new Stack<char[][]>();
+					interfaceStack.add(implementedInterfaces);
+					
+					while (!interfaceStack.isEmpty()) {
+						char[][] interfacesToAnalyze = interfaceStack.pop();
+						for (char[] interfaceToAnalyze : interfacesToAnalyze) {
+							if (CharOperation.equals(interfaceToAnalyze, interfaceTypeName)) {
+								return true;
 							}
-							for (char[] interfaceToAnalyze : interfacesToAnalyze) {
+						}
+						for (char[] interfaceToAnalyze : interfacesToAnalyze) {
+							if (!cachedItemsOnly || this.hasCacheElementFor(interfaceToAnalyze, project)) {
 								TypeHierarchyElement interfaceTypeElement = getTypeElement(interfaceToAnalyze, project);
 								if (interfaceTypeElement != null) {
 									char[][] superInterfaces = interfaceTypeElement.interfaces;
@@ -124,15 +135,22 @@ public class TypeHierarchyEngine {
 							}
 						}
 					}
-					classTypeName = classTypeElement.superclassName;
 				}
-				else {
+				classTypeName = classTypeElement.superclassName;
+				if (cachedItemsOnly && classTypeName != null && !hasCacheElementFor(classTypeName, project)) {
 					classTypeName = null;
 				}
-			} while (classTypeName != null);
-		}
-			
+			}
+			else {
+				classTypeName = null;
+			}
+		} while (classTypeName != null);
 		return false;
+	}
+	
+	private boolean hasCacheElementFor(char[] fullyQualifiedClassName, IProject project) {
+		return this.cache.containsKey(project)
+				&& this.cache.get(project).get(fullyQualifiedClassName) != null;
 	}
 	
 	private TypeHierarchyElement getTypeElement(char[] fullyQualifiedClassName, IProject project) {

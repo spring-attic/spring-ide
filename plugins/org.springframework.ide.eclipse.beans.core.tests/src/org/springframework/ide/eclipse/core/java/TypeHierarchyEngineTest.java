@@ -14,6 +14,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -21,6 +26,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ide.eclipse.core.java.typehierarchy.BytecodeTypeHierarchyClassReaderFactory;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyClassReader;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyClassReaderFactory;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyElement;
 import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -33,15 +41,17 @@ public class TypeHierarchyEngineTest {
 	private IProject project;
 	private IJavaProject javaProject;
 	private TypeHierarchyEngine engine;
+	private BytecodeTypeHierarchyClassReaderFactory classReaderFactory;
 
 	@Before
 	public void createProject() throws Exception {
 		project = StsTestUtil.createPredefinedProject("type-hierarchy-engine-testcases", "org.springframework.ide.eclipse.beans.core.tests");
 		javaProject = JdtUtils.getJavaProject(project);
 		
+		classReaderFactory = new BytecodeTypeHierarchyClassReaderFactory();
+
 		engine = new TypeHierarchyEngine();
-//		engine.setClassReaderFactory(new ClassloaderTypeHierarchyClassReaderFactory());
-		engine.setClassReaderFactory(new BytecodeTypeHierarchyClassReaderFactory());
+		engine.setClassReaderFactory(classReaderFactory);
 	}
 	
 	@After
@@ -179,11 +189,79 @@ public class TypeHierarchyEngineTest {
 	}
 	
 	@Test
-	public void testAdditionalCase() throws Exception {
-		IType type = javaProject.findType("org.AdditionalCase");
+	public void testAdditionalCaseWithLongDoubleConstantsInClass() throws Exception {
+		IType type = javaProject.findType("org.CaseWithLongAndDoubleConstants");
 		assertEquals("java.lang.Object", engine.getSupertype(type));
 	}
 	
+	@Test
+	public void testUseCachedElementsFirst() throws Exception {
+		AccessLoggingClassReaderFactory readerFactory = new AccessLoggingClassReaderFactory(classReaderFactory);
+		engine.setClassReaderFactory(readerFactory);
+		
+		engine.getSupertype(project, "org.sub.ClassB");
+		engine.getSupertype(project, "org.sub.InterfaceAB");
+		
+		IType type = javaProject.findType("org.sub.ClassABCD");
+		assertTrue(engine.doesImplement(type, "org.InterfaceB"));
+		
+		AccessLoggingClassReader reader = readerFactory.getReader(project);
+		assertTrue(reader.classAccessed("org/sub/ClassABCD"));
+		assertTrue(reader.classAccessed("org/sub/ClassB"));
+		assertTrue(reader.classAccessed("org/sub/InterfaceAB"));
+		
+		assertFalse(reader.classAccessed("org/ClassA"));
+		assertFalse(reader.classAccessed("org/sub/InterfaceCD"));
+		assertFalse(reader.classAccessed("org/InterfaceC"));
+		assertFalse(reader.classAccessed("org/InterfaceD"));
+		assertFalse(reader.classAccessed("org/InterfaceA"));
+		assertFalse(reader.classAccessed("org/InterfaceB"));
+	}
+	
+	private static class AccessLoggingClassReaderFactory implements TypeHierarchyClassReaderFactory {
+		
+		private TypeHierarchyClassReaderFactory readerFactory;
+		private Map<IProject, AccessLoggingClassReader> readers;
+
+		public AccessLoggingClassReaderFactory(TypeHierarchyClassReaderFactory readerFactory) {
+			this.readers = new HashMap<IProject, AccessLoggingClassReader>();
+			this.readerFactory = readerFactory;
+		}
+
+		public TypeHierarchyClassReader createClassReader(IProject project) {
+			TypeHierarchyClassReader reader = readerFactory.createClassReader(project);
+			AccessLoggingClassReader accessLoggingClassReader = new AccessLoggingClassReader(reader);
+			this.readers.put(project, accessLoggingClassReader);
+			return accessLoggingClassReader;
+		}
+		
+		public AccessLoggingClassReader getReader(IProject project) {
+			return this.readers.get(project);
+		}
+		
+	}
+	
+	private static class AccessLoggingClassReader implements TypeHierarchyClassReader {
+
+		private TypeHierarchyClassReader reader;
+		private List<String> accessedClasses;
+
+		public AccessLoggingClassReader(TypeHierarchyClassReader reader) {
+			this.reader = reader;
+			this.accessedClasses = new ArrayList<String>();
+		}
+
+		public TypeHierarchyElement readTypeHierarchyInformation(char[] fullyQualifiedClassName, IProject project) {
+			this.accessedClasses.add(new String(fullyQualifiedClassName));
+			return this.reader.readTypeHierarchyInformation(fullyQualifiedClassName, project);
+		}
+		
+		public boolean classAccessed(String className) {
+			return this.accessedClasses.contains(className);
+		}
+		
+	}
+ 	
 //	@Test
 //	public void testExternalClassFile() throws Exception {
 //		BytecodeTypeHierarchyClassReader reader = new BytecodeTypeHierarchyClassReader(null);
