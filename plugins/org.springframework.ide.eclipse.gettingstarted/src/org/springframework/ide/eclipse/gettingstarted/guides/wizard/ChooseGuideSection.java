@@ -8,12 +8,12 @@
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;

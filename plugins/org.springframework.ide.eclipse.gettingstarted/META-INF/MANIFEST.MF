@@ -25,6 +25,6 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.gettingstarted.content,
+ org.springframework.ide.eclipse.gettingstarted.guides,
  org.springframework.ide.eclipse.gettingstarted.importing,
- org.springframework.ide.eclipse.gettingstarted.util,
- org.springframework.ide.gettingstarted.guides
+ org.springframework.ide.eclipse.gettingstarted.util

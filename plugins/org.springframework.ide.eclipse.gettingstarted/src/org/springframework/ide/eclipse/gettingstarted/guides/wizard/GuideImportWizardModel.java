@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -22,8 +22,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;

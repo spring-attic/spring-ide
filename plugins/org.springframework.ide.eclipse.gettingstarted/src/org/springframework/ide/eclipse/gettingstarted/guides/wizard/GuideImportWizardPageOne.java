@@ -8,12 +8,12 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 

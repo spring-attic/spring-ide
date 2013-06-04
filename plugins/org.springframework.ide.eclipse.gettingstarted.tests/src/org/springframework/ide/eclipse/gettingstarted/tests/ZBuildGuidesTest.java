@@ -26,8 +26,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**

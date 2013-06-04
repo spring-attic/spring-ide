@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
 import org.eclipse.swt.layout.GridLayout;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;

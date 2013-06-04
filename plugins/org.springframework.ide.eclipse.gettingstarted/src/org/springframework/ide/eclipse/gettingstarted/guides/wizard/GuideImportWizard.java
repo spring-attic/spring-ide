@@ -8,7 +8,7 @@
  * Contributors:
  *    GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;

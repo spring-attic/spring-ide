@@ -8,7 +8,7 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.guides;
+package org.springframework.ide.eclipse.gettingstarted.guides;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 

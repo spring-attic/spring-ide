@@ -16,7 +16,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
-import org.springframework.ide.gettingstarted.guides.ReferenceApp;
+import org.springframework.ide.eclipse.gettingstarted.guides.ReferenceApp;
 
 /**
  * @author Kris De Volder

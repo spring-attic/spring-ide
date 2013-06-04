@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.gettingstarted.tests;
 
 import junit.framework.TestCase;
 
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 
 /**
  * Some infrastucture shared among different dynamically generated testcases for

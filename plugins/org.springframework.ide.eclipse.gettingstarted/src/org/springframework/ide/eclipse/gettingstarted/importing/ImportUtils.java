@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.gettingstarted.importing;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 
 /**
  * @author Kris De Volder

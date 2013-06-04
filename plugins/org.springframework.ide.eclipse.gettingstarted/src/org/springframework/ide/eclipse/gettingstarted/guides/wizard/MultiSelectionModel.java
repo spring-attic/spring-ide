@@ -6,30 +6,26 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     GoPivotal, Inc. - initial API and implementation
+ * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
-import org.eclipse.core.runtime.Assert;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 /**
- * A model capable of holding a value (selected by the user in a UI) 
- * of a given type and some validation logic associated with that value.
+ * Model of a selection that can be thought of as a Set of elements somehow selected by the user. 
+ * 
+ * @author Kris De Volder
  */
-public class SelectionModel<T> {
-	
-	public final LiveVariable<T> selection;
+public class MultiSelectionModel<T> {
+
+	public final LiveSet<T> selecteds;
 	public final LiveExpression<ValidationResult> validator;
-	
-	public SelectionModel(LiveVariable<T> selection,
-			LiveExpression<ValidationResult> validator) {
-		super();
-		Assert.isNotNull(selection);
-		Assert.isNotNull(validator);
-		this.selection = selection;
+
+	public MultiSelectionModel(LiveSet<T> selecteds, LiveExpression<ValidationResult> validator) {
+		this.selecteds = selecteds;
 		this.validator = validator;
 	}
+
 }

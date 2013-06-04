@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.gettingstarted.tests;
 import junit.framework.TestCase;
 
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
-import org.springframework.ide.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 
 /**
  * @author Kris De Volder
