@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
@@ -39,6 +40,9 @@ import org.springframework.web.client.RestTemplate;
  */
 public class GithubClient {
 	
+	private static final Pattern GITHUB_HOST = Pattern.compile("(.*\\.|)github\\.com");
+		//pattern should match 'github.com' and api.github.com'
+
 	private static final boolean DEBUG = false;
 	
 	private Credentials credentials;
@@ -63,7 +67,7 @@ public class GithubClient {
 		String username = System.getProperty("github.user.name");
 		String password = System.getProperty("github.user.password");
 		if (username!=null && password!=null) {
-			return new BasicAuthCredentials(username, password);
+			return new BasicAuthCredentials(GITHUB_HOST, username, password);
 		}
 		//Try properties file..
 		InputStream stream = GithubClient.class.getResourceAsStream("user.properties");
@@ -73,7 +77,7 @@ public class GithubClient {
 				props.load(stream);
 				username = props.getProperty("name");
 				password = props.getProperty("passwd");
-				return new BasicAuthCredentials(username, password);
+				return new BasicAuthCredentials(GITHUB_HOST, username, password);
 			} catch (Throwable e) {
 				GettingStartedActivator.log(e);
 			} finally {

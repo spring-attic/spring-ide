@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.content;
 
@@ -110,6 +110,18 @@ public class GettingStartedContent extends ContentManager {
 
 	public ReferenceApp[] getReferenceApps() {
 		return get(ReferenceApp.class);
+	}
+
+	public GettingStartedGuide getGuide(String guideName) {
+		GettingStartedGuide[] guides = getGuides();
+		if (guides!=null) {
+			for (GettingStartedGuide g : guides) {
+				if (guideName.equals(g.getName())) {
+					return g;
+				}
+			}
+		}
+		return null;
 	}
 	
 	

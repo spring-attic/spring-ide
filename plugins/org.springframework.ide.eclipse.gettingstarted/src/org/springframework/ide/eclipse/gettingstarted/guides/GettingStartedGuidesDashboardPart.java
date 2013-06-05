@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -190,18 +191,24 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 			UIJob uiJob = new UIJob("Display guides") {
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					//TODO: erase prior content if there's any already there.
-					for (final GettingStartedGuide guide : guides) {
-						displayGuide(guidesComposite, guide);
-//							Composite slot = toolkit.createComposite(guidesComposite, SWT.WRAP);
-							
-//							TableWrapLayout twl = new TableWrapLayout();
-//							twl.numColumns = 2;
-//							slot.setLayout(twl);
-
+					try {
+						//TODO: erase prior content if there's any already there.
+						for (final GettingStartedGuide guide : guides) {
+							displayGuide(guidesComposite, guide);
+	//							Composite slot = toolkit.createComposite(guidesComposite, SWT.WRAP);
+								
+	//							TableWrapLayout twl = new TableWrapLayout();
+	//							twl.numColumns = 2;
+	//							slot.setLayout(twl);
+	
+						}
+	//					guidesComposite.layout(true,true);
+						refreshUILayout();
+					} catch (SWTException e) {
+						//ignore.. we get this if someone closes the dash while this job is being scheduled / run.
+						//The widgets are already disposed and can't really be refreshed anymore so its ok to 
+						//just ignore these errors.
 					}
-//					guidesComposite.layout(true,true);
-					refreshUILayout();
 					return Status.OK_STATUS;
 				}
 			};

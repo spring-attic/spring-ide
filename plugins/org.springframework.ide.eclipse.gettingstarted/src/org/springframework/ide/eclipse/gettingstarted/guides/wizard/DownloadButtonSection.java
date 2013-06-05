@@ -31,6 +31,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
@@ -46,7 +47,7 @@ public class DownloadButtonSection extends WizardPageSection {
 	private Button button;
 
 	public DownloadButtonSection(
-			GuideImportWizardPageOne owner,
+			WizardPageWithSections owner,
 			GuideImportWizardModel model) {
 		super(owner);
 		this.model = model;
@@ -99,7 +100,6 @@ public class DownloadButtonSection extends WizardPageSection {
 	 * already downloaded.
 	 */
 	private void enableDisable() {
-		//TODO: Why doesn't this just use the model.isDownloaded LiveExp?
 		final GettingStartedGuide g = model.getGuide();
 		if (g!=null) {
 			Display dis = Display.getDefault();

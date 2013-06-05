@@ -2,6 +2,7 @@ package org.springframework.ide.eclipse.gettingstarted.github.auth;
 
 import java.net.URLConnection;
 
+import org.eclipse.swt.browser.Browser;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -19,6 +20,11 @@ public class NullCredentials extends Credentials {
 
 	@Override
 	public void apply(URLConnection conn) {
+		//No credentials so nothing to apply
+	}
+
+	@Override
+	public void apply(Browser browser) {
 		//No credentials so nothing to apply
 	}
 

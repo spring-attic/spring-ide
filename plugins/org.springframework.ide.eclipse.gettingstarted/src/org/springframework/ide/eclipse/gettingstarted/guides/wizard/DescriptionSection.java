@@ -56,10 +56,9 @@ public class DescriptionSection extends WizardPageSection {
 		int preferredHeight = fm.getHeight()*5;
 		
 		GridDataFactory grab = GridDataFactory
-				.fillDefaults().grab(true, true)
+				.fillDefaults().grab(true, false)
 				.minSize(SWT.DEFAULT, preferredHeight)
-				;
-				/*.hint(SWT.DEFAULT, preferredHeight)*/;
+				.hint(SWT.DEFAULT, preferredHeight);
 //		grab.applyTo(field);
 		grab.applyTo(text);
 		

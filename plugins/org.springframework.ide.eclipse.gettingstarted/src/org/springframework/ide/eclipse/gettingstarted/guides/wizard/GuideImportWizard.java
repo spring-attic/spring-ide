@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -25,6 +26,7 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -38,7 +40,11 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 	
 	public GuideImportWizard() {
 		setNeedsProgressMonitor(true);
+		setDefaultPageImageDescriptor(WizardImages.TEMPLATE_WIZARD_ICON);
 	}
+	
+	private static final ImageDescriptor IMAGE = WizardImages.TEMPLATE_WIZARD_ICON;
+	   //TODO: Get our own icon for GSG wizard
 	
 	private PageOne pageOne = new PageOne(model);
 	
@@ -47,7 +53,7 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 		private GuideImportWizardModel model;
 
 		protected PageOne(GuideImportWizardModel model) {
-			super("Page One", "Import Getting Started Guide", null);
+			super("Page One", "Import Getting Started Guide", IMAGE);
 			this.model = model;
 		}
 		
@@ -56,11 +62,11 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
 			sections.add(new ChooseGuideSection(this, model.getGuideSelectionModel()));
+			sections.add(new DescriptionSection(this, model.description));
 			
 			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
 			sections.add(new CodeSetCheckBoxesSection(this, GettingStartedGuide.codesetNames, model.getCodeSetModel()));
 			
-			sections.add(new DescriptionSection(this, model.description));
 			
 			return sections;
 		}
@@ -73,7 +79,7 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 //		private GuideImportWizardModel model;
 //
 //		protected PageTwo(GuideImportWizardModel model) {
-//			super("Page Two", "Import Getting Started Guide", null);
+//			super("Page Two", "Import Getting Started Guide", IMAGE);
 //			this.model = model;
 //		}
 //		
@@ -95,17 +101,6 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 		addPage(pageOne);
 //		addPage(pageTwo);
 	}
-
-//	private GuideImportWizardPageOne getPageOne() {
-//		if (pageOne==null) {
-//			pageOne = new GuideImportWizardPageOne(model);
-//		}
-//		return pageOne;
-//	}
-	
-//	public GradleImportOperation createOperation() {
-//		return getPageOne().createOperation();
-//	}
 
 	@Override
 	public boolean performFinish() {

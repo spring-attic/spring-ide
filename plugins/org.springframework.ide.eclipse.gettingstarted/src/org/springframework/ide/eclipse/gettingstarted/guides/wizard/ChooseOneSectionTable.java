@@ -77,9 +77,9 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		if (fieldNameLabel!=null) {
 			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
 		}
-		GridDataFactory grabHor = GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 150);
-		grabHor.applyTo(field);
-		grabHor.applyTo(tv.getTable());
+		GridDataFactory grab = GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 150);
+		grab.applyTo(field);
+		grab.applyTo(tv.getTable());
 		
 		
 		whenVisible(tv.getControl(), new Runnable() {

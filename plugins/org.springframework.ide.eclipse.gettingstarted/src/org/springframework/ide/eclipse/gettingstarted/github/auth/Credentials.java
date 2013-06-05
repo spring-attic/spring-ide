@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.gettingstarted.github.auth;
 
 import java.net.URLConnection;
 
+import org.eclipse.swt.browser.Browser;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -44,5 +45,11 @@ public abstract class Credentials {
 	 * Add authentication headers to a url connection.
 	 */
 	public abstract void apply(URLConnection conn);
+
+	/**
+	 * 
+	 * @param browser
+	 */
+	public abstract void apply(Browser browser);
 
 }

@@ -12,11 +12,16 @@ package org.springframework.ide.eclipse.gettingstarted.github.auth;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
+import org.eclipse.swt.browser.AuthenticationEvent;
+import org.eclipse.swt.browser.AuthenticationListener;
+import org.eclipse.swt.browser.Browser;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -32,10 +37,12 @@ import org.springframework.web.client.RestTemplate;
  */
 public class BasicAuthCredentials extends Credentials {
 
+	private Pattern host;
 	private String username;
 	private String passwd;
 
-	public BasicAuthCredentials(String username, String passwd) {
+	public BasicAuthCredentials(Pattern host, String username, String passwd) {
+		this.host = host;
 		this.username = username;
 		this.passwd = passwd;
 	}
@@ -58,10 +65,12 @@ public class BasicAuthCredentials extends Credentials {
 		interceptors.add(new ClientHttpRequestInterceptor() {
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
 					ClientHttpRequestExecution execution) throws IOException {
-				HttpHeaders headers = request.getHeaders();
-				if (!headers.containsKey("Authorization")) {
-					String authString = computeAuthString();
-					headers.add("Authorization", authString);
+				if (matchHost(request.getURI().getHost())) {
+					HttpHeaders headers = request.getHeaders();
+					if (!headers.containsKey("Authorization")) {
+						String authString = computeAuthString();
+						headers.add("Authorization", authString);
+					}
 				}
 				return execution.execute(request, body);
 			}
@@ -73,11 +82,42 @@ public class BasicAuthCredentials extends Credentials {
 	@Override
 	public void apply(URLConnection conn) {
 		try {
-			conn.setRequestProperty("Authorization", computeAuthString());
+			if (matchHost(conn.getURL().getHost())) {
+				conn.setRequestProperty("Authorization", computeAuthString());
+			}
 		} catch (UnsupportedEncodingException e) {
 			//Shouldn't really be possible...
 			GettingStartedActivator.log(e);
 		}
+	}
+
+	private boolean matchHost(String host) {
+		if (this.host!=null) {
+			return this.host.matcher(host).matches();
+		} else {
+			return true;
+		}
+	}
+
+	@Override
+	public void apply(Browser browser) {
+		browser.addAuthenticationListener(new AuthenticationListener() {
+			
+			@Override
+			public void authenticate(AuthenticationEvent event) {
+				try {
+					URI uri = new URI(event.location);
+					if (matchHost(uri.getHost())) {
+						event.user = username;
+						event.password = passwd;
+					} else {
+						/* do nothing, let default prompter run */
+					}
+				} catch (URISyntaxException e) {
+					/* shouldn't happen. do nothing, let default prompter run */
+				}
+			}
+		});
 	}
 
 }
