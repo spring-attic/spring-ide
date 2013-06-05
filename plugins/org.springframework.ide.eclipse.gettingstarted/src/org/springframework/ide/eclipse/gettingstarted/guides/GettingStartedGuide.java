@@ -101,5 +101,29 @@ public class GettingStartedGuide extends GithubRepoContent {
 		}
 		throw new NoSuchElementException(this+" has no codeset '"+name+"'");
 	}
+
+	private String beatify(String name) {
+		if (name.startsWith("gs-")) {
+			name = name.substring(3);
+		}
+		String[] words = name.split("\\-");
+		StringBuilder buf = new StringBuilder();
+		for (int i = 0; i < words.length; i++) {
+			String w = words[i];
+			if (w.length()>0) {
+				buf.append(w.substring(0,1).toUpperCase());
+				buf.append(w.substring(1));
+			}
+			buf.append(' ');
+		}
+		return buf.toString();
+	}
+	
+	/**
+	 * A more 'beautiful' name derived from the guide's repository name.
+	 */
+	public String getDisplayName() {
+		return beatify(getName());
+	}
 	
 }

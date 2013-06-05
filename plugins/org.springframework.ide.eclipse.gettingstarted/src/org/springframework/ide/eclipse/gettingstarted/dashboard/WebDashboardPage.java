@@ -1,39 +1,30 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.dashboard;
 
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPage;
-import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
 
 /**
  * A DashBoard page that displays the contents of a webpage.
@@ -42,12 +33,17 @@ import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
  */
 public class WebDashboardPage extends AbstractDashboardPage implements IExecutableExtension {
 
-	public static final String DASHBOARD_SLAVE_BROWSER_ID = null;
+	/**
+	 * Using this ID ensures we only open one 'slave' browser when opening links from within
+	 * a dashboard page.
+	 */
+	public static final String DASHBOARD_SLAVE_BROWSER_ID = WebDashboardPage.class.getName()+".SLAVE";
+	
 	/**
 	 * Helper method to open urls in a regular web browser. Should be used to open 
 	 * urls from dashboard pages that would otherwise navigate the embedded browser
-	 * away from the intended landing page that should always be shown in the 
-	 * dashboard page.
+	 * away from the intended landing page that should always be shown in that 
+	 * particular page.
 	 */
 	public static void openUrl(String url) {
 		try {
@@ -58,23 +54,12 @@ public class WebDashboardPage extends AbstractDashboardPage implements IExecutab
 		}
 	}
 
-	public static class HelloPart extends AbstractDashboardPart {
-
-		@Override
-		public Control createPartContent(Composite parent) {
-			FormToolkit toolkit = getToolkit();
-			Label label = toolkit.createLabel(parent, "Hello World!");
-			return label;
-		}
-
-	}
-
 	private static int idCounter = 0;
 
 	/**
 	 * The URL that will be displayed in this Dashboard webpage.
 	 */
-	String url;
+	private String url;
 
 	public WebDashboardPage() {
 		//It seems we are forced to pass an id and a title although looks like this
@@ -142,11 +127,12 @@ public class WebDashboardPage extends AbstractDashboardPage implements IExecutab
 		return url;
 	}
 	
-	@Override
-	protected List<AbstractDashboardPart> contributeParts(Composite parent, String path) {
-		List<AbstractDashboardPart> parts = new ArrayList<AbstractDashboardPart>();
-		parts.add(new HelloPart());
-		return parts;
+	/**
+	 * Change the url this dashboard page that will show when it is opened. 
+	 * This must be called before the page is opened.
+	 */
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 }

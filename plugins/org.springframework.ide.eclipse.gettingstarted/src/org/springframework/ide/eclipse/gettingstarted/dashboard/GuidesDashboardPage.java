@@ -56,19 +56,24 @@ public class GuidesDashboardPage extends WebDashboardPage {
 	 * Provides a js function that can be called by webpage inside the dash to
 	 * open the STS import wizard to import a guide.
 	 */
-	public class ImportGuideJSFunction extends BrowserFunction {
+	public class ImportJSFunction extends BrowserFunction {
 
-		public ImportGuideJSFunction(Browser browser) {
-			super(browser, "sts_import_guide");
+		public ImportJSFunction(Browser browser) {
+			super(browser, "sts_import");
 		}
 		
 		@Override
 		public Object function(Object[] arguments) {
-			String url = (String) arguments[0];
-			try {
-				return (Boolean)importGuideUrl(new URI(url));
-			} catch (URISyntaxException e) {
-				return false;
+			String type = (String) arguments[0];
+			if ("guide".equals(type)) {
+				String url = (String) arguments[1];
+				try {
+					return (Boolean)importGuideUrl(new URI(url));
+				} catch (URISyntaxException e) {
+					return false;
+				}
+			} else {
+				throw new Error("Unknown type of import: "+type);
 			}
 		}
 
@@ -84,11 +89,20 @@ public class GuidesDashboardPage extends WebDashboardPage {
 			Map<String, String> map = (Map<String, String>) data;
 			String useJsString = map.get("useJavaScript");
 			if (useJsString!=null) {
-				useJavaScript = Boolean.valueOf(useJsString);
+				setUseJavaScript(Boolean.valueOf(useJsString));
 			}
 		}
 	}
 	
+	/**
+	 * Enable 'use java script' option. This will provide a 'sts_import_guide' javascript function
+	 * to the webpage instead of intercepting links that look like they are pointing a github
+	 * guides project.
+	 */
+	public void setUseJavaScript(boolean enable) {
+		useJavaScript = enable;
+	}
+
 	private boolean importGuideUrl(URI uri) {
 		String host = uri.getHost();
 		if ("github.com".equals(host)) {
@@ -104,7 +118,7 @@ public class GuidesDashboardPage extends WebDashboardPage {
 		}
 		return false;
 	}
-
+	
 	public class GuidesUrlInterceptor implements LocationListener {
 
 		@Override
@@ -141,12 +155,15 @@ public class GuidesDashboardPage extends WebDashboardPage {
 
 		private boolean allowNavigation(String location) {
 			//We white list some urls for navigation since they are needed to allow signing it with github at the moment
-			if (location.startsWith("https://github.com/login?return_to")) {
-				return true;
-			} else if (location.equals("https://github.com/session")) {
-				return true;
-			} else if (location.equals(GuidesDashboardPage.this.getUrl())) {
-				return true;
+			try {
+				if (location.startsWith("https://github.com/login?return_to")) {
+					return true;
+				} else if (location.equals("https://github.com/session")) {
+					return true;
+				} else if (new URI(location).equals(new URI(GuidesDashboardPage.this.getUrl()))) {
+					return true;
+				}
+			} catch (URISyntaxException e) {
 			}
 			return false;
 		}
@@ -167,7 +184,7 @@ public class GuidesDashboardPage extends WebDashboardPage {
 		browser.addLocationListener(urlHandler);
 
 		if (useJavaScript) {
-			final BrowserFunction importGuideFun = new ImportGuideJSFunction(browser);
+			final BrowserFunction importFun = new ImportJSFunction(browser);
 			//TODO: do we need to dispose this function? In the sample snippet code this
 			// is done on a completed progress event. But I think that means the function can only
 			// be called while the page is loading. We wanna be able to call this function 

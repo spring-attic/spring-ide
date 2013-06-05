@@ -124,5 +124,4 @@ public class GettingStartedContent extends ContentManager {
 		return null;
 	}
 	
-	
 }

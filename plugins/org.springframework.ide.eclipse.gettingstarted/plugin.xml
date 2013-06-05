@@ -30,13 +30,20 @@
           label="Guides"
           path="additions">
     </page>
-    <page
+<!--    <page
           id="org.springframework.ide.eclipse.gettingstarted.guides"
           label="Guides (JS)"
           path="additions">
          <class class="org.springframework.ide.eclipse.gettingstarted.dashboard.GuidesDashboardPage">
 	         <parameter name="url" value="file:///home/kdvolder/commandline-dev/spring-ide/plugins/org.springframework.ide.eclipse.gettingstarted/resources/dashboard.html"/>
 	         <parameter name="useJavaScript" value="true"/>
+	     </class>
+    </page> -->
+    <page
+          id="org.springframework.ide.eclipse.gettingstarted.guides"
+          label="Guides (JS)"
+          path="additions">
+         <class class="org.springframework.ide.eclipse.gettingstarted.dashboard.GeneratedGuidesDashboardPage">
 	     </class>
     </page>
  </extension>

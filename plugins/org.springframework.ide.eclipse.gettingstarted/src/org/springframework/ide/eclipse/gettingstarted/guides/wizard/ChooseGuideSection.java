@@ -70,26 +70,9 @@ public class ChooseGuideSection extends WizardPageSection {
 				public String getText(Object element) {
 					if (element instanceof GettingStartedGuide) {
 						GettingStartedGuide gsg = (GettingStartedGuide) element;
-						return beatify(gsg.getName());
+						return gsg.getDisplayName();
 					}
 					return super.getText(element);
-				}
-
-				private String beatify(String name) {
-					if (name.startsWith("gs-")) {
-						name = name.substring(3);
-					}
-					String[] words = name.split("\\-");
-					StringBuilder buf = new StringBuilder();
-					for (int i = 0; i < words.length; i++) {
-						String w = words[i];
-						if (w.length()>0) {
-							buf.append(w.substring(0,1).toUpperCase());
-							buf.append(w.substring(1));
-						}
-						buf.append(' ');
-					}
-					return buf.toString();
 				}
 			});
 
