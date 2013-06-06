@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
@@ -34,6 +35,8 @@ public class GettingStartedContent extends ContentManager {
 
 	private static GettingStartedContent INSTANCE = null;
 	
+	private static boolean ADD_MOCKS = (""+Platform.getLocation()).contains("kdvolder");
+	
 	public static GettingStartedContent getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new GettingStartedContent();
@@ -48,8 +51,15 @@ public class GettingStartedContent extends ContentManager {
 		register(GettingStartedGuide.class, new ContentProvider<GettingStartedGuide>() {
 			@Override
 			public GettingStartedGuide[] fetch(DownloadManager downloader) {
-				Repo[] repos = github.getOrgRepos("springframework-meta");
 				List<GettingStartedGuide> guides = new ArrayList<GettingStartedGuide>();
+				addGuidesFrom(github.getOrgRepos("springframework-meta"), guides, downloader);
+				if (ADD_MOCKS) {
+					addGuidesFrom(github.getUserRepos("kdvolder"), guides, downloader);
+				}
+				return guides.toArray(new GettingStartedGuide[guides.size()]);
+			}
+			
+			private List<GettingStartedGuide> addGuidesFrom(Repo[] repos, List<GettingStartedGuide> guides, DownloadManager downloader) {
 				for (Repo repo : repos) {
 					String name = repo.getName();
 					if (name.startsWith("gs-") && !name.equals("gs-redis-counters")) {
@@ -59,7 +69,7 @@ public class GettingStartedContent extends ContentManager {
 						guides.add(new GettingStartedGuide(repo, downloader));
 					}
 				}
-				return guides.toArray(new GettingStartedGuide[guides.size()]);
+				return guides;
 			}
 		});
 		

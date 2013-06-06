@@ -27,7 +27,7 @@ public class ReferenceAppMetaData {
 						  // to define to other ways/places of obtaining the sample code.
 	
 	@JsonProperty("description")
-	private String description; //optional if not provided will use the github repo's desciption
+	private String description; //optional if not provided will use the github repo's description
 	
 	@JsonProperty("owner")
 	private String owner; //mandatory: github repo owner name

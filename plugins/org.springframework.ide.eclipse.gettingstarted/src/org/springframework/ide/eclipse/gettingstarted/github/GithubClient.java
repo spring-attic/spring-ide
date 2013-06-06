@@ -123,6 +123,14 @@ public class GithubClient {
 	public Repo[] getOrgRepos(String orgName) {
 		return get("/orgs/{orgName}/repos", Repo[].class, orgName);
 	}
+	
+	/**
+	 * Fetch info about repos under a given user name
+	 */
+	public Repo[] getUserRepos(String userName) {
+		return get("/users/{userName}/repos", Repo[].class, userName);
+	}
+	
 
 	/**
 	 * Fetch info about a repo identified by an owner and a name
@@ -257,5 +265,4 @@ public class GithubClient {
 		}
 	}
 
-	
 }
