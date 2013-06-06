@@ -19,6 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
@@ -45,13 +46,18 @@ public class WebDashboardPage extends AbstractDashboardPage implements IExecutab
 	 * away from the intended landing page that should always be shown in that 
 	 * particular page.
 	 */
-	public static void openUrl(String url) {
-		try {
-			IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().createBrowser(DASHBOARD_SLAVE_BROWSER_ID);
-			browser.openURL(new URL(url));
-		} catch (Exception e) {
-			GettingStartedActivator.log(e);
-		}
+	public static void openUrl(final String url) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().createBrowser(DASHBOARD_SLAVE_BROWSER_ID);
+					browser.openURL(new URL(url));
+				} catch (Exception e) {
+					GettingStartedActivator.log(e);
+				}
+			}
+		});
 	}
 
 	private static int idCounter = 0;

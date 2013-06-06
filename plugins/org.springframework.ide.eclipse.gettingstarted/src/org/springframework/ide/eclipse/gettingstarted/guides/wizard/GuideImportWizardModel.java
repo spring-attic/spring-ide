@@ -12,16 +12,20 @@ package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -45,9 +49,6 @@ public class GuideImportWizardModel {
 	// will be downloaded. This will overwrite what's there. At the very least a warning should
 	// appear in the wizard.
 	
-	//TODO: Make guides chooser section use a list/table widget instead of Combo. There are too many
-	// items for a Combo to be nice. Make the list widget 'searchable'.
-
 	public static class CodeSetValidator extends LiveExpression<ValidationResult> {
 
 		private LiveVariable<GettingStartedGuide> codesetProvider;
@@ -138,6 +139,22 @@ public class GuideImportWizardModel {
 		}
 	};
 	
+	public final LiveExpression<URL> homePage = new LiveExpression<URL>(null) {
+		@Override
+		protected URL compute() {
+			GettingStartedGuide g = guide.getValue();
+			if (g!=null) {
+				return g.getHomePage();
+			}
+			return null;
+		}
+	};
+
+	/**
+	 * Indicates whether the user has selected the option to open the home page.
+	 */
+	private LiveVariable<Boolean> enableOpenHomePage = new LiveVariable<Boolean>(true);
+	
 	{
 		buildTypeValidator.dependsOn(guide);
 		buildTypeValidator.dependsOn(isDownloaded);
@@ -146,6 +163,8 @@ public class GuideImportWizardModel {
 		isDownloaded.dependsOn(guide);
 		
 		description.dependsOn(guide);
+		
+		homePage.dependsOn(guide);
 	}
 	
 	/**
@@ -192,7 +211,7 @@ public class GuideImportWizardModel {
 		BuildType bt = buildType.getValue();
 		Set<String> codesetNames = codesets.getValue();
 		
-		mon.beginTask("Import guide codeset(s)", codesetNames.size());
+		mon.beginTask("Import guide content", codesetNames.size()+1);
 		try {
 			for (String name : codesetNames) {
 				IRunnableWithProgress oper = bt.getImportStrategy().createOperation(ImportUtils.importConfig(
@@ -200,6 +219,12 @@ public class GuideImportWizardModel {
 						g.getCodeSet(name)
 				));
 				oper.run(new SubProgressMonitor(mon, 1));
+			}
+			if (enableOpenHomePage.getValue()) {
+				URL url = homePage.getValue();
+				if (url!=null) {
+					WebDashboardPage.openUrl(url.toString());
+				}
 			}
 			return true;
 		} finally {
@@ -230,4 +255,9 @@ public class GuideImportWizardModel {
 	public LiveExpression<Boolean> isDownloaded() {
 		return isDownloaded;
 	}
+
+	public LiveVariable<Boolean> getEnableOpenHomePage() {
+		return enableOpenHomePage;
+	}
+
 }

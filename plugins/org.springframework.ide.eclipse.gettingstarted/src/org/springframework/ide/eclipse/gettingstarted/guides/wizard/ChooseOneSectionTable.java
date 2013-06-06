@@ -19,15 +19,21 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.internal.misc.StringMatcher;
+import org.eclipse.ui.internal.misc.StringMatcher.Position;
+import org.springframework.ide.eclipse.gettingstarted.guides.Describable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -39,11 +45,55 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
  * This class is very similar in functionality (from client's point of view) to {@link ChooseOneSectionCombo}.
  * It should be possible to use either one of these classes as functional replacements for one another.
  */
+@SuppressWarnings("restriction")
 public class ChooseOneSectionTable<T> extends ChooseOneSection {
+
+	private class ChoicesFilter extends ViewerFilter {
+		
+		private StringMatcher matcher = null;
+		
+		public ChoicesFilter() {
+			if (searchBox!=null) {
+				setSearchTerm(searchBox.getText());
+			}
+		}
+		
+		public void setSearchTerm(String text) {
+			matcher = new StringMatcher(text, true, false);
+		}
+		
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (matcher==null) {
+				return true;
+			} else {
+				String label = labelProvider.getText(element);
+				if (match(label)) {
+					return true;
+				} else if (element instanceof Describable) {
+					String description = ((Describable) element).getDescription();
+					return match(description);
+				}
+				return false;
+			}
+		}
+
+		private boolean match(String text) {
+			if (matcher==null) {
+				return true; // Search term not set... anything is acceptable.
+			} else {
+				Position x = matcher.find(text, 0, text.length());
+				return x!=null;
+			}
+		}
+
+	}
 
 	private SelectionModel<T> selection;
 	private String label; //Descriptive Label for this section
 	private T[] options; //The elements to choose from
+	private Text searchBox;
+	private ChoicesFilter filter;
 
 	public ChooseOneSectionTable(IPageWithSections owner, String label, SelectionModel<T> selection, T[] options) {
 		super(owner);
@@ -52,6 +102,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		this.options = options;
 	}
 	
+
 	@Override
 	public LiveExpression<ValidationResult> getValidator() {
 		return selection.validator;
@@ -63,6 +114,10 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		int cols = label==null ? 1 : 2;
 		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
 		field.setLayout(layout);
+		
+		searchBox = new Text(field, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(searchBox);
+		
 		Label fieldNameLabel = null;
 		if (label!=null) {
 			fieldNameLabel = new Label(field, SWT.NONE);
@@ -70,6 +125,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		}
 		
 		final TableViewer tv = new TableViewer(field, SWT.SINGLE|SWT.BORDER|SWT.V_SCROLL);
+		tv.addFilter(filter = new ChoicesFilter());
 		tv.setLabelProvider(labelProvider);
 		tv.setContentProvider(ArrayContentProvider.getInstance());
 		tv.setInput(options);
@@ -81,13 +137,11 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		grab.applyTo(field);
 		grab.applyTo(tv.getTable());
 		
-		
 		whenVisible(tv.getControl(), new Runnable() {
-			@Override
 			public void run() {
 				T preSelect = selection.selection.getValue();
 				if (preSelect!=null) {
-					tv.setSelection(new StructuredSelection(preSelect));
+					tv.setSelection(new StructuredSelection(preSelect), true);
 				} else {
 					tv.setSelection(StructuredSelection.EMPTY, true);
 				}
@@ -95,7 +149,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		});
 		
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
-			@SuppressWarnings("unchecked") @Override
+			@SuppressWarnings("unchecked")
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection sel = tv.getSelection();
 				if (sel.isEmpty()) {
@@ -106,11 +160,17 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 				}
 			}
 		});
+		
+		searchBox.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				filter.setSearchTerm(searchBox.getText());
+				tv.refresh();
+			}
+		});
 	}
 
 	private void whenVisible(final Control control, final Runnable runnable) {
 		PaintListener l = new PaintListener() {
-			@Override
 			public void paintControl(PaintEvent e) {
 				runnable.run();
 				control.removePaintListener(this);
