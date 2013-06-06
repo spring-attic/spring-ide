@@ -1,4 +1,4 @@
-package org.sub;
+package org;
 
 import java.io.Serializable;
 

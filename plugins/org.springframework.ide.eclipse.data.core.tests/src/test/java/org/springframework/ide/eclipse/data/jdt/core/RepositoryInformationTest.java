@@ -75,7 +75,13 @@ public class RepositoryInformationTest {
 	@Test
 	public void testNoRepositoryThroughCrudInterface() throws Exception {
 		IType type = javaProject.findType("org.CrudRepo");
-		assertFalse(RepositoryInformation.isSpringDataRepository(type));
+		assertTrue(RepositoryInformation.isSpringDataRepository(type));
+	}
+
+	@Test
+	public void testMultipleExtendedInterfaces() throws Exception {
+		IType type = javaProject.findType("org.InterfaceExtendingNoRepoAndRealRepo");
+		assertTrue(RepositoryInformation.isSpringDataRepository(type));
 	}
 
 }
