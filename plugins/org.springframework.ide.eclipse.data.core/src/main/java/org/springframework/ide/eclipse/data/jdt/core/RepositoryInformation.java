@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.Repository;
@@ -36,6 +35,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Oliver Gierke
  * @author Tomasz Zarna
+ * @author Martin Lippert
  */
 public class RepositoryInformation {
 
@@ -100,7 +100,6 @@ public class RepositoryInformation {
 	 * @return
 	 */
 	public static RepositoryInformation create(IMethod element) {
-
 		Assert.notNull(element);
 
 		IType type = element.getDeclaringType();
@@ -108,27 +107,12 @@ public class RepositoryInformation {
 	}
 	
 	/**
-	 * Returns just the type name without the parameterized type
-	 * @param typeName
-	 * @return
-	 */
-	private static String removeParameterizedType(String typeName) {
-		if (typeName.contains("<")) {
-			int pos = typeName.indexOf("<");
-			return typeName.substring(0, pos);
-		}
-	
-		return typeName;
-	}
-
-	/**
 	 * Returns a {@link RepositoryInformation} for the given {@link IType} if it is a Spring Data repository.
 	 * 
 	 * @param type must not be {@literal null}.
 	 * @return
 	 */
 	public static RepositoryInformation create(IType type) {
-
 		Assert.notNull(type);
 
 		try {
@@ -145,6 +129,28 @@ public class RepositoryInformation {
 			return false;
 		}
 		
+		try {
+			IAnnotation[] annotations = type.getAnnotations();
+			for (IAnnotation annotation : annotations) {
+				if (annotation.getElementName().equals("org.springframework.data.repository.NoRepositoryBean") ||
+						annotation.getElementName().equals("NoRepositoryBean")) {
+					return false;
+				}
+			}
+			
+			return isSpringDataRepositoryInterfaces(type);
+
+		} catch (JavaModelException e) {
+		}
+		
+		return false;
+	}
+
+	public static boolean isSpringDataRepositoryInterfaces(IType type) {
+		if (type == null) {
+			return false;
+		}
+		
 		String fullyQualifiedName = type.getFullyQualifiedName();
 		if ("org.springframework.data.repository.Repository".equals(fullyQualifiedName)) {
 			return true;
@@ -157,56 +163,25 @@ public class RepositoryInformation {
 						annotation.getElementName().equals("RepositoryDefinition")) {
 					return true;
 				}
-				if (annotation.getElementName().equals("org.springframework.data.repository.NoRepositoryBean") ||
-						annotation.getElementName().equals("NoRepositoryBean")) {
-					return false;
-				}
+			}
+
+			String[] interfaceNames = null;
+			if (type.isBinary()) {
+				interfaceNames = type.getSuperInterfaceNames();
+			}
+			else {
+				interfaceNames = SpringCore.getTypeHierarchyEngine().getInterfaces(type.getJavaProject().getProject(), type.getFullyQualifiedName());
 			}
 			
-			String[] superInterfaces = type.getSuperInterfaceTypeSignatures();
-			for(String superInterface: superInterfaces) {
-				if (superInterface.length() > 1) {
-					
-					// resolved type
-					if (superInterface.startsWith("L")) {
-						String packageName = Signature.getSignatureQualifier(superInterface);
-						String simpleName = removeParameterizedType(Signature.getSimpleName(superInterface));
-						if (packageName != null && simpleName != null) {
-							IType interfaceType = type.getJavaProject().findType(packageName + "." + simpleName);
-							if (isSpringDataRepository(interfaceType)) {
-								return true;
-							}
-						}
-						
-					// unresolved type
-					} else if (superInterface.startsWith("Q")) {
-						String simpleName = removeParameterizedType(superInterface.substring(1));
-						
-						String[][] resolveTypes = type.resolveType(simpleName);
-						if (resolveTypes != null) {
-							for(String[] resolveType: resolveTypes) {
-								StringBuilder qualifiedTypeName = new StringBuilder();
-								if (resolveType.length == 2) {
-									if (resolveType[0] != null) {
-										qualifiedTypeName.append(resolveType[0]);
-									}
-									if (resolveType[1] != null) {
-										qualifiedTypeName.append(".");
-										qualifiedTypeName.append(resolveType[1]);
-									}
-								}
-								
-								IType interfaceType = type.getJavaProject().findType(qualifiedTypeName.toString());
-								if (isSpringDataRepository(interfaceType)) {
-									return true;
-								}
-							}
-						}
-						
+			if (interfaceNames != null) {
+				for(String superInterface : interfaceNames) {
+					IType interfaceType = type.getJavaProject().findType(superInterface);
+					if (isSpringDataRepositoryInterfaces(interfaceType)) {
+						return true;
 					}
 				}
 			}
-
+			
 		} catch (JavaModelException e) {
 		}
 		

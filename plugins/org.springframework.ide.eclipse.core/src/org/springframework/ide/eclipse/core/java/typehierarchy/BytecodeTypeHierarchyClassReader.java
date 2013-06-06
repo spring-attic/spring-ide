@@ -51,13 +51,6 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 				}
 			}
 		}
-		
-//		ClassLoader classLoader = JdtUtils.getClassLoader(project, null);
-//		InputStream stream = classLoader.getResourceAsStream(classFileName);
-//		if (stream != null) {
-//			TypeHierarchyElement result = readTypeHierarchy(stream);
-//			return result;
-//		}
 		return null;
 	}
 

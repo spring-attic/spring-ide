@@ -189,6 +189,21 @@ public class TypeHierarchyEngineTest {
 	}
 	
 	@Test
+	public void testGetInterfacesOfClass() throws Exception {
+		String[] interfaces = engine.getInterfaces(project, "org.sub.ClassB");
+		assertEquals(1, interfaces.length);
+		assertEquals("org.sub.InterfaceAB", interfaces[0]);
+	}
+	
+	@Test
+	public void testGetInterfacesOfInterface() throws Exception {
+		String[] interfaces = engine.getInterfaces(project, "org.sub.InterfaceAB");
+		assertEquals(2, interfaces.length);
+		assertEquals("org.InterfaceA", interfaces[0]);
+		assertEquals("org.InterfaceB", interfaces[1]);
+	}
+	
+	@Test
 	public void testAdditionalCaseWithLongDoubleConstantsInClass() throws Exception {
 		IType type = javaProject.findType("org.CaseWithLongAndDoubleConstants");
 		assertEquals("java.lang.Object", engine.getSupertype(type));
