@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.Repository;
@@ -36,6 +35,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Oliver Gierke
  * @author Tomasz Zarna
+ * @author Martin Lippert
  */
 public class RepositoryInformation {
 
@@ -162,7 +162,25 @@ public class RepositoryInformation {
 					return false;
 				}
 			}
+
+			String[] interfaceNames = null;
+			if (type.isBinary()) {
+				interfaceNames = type.getSuperInterfaceNames();
+			}
+			else {
+				interfaceNames = SpringCore.getTypeHierarchyEngine().getInterfaces(type.getJavaProject().getProject(), type.getFullyQualifiedName());
+			}
 			
+			if (interfaceNames != null) {
+				for(String superInterface : interfaceNames) {
+					IType interfaceType = type.getJavaProject().findType(superInterface);
+					if (isSpringDataRepository(interfaceType)) {
+						return true;
+					}
+				}
+			}
+			
+/*			
 			String[] superInterfaces = type.getSuperInterfaceTypeSignatures();
 			for(String superInterface: superInterfaces) {
 				if (superInterface.length() > 1) {
@@ -171,6 +189,10 @@ public class RepositoryInformation {
 					if (superInterface.startsWith("L")) {
 						String packageName = Signature.getSignatureQualifier(superInterface);
 						String simpleName = removeParameterizedType(Signature.getSimpleName(superInterface));
+						if (simpleName != null && simpleName.endsWith(";")) {
+							simpleName = simpleName.substring(0, simpleName.length() - 1);
+						}
+						
 						if (packageName != null && simpleName != null) {
 							IType interfaceType = type.getJavaProject().findType(packageName + "." + simpleName);
 							if (isSpringDataRepository(interfaceType)) {
@@ -181,6 +203,9 @@ public class RepositoryInformation {
 					// unresolved type
 					} else if (superInterface.startsWith("Q")) {
 						String simpleName = removeParameterizedType(superInterface.substring(1));
+						if (simpleName.endsWith(";")) {
+							simpleName = simpleName.substring(0, simpleName.length() - 1);
+						}
 						
 						String[][] resolveTypes = type.resolveType(simpleName);
 						if (resolveTypes != null) {
@@ -206,7 +231,7 @@ public class RepositoryInformation {
 					}
 				}
 			}
-
+*/
 		} catch (JavaModelException e) {
 		}
 		
