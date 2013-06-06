@@ -64,6 +64,19 @@ public class TypeHierarchyEngine {
 		return null;
 	}
 	
+	public String[] getInterfaces(IProject project, String className) {
+		char[] typeName = className.replace('.', '/').toCharArray();
+		TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+		if (typeElement != null && typeElement.interfaces != null) {
+			String[] result = new String[typeElement.interfaces.length];
+			for (int i = 0; i < result.length; i++) {
+				result[i] = new String(typeElement.interfaces[i]).replace("/", ".");;
+			}
+			return result;
+		}
+		return null;
+	}
+
 	public boolean doesExtend(IType type, String className) {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
