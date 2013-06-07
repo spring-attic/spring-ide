@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 Spring IDE Developers
+ * Copyright (c) 2006, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,8 +49,10 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
  * This class is a content provider which knows about the beans core model's {@link IModelElementelements}.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class BeansModelContentProvider implements ITreeContentProvider, ITreePathContentProvider,
 		IModelChangeListener {
@@ -164,6 +166,9 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			else if (parentElement instanceof IBeansConfigSet) {
 				return getConfigSetChildren((IBeansConfigSet) parentElement);
 			}
+			else if (parentElement instanceof IBeansConfig) {
+				return ((IBeansConfig)parentElement).getComponents().toArray();
+			}
 			return ((IModelElement) parentElement).getElementChildren();
 		}
 		else if (parentElement instanceof IFile) {
@@ -200,7 +205,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 					children.add(new ZipEntryStorage(config));
 				}
 				else {
-					children.add(config.getElementResource());
+					children.add(config);
 				}
 			}
 		}

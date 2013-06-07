@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 Spring IDE Developers
+ * Copyright (c) 2006, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,10 @@ package org.springframework.ide.eclipse.beans.ui.model;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -41,6 +44,7 @@ import org.springframework.ide.eclipse.ui.AbstractCompositeImageDescriptor;
  * This class provides images for the beans core model's {@link IModelElement}s.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public final class BeansModelImages implements BeansModelImageFlags {
 
@@ -53,8 +57,15 @@ public final class BeansModelImages implements BeansModelImageFlags {
 		if (element instanceof ISpringProject
 				|| element instanceof IBeansProject) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROJECT);
-		} else if (element instanceof IBeansConfig) {
-			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
+		} else if (element instanceof BeansConfig) {
+			Image image = WorkbenchLabelProvider.getDecoratingWorkbenchLabelProvider().getImage(((BeansConfig) element).getElementResource());
+			if (isDecorationg) {
+				image = getDecoratedImage(image, element, context);
+			}
+			return image;
+		} else if (element instanceof BeansJavaConfig) {
+			BeansJavaConfig javaConfig = (BeansJavaConfig) element;
+			Image image = WorkbenchLabelProvider.getDecoratingWorkbenchLabelProvider().getImage(javaConfig.getConfigClass());
 			if (isDecorationg) {
 				image = getDecoratedImage(image, element, context);
 			}

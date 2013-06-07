@@ -108,7 +108,6 @@ public class BeansModelLabelProvider extends DecoratingWorkbenchTreePathLabelPro
 				return labelProvider.getText(element);
 			}
 		}
-
 		if (element instanceof BeanMetadataNode) {
 			return ((BeanMetadataNode) element).getLabel();
 		}

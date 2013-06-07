@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 Spring IDE Developers
+ * Copyright (c) 2006, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
@@ -35,6 +36,7 @@ import org.springframework.util.StringUtils;
  * This class provides labels for the beans core model's {@link IModelElement elements}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public final class BeansModelLabels extends BeansUILabels {
 
@@ -90,7 +92,11 @@ public final class BeansModelLabels extends BeansUILabels {
 	}
 
 	public static void appendBeansConfigLabel(IBeansConfig config, int flags, StringBuffer buf) {
-		if (isFlagged(flags, DESCRIPTION)) {
+		if (config instanceof BeansJavaConfig) {
+			BeansJavaConfig javaConfig = (BeansJavaConfig) config;
+			buf.append(javaConfig.getConfigClass().getElementName());
+		}
+		else {
 			String configName = config.getElementName();
 			if (config.isElementArchived()) {
 				ZipEntryStorage storage = new ZipEntryStorage(config);
@@ -102,8 +108,8 @@ public final class BeansModelLabels extends BeansUILabels {
 				buf.append(new Path(configName).lastSegment());
 			}
 		}
-		else {
-			buf.append("beans");
+
+		if (!isFlagged(flags, DESCRIPTION)) {
 			if (StringUtils.hasLength(config.getDefaultLazyInit())
 					&& !config.getDefaultLazyInit().equals(IBeansConfig.DEFAULT_LAZY_INIT)) {
 				buf.append(" lazy-init=\"");
@@ -142,7 +148,7 @@ public final class BeansModelLabels extends BeansUILabels {
 			}
 		}
 	}
-
+	
 	public static void appendBeanLabel(IBean bean, StringBuffer buf) {
 		if (!bean.isInnerBean()) {
 			buf.append(bean.getElementName()).append(' ');

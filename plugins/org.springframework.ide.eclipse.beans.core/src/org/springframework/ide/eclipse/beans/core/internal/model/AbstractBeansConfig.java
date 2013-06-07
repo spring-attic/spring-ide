@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  * file.
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Martin Lippert
  */
 public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements IBeansConfig {
 
@@ -429,7 +430,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 	/**
 	 * {@inheritDoc}
 	 */
-	public final int getElementStartLine() {
+	public int getElementStartLine() {
 		// Lazily initialization of this config
 		readConfig();
 

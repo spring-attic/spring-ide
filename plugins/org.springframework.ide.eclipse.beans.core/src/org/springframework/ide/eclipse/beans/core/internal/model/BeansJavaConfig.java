@@ -169,6 +169,11 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 	public Set<IBeansImport> getImports() {
 		return Collections.emptySet();
 	}
+	
+	@Override
+	public int getElementStartLine() {
+		return JdtUtils.getLineNumber(configClass);
+	}
 
 	@Override
 	protected void readConfig() {
