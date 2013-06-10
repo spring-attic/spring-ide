@@ -27,15 +27,15 @@ import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-
-import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 
 /**
  * Core counterpart of GuideImportWizard (essentially this is a 'model' for the wizard
@@ -45,11 +45,11 @@ import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
  */
 public class GuideImportWizardModel {
 	
-	//TODO: Validation: shouldn't allow importing if something already exists where codeset content
-	// will be downloaded. This will overwrite what's there. At the very least a warning should
-	// appear in the wizard.
-	
-	public static class CodeSetValidator extends LiveExpression<ValidationResult> {
+	static final ValidationResult isDownloadingMessage(GettingStartedGuide g) {
+		return ValidationResult.info(g.getName()+" is downloading...");
+	}
+
+	public class CodeSetValidator extends LiveExpression<ValidationResult> {
 
 		private LiveVariable<GettingStartedGuide> codesetProvider;
 		private LiveSet<String> selectedNames;
@@ -63,16 +63,36 @@ public class GuideImportWizardModel {
 
 		@Override
 		protected ValidationResult compute() {
-//			GettingStartedGuide g = codesetProvider.getValue();
-//			if (g!=null) { //Don't check or produce errors unless a content provider has been selected.
-//				Set<String> names = selectedNames.getValue();
-//				if (names == null || names.isEmpty()) {
-//					return ValidationResult.error("No codeset selected");
-//				}
-//			}
+			try {
+				GettingStartedGuide g = codesetProvider.getValue();
+				if (g!=null) { //Don't check or produce errors unless a content provider has been selected.
+					try {
+						Set<String> names = selectedNames.getValue();
+						if (names != null && !names.isEmpty()) {
+							for (String name : names) {
+								CodeSet cs = g.getCodeSet(name);
+								if (cs!=null) {
+									ImportConfiguration conf = ImportUtils.importConfig(g, cs);
+									ValidationResult valid = ImportUtils.validateImportConfiguration(conf);
+									if (!valid.isOk()) {
+										return valid;
+									}
+								}
+							}
+						}
+					} catch (UIThreadDownloadDisallowed e) {
+						scheduleDownloadJob();
+						return isDownloadingMessage(g);
+					}
+				}
+			} catch (Throwable e) {
+				//Unexpected. So log it for more info but also try to create a sensible error message in
+				// the wizard.
+				GettingStartedActivator.log(e);
+				return ValidationResult.error(ExceptionUtil.getMessage(e));
+			}
 			return ValidationResult.OK;
 		}
-
 	}
 
 	/**
@@ -140,13 +160,7 @@ public class GuideImportWizardModel {
 							if (codesetNames!=null) {
 								for (String csname : codesetNames) {
 									CodeSet cs = g.getCodeSet(csname);
-									if (cs==null) {
-										//Can happen if widgets / model is in process of propagating changes
-										// codeset names may still be those selected for another guide. May not
-										// be valid yet for current guide.
-										//System.out.println("Ignore invalid codeset "+csname+" in "+g.getName());
-										return ValidationResult.error("'"+g.getDisplayName()+"' has no codeset '"+csname+"'");
-									} else {
+									if (cs!=null) {
 										ValidationResult result = cs.validateBuildType(bt);
 										if (!result.isOk()) {
 											return result.withMessage("CodeSet '"+csname+"': "+result.msg);
@@ -163,7 +177,7 @@ public class GuideImportWizardModel {
 					} catch (UIThreadDownloadDisallowed e) {
 						//Careful... check some of the validation will trigger downloads. This is not allowed in UI thread.
 						scheduleDownloadJob();
-						return ValidationResult.info(g.getName()+" is downloading...");
+						return isDownloadingMessage(g);
 					}
 				}
 				return ValidationResult.OK;
@@ -227,6 +241,11 @@ public class GuideImportWizardModel {
 		
 		validCodesetNames.dependsOn(guide);
 		validCodesetNames.dependsOn(isDownloaded);
+		
+		codesetValidator.dependsOn(isDownloaded);
+		//Note: some other dependsOn are registered inside CodeSetValidator class itself. 
+		// isDownloaded is an exception because is still null when CodeSetValidator class gets
+		// instantiated.
 	}
 	
 	/**
@@ -259,8 +278,7 @@ public class GuideImportWizardModel {
 		};
 		job.schedule();
 	}
-	
-	
+		
 	/**
 	 * Performs the final step of the wizard when user clicks on Finish button.
 	 * @throws InterruptedException 
@@ -290,14 +308,16 @@ public class GuideImportWizardModel {
 			}
 			return true;
 		} catch (UIThreadDownloadDisallowed e) {
-			//This shouldn't be possible... Finish button won't be enabled unless all is validated which implies
-			// the content has to be downloaded.
+			//This shouldn't be possible... Finish button won't be enabled unless all is validated. 
+			//This implies the content has been downloaded (can't be validated otherwise).
 			GettingStartedActivator.log(e);
 			return false;
 		} finally {
 			mon.done();
 		}
 	}
+	
+	
 	
 	public void setGuide(GettingStartedGuide guide) {
 		this.guide.setValue(guide);

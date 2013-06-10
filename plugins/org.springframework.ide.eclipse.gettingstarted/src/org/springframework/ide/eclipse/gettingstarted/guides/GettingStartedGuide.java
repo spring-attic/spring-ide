@@ -156,7 +156,7 @@ public class GettingStartedGuide extends GithubRepoContent implements Describabl
 				return cs;
 			}
 		}
-		throw new NoSuchElementException(this+" has no codeset '"+name+"'");
+		return null;
 	}
 
 	private String beatify(String name) {
