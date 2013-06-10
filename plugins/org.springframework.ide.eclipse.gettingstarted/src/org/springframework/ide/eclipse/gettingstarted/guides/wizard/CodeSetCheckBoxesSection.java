@@ -17,7 +17,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -150,15 +149,22 @@ public class CodeSetCheckBoxesSection extends WizardPageSection {
 					subsections[i] = new CheckBox(owner, names[i], model);
 					subsections[i].createContents(group);
 				}
-				//TODO: we must somehow remove any selections from the model that are no longer valid!
-				// (I.e. after a cb is deleted... that particular name should no longer be considered
-				// as 'selected' in the model.
-				HashSet<String> validNameSet = new HashSet<String>(Arrays.asList(names));
-				for (String selectedName : model.selecteds.getValues()) {
-					if (!validNameSet.contains(selectedName)) {
-						model.selecteds.remove(selectedName);
-					}
-				};
+				//Note: code below removes invalid names from selection model.
+				// Code has been commented out. We assume that any code
+				// using the 'model.selecteds' will just ignore invalid
+				// codeset names. That way we can leave the selecteds as is.
+				// The benefit is that if one switches away from a guide 
+				// and then back again, then selected items will be 'preserved' even if
+				// they weren't valid in between. (If the code below is reactivated invalid 
+				// names will be automatically cleared and the user will have to reselect them
+				// when they return to the original guide).
+				
+//				HashSet<String> validNameSet = new HashSet<String>(Arrays.asList(names));
+//				for (String selectedName : model.selecteds.getValues()) {
+//					if (!validNameSet.contains(selectedName)) {
+//						model.selecteds.remove(selectedName);
+//					}
+//				};
 				group.getParent().layout(true, true);
 			}
 		});

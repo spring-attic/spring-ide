@@ -45,6 +45,14 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
  */
 public class GuideImportWizardModel {
 	
+	//TODO: when guide selection is changed and swithched back... elements get 
+	//  codeset names may get deselected (i.e. if name is not valid it gets unselected
+	// find a workaround.
+	//
+	//Idea: simply ignoring invalid 'selected names' should work. Then we can just 
+	// retain the selected names across switches. When guide is selected again
+	// the selected names from before will then be remembered.
+	
 	static final ValidationResult isDownloadingMessage(GettingStartedGuide g) {
 		return ValidationResult.info(g.getName()+" is downloading...");
 	}
@@ -294,11 +302,21 @@ public class GuideImportWizardModel {
 		mon.beginTask("Import guide content", codesetNames.size()+1);
 		try {
 			for (String name : codesetNames) {
-				IRunnableWithProgress oper = bt.getImportStrategy().createOperation(ImportUtils.importConfig(
-						g, 
-						g.getCodeSet(name)
-				));
-				oper.run(new SubProgressMonitor(mon, 1));
+				CodeSet cs = g.getCodeSet(name);
+				if (cs==null) {
+					//Ignore 'invalid' codesets. This is a bit of a hack so that we can retain selected codeset names
+					//  across guide selection changes. To do that we remember 'selected' cs names even if they
+					//  aren't valid for the current guide. That way the checkbox state stays consistent
+					//  when switching between guides (otherwise 'invalid' names would have to be cleared when switching to
+					//  a guide). 
+					mon.worked(1);
+				} else {
+					IRunnableWithProgress oper = bt.getImportStrategy().createOperation(ImportUtils.importConfig(
+							g, 
+							cs
+					));
+					oper.run(new SubProgressMonitor(mon, 1));
+				}
 			}
 			if (enableOpenHomePage.getValue()) {
 				URL url = homePage.getValue();

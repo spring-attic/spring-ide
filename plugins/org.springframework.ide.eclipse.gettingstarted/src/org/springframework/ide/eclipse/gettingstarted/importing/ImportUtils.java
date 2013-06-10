@@ -14,6 +14,7 @@ import java.io.File;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
@@ -53,6 +54,8 @@ public class ImportUtils {
 	 * default location in the workspace.
 	 */
 	public static ImportConfiguration importConfig(GettingStartedGuide guide, CodeSet codeset) {
+		Assert.isNotNull(guide);
+		Assert.isNotNull(codeset);
 		String projectName = guide.getName()+"-"+codeset.getName();
 		return ImportUtils.importConfig(
 				/*location*/
