@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
+import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
 public class ReferenceApp extends GithubRepoContent {
 
@@ -98,7 +99,7 @@ public class ReferenceApp extends GithubRepoContent {
 	/**
 	 * @return path to readme file in the codeset. 
 	 */
-	public String getReadme() {
+	public String getReadme() throws UIThreadDownloadDisallowed {
 		CodeSet cs = getCodeSet();
 		for (String name : readmes) {
 			if (cs.hasFile(name)) {
@@ -108,7 +109,7 @@ public class ReferenceApp extends GithubRepoContent {
 		return null;
 	}
 
-	public List<BuildType> getBuildTypes() {
+	public List<BuildType> getBuildTypes() throws UIThreadDownloadDisallowed {
 		return getCodeSet().getBuildTypes();
 	}
 	

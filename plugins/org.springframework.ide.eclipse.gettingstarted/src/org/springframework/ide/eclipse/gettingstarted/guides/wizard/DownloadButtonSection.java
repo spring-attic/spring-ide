@@ -80,7 +80,7 @@ public class DownloadButtonSection extends WizardPageSection {
 								InterruptedException {
 							try {
 								model.performDownload(monitor);
-							} catch (IOException e) {
+							} catch (Exception e) {
 								throw new InvocationTargetException(e);
 							}
 						}

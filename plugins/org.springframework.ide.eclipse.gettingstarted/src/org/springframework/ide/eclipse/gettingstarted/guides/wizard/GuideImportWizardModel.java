@@ -14,20 +14,22 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
+import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -63,13 +65,13 @@ public class GuideImportWizardModel {
 
 		@Override
 		protected ValidationResult compute() {
-			GettingStartedGuide g = codesetProvider.getValue();
-			if (g!=null) { //Don't check or produce errors unless a content provider has been selected.
-				Set<String> names = selectedNames.getValue();
-				if (names == null || names.isEmpty()) {
-					return ValidationResult.error("No codeset selected");
-				}
-			}
+//			GettingStartedGuide g = codesetProvider.getValue();
+//			if (g!=null) { //Don't check or produce errors unless a content provider has been selected.
+//				Set<String> names = selectedNames.getValue();
+//				if (names == null || names.isEmpty()) {
+//					return ValidationResult.error("No codeset selected");
+//				}
+//			}
 			return ValidationResult.OK;
 		}
 
@@ -85,8 +87,38 @@ public class GuideImportWizardModel {
 	 */
 	private LiveSet<String> codesets = new LiveSet<String>(new HashSet<String>());
 	{
-		codesets.addAll(GettingStartedGuide.codesetNames); //Select both codesets by default.
+		codesets.addAll(GettingStartedGuide.defaultCodesetNames); //Select both codesets by default.
 	}
+	
+	/**
+	 * The valid codeset names w.r.t. the currently selected guide
+	 */
+	public final LiveExpression<String[]> validCodesetNames = new LiveExpression<String[]>(null) {
+
+		@Override
+		protected String[] compute() {
+			try {
+				GettingStartedGuide g = guide.getValue();
+				if (g!=null) {
+					List<CodeSet> validSets = g.getCodeSets();
+					if (validSets!=null) {
+						String[] names = new String[validSets.size()];
+						for (int i = 0; i < names.length; i++) {
+							names[i] = validSets.get(i).getName();
+						}
+						return names;
+					}
+				}
+			} catch (UIThreadDownloadDisallowed e) {
+				//Failed because content is not yet downloade but this is ok... 
+				//just schedule download to happen later and in the mean time return something sensible
+				scheduleDownloadJob();
+			} catch (Throwable e) {
+				GettingStartedActivator.log(e);
+			}
+			return GettingStartedGuide.defaultCodesetNames;
+		}
+	};
 	
 	/**
 	 * The build type chosen by user
@@ -98,21 +130,43 @@ public class GuideImportWizardModel {
 	private LiveExpression<ValidationResult> buildTypeValidator = new Validator() {
 		@Override
 		protected ValidationResult compute() {
-			GettingStartedGuide g = guide.getValue();
-			if (g!=null) {
-				BuildType bt = buildType.getValue();
-				if (bt!=null) {
-					//Careful... check if downloaded before doing checks that require access to downloaded content.
-					// otherwise will end up blocking UI thread waiting for download.
-					if (!g.isDownloaded()) {
+			try {
+				GettingStartedGuide g = guide.getValue();
+				if (g!=null) {
+					try {
+						BuildType bt = buildType.getValue();
+						if (bt==null) {
+							return ValidationResult.error("No build type selected");
+						} else {
+							List<String> codesetNames = codesets.getValues();
+							if (codesetNames!=null) {
+								for (String csname : codesetNames) {
+									CodeSet cs = g.getCodeSet(csname);
+									if (cs==null) {
+										//Can happen if widgets / model is in process of propagating changes
+										// codeset names may still be those selected for another guide. May not
+										// be valid yet for current guide.
+										System.out.println("Ignore invalid codeset "+csname+" in "+g.getName());
+									} else {
+										ValidationResult result = cs.validateBuildType(bt);
+										if (!result.isOk()) {
+											return result.withMessage("CodeSet '"+csname+"': "+result.msg);
+										}
+									}
+								}
+							}
+						}
+					} catch (UIThreadDownloadDisallowed e) {
+						//Careful... check some of the validation will trigger downloads. This is not allowed in UI thread.
 						scheduleDownloadJob();
 						return ValidationResult.info(g.getName()+" is downloading...");
 					}
-					return g.validateBuildType(bt);
 				}
-				return ValidationResult.error("No build type selected");
+				return ValidationResult.OK;
+			} catch (Throwable e) {
+				GettingStartedActivator.log(e);
+				return ValidationResult.error(ExceptionUtil.getMessage(e));
 			}
-			return ValidationResult.OK;
 		}
 
 	};
@@ -159,18 +213,22 @@ public class GuideImportWizardModel {
 		buildTypeValidator.dependsOn(guide);
 		buildTypeValidator.dependsOn(isDownloaded);
 		buildTypeValidator.dependsOn(buildType);
+		buildTypeValidator.dependsOn(codesets);
 		
 		isDownloaded.dependsOn(guide);
 		
 		description.dependsOn(guide);
 		
 		homePage.dependsOn(guide);
+		
+		validCodesetNames.dependsOn(guide);
+		validCodesetNames.dependsOn(isDownloaded);
 	}
 	
 	/**
 	 * Downloads currently selected guide content (if it is not already cached locally.
 	 */
-	public void performDownload(IProgressMonitor mon) throws IOException {
+	public void performDownload(IProgressMonitor mon) throws Exception {
 		mon.beginTask("Downloading", 1);
 		try {
 			GettingStartedGuide g = guide.getValue();
@@ -227,6 +285,11 @@ public class GuideImportWizardModel {
 				}
 			}
 			return true;
+		} catch (UIThreadDownloadDisallowed e) {
+			//This shouldn't be possible... Finish button won't be enabled unless all is validated which implies
+			// the content has to be downloaded.
+			GettingStartedActivator.log(e);
+			return false;
 		} finally {
 			mon.done();
 		}

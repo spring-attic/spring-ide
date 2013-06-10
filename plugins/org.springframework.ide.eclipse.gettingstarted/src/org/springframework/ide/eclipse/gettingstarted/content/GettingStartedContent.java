@@ -35,7 +35,8 @@ public class GettingStartedContent extends ContentManager {
 
 	private static GettingStartedContent INSTANCE = null;
 	
-	private static boolean ADD_MOCKS = (""+Platform.getLocation()).contains("kdvolder");
+	private final static boolean ADD_REAL =  (""+Platform.getLocation()).contains("kdvolder");
+	private final static boolean ADD_MOCKS = (""+Platform.getLocation()).contains("kdvolder");
 	
 	public static GettingStartedContent getInstance() {
 		if (INSTANCE == null) {
@@ -52,9 +53,11 @@ public class GettingStartedContent extends ContentManager {
 			@Override
 			public GettingStartedGuide[] fetch(DownloadManager downloader) {
 				List<GettingStartedGuide> guides = new ArrayList<GettingStartedGuide>();
-				addGuidesFrom(github.getOrgRepos("springframework-meta"), guides, downloader);
 				if (ADD_MOCKS) {
 					addGuidesFrom(github.getUserRepos("kdvolder"), guides, downloader);
+				}
+				if (ADD_REAL) {
+					addGuidesFrom(github.getOrgRepos("springframework-meta"), guides, downloader);
 				}
 				return guides.toArray(new GettingStartedGuide[guides.size()]);
 			}

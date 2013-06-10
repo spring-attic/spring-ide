@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.guides.ReferenceApp;
+import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
 /**
  * This tests performs a quick validation that downloaded zip file contains
@@ -83,7 +84,7 @@ public class ReferenceAppStructureTest extends TestCase {
 	private static void assertFolder(CodeSet content, IPath path) {
 		assertTrue("Folder "+path+" not found in "+content, content.hasFolder(path));
 	}
-	private static void assertFile(CodeSet content, IPath path) {
+	private static void assertFile(CodeSet content, IPath path) throws UIThreadDownloadDisallowed {
 		assertTrue("File "+path+" not found in "+content, content.hasFile(path));
 	}
 
