@@ -8,15 +8,12 @@
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.wizard;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
-import org.springframework.ide.eclipse.gettingstarted.wizard.ChooseOneSection;
-import org.springframework.ide.eclipse.gettingstarted.wizard.ChooseOneSectionCombo;
-import org.springframework.ide.eclipse.gettingstarted.wizard.ChooseOneSectionTable;
 import org.springframework.ide.eclipse.gettingstarted.wizard.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -27,15 +24,20 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 /**
  * Allow choosing a guide in pull-down style combo box or table viewer.
  * 
+ * TODO: this was copied from the GuidesWizard but it should be changed
+ * into or replaced by something that allows picking content from
+ * a tree where the first level are the types of content available
+ * and the second level are elements of that content type.
+ * 
  * @author Kris De Volder
  */
-public class ChooseGuideSection extends WizardPageSection {
+public class ChooseTypedContentSection extends WizardPageSection {
 	
 	private ChooseOneSection wrappee;
 	private boolean useCombo = false;
 	private SelectionModel<GettingStartedGuide> model;
 
-	public ChooseGuideSection(
+	public ChooseTypedContentSection(
 			WizardPageWithSections owner,
 			SelectionModel<GettingStartedGuide> model
 	) {
@@ -50,7 +52,7 @@ public class ChooseGuideSection extends WizardPageSection {
 	 * <p>
 	 * This option is disabled by default.
 	 */
-	public ChooseGuideSection useCombo(boolean enable) {
+	public ChooseTypedContentSection useCombo(boolean enable) {
 		useCombo = enable;
 		return this;
 	}

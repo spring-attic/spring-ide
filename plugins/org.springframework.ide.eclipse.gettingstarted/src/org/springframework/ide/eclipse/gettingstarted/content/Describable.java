@@ -8,7 +8,7 @@
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides;
+package org.springframework.ide.eclipse.gettingstarted.content;
 
 /**
  * @author Kris De Volder

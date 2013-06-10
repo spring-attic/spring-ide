@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -31,9 +31,6 @@ import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfigurat
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
-import org.springframework.ide.eclipse.gettingstarted.wizard.LiveSet;
-import org.springframework.ide.eclipse.gettingstarted.wizard.MultiSelectionModel;
-import org.springframework.ide.eclipse.gettingstarted.wizard.SelectionModel;
 import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -41,12 +38,12 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
 /**
- * Core counterpart of GuideImportWizard (essentially this is a 'model' for the wizard
+ * Core counterpart of GSImportWizard (essentially this is a 'model' for the wizard
  * UI.
  * 
  * @author Kris De Volder
  */
-public class GuideImportWizardModel {
+public class GSImportWizardModel {
 	
 	//TODO: when guide selection is changed and swithched back... elements get 
 	//  codeset names may get deselected (i.e. if name is not valid it gets unselected

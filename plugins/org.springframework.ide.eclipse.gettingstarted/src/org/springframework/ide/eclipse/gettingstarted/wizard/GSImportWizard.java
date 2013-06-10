@@ -8,7 +8,7 @@
  * Contributors:
  *    GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -26,23 +26,26 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
-import org.springframework.ide.eclipse.gettingstarted.wizard.BuildTypeRadiosSection;
-import org.springframework.ide.eclipse.gettingstarted.wizard.CodeSetCheckBoxesSection;
-import org.springframework.ide.eclipse.gettingstarted.wizard.DescriptionSection;
-import org.springframework.ide.eclipse.gettingstarted.wizard.OpenUrlSection;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
+ * Generic import wizard for different types of getting started content.
+ * <p>
+ * The idea is that all content is shown together in single tree viewer,
+ * grouped by type.
+ * <p>
+ * This is a generalization of the GuideImportWizard. 
+ * 
  * @author Kris De Volder
  */
-public class GuideImportWizard extends Wizard implements IImportWizard {
+public class GSImportWizard extends Wizard implements IImportWizard {
 
-	private GuideImportWizardModel model = new GuideImportWizardModel();
+	private GSImportWizardModel model = new GSImportWizardModel();
 	
-	public GuideImportWizard() {
+	public GSImportWizard() {
 		setNeedsProgressMonitor(true);
 		setDefaultPageImageDescriptor(WizardImages.TEMPLATE_WIZARD_ICON);
 	}
@@ -54,9 +57,9 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 	
 	public class PageOne extends WizardPageWithSections {
 
-		private GuideImportWizardModel model;
+		private GSImportWizardModel model;
 
-		protected PageOne(GuideImportWizardModel model) {
+		protected PageOne(GSImportWizardModel model) {
 			super("Page One", "Import Getting Started Guide", IMAGE);
 			this.model = model;
 		}
@@ -65,7 +68,7 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 		protected List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
-			sections.add(new ChooseGuideSection(this, model.getGuideSelectionModel()));
+			sections.add(new ChooseTypedContentSection(this, model.getGuideSelectionModel()));
 			sections.add(new DescriptionSection(this, model.description));
 			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
 			sections.add(new CodeSetCheckBoxesSection(this, model.validCodesetNames, model.getCodeSetModel()));
@@ -136,7 +139,7 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 	 * the wizard (e.g. indicating OK or CANCEL).
 	 */
 	public static int open(Shell shell, GettingStartedGuide guide) {
-		GuideImportWizard wiz = new GuideImportWizard();
+		GSImportWizard wiz = new GSImportWizard();
 		wiz.setGuide(guide);
 		WizardDialog dialog = new WizardDialog(shell, wiz);
 		dialog.setBlockOnOpen(true);
