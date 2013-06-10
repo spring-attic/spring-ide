@@ -64,7 +64,7 @@ public class GuideImportWizard extends Wizard implements IImportWizard {
 			sections.add(new ChooseGuideSection(this, model.getGuideSelectionModel()));
 			sections.add(new DescriptionSection(this, model.description));
 			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
-			sections.add(new CodeSetCheckBoxesSection(this, GettingStartedGuide.codesetNames, model.getCodeSetModel()));
+			sections.add(new CodeSetCheckBoxesSection(this, model.validCodesetNames, model.getCodeSetModel()));
 			sections.add(new OpenUrlSection(this, "Home Page", model.homePage, model.getEnableOpenHomePage()));
 			
 			return sections;

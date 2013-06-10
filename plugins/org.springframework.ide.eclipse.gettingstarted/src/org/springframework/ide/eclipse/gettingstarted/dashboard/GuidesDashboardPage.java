@@ -19,10 +19,12 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
+import org.eclipse.swt.browser.CloseWindowListener;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.browser.WindowEvent;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
@@ -175,6 +177,7 @@ public class GuidesDashboardPage extends WebDashboardPage {
 	}
 
 	private LocationListener urlHandler = new GuidesUrlInterceptor();
+	private ImportJSFunction importFun;
 
 	@Override
 	protected void addBrowserHooks(Browser browser) {
@@ -182,25 +185,43 @@ public class GuidesDashboardPage extends WebDashboardPage {
 		Credentials credentials = GithubClient.createDefaultCredentials();
 		credentials.apply(browser);
 		browser.addLocationListener(urlHandler);
+		
 
 		if (useJavaScript) {
-			final BrowserFunction importFun = new ImportJSFunction(browser);
+			importFun = new ImportJSFunction(browser);
+			//
+			browser.addCloseWindowListener(new CloseWindowListener() {
+				@Override
+				public void close(WindowEvent event) {
+					System.out.println("Browser is closing");
+					importFun.dispose();
+				}
+			});
+			
 			//TODO: do we need to dispose this function? In the sample snippet code this
 			// is done on a completed progress event. But I think that means the function can only
 			// be called while the page is loading. We wanna be able to call this function 
 			// when user clicks on an import button.
 			
-			browser.addProgressListener(new ProgressAdapter() {
-				@Override
-				public void completed(ProgressEvent event) {
+//			browser.addProgressListener(new ProgressAdapter() {
+//				@Override
+//				public void completed(ProgressEvent event) {
 //					importGuideFun.dispose();
-					System.out.println("completed event");
-				}
-			});
-			
+//					System.out.println("completed event");
+//				}
+//			});
 			
 		}
 		
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		System.out.println("Browser container is disposing");
+		if (importFun!=null) {
+			importFun.dispose();
+		}
 	}
 
 }

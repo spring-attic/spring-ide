@@ -66,12 +66,17 @@ public class DownloadManager {
 	 * for cache corruption.
 	 */
 	@Deprecated
-	public File downloadFile(DownloadableItem item) throws URISyntaxException, FileNotFoundException, CoreException, IOException {
+	public File downloadFile(DownloadableItem item) throws URISyntaxException, FileNotFoundException, CoreException, IOException, UIThreadDownloadDisallowed {
 		File target = getLocalLocation(item);
 		if (target.exists()) {
 			return target;
 		}
 		
+		if (Display.getCurrent()!=null) {
+			throw new UIThreadDownloadDisallowed("Don't call download manager from the UI Thread unless the data is already cached.");
+		}
+//				
+//		);
 		//It is important not to lock the UI thread for downloads!!! 
 		//  If the UI thread is well behaved, we assume it will be careful not to call this method unless the
 		//  content is already cached. So once we get past the exists check it is ok to grab the lock.

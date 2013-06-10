@@ -10,31 +10,40 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 
 /**
  * @author Kris De Volder
  */
-public class CodeSetCheckBoxesSection extends GroupSection {
+public class CodeSetCheckBoxesSection extends WizardPageSection {
 
 	public static class CheckBox extends WizardPageSection {
 
 		private String name;
 		private MultiSelectionModel<String> model;
+		private Button cb;
 		
-		public CheckBox(WizardPageWithSections owner, String name, MultiSelectionModel<String> model) {
+		public CheckBox(IPageWithSections owner, String name, MultiSelectionModel<String> model) {
 			super(owner);
 			this.name = name;
 			this.model = model;
@@ -47,7 +56,7 @@ public class CodeSetCheckBoxesSection extends GroupSection {
 
 		@Override
 		public void createContents(Composite page) {
-			final Button cb = new Button(page, SWT.CHECK);
+			this.cb = new Button(page, SWT.CHECK);
 			cb.setText(name);
 			cb.setSelection(model.selecteds.contains(name));
 			GridDataFactory.fillDefaults().grab(true, false).applyTo(cb);
@@ -72,27 +81,29 @@ public class CodeSetCheckBoxesSection extends GroupSection {
 				}
 			});
 		}
+		
+		@Override
+		public void dispose() {
+			if (cb!=null && !cb.isDisposed()) {
+				cb.dispose();
+				cb = null;
+			}
+		}
 	}
 
-	private String[] options;
+	private LiveExpression<String[]> options;
 	private MultiSelectionModel<String> model;
+	private Group group;
 	
 
-	public CodeSetCheckBoxesSection(WizardPageWithSections owner, String[] options, MultiSelectionModel<String> model) {
-		super(owner, "Code Sets", createSections(owner, options, model));
+	public CodeSetCheckBoxesSection(WizardPageWithSections owner, LiveExpression<String[]> options, MultiSelectionModel<String> model) {
+		super(owner);
 		this.model = model;
 		this.options = options;
 	}
+	
+	private WizardPageSection[] subsections;
 
-	private static WizardPageSection[] createSections(WizardPageWithSections owner, String[] options, MultiSelectionModel<String> model) {
-		WizardPageSection[] checkboxes = new WizardPageSection[options.length];
-		for (int i = 0; i < checkboxes.length; i++) {
-			checkboxes[i] = new CheckBox(owner, options[i], model);
-		}
-		return checkboxes;
-	}
-
-	@Override
 	protected GridLayout createLayout() {
 		return new GridLayout(2, true);
 	}
@@ -100,6 +111,64 @@ public class CodeSetCheckBoxesSection extends GroupSection {
 	@Override
 	public LiveExpression<ValidationResult> getValidator() {
 		return model.validator;
+	}
+
+	@Override
+	public void createContents(Composite page) {
+		this.group = new Group(page, SWT.BORDER);
+		this.group.setText("Code Sets");
+		GridLayout layout = createLayout();
+		group.setLayout(layout);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(group);
+		
+		//This section is a bit special in that the contents of the group is only 
+		// filled in dynamically in response to events from the 'options' LiveExpression.
+		options.addListener(new UIValueListener<String[]>() {
+			@Override
+			public void uiGotValue(LiveExpression<String[]> exp, String[] names) {
+				if (names==null) {
+					names = new String[0];
+				}
+				//Dispose the checkboxes and create new ones. 
+				if (subsections!=null) {
+					for (int i = 0; i < subsections.length; i++) {
+						subsections[i].dispose();
+					}
+				}
+				subsections = new WizardPageSection[Math.max(1, names.length)];
+				
+//				GridData gd = (GridData) group.getLayoutData();
+//				boolean visible = checkboxes.length>0;
+//				gd.exclude = !visible;
+				
+				if (names.length==0) {
+					//don't leave section empty it looks ugly
+					subsections[0] = new CommentSection(owner, "No codesets");
+					subsections[0].createContents(group);
+				}
+				for (int i = 0; i < names.length; i++) {
+					subsections[i] = new CheckBox(owner, names[i], model);
+					subsections[i].createContents(group);
+				}
+				//TODO: we must somehow remove any selections from the model that are no longer valid!
+				// (I.e. after a cb is deleted... that particular name should no longer be considered
+				// as 'selected' in the model.
+				HashSet<String> validNameSet = new HashSet<String>(Arrays.asList(names));
+				for (String selectedName : model.selecteds.getValues()) {
+					if (!validNameSet.contains(selectedName)) {
+						model.selecteds.remove(selectedName);
+					}
+				};
+				group.getParent().layout(true, true);
+			}
+		});
+	}
+	
+	private void clear(Group group) {
+		Control[] children = group.getChildren();
+		for (Control c : children) {
+			c.dispose();
+		}
 	}
 
 }

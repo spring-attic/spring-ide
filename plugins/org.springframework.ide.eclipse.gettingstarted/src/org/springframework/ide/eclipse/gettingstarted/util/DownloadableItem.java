@@ -49,18 +49,14 @@ public class DownloadableItem {
 	 * the cached local file will be returned immediately. Otherwise the method will block
 	 * until the download is complete.
 	 */
-	public File getFile() throws IOException {
+	public File getFile() throws Exception {
 		final File[] fileBox = new File[1];
-		try {
-			downloader.doWithDownload(this, new DownloadRequestor() {
-				public void exec(File downloadedFile) throws Exception {
-					fileBox[0] = downloadedFile;
-					//TODO; validate file contents?
-				}
-			});
-		} catch (Exception e) {
-			throw new IOException("Download of "+url+" failed", e);
-		}
+		downloader.doWithDownload(this, new DownloadRequestor() {
+			public void exec(File downloadedFile) throws Exception {
+				fileBox[0] = downloadedFile;
+				//TODO; validate file contents?
+			}
+		});
 		return fileBox[0];
 	}
 	

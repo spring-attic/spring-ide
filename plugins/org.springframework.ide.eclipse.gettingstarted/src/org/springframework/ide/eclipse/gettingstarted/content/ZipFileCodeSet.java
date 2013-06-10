@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
+import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
 /**
  * A CodeSet stored in a Downloadable Zip File. The interesting data in the
@@ -62,10 +63,12 @@ public class ZipFileCodeSet extends CodeSet {
 		return !entries.isEmpty();
 	}
 
-	public boolean hasFile(IPath path) {
+	public boolean hasFile(IPath path) throws UIThreadDownloadDisallowed {
 		try {
 			ensureEntryCache();
 			return entries.containsKey(fileKey(path));
+		} catch (UIThreadDownloadDisallowed e) {
+			throw e;
 		} catch (Exception e) {
 			GettingStartedActivator.log(e);
 		}
@@ -129,6 +132,21 @@ public class ZipFileCodeSet extends CodeSet {
 			}
 		}
 	}
+	
+	@Override
+	public <T> T readFileEntry(String path, Processor<T> processor) throws Exception {
+		ZipFile zip = new ZipFile(zipDownload.getFile());
+		try {
+			String entryName = root.append(path).toString();
+			ZipEntry entry = zip.getEntry(entryName);
+			return processor.doit(entry==null?null:csEntry(zip, entry));
+		} finally {
+			try {
+				zip.close();
+			} catch (IOException e) {
+			}
+		}
+	}
 
 	/**
 	 * Create a CodeSetEntry that wraps a ZipEntry
@@ -159,5 +177,5 @@ public class ZipFileCodeSet extends CodeSet {
 			}
 		};
 	}
-	
+
 }

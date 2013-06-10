@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
 /**
  * This tests performs a quick validation that downloaded Guides zip file contains
@@ -96,7 +97,7 @@ public class GuidesStructureTest extends GuidesTestCase {
 	private static void assertFolder(CodeSet content, IPath path) {
 		assertTrue("Folder "+path+" not found in "+content, content.hasFolder(path));
 	}
-	private static void assertFile(CodeSet content, IPath path) {
+	private static void assertFile(CodeSet content, IPath path) throws UIThreadDownloadDisallowed {
 		assertTrue("File "+path+" not found in "+content, content.hasFile(path));
 	}
 

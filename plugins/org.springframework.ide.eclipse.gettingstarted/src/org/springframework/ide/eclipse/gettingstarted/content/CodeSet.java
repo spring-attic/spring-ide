@@ -19,8 +19,10 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.springframework.ide.eclipse.gettingstarted.content.CodeSet.Processor;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 import org.springframework.ide.eclipse.gettingstarted.util.IOUtil;
+import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
@@ -84,7 +86,7 @@ public abstract class CodeSet {
 	 * content / zip / repo the CodeSet is contained in (unless it is
 	 * already cached locally).
 	 */
-	public List<BuildType> getBuildTypes() {
+	public List<BuildType> getBuildTypes() throws UIThreadDownloadDisallowed {
 		if (buildTypes==null) {
 			buildTypes = new ArrayList<BuildType>();
 			for (BuildType type : BuildType.values()) {
@@ -110,8 +112,9 @@ public abstract class CodeSet {
 	 * 
      * If the CodeSet was not previously downloaded this will force a
      * download.
+	 * @throws UIThreadDownloadDisallowed 
 	 */
-	public abstract boolean hasFile(IPath path);
+	public abstract boolean hasFile(IPath path) throws UIThreadDownloadDisallowed;
 	
 	/**
 	 * Returns true if this codeset has a folder with a given path.
@@ -124,7 +127,7 @@ public abstract class CodeSet {
 	/**
 	 * Convenience method that allows passing paths as Strings instead of IPath instances
 	 */
-	public final boolean hasFile(String path) {
+	public final boolean hasFile(String path) throws UIThreadDownloadDisallowed {
 		return hasFile(new Path(path));
 	}
 
@@ -158,12 +161,18 @@ public abstract class CodeSet {
 		});
 	}
 
-	public ValidationResult validateBuildType(BuildType buildType) {
+	public ValidationResult validateBuildType(BuildType buildType) throws UIThreadDownloadDisallowed {
 		String bs = buildType.getBuildScript().toString();
 		if (!hasFile(bs)) {
 			return ValidationResult.error(buildType.displayName()+" is not supported: there is no '"+bs+"'");
 		}
 		return ValidationResult.OK;
 	}
+
+	/**
+	 * Read a single entry from a codeset. Note that this operation might be expensive because
+	 * it might open and close a zipfile for a ZipFileCodeSet).
+	 */
+	public abstract <T> T readFileEntry(String path, Processor<T> processor) throws Exception;
 	
 }
