@@ -14,6 +14,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -48,19 +49,24 @@ public class DescriptionSection extends WizardPageSection {
 //		Label fieldNameLabel = new Label(field, SWT.NONE);
 //		fieldNameLabel.setText("Description");
 		
-		final Text text = new Text(page, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER | SWT.READ_ONLY);
+		final Text text = new Text(page, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.READ_ONLY);
 		
 		//Determine vertical space so there's enough room for about 5 lines of text
 		GC gc = new GC(text);
 		FontMetrics fm = gc.getFontMetrics();
 		int preferredHeight = fm.getHeight()*5;
 		
-		GridDataFactory grab = GridDataFactory
-				.fillDefaults().grab(true, false)
-				.minSize(SWT.DEFAULT, preferredHeight)
-				.hint(SWT.DEFAULT, preferredHeight);
+//		GridDataFactory grab = GridDataFactory
+//				.fillDefaults().align(SWT.FILL, SWT.FILL) //without this SWT.WRAP doesn't work?
+//				.grab(true, false)
+//				.minSize(SWT.DEFAULT, preferredHeight)
+//				.hint(SWT.DEFAULT, preferredHeight);
 //		grab.applyTo(field);
-		grab.applyTo(text);
+//		grab.applyTo(text);
+		GridData data = new GridData(GridData.FILL_HORIZONTAL); //Without this, SWT.WRAP doesn't work!
+		  //See: http://vzurczak.wordpress.com/2012/08/28/force-a-swt-text-to-wrap/
+		data.heightHint = preferredHeight;
+		text.setLayoutData(data);
 		
 //		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
 		
