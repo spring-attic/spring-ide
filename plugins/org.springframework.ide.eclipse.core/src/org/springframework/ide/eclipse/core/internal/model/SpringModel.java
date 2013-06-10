@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.internal.model.resources.ISpringResourceChangeEvents;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
+import org.springframework.ide.eclipse.core.internal.project.SpringProjectContributionManager;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -331,7 +332,8 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 							if (javaProject != null
 									&& (javaProject.equals(delta.getElement().getJavaProject()) || javaProject
 											.isOnClasspath(delta.getElement()))) {
-								SpringCoreUtils.buildProject(project.getProject());
+								SpringProjectContributionManager.classpathChanged(project.getProject().getName());
+//								SpringCoreUtils.buildProject(project.getProject());
 								
 								// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=375365
 								SpringCoreUtils.buildProject(project.getProject(), "org.eclipse.wst.validation.validationbuilder");

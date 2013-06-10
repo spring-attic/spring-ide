@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -54,8 +55,11 @@ import org.springframework.ide.eclipse.core.project.ProjectContributionEventList
  * <p>
  * {@link IProjectBuilder} or {@link IValidator} implementations that want to access the state should implement the
  * {@link IProjectContributorStateAware} interface to a call back with the current state.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
+ * 
  * @since 2.0
  * @see IProjectContributor
  * @see IProjectBuilder
@@ -63,6 +67,23 @@ import org.springframework.ide.eclipse.core.project.ProjectContributionEventList
  * @see IProjectContributorState
  */
 public class SpringProjectContributionManager extends IncrementalProjectBuilder {
+	
+	private static Object dummyMapObject = new Object();
+	private static Map<String, Object> classpathChanged = new ConcurrentHashMap<String, Object>();
+	
+	/**
+	 * indicate that the classpath changed for the given project since the last build
+	 * This mirrors the same behavior as the JavaBuilder, which keeps a state between
+	 * builds and checks for classpath changes at every build.
+	 * 
+	 * This is triggered by a element change listener in SpringModel that keeps listening
+	 * for classpath changes.
+	 * 
+	 * @param projectName The name of the project
+	 */
+	public static void classpathChanged(String projectName) {
+		classpathChanged.put(projectName, dummyMapObject);
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -79,13 +100,16 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 		// Set up the state object
 		final IProjectContributorState state = prepareState(project, builderDefinitions, validatorDefinitions);
-
+		
+		// check for classpath changes (that require a full build)
+		Object removed = classpathChanged.remove(project.getName());
+		final int buildKind = removed != null ? IncrementalProjectBuilder.FULL_BUILD : kind;
+		
 		// Fire start event on listeners
 		for (final IProjectContributionEventListener listener : listeners) {
 			execute(new SafeExecutableWithMonitor() {
-
 				public void execute(IProgressMonitor subMonitor) throws Exception {
-					listener.start(kind, delta, builderDefinitions, validatorDefinitions, state, project, subMonitor);
+					listener.start(buildKind, delta, builderDefinitions, validatorDefinitions, state, project, subMonitor);
 				}
 			}, monitor);
 
@@ -95,26 +119,24 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 		for (ProjectBuilderDefinition builderDefinition : builderDefinitions) {
 			if (builderDefinition.isEnabled(project)) {
 				Set<IResource> affectedResources = getAffectedResources(builderDefinition.getProjectBuilder(), project,
-						kind, delta);
-				runBuilder(builderDefinition, affectedResources, kind, monitor, listeners);
+						buildKind, delta);
+				runBuilder(builderDefinition, affectedResources, buildKind, monitor, listeners);
 			}
 		}
 
 		// Finally run all validators
 		for (ValidatorDefinition validatorDefinition : validatorDefinitions) {
 			if (validatorDefinition.isEnabled(project)) {
-				Set<IResource> affectedResources = getAffectedResources(validatorDefinition.getValidator(), project,
-						kind, delta);
-				runValidator(validatorDefinition, affectedResources, kind, monitor, listeners);
+				Set<IResource> affectedResources = getAffectedResources(validatorDefinition.getValidator(), project, buildKind, delta);
+				runValidator(validatorDefinition, affectedResources, buildKind, monitor, listeners);
 			}
 		}
 
 		// Fire end event on listeners
 		for (final IProjectContributionEventListener listener : listeners) {
 			execute(new SafeExecutableWithMonitor() {
-
 				public void execute(IProgressMonitor subMonitor) throws Exception {
-					listener.finish(kind, delta, builderDefinitions, validatorDefinitions, state, project, subMonitor);
+					listener.finish(buildKind, delta, builderDefinitions, validatorDefinitions, state, project, subMonitor);
 				}
 			}, monitor);
 		}
