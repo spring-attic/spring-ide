@@ -192,7 +192,11 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 				
 				IBeansProject beansProject = (IBeansProject) getElementParent();
 				final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
-	
+				
+				if (cl.getResource(this.configClass.getFullyQualifiedName().replace('.', '/') + ".class") == null) {
+					return;
+				}
+					
 				Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
 					public Integer call() throws Exception {
 						// Obtain thread context classloader and override with the project classloader
