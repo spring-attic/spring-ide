@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
