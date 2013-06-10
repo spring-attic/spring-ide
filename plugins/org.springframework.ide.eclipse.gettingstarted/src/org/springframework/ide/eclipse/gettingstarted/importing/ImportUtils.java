@@ -56,7 +56,13 @@ public class ImportUtils {
 	public static ImportConfiguration importConfig(GettingStartedGuide guide, CodeSet codeset) {
 		Assert.isNotNull(guide);
 		Assert.isNotNull(codeset);
-		String projectName = guide.getName()+"-"+codeset.getName();
+		String csName = codeset.getName();
+		String projectName;
+		if ("default".equals(csName)) {
+			projectName = guide.getName();
+		} else {
+			projectName = guide.getName()+"-"+codeset.getName();
+		}
 		return ImportUtils.importConfig(
 				/*location*/
 				Platform.getLocation().append(projectName),
