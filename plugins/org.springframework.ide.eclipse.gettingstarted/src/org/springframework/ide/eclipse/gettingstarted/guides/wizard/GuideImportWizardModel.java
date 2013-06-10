@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashSet;
@@ -28,13 +27,15 @@ import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+
+import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 
 /**
  * Core counterpart of GuideImportWizard (essentially this is a 'model' for the wizard
@@ -146,11 +147,17 @@ public class GuideImportWizardModel {
 										//Can happen if widgets / model is in process of propagating changes
 										// codeset names may still be those selected for another guide. May not
 										// be valid yet for current guide.
-										System.out.println("Ignore invalid codeset "+csname+" in "+g.getName());
+										//System.out.println("Ignore invalid codeset "+csname+" in "+g.getName());
+										return ValidationResult.error("'"+g.getDisplayName()+"' has no codeset '"+csname+"'");
 									} else {
 										ValidationResult result = cs.validateBuildType(bt);
 										if (!result.isOk()) {
 											return result.withMessage("CodeSet '"+csname+"': "+result.msg);
+										}
+										ImportStrategy importStrategy = bt.getImportStrategy();
+										if (!importStrategy.isSupported()) {
+											//This means some required STS component like m2e or gradle tooling is not installed
+											return ValidationResult.error(bt.getNotInstalledMessage());
 										}
 									}
 								}
