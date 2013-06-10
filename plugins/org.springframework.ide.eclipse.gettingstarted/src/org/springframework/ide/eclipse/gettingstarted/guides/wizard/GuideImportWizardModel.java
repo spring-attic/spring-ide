@@ -45,9 +45,6 @@ import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
  */
 public class GuideImportWizardModel {
 	
-	//TODO: Validate build system choice against installed tooling. (warn if m2e / gradle tooling is
-	// required but not installed.
-	
 	//TODO: Validation: shouldn't allow importing if something already exists where codeset content
 	// will be downloaded. This will overwrite what's there. At the very least a warning should
 	// appear in the wizard.
