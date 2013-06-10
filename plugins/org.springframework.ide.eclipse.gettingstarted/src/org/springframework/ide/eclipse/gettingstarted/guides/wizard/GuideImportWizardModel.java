@@ -64,12 +64,15 @@ public class GuideImportWizardModel {
 
 		private LiveVariable<GettingStartedGuide> codesetProvider;
 		private LiveSet<String> selectedNames;
+		private LiveExpression<String[]> validCodesetNames;
 
-		public CodeSetValidator(LiveVariable<GettingStartedGuide> guide, LiveSet<String> codesets) {
+		public CodeSetValidator(LiveVariable<GettingStartedGuide> guide, LiveSet<String> codesets, LiveExpression<String[]> validCodeSetNames) {
 			this.codesetProvider = guide;
 			this.selectedNames = codesets;
+			this.validCodesetNames = validCodeSetNames;
 			this.dependsOn(guide);
 			this.dependsOn(codesets);
+			this.dependsOn(validCodeSetNames);
 		}
 
 		@Override
@@ -77,18 +80,28 @@ public class GuideImportWizardModel {
 			try {
 				GettingStartedGuide g = codesetProvider.getValue();
 				if (g!=null) { //Don't check or produce errors unless a content provider has been selected.
+					boolean codesetSelected = false;
 					try {
 						Set<String> names = selectedNames.getValue();
 						if (names != null && !names.isEmpty()) {
 							for (String name : names) {
 								CodeSet cs = g.getCodeSet(name);
 								if (cs!=null) {
+									codesetSelected = true;
 									ImportConfiguration conf = ImportUtils.importConfig(g, cs);
 									ValidationResult valid = ImportUtils.validateImportConfiguration(conf);
 									if (!valid.isOk()) {
 										return valid;
 									}
 								}
+							}
+						}
+						if (!codesetSelected) {
+							//Selectiong nothing is only allowed if there is in fact nothing to select
+							//otherwise at least on codeset must be selected for import.
+							String[] validNames = validCodesetNames.getValue();
+							if (validNames!=null && validNames.length>0) {
+								return ValidationResult.error("At least one codeset should be selected");
 							}
 						}
 					} catch (UIThreadDownloadDisallowed e) {
@@ -139,7 +152,7 @@ public class GuideImportWizardModel {
 					}
 				}
 			} catch (UIThreadDownloadDisallowed e) {
-				//Failed because content is not yet downloade but this is ok... 
+				//Failed because content is not yet downloaded but this is ok... 
 				//just schedule download to happen later and in the mean time return something sensible
 				scheduleDownloadJob();
 			} catch (Throwable e) {
@@ -155,7 +168,7 @@ public class GuideImportWizardModel {
 	private LiveVariable<BuildType> buildType = new LiveVariable<BuildType>(BuildType.DEFAULT);
 	
 	private LiveExpression<ValidationResult> guideValidator = Validator.notNull(guide, "A Guide must be selected");
-	private LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets);
+	private LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets, validCodesetNames);
 	private LiveExpression<ValidationResult> buildTypeValidator = new Validator() {
 		@Override
 		protected ValidationResult compute() {
