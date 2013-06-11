@@ -52,10 +52,21 @@
      point="org.eclipse.ui.importWizards"> 
       <wizard
             category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
+            class="org.springframework.ide.eclipse.gettingstarted.wizard.GSImportWizard"
+            icon="icons/guide-import.png"
+            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic"
+            name="Getting Started Content"> 
+         <description> 
+            An import wizards that imports code associated with a Spring Getting Started Guide
+         </description> 
+         <selection class="org.eclipse.core.resources.IResource"/> 
+      </wizard>
+      <wizard
+            category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
             class="org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizard"
             icon="icons/guide-import.png"
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.guide"
-            name="Spring Guide Project"> 
+            name="Getting Started Guide"> 
          <description> 
             An import wizards that imports code associated with a Spring Getting Started Guide
          </description> 

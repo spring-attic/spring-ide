@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.importing;
 
@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
 import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
@@ -53,13 +53,16 @@ public class ImportUtils {
 	 * Convenience method to create a import configuration that imports a particular codeset for a given guide into the 
 	 * default location in the workspace.
 	 */
-	public static ImportConfiguration importConfig(GettingStartedGuide guide, CodeSet codeset) {
+	public static ImportConfiguration importConfig(GSContent guide, CodeSet codeset) {
 		Assert.isNotNull(guide);
 		Assert.isNotNull(codeset);
 		String csName = codeset.getName();
 		String projectName;
 		if ("default".equals(csName)) {
 			projectName = guide.getName();
+		} else if (csName.equals(guide.getName())) {
+			//Don't create silly names like 'spring-pet-clinic-spring-pet-clinic'
+			projectName = csName;
 		} else {
 			projectName = guide.getName()+"-"+codeset.getName();
 		}

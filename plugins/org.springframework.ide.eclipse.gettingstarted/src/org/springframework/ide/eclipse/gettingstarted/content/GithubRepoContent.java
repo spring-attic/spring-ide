@@ -9,8 +9,9 @@ import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
+import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
-public abstract class GithubRepoContent {
+public abstract class GithubRepoContent implements GSContent {
 
 	protected DownloadManager downloader;
 	
@@ -65,6 +66,20 @@ public abstract class GithubRepoContent {
 	
 	public String getDescription() {
 		return getRepo().getDescription();
+	}
+
+	@Override
+	public CodeSet getCodeSet(String name) throws UIThreadDownloadDisallowed {
+		for (CodeSet cs : getCodeSets()) {
+			if (cs.getName().equals(name)) {
+				return cs;
+			}
+		}
+		return null;
+	}
+
+	public boolean isDownloaded() {
+		return getZip().isDownloaded();
 	}
 	
 }

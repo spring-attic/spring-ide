@@ -25,6 +25,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
@@ -56,7 +57,7 @@ public class GuideImportWizardModel {
 	// retain the selected names across switches. When guide is selected again
 	// the selected names from before will then be remembered.
 	
-	static final ValidationResult isDownloadingMessage(GettingStartedGuide g) {
+	static final ValidationResult isDownloadingMessage(GithubRepoContent g) {
 		return ValidationResult.info(g.getName()+" is downloading...");
 	}
 
@@ -78,7 +79,7 @@ public class GuideImportWizardModel {
 		@Override
 		protected ValidationResult compute() {
 			try {
-				GettingStartedGuide g = codesetProvider.getValue();
+				GithubRepoContent g = codesetProvider.getValue();
 				if (g!=null) { //Don't check or produce errors unless a content provider has been selected.
 					boolean codesetSelected = false;
 					try {
@@ -128,9 +129,15 @@ public class GuideImportWizardModel {
 	 * The names of the codesets selected for import.
 	 */
 	private LiveSet<String> codesets = new LiveSet<String>(new HashSet<String>());
-	{
-		codesets.addAll(GettingStartedGuide.defaultCodesetNames); //Select both codesets by default.
-	}
+//	{ Note: its not needed anymore to preselect any names by default. This is now
+//    done automatically by the wizard UI. When it populates checkboxes any new 
+//    names will automatically be selected.
+//  TODO: maybe this logic of selecting codesets automatically belong in the model rather than
+//   the UI. But that is more complicated to implement (the checkboxes currently do not
+//   listen to the model elements although they could.
+	
+//		codesets.addAll(GettingStartedGuide.defaultCodesetNames); //Select both codesets by default.
+//	}
 	
 	/**
 	 * The valid codeset names w.r.t. the currently selected guide
@@ -140,7 +147,7 @@ public class GuideImportWizardModel {
 		@Override
 		protected String[] compute() {
 			try {
-				GettingStartedGuide g = guide.getValue();
+				GithubRepoContent g = guide.getValue();
 				if (g!=null) {
 					List<CodeSet> validSets = g.getCodeSets();
 					if (validSets!=null) {
@@ -173,7 +180,7 @@ public class GuideImportWizardModel {
 		@Override
 		protected ValidationResult compute() {
 			try {
-				GettingStartedGuide g = guide.getValue();
+				GithubRepoContent g = guide.getValue();
 				if (g!=null) {
 					try {
 						BuildType bt = buildType.getValue();
@@ -216,7 +223,7 @@ public class GuideImportWizardModel {
 	public LiveExpression<Boolean> isDownloaded = new LiveExpression<Boolean>(false) {
 		@Override
 		protected Boolean compute() {
-			GettingStartedGuide g = guide.getValue();
+			GithubRepoContent g = guide.getValue();
 			return g == null || g.isDownloaded(); 
 		}
 	};
@@ -227,7 +234,7 @@ public class GuideImportWizardModel {
 	public final LiveExpression<String> description = new LiveExpression<String>("<no description>") {
 		@Override
 		protected String compute() {
-			GettingStartedGuide g = guide.getValue();
+			GithubRepoContent g = guide.getValue();
 			if (g!=null) {
 				return g.getDescription();
 			}
@@ -238,7 +245,7 @@ public class GuideImportWizardModel {
 	public final LiveExpression<URL> homePage = new LiveExpression<URL>(null) {
 		@Override
 		protected URL compute() {
-			GettingStartedGuide g = guide.getValue();
+			GithubRepoContent g = guide.getValue();
 			if (g!=null) {
 				return g.getHomePage();
 			}
@@ -278,7 +285,7 @@ public class GuideImportWizardModel {
 	public void performDownload(IProgressMonitor mon) throws Exception {
 		mon.beginTask("Downloading", 1);
 		try {
-			GettingStartedGuide g = guide.getValue();
+			GithubRepoContent g = guide.getValue();
 			if (g!=null) {
 				g.getZip().getFile(); //This forces download
 			}
@@ -311,7 +318,7 @@ public class GuideImportWizardModel {
 	public boolean performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		//The import will be carried out with whatever the currently selected values are
 		// in all the input fields / variables / widgets.
-		GettingStartedGuide g = guide.getValue();
+		GithubRepoContent g = guide.getValue();
 		BuildType bt = buildType.getValue();
 		Set<String> codesetNames = codesets.getValue();
 		
@@ -357,7 +364,7 @@ public class GuideImportWizardModel {
 		this.guide.setValue(guide);
 	}
 	
-	public GettingStartedGuide getGuide() {
+	public GithubRepoContent getGuide() {
 		return guide.getValue();
 	}
 

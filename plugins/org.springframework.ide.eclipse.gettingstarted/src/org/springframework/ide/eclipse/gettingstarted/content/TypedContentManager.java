@@ -27,7 +27,7 @@ class TypedContentManager<T> {
 	private DownloadManager downloader; //Manages file-system cache where downloaded content is stored.
 
 	private ContentProvider<T> contentProvider;
-	
+
 	protected TypedContentManager(DownloadManager downloader, ContentProvider<T> contentProvider) {
 		this.downloader = downloader;
 		this.contentProvider = contentProvider;

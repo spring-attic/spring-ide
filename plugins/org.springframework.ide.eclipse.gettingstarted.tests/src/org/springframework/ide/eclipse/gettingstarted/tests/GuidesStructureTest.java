@@ -20,7 +20,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
 /**
@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisal
  */
 public class GuidesStructureTest extends GuidesTestCase {
 
-	public GuidesStructureTest(GettingStartedGuide guide) {
+	public GuidesStructureTest(GithubRepoContent guide) {
 		super(guide);
 	}
 
@@ -45,7 +45,7 @@ public class GuidesStructureTest extends GuidesTestCase {
 		assertTrue("Github repo '"+guide.getName()+"' has no description", description!=null && !"".equals(description.trim()));
 	}
 
-	public static void validateZipStructure(GettingStartedGuide guide) throws IOException, Exception {
+	public static void validateZipStructure(GithubRepoContent guide) throws IOException, Exception {
 		File zipFile = guide.getZip().getFile();
 		assertTrue("Could not download "+ guide.getZip(),
 				zipFile!=null && zipFile.exists());
@@ -104,8 +104,8 @@ public class GuidesStructureTest extends GuidesTestCase {
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(GuidesStructureTest.class.getName());
 		
-		GettingStartedGuide[] guides = GuidesTests.getGuides();
-		for (GettingStartedGuide guide : guides) {
+		GithubRepoContent[] guides = GuidesTests.getGuides();
+		for (GithubRepoContent guide : guides) {
 			suite.addTest(new GuidesStructureTest(guide));
 		}
 		

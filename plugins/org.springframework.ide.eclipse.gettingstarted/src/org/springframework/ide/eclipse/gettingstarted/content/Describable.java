@@ -16,5 +16,5 @@ package org.springframework.ide.eclipse.gettingstarted.content;
 public interface Describable {
 
 	String getDescription();
-	
+
 }

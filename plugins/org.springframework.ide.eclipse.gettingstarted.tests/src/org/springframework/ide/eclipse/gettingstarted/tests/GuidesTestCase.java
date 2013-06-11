@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.gettingstarted.tests;
 
 import junit.framework.TestCase;
 
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 
 /**
  * Some infrastucture shared among different dynamically generated testcases for
@@ -25,9 +25,9 @@ public class GuidesTestCase extends TestCase {
 	/**
 	 * The guide under test
 	 */
-	protected GettingStartedGuide guide;
+	protected GithubRepoContent guide;
 
-	public GuidesTestCase(GettingStartedGuide guide) {
+	public GuidesTestCase(GithubRepoContent guide) {
 		super(guide.getName());
 		this.guide = guide;
 	}

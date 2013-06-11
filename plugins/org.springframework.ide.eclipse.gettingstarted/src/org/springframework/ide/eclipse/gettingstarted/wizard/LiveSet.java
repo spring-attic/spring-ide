@@ -36,7 +36,7 @@ public class LiveSet<T> extends LiveExpression<Set<T>> {
 	 * mutated externally.
 	 */
 	private boolean dirty = false;
-
+	
 	public LiveSet() {
 		this(new HashSet<T>());
 	}

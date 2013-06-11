@@ -25,7 +25,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
+import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
@@ -60,7 +61,7 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 		private GSImportWizardModel model;
 
 		protected PageOne(GSImportWizardModel model) {
-			super("Page One", "Import Getting Started Guide", IMAGE);
+			super("Page One", "Import Getting Started Content", IMAGE);
 			this.model = model;
 		}
 		
@@ -68,7 +69,7 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 		protected List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
-			sections.add(new ChooseTypedContentSection(this, model.getGuideSelectionModel()));
+			sections.add(new ChooseTypedContentSection(this, model.getGSContentSelectionModel(), GettingStartedContent.getInstance()));
 			sections.add(new DescriptionSection(this, model.description));
 			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
 			sections.add(new CodeSetCheckBoxesSection(this, model.validCodesetNames, model.getCodeSetModel()));
@@ -138,19 +139,19 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 	 * Open the wizard and block until it is closed by the user. Returns the exit code of
 	 * the wizard (e.g. indicating OK or CANCEL).
 	 */
-	public static int open(Shell shell, GettingStartedGuide guide) {
+	public static int open(Shell shell, GSContent guide) {
 		GSImportWizard wiz = new GSImportWizard();
-		wiz.setGuide(guide);
+		wiz.setItem(guide);
 		WizardDialog dialog = new WizardDialog(shell, wiz);
 		dialog.setBlockOnOpen(true);
 		return dialog.open(); 
 	}
 
 	/**
-	 * Sets the default selection for the guide that is going to be imported. 
+	 * Sets the default selection for the content item that is going to be imported. 
 	 */
-	public void setGuide(GettingStartedGuide guide) {
-		this.model.setGuide(guide);
+	public void setItem(GSContent guide) {
+		this.model.setItem(guide);
 	}
 	
 }

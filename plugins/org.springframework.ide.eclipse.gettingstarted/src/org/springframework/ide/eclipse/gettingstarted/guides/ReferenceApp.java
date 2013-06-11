@@ -10,18 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.guides;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
-public class ReferenceApp extends GithubRepoContent {
+public class ReferenceApp extends GithubRepoContent implements GSContent {
 
 	/**
 	 * We expect a readme file of sorts, at the root of the 
@@ -111,6 +113,17 @@ public class ReferenceApp extends GithubRepoContent {
 
 	public List<BuildType> getBuildTypes() throws UIThreadDownloadDisallowed {
 		return getCodeSet().getBuildTypes();
+	}
+
+	@Override
+	public String getDisplayName() {
+		//TODO: beatify the name
+		return getName();
+	}
+
+	@Override
+	public List<CodeSet> getCodeSets() throws UIThreadDownloadDisallowed {
+		return Arrays.asList(getCodeSet());
 	}
 	
 }
