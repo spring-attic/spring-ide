@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.gettingstarted.wizard.GSImportWizard;
  * 
  * @author Kris De Volder
  */
-public interface GSContent extends Describable {
+public interface GSContent extends Describable, DisplayNameable {
 
 	public String getName();
 	public String getDisplayName();

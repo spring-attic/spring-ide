@@ -25,7 +25,10 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.content.ContentManager;
+import org.springframework.ide.eclipse.gettingstarted.content.Describable;
 import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
@@ -37,6 +40,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+
+import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
 
 /**
  * Core counterpart of GSImportWizard (essentially this is a 'model' for the wizard
@@ -54,12 +59,15 @@ public class GSImportWizardModel {
 
 		private LiveVariable<GSContent> codesetProvider;
 		private LiveSet<String> selectedNames;
+		private LiveExpression<String[]> validCodesetNames;
 
-		public CodeSetValidator(LiveVariable<GSContent> guide, LiveSet<String> codesets) {
+		public CodeSetValidator(LiveVariable<GSContent> guide, LiveSet<String> codesets, LiveExpression<String[]> validCodeSetNames) {
 			this.codesetProvider = guide;
 			this.selectedNames = codesets;
+			this.validCodesetNames = validCodeSetNames;
 			this.dependsOn(guide);
 			this.dependsOn(codesets);
+			this.dependsOn(validCodeSetNames);
 		}
 
 		@Override
@@ -67,18 +75,28 @@ public class GSImportWizardModel {
 			try {
 				GSContent g = codesetProvider.getValue();
 				if (g!=null) { //Don't check or produce errors unless a content provider has been selected.
+					boolean codesetSelected = false;
 					try {
 						Set<String> names = selectedNames.getValue();
 						if (names != null && !names.isEmpty()) {
 							for (String name : names) {
 								CodeSet cs = g.getCodeSet(name);
 								if (cs!=null) {
+									codesetSelected = true;
 									ImportConfiguration conf = ImportUtils.importConfig(g, cs);
 									ValidationResult valid = ImportUtils.validateImportConfiguration(conf);
 									if (!valid.isOk()) {
 										return valid;
 									}
 								}
+							}
+						}
+						if (!codesetSelected) {
+							//Selectiong nothing is only allowed if there is in fact nothing to select
+							//otherwise at least on codeset must be selected for import.
+							String[] validNames = validCodesetNames.getValue();
+							if (validNames!=null && validNames.length>0) {
+								return ValidationResult.error("At least one codeset should be selected");
 							}
 						}
 					} catch (UIThreadDownloadDisallowed e) {
@@ -100,6 +118,12 @@ public class GSImportWizardModel {
 	 * The chosen guide to import stuff from.
 	 */
 	private LiveVariable<GSContent> guide = new LiveVariable<GSContent>();
+	
+	/**
+	 * Chosen element in the content picker whether it is an actual GSContent item
+	 * or a ContentType. Used to update description instead of 'c
+	 */
+	private LiveVariable<Object> rawSelection = new LiveVariable<Object>();
 	
 	/**
 	 * The names of the codesets selected for import.
@@ -145,7 +169,7 @@ public class GSImportWizardModel {
 	private LiveVariable<BuildType> buildType = new LiveVariable<BuildType>(BuildType.DEFAULT);
 	
 	private LiveExpression<ValidationResult> guideValidator = Validator.notNull(guide, "No GS content selected");
-	private LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets);
+	private LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets, validCodesetNames);
 	private LiveExpression<ValidationResult> buildTypeValidator = new Validator() {
 		@Override
 		protected ValidationResult compute() {
@@ -204,9 +228,9 @@ public class GSImportWizardModel {
 	public final LiveExpression<String> description = new LiveExpression<String>("<no description>") {
 		@Override
 		protected String compute() {
-			GSContent g = guide.getValue();
-			if (g!=null) {
-				return g.getDescription();
+			Object g = rawSelection.getValue();
+			if (g!=null && g instanceof Describable) {
+				return ((Describable) g).getDescription();
 			}
 			return "<no gs content selected>";
 		}
@@ -236,7 +260,7 @@ public class GSImportWizardModel {
 		
 		isDownloaded.dependsOn(guide);
 		
-		description.dependsOn(guide);
+		description.dependsOn(rawSelection);
 		
 		homePage.dependsOn(guide);
 		
@@ -314,7 +338,7 @@ public class GSImportWizardModel {
 			if (enableOpenHomePage.getValue()) {
 				URL url = homePage.getValue();
 				if (url!=null) {
-					WebDashboardPage.openUrl(url.toString());
+					openUrl(url.toString());
 				}
 			}
 			return true;
@@ -360,6 +384,18 @@ public class GSImportWizardModel {
 
 	public void setItem(GSContent guide) {
 		this.guide.setValue(guide);
+	}
+
+	/**
+	 * The 'raw' selection in the UI will be sent here. I.e. selected object will
+	 * be sent whether it is actual content or a ContentTypeNode.
+	 * <p>
+	 * Normally clients shouldn't be interested in this selection. It is used
+	 * to allow the Description section of the UI to display descriptions for
+	 * any selected item, including non-content nodes in the tree.
+	 */
+	public LiveVariable<Object> getRawSelection() {
+		return this.rawSelection;
 	}
 
 }

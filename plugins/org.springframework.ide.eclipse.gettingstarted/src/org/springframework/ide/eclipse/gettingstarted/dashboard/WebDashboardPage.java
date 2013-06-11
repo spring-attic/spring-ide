@@ -27,6 +27,8 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPage;
 
+import static org.eclipse.ui.browser.IWorkbenchBrowserSupport.*;
+
 /**
  * A DashBoard page that displays the contents of a webpage.
  * 
@@ -40,26 +42,6 @@ public class WebDashboardPage extends AbstractDashboardPage implements IExecutab
 	 */
 	public static final String DASHBOARD_SLAVE_BROWSER_ID = WebDashboardPage.class.getName()+".SLAVE";
 	
-	/**
-	 * Helper method to open urls in a regular web browser. Should be used to open 
-	 * urls from dashboard pages that would otherwise navigate the embedded browser
-	 * away from the intended landing page that should always be shown in that 
-	 * particular page.
-	 */
-	public static void openUrl(final String url) {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().createBrowser(DASHBOARD_SLAVE_BROWSER_ID);
-					browser.openURL(new URL(url));
-				} catch (Exception e) {
-					GettingStartedActivator.log(e);
-				}
-			}
-		});
-	}
-
 	private static int idCounter = 0;
 
 	/**

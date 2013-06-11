@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -40,9 +39,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.internal.misc.StringMatcher;
 import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.gettingstarted.content.ContentManager;
+import org.springframework.ide.eclipse.gettingstarted.content.ContentType;
 import org.springframework.ide.eclipse.gettingstarted.content.Describable;
+import org.springframework.ide.eclipse.gettingstarted.content.DisplayNameable;
 import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
@@ -86,8 +88,8 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 		@Override
 		public Object[] getChildren(Object e) {
-			if (e instanceof Class<?>) {
-				return content.get((Class<?>)e);
+			if (e instanceof ContentType<?>) {
+				return content.get((ContentType<?>)e);
 			}
 			return null;
 		}
@@ -111,37 +113,13 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	private static final LabelProvider labelProvider = new LabelProvider() {
 		public String getText(Object element) {
-			if (element instanceof Class<?>) {
-				return beatifyClassName(((Class<?>) element).getSimpleName());
-			}
-			if (element instanceof GSContent) {
-				GSContent item = (GSContent) element;
+			if (element instanceof DisplayNameable) {
+				DisplayNameable item = (DisplayNameable) element;
 				return item.getDisplayName();
 			}
 			return super.getText(element);
 		}
 
-		private String beatifyClassName(String simpleName) {
-			//Assume class name is camel case. Just split it up at capital letters and
-			// insert spaces there.
-			StringBuilder result = new StringBuilder();
-			Matcher m = Pattern.compile("[A-Z]").matcher(simpleName);
-			int pos1 = 0;
-			boolean found = m.find();
-			while (found) {
-				int pos2 = m.start();
-				if (pos2>pos1) {
-					result.append(simpleName.substring(pos1, pos2)+" ");
-				}
-				pos1 = pos2;
-				found = m.find();
-			}
-			//Don't forget the last bit
-			if (pos1>=0) {
-				result.append(simpleName.substring(pos1));
-			}
-			return result.toString();
-		};
 	};
 	
 	private class ChoicesFilter extends ViewerFilter {
@@ -175,17 +153,24 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		
 		public boolean compute(Viewer viewer, Object parentElement, Object e) {
 			String label = labelProvider.getText(e);
-			if (match(label)) {
+			if (e instanceof ContentType<?>) {
+				//Only search in the content (leaves). The contenttypes are selected if
+				// any of their children (content) is selected.
+				return matchChildren(viewer, e);
+			} else if (match(label)) {
 				return true;
 			} else if (e instanceof Describable && match(((Describable) e).getDescription())) {
 				return true;
-			} else {
-				Object[] children=contentProvider.getChildren(e);
-				if (children!=null) {
-					for (Object c : children) {
-						if (select(viewer, e, c)) {
-							return true;
-						}
+			}
+			return false;
+		}
+
+		private boolean matchChildren(Viewer viewer, Object e) {
+			Object[] children=contentProvider.getChildren(e);
+			if (children!=null) {
+				for (Object c : children) {
+					if (select(viewer, e, c)) {
+						return true;
 					}
 				}
 			}
@@ -212,10 +197,13 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	private ChoicesFilter filter;
 	private ContentManager content;
 	private ContentProvider contentProvider;
+	private LiveVariable<Object> rawSelection;
 
-	public ChooseTypedContentSection(IPageWithSections owner, SelectionModel<GSContent> selection, ContentManager content) {
+	public ChooseTypedContentSection(IPageWithSections owner, SelectionModel<GSContent> selection, 
+			LiveVariable<Object> rawSelection, ContentManager content) {
 		super(owner);
 		this.selection = selection;
+		this.rawSelection = rawSelection;
 		this.content = content;
 		this.contentProvider = new ContentProvider(content);
 	}
@@ -271,14 +259,23 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection sel = tv.getSelection();
 				if (sel.isEmpty()) {
-					selection.selection.setValue(null);
+					setSelection(null);
 				} else if (sel instanceof IStructuredSelection){
 					IStructuredSelection ss = (IStructuredSelection) sel;
-					Object el = ss.getFirstElement();
-					if (el instanceof GSContent) {
-						selection.selection.setValue((GSContent) el);
-					} else {
-						selection.selection.setValue(null);
+					setSelection(ss.getFirstElement());
+				} else {
+					//Not expecting anything else. So ignore.
+				}
+			}
+
+			private void setSelection(Object e) {
+				if (e == null) {
+					selection.selection.setValue(null);
+					rawSelection.setValue(null);
+				} else {
+					rawSelection.setValue(e);
+					if (e instanceof GSContent) {
+						selection.selection.setValue((GSContent) e);
 					}
 				}
 			}

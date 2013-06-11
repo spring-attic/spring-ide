@@ -69,7 +69,7 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 		protected List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
-			sections.add(new ChooseTypedContentSection(this, model.getGSContentSelectionModel(), GettingStartedContent.getInstance()));
+			sections.add(new ChooseTypedContentSection(this, model.getGSContentSelectionModel(), model.getRawSelection(), GettingStartedContent.getInstance()));
 			sections.add(new DescriptionSection(this, model.description));
 			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
 			sections.add(new CodeSetCheckBoxesSection(this, model.validCodesetNames, model.getCodeSetModel()));

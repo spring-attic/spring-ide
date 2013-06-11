@@ -66,6 +66,8 @@ public class ReferenceApp extends GithubRepoContent implements GSContent {
 	 */
 	private CodeSet codeset;
 
+	public static final String REFERENCE_APP_DESCRIPTION = "A reference app is a larger, complete application that shows how to use spring properly in a more realistic context.";
+
 	public ReferenceApp(ReferenceAppMetaData md, DownloadManager dl, GithubClient gh) {
 		super(dl);
 		Assert.isNotNull(md);

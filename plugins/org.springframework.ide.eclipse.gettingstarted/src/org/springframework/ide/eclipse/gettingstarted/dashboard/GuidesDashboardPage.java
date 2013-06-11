@@ -30,6 +30,8 @@ import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedCont
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.Credentials;
 import org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizard;
+import org.springframework.ide.eclipse.gettingstarted.wizard.GSImportWizard;
+import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * Dahsboard page that shows a list of getting started guides. Actually this is just
@@ -113,7 +115,8 @@ public class GuidesDashboardPage extends WebDashboardPage {
 			if ("springframework-meta".equals(org)) {
 				String guideName = path.segment(1);
 				if (guideName !=null && guideName.startsWith("gs-")) {
-					GuideImportWizard.open(getSite().getShell(), GettingStartedContent.getInstance().getGuide(guideName));
+					//GuideImportWizard.open(getSite().getShell(), GettingStartedContent.getInstance().getGuide(guideName));
+					GSImportWizard.open(getSite().getShell(),  GettingStartedContent.getInstance().getGuide(guideName));
 					return true;
 				}
 			}
@@ -151,7 +154,7 @@ public class GuidesDashboardPage extends WebDashboardPage {
 			if (!allowNavigation(event.location)) {
 				event.doit = false;
 				System.out.println("Navigation intercepted: "+event.location);
-				WebDashboardPage.openUrl(event.location);
+				UiUtil.openUrl(event.location);
 			}
 		}
 
@@ -193,23 +196,11 @@ public class GuidesDashboardPage extends WebDashboardPage {
 			browser.addCloseWindowListener(new CloseWindowListener() {
 				@Override
 				public void close(WindowEvent event) {
+					//It doesn't look like this gets called.
 					System.out.println("Browser is closing");
 					importFun.dispose();
 				}
 			});
-			
-			//TODO: do we need to dispose this function? In the sample snippet code this
-			// is done on a completed progress event. But I think that means the function can only
-			// be called while the page is loading. We wanna be able to call this function 
-			// when user clicks on an import button.
-			
-//			browser.addProgressListener(new ProgressAdapter() {
-//				@Override
-//				public void completed(ProgressEvent event) {
-//					importGuideFun.dispose();
-//					System.out.println("completed event");
-//				}
-//			});
 			
 		}
 		
@@ -218,7 +209,6 @@ public class GuidesDashboardPage extends WebDashboardPage {
 	@Override
 	public void dispose() {
 		super.dispose();
-		System.out.println("Browser container is disposing");
 		if (importFun!=null) {
 			importFun.dispose();
 		}

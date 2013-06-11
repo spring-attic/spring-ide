@@ -40,6 +40,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * Core counterpart of GuideImportWizard (essentially this is a 'model' for the wizard
@@ -344,7 +345,7 @@ public class GuideImportWizardModel {
 			if (enableOpenHomePage.getValue()) {
 				URL url = homePage.getValue();
 				if (url!=null) {
-					WebDashboardPage.openUrl(url.toString());
+					UiUtil.openUrl(url.toString());
 				}
 			}
 			return true;

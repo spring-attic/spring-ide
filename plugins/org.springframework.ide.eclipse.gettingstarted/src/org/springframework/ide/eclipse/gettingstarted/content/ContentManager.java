@@ -1,16 +1,18 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.content;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,12 +31,16 @@ import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
  */
 public abstract class ContentManager {
 	
-	private Map<Class<?>, TypedContentManager<?>>  byType = new HashMap<Class<?>, TypedContentManager<?>>();
+	private Map<Class<?>, TypedContentManager<?>>  byClass = new HashMap<Class<?>, TypedContentManager<?>>();
+	private List<ContentType<?>> types = new ArrayList<ContentType<?>>();
 	
-	public <T> void register(Class<T> type, ContentProvider<T> provider) {
-		Assert.isLegal(!byType.containsKey(type), "A content provider for "+type+" is already registered");
-		DownloadManager downloader = downloadManagerFor(type);
-		byType.put(type, new TypedContentManager<T>(downloader, provider));
+	public <T extends GSContent> void register(Class<T> klass, String description, ContentProvider<T> provider) {
+		Assert.isLegal(!byClass.containsKey(klass), "A content provider for "+klass+" is already registered");
+		
+		ContentType<T> ctype = new ContentType<T>(klass, description);
+		types.add(ctype);
+		DownloadManager downloader = downloadManagerFor(klass);
+		byClass.put(klass, new TypedContentManager<T>(downloader, provider));
 	}
 	
 	public abstract DownloadManager downloadManagerFor(Class<?> contentType);
@@ -45,16 +51,22 @@ public abstract class ContentManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T[] get(Class<T> type) {
-		TypedContentManager<T> man = (TypedContentManager<T>) byType.get(type);
+		TypedContentManager<T> man = (TypedContentManager<T>) byClass.get(type);
 		if (man!=null) {
 			return man.getAll();
 		}
 		return null; 
 	}
 
-	public Class<?>[] getTypes() {
-		Set<Class<?>> keys = byType.keySet();
-		return keys.toArray(new Class<?>[keys.size()]);
+	public ContentType<?>[] getTypes() {
+		return types.toArray(new ContentType<?>[types.size()]);
+	}
+
+	public Object[] get(ContentType<?> ct) {
+		if (ct!=null) {
+			return get(ct.getKlass());
+		}
+		return null;
 	}
 
 }

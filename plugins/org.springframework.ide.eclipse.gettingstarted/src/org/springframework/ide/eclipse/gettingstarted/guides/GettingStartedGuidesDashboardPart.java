@@ -42,11 +42,9 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
-import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizard;
 import org.springsource.ide.eclipse.dashboard.internal.ui.IdeUiPlugin;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
-//import org.springframework.ide.eclipse.wizard.WizardPlugin;
 
 /**
  * @author Kris De Volder
@@ -54,12 +52,6 @@ import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;
 public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 
 //	private static final String BROWSER_ID = GettingStartedGuidesDashboardPart.class.getName();
-
-	public static final String GUIDE_DESCRIPTION_TEXT = "A guide is a short focussed tutorial "
-			+ "on how to use Spring to accomplish a specific task. " 
-			+ "It has a 'start' code set, a 'complete' code" 
-			+ "set and a readme file explaining how you get from "
-			+ "one to the other.";
 
 	private static final String SMALL_ARROW_IMAGE = "rss/overlay-incoming.png";
 	
@@ -86,7 +78,7 @@ public class GettingStartedGuidesDashboardPart extends AbstractDashboardPart {
 
 		section.setClient(pageBook);
 
-		String explanatoryText = NLS.bind(GUIDE_DESCRIPTION_TEXT,
+		String explanatoryText = NLS.bind(GettingStartedGuide.GUIDE_DESCRIPTION_TEXT,
 				null
 		);
 				

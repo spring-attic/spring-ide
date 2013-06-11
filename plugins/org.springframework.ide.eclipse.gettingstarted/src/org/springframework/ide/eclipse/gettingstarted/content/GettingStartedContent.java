@@ -35,7 +35,7 @@ public class GettingStartedContent extends ContentManager {
 
 	private static GettingStartedContent INSTANCE = null;
 	
-	private final static boolean ADD_REAL =  (""+Platform.getLocation()).contains("kdvolder");
+	private final static boolean ADD_REAL =  true;
 	private final static boolean ADD_MOCKS = (""+Platform.getLocation()).contains("kdvolder");
 	
 	public static GettingStartedContent getInstance() {
@@ -49,7 +49,8 @@ public class GettingStartedContent extends ContentManager {
 	
 	private GettingStartedContent() {
 		//Guides: are discoverable because they are all repos in org on github
-		register(GettingStartedGuide.class, new ContentProvider<GettingStartedGuide>() {
+		register(GettingStartedGuide.class, GettingStartedGuide.GUIDE_DESCRIPTION_TEXT,
+			new ContentProvider<GettingStartedGuide>() {
 			@Override
 			public GettingStartedGuide[] fetch(DownloadManager downloader) {
 				List<GettingStartedGuide> guides = new ArrayList<GettingStartedGuide>();
@@ -78,7 +79,8 @@ public class GettingStartedContent extends ContentManager {
 		
 		//References apps: are discoverable because we maintain a list of json metadata
 		//that can be downloaded from some external url.
-		register(ReferenceApp.class, new ContentProvider<ReferenceApp>() {
+		register(ReferenceApp.class, ReferenceApp.REFERENCE_APP_DESCRIPTION,
+			new ContentProvider<ReferenceApp>() {
 
 			@Override
 			public ReferenceApp[] fetch(DownloadManager downloader) {
