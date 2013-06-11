@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -25,16 +25,13 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
+import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
-import org.springframework.ide.eclipse.gettingstarted.wizard.LiveSet;
-import org.springframework.ide.eclipse.gettingstarted.wizard.MultiSelectionModel;
-import org.springframework.ide.eclipse.gettingstarted.wizard.SelectionModel;
 import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -42,67 +39,46 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
 /**
- * Core counterpart of GuideImportWizard (essentially this is a 'model' for the wizard
+ * Core counterpart of GSImportWizard (essentially this is a 'model' for the wizard
  * UI.
  * 
  * @author Kris De Volder
  */
-public class GuideImportWizardModel {
+public class GSImportWizardModel {
 	
-	//TODO: when guide selection is changed and swithched back... elements get 
-	//  codeset names may get deselected (i.e. if name is not valid it gets unselected
-	// find a workaround.
-	//
-	//Idea: simply ignoring invalid 'selected names' should work. Then we can just 
-	// retain the selected names across switches. When guide is selected again
-	// the selected names from before will then be remembered.
-	
-	static final ValidationResult isDownloadingMessage(GithubRepoContent g) {
-		return ValidationResult.info(g.getName()+" is downloading...");
+	static final ValidationResult isDownloadingMessage(GSContent g) {
+		return ValidationResult.info(g.getDisplayName()+" is downloading...");
 	}
 
 	public class CodeSetValidator extends LiveExpression<ValidationResult> {
 
-		private LiveVariable<GettingStartedGuide> codesetProvider;
+		private LiveVariable<GSContent> codesetProvider;
 		private LiveSet<String> selectedNames;
-		private LiveExpression<String[]> validCodesetNames;
 
-		public CodeSetValidator(LiveVariable<GettingStartedGuide> guide, LiveSet<String> codesets, LiveExpression<String[]> validCodeSetNames) {
+		public CodeSetValidator(LiveVariable<GSContent> guide, LiveSet<String> codesets) {
 			this.codesetProvider = guide;
 			this.selectedNames = codesets;
-			this.validCodesetNames = validCodeSetNames;
 			this.dependsOn(guide);
 			this.dependsOn(codesets);
-			this.dependsOn(validCodeSetNames);
 		}
 
 		@Override
 		protected ValidationResult compute() {
 			try {
-				GithubRepoContent g = codesetProvider.getValue();
+				GSContent g = codesetProvider.getValue();
 				if (g!=null) { //Don't check or produce errors unless a content provider has been selected.
-					boolean codesetSelected = false;
 					try {
 						Set<String> names = selectedNames.getValue();
 						if (names != null && !names.isEmpty()) {
 							for (String name : names) {
 								CodeSet cs = g.getCodeSet(name);
 								if (cs!=null) {
-									codesetSelected = true;
 									ImportConfiguration conf = ImportUtils.importConfig(g, cs);
 									ValidationResult valid = ImportUtils.validateImportConfiguration(conf);
 									if (!valid.isOk()) {
 										return valid;
 									}
 								}
-							}
-						}
-						if (!codesetSelected) {
-							//Selectiong nothing is only allowed if there is in fact nothing to select
-							//otherwise at least on codeset must be selected for import.
-							String[] validNames = validCodesetNames.getValue();
-							if (validNames!=null && validNames.length>0) {
-								return ValidationResult.error("At least one codeset should be selected");
 							}
 						}
 					} catch (UIThreadDownloadDisallowed e) {
@@ -123,21 +99,15 @@ public class GuideImportWizardModel {
 	/**
 	 * The chosen guide to import stuff from.
 	 */
-	private LiveVariable<GettingStartedGuide> guide = new LiveVariable<GettingStartedGuide>();
+	private LiveVariable<GSContent> guide = new LiveVariable<GSContent>();
 	
 	/**
 	 * The names of the codesets selected for import.
 	 */
 	private LiveSet<String> codesets = new LiveSet<String>(new HashSet<String>());
-//	{ Note: its not needed anymore to preselect any names by default. This is now
-//    done automatically by the wizard UI. When it populates checkboxes any new 
-//    names will automatically be selected.
-//  TODO: maybe this logic of selecting codesets automatically belong in the model rather than
-//   the UI. But that is more complicated to implement (the checkboxes currently do not
-//   listen to the model elements although they could.
-	
-//		codesets.addAll(GettingStartedGuide.defaultCodesetNames); //Select both codesets by default.
-//	}
+	{
+		codesets.addAll(GettingStartedGuide.defaultCodesetNames); //Select both codesets by default.
+	}
 	
 	/**
 	 * The valid codeset names w.r.t. the currently selected guide
@@ -147,7 +117,7 @@ public class GuideImportWizardModel {
 		@Override
 		protected String[] compute() {
 			try {
-				GithubRepoContent g = guide.getValue();
+				GSContent g = guide.getValue();
 				if (g!=null) {
 					List<CodeSet> validSets = g.getCodeSets();
 					if (validSets!=null) {
@@ -159,7 +129,7 @@ public class GuideImportWizardModel {
 					}
 				}
 			} catch (UIThreadDownloadDisallowed e) {
-				//Failed because content is not yet downloaded but this is ok... 
+				//Failed because content is not yet downloade but this is ok... 
 				//just schedule download to happen later and in the mean time return something sensible
 				scheduleDownloadJob();
 			} catch (Throwable e) {
@@ -174,13 +144,13 @@ public class GuideImportWizardModel {
 	 */
 	private LiveVariable<BuildType> buildType = new LiveVariable<BuildType>(BuildType.DEFAULT);
 	
-	private LiveExpression<ValidationResult> guideValidator = Validator.notNull(guide, "A Guide must be selected");
-	private LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets, validCodesetNames);
+	private LiveExpression<ValidationResult> guideValidator = Validator.notNull(guide, "No GS content selected");
+	private LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets);
 	private LiveExpression<ValidationResult> buildTypeValidator = new Validator() {
 		@Override
 		protected ValidationResult compute() {
 			try {
-				GithubRepoContent g = guide.getValue();
+				GSContent g = guide.getValue();
 				if (g!=null) {
 					try {
 						BuildType bt = buildType.getValue();
@@ -223,7 +193,7 @@ public class GuideImportWizardModel {
 	public LiveExpression<Boolean> isDownloaded = new LiveExpression<Boolean>(false) {
 		@Override
 		protected Boolean compute() {
-			GithubRepoContent g = guide.getValue();
+			GSContent g = guide.getValue();
 			return g == null || g.isDownloaded(); 
 		}
 	};
@@ -234,18 +204,18 @@ public class GuideImportWizardModel {
 	public final LiveExpression<String> description = new LiveExpression<String>("<no description>") {
 		@Override
 		protected String compute() {
-			GithubRepoContent g = guide.getValue();
+			GSContent g = guide.getValue();
 			if (g!=null) {
 				return g.getDescription();
 			}
-			return "<no guide selected>";
+			return "<no gs content selected>";
 		}
 	};
 	
 	public final LiveExpression<URL> homePage = new LiveExpression<URL>(null) {
 		@Override
 		protected URL compute() {
-			GithubRepoContent g = guide.getValue();
+			GSContent g = guide.getValue();
 			if (g!=null) {
 				return g.getHomePage();
 			}
@@ -285,7 +255,7 @@ public class GuideImportWizardModel {
 	public void performDownload(IProgressMonitor mon) throws Exception {
 		mon.beginTask("Downloading", 1);
 		try {
-			GithubRepoContent g = guide.getValue();
+			GSContent g = guide.getValue();
 			if (g!=null) {
 				g.getZip().getFile(); //This forces download
 			}
@@ -318,7 +288,7 @@ public class GuideImportWizardModel {
 	public boolean performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		//The import will be carried out with whatever the currently selected values are
 		// in all the input fields / variables / widgets.
-		GithubRepoContent g = guide.getValue();
+		GSContent g = guide.getValue();
 		BuildType bt = buildType.getValue();
 		Set<String> codesetNames = codesets.getValue();
 		
@@ -360,20 +330,20 @@ public class GuideImportWizardModel {
 	
 	
 	
-	public void setGuide(GettingStartedGuide guide) {
-		this.guide.setValue(guide);
-	}
-	
-	public GithubRepoContent getGuide() {
-		return guide.getValue();
-	}
+//	public void setGuide(GettingStartedGuide guide) {
+//		this.guide.setValue(guide);
+//	}
+//	
+//	public GettingStartedGuide getGuide() {
+//		return guide.getValue();
+//	}
 
 	public SelectionModel<BuildType> getBuildTypeModel() {
 		return new SelectionModel<BuildType>(buildType, buildTypeValidator);
 	}
 
-	public SelectionModel<GettingStartedGuide> getGuideSelectionModel() {
-		return new SelectionModel<GettingStartedGuide>(guide, guideValidator);
+	public SelectionModel<GSContent> getGSContentSelectionModel() {
+		return new SelectionModel<GSContent>(guide, guideValidator);
 	}
 	
 	public MultiSelectionModel<String> getCodeSetModel() {
@@ -386,6 +356,10 @@ public class GuideImportWizardModel {
 
 	public LiveVariable<Boolean> getEnableOpenHomePage() {
 		return enableOpenHomePage;
+	}
+
+	public void setItem(GSContent guide) {
+		this.guide.setValue(guide);
 	}
 
 }

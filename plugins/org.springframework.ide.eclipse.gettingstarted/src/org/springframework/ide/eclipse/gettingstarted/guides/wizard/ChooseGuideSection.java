@@ -13,7 +13,12 @@ package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.wizard.ChooseOneSection;
+import org.springframework.ide.eclipse.gettingstarted.wizard.ChooseOneSectionCombo;
+import org.springframework.ide.eclipse.gettingstarted.wizard.ChooseOneSectionTable;
+import org.springframework.ide.eclipse.gettingstarted.wizard.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
@@ -69,7 +74,7 @@ public class ChooseGuideSection extends WizardPageSection {
 				@Override
 				public String getText(Object element) {
 					if (element instanceof GettingStartedGuide) {
-						GettingStartedGuide gsg = (GettingStartedGuide) element;
+						GithubRepoContent gsg = (GithubRepoContent) element;
 						return gsg.getDisplayName();
 					}
 					return super.getText(element);

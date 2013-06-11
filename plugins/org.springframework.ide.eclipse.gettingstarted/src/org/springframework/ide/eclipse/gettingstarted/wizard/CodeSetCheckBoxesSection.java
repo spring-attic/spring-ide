@@ -8,7 +8,9 @@
  * Contributors:
  * VMWare, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.wizard;
+
+import java.util.HashSet;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
@@ -144,6 +146,9 @@ public class CodeSetCheckBoxesSection extends WizardPageSection {
 				}
 				for (int i = 0; i < names.length; i++) {
 					subsections[i] = new CheckBox(owner, names[i], model);
+					if (isNewName(names[i])) {
+						model.selecteds.add(names[i]);
+					}
 					subsections[i].createContents(group);
 				}
 				//Note: code below removes invalid names from selection model.
@@ -163,6 +168,22 @@ public class CodeSetCheckBoxesSection extends WizardPageSection {
 //					}
 //				};
 				group.getParent().layout(true, true);
+			}
+
+			private HashSet<String> namesSeen = new HashSet<String>();
+			
+			/**
+			 * Tracks codeset names that have (not) been seen before. 
+			 * This method returns true the first time it is called with a given
+			 * name. Subsequent calls with the same name will return false
+			 */
+			private boolean isNewName(String name) {
+				boolean seen = namesSeen.contains(name);
+				if (!seen) {
+					//Seen it now...next time its not new anymore
+					namesSeen.add(name);
+				}
+				return !seen;
 			}
 		});
 	}

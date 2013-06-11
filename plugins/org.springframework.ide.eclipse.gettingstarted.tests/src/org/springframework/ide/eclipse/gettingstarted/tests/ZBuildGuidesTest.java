@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
@@ -50,7 +50,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	private CodeSet codeset;
 	private BuildType buildType;
 
-	public ZBuildGuidesTest(GettingStartedGuide guide, CodeSet codeset, BuildType buildType) {
+	public ZBuildGuidesTest(GithubRepoContent guide, CodeSet codeset, BuildType buildType) {
 		super(guide);
 		setName(getName()+"-"+codeset.getName()+"-"+buildType);
 		this.codeset = codeset;
@@ -95,7 +95,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 		
 	}
 	
-	static boolean zipLooksOk(GettingStartedGuide g) {
+	static boolean zipLooksOk(GithubRepoContent g) {
 		try {
 			GuidesStructureTest.validateZipStructure(g);
 			return true;
@@ -106,7 +106,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(ZBuildGuidesTest.class.getName());
-		for (GettingStartedGuide g : GuidesTests.getGuides()) {
+		for (GithubRepoContent g : GuidesTests.getGuides()) {
 			if (zipLooksOk(g)) {
 				//Avoid running build tests for zips that look like they have 'missing parts'
 				for (CodeSet cs : g.getCodeSets()) {

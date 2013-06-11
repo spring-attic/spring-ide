@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.gettingstarted.content;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
@@ -49,6 +50,11 @@ public abstract class ContentManager {
 			return man.getAll();
 		}
 		return null; 
+	}
+
+	public Class<?>[] getTypes() {
+		Set<Class<?>> keys = byType.keySet();
+		return keys.toArray(new Class<?>[keys.size()]);
 	}
 
 }

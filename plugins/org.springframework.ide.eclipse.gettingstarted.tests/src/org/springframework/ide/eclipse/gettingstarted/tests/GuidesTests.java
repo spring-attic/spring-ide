@@ -12,8 +12,9 @@ package org.springframework.ide.eclipse.gettingstarted.tests;
 
 import junit.framework.TestCase;
 
+import org.springframework.ide.eclipse.gettingstarted.content.Describable;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 
 /**
  * @author Kris De Volder
@@ -33,7 +34,7 @@ public class GuidesTests extends TestCase {
 			this.descriptionFragment = descriptionFragment;
 		}
 
-		public boolean match(GettingStartedGuide actual) {
+		public boolean match(GithubRepoContent actual) {
 			if (!this.name.equals(actual.getName())) {
 				return false;
 			} else if (descriptionFragment!=null) {
@@ -57,7 +58,7 @@ public class GuidesTests extends TestCase {
 	 */
 	public void testGetGuides() throws Exception {
 		
-		GettingStartedGuide[] guides = getGuides();
+		GithubRepoContent[] guides = getGuides();
 		
 		EG[] expected = {
 				new EG(
@@ -94,14 +95,14 @@ public class GuidesTests extends TestCase {
 //		}
 //	}
 	
-	public static GettingStartedGuide[] getGuides() {
+	public static GithubRepoContent[] getGuides() {
 		return GettingStartedContent.getInstance().getGuides();
 	}
 
-	private void assertAtLeast(EG[] expected, GettingStartedGuide[] guides) {
+	private void assertAtLeast(EG[] expected, GithubRepoContent[] guides) {
 		StringBuilder _missing = new StringBuilder();
 		StringBuilder found = new StringBuilder();
-		for (GettingStartedGuide g : guides) {
+		for (Describable g : guides) {
 			found.append(g);
 		}
 		for (EG expect : expected) {

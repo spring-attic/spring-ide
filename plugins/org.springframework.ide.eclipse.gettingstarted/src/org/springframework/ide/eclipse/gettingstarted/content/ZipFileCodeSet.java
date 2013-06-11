@@ -1,3 +1,13 @@
+/*******************************************************************************
+ *  Copyright (c) 2013 GoPivotal, Inc.
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  Contributors:
+ *      GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.content;
 
 import java.io.IOException;
@@ -11,6 +21,7 @@ import java.util.zip.ZipFile;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
@@ -21,6 +32,14 @@ import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisal
  * a path relative to the zipfile root.
  */
 public class ZipFileCodeSet extends CodeSet {
+	
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
+
+	private void debug(String msg) {
+		if (DEBUG) {
+			System.out.println(msg);
+		}
+	}
 
 	private DownloadableItem zipDownload;
 	private IPath root;
@@ -33,16 +52,26 @@ public class ZipFileCodeSet extends CodeSet {
 	 * we do any actual work. The zip entries are cached
 	 * after that.
 	 */
-	private void ensureEntryCache() throws Exception {
+	private synchronized void ensureEntryCache() throws Exception, UIThreadDownloadDisallowed {
+		//Careful... if called in UIThred this may throw an exception because downloading content
+		// in the UI thread is not allowed. Callers generally know how to deal with that but
+		// we should take care not to accidentally leave an empty hashmap around as well.
+		// I.e. take care not to install the map unless reading download etc of the
+		// zip succeeded.
 		if (entries==null) {
-			entries = new HashMap<String, CodeSetEntry>(1024);
+			debug(">>> caching codeset entries "+this);
+			final HashMap<String, CodeSetEntry> newEntries = new HashMap<String, CodeSetEntry>(1024);
 			each(new Processor<Void>() {
 				@Override
 				public Void doit(CodeSetEntry e) throws Exception {
-					entries.put(e.getPath().toString(), e);
+					debug(e.getPath().toString());
+					newEntries.put(e.getPath().toString(), e);
 					return null;
 				}
 			});
+			//Nothing bad happened. The cache map is ready now.
+			this.entries = newEntries;
+			debug("<<< cached codeset entries "+entries.size());
 		}
 	}
 

@@ -8,7 +8,7 @@
  * Contributors:
  *     GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides.wizard;
+package org.springframework.ide.eclipse.gettingstarted.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -25,7 +25,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
+import org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizardModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
@@ -100,7 +101,7 @@ public class DownloadButtonSection extends WizardPageSection {
 	 * already downloaded.
 	 */
 	private void enableDisable() {
-		final GettingStartedGuide g = model.getGuide();
+		final GithubRepoContent g = model.getGuide();
 		if (g!=null) {
 			Display dis = Display.getDefault();
 			if (dis!=null) {

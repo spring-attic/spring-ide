@@ -10,7 +10,7 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.web.util.HtmlUtils;
 
 public class GeneratedGuidesDashboardPage extends GuidesDashboardPage {
@@ -26,12 +26,12 @@ public class GeneratedGuidesDashboardPage extends GuidesDashboardPage {
 	}
 	
 	private void generateHtml() throws URISyntaxException, IOException {
-		GettingStartedGuide[] guides = GettingStartedContent.getInstance().getGuides();
+		GithubRepoContent[] guides = GettingStartedContent.getInstance().getGuides();
 		
 		BufferedWriter out = new BufferedWriter(new FileWriter(dashHtml));
 		try {
 			preamble(out);
-			for (GettingStartedGuide g : guides) {
+			for (GithubRepoContent g : guides) {
 				
 				out.write(
 						"     <li><a href=\""+g.getHomePage()+"\">"+g.getDisplayName()+"</a><br>\n"+
@@ -48,7 +48,7 @@ public class GeneratedGuidesDashboardPage extends GuidesDashboardPage {
 	}
 
 
-	private String describe(GettingStartedGuide g) {
+	private String describe(GithubRepoContent g) {
 		String desc = g.getDescription();
 		if (desc==null || "".equals(desc.trim())) {
 			return "<no description>";

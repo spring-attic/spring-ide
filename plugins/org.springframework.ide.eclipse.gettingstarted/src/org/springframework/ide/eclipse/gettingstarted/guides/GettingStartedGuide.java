@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.IPath;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.content.Describable;
+import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet.CodeSetEntry;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
@@ -35,7 +37,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
  * 
  * @author Kris De Volder
  */
-public class GettingStartedGuide extends GithubRepoContent implements Describable {
+public class GettingStartedGuide extends GithubRepoContent implements Describable, GSContent {
 
 	protected Repo repo;
 
@@ -146,19 +148,6 @@ public class GettingStartedGuide extends GithubRepoContent implements Describabl
 		return ValidationResult.OK;
 	}
 	
-	public boolean isDownloaded() {
-		return getZip().isDownloaded();
-	}
-
-	public CodeSet getCodeSet(String name) throws UIThreadDownloadDisallowed {
-		for (CodeSet cs : getCodeSets()) {
-			if (cs.getName().equals(name)) {
-				return cs;
-			}
-		}
-		return null;
-	}
-
 	private String beatify(String name) {
 		if (name.startsWith("gs-")) {
 			name = name.substring(3);
