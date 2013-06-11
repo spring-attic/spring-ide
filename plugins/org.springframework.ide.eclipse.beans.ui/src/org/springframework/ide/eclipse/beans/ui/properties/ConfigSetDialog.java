@@ -410,14 +410,15 @@ public class ConfigSetDialog extends Dialog {
 			configSet.setElementName(nameText.getText());
 			configSet.setAllowBeanDefinitionOverriding(overrideButton.getSelection());
 			configSet.setIncomplete(incompleteButton.getSelection());
+
+			Set<String> profiles = new LinkedHashSet<String>();
 			if (profilesText.getText().length() > 0) {
 				String[] profilesSpec = StringUtils.tokenizeToStringArray(profilesText.getText(), BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
-				Set<String> profiles = new LinkedHashSet<String>();
 				for (String profile : profilesSpec) {
 					profiles.add(profile);
 				}
-				configSet.setProfiles(profiles);
 			}
+			configSet.setProfiles(profiles);
 			
 			// Before removing all configs from this config set keep a copy of
 			// the original list of configs in the config set
