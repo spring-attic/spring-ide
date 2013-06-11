@@ -7,9 +7,9 @@
   auto-wiring, Spring Batch, Spring Integration, Spring Security, and Spring Webflow, and is
   integrated with Eclipse Mylyn.
 
-  It also contains Spring UAA (User Agent Analysis), an optional component that help us to
-  collect some usage data. This is completely anonymous and helps us to understand better how
-  the tooling is used and how to improve it in the future.
+  It also contains Spring UAA, an optional component that helps us to collect some usage data. 
+  This is completely anonymous and helps us to understand better how the tooling is used and how 
+  to improve it in the future.
 
   It also comes with the SpringSource Dashboard is an optional component, which brings you
   up-to-date information about SpringSource-related projects as well as an easy-to-use extension
