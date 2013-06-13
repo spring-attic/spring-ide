@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigDescrip
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigFactoryTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaConfigTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansModelUtilsTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectTest;
 import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfigRenameTypeRefactoringParticipantTest;
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
@@ -63,7 +64,8 @@ import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 	BeansConfigDescriptionWriterTest.class,
 	BeansJavaConfigRenameTypeRefactoringParticipantTest.class,
 	ResourceChangeEventHandlerTest.class,
-	TypeHierarchyEngineTest.class
+	TypeHierarchyEngineTest.class,
+	BeansModelUtilsTest.class
 })
 public class AllBeansCoreTests {
 	// goofy junit4, no class body needed

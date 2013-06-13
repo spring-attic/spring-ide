@@ -4,8 +4,7 @@ Bundle-Name: Spring IDE Beans Core Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.core.tests
 Bundle-Version: 3.3.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.core.tests.Activator
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
+Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.core,
  org.eclipse.core.resources,
@@ -22,8 +21,10 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.beans.ui.refactoring,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.jdt.core.manipulation,
- org.springframework.orm,
- javax.persistence
+ javax.persistence,
+ org.hamcrest.library;bundle-version="[1.0.0,2.0.0)",
+ org.hamcrest.core;bundle-version="[1.0.0,2.0.0)",
+ org.springframework.orm
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Spring IDE Developers

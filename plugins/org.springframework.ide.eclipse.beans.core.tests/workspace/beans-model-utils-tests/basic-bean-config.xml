@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+		
+	<bean id="simpleBean1" class="org.test.spring.SimpleBeanClass">
+	</bean>
+		
+	<bean id="simpleBean2" class="org.test.spring.SimpleBeanClass">
+	</bean>
+
+	<bean id="differentBean" class="org.test.spring.DifferentBeanClass">
+	</bean>
+
+	<bean id="supertypeChangedBean" class="org.test.spring.SubType">
+	</bean>
+
+	<bean id="factoryMethodCreatedBean" class="org.test.spring.FactoryMethodBean" factory-method="createBean">
+	</bean>
+
+	<bean id="supertypeFactoryMethodCreatedBean" class="org.test.spring.SubtypeFactoryBean" factory-method="createSupertypeBean">
+	</bean>
+
+	<bean id="factoryBean2" class="org.test.spring.FactoryMethodBean2">
+	</bean>
+
+	<bean id="factoryBeanCreatedBean" factory-method="createBean2" factory-bean="factoryBean2">
+	</bean>
+	
+	<bean id="chainedFactoryCreatedBean" factory-method="createChainedBean" factory-bean="chainedFactoryBean1">
+	</bean>
+
+	<bean id="chainedFactoryBean1" factory-method="createChainedBean" factory-bean="chainedFactoryBean2">
+	</bean>
+
+	<bean id="chainedFactoryBean2" class="org.test.spring.ChainedFactoryBean" factory-method="createChainedBean">
+	</bean>
+	
+	<bean id="acrossConfigsBean1" class="org.test.spring.UsedAcrossBeanConfigs">
+	</bean>
+
+</beans>

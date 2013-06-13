@@ -15,18 +15,14 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
@@ -38,12 +34,10 @@ public class BeansConfigDescriptionWriterTest {
 	private IProject project;
 	private BeansModel model;
 	private BeansProject beansProject;
-	private IJavaProject javaProject;
 
 	@Before
 	public void createProject() throws Exception {
 		project = StsTestUtil.createPredefinedProject("beans-config-tests", "org.springframework.ide.eclipse.beans.core.tests");
-		javaProject = JdtUtils.getJavaProject(project);
 		
 		model = new BeansModel();
 		beansProject = new BeansProject(model, project);

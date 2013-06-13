@@ -316,7 +316,7 @@
 				<repository>
 					<id>swtbot</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/</url>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
 				</repository>
 			</repositories>
 		</profile>
