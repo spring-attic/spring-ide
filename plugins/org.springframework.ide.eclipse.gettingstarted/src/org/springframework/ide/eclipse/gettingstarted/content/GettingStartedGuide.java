@@ -37,11 +37,12 @@ public class GettingStartedGuide extends GithubRepoContent implements Describabl
 
 	private List<CodeSet> codesets;
 
-	public static final String GUIDE_DESCRIPTION_TEXT = "A guide is a short focussed tutorial "
-	+ "on how to use Spring to accomplish a specific task. " 
-	+ "It has a 'start' code set, a 'complete' code" 
-	+ "set and a readme file explaining how you get from "
-	+ "one to the other.";
+	public static final String GUIDE_DESCRIPTION_TEXT = 
+			"A guide is a short focussed tutorial "
+			+ "on how to use Spring to accomplish a specific task. " 
+			+ "It has a 'start' code set, a 'complete' code" 
+			+ "set and a readme file explaining how you get from "
+			+ "one to the other.";
 
 	/**
 	 * All getting started guides are supposed to have the same codesets names. This constant defines those

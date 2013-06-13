@@ -7,7 +7,6 @@ Bundle-Activator: org.springframework.ide.eclipse.gettingstarted.tests.GettingSt
 Bundle-Vendor: SpringSource
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.junit4,
  org.springframework.ide.eclipse.wizard,
  org.springsource.ide.eclipse.dashboard.ui,
  org.springsource.ide.eclipse.commons.frameworks.test.util,
@@ -28,6 +27,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.lifecyclemapping.defaults,
  org.eclipse.m2e.discovery,
  org.eclipse.m2e.core.ui,
- org.eclipse.m2e.scm
+ org.eclipse.m2e.scm,
+ org.junit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
