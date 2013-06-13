@@ -31,7 +31,7 @@ import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
- * An instace of this test verifies that a codesets for a given 
+ * An instance of this test verifies that a codesets for a given 
  * guide imports and builds cleanly with with a given build
  * tool. 
  * <p>
@@ -47,6 +47,8 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	// It looks like the tests reports are getting sorted
 	// alphabetically.
 	
+	private static Object lock = new Object();
+	
 	private CodeSet codeset;
 	private BuildType buildType;
 
@@ -60,6 +62,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		System.out.println(">>> Setting up "+getName());
 		//Clean stuff from previous test: Delete any projects and their contents.
 		// We need to do this because imported maven and gradle projects will have the same name.
 		// And this cause clashes / errors.
@@ -69,10 +72,13 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 			project.refreshLocal(IResource.DEPTH_INFINITE, null);
 			project.delete(/*content*/true, /*force*/true, new NullProgressMonitor());
 		}
+		System.out.println("<<< Setting up "+getName());
 	}
 	
 	@Override
 	protected void runTest() throws Throwable {
+		System.out.println(">>> Running "+getName());
+		
 		try {
 			System.out.println("=== codeset build test ===");
 			System.out.println("guide   : "+guide.getName());
@@ -91,8 +97,9 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 		} catch (Throwable e) {
 			//Shorter stacktrace for somewhat nicer looking test failures on bamboo
 			throw ExceptionUtil.getDeepestCause(e);
+		} finally {
+			System.out.println("<<< Running "+getName());
 		}
-		
 	}
 	
 	static boolean zipLooksOk(GithubRepoContent g) {

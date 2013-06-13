@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisal
  * @author Kris De Volder
  */
 public class GuidesStructureTest extends GuidesTestCase {
-
+	
 	public GuidesStructureTest(GithubRepoContent guide) {
 		super(guide);
 	}
