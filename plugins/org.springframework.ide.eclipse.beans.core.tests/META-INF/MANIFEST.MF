@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.ui.refactoring,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.jdt.core.manipulation,
- javax.persistence
+ javax.persistence,
+ org.hamcrest;bundle-version="1.1.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Spring IDE Developers
