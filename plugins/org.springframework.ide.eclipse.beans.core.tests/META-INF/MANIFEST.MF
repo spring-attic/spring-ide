@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.jdt.core.manipulation,
  javax.persistence,
- org.hamcrest;bundle-version="1.1.0",
+ org.hamcrest.library;bundle-version="[1.0.0,2.0.0)",
+ org.hamcrest.core;bundle-version="[1.0.0,2.0.0)",
  org.springframework.orm
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
