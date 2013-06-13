@@ -700,19 +700,19 @@ public abstract class BeansModelUtils {
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static IBeansProject getProject(IModelElement element) {
+		IBeansProject project = getParentOfClass(element, IBeansProject.class);
+		if (project != null) {
+			return project;
+		}
+		
 		if (element instanceof IResourceModelElement) {
 			IResource resource = ((IResourceModelElement) element).getElementResource();
 			if (resource != null) {
-				IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
+				project = BeansCorePlugin.getModel().getProject(resource.getProject());
 				if (project != null) {
 					return project;
 				}
 			}
-		}
-
-		IBeansProject project = getParentOfClass(element, IBeansProject.class);
-		if (project != null) {
-			return project;
 		}
 
 		throw new IllegalArgumentException("Unsupported model element " + element);
@@ -1423,7 +1423,6 @@ public abstract class BeansModelUtils {
 	 */
 	private static IType extractBeanClass(BeanDefinition bd, IBean bean, String mergedClassName,
 			IBeansConfig beansConfig) {
-
 		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), mergedClassName);
 		// 1. factory-method on bean
 		if (bd.getFactoryMethodName() != null && bd.getFactoryBeanName() == null) {
@@ -1442,7 +1441,6 @@ public abstract class BeansModelUtils {
 				}
 			}
 			catch (NoSuchBeanDefinitionException e) {
-
 			}
 		}
 		return type;
