@@ -69,7 +69,7 @@ public class GuidesStructureTest extends GuidesTestCase {
 		Boolean previousSetIsMaven = null;
 
 		List<CodeSet> codeSets = guide.getCodeSets();
-		assertEquals("Guides should provide 2 codesets", 2, codeSets.size());
+		//assertEquals("Guides should provide 2 codesets", 2, codeSets.size()); //no longer required.
 		for (CodeSet codeset : codeSets) {
 			String codesetName = codeset.getName();
 			assertTrue("No '"+codeset.getName()+"' codeset", codeset.exists());

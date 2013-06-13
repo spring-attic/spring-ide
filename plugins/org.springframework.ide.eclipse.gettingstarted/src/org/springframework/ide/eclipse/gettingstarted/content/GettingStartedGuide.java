@@ -8,12 +8,11 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides;
+package org.springframework.ide.eclipse.gettingstarted.content;
 
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -21,12 +20,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
-import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
-import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.content.Describable;
-import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet.CodeSetEntry;
-import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
@@ -43,11 +37,12 @@ public class GettingStartedGuide extends GithubRepoContent implements Describabl
 
 	private List<CodeSet> codesets;
 
-	public static final String GUIDE_DESCRIPTION_TEXT = "A guide is a short focussed tutorial "
-	+ "on how to use Spring to accomplish a specific task. " 
-	+ "It has a 'start' code set, a 'complete' code" 
-	+ "set and a readme file explaining how you get from "
-	+ "one to the other.";
+	public static final String GUIDE_DESCRIPTION_TEXT = 
+			"A guide is a short focussed tutorial "
+			+ "on how to use Spring to accomplish a specific task. " 
+			+ "It has a 'start' code set, a 'complete' code" 
+			+ "set and a readme file explaining how you get from "
+			+ "one to the other.";
 
 	/**
 	 * All getting started guides are supposed to have the same codesets names. This constant defines those

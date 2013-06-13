@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.tests;
 
+import static org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils.importConfig;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.assertNoErrors;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.getProject;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.setAutoBuilding;
@@ -26,10 +27,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.guides.ReferenceApp;
+import org.springframework.ide.eclipse.gettingstarted.content.ReferenceApp;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
-
-import static org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils.*;
 
 /**
  * A BuildSample test checks that a particular sample project builds properly

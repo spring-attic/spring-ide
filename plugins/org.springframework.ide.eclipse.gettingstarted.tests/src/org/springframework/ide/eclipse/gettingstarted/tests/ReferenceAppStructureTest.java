@@ -20,8 +20,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
-import org.springframework.ide.eclipse.gettingstarted.guides.ReferenceApp;
+import org.springframework.ide.eclipse.gettingstarted.content.ReferenceApp;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
 /**

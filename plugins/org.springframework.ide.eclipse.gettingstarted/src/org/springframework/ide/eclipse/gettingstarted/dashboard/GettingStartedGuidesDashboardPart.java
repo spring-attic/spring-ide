@@ -8,7 +8,7 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.gettingstarted.guides;
+package org.springframework.ide.eclipse.gettingstarted.dashboard;
 
 import java.net.URI;
 import java.net.URL;
@@ -42,6 +42,7 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
+import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizard;
 import org.springsource.ide.eclipse.dashboard.internal.ui.IdeUiPlugin;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPart;

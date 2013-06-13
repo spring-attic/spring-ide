@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
+import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.wizard.BuildTypeRadiosSection;
 import org.springframework.ide.eclipse.gettingstarted.wizard.CodeSetCheckBoxesSection;
 import org.springframework.ide.eclipse.gettingstarted.wizard.DescriptionSection;

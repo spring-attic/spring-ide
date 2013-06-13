@@ -22,11 +22,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
+import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
@@ -80,9 +80,9 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 			System.out.println("type    : "+buildType);
 			System.out.println();
 			
-			String projectName = guide.getName() + "-" + codeset.getName();
-			IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(ImportUtils.importConfig(guide, codeset));
-			
+			ImportConfiguration importConf = ImportUtils.importConfig(guide, codeset);
+			String projectName = importConf.getProjectName();
+			IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(importConf);
 			importOp.run(new NullProgressMonitor());
 	
 			//TODO: we are not checking if there are extra projects beyond the expected one.

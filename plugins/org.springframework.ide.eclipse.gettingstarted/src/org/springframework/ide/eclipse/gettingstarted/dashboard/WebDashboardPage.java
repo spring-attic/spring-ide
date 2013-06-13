@@ -25,9 +25,19 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.springframework.ide.eclipse.gettingstarted.browser.BrowserFactory;
 import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPage;
 
 import static org.eclipse.ui.browser.IWorkbenchBrowserSupport.*;
+
+
+//Note: some complications on Linux systems because of problems satisfying
+// the requirements for SWT browser component to work.
+//For Ubuntu 12.04 some usefull info here.
+//Maybe this can be somehow fixed by us packaging a compatible xulrunner
+//and STS.ini file?
+
+// http://askubuntu.com/questions/125980/how-do-i-install-xulrunner-in-12-04
 
 /**
  * A DashBoard page that displays the contents of a webpage.
@@ -89,7 +99,7 @@ public class WebDashboardPage extends AbstractDashboardPage implements IExecutab
 		Composite body = form.getBody();
 		body.setLayout(layout);
 		
-		Browser browser = new Browser(body, SWT.NONE);
+		Browser browser = BrowserFactory.create(body);
 		if (url!=null) {
 			browser.setUrl(url);
 		} else {
