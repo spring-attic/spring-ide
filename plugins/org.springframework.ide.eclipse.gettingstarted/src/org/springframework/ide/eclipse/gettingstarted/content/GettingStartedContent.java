@@ -19,9 +19,6 @@ import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.AuthenticatedDownloader;
-import org.springframework.ide.eclipse.gettingstarted.guides.GettingStartedGuide;
-import org.springframework.ide.eclipse.gettingstarted.guides.ReferenceApp;
-import org.springframework.ide.eclipse.gettingstarted.guides.ReferenceAppMetaData;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 
 /**
