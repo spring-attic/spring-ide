@@ -514,5 +514,43 @@
     		category="org.springframework.ide.eclipse.beans.ui.preferencePage">
    		</page>
    	</extension>
+    <extension
+          point="org.eclipse.ui.commands">
+       <command
+             defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.AddAsBeanConfigAction"
+             id="org.springframework.ide.eclipse.beans.ui.addAsBeanConfig"
+             name="Add as Bean Configuration">
+       </command>
+       <command
+             defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.RemoveAsBeanConfigAction"
+             id="org.springframework.ide.eclipse.beans.ui.removeAsBeanConfig"
+             name="Remove as Bean Configuration">
+       </command>
+    </extension>
+    <extension
+          point="org.eclipse.ui.menus">
+       <menuContribution
+             allPopups="false"
+             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+          <menu
+                id="org.springframework.ide.eclipse.ui.tools"
+                label="Spring Tools">
+             <command
+                   commandId="org.springframework.ide.eclipse.beans.ui.addAsBeanConfig"
+                   style="push">
+                <visibleWhen
+                      checkEnabled="true">
+                </visibleWhen>
+             </command>
+             <command
+                   commandId="org.springframework.ide.eclipse.beans.ui.removeAsBeanConfig"
+                   style="push">
+                <visibleWhen
+                      checkEnabled="true">
+                </visibleWhen>
+             </command>
+          </menu>
+       </menuContribution>
+    </extension>
 	
 </plugin>

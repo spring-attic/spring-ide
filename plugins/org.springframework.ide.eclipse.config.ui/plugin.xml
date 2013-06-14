@@ -725,11 +725,6 @@
 			defaultHandler="org.springframework.ide.eclipse.config.ui.actions.OpenNamespaceConfigWizardCommandHandler"
 			name="Configure Namespaces..." description="Configure namespaces" />
       <command
-         description="Add file as a bean configuration file"
-         id="org.springframework.ide.eclipse.config.ui.command.addAsBeanConfig"
-         name="Add Bean Configuration File"
-         defaultHandler="org.springframework.ide.eclipse.config.ui.actions.AddAsBeanConfigAction" />
-      <command
          defaultHandler="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction"
          id="org.springframework.ide.eclipse.beans.ui.refactoring.command.refactorBeanClass"
          name="%renameBeanElement.label">
@@ -751,19 +746,6 @@
 			locationURI="popup:org.eclipse.wst.sse.ui.StructuredTextEditor.EditorContext?before=additions">
 			<command commandId="com.springsource.sts.ide.ui.configure.namespaces" />
 		</menuContribution>
-      <menuContribution
-         locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-         <menu label="Spring Tools" id="org.springframework.ide.eclipse.ui.tools">
-            <separator name="sts"></separator>
-            <command commandId="org.springframework.ide.eclipse.config.ui.command.addAsBeanConfig">
-               <visibleWhen
-                     checkEnabled="false">
-                  <reference
-                        definitionId="org.springframework.ide.eclipse.config.ui.definition.singleFileNotBean">
-                  </reference>
-               </visibleWhen></command>
-         </menu>
-      </menuContribution>
       <menuContribution
          allPopups="false"
          locationURI="popup:refactorPopupMenuId">
@@ -837,23 +819,6 @@
             <equals
                value="com.springsource.sts.config.ui.editors.SpringConfigEditor">
             </equals>
-         </with>
-      </definition>
-      <definition id="org.springframework.ide.eclipse.config.ui.definition.singleFileNotBean">
-         <with variable="activeMenuSelection">
-            <iterate ifEmpty="false">
-               <adapt type="org.eclipse.core.resources.IResource">
-                  <instanceof
-                     value="org.eclipse.core.resources.IFile">
-                  </instanceof>
-                  <not>
-                     <test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
-                  </not>
-               </adapt>
-            </iterate>
-            <count
-               value="1">
-            </count>
          </with>
       </definition>
 	</extension>
