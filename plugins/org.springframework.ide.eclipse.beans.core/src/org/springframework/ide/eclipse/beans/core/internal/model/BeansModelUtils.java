@@ -70,10 +70,12 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.SuperTypeHierarchyCache;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -86,8 +88,10 @@ import org.w3c.dom.Node;
 
 /**
  * Helper methods for working with the BeansCoreModel.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public abstract class BeansModelUtils {
 
@@ -1267,6 +1271,63 @@ public abstract class BeansModelUtils {
 	 * @since 2.0.5
 	 */
 	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource, IProgressMonitor monitor) {
+		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
+			return getConfigsByContainingTypesUsingTypeHierarchyEngine(resource, monitor);
+		}
+		return getConfigsByContainingTypesJDT(resource, monitor);
+	}
+	
+	protected static Set<IBeansConfig> getConfigsByContainingTypesUsingTypeHierarchyEngine(IResource resource, IProgressMonitor monitor) {
+		Set<IBeansConfig> files = new LinkedHashSet<IBeansConfig>();
+
+		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
+				&& resource.getName().endsWith(".java")) {
+			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
+			if (projects != null) {
+
+				IJavaElement element = JavaCore.create(resource);
+				if (element instanceof ICompilationUnit && element.getJavaProject().isOnClasspath(element)) {
+
+					TypeHierarchyEngine typeHierarchyEngine = SpringCore.getTypeHierarchyEngine();
+					
+					try {
+						IType[] types = ((ICompilationUnit) element).getAllTypes();
+						String[] changedTypeNames = new String[types.length];
+						for (int i = 0; i < types.length; i++) {
+							changedTypeNames[i] = types[i].getFullyQualifiedName();
+						}
+						
+						for (IBeansProject project : projects) {
+							if (project != null) {
+								Set<IBeansConfig> configs = project.getConfigs();
+								for (IBeansConfig config : configs) {
+									boolean configAdded = false;
+									Set<String> allBeanClasses = config.getBeanClasses();
+									for (int i = 0; i < changedTypeNames.length; i++) {
+										for (String className : allBeanClasses) {
+											if (typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject())
+													|| typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject())) {
+												files.add(config);
+												configAdded = true;
+												break;
+											}
+										}
+										if (configAdded) break;
+									}
+								}
+							}
+						}
+					}
+					catch (JavaModelException e) {
+						BeansCorePlugin.log(e);
+					}
+				}
+			}
+		}
+		return files;
+	}
+
+	protected static Set<IBeansConfig> getConfigsByContainingTypesJDT(IResource resource, IProgressMonitor monitor) {
 		Set<IBeansConfig> files = new LinkedHashSet<IBeansConfig>();
 
 		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
@@ -1329,7 +1390,7 @@ public abstract class BeansModelUtils {
 
 		return files;
 	}
-
+	
 	/**
 	 * Returns a list of all beans which use a bean class that is part of the java structure represented by the given
 	 * <code>resource</code>.
@@ -1338,6 +1399,77 @@ public abstract class BeansModelUtils {
 	 * @since 2.0.5
 	 */
 	public static Set<IBean> getBeansByContainingTypes(IResource resource, IProgressMonitor monitor) {
+		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
+			return getBeansByContainingTypesUsingTypeHierarchyEngine(resource, monitor);
+		}
+		return getBeansByContainingTypesJDT(resource, monitor);
+	}
+	
+	protected static Set<IBean> getBeansByContainingTypesUsingTypeHierarchyEngine(IResource resource, IProgressMonitor monitor) {
+		Set<IBean> files = new LinkedHashSet<IBean>();
+
+		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
+				&& resource.getName().endsWith(".java")) {
+			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
+			if (projects != null) {
+
+				IJavaElement element = JavaCore.create(resource);
+				if (element instanceof ICompilationUnit && element.getJavaProject().isOnClasspath(element)) {
+
+					TypeHierarchyEngine typeHierarchyEngine = SpringCore.getTypeHierarchyEngine();
+					
+					try {
+						IType[] types = ((ICompilationUnit) element).getAllTypes();
+						String[] changedTypeNames = new String[types.length];
+						for (int i = 0; i < types.length; i++) {
+							changedTypeNames[i] = types[i].getFullyQualifiedName();
+						}
+						
+						for (IBeansProject project : projects) {
+							if (project != null) {
+								Set<IBeansConfig> configs = project.getConfigs();
+								for (IBeansConfig config : configs) {
+									Set<IBean> allBeans = getBeans(config);
+
+									for (IBean bean : allBeans) {
+										String className = resolveBeanTypeAsString(bean);
+										
+										if (className != null) {
+											for (int i = 0; i < changedTypeNames.length; i++) {
+												if (typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject())
+														|| typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject())) {
+													files.add(bean);
+													break;
+												}
+											}
+										}
+										else {
+											// We can't determine the beans type so don't be cleverer as we can and let
+											// it be processed again
+											// One last check before adding too much that is not even on the resource's
+											// classpath
+											if (project != null
+													&& JdtUtils.isJavaProject(project.getProject())
+													&& JdtUtils.getJavaProject(project.getProject()).isOnClasspath(
+															resource)) {
+												files.add(bean);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					catch (JavaModelException e) {
+						BeansCorePlugin.log(e);
+					}
+				}
+			}
+		}
+		return files;
+	}
+
+	protected static Set<IBean> getBeansByContainingTypesJDT(IResource resource, IProgressMonitor monitor) {
 		Set<IBean> files = new LinkedHashSet<IBean>();
 
 		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
@@ -1444,6 +1576,74 @@ public abstract class BeansModelUtils {
 			}
 		}
 		return type;
+	}
+
+	/**
+	 * Resolves the {@link IBean} bean class by looking at parent, factory-bean and factory-method.
+	 */
+	public static String resolveBeanTypeAsString(IBean bean) {
+		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils.getMergedBeanDefinition(bean, null);
+		String mergedClassName = mergedBd.getBeanClassName();
+		return extractBeanClassAsString(mergedBd, bean, mergedClassName, getParentOfClass(bean, IBeansConfig.class));
+	}
+
+	/**
+	 * Extracts the {@link IType} of a bean definition.
+	 * <p>
+	 * Honors <code>factory-method</code>s and <code>factory-bean</code>.
+	 */
+	private static String extractBeanClassAsString(BeanDefinition bd, IBean bean, String mergedClassName,
+			IBeansConfig beansConfig) {
+		String result = mergedClassName;
+		// 1. factory-method on bean
+		if (bd.getFactoryMethodName() != null && bd.getFactoryBeanName() == null) {
+			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), mergedClassName);
+			result = extractTypeFromFactoryMethodAsString(bd, type);
+			if (result == null) {
+				result = mergedClassName;
+			}
+		}
+		// 2. factory-method on factory-bean
+		else if (bd.getFactoryMethodName() != null && bd.getFactoryBeanName() != null) {
+			try {
+				IBean factoryB = getBeanWithConfigSets(bd.getFactoryBeanName(), beansConfig);
+				if (factoryB != null) {
+					BeanDefinition factoryBd = BeansModelUtils.getMergedBeanDefinition(factoryB, null);
+					String factoryBeanTypeName = extractBeanClassAsString(factoryBd, bean, factoryBd.getBeanClassName(), beansConfig);
+					if (factoryBeanTypeName != null) {
+						IType factoryBeanType = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), factoryBeanTypeName);
+						result = extractTypeFromFactoryMethodAsString(bd, factoryBeanType);
+						if (result == null) {
+							result = factoryBeanTypeName;
+						}
+					}
+				}
+			}
+			catch (NoSuchBeanDefinitionException e) {
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Extracts the {@link IType} of a {@link BeanDefinition} by only looking at the <code>
+	 * factory-method</code> . The passed in {@link IType} <b>must</b> be the bean class or the resolved type of the
+	 * factory bean in use.
+	 */
+	private static String extractTypeFromFactoryMethodAsString(BeanDefinition bd, IType type) {
+		String factoryMethod = bd.getFactoryMethodName();
+		try {
+			int argCount = (!bd.isAbstract() ? bd.getConstructorArgumentValues().getArgumentCount() : -1);
+			Set<IMethod> methods = Introspector.getAllMethods(type);
+			for (IMethod method : methods) {
+				if (factoryMethod.equals(method.getElementName()) && method.getParameterNames().length == argCount) {
+					return JdtUtils.resolveClassNameBySignature(method.getReturnType(), type);
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
 	}
 
 	/**
