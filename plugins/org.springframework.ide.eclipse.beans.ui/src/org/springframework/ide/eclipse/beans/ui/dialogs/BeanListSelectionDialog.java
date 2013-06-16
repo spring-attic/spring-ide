@@ -361,7 +361,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 			String text = ((ITextSelection) selection).getText();
 			int n = text.indexOf('\n');
 			if (n > -1) {
-				text.substring(0, n);
+				text = text.substring(0, n);
 			}
 			filterText.setText(text);
 			filterText.setSelection(0, text.length());
