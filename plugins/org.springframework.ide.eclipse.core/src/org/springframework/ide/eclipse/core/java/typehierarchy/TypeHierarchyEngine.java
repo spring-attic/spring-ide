@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
+import java.util.ArrayDeque;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IProject;
@@ -133,7 +133,7 @@ public class TypeHierarchyEngine {
 			if (classTypeElement != null) {
 				char[][] implementedInterfaces = classTypeElement.interfaces;
 				if (implementedInterfaces != null) {
-					Stack<char[][]> interfaceStack = new Stack<char[][]>();
+					ArrayDeque<char[][]> interfaceStack = new ArrayDeque<char[][]>();
 					interfaceStack.add(implementedInterfaces);
 					
 					while (!interfaceStack.isEmpty()) {
