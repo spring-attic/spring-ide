@@ -190,7 +190,11 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 					return;
 				}
 				
-				IBeansProject beansProject = (IBeansProject) getElementParent();
+				IBeansProject beansProject = BeansModelUtils.getParentOfClass(this, IBeansProject.class);
+				if (beansProject == null) {
+					return;
+				}
+				
 				final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
 				
 				if (cl.getResource(this.configClass.getFullyQualifiedName().replace('.', '/') + ".class") == null) {
