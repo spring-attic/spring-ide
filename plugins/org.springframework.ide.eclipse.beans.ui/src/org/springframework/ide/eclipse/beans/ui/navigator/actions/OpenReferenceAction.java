@@ -64,7 +64,7 @@ public class OpenReferenceAction extends AbstractNavigatorAction {
 						bean = BeansModelUtils.getBean(beanName, context);
 					}
 				}
-				else {
+				else if (config != null) {
 					bean = config.getBean(beanName);
 				}
 				if (bean != null) {

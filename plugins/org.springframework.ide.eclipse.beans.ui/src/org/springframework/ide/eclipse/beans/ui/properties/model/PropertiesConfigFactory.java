@@ -39,7 +39,7 @@ public class PropertiesConfigFactory {
 
 		}
 		else {
-			if (name.length() > 0 && name.charAt(0) == '/') {
+			if (name != null && name.length() > 0 && name.charAt(0) == '/') {
 				String projectPath = '/' + project.getElementName() + '/';
 				if (name.startsWith(projectPath)) {
 					name = name.substring(projectPath.length());

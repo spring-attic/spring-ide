@@ -99,7 +99,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 
 					public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions,
 							final IProject project) {
-						if (project == null || (project != null && project.equals(activeProject))) {
+						if (project == null || project.equals(activeProject)) {
 							for (INamespaceDefinition namespaceDefinition : namespaceDefinitions) {
 								synchronized (namespaceDefinitionList) {
 									if (!namespaceDefinitionList.contains(namespaceDefinition)) {

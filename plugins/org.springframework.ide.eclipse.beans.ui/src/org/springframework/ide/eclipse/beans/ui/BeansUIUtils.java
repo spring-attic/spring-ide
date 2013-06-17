@@ -57,9 +57,9 @@ import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.TreePathBuilder;
 import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -320,7 +320,7 @@ public final class BeansUIUtils {
 	 * @since 2.0.2
 	 */
 	public static boolean shouldOpenConfigFile() {
-		IScopeContext context = new InstanceScope();
+		IScopeContext context = InstanceScope.INSTANCE;
 		IEclipsePreferences node = context.getNode(BeansUIPlugin.PLUGIN_ID);
 		return node.getBoolean(
 				BeansUIPlugin.DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);

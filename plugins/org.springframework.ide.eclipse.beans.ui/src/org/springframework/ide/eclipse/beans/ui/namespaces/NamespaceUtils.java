@@ -327,7 +327,7 @@ public class NamespaceUtils {
 							image = new NamespaceDefinitionImageAccessor(namespaceDefinition);
 						}
 						return new DefaultNamespaceDefinition(prefix, uri, schemaLocation,
-								namespaceDefinition.getUriMapping(), image);
+						        namespaceDefinition != null ? namespaceDefinition.getUriMapping() : new Properties(), image);
 					}
 				}
 			}

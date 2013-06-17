@@ -218,7 +218,7 @@ public class ConfigLocatorTab {
 		}
 		text += definition.getDescription();
 
-		if (text == null || text.length() == 0) {
+		if (text.length() == 0) {
 			descriptionText
 					.setText(SpringUIMessages.ProjectBuilderPropertyPage_noBuilderDescription);
 		}

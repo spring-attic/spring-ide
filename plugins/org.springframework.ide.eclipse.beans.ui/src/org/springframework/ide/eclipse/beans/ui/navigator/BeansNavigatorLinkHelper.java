@@ -33,8 +33,8 @@ import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFa
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.ILinkHelperExtension;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * {@link ILinkHelper} implementation for resolving links to {@link IBeansModelElement}s.

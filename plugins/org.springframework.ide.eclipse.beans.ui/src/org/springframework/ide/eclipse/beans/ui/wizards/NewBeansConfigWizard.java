@@ -34,9 +34,9 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * {@link INewWizard} implementation that creates a new {@link IBeansConfig} instance.
@@ -140,23 +140,22 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 			beansProject = new BeansProject(BeansCorePlugin.getModel(), file.getProject());
 		}
 
-		if (beansProject != null) {
-			beansProject.addConfig(file, IBeansConfig.Type.MANUAL);
-			newConfig = beansProject.getConfig(file);
+		beansProject.addConfig(file, IBeansConfig.Type.MANUAL);
+		newConfig = beansProject.getConfig(file);
 
 		Set<IBeansConfigSet> configSets = linkPage.getBeansConfigSets();
 		for (IBeansConfigSet bcs : configSets) {
 			if (beansProject.equals(bcs.getElementParent())) {
 				((BeansConfigSet) bcs).addConfig(newConfig.getId());
 			}
-
-			// Now save modified project description
-			beansProject.saveDescription();
-
-			// Finally (after saving the modified project description!!!)
-			// refresh the label decoration of all config files
-			BeansModelLabelDecorator.update();
 		}
+
+		// Now save modified project description
+		beansProject.saveDescription();
+
+		// Finally (after saving the modified project description!!!)
+		// refresh the label decoration of all config files
+		BeansModelLabelDecorator.update();
 	}
 
 	private BeansProject getProject(IResource file) {
