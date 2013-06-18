@@ -269,7 +269,7 @@ public class NewSpringProjectWizardMainPage extends WizardPage implements IWizar
 			if (!area.isAreaComplete()) {
 				return true;
 			}
-			IStatus areaStatus = area.getValidationStatus(true);
+			IStatus areaStatus = area.getValidationStatus();
 
 			if (areaStatus != null && areaStatus.getSeverity() == IStatus.ERROR) {
 				return true;
