@@ -10,23 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
-/**
- * Sets the status of a wizard page in the wizard based on a notification from
- * wizard area
- * 
- */
-public interface IWizardPageStatusHandler {
+import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
-	/**
-	 * Set the status of the wizard, and optionally trigger a full validation of
-	 * the wizard pages.
-	 * @param status of the page
-	 */
-	public abstract void notifyStatusChange(WizardPageArea area);
+public class NewSpringProjectWizardModel {
+	public final LiveVariable<String> projectName = new LiveVariable<String>();
 
-	/**
-	 * 
-	 * @param area to be added which notify the handler observer of changes
-	 */
-	public void addPageArea(WizardPageArea area);
+	public final LiveVariable<String> projectLocation = new LiveVariable<String>();
+
+	public final LiveVariable<Template> selectedTemplate = new LiveVariable<Template>();
+
 }

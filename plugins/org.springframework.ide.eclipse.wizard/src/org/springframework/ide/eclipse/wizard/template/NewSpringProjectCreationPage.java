@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import java.io.File;
+import java.net.URI;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -176,10 +178,18 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 	 */
 	protected void refreshProjectValues() {
 		NewSpringProjectWizard wizard = (NewSpringProjectWizard) getWizard();
-		NewSpringProjectWizardMainPage mainPage = wizard.getMainPage();
 
-		setProjectName(mainPage.getProjectName());
-		setProjectLocationURI(mainPage.getProjectLocationURI());
+		setProjectName(wizard.getModel().projectName.getValue());
+
+		String uriVal = wizard.getModel().projectLocation.getValue();
+		if (uriVal != null) {
+			URI uri = new File(uriVal).toURI();
+			setProjectLocationURI(uri);
+		}
+		else {
+			setProjectLocationURI(null);
+		}
+
 	}
 
 	public void performFinish() {

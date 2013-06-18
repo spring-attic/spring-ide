@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012, 2013 VMware, Inc.
+ *  Copyright (c) 2012, 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
@@ -50,6 +50,7 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -97,22 +98,21 @@ import org.xml.sax.SAXException;
  * displayed in the part viewer based on metadata, but the actual contents of
  * the template are not download unless explicitly requested through the
  * download API. Selecting templates in the part viewer does not automatically
- * download the contents.
+ * download the contents. This template selection area only performs validations
+ * based on whether a template is selected or not.
  * @author Terry Denney
  * @author Leo Dos Santos
  * @author Christian Dupuis
  * @author Kaitlin Duck Sherwood
  * @author Nieraj Singh
  */
-public class TemplateSelectionPart {
+public class TemplateSelectionPart extends WizardPageArea {
 
 	public static final String SIMPLE_PROJECTS_CATEGORY = "Simple Projects";
 
-	private Template selectedTemplate;
-
 	private final List<Template> templates;
 
-	private final NewSpringProjectWizard wizard;
+	private final IWizard wizard;
 
 	private Label descriptionLabel;
 
@@ -128,15 +128,19 @@ public class TemplateSelectionPart {
 
 	private Button refreshButton;
 
-	private final IWizardPageStatusHandler statusHandler;
+	private final NewSpringProjectWizardModel model;
 
-	public TemplateSelectionPart(NewSpringProjectWizard wizard, IWizardPageStatusHandler statusHandler) {
+	public TemplateSelectionPart(IWizard wizard, NewSpringProjectWizardModel model,
+			IWizardPageStatusHandler statusHandler) {
+		super(statusHandler);
 		this.wizard = wizard;
+		this.model = model;
 		templates = new ArrayList<Template>();
-		this.statusHandler = statusHandler;
+
 	}
 
-	public Control createControl(Composite parent) {
+	@Override
+	public Control createArea(Composite parent) {
 
 		initializeTemplates();
 
@@ -465,66 +469,52 @@ public class TemplateSelectionPart {
 	}
 
 	protected void setSeletectedTemplate(Template template) {
-		selectedTemplate = template;
-		if (selectedTemplate != null) {
-			setDescription(selectedTemplate);
+		model.selectedTemplate.setValue(template);
+		if (template != null) {
+			setDescription(template);
 		}
-		handleChanged();
+		notifyStatusChange(validateArea());
 	}
 
-	public boolean isValid() {
-		return getStatus().getSeverity() != IStatus.ERROR && getTemplate() != null;
-	}
+	@Override
+	protected IStatus validateArea() {
+		Template template = model.selectedTemplate.getValue();
+		IStatus status = Status.OK_STATUS;
+		if (template != null) {
 
-	public IStatus getStatus() {
-		if (selectedTemplate != null) {
+			String warning = getWarning(template);
 
-			String warning = getWarning(selectedTemplate);
+			// Warnings apply to both Simple Projects and templates
 			if (warning != null) {
-				return new Status(IStatus.WARNING, WizardPlugin.PLUGIN_ID, warning);
+				status = createStatus(warning, IStatus.WARNING);
 			}
-			else {
-				if (!(selectedTemplate instanceof SimpleProject)) {
-					String message = "Click 'Next' to load the template contents.";
-					return new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, message);
-				}
-				else {
-					return Status.OK_STATUS;
-				}
+			else if (!(template instanceof SimpleProject)) {
+				String message = "Click 'Next' to load the template contents.";
+				status = createStatus(message, IStatus.INFO);
 			}
+
+			// For the purposes of selecting a template, if it is not null, the
+			// area is complete.
+			// Other sections in the wizard may provider additional validation
+			// on the template, but it is not the responsibility of the template
+			// selection
+			// area to provide validation beyond just selecting a template
+			setAreaComplete(true);
+
 		}
 		else {
-			// Do not treat as an error. That way the template requirement
-			// message will show in the wizard, but not as an error.
-			return new Status(IStatus.OK, WizardPlugin.PLUGIN_ID, "Please select a template.");
+			setAreaComplete(false);
+			status = createStatus("Please select a template.", IStatus.INFO);
 		}
+		return status;
 	}
 
 	protected void setError(String error, Throwable t) {
-		if (statusHandler != null) {
-			statusHandler.setStatus(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, error, t), false);
-		}
+		notifyStatusChange(new Status(IStatus.ERROR, WizardPlugin.PLUGIN_ID, error, t), false);
 	}
 
 	protected void setError(IStatus error) {
-		if (statusHandler != null) {
-			statusHandler.setStatus(error, false);
-		}
-	}
-
-	protected void handleChanged() {
-		IStatus status = getStatus();
-		if (statusHandler != null) {
-			statusHandler.setStatus(status, true);
-		}
-	}
-
-	public Template getTemplate() {
-		return selectedTemplate;
-	}
-
-	public boolean hasSelection() {
-		return selectedTemplate != null;
+		notifyStatusChange(error, false);
 	}
 
 	/**
@@ -608,17 +598,17 @@ public class TemplateSelectionPart {
 					catch (CoreException e) {
 						String message = NLS.bind("Error getting and parsing descriptors file in background {0}",
 								e.getMessage());
-						MessageDialog.openWarning(wizard.getShell(), "Warning", message);
+						MessageDialog.openWarning(wizard.getContainer().getShell(), "Warning", message);
 					}
 					catch (SAXException e) {
 						String message = NLS.bind("Error parsing tmp descriptors file at {0} in background.\n{1}",
 								file, e.getMessage());
-						MessageDialog.openWarning(wizard.getShell(), "Warning", message);
+						MessageDialog.openWarning(wizard.getContainer().getShell(), "Warning", message);
 					}
 					catch (IOException e) {
 						String message = NLS.bind("IO error on file at {0} opened in background.\n{1}", file,
 								e.getMessage());
-						MessageDialog.openWarning(wizard.getShell(), "Warning", message);
+						MessageDialog.openWarning(wizard.getContainer().getShell(), "Warning", message);
 					}
 
 				}
@@ -694,7 +684,7 @@ public class TemplateSelectionPart {
 
 		boolean needsDownload = false;
 		for (Template template : templates) {
-			if (!template.getItem().isLocal()) {
+			if (!(template instanceof SimpleProject) && !template.getItem().isLocal()) {
 				needsDownload = true;
 				break;
 			}

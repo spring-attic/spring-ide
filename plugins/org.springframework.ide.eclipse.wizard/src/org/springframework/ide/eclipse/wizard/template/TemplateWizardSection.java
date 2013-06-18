@@ -1,16 +1,18 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +72,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 		if (page == getWizard().getMainPage()) {
 
-			final Template template = getWizard().getMainPage().getSelectedTemplate();
+			final Template template = getWizard().getModel().selectedTemplate.getValue();
 
 			// First, clear the cached first template page, as to not show the
 			// wrong page
@@ -184,7 +186,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 		boolean canFinish = super.canFinish();
 
 		if (canFinish) {
-			Template template = getWizard().getMainPage().getSelectedTemplate();
+			Template template = getWizard().getModel().selectedTemplate.getValue();
 			// For now, any simple template project can complete from the first
 			// wizard page.
 			if (!(template instanceof SimpleProject)) {
@@ -225,7 +227,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 		// Only check if there is one more page after the main page. Any
 		// subsequent pages after the second page added by the second page.
 		if (currentPage == getWizard().getMainPage()) {
-			Template template = getWizard().getMainPage().getSelectedTemplate();
+			Template template = getWizard().getModel().selectedTemplate.getValue();
 			if (template == null) {
 				return false;
 			}
@@ -250,7 +252,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 	 * be contributing wizard pages through the wizard UI info.
 	 */
 	protected boolean hasTemplateWizardPages() {
-		Template template = getWizard().getMainPage().getSelectedTemplate();
+		Template template = getWizard().getModel().selectedTemplate.getValue();
 		if (template == null || template instanceof SimpleProject) {
 			return false;
 		}
@@ -273,7 +275,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 	@Override
 	public ProjectConfiguration getProjectConfiguration() throws CoreException {
 
-		Template template = getWizard().getMainPage().getSelectedTemplate();
+		Template template = getWizard().getModel().selectedTemplate.getValue();
 
 		final WizardUIInfo uiInfo = getUIInfo(template);
 
@@ -283,9 +285,12 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 							+ ". Check the template installation location and verify that the files are accessible."));
 		}
 
+		String projectName = getWizard().getModel().projectName.getValue();
+		String uriValue = getWizard().getModel().projectLocation.getValue();
+		URI uri = uriValue != null ? new File(uriValue).toURI() : null;
+
 		TemplateProjectConfigurationDescriptor descriptor = new TemplateProjectConfigurationDescriptor(
-				uiInfo.getProjectNameToken(), getWizard().getMainPage().getProjectName(),
-				uiInfo.getTopLevelPackageTokens(), template, getWizard().getMainPage().getProjectLocationURI(),
+				uiInfo.getProjectNameToken(), projectName, uiInfo.getTopLevelPackageTokens(), template, uri,
 				getTemplateInputHandlers(), getWizard().getMainPage().getVersion());
 
 		return new TemplateProjectConfiguration(descriptor, getWizard().getShell());
