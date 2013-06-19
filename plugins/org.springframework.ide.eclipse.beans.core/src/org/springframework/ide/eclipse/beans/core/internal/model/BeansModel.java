@@ -44,6 +44,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
+import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
@@ -61,6 +64,7 @@ import org.springframework.util.ObjectUtils;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Martin Lippert
+ * @author Andrew Eisenberg
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
 
@@ -219,53 +223,46 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 	}
 
-	public IBeansConfig getConfig(IFile configFile) {
-		return getConfig(configFile, true);
-	}
+    public IBeansConfig getConfig(BeansConfigId id) {
+        return getConfig(id, true);
+    }
 
-	public IBeansConfig getConfig(IFile configFile, boolean includeImported) {
-		if (configFile != null) {
-			IBeansProject project = getProject(configFile.getProject());
-			if (project != null) {
-				IBeansConfig bc = project.getConfig(configFile, includeImported);
-				if (bc != null) {
-					return bc;
-				}
-			}
+    public IBeansConfig getConfig(BeansConfigId id, boolean includeImported) {
+        if (id != null) {
+            IBeansProject project = getProject(id.project);
+            if (project != null) {
+                IBeansConfig bc = project.getConfig(id, includeImported);
+                if (bc != null) {
+                    return bc;
+                }
+            }
 
-			for (IBeansProject p : getProjects()) {
-				IBeansConfig bc = p.getConfig(configFile, includeImported);
-				if (bc != null) {
-					return bc;
-				}
-			}
-		}
-		return null;
-	}
+            for (IBeansProject p : getProjects()) {
+                BeansConfigId newId = new BeansConfigId(id.kind, p.getElementName(), id.name);
+                IBeansConfig bc = p.getConfig(newId, includeImported);
+                if (bc != null) {
+                    return bc;
+                }
+            }
+        }
+        return null;
+    }
 
-	public boolean isConfig(IFile configFile, boolean includeImported) {
-		if (configFile != null) {
-			IBeansProject project = getProject(configFile.getProject());
+
+	public boolean isConfig(BeansConfigId id, boolean includeImported) {
+		if (id != null) {
+			IBeansProject project = getProject(id.project);
 			
 			// check the project of the file itself first
 			String configName = null;
-			if (project != null) {
-				if (!(configFile instanceof ExternalFile)) {
-					configName = configFile.getProjectRelativePath().toString();
-				}
-				else {
-					configName = configFile.getFullPath().toString();
-				}
-
-				if (project.hasConfig(configFile, configName, includeImported)) {
-					return true;
-				}
+			if (project != null && project.hasConfig(id, includeImported)) {
+			    return true;
 			}
 			
 			// then check all the other projects
-			configName = configFile.getFullPath().toString();
 			for (IBeansProject p : getProjects()) {
-				if (p.hasConfig(configFile, configName, includeImported)) {
+                BeansConfigId newId = new BeansConfigId(id.kind, p.getElementName(), id.name);
+				if (p.hasConfig(newId, includeImported)) {
 					return true;
 				}
 			}
@@ -273,52 +270,36 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		return false;
 	}
 
-	public Set<IBeansConfig> getConfigs(IFile configFile, boolean includeImported) {
+	public Set<IBeansConfig> getConfigs(BeansConfigId id, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
-		if (configFile != null) {
+		if (id != null) {
 			for (IBeansProject p : getProjects()) {
-				beansConfigs.addAll(p.getConfigs(configFile, includeImported));
+				beansConfigs.addAll(p.getConfigs(id, includeImported));
 			}
 		}
 		return beansConfigs;
 	}
 
-	public IBeansConfig getConfig(String configName) {
-
-		// Extract config name from given full-qualified name
-		// External config files (with a leading '/') are handled too
-		int configNamePos = configName.indexOf('/', (configName.charAt(0) == '/' ? 1 : 0));
-		if (configNamePos > 0) {
-			String projectName = configName.substring(1, configNamePos);
-			configName = configName.substring(configNamePos + 1);
-			IBeansProject project = BeansCorePlugin.getModel().getProject(projectName);
-			if (project != null) {
-				return project.getConfig(configName);
-			}
-		}
-		return null;
-	}
-
 	/**
-	 * Returns a list of all configs from this model which contain a bean with given bean class.
-	 */
-	public Set<IBeansConfig> getConfigs(String className) {
-		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
-		try {
-			r.lock();
-			for (IBeansProject project : projects.values()) {
-				for (IBeansConfig config : project.getConfigs()) {
-					if (config.isBeanClass(className)) {
-						configs.add(config);
-					}
-				}
-			}
-		}
-		finally {
-			r.unlock();
-		}
-		return configs;
-	}
+     * Returns a list of all configs from this model which contain a bean with given bean class.
+     */
+    public Set<IBeansConfig> getConfigs(String className) {
+        Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
+        try {
+            r.lock();
+            for (IBeansProject project : projects.values()) {
+                for (IBeansConfig config : project.getConfigs()) {
+                    if (config.isBeanClass(className)) {
+                        configs.add(config);
+                    }
+                }
+            }
+        }
+        finally {
+            r.unlock();
+        }
+        return configs;
+    }
 
 	@Override
 	public boolean equals(Object other) {
@@ -563,7 +544,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					r.unlock();
 				}
 				
-				if (!BeansConfigFactory.isJavaConfigFile(file) && project.addConfig(file, type)) {
+				if (!BeansConfigFactory.getConfigKind(file).equals(JavaConfigGenerator.JAVA_CONFIG_KIND) && project.addConfig(file, type)) {
 					// In case this is a auto detected config make sure to refresh the
 					// project too, as the project description file will not change
 					if (type == IBeansConfig.Type.AUTO_DETECTED) {
@@ -587,7 +568,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			Set<IReloadableBeansConfig> configs = new LinkedHashSet<IReloadableBeansConfig>();
 			try {
 				r.lock();
-				Set<IBeansConfig> bcs = getConfigs(file, true);
+				Set<IBeansConfig> bcs = getConfigs(BeansConfigFactory.getConfigId(file), true);
 				for (IBeansConfig bc : bcs) {
 					if (bc instanceof IImportedBeansConfig) {
 						configs.add(BeansModelUtils.getParentOfClass(bc, IReloadableBeansConfig.class));
@@ -692,5 +673,4 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 	}
-
 }

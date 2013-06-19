@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -63,7 +64,7 @@ public class BeansNavigatorLinkHelper implements ILinkHelper, ILinkHelperExtensi
 				return StructuredSelection.EMPTY;
 			}
 
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 			if (config != null) {
 				IEditorPart editor = SpringUIUtils.getActiveEditor();
 				if (editor.getEditorInput() == input && editor.getSite() != null

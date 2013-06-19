@@ -53,8 +53,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig.Type;
@@ -62,14 +61,16 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
-import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * Dialog for creating a beans config set.
@@ -431,16 +432,16 @@ public class ConfigSetDialog extends Dialog {
 			List newConfigs = Arrays.asList(configsViewer.getCheckedElements());
 			for (IBeansConfig config : oldConfigs) {
 				if (newConfigs.contains(config)) {
-					configSet.addConfig(config.getElementName());
+					configSet.addConfig(config.getId());
 				}
 			}
 
 			// Finally add the newly selected configs to the config set
 			for (Object newConfig : newConfigs) {
 				IBeansConfig config = (IBeansConfig) newConfig;
-				String configName = config.getElementName();
-				if (!configSet.hasConfig(configName)) {
-					configSet.addConfig(configName);
+				BeansConfigId id = config.getId();
+                if (!configSet.hasConfig(id)) {
+					configSet.addConfig(id);
 				}
 			}
 
@@ -472,13 +473,9 @@ public class ConfigSetDialog extends Dialog {
 			for (IBeansConfig config : beansProject.getConfigs()) {
 				String projectPath = ModelUtils.getResourcePath(config.getElementParent());
 				if (projectPath != null) {
-
-					// Create the full qualified path of the config
-					// (with support for configs stored in JAR files)
-					// as long as its not the initiating project
-					String name = addProjectPath && (config instanceof BeansConfig) ? projectPath + "/" + config.getElementName() : config.getElementName();
-					if (!configSet.hasConfig(name)) {
-						configs.add(BeansConfigFactory.create(beansProject, name, Type.MANUAL));
+					BeansConfigId id = config.getId();
+                    if (!configSet.hasConfig(id)) {
+						configs.add(BeansConfigFactory.create(beansProject, id, Type.MANUAL));
 					}
 				}
 			}

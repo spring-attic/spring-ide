@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
@@ -64,7 +65,7 @@ public class PointcutMatcherContentProvider implements ITreeContentProvider {
 		}
 		if (parentElement instanceof IFile) {
 			parentElement = BeansCorePlugin.getModel().getConfig(
-					(IFile) parentElement);
+					BeansConfigFactory.getConfigId((IFile) parentElement));
 		}
 
 		// handle tree layout

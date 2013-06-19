@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -82,13 +81,13 @@ public class BeansJavaConfigTypeChange extends Change {
 					if (config instanceof BeansJavaConfig) {
 						IType configClass = ((BeansJavaConfig) config).getConfigClass();
 						if (type.equals(configClass)) {
-							((BeansConfigSet) configSet).removeConfig(config.getElementName());
-							((BeansConfigSet) configSet).addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newName);
+							((BeansConfigSet) configSet).removeConfig(config.getId());
+							((BeansConfigSet) configSet).addConfig(config.getId().newName(newName));
 						}
 						else if (configClass != null && type.equals(configClass.getDeclaringType())) {
-							beansProject.removeConfig(config.getElementName());
+							beansProject.removeConfig(config.getId());
 							String newConfigClassName = newName + "$" + configClass.getElementName();
-							beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newConfigClassName, IBeansConfig.Type.MANUAL);
+							beansProject.addConfig(config.getId().newName(newConfigClassName), IBeansConfig.Type.MANUAL);
 						}
 					}
 				}
@@ -99,8 +98,8 @@ public class BeansJavaConfigTypeChange extends Change {
 				if (config instanceof BeansJavaConfig) {
 					IType configClass = ((BeansJavaConfig) config).getConfigClass();
 					if (configClass != null && getNewConfigName(newName, type, configClass) != null) {
-						beansProject.removeConfig(config.getElementName());
-						beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + getNewConfigName(newName, type, configClass), IBeansConfig.Type.MANUAL);
+						beansProject.removeConfig(config.getId());
+						beansProject.addConfig(config.getId().newName(getNewConfigName(newName, type, configClass)), IBeansConfig.Type.MANUAL);
 //						removeMarkers(config);
 						updated = true;
 					}

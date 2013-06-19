@@ -19,6 +19,8 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
@@ -44,23 +46,23 @@ public class PropertiesProject extends BeansProject {
 		modelPopulated = true;
 
 		configSuffixes = new LinkedHashSet<String>(project.getConfigSuffixes());
-		locatorByAutoDetectedConfig = new HashMap<String, String>();
-		autoDetectedConfigsByLocator = new HashMap<String, Set<String>>();
+		locatorByAutoDetectedConfig = new HashMap<BeansConfigId, String>();
+		autoDetectedConfigsByLocator = new HashMap<String, Set<BeansConfigId>>();
 		autoDetectedConfigSets = new HashMap<String, IBeansConfigSet>();
 		autoDetectedConfigSetsByLocator = new HashMap<String, String>();
 		
 		isImportsEnabled = project.isImportsEnabled();
 
-		configs = new LinkedHashMap<String, IBeansConfig>();
-		autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
+		configs = new LinkedHashMap<BeansConfigId, IBeansConfig>();
+		autoDetectedConfigs = new LinkedHashMap<BeansConfigId, IBeansConfig>();
 		for (IBeansConfig config : project.getConfigs()) {
 			if (config.getType() == IBeansConfig.Type.MANUAL) {
-				configs.put(config.getElementName(), PropertiesConfigFactory.create(this, config
-						.getElementName(), config.getType()));
+				configs.put(config.getId(), BeansConfigFactory.create(this, config
+						.getId(), config.getType()));
 			}
 			else {
-				autoDetectedConfigs.put(config.getElementName(), PropertiesConfigFactory.create(this, config
-						.getElementName(), config.getType()));
+				autoDetectedConfigs.put(config.getId(), BeansConfigFactory.create(this, config
+						.getId(), config.getType()));
 			}
 		}
 
@@ -87,14 +89,14 @@ public class PropertiesProject extends BeansProject {
 	}
 
 	@Override
-	public void setConfigs(Set<String> configNames) {
-		super.setConfigs(configNames);
+	public void setConfigs(Set<BeansConfigId> configIds) {
+		super.setConfigs(configIds);
 		notifyListeners();
 	}
 
 	@Override
-	public boolean addConfig(String configName, IBeansConfig.Type type) {
-		if (super.addConfig(configName, type)) {
+	public boolean addConfig(BeansConfigId configId, IBeansConfig.Type type) {
+		if (super.addConfig(configId, type)) {
 			notifyListeners();
 			return true;
 		}
@@ -102,8 +104,8 @@ public class PropertiesProject extends BeansProject {
 	}
 
 	@Override
-	public boolean removeConfig(String configName) {
-		if (super.removeConfig(configName)) {
+	public boolean removeConfig(BeansConfigId configId) {
+		if (super.removeConfig(configId)) {
 			notifyListeners();
 			return true;
 		}

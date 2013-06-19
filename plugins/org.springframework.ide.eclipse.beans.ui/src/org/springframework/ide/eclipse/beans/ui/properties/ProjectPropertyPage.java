@@ -143,7 +143,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		// At first delete all problem markers from the removed config files
 		if (configFilesTab.hasUserMadeChanges()) {
 			for (IBeansConfig currentConfig : currentProject.getConfigs()) {
-				if (!newProject.hasConfig(currentConfig.getElementName())) {
+				if (!newProject.hasConfig(currentConfig.getId())) {
 					MarkerUtils.deleteAllMarkers(currentConfig.getElementResource(), SpringCore.MARKER_ID);
 				}
 			}

@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
@@ -97,7 +98,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider impleme
 					| BeansUILabels.DESCRIPTION);
 		}
 		if (element instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) element));
 			if (config != null) {
 				return BeansModelLabels.getElementLabel(config, BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
 			}

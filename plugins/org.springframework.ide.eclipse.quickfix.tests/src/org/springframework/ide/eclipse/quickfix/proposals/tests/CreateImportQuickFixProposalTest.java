@@ -19,10 +19,10 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.quickfix.proposals.CreateImportQuickFixProposal;
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
-
 
 /**
  * @author Terry Denney
@@ -39,8 +39,8 @@ public class CreateImportQuickFixProposalTest extends AbstractBeanFileQuickfixTe
 		int offset = getOffset(valueRegion, beanNode);
 		int length = getLength(valueRegion, false);
 
-		IFile configFile = (IFile) project.findMember(importFilePath);
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(configFile);
+		IFile file = (IFile) project.findMember(importFilePath);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 		IBean importBean = BeansModelUtils.getBean(parentAttr.getValue(), config);
 
 		IBeansProject beanProject = BeansCorePlugin.getModel().getProject(project);

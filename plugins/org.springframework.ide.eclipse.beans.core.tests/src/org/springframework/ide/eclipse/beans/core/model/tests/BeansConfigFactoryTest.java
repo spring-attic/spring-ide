@@ -18,15 +18,17 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -54,26 +56,34 @@ public class BeansConfigFactoryTest {
 	public void deleteProject() throws Exception {
 		project.delete(true, null);
 	}
+	
+	private BeansConfigId getConfigIdForFileName(String fName) {
+	    return BeansConfigFactory.getConfigId(project.getFile(fName));
+	}
 
+	private BeansConfigId getConfigIdForClassName(String cName) throws JavaModelException {
+	    return BeansConfigFactory.getConfigId(javaProject.findType(cName), project);
+	}
+	
 	@Test
 	public void testCreateBeansConfig() throws Exception {
-		IBeansConfig config = BeansConfigFactory.create(beansProject, "basic-bean-config.xml", IBeansConfig.Type.MANUAL);
-		assertTrue(config instanceof BeansConfig);
+		IBeansConfig config = BeansConfigFactory.create(beansProject, getConfigIdForFileName("/beans-config-tests/basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
+		assertTrue(config instanceof XMLBeansConfig);
 		assertEquals("basic-bean-config.xml", config.getElementName());
 	}
 	
 	@Test
 	public void testCreateBeansConfigFullyQualifiedPath() throws Exception {
-		IBeansConfig config = BeansConfigFactory.create(beansProject, "/beans-config-tests/basic-bean-config.xml", IBeansConfig.Type.MANUAL);
-		assertTrue(config instanceof BeansConfig);
+		IBeansConfig config = BeansConfigFactory.create(beansProject, getConfigIdForFileName("/beans-config-tests/basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
+		assertTrue(config instanceof XMLBeansConfig);
 		assertEquals("basic-bean-config.xml", config.getElementName());
 	}
 	
 	@Test
 	public void testCreateBeansJavaConfig() throws Exception {
-		IBeansConfig config = BeansConfigFactory.create(beansProject, "java:org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
+		IBeansConfig config = BeansConfigFactory.create(beansProject, getConfigIdForClassName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
 		assertTrue(config instanceof BeansJavaConfig);
-		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
+		assertEquals(getConfigIdForClassName("org.test.spring.SimpleConfigurationClass"), config.getElementName());
 		
 		IType type = javaProject.findType("org.test.spring.SimpleConfigurationClass");
 		assertEquals(type, ((BeansJavaConfig)config).getConfigClass());
@@ -81,7 +91,7 @@ public class BeansConfigFactoryTest {
 	
 	@Test
 	public void testCreateBeansJavaConfigTypeError() throws Exception {
-		IBeansConfig config = BeansConfigFactory.create(beansProject, "java:org.test.spring.SimpleConfigurationClassError", IBeansConfig.Type.MANUAL);
+		IBeansConfig config = BeansConfigFactory.create(beansProject, getConfigIdForClassName("org.test.spring.SimpleConfigurationClassError"), IBeansConfig.Type.MANUAL);
 		assertTrue(config instanceof BeansJavaConfig);
 		assertNull(((BeansJavaConfig)config).getConfigClass());
 		assertEquals("org.test.spring.SimpleConfigurationClassError", ((BeansJavaConfig)config).getConfigClassName());
@@ -90,7 +100,7 @@ public class BeansConfigFactoryTest {
 	@Test
 	public void testConfigNameXMLRelative() throws Exception {
 		IFile file = project.getFile("/basic-bean-config.xml");
-		assertEquals("basic-bean-config.xml", BeansConfigFactory.getConfigName(file, project));
+		assertEquals("basic-bean-config.xml", BeansConfigFactory.getConfigId(file, project).name);
 	}
 	
 	@Test
@@ -98,7 +108,7 @@ public class BeansConfigFactoryTest {
 		IProject extraProject = StsTestUtil.createPredefinedProject("jdt-annotation-tests", "org.springframework.ide.eclipse.beans.core.tests");
 
 		IFile file = extraProject.getFile("/test.xml");
-		assertEquals("/jdt-annotation-tests/test.xml", BeansConfigFactory.getConfigName(file, project));
+		assertEquals("/jdt-annotation-tests/test.xml", BeansConfigFactory.getConfigId(file, project).name);
 		
 		extraProject.delete(true, null);
 	}
@@ -106,7 +116,7 @@ public class BeansConfigFactoryTest {
 	@Test
 	public void testConfigNameJavaFile() throws Exception {
 		IFile file = project.getFile("/src/org/test/spring/SimpleConfigurationClass.java");
-		assertEquals("java:org.test.spring.SimpleConfigurationClass", BeansConfigFactory.getConfigName(file, project));
+		assertEquals("org.test.spring.SimpleConfigurationClass", BeansConfigFactory.getConfigId(file, project).name);
 	}
 	
 }

@@ -22,14 +22,17 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel.ResourceChangeEventHandler;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
+import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -68,11 +71,15 @@ public class ResourceChangeEventHandlerTest {
 		project.delete(true, null);
 	}
 	
+    private BeansConfigId getConfigIdForClassName(String cName) throws JavaModelException {
+        return BeansConfigFactory.getConfigId(javaProject.findType(cName), project);
+    }
+
 	@Test
 	public void testSimpleJavaConfigAddedHandler() throws Exception {
 		IType configClass = javaProject.findType("org.test.spring.SimpleConfigurationClass");
-		beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
-		IBeansConfig config = beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.SimpleConfigurationClass");
+		beansProject.addConfig(getConfigIdForClassName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+		IBeansConfig config = beansProject.getConfig(getConfigIdForClassName("org.test.spring.SimpleConfigurationClass"));
 		
 		ResourceChangeEventHandler handler = this.model.new ResourceChangeEventHandler();
 		IResource resource = configClass.getResource();
@@ -89,8 +96,8 @@ public class ResourceChangeEventHandlerTest {
 	@Test
 	public void testInnerClassJavaConfigAddedHandler() throws Exception {
 		IType configClass = javaProject.findType("org.test.spring.OuterConfigurationClass$InnerConfigurationClass");
-		beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.OuterConfigurationClass$InnerConfigurationClass", IBeansConfig.Type.MANUAL);
-		IBeansConfig config = beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.OuterConfigurationClass$InnerConfigurationClass");
+		beansProject.addConfig(getConfigIdForClassName("org.test.spring.OuterConfigurationClass$InnerConfigurationClass"), IBeansConfig.Type.MANUAL);
+		IBeansConfig config = beansProject.getConfig(getConfigIdForClassName("org.test.spring.OuterConfigurationClass$InnerConfigurationClass"));
 		
 		ResourceChangeEventHandler handler = this.model.new ResourceChangeEventHandler();
 		IResource resource = configClass.getResource();

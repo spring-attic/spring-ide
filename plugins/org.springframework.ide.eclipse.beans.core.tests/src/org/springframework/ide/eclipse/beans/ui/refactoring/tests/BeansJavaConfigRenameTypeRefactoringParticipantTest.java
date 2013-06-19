@@ -17,15 +17,18 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 import org.eclipse.ltk.internal.core.refactoring.resource.RenameResourceProcessor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
+import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
 import org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigRenameTypeRefactoringParticipant;
 import org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigTypeChange;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -58,10 +61,14 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 		project.delete(true, null);
 	}
 	
+	private BeansConfigId getConfigForClassName(String cName) throws JavaModelException {
+	    return BeansConfigFactory.getConfigId(javaProject.findType(cName), project);
+	}
+	
 	@Test
 	public void testBasicTypeRename() throws Exception {
 		IType configClass = javaProject.findType("org.test.spring.SimpleConfigurationClass");
-		beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigForClassName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		BeansJavaConfigRenameTypeRefactoringParticipant participant = new BeansJavaConfigRenameTypeRefactoringParticipant();
 		RenameTypeArguments arguments = new RenameTypeArguments("NewClassName", true, false, null);
@@ -71,15 +78,15 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 		change.setBeansModel(model);
 		change.perform(new NullProgressMonitor());
 		
-		assertNull(beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.SimpleConfigurationClass"));
-		IBeansConfig newConfig = beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.NewClassName");
+		assertNull(beansProject.getConfig(getConfigForClassName("org.test.spring.SimpleConfigurationClass")));
+		IBeansConfig newConfig = beansProject.getConfig(getConfigForClassName("org.test.spring.NewClassName"));
 		assertNotNull(newConfig);
 	}
 
 	@Test
 	public void testTypeRenameInnerConfigurationClass() throws Exception {
 		IType configClass = javaProject.findType("org.test.spring.OuterConfigurationClass$InnerConfigurationClass");
-		beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.OuterConfigurationClass$InnerConfigurationClass", IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigForClassName("org.test.spring.OuterConfigurationClass$InnerConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		BeansJavaConfigRenameTypeRefactoringParticipant participant = new BeansJavaConfigRenameTypeRefactoringParticipant();
 		RenameTypeArguments arguments = new RenameTypeArguments("NewClassName", true, false, null);
@@ -89,15 +96,15 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 		change.setBeansModel(model);
 		change.perform(new NullProgressMonitor());
 		
-		assertNull(beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.OuterConfigurationClass$InnerConfigurationClass"));
-		IBeansConfig newConfig = beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.OuterConfigurationClass$NewClassName");
+		assertNull(beansProject.getConfig(getConfigForClassName("org.test.spring.OuterConfigurationClass$InnerConfigurationClass")));
+		IBeansConfig newConfig = beansProject.getConfig(getConfigForClassName("org.test.spring.OuterConfigurationClass$NewClassName"));
 		assertNotNull(newConfig);
 	}
 
 	@Test
 	public void testTypeRenameOuterConfigurationClass() throws Exception {
 		IType outerClass = javaProject.findType("org.test.spring.OuterConfigurationClass");
-		beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.OuterConfigurationClass$InnerConfigurationClass", IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigForClassName("org.test.spring.OuterConfigurationClass$InnerConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		BeansJavaConfigRenameTypeRefactoringParticipant participant = new BeansJavaConfigRenameTypeRefactoringParticipant();
 		RenameTypeArguments arguments = new RenameTypeArguments("NewClassName", true, false, null);
@@ -107,15 +114,15 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 		change.setBeansModel(model);
 		change.perform(new NullProgressMonitor());
 		
-		assertNull(beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.OuterConfigurationClass$InnerConfigurationClass"));
-		IBeansConfig newConfig = beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.NewClassName$InnerConfigurationClass");
+		assertNull(beansProject.getConfig(getConfigForClassName("org.test.spring.OuterConfigurationClass$InnerConfigurationClass")));
+		IBeansConfig newConfig = beansProject.getConfig(getConfigForClassName("org.test.spring.NewClassName$InnerConfigurationClass"));
 		assertNotNull(newConfig);
 	}
 
 	@Test
 	public void testTypeRenameDoubleOuterOuterConfigurationClass() throws Exception {
 		IType outerClass = javaProject.findType("org.test.spring.DoubleOuterConfigurationClass");
-		beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass", IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigForClassName("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		BeansJavaConfigRenameTypeRefactoringParticipant participant = new BeansJavaConfigRenameTypeRefactoringParticipant();
 		RenameTypeArguments arguments = new RenameTypeArguments("NewClassName", true, false, null);
@@ -125,15 +132,15 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 		change.setBeansModel(model);
 		change.perform(new NullProgressMonitor());
 		
-		assertNull(beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass"));
-		IBeansConfig newConfig = beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.NewClassName$OuterConfigurationClass$InnerConfigurationClass");
+		assertNull(beansProject.getConfig(getConfigForClassName("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass")));
+		IBeansConfig newConfig = beansProject.getConfig(getConfigForClassName("org.test.spring.NewClassName$OuterConfigurationClass$InnerConfigurationClass"));
 		assertNotNull(newConfig);
 	}
 
 	@Test
 	public void testTypeRenameDoubleOuterConfigurationClass() throws Exception {
 		IType outerClass = javaProject.findType("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass");
-		beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass", IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigForClassName("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		BeansJavaConfigRenameTypeRefactoringParticipant participant = new BeansJavaConfigRenameTypeRefactoringParticipant();
 		RenameTypeArguments arguments = new RenameTypeArguments("NewClassName", true, false, null);
@@ -143,15 +150,15 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 		change.setBeansModel(model);
 		change.perform(new NullProgressMonitor());
 		
-		assertNull(beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass"));
-		IBeansConfig newConfig = beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.DoubleOuterConfigurationClass$NewClassName$InnerConfigurationClass");
+		assertNull(beansProject.getConfig(getConfigForClassName("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass")));
+		IBeansConfig newConfig = beansProject.getConfig(getConfigForClassName("org.test.spring.DoubleOuterConfigurationClass$NewClassName$InnerConfigurationClass"));
 		assertNotNull(newConfig);
 	}
 
 	@Test
 	public void testTypeRenameDoubleOuterInnerConfigurationClass() throws Exception {
 		IType outerClass = javaProject.findType("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass");
-		beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass", IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigForClassName("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		BeansJavaConfigRenameTypeRefactoringParticipant participant = new BeansJavaConfigRenameTypeRefactoringParticipant();
 		RenameTypeArguments arguments = new RenameTypeArguments("NewClassName", true, false, null);
@@ -161,8 +168,8 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 		change.setBeansModel(model);
 		change.perform(new NullProgressMonitor());
 		
-		assertNull(beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass"));
-		IBeansConfig newConfig = beansProject.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + "org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$NewClassName");
+		assertNull(beansProject.getConfig(getConfigForClassName("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$InnerConfigurationClass")));
+		IBeansConfig newConfig = beansProject.getConfig(getConfigForClassName("org.test.spring.DoubleOuterConfigurationClass$OuterConfigurationClass$NewClassName"));
 		assertNotNull(newConfig);
 	}
 

@@ -41,6 +41,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
@@ -83,13 +85,13 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/** Internal version number; intentionally set to lower value */
 	protected volatile String version = "2.0.0";
 
-	protected volatile Map<String, IBeansConfig> configs = new LinkedHashMap<String, IBeansConfig>();
+	protected volatile Map<BeansConfigId, IBeansConfig> configs = new LinkedHashMap<BeansConfigId, IBeansConfig>();
 
-	protected volatile Map<String, IBeansConfig> autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
+	protected volatile Map<BeansConfigId, IBeansConfig> autoDetectedConfigs = new LinkedHashMap<BeansConfigId, IBeansConfig>();
 
-	protected volatile Map<String, Set<String>> autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<String>>();
+	protected volatile Map<String, Set<BeansConfigId>> autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<BeansConfigId>>();
 
-	protected volatile Map<String, String> locatorByAutoDetectedConfig = new LinkedHashMap<String, String>();
+	protected volatile Map<BeansConfigId, String> locatorByAutoDetectedConfig = new LinkedHashMap<BeansConfigId, String>();
 
 	protected volatile Map<String, IBeansConfigSet> configSets = new LinkedHashMap<String, IBeansConfigSet>();
 
@@ -251,9 +253,9 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * markers are deleted.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param configNames list of config names
+	 * @param configIds list of config names
 	 */
-	public void setConfigs(Set<String> configNames) {
+	public void setConfigs(Set<BeansConfigId> configIds) {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
@@ -264,9 +266,9 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			// 1. delete all problem markers from them
 			// 2. remove config from any config set
 			for (IBeansConfig config : configs.values()) {
-				String configName = config.getElementName();
-				if (!configNames.contains(configName)) {
-					removeConfig(configName);
+				BeansConfigId configId = config.getId();
+				if (!configIds.contains(configId)) {
+					removeConfig(configId);
 
 					// Defer deletion of problem markers until write lock is
 					// released
@@ -276,7 +278,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 			// Create new list of configs
 			configs.clear();
-			for (String configName : configNames) {
+			for (BeansConfigId configName : configIds) {
 				configs.put(configName, BeansConfigFactory.create(this, configName, Type.MANUAL));
 			}
 		}
@@ -300,29 +302,29 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * @return <code>true</code> if config file was added to this project
 	 */
 	public boolean addConfig(IFile file, IBeansConfig.Type type) {
-		return addConfig(this.getConfigName(file), type);
+		return addConfig(this.getConfigId(file), type);
 	}
 	
 	/**
 	 * Adds the given beans config to the list of configs.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param configName the config name to add
+	 * @param configId the config name to add
 	 * @return <code>true</code> if config was added to this project
 	 */
-	public boolean addConfig(String configName, IBeansConfig.Type type) {
+	public boolean addConfig(BeansConfigId configId, IBeansConfig.Type type) {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
 		try {
 			w.lock();
-			if (configName.length() > 0 && !configs.containsKey(configName)) {
+			if (configId.name.length() > 0 && !configs.containsKey(configId)) {
 				if (type == IBeansConfig.Type.MANUAL) {
-					IBeansConfig config = BeansConfigFactory.create(this, configName, type);
+					IBeansConfig config = BeansConfigFactory.create(this, configId, type);
 					addConfig(config);
 					return true;
 				}
-				else if (type == IBeansConfig.Type.AUTO_DETECTED && !autoDetectedConfigs.containsKey(configName)) {
+				else if (type == IBeansConfig.Type.AUTO_DETECTED && !autoDetectedConfigs.containsKey(configId)) {
 					populateAutoDetectedConfigsAndConfigSets();
 					return true;
 				}
@@ -342,7 +344,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * @return <code>true</code> if config file was added to this project
 	 */
 	private boolean addConfig(IBeansConfig config) {
-		String configName = config.getElementName();
+		BeansConfigId configName = config.getId();
 
 		if (configs.containsKey(configName)) {
 			return false;
@@ -370,70 +372,70 @@ I	 * Removes the given beans config from the list of configs and from all config
 	 */
 	public boolean removeConfig(IFile file) {
 		if (file.getProject().equals(project)) {
-			return removeConfig(getConfigName(file));
+			return removeConfig(getConfigId(file));
 		}
 
 		// External configs only remove from all config sets
-		return removeConfigFromConfigSets(getConfigName(file));
+		return removeConfigFromConfigSets(getConfigId(file));
 	}
 
 	/**
 	 * Removes the given beans config from the list of configs and from all config sets.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param configName the config name to remove
+	 * @param configId the config name to remove
 	 * @return <code>true</code> if config was removed to this project
 	 */
-	public boolean removeConfig(String configName) {
-		if (hasConfig(configName)) {
+	public boolean removeConfig(BeansConfigId configId) {
+		if (hasConfig(configId)) {
 			try {
 				w.lock();
-				IBeansConfig config = configs.remove(configName);
-				IBeansConfig autoDetectedConfig = autoDetectedConfigs.remove(configName);
+				IBeansConfig config = configs.remove(configId);
+				IBeansConfig autoDetectedConfig = autoDetectedConfigs.remove(configId);
 				if (config != null) {
 					config.unregisterEventListener(eventListener);
 				}
 				if (autoDetectedConfig != null) {
 					autoDetectedConfig.unregisterEventListener(eventListener);
 				}
-				String locatorId = locatorByAutoDetectedConfig.remove(configName);
+				String locatorId = locatorByAutoDetectedConfig.remove(configId);
 				if (locatorId != null && autoDetectedConfigsByLocator.containsKey(locatorId)) {
-					autoDetectedConfigsByLocator.get(locatorId).remove(configName);
+					autoDetectedConfigsByLocator.get(locatorId).remove(configId);
 				}
 			}
 			finally {
 				w.unlock();
 			}
-			removeConfigFromConfigSets(configName);
+			removeConfigFromConfigSets(configId);
 			return true;
 		}
 		return false;
 	}
 
 	public boolean hasConfig(IFile file) {
-		return hasConfig(getConfigName(file));
+		return hasConfig(getConfigId(file));
 	}
 
-	public boolean hasConfig(String configName) {
+	public boolean hasConfig(BeansConfigId configId) {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
 		try {
 			r.lock();
-			return (configs.containsKey(configName) || autoDetectedConfigs.containsKey(configName));
+			return (configs.containsKey(configId) || autoDetectedConfigs.containsKey(configId));
 		}
 		finally {
 			r.unlock();
 		}
 	}
 	
-	public boolean hasConfig(IFile configFile, String configName, boolean includeImported) {
-		if (hasConfig(configName)) {
+	public boolean hasConfig(BeansConfigId configId, boolean includeImported) {
+		if (hasConfig(configId)) {
 			return true;
 		}
 		
 		for (IBeansConfig config : getConfigs()) {
-			if (config.getElementResource() != null && config.getElementResource().equals(configFile)) {
+			if (config.getElementResource() != null && config.getElementResource().equals(configId)) {
 				return true;
 			}
 		}
@@ -442,7 +444,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			try {
 				r.lock();
 				for (IBeansConfig bc : getConfigs()) {
-					if (hasImportedBeansConfig(configFile, bc)) {
+					if (hasImportedBeansConfig(configId, bc)) {
 						return true;
 					}
 				}
@@ -454,8 +456,8 @@ I	 * Removes the given beans config from the list of configs and from all config
 		return false;
 	}
 
-	public IBeansConfig getConfig(IFile configFile, boolean includeImported) {
-		Set<IBeansConfig> beansConfigs = getConfigs(configFile, includeImported);
+	public IBeansConfig getConfig(BeansConfigId id, boolean includeImported) {
+		Set<IBeansConfig> beansConfigs = getConfigs(id, includeImported);
 		Iterator<IBeansConfig> iterator = beansConfigs.iterator();
 		if (iterator.hasNext()) {
 			return iterator.next();
@@ -463,13 +465,13 @@ I	 * Removes the given beans config from the list of configs and from all config
 		return null;
 	}
 
-	public Set<IBeansConfig> getConfigs(IFile file, boolean includeImported) {
+	public Set<IBeansConfig> getConfigs(BeansConfigId id, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
 		
-		if (file.getProject() != null && !this.project.equals(file.getProject())) {
-			IBeansProject otherBeansProject = BeansCorePlugin.getModel().getProject(file.getProject());
+		if (!this.project.equals(id.project)) {
+			IBeansProject otherBeansProject = BeansCorePlugin.getModel().getProject(id.project);
 			if (otherBeansProject != null) {
-				Set<IBeansConfig> otherProjectConfigs = otherBeansProject.getConfigs(file, false);
+				Set<IBeansConfig> otherProjectConfigs = otherBeansProject.getConfigs(id, false);
 				for (IBeansConfig otherProjectConfig : otherProjectConfigs) {
 					beansConfigs.add(otherProjectConfig);
 				}
@@ -479,7 +481,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		Set<IBeansConfig> ownConfigs = getConfigs();
 		if (ownConfigs != null) {
 			for (IBeansConfig config : ownConfigs) {
-				if (config.getElementResource() != null && config.getElementResource().equals(file)) {
+				if (config.getElementResource() != null && config.getId().equals(id)) {
 					beansConfigs.add(config);
 				}
 			}
@@ -493,7 +495,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 				r.lock();
 				if (ownConfigs != null) {
 					for (IBeansConfig bc : ownConfigs) {
-						checkForImportedBeansConfig(file, bc, beansConfigs);
+						checkForImportedBeansConfig(id, bc, beansConfigs);
 					}
 				}
 			}
@@ -504,38 +506,38 @@ I	 * Removes the given beans config from the list of configs and from all config
 		return beansConfigs;
 	}
 
-	private void checkForImportedBeansConfig(IFile file, IBeansConfig bc, Set<IBeansConfig> beansConfigs) {
-		if (bc.getElementResource() != null && bc.getElementResource().equals(file)) {
+	private void checkForImportedBeansConfig(BeansConfigId id, IBeansConfig bc, Set<IBeansConfig> beansConfigs) {
+		if (bc.getId() != null && bc.getId().equals(id)) {
 			beansConfigs.add(bc);
 		}
 
 		for (IBeansImport bi : bc.getImports()) {
 			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
-				if (importedBc.getElementResource() != null && importedBc.getElementResource().equals(file)) {
+				if (importedBc.getElementResource() != null && importedBc.getElementResource().equals(id)) {
 					beansConfigs.add(importedBc);
 				}
 				for (IBeansImport iBi : importedBc.getImports()) {
 					for (IBeansConfig iBc : iBi.getImportedBeansConfigs()) {
-						checkForImportedBeansConfig(file, iBc, beansConfigs);
+						checkForImportedBeansConfig(id, iBc, beansConfigs);
 					}
 				}
 			}
 		}
 	}
 
-	private boolean hasImportedBeansConfig(IFile file, IBeansConfig bc) {
-		if (bc.getElementResource() != null && bc.getElementResource().equals(file)) {
+	private boolean hasImportedBeansConfig(BeansConfigId id, IBeansConfig bc) {
+		if (bc.getElementResource() != null && bc.getId().equals(id)) {
 			return true;
 		}
 
 		for (IBeansImport bi : bc.getImports()) {
 			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
-				if (importedBc.getElementResource() != null && importedBc.getElementResource().equals(file)) {
+				if (importedBc.getElementResource() != null && importedBc.getId().equals(id)) {
 					return true;
 				}
 				for (IBeansImport iBi : importedBc.getImports()) {
 					for (IBeansConfig iBc : iBi.getImportedBeansConfigs()) {
-						if (hasImportedBeansConfig(file, iBc)) {
+						if (hasImportedBeansConfig(id, iBc)) {
 							return true;
 						}
 					}
@@ -549,7 +551,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 	 * {@inheritDoc}
 	 */
 	public IBeansConfig getConfig(IFile file) {
-		IBeansConfig config = getConfig(getConfigName(file));
+		IBeansConfig config = getConfig(getConfigId(file));
 		if (config == null) {
 			if (!this.modelPopulated) {
 				populateModel();
@@ -573,20 +575,20 @@ I	 * Removes the given beans config from the list of configs and from all config
 	/**
 	 * {@inheritDoc}
 	 */
-	public IBeansConfig getConfig(String configName) {
-		if (configName != null && configName.length() > 0 && configName.charAt(0) == '/') {
-			return BeansCorePlugin.getModel().getConfig(configName);
+	public IBeansConfig getConfig(BeansConfigId configId) {
+		if (configId != null && configId.name.length() > 0 && configId.name.charAt(0) == '/') {
+			return BeansCorePlugin.getModel().getConfig(configId);
 		}
 		if (!this.modelPopulated) {
 			populateModel();
 		}
 		try {
 			r.lock();
-			if (configs.containsKey(configName)) {
-				return configs.get(configName);
+			if (configs.containsKey(configId)) {
+				return configs.get(configId);
 			}
-			else if (autoDetectedConfigs.containsKey(configName)) {
-				return autoDetectedConfigs.get(configName);
+			else if (autoDetectedConfigs.containsKey(configId)) {
+				return autoDetectedConfigs.get(configId);
 			}
 			return null;
 		}
@@ -595,13 +597,13 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 	}
 
-	public Set<String> getConfigNames() {
+	public Set<BeansConfigId> getConfigNames() {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
 		try {
 			r.lock();
-			Set<String> configNames = new LinkedHashSet<String>(configs.keySet());
+			Set<BeansConfigId> configNames = new LinkedHashSet<BeansConfigId>(configs.keySet());
 			configNames.addAll(autoDetectedConfigs.keySet());
 			return configNames;
 		}
@@ -610,13 +612,13 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 	}
 
-	public Set<String> getManualConfigNames() {
+	public Set<BeansConfigId> getManualConfigNames() {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
 		try {
 			r.lock();
-			return new LinkedHashSet<String>(configs.keySet());
+			return new LinkedHashSet<BeansConfigId>(configs.keySet());
 		}
 		finally {
 			r.unlock();
@@ -904,12 +906,12 @@ I	 * Removes the given beans config from the list of configs and from all config
 	public void removeAutoDetectedConfigs(String locatorId) {
 		try {
 			w.lock();
-			Set<String> configs = autoDetectedConfigsByLocator.get(locatorId);
+			Set<BeansConfigId> configs = autoDetectedConfigsByLocator.get(locatorId);
 			if (configs != null) {
 				autoDetectedConfigsByLocator.remove(locatorId);
 			}
 			if (configs != null) {
-				for (String configName : configs) {
+				for (BeansConfigId configName : configs) {
 					// Before actually removing make sure to delete ALL markers
 					MarkerUtils.deleteAllMarkers(getConfig(configName).getElementResource(), SpringCore.MARKER_ID);
 
@@ -937,7 +939,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		return false;
 	}
 
-	private boolean removeConfigFromConfigSets(String configName) {
+	private boolean removeConfigFromConfigSets(BeansConfigId configId) {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
@@ -945,14 +947,14 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			for (IBeansConfigSet configSet : configSets.values()) {
-				if (configSet.hasConfig(configName)) {
-					((BeansConfigSet) configSet).removeConfig(configName);
+				if (configSet.hasConfig(configId)) {
+					((BeansConfigSet) configSet).removeConfig(configId);
 					hasRemoved = true;
 				}
 			}
 			for (IBeansConfigSet configSet : autoDetectedConfigSets.values()) {
-				if (configSet.hasConfig(configName)) {
-					((BeansConfigSet) configSet).removeConfig(configName);
+				if (configSet.hasConfig(configId)) {
+					((BeansConfigSet) configSet).removeConfig(configId);
 					hasRemoved = true;
 				}
 			}
@@ -967,8 +969,8 @@ I	 * Removes the given beans config from the list of configs and from all config
 	 * Returns the config name from given file. If the file belongs to this project then the config name is the
 	 * project-relative path of the given file otherwise it's the workspace-relative path with a leading '/'.
 	 */
-	private String getConfigName(IFile file) {
-		return BeansConfigFactory.getConfigName(file, this.project);
+	private BeansConfigId getConfigId(IFile file) {
+		return BeansConfigFactory.getConfigId(file, this.project);
 	}
 
 	/**
@@ -990,7 +992,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			Set<IBeansConfig> configuredConfigs = new LinkedHashSet<IBeansConfig>(configs.values());
 			for (IBeansConfig config : configuredConfigs) {
 				if (config.getElementResource() == null || !config.getElementResource().exists()) {
-					removeConfig(config.getElementName());
+					removeConfig(config.getId());
 				}
 			}
 
@@ -1000,9 +1002,9 @@ I	 * Removes the given beans config from the list of configs and from all config
 			// Remove all invalid config names from this project's config sets
 			IBeansModel model = BeansCorePlugin.getModel();
 			for (IBeansConfigSet configSet : configSets.values()) {
-				for (String configName : configSet.getConfigNames()) {
-					if (!hasConfig(configName) && model.getConfig(configName) == null) {
-						((BeansConfigSet) configSet).removeConfig(configName);
+				for (BeansConfigId configId : configSet.getConfigIds()) {
+					if (!hasConfig(configId) && model.getConfig(configId) == null) {
+						((BeansConfigSet) configSet).removeConfig(configId);
 					}
 				}
 			}
@@ -1036,7 +1038,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		// Add auto detected beans configs
 		for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory.getBeansConfigLocatorDefinitions()) {
 			if (locator.isEnabled(getProject()) && locator.getBeansConfigLocator().supports(getProject())) {
-				final Map<String, IBeansConfig> detectedConfigs = new HashMap<String, IBeansConfig>();
+				final Map<BeansConfigId, IBeansConfig> detectedConfigs = new HashMap<BeansConfigId, IBeansConfig>();
 				final String[] configSetName = new String[1];
 
 				// Prevent extension contribution from crashing the model creation
@@ -1049,11 +1051,10 @@ I	 * Removes the given beans config from the list of configs and from all config
 					public void run() throws Exception {
 						Set<IFile> files = locator.getBeansConfigLocator().locateBeansConfigs(getProject(), null);
 						for (IFile file : files) {
-							BeansConfig config = new BeansConfig(BeansProject.this, file.getProjectRelativePath()
-									.toString(), Type.AUTO_DETECTED);
-							String configName = getConfigName(file);
-							if (!hasConfig(configName)) {
-								detectedConfigs.put(configName, config);
+						    BeansConfigId configId = getConfigId(file);
+						    IBeansConfig config = BeansConfigFactory.create(configId, Type.AUTO_DETECTED);
+							if (!hasConfig(configId)) {
+								detectedConfigs.put(configId, config);
 							}
 						}
 						if (files.size() > 1) {
@@ -1066,13 +1067,13 @@ I	 * Removes the given beans config from the list of configs and from all config
 				});
 
 				if (detectedConfigs.size() > 0) {
-					Set<String> configNamesByLocator = new LinkedHashSet<String>();
+					Set<BeansConfigId> configNamesByLocator = new LinkedHashSet<BeansConfigId>();
 
-					for (Map.Entry<String, IBeansConfig> detectedConfig : detectedConfigs.entrySet()) {
+					for (Map.Entry<BeansConfigId, IBeansConfig> detectedConfig : detectedConfigs.entrySet()) {
 						autoDetectedConfigs.put(detectedConfig.getKey(), detectedConfig.getValue());
 						detectedConfig.getValue().registerEventListener(eventListener);
-						configNamesByLocator.add(getConfigName((IFile) detectedConfig.getValue().getElementResource()));
-						locatorByAutoDetectedConfig.put(getConfigName((IFile) detectedConfig.getValue()
+						configNamesByLocator.add(getConfigId((IFile) detectedConfig.getValue().getElementResource()));
+						locatorByAutoDetectedConfig.put(getConfigId((IFile) detectedConfig.getValue()
 								.getElementResource()), locator.getNamespaceUri() + "." + locator.getId());
 					}
 					autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(),
@@ -1110,10 +1111,10 @@ I	 * Removes the given beans config from the list of configs and from all config
 		public void onPostProcessorDetected(IBeansConfig config, IBeansConfigPostProcessor postProcessor) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
-					if (configSet.hasConfig((IFile) config.getElementResource())) {
+					if (configSet.hasConfig(config.getId())) {
 						for (IBeansConfig configSetConfig : configSet.getConfigs()) {
-							if (!configSetConfig.equals(config) && configSetConfig instanceof BeansConfig) {
-								((BeansConfig) configSetConfig).addExternalPostProcessor(postProcessor, config);
+							if (!configSetConfig.equals(config) && configSetConfig instanceof XMLBeansConfig) {
+								((XMLBeansConfig) configSetConfig).addExternalPostProcessor(postProcessor, config);
 							}
 						}
 					}
@@ -1127,10 +1128,10 @@ I	 * Removes the given beans config from the list of configs and from all config
 		public void onPostProcessorRemoved(IBeansConfig config, IBeansConfigPostProcessor postProcessor) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
-					if (configSet.hasConfig((IFile) config.getElementResource())) {
+					if (configSet.hasConfig(config.getId())) {
 						for (IBeansConfig configSetConfig : configSet.getConfigs()) {
-							if (!configSetConfig.equals(config) && configSetConfig instanceof BeansConfig) {
-								((BeansConfig) configSetConfig).removeExternalPostProcessor(postProcessor, config);
+							if (!configSetConfig.equals(config) && configSetConfig instanceof XMLBeansConfig) {
+								((XMLBeansConfig) configSetConfig).removeExternalPostProcessor(postProcessor, config);
 							}
 						}
 					}
@@ -1156,7 +1157,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		public void onReset(IBeansConfig config) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
-					if (configSet.hasConfig((IFile) config.getElementResource())) {
+					if (configSet.hasConfig(config.getId())) {
 						if (configSet instanceof BeansConfigSet) {
 							((BeansConfigSet) configSet).reset();
 						}
@@ -1188,5 +1189,4 @@ I	 * Removes the given beans config from the list of configs and from all config
 			r.unlock();
 		}
 	}
-
 }

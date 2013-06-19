@@ -70,6 +70,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -378,7 +381,7 @@ public abstract class BeansModelUtils {
 		if (bean == null) {
 			IBeansProject project = (IBeansProject) config.getElementParent();
 			for (IBeansConfigSet configSet : project.getConfigSets()) {
-				if (configSet.hasConfig(config.getElementName())) {
+				if (configSet.hasConfig(config.getId())) {
 					bean = getBean(name, configSet);
 					if (bean != null) {
 						break;
@@ -424,30 +427,30 @@ public abstract class BeansModelUtils {
 
 	/**
 	 * Returns config for given name from specified context (<code>IBeansProject</code> or <code>IBeansConfigSet</code>
-	 * ). Externally referenced configs (config name starts with '/') are recognized too.
-	 * @param configName the name of the config to look for
+	 * ). Externally referenced configs (configs from other projects) are recognized too.
+	 * @param configId the name of the config to look for
 	 * @param context the context used for config look-up
 	 * @throws IllegalArgumentException if unsupported context specified
 	 */
-	public static IBeansConfig getConfig(String configName, IModelElement context) {
-		// For external project get the corresponding project from beans model
-		if (configName.charAt(0) == IBeansConfigSet.EXTERNAL_CONFIG_NAME_PREFIX) {
-			// Extract project and config name from full qualified config name
-			int pos = configName.indexOf('/', 1);
-			String projectName = configName.substring(1, pos);
-			configName = configName.substring(pos + 1);
-			IBeansProject project = BeansCorePlugin.getModel().getProject(projectName);
-			if (project != null) {
-				return project.getConfig(configName);
-			}
-		}
-		else if (context instanceof IBeansProject) {
-			return ((IBeansProject) context).getConfig(configName);
-		}
-		else if (context instanceof IBeansConfigSet) {
-			return ((IBeansProject) context.getElementParent()).getConfig(configName);
-		}
-		return null;
+	public static IBeansConfig getConfig(BeansConfigId configId, IModelElement context) {
+	    String projectName = configId.project;
+	    IBeansProject contextProject;
+	    if (context instanceof IBeansProject) {
+	        contextProject = (IBeansProject) context;
+	    } else if (context instanceof IBeansConfigSet) {
+	        contextProject = (IBeansProject) context.getElementParent();
+	    } else {
+	        return null;
+	    }
+	    if (!projectName.equals(contextProject.getElementName())) {
+            IBeansProject project = BeansCorePlugin.getModel().getProject(projectName);
+            if (project != null) {
+                return project.getConfig(configId);
+            }
+	    } else {
+	        contextProject.getConfig(configId);
+	    }
+	    return null;
 	}
 
 	/**
@@ -461,7 +464,7 @@ public abstract class BeansModelUtils {
 
 		IBeansProject project = BeansCorePlugin.getModel().getProject(storage.getFile().getProject());
 		if (project != null) {
-			return project.getConfig(storage.getFullName());
+			return project.getConfig(BeansConfigFactory.getConfigId(storage.getFullName(), project.getProject()));
 		}
 		return null;
 	}
@@ -668,7 +671,7 @@ public abstract class BeansModelUtils {
 				monitor = new NullProgressMonitor();
 			}
 
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(resource, true);
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(resource), true);
 			ModelElementDetermingModelVisitor v = new ModelElementDetermingModelVisitor(startLine, endLine, resource);
 			beansConfig.accept(v, monitor);
 			return v.getElement();
@@ -745,7 +748,7 @@ public abstract class BeansModelUtils {
 	 */
 	public static IResourceModelElement getResourceModelElement(Object obj) {
 		if (obj instanceof IFile) {
-			return BeansCorePlugin.getModel().getConfig((IFile) obj);
+			return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) obj));
 		}
 		else if (obj instanceof IProject) {
 			return BeansCorePlugin.getModel().getProject((IProject) obj);
@@ -753,10 +756,10 @@ public abstract class BeansModelUtils {
 		else if (obj instanceof IAdaptable) {
 			IResource resource = (IResource) ((IAdaptable) obj).getAdapter(IResource.class);
 			if (resource instanceof IFile) {
-				return BeansCorePlugin.getModel().getConfig((IFile) resource);
+				return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource));
 			}
 			else if (resource instanceof IProject) {
-				return BeansCorePlugin.getModel().getConfig((IFile) obj);
+				return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) obj));
 			}
 		}
 		return null;

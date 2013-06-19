@@ -32,7 +32,7 @@ import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig.InternalScannedGenericBeanDefinition;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig.InternalScannedGenericBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;

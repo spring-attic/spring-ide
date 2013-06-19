@@ -56,6 +56,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
@@ -256,7 +257,7 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			if (!BeansCoreUtils.isBeansConfig(resource, true) || document == null) {
 				return nodes.toArray();
 			}
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource, true);
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource), true);
 			int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
 			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 			String id = BeansEditorUtils.getAttribute(element, "id");
@@ -398,13 +399,14 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			return ((IModelElement) element).getElementParent();
 		}
 		else if (element instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) element));
 			if (config != null) {
 				return config.getElementParent();
 			}
 		}
 		else if (element instanceof ZipEntryStorage) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(((ZipEntryStorage) element).getFullName());
+			ZipEntryStorage zipEntryStorage = (ZipEntryStorage) element;
+            IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(zipEntryStorage.getFullName(), zipEntryStorage.getFile().getProject()));
 			if (config != null) {
 				return config.getElementParent();
 			}

@@ -15,6 +15,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -59,28 +60,28 @@ public interface IBeansModel extends IBeansModelElement, IModel, ILazyInitialize
 	 */
 	Set<IBeansProject> getProjects();
 
-	/**
-	 * Returns the beans config for given config file.
-	 * 
-	 * @param configFile
-	 *            the config file a beans config is requested for
-	 */
-	IBeansConfig getConfig(IFile configFile);
+    /**
+     * Returns the beans config for given config file.
+     * 
+     * @param id
+     *            the config id a beans config is requested for
+     */
+	IBeansConfig getConfig(BeansConfigId id);
+	
+    /**
+     * Returns the beans config for given config file. Includes imported
+     * {@link IImportedBeansConfig} in the search if
+     * <code>includeImported</code> is true.
+     * 
+     * @param id
+     *            the config id a beans config is requested for
+     * @param includeImported
+     *            true if imported configs should be queried as well.
+     * @since 3.4.0
+     */
+    IBeansConfig getConfig(BeansConfigId id, boolean includeImported);
 
-	/**
-	 * Returns the beans config for given config file. Includes imported
-	 * {@link IImportedBeansConfig} in the search if
-	 * <code>includeImported</code> is true.
-	 * 
-	 * @param configFile
-	 *            the config file a beans config is requested for
-	 * @param includeImported
-	 *            true if imported configs should be queried as well.
-	 * @since 2.0.3
-	 */
-	IBeansConfig getConfig(IFile configFile, boolean includeImported);
-
-	/**
+    /**
 	 * Returns all beans configs for given config file. Includes imported
 	 * {@link IImportedBeansConfig} in the search if
 	 * <code>includeImported</code> is true.
@@ -91,34 +92,12 @@ public interface IBeansModel extends IBeansModelElement, IModel, ILazyInitialize
 	 *            true if imported configs should be queried as well.
 	 * @since 2.0.3
 	 */
-	Set<IBeansConfig> getConfigs(IFile configFile, boolean includeImported);
-
-	/**
-	 * Returns the beans config for given full-qualified config file name
-	 * (including project name). <br>
-	 * External config files (with a leading '/') are handled too.
-	 * 
-	 * @param name
-	 *            the name of a config file a beans config is requested for
-	 */
-	IBeansConfig getConfig(String configName);
-
-	/**
-	 * Returns a list of all configs which contain a bean with given bean class.
-	 */
+	Set<IBeansConfig> getConfigs(BeansConfigId id, boolean includeImported);
+	
+    /**
+     * Returns a list of all configs which contain a bean with given bean class.
+     */
 	Set<IBeansConfig> getConfigs(String className);
-
-	/**
-	 * Returns true if the given resource is a config file. Includes imported
-	 * {@link IImportedBeansConfig} in the search if
-	 * <code>includeImported</code> is true.
-	 * 
-	 * @param configFile
-	 *            the config file a beans config is requested for
-	 * @param includeImported
-	 *            true if imported configs should be queried as well.
-	 * @since 3.2.0
-	 */
-	boolean isConfig(IFile resource, boolean includeImported);
-
+	
+	boolean isConfig(BeansConfigId id, boolean includeImported);
 }

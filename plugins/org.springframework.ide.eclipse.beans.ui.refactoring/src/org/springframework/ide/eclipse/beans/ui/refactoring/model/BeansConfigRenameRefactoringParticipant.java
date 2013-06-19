@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -41,6 +43,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
 public class BeansConfigRenameRefactoringParticipant extends RenameParticipant {
 
 	private IFile config;
+	private BeansConfigId configId;
 
 	/**
 	 * {@inheritDoc}
@@ -78,6 +81,7 @@ public class BeansConfigRenameRefactoringParticipant extends RenameParticipant {
 	protected boolean initialize(Object element) {
 		if (element instanceof IFile && BeansCoreUtils.isBeansConfig((IResource) element, false)) {
 			config = (IFile) element;
+			configId = BeansConfigFactory.getConfigId(config);
 			return true;
 		}
 		return false;
@@ -89,8 +93,11 @@ public class BeansConfigRenameRefactoringParticipant extends RenameParticipant {
 
 		private final String newName;
 
+        private BeansConfigId configId;
+
 		public ModelChange(IFile config, String newName) {
 			this.config = config;
+			this.configId = BeansConfigFactory.getConfigId(config);
 			this.newName = newName;
 		}
 
@@ -141,29 +148,21 @@ public class BeansConfigRenameRefactoringParticipant extends RenameParticipant {
 
 				// Firstly rename references to config sets
 				for (IBeansConfigSet configSet : beansProject.getConfigSets()) {
-					if (configSet.hasConfig(config)) {
-						if (config.getProject().equals(project.getProject())) {
-							IPath path = config.getProjectRelativePath();
-							IPath newPath = path.removeLastSegments(1).append(newName);
-							((BeansConfigSet) configSet).removeConfig(config.getProjectRelativePath().toString());
-							((BeansConfigSet) configSet).addConfig(newPath.toString());
-						}
-						else {
-							IPath path = config.getFullPath();
-							IPath newPath = path.removeLastSegments(1).append(newName);
-							((BeansConfigSet) configSet).removeConfig(path.toString());
-							((BeansConfigSet) configSet).addConfig(newPath.toString());
-						}
+					if (configSet.hasConfig(configId)) {
+                        ((BeansConfigSet) configSet).removeConfig(configId);
+                        IPath path = config.getFullPath();
+                        IPath newPath = path.removeLastSegments(1).append(newName);
+                        ((BeansConfigSet) configSet).addConfig(configId.newName(newPath.toString()));
 						updated = true;
 					}
 				}
 
 				// Secondly rename configs
-				if (project.hasConfig(config)) {
+				if (project.hasConfig(configId)) {
 					IPath path = config.getProjectRelativePath();
 					IPath newPath = path.removeLastSegments(1).append(newName);
-					((BeansProject) project).removeConfig(path.toString());
-					((BeansProject) project).addConfig(newPath.toString(), IBeansConfig.Type.MANUAL);
+					((BeansProject) project).removeConfig(configId);
+					((BeansProject) project).addConfig(configId.newName(newPath.toString()), IBeansConfig.Type.MANUAL);
 					removeMarkers(config);
 					updated = true;
 				}

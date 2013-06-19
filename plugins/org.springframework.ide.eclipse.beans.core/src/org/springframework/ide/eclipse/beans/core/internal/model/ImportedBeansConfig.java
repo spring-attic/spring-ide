@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -134,4 +135,13 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 			modificationTimestamp = file.getModificationStamp();
 		}
 	}
+
+    public String getKind() {
+        return null;
+    }
+
+    public BeansConfigId getId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

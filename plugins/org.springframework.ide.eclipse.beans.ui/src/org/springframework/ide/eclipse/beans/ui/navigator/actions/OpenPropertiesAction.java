@@ -22,6 +22,7 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage;
@@ -61,7 +62,7 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 					if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
 							.equals(getActionSite().getExtensionId())) {
 						element = BeansCorePlugin.getModel().getConfig(
-								(IFile) tElement);
+						        BeansConfigFactory.getConfigId((IFile) tElement));
 					}
 				} else if (tElement instanceof ZipEntryStorage) {
 					element = BeansModelUtils

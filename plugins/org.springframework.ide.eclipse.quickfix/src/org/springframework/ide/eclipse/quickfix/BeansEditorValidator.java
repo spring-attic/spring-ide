@@ -55,6 +55,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -64,7 +65,6 @@ import org.springframework.ide.eclipse.quickfix.processors.QuickfixProcessorFact
 import org.springframework.ide.eclipse.quickfix.validator.BeanValidatorVisitor;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 
 /**
  * Source validator for beans XML editor.
@@ -452,8 +452,8 @@ public class BeansEditorValidator implements ISourceValidator, IValidator {
 			return;
 		}
 
-		IStructuredDocumentRegion[] regions = ((IStructuredDocument) document).getStructuredDocumentRegions(dirtyRegion
-				.getOffset(), dirtyRegion.getLength());
+		IStructuredDocumentRegion[] regions = ((IStructuredDocument) document).getStructuredDocumentRegions(
+				dirtyRegion.getOffset(), dirtyRegion.getLength());
 
 		Set<IDOMNode> checkedNodes = new HashSet<IDOMNode>();
 
@@ -477,7 +477,7 @@ public class BeansEditorValidator implements ISourceValidator, IValidator {
 
 	private void validateNode(IDOMNode node, IReporter reporter) {
 		IBeansModel model = BeansCorePlugin.getModel();
-		Set<IBeansConfig> configs = model.getConfigs(file, true);
+		Set<IBeansConfig> configs = model.getConfigs(BeansConfigFactory.getConfigId(file), true);
 		for (IBeansConfig config : configs) {
 			Set<IResourceModelElement> contextElements = getContextElements(config);
 			for (IResourceModelElement contextElement : contextElements) {

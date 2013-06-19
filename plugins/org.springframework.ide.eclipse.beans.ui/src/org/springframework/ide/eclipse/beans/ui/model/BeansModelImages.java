@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -57,8 +57,8 @@ public final class BeansModelImages implements BeansModelImageFlags {
 		if (element instanceof ISpringProject
 				|| element instanceof IBeansProject) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROJECT);
-		} else if (element instanceof BeansConfig) {
-			Image image = WorkbenchLabelProvider.getDecoratingWorkbenchLabelProvider().getImage(((BeansConfig) element).getElementResource());
+		} else if (element instanceof XMLBeansConfig) {
+			Image image = WorkbenchLabelProvider.getDecoratingWorkbenchLabelProvider().getImage(((XMLBeansConfig) element).getElementResource());
 			if (isDecorationg) {
 				image = getDecoratedImage(image, element, context);
 			}

@@ -102,6 +102,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
@@ -1243,7 +1244,7 @@ public class BeansInplaceOutlineDialog {
 				IFile file = ((IFileEditorInput) input).getFile();
 				if (BeansCoreUtils.isBeansConfig(file, true)) {
 					this.selectedBeansConfig = BeansCorePlugin.getModel()
-							.getConfig(file, true);
+							.getConfig(BeansConfigFactory.getConfigId(file), true);
 					viewer.setInput(this.selectedBeansConfig);
 				}
 			}
@@ -1281,7 +1282,7 @@ public class BeansInplaceOutlineDialog {
 					this.lastSelection = mostspecificElement;
 				}
 				else {
-					this.lastSelection = BeansCorePlugin.getModel().getConfig(file);
+					this.lastSelection = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 				}
 			}
 		}

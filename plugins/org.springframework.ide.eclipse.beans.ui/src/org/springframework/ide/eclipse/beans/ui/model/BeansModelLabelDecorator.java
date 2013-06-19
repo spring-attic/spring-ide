@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.MarkerUtils;
@@ -160,7 +161,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator implements IL
 			return;
 		}
 		
-		IBeansConfig config = model.getConfig(file, true);
+		IBeansConfig config = model.getConfig(BeansConfigFactory.getConfigId(file), true);
 		if (config != null) {
 			addErrorOverlay(decoration, getSeverity(config));
 			decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);

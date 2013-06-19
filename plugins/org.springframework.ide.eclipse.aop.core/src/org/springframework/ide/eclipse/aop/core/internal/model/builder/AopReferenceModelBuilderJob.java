@@ -58,6 +58,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
@@ -332,7 +333,7 @@ public class AopReferenceModelBuilderJob extends Job {
 		IBeansProject project = BeansCorePlugin.getModel().getProject(currentFile.getProject());
 
 		if (project != null) {
-			IBeansConfig config = project.getConfig(currentFile, true);
+			IBeansConfig config = project.getConfig(BeansConfigFactory.getConfigId(currentFile, project.getProject()), true);
 			IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
 
 			if (javaProject != null && config != null) {

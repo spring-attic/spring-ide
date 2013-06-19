@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.beans.core.autowire.internal.validation.
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
@@ -32,14 +32,14 @@ public class AutowireDependencyProblemsRule implements IValidationRule<IBeansCon
 
 	/**
 	 * Checks if the this rule supports given {@link IModelElement} and {@link IValidationContext}.
-	 * @return true if element is a {@link BeansConfig} and context is {@link IBeansValidationContext}
+	 * @return true if element is a {@link XMLBeansConfig} and context is {@link IBeansValidationContext}
 	 */
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return element instanceof IBeansConfig && context instanceof IBeansValidationContext;
 	}
 
 	/**
-	 * Pass all {@link ValidationProblem}s that are stored in given {@link BeansConfig} into the <code>context</code>.
+	 * Pass all {@link ValidationProblem}s that are stored in given {@link XMLBeansConfig} into the <code>context</code>.
 	 */
 	public void validate(IBeansConfig element, IBeansValidationContext context, IProgressMonitor monitor) {
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(element, (IBeansModelElement) context

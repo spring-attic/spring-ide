@@ -20,10 +20,10 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.quickfix.proposals.AddConfigSetQuickFixProposal;
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
-
 
 /**
  * @author Terry Denney
@@ -48,7 +48,7 @@ public class AddConfigSetQuickFixProposalTest extends AbstractBeanFileQuickfixTe
 		int length = getLength(valueRegion, false);
 
 		IFile configFile = (IFile) project.findMember("src/import-test.xml");
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(configFile);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(configFile));
 		IBean importBean = BeansModelUtils.getBean(parentAttr.getValue(), config);
 
 		BeansProject beanProject = (BeansProject) BeansCorePlugin.getModel().getProject(project);

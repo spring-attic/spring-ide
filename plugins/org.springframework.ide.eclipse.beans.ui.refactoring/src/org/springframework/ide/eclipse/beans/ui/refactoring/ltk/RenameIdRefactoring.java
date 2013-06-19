@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.refactoring.util.BeansRefactoringChangeUtils;
 import org.springframework.util.StringUtils;
@@ -119,7 +120,7 @@ public class RenameIdRefactoring extends Refactoring {
 
 	private void addChangesForUpdatedReferences(RenameIdType descriptor, CompositeChange compositeChange, IProgressMonitor pm)
 			throws CoreException {
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 		if (config != null) {
 			Set<IBeansConfig> visitedResources = new HashSet<IBeansConfig>();
 			visitedResources.add(config);

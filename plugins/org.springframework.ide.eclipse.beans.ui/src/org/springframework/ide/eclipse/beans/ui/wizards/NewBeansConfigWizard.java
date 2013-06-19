@@ -144,11 +144,10 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 			beansProject.addConfig(file, IBeansConfig.Type.MANUAL);
 			newConfig = beansProject.getConfig(file);
 
-			Set<IBeansConfigSet> configSets = linkPage.getBeansConfigSets();
-			for (IBeansConfigSet bcs : configSets) {
-				if (beansProject.equals(bcs.getElementParent())) {
-					((BeansConfigSet) bcs).addConfig(newConfig.getElementName());
-				}
+		Set<IBeansConfigSet> configSets = linkPage.getBeansConfigSets();
+		for (IBeansConfigSet bcs : configSets) {
+			if (beansProject.equals(bcs.getElementParent())) {
+				((BeansConfigSet) bcs).addConfig(newConfig.getId());
 			}
 
 			// Now save modified project description

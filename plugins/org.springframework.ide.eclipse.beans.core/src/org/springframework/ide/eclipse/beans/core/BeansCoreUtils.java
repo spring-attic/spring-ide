@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 
 /**
  * Some helper methods for the Spring IDE core model.
@@ -43,7 +44,7 @@ public class BeansCoreUtils {
 	public static boolean isBeansConfig(IResource resource, boolean includeImported) {
 		if (resource instanceof IFile) {
 //			return BeansCorePlugin.getModel().getConfig((IFile) resource, includeImported) != null;
-			return BeansCorePlugin.getModel().isConfig((IFile) resource, includeImported);
+			return BeansCorePlugin.getModel().isConfig(BeansConfigFactory.getConfigId((IFile) resource), includeImported);
 		}
 		return false;
 	}

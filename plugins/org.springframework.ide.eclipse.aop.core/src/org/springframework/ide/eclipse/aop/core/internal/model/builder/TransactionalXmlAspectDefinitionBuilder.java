@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.aop.core.model.builder.IDocumentFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
@@ -94,7 +95,7 @@ public class TransactionalXmlAspectDefinitionBuilder extends AbstractAspectDefin
 		info.setPointcutExpression(pointcutExpression);
 		info.setAspectClassName(TRANSACTION_INTERCEPTOR_CLASS);
 		
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 		if (config != null) {
 			Set<IBean> beans = config.getBeans(TRANSACTION_INTERCEPTOR_CLASS);
 			if (beans.size() > 0) {

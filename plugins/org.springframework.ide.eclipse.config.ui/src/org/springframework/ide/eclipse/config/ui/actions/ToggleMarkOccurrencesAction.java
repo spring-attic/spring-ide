@@ -47,6 +47,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
@@ -57,7 +58,6 @@ import org.springframework.ide.eclipse.core.internal.model.SpringProject;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 
 /**
  * This action toggles the mark occurrences for bean references.
@@ -226,7 +226,7 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 			IFile file = editor.getResourceFile();
 
 			BeansValidationContext context = null;
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 			if (config != null) {
 				context = new BeansValidationContext(config,
 						new SpringProject(SpringCore.getModel(), file.getProject()));
@@ -254,8 +254,8 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 
 				if (attribute != null && attribute.getStartOffset() <= offset && attribute.getEndOffset() >= offset) {
 					if (context != null) {
-						List<ToolAnnotationData> toolAnnotations = context.getToolAnnotation(node, attribute
-								.getLocalName());
+						List<ToolAnnotationData> toolAnnotations = context.getToolAnnotation(node,
+								attribute.getLocalName());
 						for (ToolAnnotationData toolAnnotation : toolAnnotations) {
 							if ("ref".equals(toolAnnotation.getKind())) { //$NON-NLS-1$
 								return attribute.getNodeValue();
@@ -348,8 +348,8 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 	}
 
 	private void updateAnnotations(Set<OccurrenceLocation> locations) {
-		IAnnotationModel annotationModel = editor.getSourcePage().getDocumentProvider().getAnnotationModel(
-				editor.getEditorInput());
+		IAnnotationModel annotationModel = editor.getSourcePage().getDocumentProvider()
+				.getAnnotationModel(editor.getEditorInput());
 		if (annotationModel == null) {
 			return;
 		}
@@ -362,8 +362,8 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 		}
 
 		if (annotationModel instanceof IAnnotationModelExtension) {
-			((IAnnotationModelExtension) annotationModel).replaceAnnotations(annotations
-					.toArray(new Annotation[annotations.size()]), newAnnotations);
+			((IAnnotationModelExtension) annotationModel).replaceAnnotations(
+					annotations.toArray(new Annotation[annotations.size()]), newAnnotations);
 		}
 		else {
 			for (Annotation annotation : annotations) {

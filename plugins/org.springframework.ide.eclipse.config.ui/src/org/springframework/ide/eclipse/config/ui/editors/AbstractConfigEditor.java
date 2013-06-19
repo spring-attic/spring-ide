@@ -68,7 +68,7 @@ import org.eclipse.wst.xml.core.internal.provisional.contenttype.ContentTypeIdFo
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.mylyn.ui.IBeansXmlEditor;
 import org.springframework.ide.eclipse.config.core.ConfigCoreUtils;
 import org.springframework.ide.eclipse.config.core.IConfigEditor;
@@ -391,8 +391,8 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 
 	public void elementChanged(ModelChangeEvent event) {
 		Object source = event.getSource();
-		if (source instanceof BeansConfig) {
-			IResource resource = ((BeansConfig) source).getElementResource();
+		if (source instanceof XMLBeansConfig) {
+			IResource resource = ((XMLBeansConfig) source).getElementResource();
 			if (resource != null && resource.equals(this.resource)) {
 				headerMessage.updateMessage();
 				Display.getDefault().asyncExec(new Runnable() {

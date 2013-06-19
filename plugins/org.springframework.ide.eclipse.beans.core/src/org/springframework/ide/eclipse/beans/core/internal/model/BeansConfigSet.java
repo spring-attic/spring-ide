@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -46,7 +47,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 
 	private final Lock w = rwl.writeLock();
 
-	protected Set<String> configNames;
+	protected Set<BeansConfigId> configIds;
 
 	private volatile boolean allowAliasOverriding;
 
@@ -75,12 +76,12 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 	private volatile Set<String> profiles;
 
 	public BeansConfigSet(IBeansProject project, String name, Type type) {
-		this(project, name, new LinkedHashSet<String>(), type);
+		this(project, name, new LinkedHashSet<BeansConfigId>(), type);
 	}
 
-	public BeansConfigSet(IBeansProject project, String name, Set<String> configNames, Type type) {
+	public BeansConfigSet(IBeansProject project, String name, Set<BeansConfigId> configIds, Type type) {
 		super(project, name);
-		this.configNames = new LinkedHashSet<String>(configNames);
+		this.configIds = new LinkedHashSet<BeansConfigId>(configIds);
 		allowAliasOverriding = true;
 		allowBeanDefinitionOverriding = true;
 		this.type = type;
@@ -151,11 +152,11 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		return isIncomplete;
 	}
 
-	public void addConfig(String configName) {
-		if (configName.length() > 0 && !getConfigNames().contains(configName)) {
+	public void addConfig(BeansConfigId configId) {
+		if (configId != null && !getConfigIds().contains(configId)) {
 			try {
 				w.lock();
-				configNames.add(configName);
+				configIds.add(configId);
 			}
 			finally {
 				w.unlock();
@@ -164,23 +165,14 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		}
 	}
 
-	public boolean hasConfig(String configName) {
-		return getConfigNames().contains(configName);
+	public boolean hasConfig(BeansConfigId configName) {
+		return getConfigIds().contains(configName);
 	}
 
-	public boolean hasConfig(IFile file) {
-		if (file == null) return false;
-		
-		if (file.getProject().equals(((IBeansProject) getElementParent()).getProject())) {
-			return getConfigNames().contains(file.getProjectRelativePath().toString());
-		}
-		return getConfigNames().contains(file.getFullPath().toString());
-	}
-
-	public void removeConfig(String configName) {
+	public void removeConfig(BeansConfigId configId) {
 		try {
 			w.lock();
-			configNames.remove(configName);
+			configIds.remove(configId);
 		}
 		finally {
 			w.unlock();
@@ -191,7 +183,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 	public void removeAllConfigs() {
 		try {
 			w.lock();
-			configNames.clear();
+			configIds.clear();
 		}
 		finally {
 			w.unlock();
@@ -201,8 +193,8 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 
 	public Set<IBeansConfig> getConfigs() {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
-		for (String configName : getConfigNames()) {
-			IBeansConfig config = BeansModelUtils.getConfig(configName, this);
+		for (BeansConfigId configId : getConfigIds()) {
+			IBeansConfig config = BeansModelUtils.getConfig(configId, this);
 			if (config != null) {
 				configs.add(config);
 			}
@@ -210,22 +202,22 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 		return configs;
 	}
 
-	public Set<String> getConfigNames() {
+	public Set<BeansConfigId> getConfigIds() {
 		try {
 			r.lock();
-			return new LinkedHashSet<String>(configNames);
+			return new LinkedHashSet<BeansConfigId>(configIds);
 		}
 		finally {
 			r.unlock();
 		}
 	}
 
-	public boolean hasAlias(String name) {
-		return getAliasesMap().containsKey(name);
+	public boolean hasAlias(String alias) {
+		return getAliasesMap().containsKey(alias);
 	}
 
-	public IBeanAlias getAlias(String name) {
-		return getAliasesMap().get(name);
+	public IBeanAlias getAlias(String alias) {
+		return getAliasesMap().get(alias);
 	}
 
 	public Set<IBeanAlias> getAliases() {
@@ -287,7 +279,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 	public String toString() {
 		try {
 			r.lock();
-			return getElementName() + ": " + configNames.toString();
+			return getElementName() + ": " + configIds.toString();
 		}
 		finally {
 			r.unlock();
@@ -305,8 +297,8 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 					return aliasesMap;
 				}
 				aliasesMap = new LinkedHashMap<String, IBeanAlias>();
-				for (String configName : configNames) {
-					IBeansConfig config = BeansModelUtils.getConfig(configName, this);
+				for (BeansConfigId configId : configIds) {
+					IBeansConfig config = BeansModelUtils.getConfig(configId, this);
 					if (config != null) {
 						for (IBeanAlias alias : config.getAliases()) {
 							if (allowAliasOverriding || !aliasesMap.containsKey(alias.getElementName())) {
@@ -341,8 +333,8 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 					return components;
 				}
 				components = new LinkedHashSet<IBeansComponent>();
-				for (String configName : configNames) {
-					IBeansConfig config = BeansModelUtils.getConfig(configName, this);
+				for (BeansConfigId configId : configIds) {
+					IBeansConfig config = BeansModelUtils.getConfig(configId, this);
 					if (config != null) {
 						for (IBeansComponent component : config.getComponents()) {
 							components.add(component);
@@ -375,8 +367,8 @@ public class BeansConfigSet extends AbstractResourceModelElement implements IBea
 					return beansMap;
 				}
 				beansMap = new LinkedHashMap<String, IBean>();
-				for (String configName : configNames) {
-					IBeansConfig config = BeansModelUtils.getConfig(configName, this);
+				for (BeansConfigId configId : configIds) {
+					IBeansConfig config = BeansModelUtils.getConfig(configId, this);
 					if (config != null) {
 						for (IBean bean : config.getBeans()) {
 							if (allowBeanDefinitionOverriding || !beansMap.containsKey(bean.getElementName())) {

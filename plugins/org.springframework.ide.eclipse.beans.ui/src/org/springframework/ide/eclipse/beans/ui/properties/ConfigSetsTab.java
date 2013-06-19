@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Tree;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfig;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
@@ -86,8 +85,8 @@ public class ConfigSetsTab {
 			if (element instanceof PropertiesConfigSet) {
 				return ((PropertiesConfigSet) element).getElementParent();
 			}
-			else if (element instanceof PropertiesConfig) {
-				return ((PropertiesConfig) element).getElementParent().getElementParent();
+			else if (element instanceof IBeansConfig) {
+				return ((IBeansConfig) element).getElementParent().getElementParent();
 			}
 			return null;
 		}
@@ -295,8 +294,8 @@ public class ConfigSetsTab {
 	 * The user has pressed the down button. Move the selected config down.
 	 */
 	private void handleDownButtonPressed() {
-		if (selectedElement != null && selectedElement instanceof PropertiesConfig) {
-			PropertiesConfig config = (PropertiesConfig) selectedElement;
+		if (selectedElement != null && selectedElement instanceof IBeansConfig) {
+		    IBeansConfig config = (IBeansConfig) selectedElement;
 			PropertiesConfigSet configSet = (PropertiesConfigSet) config.getElementParent();
 			configSet.moveConfigDown(config);
 			configSetsViewer.refresh(false);
@@ -358,8 +357,8 @@ public class ConfigSetsTab {
 				editButtonsEnabled = ((PropertiesConfigSet) selectedElement).getType() 
 					== IBeansConfigSet.Type.MANUAL;
 			}
-			else if (selected instanceof PropertiesConfig) {
-				PropertiesConfig config = (PropertiesConfig) selected;
+			else if (selected instanceof IBeansConfig) {
+			    IBeansConfig config = (IBeansConfig) selected;
 				PropertiesConfigSet configSet = (PropertiesConfigSet) config.getElementParent();
 				if (configSet != null && configSet.getConfigs().size() > 1) {
 					selectedElement = config;
@@ -383,8 +382,8 @@ public class ConfigSetsTab {
 	 * The user has pressed the up button. Move the selected config up.
 	 */
 	private void handleUpButtonPressed() {
-		if (selectedElement != null && selectedElement instanceof PropertiesConfig) {
-			PropertiesConfig config = (PropertiesConfig) selectedElement;
+		if (selectedElement != null && selectedElement instanceof IBeansConfig) {
+		    IBeansConfig config = (IBeansConfig) selectedElement;
 			PropertiesConfigSet configSet = (PropertiesConfigSet) config.getElementParent();
 			configSet.moveConfigUp(config);
 			configSetsViewer.refresh(false);

@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.TypeStructureState;
@@ -71,7 +72,7 @@ public class BeanMetadataProjectBuilder implements IProjectBuilder, IProjectCont
 	 */
 	public void cleanup(IResource resource, IProgressMonitor monitor) throws CoreException {
 		if (BeansCoreUtils.isBeansConfig(resource) && resource instanceof IFile) {
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig((IFile) resource);
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource));
 			for (IBean bean : beansConfig.getBeans()) {
 				BeansMetadataPlugin.getMetadataModel().clearBeanMetadata(bean);
 				BeansMetadataPlugin.getMetadataModel().clearBeanProperties(bean);

@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.quickfix.processors.tests;
 
-import org.springframework.ide.eclipse.quickfix.processors.NameSuggestionComparator;
-
 import junit.framework.TestCase;
+
+import org.springframework.ide.eclipse.quickfix.processors.NameSuggestionComparator;
 
 
 /**

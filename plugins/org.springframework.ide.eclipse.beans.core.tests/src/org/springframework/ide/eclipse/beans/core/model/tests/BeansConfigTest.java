@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -55,9 +57,13 @@ public class BeansConfigTest {
 		project.delete(true, null);
 	}
 
+	private BeansConfigId getConfigForFileName(String fName) {
+	    return BeansConfigFactory.getConfigId(project.getFile(fName));
+	}
+
 	@Test
 	public void testBasicConfigBeans() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "basic-bean-config.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
 		
 		Set<IBean> beans = BeansModelUtils.getBeans(config);
 		assertEquals(1, beans.size());
@@ -71,7 +77,7 @@ public class BeansConfigTest {
 
 	@Test
 	public void testAdvancedConfigBeans() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "advanced-bean-config.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("advanced-bean-config.xml"), IBeansConfig.Type.MANUAL);
 		
 		Set<IBean> beans = BeansModelUtils.getBeans(config);
 		assertEquals(2, beans.size());
@@ -85,7 +91,7 @@ public class BeansConfigTest {
 
 	@Test
 	public void testBasicComponentScanning() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "basic-component-scanning.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("basic-component-scanning.xml"), IBeansConfig.Type.MANUAL);
 		
 		IBean bean = BeansModelUtils.getBean("simpleScannedBean", config);
 		assertEquals("simpleScannedBean", bean.getElementName());
@@ -93,7 +99,7 @@ public class BeansConfigTest {
 
 	@Test
 	public void testComponentScanningWithEnableAnnotations() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "advanced-component-scanning.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("advanced-component-scanning.xml"), IBeansConfig.Type.MANUAL);
 		
 		IBean simpleBean = BeansModelUtils.getBean("simpleScannedBean", config);
 		assertEquals("simpleScannedBean", simpleBean.getElementName());
@@ -111,7 +117,7 @@ public class BeansConfigTest {
 
 	@Test
 	public void testComponentScanningWithProfile() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "profile-component-scanning.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("profile-component-scanning.xml"), IBeansConfig.Type.MANUAL);
 		
 		IBean simpleBean = BeansModelUtils.getBean("simpleScannedBean", config);
 		assertEquals("simpleScannedBean", simpleBean.getElementName());

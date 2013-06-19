@@ -17,6 +17,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.quickfix.proposals.AddToConfigSetQuickFixProposal;
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
@@ -46,7 +47,7 @@ public class AddToConfigSetQuickFixProposalTest extends AbstractBeanFileQuickfix
 
 		BeansProject beanProject = (BeansProject) BeansCorePlugin.getModel().getProject(project);
 		IBeansConfigSet configSet = beanProject.getConfigSet("AddToConfigSetTest");
-		IBeansConfig config = beanProject.getConfig(file);
+		IBeansConfig config = beanProject.getConfig(BeansConfigFactory.getConfigId(file));
 
 		assertFalse("Expects config file to not be in config set", configSet.getConfigs().contains(config));
 
@@ -55,7 +56,7 @@ public class AddToConfigSetQuickFixProposalTest extends AbstractBeanFileQuickfix
 		proposal.apply(document);
 
 		configSet = beanProject.getConfigSet("AddToConfigSetTest");
-		config = beanProject.getConfig(file);
+		config = beanProject.getConfig(BeansConfigFactory.getConfigId(file));
 		assertTrue("Expects config file to be added into config set", configSet.getConfigs().contains(config));
 	}
 

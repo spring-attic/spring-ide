@@ -37,9 +37,9 @@ import org.springframework.ide.eclipse.beans.core.internal.model.update.BeansMod
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.quickfix.QuickfixUtils;
-
 
 /**
  * Quick fix proposal for creating a new config set
@@ -145,9 +145,9 @@ public class AddConfigSetQuickFixProposal extends BeanAttributeQuickFixProposal 
 		}
 	}
 
-	private final String configName;
+	private final BeansConfigId configId;
 
-	private final String referencedConfigName;
+	private final BeansConfigId referencedConfigId;
 
 	private final BeansProject project;
 
@@ -156,8 +156,8 @@ public class AddConfigSetQuickFixProposal extends BeanAttributeQuickFixProposal 
 	public AddConfigSetQuickFixProposal(int offset, int length, boolean missingEndQuote, IBean importBean, IFile file) {
 		super(offset, length, missingEndQuote);
 
-		this.configName = QuickfixUtils.getConfigName(file);
-		this.referencedConfigName = QuickfixUtils.getConfigName(importBean.getElementResource());
+		this.configId = BeansConfigFactory.getConfigId(file);
+		this.referencedConfigId = BeansConfigFactory.getConfigId((IFile) importBean.getElementResource());
 
 		IBeansModel model = BeansCorePlugin.getModel();
 		this.project = (BeansProject) model.getProject(file.getProject());
@@ -181,9 +181,9 @@ public class AddConfigSetQuickFixProposal extends BeanAttributeQuickFixProposal 
 		}
 
 		if (configSetName != null) {
-			Set<String> configNames = new HashSet<String>();
-			configNames.add(configName);
-			configNames.add(referencedConfigName);
+			Set<BeansConfigId> configNames = new HashSet<BeansConfigId>();
+			configNames.add(configId);
+			configNames.add(referencedConfigId);
 
 			IBeansConfigSet configSet = new BeansConfigSet(project, configSetName, configNames,
 					IBeansConfigSet.Type.MANUAL);
@@ -195,7 +195,7 @@ public class AddConfigSetQuickFixProposal extends BeanAttributeQuickFixProposal 
 	}
 
 	public String getDisplayString() {
-		return "Create new config set with " + configName + " and " + referencedConfigName;
+		return "Create new config set with " + configId + " and " + referencedConfigId;
 	}
 
 	public Image getImage() {

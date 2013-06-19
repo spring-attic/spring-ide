@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  * @since 2.0.2
  */
 public class SpringParsingProblemsRule implements
-		IValidationRule<BeansConfig, IBeansValidationContext> {
+		IValidationRule<XMLBeansConfig, IBeansValidationContext> {
 
 	/** Regular expressions to that must be ignored and not reported to the user */
 	private static final List<Pattern> IGNORABLE_ERROR_MESSAGE_PATTERNS = Arrays.asList(new Pattern[] {
@@ -39,18 +39,18 @@ public class SpringParsingProblemsRule implements
 
 	/**
 	 * Checks if the this rule supports given {@link IModelElement} and {@link IValidationContext}.
-	 * @return true if element is a {@link BeansConfig} and context is
+	 * @return true if element is a {@link XMLBeansConfig} and context is
 	 * {@link IBeansValidationContext}
 	 */
 	public boolean supports(IModelElement element, IValidationContext context) {
-		return element instanceof BeansConfig && context instanceof IBeansValidationContext;
+		return element instanceof XMLBeansConfig && context instanceof IBeansValidationContext;
 	}
 
 	/**
-	 * Pass all {@link ValidationProblem}s that are stored in given {@link BeansConfig} into the
+	 * Pass all {@link ValidationProblem}s that are stored in given {@link XMLBeansConfig} into the
 	 * <code>context</code>.
 	 */
-	public void validate(BeansConfig element, IBeansValidationContext context,
+	public void validate(XMLBeansConfig element, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		for (ValidationProblem problem : element.getProblems()) {
 			if (!isMessageIgnorable(problem.getMessage())) {

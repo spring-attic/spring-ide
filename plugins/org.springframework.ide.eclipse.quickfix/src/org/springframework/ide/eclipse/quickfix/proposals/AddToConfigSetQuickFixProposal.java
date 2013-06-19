@@ -18,9 +18,9 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.internal.model.update.BeansModelUpdater;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.quickfix.QuickfixUtils;
-
 
 /**
  * Quick fix proposal for adding config file into config set
@@ -45,9 +45,9 @@ public class AddToConfigSetQuickFixProposal extends BeanAttributeQuickFixProposa
 	@Override
 	public void applyQuickFix(IDocument document) {
 		if (configSet instanceof BeansConfigSet) {
-			BeansConfigSet newConfigSet = new BeansConfigSet(project, configSet.getElementName(), configSet
-					.getConfigNames(), configSet.getType());
-			newConfigSet.addConfig(QuickfixUtils.getConfigName(file));
+			BeansConfigSet newConfigSet = new BeansConfigSet(project, configSet.getElementName(),
+					configSet.getConfigIds(), configSet.getType());
+			newConfigSet.addConfig(BeansConfigFactory.getConfigId(file));
 			project.removeConfigSet(configSet.getElementName());
 			project.addConfigSet(newConfigSet);
 

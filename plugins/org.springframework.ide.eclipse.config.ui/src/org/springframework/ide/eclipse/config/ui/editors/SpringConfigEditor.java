@@ -20,6 +20,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.config.core.IConfigEditorPage;
 import org.springframework.ide.eclipse.config.core.preferences.SpringConfigPreferenceConstants;
@@ -28,7 +29,6 @@ import org.springframework.ide.eclipse.config.ui.editors.namespaces.NamespacesFo
 import org.springframework.ide.eclipse.config.ui.editors.overview.OverviewFormPage;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.w3c.dom.Node;
-
 
 /**
  * This class is a multi-page form editor for editing Spring configuration
@@ -84,7 +84,8 @@ public class SpringConfigEditor extends AbstractConfigEditor implements IPropert
 	private void createBeanGraphPage() {
 		boolean gefEnabled = getPreferenceStore().getBoolean(SpringConfigPreferenceConstants.PREF_ENABLE_GEF_PAGES);
 		if (gefEnabled) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(getResourceFile());
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					BeansConfigFactory.getConfigId(getResourceFile()));
 			if (config != null) {
 				addBeanGraphPage(config);
 			}
@@ -100,7 +101,8 @@ public class SpringConfigEditor extends AbstractConfigEditor implements IPropert
 			requiresDeferredBeanGraph = false;
 		}
 		if (requiresDeferredBeanGraph) {
-			final IBeansConfig config = BeansCorePlugin.getModel().getConfig(getResourceFile());
+			final IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					BeansConfigFactory.getConfigId(getResourceFile()));
 			if (config != null) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {

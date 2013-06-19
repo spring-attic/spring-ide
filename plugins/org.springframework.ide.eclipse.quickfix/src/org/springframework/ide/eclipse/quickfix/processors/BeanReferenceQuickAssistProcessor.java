@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.quickfix.ContentAssistProposalWrapper;
 import org.springframework.ide.eclipse.quickfix.QuickfixContentAssistConverter;
 import org.springframework.ide.eclipse.quickfix.QuickfixUtils;
@@ -34,7 +35,6 @@ import org.springframework.ide.eclipse.quickfix.proposals.AddToConfigSetQuickFix
 import org.springframework.ide.eclipse.quickfix.proposals.CreateImportQuickFixProposal;
 import org.springframework.ide.eclipse.quickfix.proposals.CreateNewBeanQuickFixProposal;
 import org.springframework.ide.eclipse.quickfix.proposals.RenameToSimilarNameQuickFixProposal;
-
 
 /**
  * Quick assist processor for bean parent attribute in beans XML editor.
@@ -86,7 +86,7 @@ public class BeanReferenceQuickAssistProcessor extends BeanQuickAssistProcessor 
 					Set<IBeansConfigSet> configSets = project.getConfigSets();
 
 					for (IBeansConfigSet configSet : configSets) {
-						if (configSet.hasConfig((IFile) bean.getElementResource())) {
+						if (configSet.hasConfig(BeansConfigFactory.getConfigId((IFile) bean.getElementResource()))) {
 							addToConfigSetProposals.add(new AddToConfigSetQuickFixProposal(offset, length,
 									missingEndQuote, file, configSet, project));
 						}

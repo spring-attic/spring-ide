@@ -15,12 +15,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
+import org.springframework.ide.eclipse.beans.core.model.generators.XMLConfigGenerator;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -181,15 +183,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 			if (elementName.equals(CONFIG)) {
 				String config = charBuffer.toString().trim();
 
-				// If given config is a full path within this Spring
-				// project then convert it to a project relative path
-				if (config.length() > 0 && config.charAt(0) == '/') {
-					String projectPath = '/' + project.getElementName() + '/';
-					if (config.startsWith(projectPath)) {
-						config = config.substring(projectPath.length());
-					}
-				}
-				project.addConfig(config, IBeansConfig.Type.MANUAL);
+				project.addConfig(new BeansConfigId(XMLConfigGenerator.XML_CONFIG_KIND, project.getElementName(), config), IBeansConfig.Type.MANUAL);
 				state = State.CONFIGS;
 			}
 		} else if (state == State.CONFIG_SETS) {
@@ -238,16 +232,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.CONFIG_SET_CONFIG) {
 			if (elementName.equals(CONFIG)) {
 				String config = charBuffer.toString().trim();
-
-				// If given config is a full path within this Spring
-				// project then convert it to a project relative path
-				if (config.length() > 0 && config.charAt(0) == '/') {
-					String projectPath = '/' + project.getElementName() + '/';
-					if (config.startsWith(projectPath)) {
-						config = config.substring(projectPath.length());
-					}
-				}
-				configSet.addConfig(config);
+				configSet.addConfig(BeansConfigFactory.getConfigId(config, this.project.getProject()));
 				state = State.CONFIG_SET_CONFIGS;
 			}
 		}

@@ -18,6 +18,8 @@ import java.util.Set;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
@@ -30,7 +32,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 public class PropertiesConfigSet extends BeansConfigSet {
 
 	public PropertiesConfigSet(PropertiesProject project, String name, Type type) {
-		super(project, name, new HashSet<String>(), type);
+		super(project, name, new HashSet<BeansConfigId>(), type);
 	}
 
 	/**
@@ -39,7 +41,7 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	 */
 	public PropertiesConfigSet(PropertiesProject project,
 			IBeansConfigSet configSet, Type type) {
-		super(project, configSet.getElementName(), configSet.getConfigNames(), type);
+		super(project, configSet.getElementName(), configSet.getConfigIds(), type);
 		super.setAllowAliasOverriding(configSet.isAllowAliasOverriding());
 		super.setAllowBeanDefinitionOverriding(configSet
 				.isAllowBeanDefinitionOverriding());
@@ -73,14 +75,14 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	}
 
 	@Override
-	public void addConfig(String configName) {
-		super.addConfig(configName);
+	public void addConfig(BeansConfigId configId) {
+		super.addConfig(configId);
 		notifyListeners();
 	}
 
 	@Override
-	public void removeConfig(String configName) {
-		super.removeConfig(configName);
+	public void removeConfig(BeansConfigId configId) {
+		super.removeConfig(configId);
 		notifyListeners();
 	}
 
@@ -93,8 +95,8 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	@Override
 	public Set<IBeansConfig> getConfigs() {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
-		for (String configName : configNames) {
-			IBeansConfig config = PropertiesConfigFactory.create(this, configName, IBeansConfig.Type.MANUAL);
+		for (BeansConfigId configId : configIds) {
+			IBeansConfig config = BeansConfigFactory.create(this, configId, IBeansConfig.Type.MANUAL);
 			if (config != null) {
 				configs.add(config);
 			}
@@ -103,32 +105,32 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	}
 
 	public void moveConfigUp(IBeansConfig config) {
-		String configName = config.getElementName();
-		if (configNames.contains(configName)) {
-			ArrayList<String> newConfigNames = new ArrayList<String>(
-					configNames);
-			int index = newConfigNames.indexOf(configName);
+	    BeansConfigId configId = config.getId();
+		if (configIds.contains(configId)) {
+			ArrayList<BeansConfigId> newConfigIds = new ArrayList<BeansConfigId>(
+					configIds);
+			int index = newConfigIds.indexOf(configId);
 			if (index > 0) {
-				newConfigNames.remove(configName);
-				newConfigNames.add(index - 1, configName);
-				configNames.clear();
-				configNames.addAll(newConfigNames);
+				newConfigIds.remove(configId);
+				newConfigIds.add(index - 1, configId);
+				configIds.clear();
+				configIds.addAll(newConfigIds);
 				notifyListeners();
 			}
 		}
 	}
 
 	public void moveConfigDown(IBeansConfig config) {
-		String configName = config.getElementName();
-		if (configNames.contains(configName)) {
-			ArrayList<String> newConfigNames = new ArrayList<String>(
-					configNames);
-			int index = newConfigNames.indexOf(configName);
-			if (index < (configNames.size() - 1)) {
-				newConfigNames.remove(configName);
-				newConfigNames.add(index + 1, configName);
-				configNames.clear();
-				configNames.addAll(newConfigNames);
+	    BeansConfigId configId = config.getId();
+		if (configIds.contains(configId)) {
+			ArrayList<BeansConfigId> newConfigNames = new ArrayList<BeansConfigId>(
+					configIds);
+			int index = newConfigNames.indexOf(configId);
+			if (index < (configIds.size() - 1)) {
+				newConfigNames.remove(configId);
+				newConfigNames.add(index + 1, configId);
+				configIds.clear();
+				configIds.addAll(newConfigNames);
 				notifyListeners();
 			}
 		}

@@ -22,7 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -31,6 +31,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -57,9 +59,13 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 		project.delete(true, null);
 	}
 
+	private BeansConfigId getConfigForFileName(String fName) {
+        return BeansConfigFactory.getConfigId(project.getFile(fName));
+    }
+
 	@Test
 	public void testResourceInjection() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/context/annotation/testResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("src/org/springframework/context/annotation/testResourceInjection-context.xml"), IBeansConfig.Type.MANUAL);
 
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
@@ -83,7 +89,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 
 	@Test
 	public void testExtendedResourceInjection() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/context/annotation/testExtendedResourceInjection-context.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("src/org/springframework/context/annotation/testExtendedResourceInjection-context.xml"), IBeansConfig.Type.MANUAL);
 
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
@@ -125,7 +131,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 
 	@Test
 	public void testExtendedResourceInjectionWithOverriding() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/context/annotation/testExtendedResourceInjectionWithOverriding-context.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("src/org/springframework/context/annotation/testExtendedResourceInjectionWithOverriding-context.xml"), IBeansConfig.Type.MANUAL);
 
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });
@@ -154,7 +160,7 @@ public class CommonAnnotationInjectionMetadataProviderTests extends BeansCoreTes
 
 	@Test
 	public void testExtendedEjbInjection() throws Exception {
-		BeansConfig config = new BeansConfig(beansProject, "src/org/springframework/context/annotation/testExtendedEjbInjection-context.xml", IBeansConfig.Type.MANUAL);
+		XMLBeansConfig config = new XMLBeansConfig(beansProject, getConfigForFileName("src/org/springframework/context/annotation/testExtendedEjbInjection-context.xml"), IBeansConfig.Type.MANUAL);
 
 		Map<String, Integer[]> allowedRefs = new HashMap<String, Integer[]>();
 		allowedRefs.put("testBean", new Integer[] { 70 });

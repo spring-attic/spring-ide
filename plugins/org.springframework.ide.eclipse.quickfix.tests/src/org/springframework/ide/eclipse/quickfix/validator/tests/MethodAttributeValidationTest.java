@@ -18,6 +18,7 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.MethodAttributeQuickAssistProcessor;
@@ -47,7 +48,7 @@ public class MethodAttributeValidationTest extends AbstractBeanValidationTestCas
 		IDOMNode beanNode = QuickfixTestUtil.getNode(BeansSchemaConstants.ELEM_BEAN, beanName, children);
 		AttrImpl attr = (AttrImpl) beanNode.getAttributes().getNamedItem(attrName);
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (beanValidator.validateAttributeWithConfig(config, contextElement, attr, beanNode, reporter, true,

@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -70,49 +71,39 @@ public interface IBeansProject extends IBeansModelElement, IResourceModelElement
 	@Deprecated
 	boolean hasConfigExtension(String extension);
 
-	/**
-	 * Returns true if given file belongs to the list of Spring bean config files which are stored in the project
-	 * description.
-	 */
-	boolean hasConfig(IFile file);
-
-	/**
-	 * Returns true if given config name belongs to the list of Spring bean config files which are stored in the project
-	 * description.
-	 */
-	boolean hasConfig(String configName);
+    /**
+     * Returns true if given file belongs to the list of Spring bean config files which are stored in the project
+     * description.
+     * 
+     * Deprecated. use {@link #hasConfig(BeansConfigId)} instead
+     */
+    boolean hasConfig(BeansConfigId id);
 
 	/**
 	 * Returns true if given file belongs to the list of Spring bean config files which are stored in the project
 	 * description, including imported beans, if includeImported is set to true.
 	 * @since 3.2.0
 	 */
-	boolean hasConfig(IFile configFile, String configName, boolean includeImported);
+	boolean hasConfig(BeansConfigId configId, boolean includeImported);
 
-	/**
-	 * Returns <code>IBeansConfig</code> for given config file.
-	 * @deprecated
-	 */
-	IBeansConfig getConfig(IFile configFile);
-
-	/**
-	 * Returns <code>IBeansConfig</code> of given name.
-	 */
-	IBeansConfig getConfig(String configName);
-
+    /**
+     * Returns <code>IBeansConfig</code> for given config id.
+     */
+	IBeansConfig getConfig(BeansConfigId configId);
+	
 	/**
 	 * Returns <code>IBeansConfig</code> for the given config file. Includes imported {@link IImportedBeansConfig} in
 	 * the search if <code>includeImported</code> is true.
 	 * @since 2.0.3
 	 */
-	IBeansConfig getConfig(IFile configFile, boolean includeImported);
+	IBeansConfig getConfig(BeansConfigId configId, boolean includeImported);
 
 	/**
 	 * Returns all <code>IBeansConfig</code> for the given config file. Includes imported {@link IImportedBeansConfig}
 	 * in the search if <code>includeImported</code> is true.
 	 * @since 2.0.3
 	 */
-	Set<IBeansConfig> getConfigs(IFile configFile, boolean includeImported);
+	Set<IBeansConfig> getConfigs(BeansConfigId configId, boolean includeImported);
 
 	/**
 	 * Returns a collection of all configs defined in this project.

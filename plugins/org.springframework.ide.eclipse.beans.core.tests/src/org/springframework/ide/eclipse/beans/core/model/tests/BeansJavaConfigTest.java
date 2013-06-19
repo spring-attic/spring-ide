@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -43,7 +44,19 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  */
 public class BeansJavaConfigTest {
 	
-	private IProject project;
+	/**
+     * 
+     */
+    private static final String PROFILE_CLASS_NAME = "org.test.profile.ProfileConfigurationClass";
+    /**
+     * 
+     */
+    private static final String ADVANCED_CLASS_NAME = "org.test.advanced.AdvancedConfigurationClass";
+    /**
+     * 
+     */
+    private static final String CLASS_NAME = "org.test.spring.SimpleConfigurationClass";
+    private IProject project;
 	private IBeansModel model;
 	private IBeansProject beansProject;
 	private IJavaProject javaProject;
@@ -64,10 +77,11 @@ public class BeansJavaConfigTest {
 	
 	@Test
 	public void testConfigWithoutClass() throws Exception {
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, null, "org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
+	    IType configClass = javaProject.findType(CLASS_NAME);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, null, BeansConfigFactory.getConfigId(configClass, project), IBeansConfig.Type.MANUAL);
 		
 		assertNull(config.getConfigClass());
-		assertEquals("org.test.spring.SimpleConfigurationClass", config.getConfigClassName());
+		assertEquals(CLASS_NAME, config.getConfigClassName());
 		
 		IModelElement[] children = config.getElementChildren();
 		assertEquals(0, children.length);
@@ -77,8 +91,8 @@ public class BeansJavaConfigTest {
 
 	@Test
 	public void testBasicConfigBeans() throws Exception {
-		IType configClass = javaProject.findType("org.test.spring.SimpleConfigurationClass");
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, "org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
+		IType configClass = javaProject.findType(CLASS_NAME);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigFactory.getConfigId(configClass, project), IBeansConfig.Type.MANUAL);
 		
 		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
 		
@@ -112,8 +126,8 @@ public class BeansJavaConfigTest {
 
 	@Test
 	public void testComponentScanningWithEnableAnnotations() throws Exception {
-		IType configClass = javaProject.findType("org.test.advanced.AdvancedConfigurationClass");
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, "org.test.advanced.AdvancedConfigurationClass", IBeansConfig.Type.MANUAL);
+		IType configClass = javaProject.findType(ADVANCED_CLASS_NAME);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigFactory.getConfigId(configClass, project), IBeansConfig.Type.MANUAL);
 		
 		assertEquals("java:org.test.advanced.AdvancedConfigurationClass", config.getElementName());
 
@@ -133,8 +147,8 @@ public class BeansJavaConfigTest {
 
 	@Test
 	public void testComponentScanningWithProfile() throws Exception {
-		IType configClass = javaProject.findType("org.test.profile.ProfileConfigurationClass");
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, "org.test.profile.ProfileConfigurationClass", IBeansConfig.Type.MANUAL);
+		IType configClass = javaProject.findType(PROFILE_CLASS_NAME);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigFactory.getConfigId(configClass, project), IBeansConfig.Type.MANUAL);
 		
 		IBean simpleBean = BeansModelUtils.getBean("simpleScannedBean", config);
 		assertEquals("simpleScannedBean", simpleBean.getElementName());

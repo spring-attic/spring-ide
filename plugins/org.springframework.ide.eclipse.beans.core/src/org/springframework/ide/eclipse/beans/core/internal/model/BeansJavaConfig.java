@@ -57,15 +57,17 @@ import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig.InternalScannedGenericBeanDefinition;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig.InternalScannedGenericBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigEventListener;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
@@ -89,7 +91,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement, IReloadableBeansConfig {
 
 	private IType configClass;
-	private String configClassName;
+	private BeansConfigId configID;
 
 	private BeansConfigProblemReporter problemReporter;
 	private UniqueBeanNameGenerator beanNameGenerator;
@@ -98,11 +100,11 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 	/** Internal cache for all children */
 	private transient IModelElement[] children;
 	
-	public BeansJavaConfig(IBeansProject project, IType configClass, String configClassName, Type type) {
-		super(project, BeansConfigFactory.JAVA_CONFIG_TYPE + configClassName, type);
+	public BeansJavaConfig(IBeansProject project, IType configClass, BeansConfigId configID, Type type) {
+		super(project, configID.name, type);
 		
 		this.configClass = configClass;
-		this.configClassName = configClassName;
+		this.configID = configID;
 
 		modificationTimestamp = IResource.NULL_STAMP;
 		
@@ -129,22 +131,29 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		
 		if (file == null || !file.exists()) {
 			modificationTimestamp = IResource.NULL_STAMP;
-			String msg = "Beans Java config class '" + configClassName + "' not accessible";
+			String msg = "Beans Java config class '" + configID + "' not accessible";
 			problems = new CopyOnWriteArraySet<ValidationProblem>();
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
 		}
-
 	}
+    public BeansJavaConfig(IBeansConfigSet configSet,IType configClass,  BeansConfigId id, Type type) {
+        this((IBeansProject) configSet.getElementParent(), configClass, id, type);
+
+        // After initializing the config with the corresponding project
+        // (required for retrieving the file) change the parent to the given
+        // config set
+        setElementParent(configSet);
+    }
 
 	public IType getConfigClass() {
 		return this.configClass;
 	}
 	
 	public String getConfigClassName() {
-		return this.configClassName;
+		return this.configID.name;
 	}
 
 	public boolean isInitialized() {
@@ -316,14 +325,14 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 	}
 
 	/**
-	 * Registers the given component definition with this {@link BeansConfig}'s beans and component storage.
+	 * Registers the given component definition with this {@link XMLBeansConfig}'s beans and component storage.
 	 */
 	private void registerComponentDefinition(ComponentDefinition componentDefinition,
 			Map<String, IModelElementProvider> elementProviders) {
 		String uri = NamespaceUtils.getNameSpaceURI(componentDefinition);
 		IModelElementProvider provider = elementProviders.get(uri);
 		if (provider == null) {
-			provider = BeansConfig.DEFAULT_ELEMENT_PROVIDER;
+			provider = XMLBeansConfig.DEFAULT_ELEMENT_PROVIDER;
 		}
 		ISourceModelElement element = provider.getElement(BeansJavaConfig.this, componentDefinition);
 		if (element instanceof IBean) {
@@ -437,5 +446,13 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 			}
 		}
 	}
+
+    public String getKind() {
+        return configID.kind;
+    }
+
+    public BeansConfigId getId() {
+        return configID;
+    }
 
 }

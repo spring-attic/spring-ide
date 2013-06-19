@@ -17,6 +17,7 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.ClassAttributeQuickAssistProcessor;
@@ -91,7 +92,7 @@ public class PlaceholderTest extends AbstractBeanValidationTestCase {
 
 	private void validate(String beanName) {
 		IDOMNode node = QuickfixTestUtil.getNode(BeansSchemaConstants.ELEM_BEAN, beanName, beansNode.getChildNodes());
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			BeanValidatorVisitor visitor = new BeanValidatorVisitor(config, contextElement, reporter, validator);

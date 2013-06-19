@@ -18,13 +18,13 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.BeanReferenceQuickAssistProcessor;
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
 import org.springframework.ide.eclipse.quickfix.validator.BeanReferenceValidator;
 import org.w3c.dom.NodeList;
-
 
 /**
  * @author Terry Denney
@@ -44,7 +44,7 @@ public class BeanReferenceAttributeValidationTest extends AbstractBeanValidation
 			attr = (AttrImpl) beanNode.getAttributes().getNamedItem(BeansSchemaConstants.ATTR_PARENT);
 		}
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (beanRefAttrValidator.validateAttributeWithConfig(config, contextElement, attr, beanNode, reporter,
@@ -65,7 +65,7 @@ public class BeanReferenceAttributeValidationTest extends AbstractBeanValidation
 
 		AttrImpl attr = (AttrImpl) constructorArgNode.getAttributes().getNamedItem(BeansSchemaConstants.ATTR_REF);
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (beanRefAttrValidator.validateAttributeWithConfig(config, contextElement, attr, constructorArgNode,
@@ -86,7 +86,7 @@ public class BeanReferenceAttributeValidationTest extends AbstractBeanValidation
 
 		AttrImpl attr = (AttrImpl) propertyNode.getAttributes().getNamedItem(BeansSchemaConstants.ATTR_REF);
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (beanRefAttrValidator.validateAttributeWithConfig(config, contextElement, attr, propertyNode, reporter,
@@ -114,8 +114,8 @@ public class BeanReferenceAttributeValidationTest extends AbstractBeanValidation
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects a warning message", getWarningMessage(messages));
-		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter", getProcessor(messages,
-				BeanReferenceQuickAssistProcessor.class));
+		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter",
+				getProcessor(messages, BeanReferenceQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -174,8 +174,8 @@ public class BeanReferenceAttributeValidationTest extends AbstractBeanValidation
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects a warning message", getWarningMessage(messages));
 
-		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter", getProcessor(messages,
-				BeanReferenceQuickAssistProcessor.class));
+		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter",
+				getProcessor(messages, BeanReferenceQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")

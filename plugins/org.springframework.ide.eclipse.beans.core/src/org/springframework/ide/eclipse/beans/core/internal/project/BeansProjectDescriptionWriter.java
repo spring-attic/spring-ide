@@ -90,7 +90,7 @@ public class BeansProjectDescriptionWriter implements IBeansProjectDescriptionCo
 		writer.printCDataTag(NAME, configSet.getElementName());
 		writer.printSimpleTag(OVERRIDING, Boolean.valueOf(configSet.isAllowBeanDefinitionOverriding()).toString());
 		writer.printSimpleTag(INCOMPLETE, Boolean.valueOf(configSet.isIncomplete()).toString());
-		write(CONFIGS, CONFIG, configSet.getConfigNames(), writer);
+		write(CONFIGS, CONFIG, configSet.getConfigIds(), writer);
 		writeCData(PROFILES, PROFILE, configSet.getProfiles(), writer);
 		writer.endTag(CONFIG_SET);
 	}

@@ -25,6 +25,7 @@ import org.eclipse.ui.IWorkingSet;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -161,7 +162,7 @@ public class BeansSearchScope {
 				}
 			} else if (resource instanceof IFile) {
 				IBeansModel model = BeansCorePlugin.getModel();
-				element = model.getConfig((IFile) resource);
+				element = model.getConfig(BeansConfigFactory.getConfigId((IFile) resource));
 			}
 		}
 		if (element != null && !elements.contains(element)

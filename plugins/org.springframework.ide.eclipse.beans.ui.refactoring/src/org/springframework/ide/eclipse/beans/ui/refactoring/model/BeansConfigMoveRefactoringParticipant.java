@@ -30,6 +30,8 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -141,27 +143,20 @@ public class BeansConfigMoveRefactoringParticipant extends MoveParticipant {
 				BeansProject beansProject = (BeansProject) project;
 
 				// Firstly rename references to config sets
+				BeansConfigId id = BeansConfigFactory.getConfigId(config);
 				for (IBeansConfigSet configSet : beansProject.getConfigSets()) {
-					if (configSet.hasConfig(config)) {
-						if (config.getProject().equals(project.getProject())) {
-							IPath newPath = newName.getProjectRelativePath().append(config.getName());
-							((BeansConfigSet) configSet).removeConfig(config.getProjectRelativePath().toString());
-							((BeansConfigSet) configSet).addConfig(newPath.toString());
-						}
-						else {
-							IPath newPath = newName.getFullPath().append(config.getName());
-							((BeansConfigSet) configSet).removeConfig(config.getFullPath().toString());
-							((BeansConfigSet) configSet).addConfig(newPath.toString());
-						}
+					if (configSet.hasConfig(id)) {
+						((BeansConfigSet) configSet).removeConfig(id);
+						((BeansConfigSet) configSet).addConfig(id);
 						updated = true;
 					}
 				}
 
 				// Secondly rename configs
-				if (project.hasConfig(config)) {
+				if (project.hasConfig(id)) {
 					IPath newPath = newName.getProjectRelativePath().append(config.getName());
-					((BeansProject) project).removeConfig(config.getProjectRelativePath().toString());
-					((BeansProject) project).addConfig(newPath.toString(), IBeansConfig.Type.MANUAL);
+					((BeansProject) project).removeConfig(id);
+					((BeansProject) project).addConfig(new BeansConfigId(id.kind, id.project, newPath.toString()), IBeansConfig.Type.MANUAL);
 					removeMarkers(config);
 					updated = true;
 				}

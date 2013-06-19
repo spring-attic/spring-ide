@@ -14,12 +14,12 @@ import java.util.Collection;
 
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
 /**
- * Utility that provides methods to register elements with the {@link BeansConfig}.
+ * Utility that provides methods to register elements with the {@link XMLBeansConfig}.
  * @author Christian Dupuis
  * @since 2.0
  */

@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -75,10 +74,10 @@ public class BeansJavaConfigPackageChange extends Change {
 					if (config instanceof BeansJavaConfig) {
 						IType configClass = ((BeansJavaConfig) config).getConfigClass();
 						if (configClass != null && configClass.getPackageFragment().getElementName().equals(oldPackageName)) {
-							((BeansConfigSet) configSet).removeConfig(config.getElementName());
+							((BeansConfigSet) configSet).removeConfig(config.getId());
 							
 							String newConfigClassName = newPackageName + "." + configClass.getTypeQualifiedName();
-							((BeansConfigSet) configSet).addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newConfigClassName);
+							((BeansConfigSet) configSet).addConfig(config.getId().newName(newConfigClassName));
 						}
 					}
 				}
@@ -90,10 +89,10 @@ public class BeansJavaConfigPackageChange extends Change {
 				if (config instanceof BeansJavaConfig) {
 					IType configClass = ((BeansJavaConfig) config).getConfigClass();
 					if (configClass != null && configClass.getPackageFragment().getElementName().equals(oldPackageName)) {
-						beansProject.removeConfig(config.getElementName());
+						beansProject.removeConfig(config.getId());
 						
 						String newConfigClassName = newPackageName + "." + configClass.getTypeQualifiedName();
-						beansProject.addConfig(BeansConfigFactory.JAVA_CONFIG_TYPE + newConfigClassName, IBeansConfig.Type.MANUAL);
+						beansProject.addConfig(config.getId().newName(newConfigClassName), IBeansConfig.Type.MANUAL);
 						updated = true;
 					}
 				}

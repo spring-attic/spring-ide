@@ -82,10 +82,12 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
+import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.beans.core.model.locate.ProjectScanningBeansConfigLocator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -191,8 +193,8 @@ public class ConfigFilesTab {
 	}
 
 	private void calculateSelectedElement(IModelElement modelElement) {
-		if (modelElement != null && this.project != null) {
-			this.selectedElement = this.project.getConfig(modelElement.getElementName());
+		if (modelElement instanceof IBeansConfig && this.project != null) {
+			this.selectedElement = this.project.getConfig(((IBeansConfig) modelElement).getId());
 		}
 	}
 
@@ -442,20 +444,7 @@ public class ConfigFilesTab {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
-					String config;
-					if (element instanceof IType) {
-						IType type = (IType) element;
-						config = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
-					}
-					else if (element instanceof ZipEntryStorage) {
-						ZipEntryStorage storage = (ZipEntryStorage) element;
-						config = storage.getFullName();
-					}
-					else {
-						IFile file = (IFile) element;
-						config = file.getProjectRelativePath().toString();
-					}
-					project.addConfig(config, IBeansConfig.Type.MANUAL);
+					project.addConfig(BeansConfigFactory.getConfigId(element, project.getProject()), IBeansConfig.Type.MANUAL);
 				}
 				configsViewer.refresh(false);
 				hasUserMadeChanges = true;
@@ -469,13 +458,8 @@ public class ConfigFilesTab {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
-					String config = null;
 					if (element instanceof IType) {
-						IType type = (IType) element;
-						config = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
-					}
-					if (config != null) {
-						project.addConfig(config, IBeansConfig.Type.MANUAL);
+					    project.addConfig(BeansConfigFactory.getConfigId(element, project.getProject()), IBeansConfig.Type.MANUAL);
 					}
 				}
 			}
@@ -582,34 +566,7 @@ public class ConfigFilesTab {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
-					String config = null;
-					if (element instanceof ZipEntryStorage) {
-						ZipEntryStorage storage = (ZipEntryStorage) element;
-						config = storage.getFullName();
-					}
-					else if (element instanceof IFile) {
-						IFile file = (IFile) element;
-						config = file.getProjectRelativePath().toString();
-					}
-					else if (element instanceof JarEntryFile) {
-						IPath fullPath = ((JarPackageFragmentRoot) ((JarEntryFile) element).getPackageFragmentRoot())
-								.getPath();
-						String entryName = ((JarEntryFile) element).getFullPath().toString();
-						for (String name : JavaCore.getClasspathVariableNames()) {
-							IPath variablePath = JavaCore.getClasspathVariable(name);
-							if (variablePath != null && variablePath.isPrefixOf(fullPath)) {
-								if (MessageDialog.openQuestion(SpringUIUtils.getStandardDisplay().getActiveShell(),
-										"Use classpath variable", "Do you want to use the classpath variable '" + name
-												+ "' to refer to the config file\n'" + entryName + "'?")) {
-									fullPath = new Path(name).append(fullPath.removeFirstSegments(variablePath
-											.segmentCount()));
-								}
-								break;
-							}
-						}
-						config = IBeansConfig.EXTERNAL_FILE_NAME_PREFIX + fullPath.toString()
-								+ ZipEntryStorage.DELIMITER + entryName;
-					}
+					BeansConfigId config = BeansConfigFactory.getConfigId(element, project.getProject());
 					if (config != null) {
 						project.addConfig(config, IBeansConfig.Type.MANUAL);
 					}
@@ -629,7 +586,7 @@ public class ConfigFilesTab {
 			Iterator elements = selection.iterator();
 			while (elements.hasNext()) {
 				IBeansConfig config = (IBeansConfig) elements.next();
-				project.removeConfig(config.getElementName());
+				project.removeConfig(config.getId());
 			}
 			configsViewer.refresh(false);
 			hasUserMadeChanges = true;
@@ -772,7 +729,7 @@ public class ConfigFilesTab {
 
 			IBeansProject project = BeansCorePlugin.getModel().getProject(element.getProject());
 			if (project != null) {
-				IBeansConfig beansConfig = project.getConfig(element);
+				IBeansConfig beansConfig = project.getConfig(BeansConfigFactory.getConfigId(element));
 				return beansConfig == null;
 			}
 			return false;
@@ -790,9 +747,7 @@ public class ConfigFilesTab {
 			if (element instanceof IType) {
 				IBeansProject beansProj = BeansCorePlugin.getModel().getProject(project.getProject());
 				if (beansProj != null) {
-					IType type = (IType) element;
-					IBeansConfig beansConfig = project.getConfig(BeansConfigFactory.JAVA_CONFIG_TYPE 
-							+ type.getFullyQualifiedName());
+					IBeansConfig beansConfig = project.getConfig(BeansConfigFactory.getConfigId(element, project.getProject()));
 					return beansConfig == null;
 				}
 				return true;
@@ -813,7 +768,7 @@ public class ConfigFilesTab {
 		public String getText(Object element) {
 			String label = super.getText(element);
 			if (element instanceof IFile) {
-				IBeansConfig bc = BeansCorePlugin.getModel().getConfig((IFile) element, true);
+				IBeansConfig bc = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) element), true);
 				if (bc instanceof IImportedBeansConfig) {
 					label += " [imported]";
 				}

@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.metadata.MetadataPlugin;
 import org.springframework.ide.eclipse.metadata.MetadataUIImages;
 import org.springframework.ide.eclipse.metadata.ui.RequestMappingBeanMetadataReference;
@@ -68,7 +69,7 @@ public class ShowRequestMappingsAction extends AbstractNavigatorAction
 					(IProject) treeElement);
 		} else if (treeElement instanceof IFile) {
 			modelElement = BeansCorePlugin.getModel().getConfig(
-					(IFile) treeElement);
+			        BeansConfigFactory.getConfigId((IFile) treeElement));
 		} else if (treeElement instanceof RequestMappingBeanMetadataReference) {
 			modelElement = ((RequestMappingBeanMetadataReference) treeElement)
 					.getBeansProject();

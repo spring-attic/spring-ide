@@ -97,6 +97,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
@@ -135,7 +136,7 @@ import org.xml.sax.SAXParseException;
  * @author Christian Dupuis
  * @author Martin Lippert
  */
-public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement, IReloadableBeansConfig {
+public class XMLBeansConfig extends AbstractBeansConfig implements IBeansConfig, ILazyInitializedModelElement, IReloadableBeansConfig {
 
 	private static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID + "/model/loading/debug";
 
@@ -178,15 +179,28 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	private transient IModelElement[] children;
 	
 	private transient Stack<CompositeComponentDefinition> componentDefinitions = new Stack<CompositeComponentDefinition>();
+	
+	private final BeansConfigId id;
 
 	/**
-	 * Creates a new {@link BeansConfig}.
+	 * Creates a new {@link XMLBeansConfig}.
 	 */
-	public BeansConfig(IBeansProject project, String name, Type type) {
-		super(project, name, type);
-		init(name, project);
+	public XMLBeansConfig(IBeansProject project, BeansConfigId id, Type type) {
+		super(project, id.name, type);
+		this.id = id;
+		init(id.name, project);
 	}
 
+	public XMLBeansConfig(IBeansConfigSet configSet, BeansConfigId id, Type type) {
+	    this((IBeansProject) configSet.getElementParent(), id, type);
+
+	    // After initializing the config with the corresponding project
+	    // (required for retrieving the file) change the parent to the given
+	    // config set
+	    setElementParent(configSet);
+	}
+
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -414,7 +428,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						
 						@Override
 						protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {
-							return new ToolingFriendlyBeanDefinitionDocumentReader(BeansConfig.this);
+							return new ToolingFriendlyBeanDefinitionDocumentReader(XMLBeansConfig.this);
 						}
 					};
 
@@ -746,14 +760,14 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			}
 
 			public void run() throws Exception {
-				postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansConfig.this,
+				postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(XMLBeansConfig.this,
 						beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
 			}
 		});
 	}
 
 	/**
-	 * Registers the given component definition with this {@link BeansConfig}'s beans and component storage.
+	 * Registers the given component definition with this {@link XMLBeansConfig}'s beans and component storage.
 	 */
 	private void registerComponentDefinition(ComponentDefinition componentDefinition,
 			Map<String, IModelElementProvider> elementProviders) {
@@ -762,7 +776,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		if (provider == null) {
 			provider = DEFAULT_ELEMENT_PROVIDER;
 		}
-		ISourceModelElement element = provider.getElement(BeansConfig.this, componentDefinition);
+		ISourceModelElement element = provider.getElement(XMLBeansConfig.this, componentDefinition);
 		if (element instanceof IBean) {
 			beans.put(element.getElementName(), (IBean) element);
 		}
@@ -969,7 +983,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		private void processImportDefinition(ImportDefinition importDefinition, IBeansConfig config) {
 			BeansImport beansImport = new BeansImport(config, importDefinition);
 
-			if (config instanceof BeansConfig) {
+			if (config instanceof XMLBeansConfig) {
 				imports.add(beansImport);
 			}
 			else if (config instanceof ImportedBeansConfig) {
@@ -1163,7 +1177,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	/**
 	 * Special {@link ReaderEventListener} implementation that passes
 	 * {@link ReaderEventListener#componentRegistered(ComponentDefinition)} calls to this configs
-	 * {@link BeansConfig#registerComponentDefinition(ComponentDefinition, Map)}.
+	 * {@link XMLBeansConfig#registerComponentDefinition(ComponentDefinition, Map)}.
 	 * @author Christian Dupuis
 	 * @since 2.2.5
 	 */
@@ -1238,9 +1252,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		
 		private BeanDefinitionParserDelegate delegate;
 
-		private BeansConfig beansConfig;
+		private XMLBeansConfig beansConfig;
 
-		public ToolingFriendlyBeanDefinitionDocumentReader(BeansConfig beansConfig) {
+		public ToolingFriendlyBeanDefinitionDocumentReader(XMLBeansConfig beansConfig) {
 			this.beansConfig = beansConfig;
 		}
 
@@ -1400,4 +1414,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			return super.parseCustomElement(ele, containingBd);
 		}
 	}
+
+    public String getKind() {
+        return id.kind;
+    }
+
+    public BeansConfigId getId() {
+        return id;
+    }
 }	

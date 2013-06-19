@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.model;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -38,13 +39,16 @@ public interface IBeansConfigSet extends IBeansModelElement,
 
 	boolean isIncomplete();
 
-	boolean hasConfig(String configName);
-
-	boolean hasConfig(IFile file);
+	
+	boolean hasConfig(BeansConfigId configId);
+	
+//	boolean hasConfig(String configName);
+//
+//	boolean hasConfig(IFile file);
 
 	Set<IBeansConfig> getConfigs();
 
-	Set<String> getConfigNames();
+	Set<BeansConfigId> getConfigIds();
 
 	public boolean hasAlias(String name);
 

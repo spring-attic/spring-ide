@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils;
@@ -108,7 +109,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			return ((IModelElement) element).getElementChildren().length > 0;
 		}
 		else if (element instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) element));
 			if (config != null) {
 				// The single IBeansConfig node is available
 				return true;
@@ -172,7 +173,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			return ((IModelElement) parentElement).getElementChildren();
 		}
 		else if (parentElement instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) parentElement);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) parentElement));
 			if (config != null) {
 				return config.getComponents().toArray();
 			}
@@ -266,14 +267,13 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			}
 		}
 		else if (element instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig((IFile) element);
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) element));
 			if (config != null) {
 				return config.getElementParent();
 			}
 		}
 		else if (element instanceof ZipEntryStorage) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-					((ZipEntryStorage) element).getFullName());
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(element, ((ZipEntryStorage) element).getFile().getProject()));
 			if (config != null) {
 				return config.getElementParent();
 			}

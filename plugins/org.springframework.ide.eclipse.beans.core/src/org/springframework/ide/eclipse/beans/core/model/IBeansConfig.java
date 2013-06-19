@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Set;
 
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -50,6 +51,10 @@ public interface IBeansConfig extends IBeansModelElement, IResourceModelElement,
 	String getDefaultDestroyMethod();
 
 	String getDefaultMerge();
+	
+	String getKind();
+	
+	BeansConfigId getId();
 
 	Set<IBeansImport> getImports();
 
