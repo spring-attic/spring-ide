@@ -64,6 +64,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -367,9 +368,9 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 				return true;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			SpringCore.log(e);
 		} catch (Error e) {
-			e.printStackTrace();
+			SpringCore.log(e);
 		}
 		return false;
 	}

@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.ProjectClassLoaderCache;
 
 /**
@@ -40,7 +41,7 @@ public class BytecodeTypeHierarchyClassReaderFactory implements TypeHierarchyCla
 						locations.add(new ZipClasspathElement(zipFile));
 						usedURLs.add(url);
 					} catch (Exception e) {
-						e.printStackTrace();
+						SpringCore.log(e);
 					}
 				}
 				else {
@@ -49,7 +50,7 @@ public class BytecodeTypeHierarchyClassReaderFactory implements TypeHierarchyCla
 						locations.add(new FileClasspathElement(file));
 						usedURLs.add(url);
 					} catch (Exception e) {
-						e.printStackTrace();
+						SpringCore.log(e);
 					}
 				}
 			}

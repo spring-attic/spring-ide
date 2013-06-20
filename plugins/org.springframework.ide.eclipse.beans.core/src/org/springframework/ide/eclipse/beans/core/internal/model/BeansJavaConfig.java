@@ -69,6 +69,7 @@ import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
@@ -408,7 +409,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 						((AbstractBeanDefinition) ((BeanComponentDefinition) componentDefinition).getBeanDefinition())
 						.setSource(new JavaModelSourceLocation(configClass));
 					} catch (JavaModelException e) {
-						e.printStackTrace();
+						SpringCore.log(e);
 					}
 				}
 			}

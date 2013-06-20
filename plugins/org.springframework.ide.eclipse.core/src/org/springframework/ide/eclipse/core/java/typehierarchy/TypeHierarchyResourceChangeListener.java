@@ -30,7 +30,7 @@ public class TypeHierarchyResourceChangeListener implements IResourceChangeListe
 			try {
 				event.getDelta().accept(new CacheResetVisitor());
 			} catch (CoreException e) {
-				e.printStackTrace();
+				SpringCore.log(e);
 			}
 		}
 	}

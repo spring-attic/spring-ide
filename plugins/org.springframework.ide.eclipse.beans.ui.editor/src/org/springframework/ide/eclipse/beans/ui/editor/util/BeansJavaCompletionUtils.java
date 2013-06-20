@@ -41,6 +41,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistProposalRecorder;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
@@ -297,7 +298,7 @@ public class BeansJavaCompletionUtils {
 				buffer = cu.getBuffer();
 			}
 			catch (JavaModelException e) {
-				e.printStackTrace();
+				SpringCore.log(e);
 				buffer = null;
 			}
 

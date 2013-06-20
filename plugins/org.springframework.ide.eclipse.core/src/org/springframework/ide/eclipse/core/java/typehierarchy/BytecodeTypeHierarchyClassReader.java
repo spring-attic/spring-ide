@@ -17,6 +17,7 @@ import java.io.InputStream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * @author Martin Lippert
@@ -47,6 +48,7 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 					try {
 						stream.close();
 					} catch (IOException e) {
+						SpringCore.log(e);
 					}
 				}
 			}
@@ -144,7 +146,7 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 			
 			return new TypeHierarchyElement(className, superclassName, interfaceNames);
 		} catch(Exception e) {
-			e.printStackTrace();
+			SpringCore.log(e);
 		}
 		
 		return null;
