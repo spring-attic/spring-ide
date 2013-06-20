@@ -180,13 +180,6 @@
             namespaceUri="http://www.springframework.org/schema/lang">
       </formPage>
       <formPage
-            class="org.springframework.ide.eclipse.config.ui.editors.osgi.OsgiFormPage"
-            id="com.springsource.sts.config.ui.editors.osgi"
-            name="%osgiPageName"
-            namespacePrefix="osgi"
-            namespaceUri="http://www.springframework.org/schema/osgi">
-      </formPage>
-      <formPage
             class="org.springframework.ide.eclipse.config.ui.editors.security.SecurityFormPage"
             id="com.springsource.sts.config.ui.editors.security"
             name="%secPageName"
@@ -257,13 +250,6 @@
             name="%taskPageName"
             namespacePrefix="task"
             namespaceUri="http://www.springframework.org/schema/task">
-      </formPage>
-      <formPage
-            class="org.springframework.ide.eclipse.config.ui.editors.bp.BlueprintFormPage"
-            id="com.springsource.sts.config.ui.editors.bp"
-            name="%bpPageName"
-            namespacePrefix="bp"
-            namespaceUri="http://www.osgi.org/xmlns/blueprint/v1.0.0">
       </formPage>
       <formPage
             class="org.springframework.ide.eclipse.config.ui.editors.webflow.WebFlowFormPage"
@@ -553,13 +539,6 @@
             namespaceUri="http://www.springframework.org/schema/integration/xmpp"
             paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.xmpp.graph.parts.IntXmppPaletteFactory"
             parentUri="http://www.springframework.org/schema/integration">
-      </adapter>
-      <adapter
-            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.osgi.compendium.OsgiCompendiumMasterDetailsBlock"
-            id="com.springsource.sts.config.ui.editors.osgi.compendium"
-            label="osgix"
-            namespaceUri="http://www.springframework.org/schema/osgi-compendium"
-            parentUri="http://www.springframework.org/schema/osgi">
       </adapter>
    </extension>
    <extension

@@ -53,5 +53,32 @@
 			name="OSGi Blueprint Services"
 			uri="http://www.osgi.org/xmlns/blueprint/v1.0.0" />
 	</extension>
+	<extension
+	       point="com.springsource.sts.config.ui.formPages">
+		<formPage
+		    class="org.springframework.ide.eclipse.osgi.ui.editor.OsgiFormPage"
+		    id="com.springsource.sts.config.ui.editors.osgi"
+		    name="%osgiPageName"
+		    namespacePrefix="osgi"
+		    namespaceUri="http://www.springframework.org/schema/osgi">
+		</formPage>
+		<formPage
+		    class="org.springframework.ide.eclipse.osgi.ui.editor.blueprint.BlueprintFormPage"
+		    id="com.springsource.sts.config.ui.editors.bp"
+		    name="%bpPageName"
+		    namespacePrefix="bp"
+		    namespaceUri="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+		</formPage>
+	</extension>
+	<extension
+	    point="com.springsource.sts.config.ui.pageAdapters">
+		<adapter
+		    detailsFactory="org.springframework.ide.eclipse.osgi.ui.editor.compendium.OsgiCompendiumMasterDetailsBlock"
+		    id="com.springsource.sts.config.ui.editors.osgi.compendium"
+		    label="osgix"
+		    namespaceUri="http://www.springframework.org/schema/osgi-compendium"
+		    parentUri="http://www.springframework.org/schema/osgi">
+		</adapter>
+	</extension>
 
 </plugin>

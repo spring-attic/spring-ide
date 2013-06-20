@@ -41,7 +41,6 @@ import org.springframework.ide.eclipse.config.ui.hyperlinks.ListenerMethodHyperl
 import org.springframework.ide.eclipse.config.ui.hyperlinks.LookupReplaceMethodHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.PointcutReferenceHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.PropertyNameHyperlinkProvider;
-import org.springframework.ide.eclipse.config.ui.hyperlinks.RegistrationMethodHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.StateReferenceHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.StepReferenceHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.SubflowReferenceHyperlinkProvider;
@@ -57,7 +56,6 @@ import org.springframework.ide.eclipse.config.ui.widgets.TextAreaAttribute;
 import org.springframework.ide.eclipse.config.ui.widgets.TextAttribute;
 import org.springframework.ide.eclipse.config.ui.wizards.ExtendedNewClassCreationWizard;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
-
 
 /**
  * @author Leo Dos Santos
@@ -454,28 +452,6 @@ public abstract class AbstractConfigDetailsSectionPart extends AbstractConfigSec
 		HyperlinkedTextAttribute linkAttr = new XmlBackedHyperlinkTextAttribute(client, toolkit, attr, required) {
 			public void openHyperlink() {
 				XmlBackedHyperlinkProvider provider = new PropertyNameHyperlinkProvider(getConfigEditor()
-						.getTextViewer(), getInput(), attr);
-				provider.open(text.getText());
-			}
-		};
-		linkAttr.createAttribute(2);
-		return linkAttr;
-	}
-
-	/**
-	 * Creates a {@link HyperlinkedTextAttribute} widget set for displaying an
-	 * attribute that refers to a Java method. Clicking the hyperlink will open
-	 * the class file at the method displayed in the text field.
-	 * 
-	 * @param client the parent composite
-	 * @param attr the attribute name
-	 * @param required denotes whether this is a required field
-	 * @return {@link HyperlinkedTextAttribute} widget set
-	 */
-	protected HyperlinkedTextAttribute createRegistrationMethodAttribute(Composite client, String attr, boolean required) {
-		HyperlinkedTextAttribute linkAttr = new XmlBackedHyperlinkTextAttribute(client, toolkit, attr, required) {
-			public void openHyperlink() {
-				XmlBackedHyperlinkProvider provider = new RegistrationMethodHyperlinkProvider(getConfigEditor()
 						.getTextViewer(), getInput(), attr);
 				provider.open(text.getText());
 			}
