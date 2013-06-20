@@ -429,7 +429,7 @@
 	
 	<extension point="org.eclipse.ui.preferencePages">
 	 	<page id="org.springframework.ide.eclipse.beans.ui.preferencePage"
-  	      	name="Beans Support"
+  	      	name="%beansSupportPreferencePage.name"
 	      	class="org.springframework.ide.eclipse.beans.ui.preferences.BeansPreferencePage"
 	      	category="org.springframework.ide.eclipse.ui.preferencePage">
       		<keywordReference
@@ -519,12 +519,27 @@
        <command
              defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.AddAsBeanConfigAction"
              id="org.springframework.ide.eclipse.beans.ui.addAsBeanConfig"
-             name="Add as Bean Configuration">
+             name="%addAsBeanConfigurationCommand.name">
        </command>
        <command
              defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.RemoveAsBeanConfigAction"
              id="org.springframework.ide.eclipse.beans.ui.removeAsBeanConfig"
-             name="Remove as Bean Configuration">
+             name="%removeAsBeanConfigurationCommand.name">
+       </command>
+       <command
+             defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.AddToNewConfigSetAction"
+             id="org.springframework.ide.eclipse.beans.ui.addToNewConfigSet"
+             name="%addToNewConfigSetCommand.name">
+       </command>
+       <command
+             defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.AddToConfigSetHandler"
+             id="org.springframework.ide.eclipse.beans.ui.addToConfigSet"
+             name="%addToConfigSetCommand.name">
+       </command>
+       <command
+             defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.RemoveFromConfigSetHandler"
+             id="org.springframework.ide.eclipse.beans.ui.removeFromConfigSet"
+             name="%removeFromConfigSetCommand.name">
        </command>
     </extension>
     <extension
@@ -534,7 +549,7 @@
              locationURI="popup:org.eclipse.ui.popup.any?after=additions">
           <menu
                 id="org.springframework.ide.eclipse.ui.tools"
-                label="Spring Tools">
+                label="%springToolsMenu.label">
              <command
                    commandId="org.springframework.ide.eclipse.beans.ui.addAsBeanConfig"
                    style="push">
@@ -549,6 +564,35 @@
                       checkEnabled="true">
                 </visibleWhen>
              </command>
+             <command
+                   commandId="org.springframework.ide.eclipse.beans.ui.addToNewConfigSet"
+                   style="push">
+                <visibleWhen
+                      checkEnabled="true">
+                </visibleWhen>
+             </command>
+             <menu
+                   commandId="org.springframework.ide.eclipse.beans.ui.addToConfigSet"
+                   label="%addToConfigSetMenu.label">
+                <visibleWhen
+                      checkEnabled="true">
+                </visibleWhen>
+                <dynamic
+                      class="org.springframework.ide.eclipse.beans.ui.actions.AddToConfigSetAction"
+                      id="org.springframework.ide.eclipse.beans.ui.addToConfigSetDynamicAction">
+                </dynamic>
+             </menu>
+             <menu
+                   commandId="org.springframework.ide.eclipse.beans.ui.removeFromConfigSet"
+                   label="%removeFromConfigSetMenu.label">
+                <visibleWhen
+                      checkEnabled="true">
+                </visibleWhen>
+                <dynamic
+                      class="org.springframework.ide.eclipse.beans.ui.actions.RemoveFromConfigSetAction"
+                      id="org.springframework.ide.eclipse.beans.ui.removeFromConfigSetDynamicAction">
+                </dynamic>
+             </menu>
           </menu>
        </menuContribution>
     </extension>

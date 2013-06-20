@@ -43,7 +43,6 @@ public class RemoveAsBeanConfigAction extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		for (IBeansConfig config : selectedItems) {
 			removeConfigFromProject(config);
-
 		}
 		BeansModelLabelDecorator.update();
 		return null;
