@@ -137,8 +137,9 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 					// fill in the resolvableDependencies
 					fillResolvableDependencies();
 
+					Set<IBean> elementBeans = BeansModelUtils.getBeans(element);
 					for (IInjectionMetadataProvider provider : createInjectionMetadataProviders()) {
-						for (final IBean bean : BeansModelUtils.getBeans(element)) {
+						for (final IBean bean : elementBeans) {
 
 							List<InjectionMetadata> beanInjectionMetadata = null;
 							if (injectionMetadata.containsKey(bean)) {
