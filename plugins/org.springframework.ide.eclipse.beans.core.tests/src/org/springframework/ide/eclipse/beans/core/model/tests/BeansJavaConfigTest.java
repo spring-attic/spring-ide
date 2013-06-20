@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -78,7 +78,7 @@ public class BeansJavaConfigTest {
 	@Test
 	public void testConfigWithoutClass() throws Exception {
 	    IType configClass = javaProject.findType(CLASS_NAME);
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, null, BeansConfigFactory.getConfigId(configClass, project), IBeansConfig.Type.MANUAL);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, null, BeansConfigId.create(configClass, project), IBeansConfig.Type.MANUAL);
 		
 		assertNull(config.getConfigClass());
 		assertEquals(CLASS_NAME, config.getConfigClassName());
@@ -92,7 +92,7 @@ public class BeansJavaConfigTest {
 	@Test
 	public void testBasicConfigBeans() throws Exception {
 		IType configClass = javaProject.findType(CLASS_NAME);
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigFactory.getConfigId(configClass, project), IBeansConfig.Type.MANUAL);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigId.create(configClass, project), IBeansConfig.Type.MANUAL);
 		
 		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
 		
@@ -127,7 +127,7 @@ public class BeansJavaConfigTest {
 	@Test
 	public void testComponentScanningWithEnableAnnotations() throws Exception {
 		IType configClass = javaProject.findType(ADVANCED_CLASS_NAME);
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigFactory.getConfigId(configClass, project), IBeansConfig.Type.MANUAL);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigId.create(configClass, project), IBeansConfig.Type.MANUAL);
 		
 		assertEquals("java:org.test.advanced.AdvancedConfigurationClass", config.getElementName());
 
@@ -148,7 +148,7 @@ public class BeansJavaConfigTest {
 	@Test
 	public void testComponentScanningWithProfile() throws Exception {
 		IType configClass = javaProject.findType(PROFILE_CLASS_NAME);
-		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigFactory.getConfigId(configClass, project), IBeansConfig.Type.MANUAL);
+		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigId.create(configClass, project), IBeansConfig.Type.MANUAL);
 		
 		IBean simpleBean = BeansModelUtils.getBean("simpleScannedBean", config);
 		assertEquals("simpleScannedBean", simpleBean.getElementName());

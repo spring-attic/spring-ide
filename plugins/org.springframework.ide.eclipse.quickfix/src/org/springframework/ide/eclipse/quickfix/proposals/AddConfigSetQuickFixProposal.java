@@ -37,7 +37,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.update.BeansMod
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 
@@ -156,8 +155,8 @@ public class AddConfigSetQuickFixProposal extends BeanAttributeQuickFixProposal 
 	public AddConfigSetQuickFixProposal(int offset, int length, boolean missingEndQuote, IBean importBean, IFile file) {
 		super(offset, length, missingEndQuote);
 
-		this.configId = BeansConfigFactory.getConfigId(file);
-		this.referencedConfigId = BeansConfigFactory.getConfigId((IFile) importBean.getElementResource());
+		this.configId = BeansConfigId.create(file);
+		this.referencedConfigId = BeansConfigId.create((IFile) importBean.getElementResource());
 
 		IBeansModel model = BeansCorePlugin.getModel();
 		this.project = (BeansProject) model.getProject(file.getProject());

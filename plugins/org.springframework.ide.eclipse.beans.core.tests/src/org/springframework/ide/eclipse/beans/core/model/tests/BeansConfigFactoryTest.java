@@ -58,11 +58,11 @@ public class BeansConfigFactoryTest {
 	}
 	
 	private BeansConfigId getConfigIdForFileName(String fName) {
-	    return BeansConfigFactory.getConfigId(project.getFile(fName));
+	    return BeansConfigId.create(project.getFile(fName));
 	}
 
 	private BeansConfigId getConfigIdForClassName(String cName) throws JavaModelException {
-	    return BeansConfigFactory.getConfigId(javaProject.findType(cName), project);
+	    return BeansConfigId.create(javaProject.findType(cName), project);
 	}
 	
 	@Test
@@ -100,7 +100,7 @@ public class BeansConfigFactoryTest {
 	@Test
 	public void testConfigNameXMLRelative() throws Exception {
 		IFile file = project.getFile("/basic-bean-config.xml");
-		assertEquals("basic-bean-config.xml", BeansConfigFactory.getConfigId(file, project).name);
+		assertEquals("basic-bean-config.xml", BeansConfigId.create(file, project).name);
 	}
 	
 	@Test
@@ -108,7 +108,7 @@ public class BeansConfigFactoryTest {
 		IProject extraProject = StsTestUtil.createPredefinedProject("jdt-annotation-tests", "org.springframework.ide.eclipse.beans.core.tests");
 
 		IFile file = extraProject.getFile("/test.xml");
-		assertEquals("/jdt-annotation-tests/test.xml", BeansConfigFactory.getConfigId(file, project).name);
+		assertEquals("/jdt-annotation-tests/test.xml", BeansConfigId.create(file, project).name);
 		
 		extraProject.delete(true, null);
 	}
@@ -116,7 +116,7 @@ public class BeansConfigFactoryTest {
 	@Test
 	public void testConfigNameJavaFile() throws Exception {
 		IFile file = project.getFile("/src/org/test/spring/SimpleConfigurationClass.java");
-		assertEquals("org.test.spring.SimpleConfigurationClass", BeansConfigFactory.getConfigId(file, project).name);
+		assertEquals("org.test.spring.SimpleConfigurationClass", BeansConfigId.create(file, project).name);
 	}
 	
 }

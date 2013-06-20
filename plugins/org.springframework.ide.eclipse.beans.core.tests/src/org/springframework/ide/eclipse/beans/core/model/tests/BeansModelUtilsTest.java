@@ -7,7 +7,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -25,7 +27,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -39,7 +40,7 @@ public class BeansModelUtilsTest {
 	private IJavaProject javaProject;
 	
 	private BeansConfigId getConfigForFileName(String fName) {
-        return BeansConfigFactory.getConfigId(project.getFile(fName));
+        return BeansConfigId.create(project.getFile(fName));
     }
 
 	@Before

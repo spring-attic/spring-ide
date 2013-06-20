@@ -16,16 +16,13 @@ import java.io.ByteArrayOutputStream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -57,7 +54,7 @@ public class BeansConfigDescriptionWriterTest {
 	}
 	
 	private BeansConfigId getConfigForFileName(String fName) {
-	    return BeansConfigFactory.getConfigId(project.getFile(fName));
+	    return BeansConfigId.create(project.getFile(fName));
 	}
 
 	@Test

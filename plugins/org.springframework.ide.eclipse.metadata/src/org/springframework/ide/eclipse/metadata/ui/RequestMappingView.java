@@ -87,6 +87,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -513,7 +514,7 @@ public class RequestMappingView extends ViewPart implements ISelectionListener,
 
 	private IBeansModelElement getInputFromFile(IFile file) {
 		IBeansModelElement modelElement = BeansCorePlugin.getModel().getConfig(
-		        BeansConfigFactory.getConfigId(file));
+		        BeansConfigId.create(file));
 		if (modelElement == null) {
 			IProject project = file.getProject();
 			modelElement = BeansCorePlugin.getModel().getProject(project);

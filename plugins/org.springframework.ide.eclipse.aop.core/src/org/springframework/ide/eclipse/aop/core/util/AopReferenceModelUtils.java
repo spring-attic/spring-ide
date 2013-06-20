@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.TypeStructureState;
@@ -162,7 +163,7 @@ public class AopReferenceModelUtils {
 			}
 
 		}
-		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
+		else if (BeansCoreUtils.isBeansConfig(BeansConfigId.create(resource, resource.getProject()), true)) {
 			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils.getResourceModelElement(resource);
 			if (beansConfig instanceof IImportedBeansConfig) {
 				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, IBeansConfig.class);
@@ -205,15 +206,13 @@ public class AopReferenceModelUtils {
 		for (IResource resource : files) {
 			// add confis from config set
 			IBeansProject project = BeansCorePlugin.getModel().getProject(resource.getProject());
-			IBeansConfig beansConfig = project.getConfig(BeansConfigFactory.getConfigId((IFile) resource));
-			if (project != null) {
-				Set<IBeansConfigSet> configSets = project.getConfigSets();
-				for (IBeansConfigSet configSet : configSets) {
-					if (configSet.getConfigs().contains(beansConfig)) {
-						Set<IBeansConfig> bcs = configSet.getConfigs();
-						for (IBeansConfig bc : bcs) {
-							newResources.add(bc.getElementResource());
-						}
+			IBeansConfig beansConfig = project.getConfig(BeansConfigId.create((IFile) resource));
+			Set<IBeansConfigSet> configSets = project.getConfigSets();
+			for (IBeansConfigSet configSet : configSets) {
+				if (configSet.getConfigs().contains(beansConfig)) {
+					Set<IBeansConfig> bcs = configSet.getConfigs();
+					for (IBeansConfig bc : bcs) {
+						newResources.add(bc.getElementResource());
 					}
 				}
 			}

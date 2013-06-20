@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 
@@ -56,7 +57,7 @@ public class AddAsBeanConfigAction extends AbstractHandler {
 				IType type = (IType) element;
 				IProject project = type.getJavaProject().getProject();
 				IBeansProject springProject = BeansCorePlugin.getModel().getProject(project);
-				((BeansProject) springProject).addConfig(BeansConfigFactory.getConfigId(type, project), IBeansConfig.Type.MANUAL);
+				((BeansProject) springProject).addConfig(BeansConfigId.create(type, project), IBeansConfig.Type.MANUAL);
 				((BeansProject) springProject).saveDescription();
 			} else if (element instanceof IFile) {
 				IFile file = (IFile) element;
@@ -71,7 +72,7 @@ public class AddAsBeanConfigAction extends AbstractHandler {
 	}
 
 	private boolean isBeansConfig(IFile file) {
-		return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file)) != null;
+		return BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file)) != null;
 	}
 
 	private boolean isBeansConfig(IType type) {
@@ -79,7 +80,7 @@ public class AddAsBeanConfigAction extends AbstractHandler {
 		IProject project = type.getJavaProject().getProject();
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(project);
 		if (beansProject != null) {
-			config = beansProject.getConfig(BeansConfigFactory.getConfigId(type, project));
+			config = beansProject.getConfig(BeansConfigId.create(type, project));
 		}
 		return config != null;
 	}

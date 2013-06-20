@@ -40,7 +40,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DelegatingNamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
@@ -190,7 +190,7 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 		
 		String namespaceUri = currentNode.getNamespaceURI();
 		IFile file = BeansEditorUtils.getFile(document);
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file), true);
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file), true);
 		
 		// Only search for non-default namespace handlers
 		if (config != null && namespaceUri != null && !namespaceUri.equals(NamespaceUtils.DEFAULT_NAMESPACE_URI)) {

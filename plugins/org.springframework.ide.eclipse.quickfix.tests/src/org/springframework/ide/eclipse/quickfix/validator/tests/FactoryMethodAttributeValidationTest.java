@@ -18,7 +18,7 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.MethodAttributeQuickAssistProcessor;
@@ -28,7 +28,6 @@ import org.springframework.ide.eclipse.quickfix.validator.BeanValidator;
 import org.springframework.ide.eclipse.quickfix.validator.ClassAttributeValidator;
 import org.springframework.ide.eclipse.quickfix.validator.FactoryMethodValidator;
 import org.w3c.dom.NodeList;
-
 
 /**
  * @author Terry Denney
@@ -45,7 +44,7 @@ public class FactoryMethodAttributeValidationTest extends AbstractBeanValidation
 		IDOMNode beanNode = QuickfixTestUtil.getNode(BeansSchemaConstants.ELEM_BEAN, beanName, children);
 		AttrImpl attr = (AttrImpl) beanNode.getAttributes().getNamedItem(BeansSchemaConstants.ATTR_FACTORY_METHOD);
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (beanValidator.validateAttributeWithConfig(config, contextElement, attr, beanNode, reporter, true,
@@ -81,8 +80,8 @@ public class FactoryMethodAttributeValidationTest extends AbstractBeanValidation
 		assertFalse("Does not expect error in factory-method", hasMethodError("test1", factoryMethodAttrValidator));
 		assertFalse("Does not expect error in class", hasMethodError("test1", classAttrValidator));
 		assertEquals("Expects no messages", 0, getVisibleMessages(reporter.getMessages()).size());
-		assertNotNull("Expects RenameMethodQuickAssistProcessor to be in reporter", getProcessor(
-				reporter.getMessages(), RenameMethodQuickAssistProcessor.class));
+		assertNotNull("Expects RenameMethodQuickAssistProcessor to be in reporter",
+				getProcessor(reporter.getMessages(), RenameMethodQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -94,10 +93,10 @@ public class FactoryMethodAttributeValidationTest extends AbstractBeanValidation
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(message, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects MethodAttributeQuickAssistProcessor to be in reporter", getProcessor(messages,
-				MethodAttributeQuickAssistProcessor.class));
-		assertNotNull("Expects a RenameMethodQuickAssistProcessor to be in reporter", getProcessor(messages,
-				RenameMethodQuickAssistProcessor.class));
+		assertNotNull("Expects MethodAttributeQuickAssistProcessor to be in reporter",
+				getProcessor(messages, MethodAttributeQuickAssistProcessor.class));
+		assertNotNull("Expects a RenameMethodQuickAssistProcessor to be in reporter",
+				getProcessor(messages, RenameMethodQuickAssistProcessor.class));
 	}
 
 }

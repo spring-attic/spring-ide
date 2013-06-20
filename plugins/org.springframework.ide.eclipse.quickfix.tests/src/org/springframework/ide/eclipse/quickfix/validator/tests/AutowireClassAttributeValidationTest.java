@@ -18,7 +18,7 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.ConstructorArgQuickAssistProcessor;
@@ -44,7 +44,7 @@ public class AutowireClassAttributeValidationTest extends AbstractBeanValidation
 
 		String className = classAttr.getNodeValue();
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (classAttrValidator.validateAttributeWithConfig(config, contextElement, file, classAttr, node, reporter,

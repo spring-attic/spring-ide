@@ -20,9 +20,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
-import org.springframework.ide.eclipse.beans.core.model.generators.XMLConfigGenerator;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -182,8 +180,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.CONFIG) {
 			if (elementName.equals(CONFIG)) {
 				String config = charBuffer.toString().trim();
-
-				project.addConfig(new BeansConfigId(XMLConfigGenerator.XML_CONFIG_KIND, project.getElementName(), config), IBeansConfig.Type.MANUAL);
+				project.addConfig(BeansConfigId.parse(config, project.getProject()), IBeansConfig.Type.MANUAL);
 				state = State.CONFIGS;
 			}
 		} else if (state == State.CONFIG_SETS) {
@@ -232,7 +229,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.CONFIG_SET_CONFIG) {
 			if (elementName.equals(CONFIG)) {
 				String config = charBuffer.toString().trim();
-				configSet.addConfig(BeansConfigFactory.getConfigId(config, this.project.getProject()));
+				configSet.addConfig(BeansConfigId.create(config, this.project.getProject()));
 				state = State.CONFIG_SET_CONFIGS;
 			}
 		}

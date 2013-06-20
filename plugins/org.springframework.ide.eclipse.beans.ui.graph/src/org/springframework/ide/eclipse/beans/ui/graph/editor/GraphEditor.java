@@ -89,6 +89,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.ExportAction;
@@ -212,7 +213,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 				refresh = originalResource.equals(changedResource);
 			}
 			else if (originalInputElement instanceof IBeansConfigSet) {
-				refresh = ((IBeansConfigSet) originalInputElement).hasConfig(BeansConfigFactory.getConfigId((IFile) changedResource));
+				refresh = ((IBeansConfigSet) originalInputElement).hasConfig(BeansConfigId.create((IFile) changedResource));
 			}
 			return refresh;
 		}

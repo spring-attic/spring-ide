@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
@@ -138,7 +138,7 @@ public class WebflowNavigatorDropAdapter extends CommonDropAdapterAssistant {
 				if (!webflowProject.isUpdatable()) {
 					return Status.CANCEL_STATUS;
 				}
-				IBeansModelElement beansElement = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+				IBeansModelElement beansElement = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 
 				if (beansElement != null && resource.getProject().equals(project)
 						&& !webflowConfig.getBeansConfigs().contains(beansElement)) {

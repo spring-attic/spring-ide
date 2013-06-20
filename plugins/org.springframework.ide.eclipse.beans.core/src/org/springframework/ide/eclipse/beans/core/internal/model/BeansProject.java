@@ -435,7 +435,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 		
 		for (IBeansConfig config : getConfigs()) {
-			if (config.getElementResource() != null && config.getElementResource().equals(configId)) {
+			if (configId.equals(config.getId())) {
 				return true;
 			}
 		}
@@ -468,7 +468,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 	public Set<IBeansConfig> getConfigs(BeansConfigId id, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
 		
-		if (!this.project.equals(id.project)) {
+		if (!this.project.getName().equals(id.project)) {
 			IBeansProject otherBeansProject = BeansCorePlugin.getModel().getProject(id.project);
 			if (otherBeansProject != null) {
 				Set<IBeansConfig> otherProjectConfigs = otherBeansProject.getConfigs(id, false);
@@ -513,7 +513,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 
 		for (IBeansImport bi : bc.getImports()) {
 			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
-				if (importedBc.getElementResource() != null && importedBc.getElementResource().equals(id)) {
+				if (importedBc.getId() != null && importedBc.getId().equals(id)) {
 					beansConfigs.add(importedBc);
 				}
 				for (IBeansImport iBi : importedBc.getImports()) {
@@ -970,7 +970,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 	 * project-relative path of the given file otherwise it's the workspace-relative path with a leading '/'.
 	 */
 	private BeansConfigId getConfigId(IFile file) {
-		return BeansConfigFactory.getConfigId(file, this.project);
+		return BeansConfigId.create(file, this.project);
 	}
 
 	/**

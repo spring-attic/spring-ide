@@ -46,7 +46,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
@@ -82,7 +82,7 @@ public final class BeansUIUtils {
 				IFile file = ((IFileEditorInput) input).getFile();
 				IBeansProject project = BeansCorePlugin.getModel().getProject(
 						file.getProject());
-				if (project != null && project.getConfig(BeansConfigFactory.getConfigId(file), true) != null) {
+				if (project != null && project.getConfig(BeansConfigId.create(file), true) != null) {
 					return file;
 				}
 			}
@@ -99,7 +99,7 @@ public final class BeansUIUtils {
 			IEditorInput input = ((IEditorPart) part).getEditorInput();
 			if (input instanceof IFileEditorInput) {
 				IFile file = ((IFileEditorInput) input).getFile();
-				return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+				return BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 			}
 			else if (input instanceof ZipEntryEditorInput) {
 				ZipEntryStorage storage = (ZipEntryStorage) ((ZipEntryEditorInput) input)
@@ -107,7 +107,7 @@ public final class BeansUIUtils {
 				IBeansProject project = BeansCorePlugin.getModel().getProject(
 						storage.getFile().getProject());
 				if (project != null) {
-					return project.getConfig(BeansConfigFactory.getConfigId(storage, project.getProject()));
+					return project.getConfig(BeansConfigId.create(storage, project.getProject()));
 				}
 			}
 		}
@@ -306,7 +306,7 @@ public final class BeansUIUtils {
 			}
 			else if (segment instanceof IFile) {
 				IFile file = (IFile) segment;
-				IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+				IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 				if (config != null) {
 					return config;
 				}

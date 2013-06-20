@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.quickfix.ContentAssistProposalWrapper;
 import org.springframework.ide.eclipse.quickfix.QuickfixContentAssistConverter;
 import org.springframework.ide.eclipse.quickfix.QuickfixUtils;
@@ -86,7 +86,7 @@ public class BeanReferenceQuickAssistProcessor extends BeanQuickAssistProcessor 
 					Set<IBeansConfigSet> configSets = project.getConfigSets();
 
 					for (IBeansConfigSet configSet : configSets) {
-						if (configSet.hasConfig(BeansConfigFactory.getConfigId((IFile) bean.getElementResource()))) {
+						if (configSet.hasConfig(BeansConfigId.create((IFile) bean.getElementResource()))) {
 							addToConfigSetProposals.add(new AddToConfigSetQuickFixProposal(offset, length,
 									missingEndQuote, file, configSet, project));
 						}

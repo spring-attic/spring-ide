@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.w3c.dom.Element;
 
 /**
@@ -112,7 +113,7 @@ public class CreateConstructorMarkerResolution extends AbstractCreateMethodMarke
 			}
 
 			IBeansConfig beansConfig = beansModel.getConfig(
-					BeansConfigFactory.getConfigId((IFile) marker.getResource()), false);
+					BeansConfigId.create((IFile) marker.getResource()), false);
 			String beanName = beanElement.getAttribute("id");
 			IBean bean = BeansModelUtils.getBean(beanName, beansConfig);
 			if (bean != null && bean.getConstructorArguments() != null) {

@@ -47,7 +47,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
@@ -226,7 +226,7 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 			IFile file = editor.getResourceFile();
 
 			BeansValidationContext context = null;
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 			if (config != null) {
 				context = new BeansValidationContext(config,
 						new SpringProject(SpringCore.getModel(), file.getProject()));

@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -60,7 +61,7 @@ public class PointcutMatcherScope {
 			}
 			else if (resource instanceof IFile) {
 				IBeansModel model = BeansCorePlugin.getModel();
-				element = model.getConfig(BeansConfigFactory.getConfigId((IFile) resource));
+				element = model.getConfig(BeansConfigId.create((IFile) resource));
 			}
 			else if (adaptable instanceof IBeansConfigSet) {
 				for (IBeansConfig config : ((IBeansConfigSet) adaptable)

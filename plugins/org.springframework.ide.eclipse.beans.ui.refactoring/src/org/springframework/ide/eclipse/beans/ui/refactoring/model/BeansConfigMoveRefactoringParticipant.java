@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.MarkerUtils;
@@ -143,7 +142,7 @@ public class BeansConfigMoveRefactoringParticipant extends MoveParticipant {
 				BeansProject beansProject = (BeansProject) project;
 
 				// Firstly rename references to config sets
-				BeansConfigId id = BeansConfigFactory.getConfigId(config);
+				BeansConfigId id = BeansConfigId.create(config);
 				for (IBeansConfigSet configSet : beansProject.getConfigSets()) {
 					if (configSet.hasConfig(id)) {
 						((BeansConfigSet) configSet).removeConfig(id);
@@ -156,7 +155,7 @@ public class BeansConfigMoveRefactoringParticipant extends MoveParticipant {
 				if (project.hasConfig(id)) {
 					IPath newPath = newName.getProjectRelativePath().append(config.getName());
 					((BeansProject) project).removeConfig(id);
-					((BeansProject) project).addConfig(new BeansConfigId(id.kind, id.project, newPath.toString()), IBeansConfig.Type.MANUAL);
+					((BeansProject) project).addConfig(id.newName(newPath.toPortableString()), IBeansConfig.Type.MANUAL);
 					removeMarkers(config);
 					updated = true;
 				}

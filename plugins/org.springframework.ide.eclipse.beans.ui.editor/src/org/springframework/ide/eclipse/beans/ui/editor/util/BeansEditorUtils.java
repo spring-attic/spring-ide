@@ -68,7 +68,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IClassNameProvider;
@@ -465,8 +465,8 @@ public class BeansEditorUtils {
 		Set<IBean> beans = new HashSet<IBean>();
 		Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
 		IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
-
-		Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(BeansConfigFactory.getConfigId(file), true);
+		BeansConfigId id = BeansConfigId.create(file, project.getProject());
+        Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(id, true);
 		for (IBeansConfig config : allConfigs) {
 			if (config instanceof IImportedBeansConfig) {
 				IBeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config, IBeansConfig.class);
@@ -478,7 +478,7 @@ public class BeansEditorUtils {
 			Set<IBeansConfigSet> configSets = project.getConfigSets();
 
 			for (IBeansConfigSet configSet : configSets) {
-				if (configSet.hasConfig(BeansConfigFactory.getConfigId(file)) || !BeansCoreUtils.isBeansConfig(file)) {
+				if (configSet.hasConfig(id) || !BeansCoreUtils.isBeansConfig(id)) {
 					Set<IBeansConfig> bcs = configSet.getConfigs();
 					configs.addAll(bcs);
 				}
@@ -493,7 +493,7 @@ public class BeansEditorUtils {
 		}
 
 		if (BeansCoreUtils.isBeansConfig(file, true)) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(id);
 			if (config instanceof IImportedBeansConfig) {
 				configs.add(BeansModelUtils.getParentOfClass(config, IBeansConfig.class));
 			}

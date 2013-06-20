@@ -26,8 +26,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
-import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
@@ -51,14 +50,14 @@ public class RemoveAsBeanConfigAction extends AbstractHandler {
 	}
 
 	private IBeansConfig getConfigFromFile(IFile file) {
-		return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+		return BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 	}
 
 	private IBeansConfig getConfigFromType(IType type) {
 		IProject project = type.getJavaProject().getProject();
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(project);
 		if (beansProject != null) {
-			return  beansProject.getConfig(BeansConfigFactory.getConfigId(type, type.getJavaProject().getProject()));
+			return  beansProject.getConfig(BeansConfigId.create(type, type.getJavaProject().getProject()));
 		}
 		return null;
 	}

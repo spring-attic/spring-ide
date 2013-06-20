@@ -18,7 +18,7 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.MethodDeprecatedQuickAssistProcessor;
@@ -27,7 +27,6 @@ import org.springframework.ide.eclipse.quickfix.processors.RenamePropertyQuickAs
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
 import org.springframework.ide.eclipse.quickfix.validator.PropertyValidator;
 import org.w3c.dom.NodeList;
-
 
 /**
  * @author Terry Denney
@@ -44,7 +43,7 @@ public class PropertyAttributeValidationTest extends AbstractBeanValidationTestC
 		IDOMNode propertyNode = QuickfixTestUtil.getFirstNode(BeansSchemaConstants.ELEM_PROPERTY, beanChildren);
 		AttrImpl attr = (AttrImpl) propertyNode.getAttributes().getNamedItem(BeansSchemaConstants.ATTR_NAME);
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (propertyAttrValidator.validateAttributeWithConfig(config, contextElement, attr, propertyNode, reporter,
@@ -72,10 +71,10 @@ public class PropertyAttributeValidationTest extends AbstractBeanValidationTestC
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects a warning message", getWarningMessage(messages));
-		assertNotNull("Expects MethodDeprecatedQuickAssistProcessor to be in reporter", getProcessor(messages,
-				MethodDeprecatedQuickAssistProcessor.class));
-		assertNotNull("Expects a RenamePropertyQuickAssistProcessor to be in reporter", getProcessor(messages,
-				RenamePropertyQuickAssistProcessor.class));
+		assertNotNull("Expects MethodDeprecatedQuickAssistProcessor to be in reporter",
+				getProcessor(messages, MethodDeprecatedQuickAssistProcessor.class));
+		assertNotNull("Expects a RenamePropertyQuickAssistProcessor to be in reporter",
+				getProcessor(messages, RenamePropertyQuickAssistProcessor.class));
 
 	}
 
@@ -84,8 +83,8 @@ public class PropertyAttributeValidationTest extends AbstractBeanValidationTestC
 		assertFalse("Does not expect error", hasError("propertyTest3"));
 		List<IMessage> messages = reporter.getMessages();
 		assertEquals("Expects no messages", 0, getVisibleMessages(messages).size());
-		assertNotNull("Expects RenamePropertyQuickAssistProcessor to be in reporter", getProcessor(messages,
-				RenamePropertyQuickAssistProcessor.class));
+		assertNotNull("Expects RenamePropertyQuickAssistProcessor to be in reporter",
+				getProcessor(messages, RenamePropertyQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -97,8 +96,8 @@ public class PropertyAttributeValidationTest extends AbstractBeanValidationTestC
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects PropertyAttributeQuickAssistProcessor to be in reporter", getProcessor(messages,
-				PropertyAttributeQuickAssistProcessor.class));
+		assertNotNull("Expects PropertyAttributeQuickAssistProcessor to be in reporter",
+				getProcessor(messages, PropertyAttributeQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -106,8 +105,8 @@ public class PropertyAttributeValidationTest extends AbstractBeanValidationTestC
 		assertFalse("Does not expect error", hasError("propertyTest1"));
 		List<IMessage> messages = reporter.getMessages();
 		assertEquals("Expects no messages", 0, getVisibleMessages(messages).size());
-		assertNotNull("Expects RenamePropertyQuickAssistProcessor to be in reporter", getProcessor(messages,
-				RenamePropertyQuickAssistProcessor.class));
+		assertNotNull("Expects RenamePropertyQuickAssistProcessor to be in reporter",
+				getProcessor(messages, RenamePropertyQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -119,8 +118,8 @@ public class PropertyAttributeValidationTest extends AbstractBeanValidationTestC
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects PropertyAttributeQuickAssistProcessor to be in reporter", getProcessor(messages,
-				PropertyAttributeQuickAssistProcessor.class));
+		assertNotNull("Expects PropertyAttributeQuickAssistProcessor to be in reporter",
+				getProcessor(messages, PropertyAttributeQuickAssistProcessor.class));
 	}
 
 }

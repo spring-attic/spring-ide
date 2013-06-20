@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -64,7 +65,7 @@ public class BeansConfigValidator extends AbstractValidator {
 			object = BeansCorePlugin.getModel().getProject(((ISpringProject) object).getProject());
 		}
 		else if (object instanceof IFile) {
-			object = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) object));
+			object = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) object));
 		}
 		if (object instanceof IBeansModelElement) {
 			if (object instanceof IBeansProject) {
@@ -94,7 +95,7 @@ public class BeansConfigValidator extends AbstractValidator {
 		if (resource instanceof IFile) {
 
 			// First check for a beans config file
-			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs(BeansConfigFactory.getConfigId((IFile) resource), true);
+			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs(BeansConfigId.create((IFile) resource), true);
 			if (configs != null && configs.size() > 0) {
 				for (IBeansConfig beansConfig : configs) {
 					// Resolve imported config files to their root importing one
@@ -198,7 +199,7 @@ public class BeansConfigValidator extends AbstractValidator {
 	 */
 	private void propagateChangedResourceToConfigSets(Set<IResource> resources) {
 		for (IResource resource : new HashSet<IResource>(resources)) {
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource));
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) resource));
 			for (IBeansConfigSet beansConfigSet : BeansModelUtils.getConfigSets(beansConfig)) {
 				for (IBeansConfig bc : beansConfigSet.getConfigs()) {
 					if (!resources.contains(bc.getElementResource())) {
@@ -298,7 +299,7 @@ public class BeansConfigValidator extends AbstractValidator {
 		 */
 		public void init(IResource resource) {
 			if (resource instanceof IFile) {
-				rootElement = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource));
+				rootElement = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) resource));
 			}
 		}
 

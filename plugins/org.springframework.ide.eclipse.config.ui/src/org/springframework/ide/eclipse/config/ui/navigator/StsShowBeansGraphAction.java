@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
@@ -68,7 +68,7 @@ public class StsShowBeansGraphAction extends AbstractNavigatorAction {
 					}
 				}
 				else if (tElement instanceof IFile) {
-					rElement = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) tElement));
+					rElement = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) tElement));
 				}
 				else if (tElement instanceof ZipEntryStorage) {
 					rElement = BeansModelUtils.getConfig((ZipEntryStorage) tElement);

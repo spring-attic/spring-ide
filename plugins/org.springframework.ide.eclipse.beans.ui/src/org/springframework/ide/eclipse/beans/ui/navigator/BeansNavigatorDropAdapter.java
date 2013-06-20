@@ -31,7 +31,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
@@ -129,8 +129,8 @@ public class BeansNavigatorDropAdapter extends CommonDropAdapterAssistant {
 					return Status.CANCEL_STATUS;
 				}
 				// TODO CD add support for linked project and config sets
-				if (resource.getProject().equals(project) && !beansConfigSet.hasConfig(BeansConfigFactory.getConfigId(file))) {
-					IBeansConfig bc = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource));
+				if (resource.getProject().equals(project) && !beansConfigSet.hasConfig(BeansConfigId.create(file))) {
+					IBeansConfig bc = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) resource));
 					// check if resource is already a beans config
 					if (bc != null) {
 						beansConfigSet.addConfig(bc.getId());

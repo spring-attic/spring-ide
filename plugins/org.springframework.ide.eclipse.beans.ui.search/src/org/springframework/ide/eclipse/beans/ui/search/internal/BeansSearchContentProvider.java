@@ -18,7 +18,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -68,7 +68,7 @@ public class BeansSearchContentProvider extends BeansModelContentProvider {
 			return IModelElement.NO_CHILDREN;
 		}
 		if (parentElement instanceof IFile) {
-			parentElement = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) parentElement));
+			parentElement = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) parentElement));
 		}
 
 		// Create list of matched element's children which belong to given

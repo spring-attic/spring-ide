@@ -26,6 +26,9 @@
 	<extension-point id="beansconfiglocators" name="%extensionBeanconfiglocators.name"
 		schema="schema/beansconfiglocators.exsd" />
 
+	<extension-point id="beansconfigkind" name="%extensionBeanconfigkind.name"
+		schema="schema/beansconfigkind.exsd" />
+
 	<extension point="org.eclipse.core.resources.markers"
 			id="problemmarker"
 			name="%beansProblemMarker">
@@ -232,6 +235,17 @@
                 value="org.springframework.ide.eclipse.core.springnature">
           </projectNature> -->
        </resolverExtension>
+    </extension>
+    <extension
+          point="org.springframework.ide.eclipse.beans.core.beansconfigkind">
+       <configGenerator
+             generator="org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator"
+             id="java">
+       </configGenerator>
+       <configGenerator
+             generator="org.springframework.ide.eclipse.beans.core.model.generators.XMLConfigGenerator"
+             id="xml">
+       </configGenerator>
     </extension>
 
 </plugin>

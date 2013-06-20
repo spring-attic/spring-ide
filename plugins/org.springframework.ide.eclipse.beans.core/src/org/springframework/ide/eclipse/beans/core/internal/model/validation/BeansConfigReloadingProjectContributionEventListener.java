@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
@@ -170,7 +171,7 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 			}
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
-			IBeansConfig bc = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource), true);
+			IBeansConfig bc = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) resource), true);
 			// Resources are loaded by isBeansConfig from the top; so the resourceChanged check here is not sufficient
 			if (bc.resourceChanged()) {
 				if (bc instanceof IImportedBeansConfig) {

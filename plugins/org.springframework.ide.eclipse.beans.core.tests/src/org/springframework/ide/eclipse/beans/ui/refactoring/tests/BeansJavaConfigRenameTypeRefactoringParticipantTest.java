@@ -26,9 +26,7 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
-import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
 import org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigRenameTypeRefactoringParticipant;
 import org.springframework.ide.eclipse.beans.ui.refactoring.model.BeansJavaConfigTypeChange;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -62,7 +60,7 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 	}
 	
 	private BeansConfigId getConfigForClassName(String cName) throws JavaModelException {
-	    return BeansConfigFactory.getConfigId(javaProject.findType(cName), project);
+	    return BeansConfigId.create(javaProject.findType(cName), project);
 	}
 	
 	@Test

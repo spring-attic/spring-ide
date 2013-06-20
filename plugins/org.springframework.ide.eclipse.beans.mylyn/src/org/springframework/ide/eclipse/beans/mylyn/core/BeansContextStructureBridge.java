@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -273,7 +274,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 					// skip: it's too expensive to load the model on the UI thread
 					includeImports = false;
 				}
-				IBeansConfig bc = project.getConfig(BeansConfigFactory.getConfigId(configFile), includeImports);
+				IBeansConfig bc = project.getConfig(BeansConfigId.create(configFile), includeImports);
 				if (bc != null) {
 					return bc;
 				}

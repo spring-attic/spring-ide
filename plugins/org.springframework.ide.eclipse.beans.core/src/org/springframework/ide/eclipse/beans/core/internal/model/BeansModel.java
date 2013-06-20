@@ -44,7 +44,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -238,7 +237,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
             }
 
             for (IBeansProject p : getProjects()) {
-                BeansConfigId newId = new BeansConfigId(id.kind, p.getElementName(), id.name);
+                BeansConfigId newId = id.newProject(p.getElementName());
                 IBeansConfig bc = p.getConfig(newId, includeImported);
                 if (bc != null) {
                     return bc;
@@ -254,14 +253,13 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			IBeansProject project = getProject(id.project);
 			
 			// check the project of the file itself first
-			String configName = null;
 			if (project != null && project.hasConfig(id, includeImported)) {
 			    return true;
 			}
 			
 			// then check all the other projects
 			for (IBeansProject p : getProjects()) {
-                BeansConfigId newId = new BeansConfigId(id.kind, p.getElementName(), id.name);
+                BeansConfigId newId = id.newProject(p.getElementName());
 				if (p.hasConfig(newId, includeImported)) {
 					return true;
 				}
@@ -544,7 +542,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					r.unlock();
 				}
 				
-				if (!BeansConfigFactory.getConfigKind(file).equals(JavaConfigGenerator.JAVA_CONFIG_KIND) && project.addConfig(file, type)) {
+				if (!BeansConfigId.getConfigKind(file).equals(JavaConfigGenerator.JAVA_CONFIG_KIND) && project.addConfig(file, type)) {
 					// In case this is a auto detected config make sure to refresh the
 					// project too, as the project description file will not change
 					if (type == IBeansConfig.Type.AUTO_DETECTED) {
@@ -568,7 +566,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			Set<IReloadableBeansConfig> configs = new LinkedHashSet<IReloadableBeansConfig>();
 			try {
 				r.lock();
-				Set<IBeansConfig> bcs = getConfigs(BeansConfigFactory.getConfigId(file), true);
+				Set<IBeansConfig> bcs = getConfigs(BeansConfigId.create(file), true);
 				for (IBeansConfig bc : bcs) {
 					if (bc instanceof IImportedBeansConfig) {
 						configs.add(BeansModelUtils.getParentOfClass(bc, IReloadableBeansConfig.class));

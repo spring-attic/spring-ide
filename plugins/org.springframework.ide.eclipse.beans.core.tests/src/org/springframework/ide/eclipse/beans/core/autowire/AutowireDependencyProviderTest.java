@@ -24,16 +24,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.FactoryBeanTypeResolverExtensions;
-import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -62,7 +61,7 @@ public class AutowireDependencyProviderTest {
 	}
 	
 	private BeansConfigId getConfigForFileName(String fName) {
-	    return BeansConfigFactory.getConfigId(project.getFile(fName));
+	    return BeansConfigId.create(project.getFile(fName));
 	}
 
 	@Test

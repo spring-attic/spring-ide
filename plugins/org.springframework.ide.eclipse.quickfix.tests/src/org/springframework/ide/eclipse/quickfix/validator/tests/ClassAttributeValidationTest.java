@@ -18,7 +18,7 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.ClassAttributeQuickAssistProcessor;
@@ -27,7 +27,6 @@ import org.springframework.ide.eclipse.quickfix.processors.ConstructorArgQuickAs
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
 import org.springframework.ide.eclipse.quickfix.validator.ClassAttributeValidator;
 import org.w3c.dom.NodeList;
-
 
 /**
  * @author Terry Denney
@@ -47,7 +46,7 @@ public class ClassAttributeValidationTest extends AbstractBeanValidationTestCase
 
 		String className = classAttr.getNodeValue();
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (classAttrValidator.validateAttributeWithConfig(config, contextElement, file, classAttr, node, reporter,
@@ -81,8 +80,8 @@ public class ClassAttributeValidationTest extends AbstractBeanValidationTestCase
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter", getProcessor(messages,
-				ClassAttributeQuickAssistProcessor.class));
+		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter",
+				getProcessor(messages, ClassAttributeQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -94,8 +93,8 @@ public class ClassAttributeValidationTest extends AbstractBeanValidationTestCase
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects ConstructorArgQuickAssistProcessor to be in reporter", getProcessor(messages,
-				ConstructorArgQuickAssistProcessor.class));
+		assertNotNull("Expects ConstructorArgQuickAssistProcessor to be in reporter",
+				getProcessor(messages, ConstructorArgQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -107,8 +106,8 @@ public class ClassAttributeValidationTest extends AbstractBeanValidationTestCase
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects a warning message", getWarningMessage(messages));
-		assertNotNull("Expects ClassDeprecatedQuickAssistProcessor to be in reporter", getProcessor(messages,
-				ClassDeprecatedQuickAssistProcessor.class));
+		assertNotNull("Expects ClassDeprecatedQuickAssistProcessor to be in reporter",
+				getProcessor(messages, ClassDeprecatedQuickAssistProcessor.class));
 	}
 
 	public void testInnerClass() {
@@ -135,8 +134,8 @@ public class ClassAttributeValidationTest extends AbstractBeanValidationTestCase
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter", getProcessor(messages,
-				ClassAttributeQuickAssistProcessor.class));
+		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter",
+				getProcessor(messages, ClassAttributeQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -148,8 +147,8 @@ public class ClassAttributeValidationTest extends AbstractBeanValidationTestCase
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter", getProcessor(messages,
-				ClassAttributeQuickAssistProcessor.class));
+		assertNotNull("Expects ClassAttributeQuickAssistProcessor to be in reporter",
+				getProcessor(messages, ClassAttributeQuickAssistProcessor.class));
 	}
 
 }

@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -44,7 +44,7 @@ public class RequiredPropertyRuleTest extends BeansCoreTestCase {
 	@Before
 	public void setUp() throws Exception {
 		resource = createPredefinedProjectAndGetResource("required", "src/ide-825.xml");
-		beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource));
+		beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) resource));
 		StsTestUtil.waitForResource(resource);
 	}
 

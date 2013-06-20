@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.ui.workingsets.IWorkingSetFilter;
@@ -61,7 +61,7 @@ public class BeansWorkingSetViewerFilter implements IWorkingSetFilter {
 					}
 					else if (adaptable instanceof IFile) {
 						IBeansConfig bc = BeansCorePlugin.getModel().getConfig(
-						        BeansConfigFactory.getConfigId((IFile) adaptable));
+						        BeansConfigId.create((IFile) adaptable));
 						if (element.equals(bc)) {
 							return true;
 						}

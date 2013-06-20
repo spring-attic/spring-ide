@@ -20,15 +20,12 @@ import java.util.StringTokenizer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -46,7 +43,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -85,9 +81,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
-import org.springframework.ide.eclipse.beans.core.model.generators.JavaConfigGenerator;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.beans.core.model.locate.ProjectScanningBeansConfigLocator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -444,7 +438,7 @@ public class ConfigFilesTab {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
-					project.addConfig(BeansConfigFactory.getConfigId(element, project.getProject()), IBeansConfig.Type.MANUAL);
+					project.addConfig(BeansConfigId.create(element, project.getProject()), IBeansConfig.Type.MANUAL);
 				}
 				configsViewer.refresh(false);
 				hasUserMadeChanges = true;
@@ -459,7 +453,7 @@ public class ConfigFilesTab {
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
 					if (element instanceof IType) {
-					    project.addConfig(BeansConfigFactory.getConfigId(element, project.getProject()), IBeansConfig.Type.MANUAL);
+					    project.addConfig(BeansConfigId.create(element, project.getProject()), IBeansConfig.Type.MANUAL);
 					}
 				}
 			}
@@ -566,7 +560,7 @@ public class ConfigFilesTab {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
-					BeansConfigId config = BeansConfigFactory.getConfigId(element, project.getProject());
+					BeansConfigId config = BeansConfigId.create(element, project.getProject());
 					if (config != null) {
 						project.addConfig(config, IBeansConfig.Type.MANUAL);
 					}
@@ -729,7 +723,7 @@ public class ConfigFilesTab {
 
 			IBeansProject project = BeansCorePlugin.getModel().getProject(element.getProject());
 			if (project != null) {
-				IBeansConfig beansConfig = project.getConfig(BeansConfigFactory.getConfigId(element));
+				IBeansConfig beansConfig = project.getConfig(BeansConfigId.create(element));
 				return beansConfig == null;
 			}
 			return false;
@@ -747,7 +741,7 @@ public class ConfigFilesTab {
 			if (element instanceof IType) {
 				IBeansProject beansProj = BeansCorePlugin.getModel().getProject(project.getProject());
 				if (beansProj != null) {
-					IBeansConfig beansConfig = project.getConfig(BeansConfigFactory.getConfigId(element, project.getProject()));
+					IBeansConfig beansConfig = project.getConfig(BeansConfigId.create(element, project.getProject()));
 					return beansConfig == null;
 				}
 				return true;
@@ -768,7 +762,7 @@ public class ConfigFilesTab {
 		public String getText(Object element) {
 			String label = super.getText(element);
 			if (element instanceof IFile) {
-				IBeansConfig bc = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) element), true);
+				IBeansConfig bc = BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) element), true);
 				if (bc instanceof IImportedBeansConfig) {
 					label += " [imported]";
 				}

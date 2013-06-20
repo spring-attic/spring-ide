@@ -17,7 +17,7 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.NameSpaceElementsQuickAssistProcessor;
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
@@ -25,7 +25,6 @@ import org.springframework.ide.eclipse.quickfix.validator.NamespaceElementsValid
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
 /**
  * @author Terry Denney
  */
@@ -49,7 +48,7 @@ public class NamespaceElementsValidationTest extends AbstractBeanValidationTestC
 			return foundError;
 		}
 
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 		Set<IResourceModelElement> contextElements = getContextElements(config);
 		for (IResourceModelElement contextElement : contextElements) {
 			if (namespaceValidator.validateAttributeWithConfig(config, contextElement, attr, node, reporter, true,
@@ -108,28 +107,28 @@ public class NamespaceElementsValidationTest extends AbstractBeanValidationTestC
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects NameSpaceElementsQuickAssistProcessor to be in reporter", getProcessor(messages,
-				NameSpaceElementsQuickAssistProcessor.class));
+		assertNotNull("Expects NameSpaceElementsQuickAssistProcessor to be in reporter",
+				getProcessor(messages, NameSpaceElementsQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
 	public void testConstantWithNoFieldFoundError() {
-		assertTrue("Expects error", hasError("util:constant", "static-field", "com.test.Foo.NO_SUCH_FIELD",
-				"static-field"));
+		assertTrue("Expects error",
+				hasError("util:constant", "static-field", "com.test.Foo.NO_SUCH_FIELD", "static-field"));
 		List messages = reporter.getMessages();
 		String expectedMessage = "Field 'NO_SUCH_FIELD' not found on class 'com.test.Foo'";
 		List<String> visibleMessages = getVisibleMessages(messages);
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects a NameSpaceElementsQuickAssistProcessor to be in reporter", getProcessor(messages,
-				NameSpaceElementsQuickAssistProcessor.class));
+		assertNotNull("Expects a NameSpaceElementsQuickAssistProcessor to be in reporter",
+				getProcessor(messages, NameSpaceElementsQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")
 	public void testContantWithNoError() {
-		assertFalse("Does not expect error", hasError("util:constant", "static-field", "com.test.Foo.ABCD",
-				"static-field"));
+		assertFalse("Does not expect error",
+				hasError("util:constant", "static-field", "com.test.Foo.ABCD", "static-field"));
 		assertEquals("Expects no messages", 0, getVisibleMessages(reporter.getMessages()).size());
 	}
 
@@ -142,8 +141,8 @@ public class NamespaceElementsValidationTest extends AbstractBeanValidationTestC
 		assertEquals("Expects 1 message", 1, visibleMessages.size());
 		assertEquals(expectedMessage, visibleMessages.get(0));
 		assertNotNull("Expects an error message", getErrorMessage(messages));
-		assertNotNull("Expects NameSpaceElementsQuickAssistProcessor to be in reporter", getProcessor(messages,
-				NameSpaceElementsQuickAssistProcessor.class));
+		assertNotNull("Expects NameSpaceElementsQuickAssistProcessor to be in reporter",
+				getProcessor(messages, NameSpaceElementsQuickAssistProcessor.class));
 	}
 
 	@SuppressWarnings("unchecked")

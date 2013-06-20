@@ -81,7 +81,7 @@ public class BeansConfigRenameRefactoringParticipant extends RenameParticipant {
 	protected boolean initialize(Object element) {
 		if (element instanceof IFile && BeansCoreUtils.isBeansConfig((IResource) element, false)) {
 			config = (IFile) element;
-			configId = BeansConfigFactory.getConfigId(config);
+			configId = BeansConfigId.create(config);
 			return true;
 		}
 		return false;
@@ -97,7 +97,7 @@ public class BeansConfigRenameRefactoringParticipant extends RenameParticipant {
 
 		public ModelChange(IFile config, String newName) {
 			this.config = config;
-			this.configId = BeansConfigFactory.getConfigId(config);
+			this.configId = BeansConfigId.create(config);
 			this.newName = newName;
 		}
 

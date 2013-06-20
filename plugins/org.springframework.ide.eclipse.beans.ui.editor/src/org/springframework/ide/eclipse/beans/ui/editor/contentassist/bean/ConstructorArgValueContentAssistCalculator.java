@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -21,7 +20,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistContext;
@@ -62,7 +61,7 @@ public class ConstructorArgValueContentAssistCalculator extends ClassContentAssi
 				IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
 				if (type != null) {
 					try {
-						IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(context.getFile()));
+						IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(context.getFile()));
 						if (config != null && context.getParentNode() instanceof Element) {
 							IModelElement element = BeansModelUtils.getModelElement((Element) context.getParentNode(), config);
 							int argIndex = getArgumentIndex(context.getNode());

@@ -18,7 +18,7 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.quickfix.processors.ConstructorArgNameQuickAssistProcessor;
@@ -27,7 +27,6 @@ import org.springframework.ide.eclipse.quickfix.validator.ConstructorArgNameVali
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 
 /**
  * @author Terry Denney
@@ -49,7 +48,7 @@ public class ConstructorArgNameValidationTest extends AbstractBeanValidationTest
 				NamedNodeMap attrs = beanChild.getAttributes();
 				Node attr = attrs.getNamedItem(BeansSchemaConstants.ATTR_NAME);
 				if (attr != null && constructorArgName.equals(attr.getNodeValue())) {
-					IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+					IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 					Set<IResourceModelElement> contextElements = getContextElements(config);
 					for (IResourceModelElement contextElement : contextElements) {
 						if (constructorArgNameValidator.validateAttributeWithConfig(config, contextElement,

@@ -34,6 +34,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -268,9 +269,7 @@ public class XMLBeansConfig extends AbstractBeansConfig implements IBeansConfig,
 	 * @param project
 	 */
 	protected void init(String name, IBeansProject project) {
-		IContainer container = null;
 		String fileName = null;
-		String fullPath = null;
 
 		// At first check for a config file in a JAR
 		int pos = name.indexOf(ZipEntryStorage.DELIMITER);
@@ -297,16 +296,13 @@ public class XMLBeansConfig extends AbstractBeansConfig implements IBeansConfig,
 			file = new ExternalFile(new File(fileName), name.substring(pos + 1), project.getProject());
 		}
 		else {
-			container = (IProject) ((IResourceModelElement) getElementParent()).getElementResource();
-			fullPath = container.getFullPath().append(fileName).toString();
-
 			// Try to find the configuration file in the workspace
-			file = (IFile) container.findMember(fileName);
+			file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(fileName));
 		}
 
 		if (file == null || !file.exists()) {
 			modificationTimestamp = IResource.NULL_STAMP;
-			String msg = "Beans config file '" + fullPath + "' not accessible";
+			String msg = "Beans config file '" + fileName + "' not accessible";
 			problems = new CopyOnWriteArraySet<ValidationProblem>();
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
 		}

@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IHyperlinkCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
@@ -66,7 +66,7 @@ public class ConstructorArgNameHyperlinkCalculator implements IHyperlinkCalculat
 			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			
 			if (type != null) {
-				IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+				IBeansConfig config = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 				if (config != null && parentNode instanceof Element) {
 					IModelElement element = BeansModelUtils.getModelElement((Element) parentNode, config);
 					int argIndex = getArgumentIndex(node);

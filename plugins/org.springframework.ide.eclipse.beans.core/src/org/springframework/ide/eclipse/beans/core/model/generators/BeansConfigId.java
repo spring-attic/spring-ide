@@ -1,23 +1,35 @@
-/*
- * Copyright 2011 SpringSource, a division of VMware, Inc
- * 
- * andrew - Initial API and implementation
+/*******************************************************************************
+ * Copyright (c) 2013 Spring IDE Developers
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Contributors:
+ *     Spring IDE Developers - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model.generators;
 
+import java.io.IOException;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.JarEntryFile;
+import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
+import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * 
@@ -26,19 +38,11 @@ import org.eclipse.core.runtime.Assert;
  */
 public class BeansConfigId {
     
-    public static BeansConfigId toConfigId(String idString) {
-        int colonIndex = idString.indexOf(':');
-        int nextColonIndex = idString.indexOf(colonIndex+1, ':');
-        Assert.isLegal(colonIndex > 0, "Invalid bean config id: " + idString);
-        Assert.isLegal(nextColonIndex > 0, "Invalid bean config id: " + idString);
-        return new BeansConfigId(idString.substring(0, colonIndex), idString.substring(colonIndex+1, nextColonIndex), idString.substring(nextColonIndex)+1);
-    }
-    
     public final String name;
     public final String kind;
     public final String project;
     
-    public BeansConfigId(String kind, String project, String name) {
+    private BeansConfigId(String kind, String project, String name) {
         super();
         Assert.isNotNull(kind, "Bean kind must not be null");
         Assert.isNotNull(name, "Bean name must not be null");
@@ -57,6 +61,16 @@ public class BeansConfigId {
     @Override
     public String toString() {
         return kind + ":" + project + ":" + name;
+    }
+    
+    public String serialize() {
+        if (kind.equals(XMLConfigGenerator.XML_CONFIG_KIND)) {
+            if (name.startsWith("/" + project + "/")) {
+                return name.substring(("/" + project + "/").length());
+            }
+            return name;
+        }
+        return kind + ":" + name;
     }
     
     public BeansConfigId newName(String newName) {
@@ -99,5 +113,103 @@ public class BeansConfigId {
             return false;
         }
         return true;
+    }
+
+    public static String getConfigKind(IFile file) {
+        return file.getFileExtension();
+    }
+
+    public static BeansConfigId parse(String idString, IProject project) {
+    	if (idString.startsWith(JavaConfigGenerator.JAVA_CONFIG_KIND + ":")) {
+    		return new BeansConfigId(JavaConfigGenerator.JAVA_CONFIG_KIND, project.getName(), idString.substring((JavaConfigGenerator.JAVA_CONFIG_KIND + ":").length()));
+    	}
+    	String newName;
+    	if (idString.startsWith(XMLConfigGenerator.XML_CONFIG_KIND + ":")) {
+    		newName = idString.substring((XMLConfigGenerator.XML_CONFIG_KIND + ":").length());
+    	} else {
+    		newName = idString;
+    	}
+    	if (newName.charAt(0) != '/') {
+    		newName = "/" + project.getName() + "/" + newName;
+    	}
+    	return new BeansConfigId(XMLConfigGenerator.XML_CONFIG_KIND, project.getName(), newName);
+    }
+
+    public static BeansConfigId create(IFile file) {
+        return create(file, file.getProject());
+    }
+
+    public static BeansConfigId create(Object obj, IProject project) {
+        if (obj instanceof IType) {
+            IType type = (IType) obj;
+            return new BeansConfigId(JavaConfigGenerator.JAVA_CONFIG_KIND, project.getName(), type.getFullyQualifiedName('$'));
+    
+        } else if (obj instanceof ZipEntryStorage) {
+            ZipEntryStorage entry = (ZipEntryStorage) obj;
+            return new BeansConfigId(XMLConfigGenerator.XML_CONFIG_KIND, project.getName(), entry.getFullName());
+        } else if (obj instanceof JarEntryFile) {
+            JarEntryFile jarEntry = (JarEntryFile) obj;
+            IPath fullPath = ((JarPackageFragmentRoot) jarEntry.getPackageFragmentRoot())
+                    .getPath();
+            String entryName = jarEntry.getFullPath().toString();
+            for (String name : JavaCore.getClasspathVariableNames()) {
+                IPath variablePath = JavaCore.getClasspathVariable(name);
+                if (variablePath != null && variablePath.isPrefixOf(fullPath)) {
+                    fullPath = new Path(name).append(fullPath.removeFirstSegments(variablePath
+                            .segmentCount()));
+                    break;
+                }
+            }
+            String path = IBeansConfig.EXTERNAL_FILE_NAME_PREFIX + fullPath.toString()
+                    + ZipEntryStorage.DELIMITER + entryName;
+            return new BeansConfigId(XMLConfigGenerator.XML_CONFIG_KIND, project.getName(), path);
+        } else if (obj instanceof String) {
+            return BeansConfigId.parse((String) obj, project);
+        } else if (obj instanceof Resource) {
+            try {
+                return BeansConfigId.parse(((Resource) obj).getFile().getCanonicalPath(), project);
+            } catch (IOException e) {
+                throw new RuntimeException(obj.toString() + " does not exist");
+            }
+        } else if (obj instanceof IFile) {
+            IFile file = (IFile) obj;
+            if (project == null) {
+                project = file.getProject();
+            }
+        
+            if (!XMLConfigGenerator.XML_CONFIG_KIND.equals(file.getFileExtension())) {
+                IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
+                if (javaProject != null) {
+                    IJavaElement element = JavaCore.create(file, javaProject);
+                    if (element != null && element.getPrimaryElement() instanceof ICompilationUnit) {
+                        String typeName = element.getElementName();
+                        String fileExtension = file.getFileExtension();
+                        if (fileExtension != null && fileExtension.length() > 0) {
+                            typeName = typeName.substring(0, typeName.length() - (fileExtension.length() + 1));
+                        }
+                        
+                        IJavaElement parent = element.getParent();
+                        String packageName = "";
+                        if (parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+                            IPackageFragment packageFragment = (IPackageFragment) parent;
+                            if (!packageFragment.isDefaultPackage()) {
+                                packageName = packageFragment.getElementName() + ".";
+                            }
+                            
+                            return new BeansConfigId(file.getFileExtension(), project.getName(), packageName + typeName);
+                        }
+                    }
+                }
+            }
+            return new BeansConfigId(file.getFileExtension(), project.getName(), file.getFullPath().toString());
+        } else if (obj instanceof IResource) {
+            return null;
+        }
+        
+        // maybe it's ok to return null 
+        if (obj == null) {
+            throw new IllegalArgumentException("Attempt to create a BeansConfigId from null argument");
+        }
+        throw new IllegalArgumentException("Attempt to create a BeansConfigId from an unexpected type: " + obj.getClass() + " toString: "  + obj);
     }
 }

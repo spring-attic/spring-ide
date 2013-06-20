@@ -45,6 +45,9 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 
 	private IModelElement[] children = null;
 	
+	private BeansConfigId id;
+	
+	// TODO FIXADE Can we change 2nd arg to BeansConfigId???
 	public ImportedBeansConfig(IBeansImport beansImport, Resource resource, Type type) {
 		super(beansImport, resource.getFilename(), type);
 		init(resource);
@@ -133,15 +136,15 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
+			id = BeansConfigId.create(file);
 		}
 	}
 
     public String getKind() {
-        return null;
+        return id.kind;
     }
 
     public BeansConfigId getId() {
-        // TODO Auto-generated method stub
-        return null;
+        return id;
     }
 }

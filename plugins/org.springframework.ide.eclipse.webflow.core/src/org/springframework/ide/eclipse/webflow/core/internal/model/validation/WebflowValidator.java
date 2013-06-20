@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -103,7 +104,7 @@ public class WebflowValidator extends AbstractValidator {
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource)) {
 			IBeansConfig bc = BeansCorePlugin.getModel().getConfig(
-			        BeansConfigFactory.getConfigId((IFile) resource));
+			        BeansConfigId.create((IFile) resource));
 			IWebflowProject wp = Activator.getModel().getProject(
 					resource.getProject());
 			for (IWebflowConfig fc : wp.getConfigs()) {

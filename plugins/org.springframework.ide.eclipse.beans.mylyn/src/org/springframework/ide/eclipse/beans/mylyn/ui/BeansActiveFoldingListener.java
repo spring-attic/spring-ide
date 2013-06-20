@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.beans.mylyn.core.BeansContextStructureBridge;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
@@ -213,7 +214,7 @@ public class BeansActiveFoldingListener extends AbstractContextListener {
 
 			if (file != null && BeansContextStructureBridge.isBeansConfig(file)) {
 
-				final IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file));
+				final IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file));
 
 				workbench.getDisplay().asyncExec(new Runnable() {
 

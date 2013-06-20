@@ -55,7 +55,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -477,7 +477,7 @@ public class BeansEditorValidator implements ISourceValidator, IValidator {
 
 	private void validateNode(IDOMNode node, IReporter reporter) {
 		IBeansModel model = BeansCorePlugin.getModel();
-		Set<IBeansConfig> configs = model.getConfigs(BeansConfigFactory.getConfigId(file), true);
+		Set<IBeansConfig> configs = model.getConfigs(BeansConfigId.create(file), true);
 		for (IBeansConfig config : configs) {
 			Set<IResourceModelElement> contextElements = getContextElements(config);
 			for (IResourceModelElement contextElement : contextElements) {

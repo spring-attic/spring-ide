@@ -464,7 +464,7 @@ public abstract class BeansModelUtils {
 
 		IBeansProject project = BeansCorePlugin.getModel().getProject(storage.getFile().getProject());
 		if (project != null) {
-			return project.getConfig(BeansConfigFactory.getConfigId(storage.getFullName(), project.getProject()));
+			return project.getConfig(BeansConfigId.create(storage, project.getProject()));
 		}
 		return null;
 	}
@@ -671,7 +671,7 @@ public abstract class BeansModelUtils {
 				monitor = new NullProgressMonitor();
 			}
 
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(resource), true);
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(resource), true);
 			ModelElementDetermingModelVisitor v = new ModelElementDetermingModelVisitor(startLine, endLine, resource);
 			beansConfig.accept(v, monitor);
 			return v.getElement();
@@ -748,7 +748,7 @@ public abstract class BeansModelUtils {
 	 */
 	public static IResourceModelElement getResourceModelElement(Object obj) {
 		if (obj instanceof IFile) {
-			return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) obj));
+			return BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) obj));
 		}
 		else if (obj instanceof IProject) {
 			return BeansCorePlugin.getModel().getProject((IProject) obj);
@@ -756,10 +756,10 @@ public abstract class BeansModelUtils {
 		else if (obj instanceof IAdaptable) {
 			IResource resource = (IResource) ((IAdaptable) obj).getAdapter(IResource.class);
 			if (resource instanceof IFile) {
-				return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) resource));
+				return BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) resource));
 			}
 			else if (resource instanceof IProject) {
-				return BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId((IFile) obj));
+				return BeansCorePlugin.getModel().getConfig(BeansConfigId.create((IFile) obj));
 			}
 		}
 		return null;

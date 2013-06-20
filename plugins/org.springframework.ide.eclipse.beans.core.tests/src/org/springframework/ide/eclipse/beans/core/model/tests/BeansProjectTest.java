@@ -25,15 +25,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansJavaConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.internal.model.XMLBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -71,7 +70,7 @@ public class BeansProjectTest {
 	}
 
 	private BeansConfigId getConfigIdForFileName(String fName) {
-	    return BeansConfigFactory.getConfigId(project.getFile(fName));
+	    return BeansConfigId.create(project.getFile(fName));
 	}
 
 	@Test
@@ -322,7 +321,7 @@ public class BeansProjectTest {
 		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
 		
 		IFile xmlFile = (IFile) project.findMember("basic-bean-config.xml");
-		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(xmlFile), false);
+		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile), false);
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
 		assertEquals("basic-bean-config.xml", config.getElementName());
@@ -334,13 +333,13 @@ public class BeansProjectTest {
 		beansProject.addConfig(getConfigIdForFileName("advanced-bean-config.xml"), IBeansConfig.Type.MANUAL);
 		
 		IFile xmlFile1 = (IFile) project.findMember("basic-bean-config.xml");
-		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(xmlFile1), false);
+		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile1), false);
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
 		assertEquals("basic-bean-config.xml", config.getElementName());
 
 		IFile xmlFile2 = (IFile) project.findMember("advanced-bean-config.xml");
-		configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(xmlFile2), false);
+		configs = beansProject.getConfigs(BeansConfigId.create(xmlFile2), false);
 		assertEquals(1, configs.size());
 		config = configs.iterator().next();
 		assertEquals("advanced-bean-config.xml", config.getElementName());
@@ -352,13 +351,13 @@ public class BeansProjectTest {
 		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
 
 		IFile xmlFile = (IFile) project.findMember("basic-bean-config.xml");
-		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(xmlFile), false);
+		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile), false);
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
 		assertEquals("basic-bean-config.xml", config.getElementName());
 
 		IFile javaFile = (IFile) project.findMember("src/org/test/spring/SimpleConfigurationClass.java");
-		configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(javaFile), false);
+		configs = beansProject.getConfigs(BeansConfigId.create(javaFile), false);
 		assertEquals(1, configs.size());
 		config = configs.iterator().next();
 		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
@@ -370,7 +369,7 @@ public class BeansProjectTest {
 		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass2"), IBeansConfig.Type.MANUAL);
 
 		IFile javaFile = (IFile) project.findMember("src/org/test/spring/TwoInnerConfigurationClasses.java");
-		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(javaFile), false);
+		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(javaFile), false);
 		assertEquals(2, configs.size());
 
 		Iterator<IBeansConfig> iterator = configs.iterator();
@@ -393,7 +392,7 @@ public class BeansProjectTest {
 		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml"), IBeansConfig.Type.MANUAL);
 		
 		IFile xmlFile = (IFile) secondProject.findMember("second-bean-config.xml");
-		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(xmlFile), false);
+		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile), false);
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
 		assertEquals("second-bean-config.xml", config.getElementName());
@@ -410,10 +409,10 @@ public class BeansProjectTest {
 		assertEquals(1, imports.size());
 		
 		IFile importedFile = (IFile) project.findMember("advanced-bean-config.xml");
-		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(importedFile), false);
+		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(importedFile), false);
 		assertEquals(0, configs.size());
 		
-		configs = beansProject.getConfigs(BeansConfigFactory.getConfigId(importedFile), true);
+		configs = beansProject.getConfigs(BeansConfigId.create(importedFile), true);
 		assertEquals(1, configs.size());
 		IBeansConfig importedConfig = configs.iterator().next();
 		assertEquals("advanced-bean-config.xml", importedConfig.getElementName());
