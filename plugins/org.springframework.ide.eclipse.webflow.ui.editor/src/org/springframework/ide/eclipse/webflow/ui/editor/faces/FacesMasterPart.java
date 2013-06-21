@@ -1,14 +1,14 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.webflow;
+package org.springframework.ide.eclipse.webflow.ui.editor.faces;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.swt.widgets.Composite;
@@ -16,14 +16,14 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigFormPage;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractNamespaceMasterPart;
 
-
 /**
  * @author Leo Dos Santos
+ * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
-public class WebFlowMasterPart extends AbstractNamespaceMasterPart {
+public class FacesMasterPart extends AbstractNamespaceMasterPart {
 
-	public WebFlowMasterPart(AbstractConfigFormPage page, Composite parent) {
+	public FacesMasterPart(AbstractConfigFormPage page, Composite parent) {
 		super(page, parent);
 	}
 
@@ -35,7 +35,7 @@ public class WebFlowMasterPart extends AbstractNamespaceMasterPart {
 
 	@Override
 	protected String getSectionTitle() {
-		return Messages.getString("WebFlowMasterPart.MASTER_SECTION_TITLE"); //$NON-NLS-1$
+		return Messages.getString("FacesMasterPart.MASTER_SECTION_TITLE"); //$NON-NLS-1$
 	}
 
 }

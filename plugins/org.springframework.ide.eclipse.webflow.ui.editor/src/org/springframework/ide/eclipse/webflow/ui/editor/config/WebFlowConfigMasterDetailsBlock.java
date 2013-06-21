@@ -1,14 +1,14 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.webflow.config;
+package org.springframework.ide.eclipse.webflow.ui.editor.config;
 
 import org.eclipse.swt.widgets.Composite;
 import org.osgi.framework.Version;
@@ -16,7 +16,6 @@ import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigDetailsPa
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigFormPage;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigMasterPart;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractNamespaceMasterDetailsBlock;
-
 
 /**
  * @author Leo Dos Santos

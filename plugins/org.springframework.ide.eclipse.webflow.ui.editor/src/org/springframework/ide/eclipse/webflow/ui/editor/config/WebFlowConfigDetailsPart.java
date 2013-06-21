@@ -1,14 +1,14 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.webflow;
+package org.springframework.ide.eclipse.webflow.ui.editor.config;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -18,25 +18,24 @@ import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigMasterPar
 import org.springframework.ide.eclipse.config.ui.editors.AbstractNamespaceDetailsPart;
 import org.springframework.ide.eclipse.config.ui.editors.SpringConfigDetailsSectionPart;
 
-
 /**
  * @author Leo Dos Santos
  */
 @SuppressWarnings("restriction")
-public class WebFlowDetailsPart extends AbstractNamespaceDetailsPart {
+public class WebFlowConfigDetailsPart extends AbstractNamespaceDetailsPart {
 
-	public WebFlowDetailsPart(AbstractConfigMasterPart master) {
+	public WebFlowConfigDetailsPart(AbstractConfigMasterPart master) {
 		super(master);
 	}
 
-	public WebFlowDetailsPart(AbstractConfigMasterPart master, String docsUrl) {
+	public WebFlowConfigDetailsPart(AbstractConfigMasterPart master, String docsUrl) {
 		super(master, docsUrl);
 	}
 
 	@Override
 	public SpringConfigDetailsSectionPart createDetailsSectionPart(AbstractConfigEditor editor, IDOMElement input,
 			Composite parent, FormToolkit toolkit) {
-		return new WebFlowDetailsSectionPart(editor, input, parent, toolkit);
+		return new WebFlowConfigDetailsSectionPart(editor, input, parent, toolkit);
 	}
 
 }

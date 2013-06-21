@@ -31,18 +31,6 @@
                contentTypeId="com.springsource.sts.config.ui.beanConfigFile">
          </contentTypeBinding>
       </editor>
-      <editor
-            class="org.springframework.ide.eclipse.config.ui.editors.webflow.SpringWebFlowEditor"
-            contributorClass="org.springframework.ide.eclipse.config.ui.editors.SpringConfigEditorContributor"
-            default="true"
-            icon="icons/webflow-config.png"
-            id="com.springsource.sts.config.ui.editors.SpringWebFlowEditor"
-            name="%webflowEditorName"
-            symbolicFontName="org.eclipse.wst.sse.ui.textfont">
-			<contentTypeBinding
-				contentTypeId="com.springsource.sts.config.ui.webflowConfigFile" >
-         </contentTypeBinding>
-		</editor>
    </extension>
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
@@ -54,20 +42,6 @@
             priority="high">
          <describer
                class="org.springframework.ide.eclipse.config.ui.contenttype.SpringElementContentDescriber">
-         </describer>
-      </content-type>
-      <content-type
-            base-type="org.eclipse.core.runtime.xml"
-            default-charset="UTF-8"
-            id="com.springsource.sts.config.ui.webflowConfigFile"
-            name="%webflowEditorContentTypeName"
-            priority="high">
-         <describer
-               class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
-               <parameter
-                     name="element"
-                     value="{http://www.springframework.org/schema/webflow}flow">
-               </parameter>
          </describer>
       </content-type>
    </extension>
@@ -103,14 +77,6 @@
             class="org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration"
             target="com.springsource.sts.config.ui.beanConfigFile">
       </contentOutlineConfiguration>
-      <sourceViewerConfiguration
-            class="org.springframework.ide.eclipse.beans.ui.editor.BeansStructuredTextViewerConfiguration"
-            target="com.springsource.sts.config.ui.webflowConfigFile">
-      </sourceViewerConfiguration>
-      <contentOutlineConfiguration
-            class="org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration"
-            target="com.springsource.sts.config.ui.webflowConfigFile">
-      </contentOutlineConfiguration>
       <!-- The following extension definition should enable all XML contexts for all config files,
       	   according to the documentation at http://wiki.eclipse.org/Table_of_WTP_IDs. For some 
       	   reason this isn't working and so I've left it but commented it out.
@@ -143,20 +109,6 @@
             name="%contextPageName"
             namespacePrefix="context"
             namespaceUri="http://www.springframework.org/schema/context">
-      </formPage>
-      <formPage
-            class="org.springframework.ide.eclipse.config.ui.editors.faces.FacesFormPage"
-            id="com.springsource.sts.config.ui.editors.faces"
-            name="%facesPageName"
-            namespacePrefix="faces"
-            namespaceUri="http://www.springframework.org/schema/faces">
-      </formPage>
-      <formPage
-            class="org.springframework.ide.eclipse.config.ui.editors.webflow.config.WebFlowConfigFormPage"
-            id="com.springsource.sts.config.ui.editors.webflow.config"
-            name="%flowConfigPageName"
-            namespacePrefix="flow"
-            namespaceUri="http://www.springframework.org/schema/webflow-config">
       </formPage>
       <formPage
             class="org.springframework.ide.eclipse.config.ui.editors.jee.JeeFormPage"
@@ -250,14 +202,6 @@
             name="%taskPageName"
             namespacePrefix="task"
             namespaceUri="http://www.springframework.org/schema/task">
-      </formPage>
-      <formPage
-            class="org.springframework.ide.eclipse.config.ui.editors.webflow.WebFlowFormPage"
-            graph="org.springframework.ide.eclipse.config.ui.editors.webflow.graph.WebFlowGraphicalEditor"
-            id="com.springsource.sts.config.ui.editors.webflow"
-            name="%flowPageName"
-            namespacePrefix="flow"
-            namespaceUri="http://www.springframework.org/schema/webflow">
       </formPage>
    </extension>
    <extension
@@ -605,52 +549,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
-         <actionProvider
-               class="org.springframework.ide.eclipse.config.ui.navigator.StsWebFlowNavigatorActionProvider"
-               id="com.springsource.sts.config.ui.navigator.webflow.springExplorerActions"
-               overrides="org.springframework.ide.eclipse.webflow.ui.navigator.springExplorerActions">
-            <enablement>
-               <or>
-                  <instanceof
-                        value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject">
-                  </instanceof>
-                  <and>
-                     <instanceof
-                           value="org.eclipse.core.resources.IFile">
-                     </instanceof>
-                     <test
-                           property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig">
-                     </test>
-                  </and>
-                  <instanceof
-                        value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement">
-                  </instanceof>
-               </or>
-            </enablement>
-         </actionProvider>
-         <actionProvider
-               class="org.springframework.ide.eclipse.config.ui.navigator.StsWebFlowNavigatorActionProvider"
-               id="com.springsource.sts.config.ui.navigator.webflow.projectExplorerActions"
-               overrides="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerActions">
-            <enablement>
-               <or>
-                  <instanceof
-                        value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject">
-                  </instanceof>
-                  <and>
-                     <instanceof
-                           value="org.eclipse.core.resources.IFile">
-                     </instanceof>
-                     <test
-                           property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig">
-                     </test>
-                  </and>
-                  <instanceof
-                        value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement">
-                  </instanceof>
-               </or>
-            </enablement>
-         </actionProvider>
       <actionProvider
             class="org.springframework.ide.eclipse.config.ui.navigator.StsSpringExplorerActionProvider"
             id="com.springsource.sts.config.ui.navigator.graph.springExplorerActions"
@@ -681,21 +579,17 @@
             viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
          <includes>
             <actionExtension
-                  pattern="com.springsource.sts.config.ui.navigator.webflow.springExplorerActions">
-            </actionExtension>
-            <actionExtension
                   pattern="com.springsource.sts.config.ui.navigator.graph.springExplorerActions">
-            </actionExtension></includes>
+            </actionExtension>
+         </includes>
       </viewerActionBinding>
       <viewerActionBinding
             viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
             <actionExtension
-                  pattern="com.springsource.sts.config.ui.navigator.webflow.projectExplorerActions">
-            </actionExtension>
-            <actionExtension
                   pattern="com.springsource.sts.config.ui.navigator.graph.springExplorerActions">
-            </actionExtension></includes>
+            </actionExtension>
+         </includes>
       </viewerActionBinding>
    </extension>
    

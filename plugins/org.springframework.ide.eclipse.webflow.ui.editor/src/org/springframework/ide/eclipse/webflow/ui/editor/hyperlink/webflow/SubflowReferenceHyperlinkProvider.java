@@ -1,19 +1,19 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.hyperlinks;
+package org.springframework.ide.eclipse.webflow.ui.editor.hyperlink.webflow;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IHyperlinkCalculator;
-import org.springframework.ide.eclipse.webflow.ui.editor.hyperlink.webflow.SubflowReferenceHyperlinkCalculator;
+import org.springframework.ide.eclipse.config.ui.hyperlinks.XmlBackedHyperlinkProvider;
 
 /**
  * An {@link XmlBackedHyperlinkProvider} that uses

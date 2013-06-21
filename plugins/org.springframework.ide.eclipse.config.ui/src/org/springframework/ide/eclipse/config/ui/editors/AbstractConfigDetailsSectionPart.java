@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors;
 
@@ -41,12 +41,8 @@ import org.springframework.ide.eclipse.config.ui.hyperlinks.ListenerMethodHyperl
 import org.springframework.ide.eclipse.config.ui.hyperlinks.LookupReplaceMethodHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.PointcutReferenceHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.PropertyNameHyperlinkProvider;
-import org.springframework.ide.eclipse.config.ui.hyperlinks.StateReferenceHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.StepReferenceHyperlinkProvider;
-import org.springframework.ide.eclipse.config.ui.hyperlinks.SubflowReferenceHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.ToolAnnotationBasedHyperlinkProvider;
-import org.springframework.ide.eclipse.config.ui.hyperlinks.WebFlowActionMethodHyperlinkProvider;
-import org.springframework.ide.eclipse.config.ui.hyperlinks.WebFlowBeanReferenceHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.hyperlinks.XmlBackedHyperlinkProvider;
 import org.springframework.ide.eclipse.config.ui.widgets.ButtonAttribute;
 import org.springframework.ide.eclipse.config.ui.widgets.ComboAttribute;
@@ -462,28 +458,6 @@ public abstract class AbstractConfigDetailsSectionPart extends AbstractConfigSec
 
 	/**
 	 * Creates a {@link HyperlinkedTextAttribute} widget set for displaying an
-	 * attribute that refers to a Web Flow state. Clicking the hyperlink will
-	 * open the configuration file containing the state definition.
-	 * 
-	 * @param client the parent composite
-	 * @param attr the attribute name
-	 * @param required denotes whether this is a required field
-	 * @return {@link HyperlinkedTextAttribute} widget set
-	 */
-	protected HyperlinkedTextAttribute createStateAttribute(Composite client, String attr, boolean required) {
-		HyperlinkedTextAttribute linkAttr = new XmlBackedHyperlinkTextAttribute(client, toolkit, attr, required) {
-			public void openHyperlink() {
-				XmlBackedHyperlinkProvider provider = new StateReferenceHyperlinkProvider(getConfigEditor()
-						.getTextViewer(), getInput(), attr);
-				provider.open(text.getText());
-			}
-		};
-		linkAttr.createAttribute(2);
-		return linkAttr;
-	}
-
-	/**
-	 * Creates a {@link HyperlinkedTextAttribute} widget set for displaying an
 	 * attribute that refers to a Batch step. Clicking the hyperlink will open
 	 * the configuration file containing the step definition.
 	 * 
@@ -497,28 +471,6 @@ public abstract class AbstractConfigDetailsSectionPart extends AbstractConfigSec
 		HyperlinkedTextAttribute linkAttr = new XmlBackedHyperlinkTextAttribute(client, toolkit, attr, required) {
 			public void openHyperlink() {
 				XmlBackedHyperlinkProvider provider = new StepReferenceHyperlinkProvider(getConfigEditor()
-						.getTextViewer(), getInput(), attr);
-				provider.open(text.getText());
-			}
-		};
-		linkAttr.createAttribute(2);
-		return linkAttr;
-	}
-
-	/**
-	 * Creates a {@link HyperlinkedTextAttribute} widget set for displaying an
-	 * attribute that refers to a Web Flow subflow. Clicking the hyperlink will
-	 * open the configuration file containing the subflow definition.
-	 * 
-	 * @param client the parent composite
-	 * @param attr the attribute name
-	 * @param required denotes whether this is a required field
-	 * @return {@link HyperlinkedTextAttribute} widget set
-	 */
-	protected HyperlinkedTextAttribute createSubflowAttribute(Composite client, String attr, boolean required) {
-		HyperlinkedTextAttribute linkAttr = new XmlBackedHyperlinkTextAttribute(client, toolkit, attr, required) {
-			public void openHyperlink() {
-				XmlBackedHyperlinkProvider provider = new SubflowReferenceHyperlinkProvider(getConfigEditor()
 						.getTextViewer(), getInput(), attr);
 				provider.open(text.getText());
 			}
@@ -591,50 +543,6 @@ public abstract class AbstractConfigDetailsSectionPart extends AbstractConfigSec
 		HyperlinkedTextAttribute linkAttr = new XmlBackedHyperlinkTextAttribute(client, toolkit, attr, required) {
 			public void openHyperlink() {
 				XmlBackedHyperlinkProvider provider = new ToolAnnotationBasedHyperlinkProvider(getConfigEditor()
-						.getTextViewer(), getInput(), attr);
-				provider.open(text.getText());
-			}
-		};
-		linkAttr.createAttribute(2);
-		return linkAttr;
-	}
-
-	/**
-	 * Creates a {@link HyperlinkedTextAttribute} widget set for displaying an
-	 * attribute that refers to another Web Flow bean. Clicking the hyperlink
-	 * will open the configuration file containing the bean definition.
-	 * 
-	 * @param client the parent composite
-	 * @param attr the attribute name
-	 * @param required denotes whether this is a required field
-	 * @return {@link HyperlinkedTextAttribute} widget set
-	 */
-	protected HyperlinkedTextAttribute createWebFlowBeanAttribute(Composite client, String attr, boolean required) {
-		HyperlinkedTextAttribute linkAttr = new XmlBackedHyperlinkTextAttribute(client, toolkit, attr, required) {
-			public void openHyperlink() {
-				XmlBackedHyperlinkProvider provider = new WebFlowBeanReferenceHyperlinkProvider(getConfigEditor()
-						.getTextViewer(), getInput(), attr);
-				provider.open(text.getText());
-			}
-		};
-		linkAttr.createAttribute(2);
-		return linkAttr;
-	}
-
-	/**
-	 * Creates a {@link HyperlinkedTextAttribute} widget set for displaying an
-	 * attribute that refers to a Java method. Clicking the hyperlink will open
-	 * the class file at the method displayed in the text field.
-	 * 
-	 * @param client the parent composite
-	 * @param attr the attribute name
-	 * @param required denotes whether this is a required field
-	 * @return {@link HyperlinkedTextAttribute} widget set
-	 */
-	protected HyperlinkedTextAttribute createWebFlowMethodAttribute(Composite client, String attr, boolean required) {
-		HyperlinkedTextAttribute linkAttr = new XmlBackedHyperlinkTextAttribute(client, toolkit, attr, required) {
-			public void openHyperlink() {
-				XmlBackedHyperlinkProvider provider = new WebFlowActionMethodHyperlinkProvider(getConfigEditor()
 						.getTextViewer(), getInput(), attr);
 				provider.open(text.getText());
 			}
