@@ -79,5 +79,76 @@
 		<include file="templates/templates.xml"
 			translations="templates/templates.properties" />
 	</extension>
+	
+	<extension
+	   point="com.springsource.sts.config.ui.formPages">
+	   <formPage
+            class="org.springframework.ide.eclipse.webflow.ui.editor.faces.FacesFormPage"
+            id="com.springsource.sts.config.ui.editors.faces"
+            name="%facesPageName"
+            namespacePrefix="faces"
+            namespaceUri="http://www.springframework.org/schema/faces">
+       </formPage>
+       <formPage
+            class="org.springframework.ide.eclipse.webflow.ui.editor.config.WebFlowConfigFormPage"
+            id="com.springsource.sts.config.ui.editors.webflow.config"
+            name="%flowConfigPageName"
+            namespacePrefix="flow"
+            namespaceUri="http://www.springframework.org/schema/webflow-config">
+       </formPage>
+       <formPage
+            class="org.springframework.ide.eclipse.webflow.ui.editor.WebFlowFormPage"
+            graph="org.springframework.ide.eclipse.config.ui.editors.webflow.graph.WebFlowGraphicalEditor"
+            id="com.springsource.sts.config.ui.editors.webflow"
+            name="%flowPageName"
+            namespacePrefix="flow"
+            namespaceUri="http://www.springframework.org/schema/webflow">
+      </formPage>
+	</extension>
+ 	<extension
+       point="org.eclipse.ui.editors">
+    	<editor
+            class="org.springframework.ide.eclipse.webflow.ui.editor.SpringWebFlowEditor"
+            contributorClass="org.springframework.ide.eclipse.config.ui.editors.SpringConfigEditorContributor"
+            default="true"
+            icon="icons/full/obj16/webflow-config.png"
+            id="com.springsource.sts.config.ui.editors.SpringWebFlowEditor"
+            name="%webflowEditorName"
+            symbolicFontName="org.eclipse.wst.sse.ui.textfont">
+			<contentTypeBinding
+				contentTypeId="com.springsource.sts.config.ui.webflowConfigFile" >
+         </contentTypeBinding>
+		</editor>
+ 	</extension>
+ 	
+	<extension
+	    point="org.eclipse.core.contenttype.contentTypes">
+	    <content-type
+            base-type="org.eclipse.core.runtime.xml"
+            default-charset="UTF-8"
+            id="com.springsource.sts.config.ui.webflowConfigFile"
+            name="%webflowEditorContentTypeName"
+            priority="high">
+         <describer
+               class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+               <parameter
+                     name="element"
+                     value="{http://www.springframework.org/schema/webflow}flow">
+               </parameter>
+         </describer>
+       </content-type>
+	</extension>
+	
+	<extension
+	 	point="org.eclipse.wst.sse.ui.editorConfiguration">
+	 	<sourceViewerConfiguration
+            class="org.springframework.ide.eclipse.beans.ui.editor.BeansStructuredTextViewerConfiguration"
+            target="com.springsource.sts.config.ui.webflowConfigFile">
+      	</sourceViewerConfiguration>
+      	<contentOutlineConfiguration
+            class="org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration"
+            target="com.springsource.sts.config.ui.webflowConfigFile">
+      	</contentOutlineConfiguration>
+	</extension>
 
 </plugin>

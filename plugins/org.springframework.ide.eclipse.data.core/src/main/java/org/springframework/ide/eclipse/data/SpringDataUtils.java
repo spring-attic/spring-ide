@@ -105,8 +105,9 @@ public abstract class SpringDataUtils {
 	 * @return
 	 */
 	public static boolean isRepositoryBean(IBean bean) {
-		IBeansProject project = BeansModelUtils.getProject(bean);
-		return getRepositoryBeansFor(project.getProject()).contains(bean);
+		return bean.getProperty("repositoryInterface") != null;
+//		IBeansProject project = BeansModelUtils.getProject(bean);
+//		return getRepositoryBeansFor(project.getProject()).contains(bean);
 	}
 
 	/**
@@ -125,7 +126,8 @@ public abstract class SpringDataUtils {
 		Set<IBean> result = new HashSet<IBean>();
 
 		for (IBean bean : BeansModelUtils.getBeans(beansProject)) {
-			if (bean.getProperty("repositoryInterface") != null) {
+//			if (bean.getProperty("repositoryInterface") != null) {
+			if (isRepositoryBean(bean)) {
 				result.add(bean);
 			}
 		}

@@ -661,13 +661,7 @@ public class JdtUtils {
 	}
 
 	public static boolean isAjdtPresent() {
-		try {
-			Class.forName(AJDT_CLASS);
-			return true;
-		}
-		catch (ClassNotFoundException e) {
-			return false;
-		}
+	    return Platform.getBundle("org.eclipse.ajdt.core") != null;
 	}
 
 	/**

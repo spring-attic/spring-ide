@@ -69,6 +69,7 @@ import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
@@ -190,7 +191,11 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 					return;
 				}
 				
-				IBeansProject beansProject = (IBeansProject) getElementParent();
+				IBeansProject beansProject = BeansModelUtils.getParentOfClass(this, IBeansProject.class);
+				if (beansProject == null) {
+					return;
+				}
+				
 				final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
 				
 				if (cl.getResource(this.configClass.getFullyQualifiedName().replace('.', '/') + ".class") == null) {
@@ -404,7 +409,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 						((AbstractBeanDefinition) ((BeanComponentDefinition) componentDefinition).getBeanDefinition())
 						.setSource(new JavaModelSourceLocation(configClass));
 					} catch (JavaModelException e) {
-						e.printStackTrace();
+						SpringCore.log(e);
 					}
 				}
 			}

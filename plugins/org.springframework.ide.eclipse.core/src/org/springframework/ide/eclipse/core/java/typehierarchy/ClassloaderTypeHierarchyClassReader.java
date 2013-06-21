@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
@@ -37,12 +35,8 @@ public class ClassloaderTypeHierarchyClassReader implements TypeHierarchyClassRe
 					return new TypeHierarchyElement(classReader.getName(), classReader.getSuperclassName(), classReader.getInterfaceNames());
 				}
 			}
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (ClassFormatException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			SpringCore.log(e);
 		}
 		
 		return null;

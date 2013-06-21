@@ -17,7 +17,6 @@ import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
-import org.springframework.ide.eclipse.beans.ui.actions.ConfigureJavaConfigAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenActionWrapperAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenConfigFileAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenJavaElementAction;
@@ -28,7 +27,6 @@ import org.springframework.ide.eclipse.ui.navigator.actions.ValidationAction;
 /**
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Leo Dos Santos
  */
 public class BeansNavigatorActionProvider extends CommonActionProvider {
 
@@ -38,7 +36,6 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 	private OpenPropertiesAction openPropertiesAction;
 	private OpenActionWrapperAction openAction;
 	private ValidationAction validationAction;
-	private ConfigureJavaConfigAction configJavaConfigAction;
 
 	public BeansNavigatorActionProvider() {
 	}
@@ -52,7 +49,6 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		openAction = new OpenActionWrapperAction(site, openConfigAction,
 				openElementAction);
 		validationAction = new ValidationAction(site);
-		configJavaConfigAction = new ConfigureJavaConfigAction(site);
 	}
 
 	@Override
@@ -76,10 +72,6 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		if (openPropertiesAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,
 					openPropertiesAction);
-		}
-		if (configJavaConfigAction.isEnabled()) {
-			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,
-					configJavaConfigAction);
 		}
 	}
 

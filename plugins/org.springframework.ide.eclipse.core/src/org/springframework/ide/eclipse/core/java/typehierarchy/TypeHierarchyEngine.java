@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
+import java.util.ArrayDeque;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IProject;
@@ -81,25 +81,29 @@ public class TypeHierarchyEngine {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
 			IProject project = ((IJavaProject)ancestor).getProject();
-		
-			char[] typeName = type.getFullyQualifiedName().replace('.', '/').toCharArray();
-			char[] superTypeName = className.replace('.',  '/').toCharArray();
-		
-			do {
-				if (CharOperation.equals(typeName, superTypeName)) {
-					return true;
+			return doesExtend(type.getFullyQualifiedName(), className, project);
+		}
+		return false;
+	}
+	
+	public boolean doesExtend(String type, String className, IProject project) {
+		char[] typeName = type.replace('.', '/').toCharArray();
+		char[] superTypeName = className.replace('.',  '/').toCharArray();
+	
+		do {
+			if (CharOperation.equals(typeName, superTypeName)) {
+				return true;
+			}
+			else {
+				TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+				if (typeElement != null) {
+					typeName = typeElement.superclassName;
 				}
 				else {
-					TypeHierarchyElement typeElement = getTypeElement(typeName, project);
-					if (typeElement != null) {
-						typeName = typeElement.superclassName;
-					}
-					else {
-						typeName = null;
-					}
+					typeName = null;
 				}
-			} while (typeName != null);
-		}
+			}
+		} while (typeName != null);
 		return false;
 	}
 	
@@ -107,17 +111,20 @@ public class TypeHierarchyEngine {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
 			IProject project = ((IJavaProject)ancestor).getProject();
-		
-			char[] classTypeName = type.getFullyQualifiedName().replace('.', '/').toCharArray();
-			char[] interfaceTypeName = interfaceName.replace('.',  '/').toCharArray();
-			
-			// cached items first
-			boolean result = doesImplement(project, classTypeName, interfaceTypeName, true)
-					|| doesImplement(project, classTypeName, interfaceTypeName, false);
-			
-			return result;
+			return doesImplement(type.getFullyQualifiedName(), interfaceName, project);
 		}
 		return false;
+	}
+	
+	public boolean doesImplement(final String type, final String interfaceName, IProject project) {
+		char[] classTypeName = type.replace('.', '/').toCharArray();
+		char[] interfaceTypeName = interfaceName.replace('.',  '/').toCharArray();
+
+		// cached items first
+		boolean result = doesImplement(project, classTypeName, interfaceTypeName, true)
+				|| doesImplement(project, classTypeName, interfaceTypeName, false);
+
+		return result;
 	}
 
 	protected boolean doesImplement(IProject project, char[] classTypeName, char[] interfaceTypeName, boolean cachedItemsOnly) {
@@ -126,7 +133,7 @@ public class TypeHierarchyEngine {
 			if (classTypeElement != null) {
 				char[][] implementedInterfaces = classTypeElement.interfaces;
 				if (implementedInterfaces != null) {
-					Stack<char[][]> interfaceStack = new Stack<char[][]>();
+					ArrayDeque<char[][]> interfaceStack = new ArrayDeque<char[][]>();
 					interfaceStack.add(implementedInterfaces);
 					
 					while (!interfaceStack.isEmpty()) {

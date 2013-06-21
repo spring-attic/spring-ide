@@ -64,6 +64,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -137,8 +138,9 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 					// fill in the resolvableDependencies
 					fillResolvableDependencies();
 
+					Set<IBean> elementBeans = BeansModelUtils.getBeans(element);
 					for (IInjectionMetadataProvider provider : createInjectionMetadataProviders()) {
-						for (final IBean bean : BeansModelUtils.getBeans(element)) {
+						for (final IBean bean : elementBeans) {
 
 							List<InjectionMetadata> beanInjectionMetadata = null;
 							if (injectionMetadata.containsKey(bean)) {
@@ -326,6 +328,15 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 
 	public String[] getBeansForType(Class<?> requiredType) {
 		Set<String> matchingBeans = new HashSet<String>();
+		
+		Class<?> factoryBeanClass = null;
+		try {
+			factoryBeanClass = ClassUtils.loadClass(FactoryBean.class.getName());
+		}
+		catch (ClassNotFoundException e) {
+			return new String[0];
+		}
+		
 		for (IBean bean : beans) {
 			String beanClassName = ValidationRuleUtils.getBeanClassName(bean, context);
 			if (beanClassName != null) {
@@ -334,11 +345,13 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 					if (requiredType.isAssignableFrom(beanClass)) {
 						matchingBeans.add(bean.getElementName());
 					}
-					else if (ClassUtils.loadClass(FactoryBean.class.getName()).isAssignableFrom(beanClass) && isFactoryForType(beanClass, requiredType)) {
-						matchingBeans.add(bean.getElementName());
-					}
-					else if (ClassUtils.loadClass(FactoryBean.class.getName()).isAssignableFrom(beanClass) && isExtensibleFactoryForType(bean, beanClass, requiredType)) {
-						matchingBeans.add(bean.getElementName());
+					else if (factoryBeanClass.isAssignableFrom(beanClass)) {
+						if (isFactoryForType(beanClass, requiredType)) {
+							matchingBeans.add(bean.getElementName());
+						} 
+						else if (isExtensibleFactoryForType(bean, beanClass, requiredType)) {
+							matchingBeans.add(bean.getElementName());
+						}
 					}
 				}
 				catch (ClassNotFoundException e) {
@@ -355,9 +368,9 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 				return true;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			SpringCore.log(e);
 		} catch (Error e) {
-			e.printStackTrace();
+			SpringCore.log(e);
 		}
 		return false;
 	}

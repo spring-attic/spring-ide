@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012, 2013 VMware, Inc.
+ *  Copyright (c) 2012, 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template;
 
@@ -36,6 +36,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.wizard.WizardImages;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 
 /**
  * @author Terry Denney
@@ -61,6 +62,8 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 
 	private final SpringWizardSectionFactory sectionFactory;
 
+	private final NewSpringProjectWizardModel model = new NewSpringProjectWizardModel();
+
 	private IProject project;
 
 	public NewSpringProjectWizard() {
@@ -71,13 +74,17 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 
 		sectionFactory = new SpringWizardSectionFactory(this);
 
-		mainPage = new NewSpringProjectWizardMainPage();
+		mainPage = new NewSpringProjectWizardMainPage(model);
 		mainPage.setTitle(NewSpringProjectWizardMessages.NewProject_title);
 		mainPage.setDescription("Create a Spring project by selecting a template or simple project type.");
 	}
 
 	public NewSpringProjectWizardMainPage getMainPage() {
 		return mainPage;
+	}
+
+	public NewSpringProjectWizardModel getModel() {
+		return model;
 	}
 
 	@Override
@@ -137,7 +144,13 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 	}
 
 	protected SpringProjectWizardSection getSection() {
-		return sectionFactory.getSection(mainPage.getDescriptor());
+		Template template = getModel().selectedTemplate.getValue();
+
+		if (template != null) {
+			ProjectWizardDescriptor descriptor = new ProjectWizardDescriptor(template);
+			return sectionFactory.getSection(descriptor);
+		}
+		return null;
 	}
 
 	@Override
@@ -299,7 +312,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 	}
 
 	public IWorkingSet[] getWorkingSets() {
-		return mainPage.getWorkingSets();
+		return mainPage.getSelectedWorkingSets();
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 
@@ -41,7 +42,7 @@ public class JdtConnectedMetadataReader implements MetadataReader {
 			ClassReader classReader = classReaderFactory.getClassReader(type.getFullyQualifiedName());
 			classReader.accept(this.visitor, 0);
 		} catch (IOException e) {
-			e.printStackTrace();
+			SpringCore.log(e);
 		}
 		
 	}

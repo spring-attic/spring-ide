@@ -34,6 +34,17 @@
 			name="Spring Batch"
 			uri="http://www.springframework.org/schema/batch" />
 	</extension>
+	<extension
+	       point="com.springsource.sts.config.ui.formPages">
+	    <formPage
+            class="org.springframework.ide.eclipse.batch.ui.editor.BatchFormPage"
+            graph="org.springframework.ide.eclipse.config.ui.editors.batch.graph.BatchGraphicalEditor"
+            id="com.springsource.sts.config.ui.editors.batch"
+            name="%batchPageName"
+            namespacePrefix="batch"
+            namespaceUri="http://www.springframework.org/schema/batch">
+      	</formPage>
+	</extension>
 	
 
 </plugin>
