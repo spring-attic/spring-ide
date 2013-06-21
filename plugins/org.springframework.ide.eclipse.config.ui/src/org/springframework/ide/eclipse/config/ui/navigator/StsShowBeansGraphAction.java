@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.navigator;
 
@@ -32,8 +32,8 @@ import org.springframework.ide.eclipse.config.ui.editors.SpringConfigGraphPage;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * @author Leo Dos Santos
@@ -84,10 +84,10 @@ public class StsShowBeansGraphAction extends AbstractNavigatorAction {
 
 	@Override
 	public void run() {
-		IEditorInput input;
-		if (element.getElementResource() instanceof IFile) {
+		if (element.getElementResource() instanceof IFile
+				&& BeansUIUtils.isBeansConfigContentType((IFile) element.getElementResource())) {
 			IFile file = (IFile) element.getElementResource();
-			input = new FileEditorInput(file);
+			IEditorInput input = new FileEditorInput(file);
 			IEditorPart part = SpringUIUtils.openInEditor(input, SpringConfigEditor.ID_EDITOR);
 			if (part instanceof SpringConfigEditor) {
 				SpringConfigEditor cEditor = (SpringConfigEditor) part;
@@ -98,6 +98,7 @@ public class StsShowBeansGraphAction extends AbstractNavigatorAction {
 			}
 		}
 		else {
+			IEditorInput input;
 			if (element instanceof IBeansConfig || element instanceof IBeansConfigSet) {
 				input = new GraphEditorInput(element.getElementID());
 			}

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.actions;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,10 +18,6 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.content.IContentType;
-import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -34,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFact
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 
 /**
@@ -84,22 +79,6 @@ public class AddAsBeanConfigAction extends AbstractHandler {
 		return config != null;
 	}
 	
-	private boolean isBeansConfigContentType(IFile file) {
-		IContentTypeManager contentTypeManager = Platform.getContentTypeManager();			
-		try {
-			InputStream contents = file.getContents();
-			IContentType contentType = contentTypeManager.findContentTypeFor(contents, file.getName());
-			if (contentType != null && contentType.isKindOf(contentTypeManager.getContentType("com.springsource.sts.config.ui.beanConfigFile"))) {
-				return true;
-			}
-		} catch (CoreException e) {
-			// if something goes wrong, treats the file as non spring content type
-		} catch (IOException e) {
-			// if something goes wrong, treats the file as non spring content type
-		}
-		return false;
-	}
-	
 	private boolean isBeansProject(IProject project) {
 		return BeansCorePlugin.getModel().getProject(project) != null;
 	}
@@ -127,7 +106,7 @@ public class AddAsBeanConfigAction extends AbstractHandler {
 				} else if (element instanceof IFile) {
 					IFile file = (IFile) element;
 					IProject project = file.getProject();
-					if (isBeansProject(project) && !isBeansConfig(file) && isBeansConfigContentType(file)) {
+					if (isBeansProject(project) && !isBeansConfig(file) && BeansUIUtils.isBeansConfigContentType(file)) {
 						selectedItems.add(file);
 					}
 				} 

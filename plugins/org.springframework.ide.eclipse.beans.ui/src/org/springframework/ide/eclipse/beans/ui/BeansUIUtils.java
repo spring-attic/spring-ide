@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 Spring IDE Developers
+ * Copyright (c) 2004 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -18,6 +20,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -56,9 +61,9 @@ import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.TreePathBuilder;
 import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -324,4 +329,21 @@ public final class BeansUIUtils {
 		return node.getBoolean(
 				BeansUIPlugin.DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
 	}
+	
+	public static boolean isBeansConfigContentType(IFile file) {
+		IContentTypeManager contentTypeManager = Platform.getContentTypeManager();			
+		try {
+			InputStream contents = file.getContents();
+			IContentType contentType = contentTypeManager.findContentTypeFor(contents, file.getName());
+			if (contentType != null && contentType.isKindOf(contentTypeManager.getContentType("com.springsource.sts.config.ui.beanConfigFile"))) {
+				return true;
+			}
+		} catch (CoreException e) {
+			// if something goes wrong, treats the file as non spring content type
+		} catch (IOException e) {
+			// if something goes wrong, treats the file as non spring content type
+		}
+		return false;
+	}
+	
 }
