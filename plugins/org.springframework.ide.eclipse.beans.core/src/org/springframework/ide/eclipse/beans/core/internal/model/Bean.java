@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,9 +7,12 @@
  *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
+ *     GoPivotal, Inc.       - performance optimizations
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -49,6 +52,7 @@ import org.springframework.util.ObjectUtils;
  * This class holds the data for a Spring bean.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public class Bean extends AbstractBeansModelElement implements IBean {
 
@@ -192,11 +196,11 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return null;
 	}
 
-	public Set<IBeanProperty> getProperties() {
+	public Collection<IBeanProperty> getProperties() {
 		if (properties == null) {
 			initBean();
 		}
-		return new LinkedHashSet<IBeanProperty>(properties.values());
+		return Collections.unmodifiableCollection(properties.values());
 	}
 
 	public String getClassName() {
