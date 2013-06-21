@@ -22,14 +22,11 @@ import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.CloseWindowListener;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
-import org.eclipse.swt.browser.ProgressAdapter;
-import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.WindowEvent;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.Credentials;
-import org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizard;
 import org.springframework.ide.eclipse.gettingstarted.wizard.GSImportWizard;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
@@ -83,20 +80,20 @@ public class GuidesDashboardPage extends WebDashboardPage {
 
 	}
 	
-	@Override
-	public void setInitializationData(IConfigurationElement cfig,
-			String propertyName, Object data) {
-		// TODO Auto-generated method stub
-		super.setInitializationData(cfig, propertyName, data);
-		if (data!=null && data instanceof Map) {
-			@SuppressWarnings("unchecked")
-			Map<String, String> map = (Map<String, String>) data;
-			String useJsString = map.get("useJavaScript");
-			if (useJsString!=null) {
-				setUseJavaScript(Boolean.valueOf(useJsString));
-			}
-		}
-	}
+//	@Override
+//	public void setInitializationData(IConfigurationElement cfig,
+//			String propertyName, Object data) {
+//		// TODO Auto-generated method stub
+//		super.setInitializationData(cfig, propertyName, data);
+//		if (data!=null && data instanceof Map) {
+//			@SuppressWarnings("unchecked")
+//			Map<String, String> map = (Map<String, String>) data;
+//			String useJsString = map.get("useJavaScript");
+//			if (useJsString!=null) {
+//				setUseJavaScript(Boolean.valueOf(useJsString));
+//			}
+//		}
+//	}
 	
 	/**
 	 * Enable 'use java script' option. This will provide a 'sts_import_guide' javascript function
@@ -116,7 +113,7 @@ public class GuidesDashboardPage extends WebDashboardPage {
 				String guideName = path.segment(1);
 				if (guideName !=null && guideName.startsWith("gs-")) {
 					//GuideImportWizard.open(getSite().getShell(), GettingStartedContent.getInstance().getGuide(guideName));
-					GSImportWizard.open(getSite().getShell(),  GettingStartedContent.getInstance().getGuide(guideName));
+					GSImportWizard.open(getShell(),  GettingStartedContent.getInstance().getGuide(guideName));
 					return true;
 				}
 			}
@@ -208,7 +205,6 @@ public class GuidesDashboardPage extends WebDashboardPage {
 	
 	@Override
 	public void dispose() {
-		super.dispose();
 		if (importFun!=null) {
 			importFun.dispose();
 		}

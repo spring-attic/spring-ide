@@ -21,7 +21,7 @@ public class GeneratedGuidesDashboardPage extends GuidesDashboardPage {
 		URL entry = GettingStartedActivator.getDefault().getBundle().getEntry("resources/dashboard.html");
 		dashHtml = new File(FileLocator.toFileURL(entry).toURI());
 		//generateHtml();
-		setUrl(dashHtml.toURI().toString());
+		setHomeUrl(dashHtml.toURI().toString());
 		setUseJavaScript(true);
 	}
 	

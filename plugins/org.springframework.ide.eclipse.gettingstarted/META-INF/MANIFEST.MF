@@ -23,7 +23,13 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.logging,
  org.springsource.ide.eclipse.commons.livexp,
  org.springframework.ide.eclipse.wizard,
- org.springsource.ide.eclipse.commons.core
+ org.springsource.ide.eclipse.commons.core,
+ org.eclipse.ui.browser,
+ org.eclipse.mylyn.commons.core,
+ org.eclipse.mylyn.commons.ui,
+ org.eclipse.mylyn.discovery.core,
+ org.eclipse.mylyn.discovery.ui,
+ org.springsource.ide.eclipse.commons.configurator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.gettingstarted.content,

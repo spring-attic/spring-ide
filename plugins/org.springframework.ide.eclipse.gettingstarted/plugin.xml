@@ -17,12 +17,19 @@
         without loosing dashboard content. 
      -->
     <page
-          class="org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage:http://springsource.org"
+          class="org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage:http://sagan-design.businesscatalyst.com/guides-6.html"
           id="org.springframework.ide.eclipse.gettingstarted.springhome"
           label="Spring Home Page"
           path="additions">
     </page>
     
+
+     <page
+          class="org.springframework.ide.eclipse.gettingstarted.dashboard.GuidesDashboardPageWithPreview"
+          id="org.springframework.ide.eclipse.gettingstarted.guideswp"
+          label="Guides WP"
+          path="additions">
+    </page>
     
     <page
           class="org.springframework.ide.eclipse.gettingstarted.dashboard.GuidesDashboardPage:https://github.com/springframework-meta"
@@ -53,7 +60,7 @@
       <wizard
             category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
             class="org.springframework.ide.eclipse.gettingstarted.wizard.GSImportWizard"
-            icon="icons/guide-import.png"
+            icon="resources/icons/guide-import.png"
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic"
             name="Getting Started Content"> 
          <description> 
@@ -64,7 +71,7 @@
       <wizard
             category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
             class="org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizard"
-            icon="icons/guide-import.png"
+            icon="resources/icons/guide-import.png"
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.guide"
             name="Getting Started Guide"> 
          <description> 
@@ -77,5 +84,20 @@
             name="Spring">
       </category> 
 </extension>
+ 
+ <!-- New dashboard -->
+ 
+	<extension point="org.eclipse.ui.editors">
+		<editor
+			class="org.springframework.ide.eclipse.gettingstarted.dashboard.DashboardEditor"
+			icon="resources/icons/dashboard_16.png"
+			id="org.springframework.ide.eclipse.gettingstarted.dashboard.DashboardEditor"
+			name="Dashboard">
+		</editor>
+	</extension>
+ 
+ 
+ <!-- org.springframework.ide.eclipse.gettingstarted.Dashboard -->
+ 
  
 </plugin>

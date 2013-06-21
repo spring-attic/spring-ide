@@ -20,13 +20,17 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Composite;
+import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+
+import org.eclipse.ui.internal.browser.BrowserViewer;
 
 /**
  * Try to hide platform related mess from client code that needs to create an SWT 
  * Browser widget. What this factory does is try and properly configure
  * xulrunner native libraries we can ship as an eclipse plugin.
  */
+@SuppressWarnings("restriction")
 public class BrowserFactory {
 
 	private static final String XUL_RUNNER_BUNDLE = "org.springframework.ide.eclipse.xulrunner";
@@ -38,8 +42,10 @@ public class BrowserFactory {
 	//    -Dorg.eclipse.swt.browser.DefaultType=mozilla
 	
 	private static class BrowserFactoryImplementation {
-		Browser create(Composite body) {
-			return new Browser(body, SWT.NONE);
+		STSBrowserViewer create(Composite parent) {
+			STSBrowserViewer viewer = new STSBrowserViewer(parent, BrowserViewer.BUTTON_BAR|BrowserViewer.LOCATION_BAR);
+			return viewer;
+//			return new Browser(parent, SWT.NONE);
 		}
 	}
 	
@@ -74,21 +80,24 @@ public class BrowserFactory {
 
 		private String getXULRunnerPath() {
 			String osArch = Platform.getOS()+"-"+Platform.getOSArch();
-			URL entry = Platform.getBundle(XUL_RUNNER_BUNDLE).getEntry(osArch);
-			try {
-				if (entry!=null) {
-					File file = new File(FileLocator.toFileURL(entry).toURI());
-					if (file.exists()) {
-						return file.getAbsolutePath();
+			Bundle bundle = Platform.getBundle(XUL_RUNNER_BUNDLE);
+			if (bundle!=null) {
+				URL entry = bundle.getEntry(osArch);
+				try {
+					if (entry!=null) {
+						File file = new File(FileLocator.toFileURL(entry).toURI());
+						if (file.exists()) {
+							return file.getAbsolutePath();
+						}
 					}
+				} catch (URISyntaxException e) {
+					//Shouldn't be possible!
+					GettingStartedActivator.log(e);
+				} catch (IOException e) {
+					//Probaly thrown by new File(uri) call. It means the uri isn't pointing to a file.
+					// that probably means the bundle isn't 'exploded'.
+					GettingStartedActivator.log(new Error("Bundle '"+XUL_RUNNER_BUNDLE+"' not exploded?", e));
 				}
-			} catch (URISyntaxException e) {
-				//Shouldn't be possible!
-				GettingStartedActivator.log(e);
-			} catch (IOException e) {
-				//Probaly thrown by new File(uri) call. It means the uri isn't pointing to a file.
-				// that probably means the bundle isn't 'exploded'.
-				GettingStartedActivator.log(new Error("Bundle '"+XUL_RUNNER_BUNDLE+"' not exploded?", e));
 			}
 			return null;
 		}
@@ -102,7 +111,7 @@ public class BrowserFactory {
 
 	private static BrowserFactoryImplementation implementation;
 
-	public static Browser create(Composite body) {
+	public static STSBrowserViewer create(Composite body) {
 		return implementation().create(body);
 	}
 

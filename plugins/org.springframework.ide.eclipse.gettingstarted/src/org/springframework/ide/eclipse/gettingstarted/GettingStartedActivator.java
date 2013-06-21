@@ -1,7 +1,5 @@
 package org.springframework.ide.eclipse.gettingstarted;
 
-import java.net.URISyntaxException;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -13,7 +11,7 @@ import org.osgi.framework.BundleContext;
 public class GettingStartedActivator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.springframework.ide.gettingstarted.guides"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.gettingstarted"; //$NON-NLS-1$
 
 	// The shared instance
 	private static GettingStartedActivator plugin;

@@ -10,25 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.dashboard;
 
-import java.net.URL;
-import java.util.Map;
-
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWebBrowser;
-import org.eclipse.ui.forms.IManagedForm;
-import org.eclipse.ui.forms.widgets.ScrolledForm;
-import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.gettingstarted.browser.BrowserFactory;
-import org.springsource.ide.eclipse.dashboard.ui.AbstractDashboardPage;
-
-import static org.eclipse.ui.browser.IWorkbenchBrowserSupport.*;
+import org.springframework.ide.eclipse.gettingstarted.browser.STSBrowserViewer;
 
 
 //Note: some complications on Linux systems because of problems satisfying
@@ -44,71 +32,65 @@ import static org.eclipse.ui.browser.IWorkbenchBrowserSupport.*;
  * 
  * @author Kris De Volder
  */
-public class WebDashboardPage extends AbstractDashboardPage implements IExecutableExtension {
+public class WebDashboardPage extends ADashboardPage /* implements IExecutableExtension*/ {
 
 	/**
 	 * Using this ID ensures we only open one 'slave' browser when opening links from within
 	 * a dashboard page.
 	 */
 	public static final String DASHBOARD_SLAVE_BROWSER_ID = WebDashboardPage.class.getName()+".SLAVE";
-	
-	private static int idCounter = 0;
 
 	/**
 	 * The URL that will be displayed in this Dashboard webpage.
 	 */
-	private String url;
+	private String homeUrl;
 
+	private String name;
+
+	private Shell shell;
+
+	/**
+	 * Constructor for when this class is used as n {@link IExecutableExtension}. In that case
+	 * setInitializationData method will be called with infos from plugin.xml to fill
+	 * in the fields.
+	 */
 	public WebDashboardPage() {
-		//It seems we are forced to pass an id and a title although looks like this
-		// stuff isn't used. Morever we don't really know what it will be yet... that
-		// info is passed in later by 'setInitializationData'
-		super(generateId(), "Generic Web Page");
 	}
 	
-	private static synchronized String generateId() {
-		return WebDashboardPage.class.getName() + (idCounter++);
+	public WebDashboardPage(String name, String homeUrl) {
+		this.name = name;
+		this.homeUrl = homeUrl;
 	}
 
-	@Override
-	public void setInitializationData(IConfigurationElement cfig,
-			String propertyName, Object data) {
-		super.setInitializationData(cfig, propertyName, data);
-		if (data!=null) {
-			if (data instanceof String) {
-				this.url = (String) data;
-			} else if (data instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, String> map = (Map<String, String>) data;
-				this.url = map.get("url");
-			}
-		}
-	}
+	
+//	@Override
+//	public void setInitializationData(IConfigurationElement cfig,
+//			String propertyName, Object data) {
+//		if (data!=null && data instanceof Map) {
+//			@SuppressWarnings("unchecked")
+//			Map<String, String> map = (Map<String, String>) data;
+//			this.name = map.get("name");
+//			this.homeUrl = map.get("url");
+//		}
+//		Assert.isNotNull(this.name, "A name must be provided as initialization data for WebDashboardPage");
+//		Assert.isNotNull(this.homeUrl, "A url must be provided as initialization data for WebDashboardPage");
+//	}
 	
 	@Override
-	protected void createFormContent(IManagedForm managedForm) {
-//		FormToolkit toolkit = managedForm.getToolkit();
-		ScrolledForm form = managedForm.getForm();
-		
-		//toolkit.decorateFormHeading(form.getForm()); TODO: what's this for? 
-
-		//IPreferenceStore prefStore = IdeUiPlugin.getDefault().getPreferenceStore();
-		
-		FillLayout layout = new FillLayout();
-
-		Composite body = form.getBody();
-		body.setLayout(layout);
-		
-		Browser browser = BrowserFactory.create(body);
-		if (url!=null) {
-			browser.setUrl(url);
+	public void createControl(Composite parent) {
+		this.shell = parent.getShell();
+		parent.setLayout(new FillLayout());
+		STSBrowserViewer browserViewer = BrowserFactory.create(parent);
+		Browser browser = browserViewer.getBrowser();
+		if (homeUrl!=null) {
+			browserViewer.setHomeUrl(homeUrl);
+			browserViewer.setURL(homeUrl);
 		} else {
 			browser.setText("<h1>URL not set</h1>" +
 					"<p>Url should be provided via the setInitializationData method</p>"
 			);
 		}
 		addBrowserHooks(browser);
-//		searchBox.setFocus();
 	}
 
 	/**
@@ -122,15 +104,24 @@ public class WebDashboardPage extends AbstractDashboardPage implements IExecutab
 	 * The url of the landing page this dashboard page will show when it is opened.
 	 */
 	public String getUrl() {
-		return url;
+		return homeUrl;
 	}
 	
 	/**
-	 * Change the url this dashboard page that will show when it is opened. 
-	 * This must be called before the page is opened.
+	 * Change the url this dashboard page will show when it is first opened,
+	 * or when the user clicks on the 'home' icon. 
 	 */
-	public void setUrl(String url) {
-		this.url = url;
+	public void setHomeUrl(String url) {
+		this.homeUrl = url;
+	}
+
+	public String getName() {
+		return name;
+	}
+	
+	public Shell getShell() {
+		return shell;
 	}
 
 }
+ 
