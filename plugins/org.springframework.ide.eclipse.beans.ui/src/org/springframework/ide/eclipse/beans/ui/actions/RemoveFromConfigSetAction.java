@@ -17,6 +17,7 @@ import java.util.Set;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.ISelectionService;
@@ -27,7 +28,9 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
@@ -72,9 +75,11 @@ public class RemoveFromConfigSetAction extends CompoundContributionItem implemen
 		private IBeansConfig config;
 		
 		private RemoveFromConfigSetDynamicAction(IBeansConfigSet configSet, IBeansConfig config) {
-			super(config.getElementName());
+			super();
 			this.configSet = configSet;
 			this.config = config;
+			setText(BeansModelLabels.getElementLabel(config, 0));
+			setImageDescriptor(ImageDescriptor.createFromImage(BeansModelImages.getImage(config)));
 		}
 
 		@Override
