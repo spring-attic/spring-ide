@@ -153,14 +153,6 @@
             namespaceUri="http://www.springframework.org/schema/util">
       </formPage>
       <formPage
-            class="org.springframework.ide.eclipse.config.ui.editors.batch.BatchFormPage"
-            graph="org.springframework.ide.eclipse.config.ui.editors.batch.graph.BatchGraphicalEditor"
-            id="com.springsource.sts.config.ui.editors.batch"
-            name="%batchPageName"
-            namespacePrefix="batch"
-            namespaceUri="http://www.springframework.org/schema/batch">
-      </formPage>
-      <formPage
             class="org.springframework.ide.eclipse.config.ui.editors.integration.IntegrationFormPage"
             graph="org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationGraphicalEditor"
             id="com.springsource.sts.config.ui.editors.integration"
