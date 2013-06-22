@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
@@ -48,9 +49,9 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 	private BeansConfigId id;
 	
 	// TODO FIXADE Can we change 2nd arg to BeansConfigId???
-	public ImportedBeansConfig(IBeansImport beansImport, Resource resource, Type type) {
+	public ImportedBeansConfig(IBeansImport beansImport, Resource resource, IBeansProject project, Type type) {
 		super(beansImport, resource.getFilename(), type);
-		init(resource);
+		init(resource, project);
 	}
 
 	@Override
@@ -113,7 +114,7 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 		imports.add(beansImport);
 	}
 
-	private void init(Resource resource) {
+	private void init(Resource resource, IBeansProject project) {
 		if (resource instanceof IAdaptable) {
 			if (((IAdaptable) resource).getAdapter(ZipEntryStorage.class) != null) {
 				ZipEntryStorage storage = (ZipEntryStorage) ((IAdaptable) resource)
@@ -133,10 +134,11 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 			String msg = "Imported Beans config file '" + resource + "' not accessible";
 			problems = new CopyOnWriteArraySet<ValidationProblem>();
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, file, -1));
+            id = BeansConfigId.create(resource, project.getProject());
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
-			id = BeansConfigId.create(file);
+			id = BeansConfigId.create(file, project.getProject());
 		}
 	}
 

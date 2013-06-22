@@ -466,7 +466,7 @@ public class BeansEditorUtils {
 		Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
 		IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
 		BeansConfigId id = BeansConfigId.create(file, project.getProject());
-        Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(id, true);
+        Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(file, true);
 		for (IBeansConfig config : allConfigs) {
 			if (config instanceof IImportedBeansConfig) {
 				IBeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config, IBeansConfig.class);
@@ -478,7 +478,7 @@ public class BeansEditorUtils {
 			Set<IBeansConfigSet> configSets = project.getConfigSets();
 
 			for (IBeansConfigSet configSet : configSets) {
-				if (configSet.hasConfig(id) || !BeansCoreUtils.isBeansConfig(id)) {
+				if (configSet.hasConfig(id) || !BeansCoreUtils.isBeansConfig(file)) {
 					Set<IBeansConfig> bcs = configSet.getConfigs();
 					configs.addAll(bcs);
 				}

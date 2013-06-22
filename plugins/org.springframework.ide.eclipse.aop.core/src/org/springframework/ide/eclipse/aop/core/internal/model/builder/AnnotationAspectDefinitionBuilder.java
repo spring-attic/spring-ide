@@ -35,7 +35,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigFactory;
+import org.springframework.ide.eclipse.beans.core.model.generators.BeansConfigId;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
@@ -62,7 +62,7 @@ public class AnnotationAspectDefinitionBuilder extends AbstractAspectDefinitionB
 	public void buildAspectDefinitions(List<IAspectDefinition> aspectInfos, IFile file,
 			IProjectClassLoaderSupport classLoaderSupport, IDocumentFactory factory) {
 		if (BeansCoreUtils.isBeansConfig(file, true)) {
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigFactory.getConfigId(file), true);
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(BeansConfigId.create(file), true);
 			parseAnnotationAspects(beansConfig, aspectInfos, classLoaderSupport);
 		}
 	}

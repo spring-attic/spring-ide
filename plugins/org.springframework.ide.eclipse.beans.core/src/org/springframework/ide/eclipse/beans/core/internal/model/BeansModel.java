@@ -248,19 +248,22 @@ public class BeansModel extends AbstractModel implements IBeansModel {
     }
 
 
-	public boolean isConfig(BeansConfigId id, boolean includeImported) {
-		if (id != null) {
-			IBeansProject project = getProject(id.project);
+	public boolean isConfig(IFile file, boolean includeImported) {
+		if (file != null) {
+			IBeansProject project = getProject(file.getProject().getName());
 			
 			// check the project of the file itself first
-			if (project != null && project.hasConfig(id, includeImported)) {
+			if (project != null && project.hasConfig(BeansConfigId.create(file, project.getProject()), includeImported)) {
 			    return true;
 			}
 			
 			// then check all the other projects
 			for (IBeansProject p : getProjects()) {
-                BeansConfigId newId = id.newProject(p.getElementName());
-				if (p.hasConfig(newId, includeImported)) {
+			    if (p.equals(project)) {
+			        continue;
+			    }
+                BeansConfigId newId = BeansConfigId.create(file, p.getProject());
+				if (newId != null && p.hasConfig(newId, includeImported)) {
 					return true;
 				}
 			}
@@ -268,17 +271,21 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		return false;
 	}
 
-	public Set<IBeansConfig> getConfigs(BeansConfigId id, boolean includeImported) {
-		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
-		if (id != null) {
-			for (IBeansProject p : getProjects()) {
-				beansConfigs.addAll(p.getConfigs(id, includeImported));
-			}
-		}
-		return beansConfigs;
-	}
+	public Set<IBeansConfig> getConfigs(IFile configFile,
+            boolean includeImported) {
+        Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
+        if (configFile != null) {
+            for (IBeansProject p : getProjects()) {
+                BeansConfigId id = BeansConfigId.create(configFile, p.getProject());
+                if (id != null) {
+                    beansConfigs.addAll(p.getConfigs(id, includeImported));
+                }
+            }
+        }
+        return beansConfigs;
+    }
 
-	/**
+    /**
      * Returns a list of all configs from this model which contain a bean with given bean class.
      */
     public Set<IBeansConfig> getConfigs(String className) {
@@ -566,7 +573,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			Set<IReloadableBeansConfig> configs = new LinkedHashSet<IReloadableBeansConfig>();
 			try {
 				r.lock();
-				Set<IBeansConfig> bcs = getConfigs(BeansConfigId.create(file), true);
+				Set<IBeansConfig> bcs = getConfigs(file, true);
 				for (IBeansConfig bc : bcs) {
 					if (bc instanceof IImportedBeansConfig) {
 						configs.add(BeansModelUtils.getParentOfClass(bc, IReloadableBeansConfig.class));

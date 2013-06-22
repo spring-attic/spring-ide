@@ -990,7 +990,7 @@ public class XMLBeansConfig extends AbstractBeansConfig implements IBeansConfig,
 				Resource[] importedResources = importDefinition.getActualResources();
 
 				for (Resource importedResource : importedResources) {
-					ImportedBeansConfig importedBeansConfig = new ImportedBeansConfig(beansImport, importedResource,
+					ImportedBeansConfig importedBeansConfig = new ImportedBeansConfig(beansImport, importedResource, ((IBeansProject) getElementParent()),
 							getType());
 					importedBeansConfig.readConfig();
 					beansImport.addImportedBeansConfig(importedBeansConfig);

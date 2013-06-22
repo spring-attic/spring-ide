@@ -60,7 +60,8 @@ public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
 	}
 	
 	private BeansConfigId getConfigForClassName(String cName) throws JavaModelException {
-	    return BeansConfigId.create(javaProject.findType(cName), project);
+	    // type was not actually renamed, so can't use the type to create the Id.
+	    return BeansConfigId.parse("java:" + cName, project);
 	}
 	
 	@Test

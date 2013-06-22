@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
+import org.eclipse.jdt.internal.core.util.Util;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -60,10 +61,6 @@ public class BeansConfigId {
     
     @Override
     public String toString() {
-        return kind + ":" + project + ":" + name;
-    }
-    
-    public String serialize() {
         if (kind.equals(XMLConfigGenerator.XML_CONFIG_KIND)) {
             if (name.startsWith("/" + project + "/")) {
                 return name.substring(("/" + project + "/").length());
@@ -177,11 +174,11 @@ public class BeansConfigId {
                 project = file.getProject();
             }
         
-            if (!XMLConfigGenerator.XML_CONFIG_KIND.equals(file.getFileExtension())) {
-                IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
+            if (!XMLConfigGenerator.XML_CONFIG_KIND.equals(file.getFileExtension()) && Util.isJavaLikeFileName(file.getName())) {
+                IJavaProject javaProject = JdtUtils.getJavaProject(project);
                 if (javaProject != null) {
                     IJavaElement element = JavaCore.create(file, javaProject);
-                    if (element != null && element.getPrimaryElement() instanceof ICompilationUnit) {
+                    if (element != null && element.getPrimaryElement() instanceof ICompilationUnit && element.exists()) {
                         String typeName = element.getElementName();
                         String fileExtension = file.getFileExtension();
                         if (fileExtension != null && fileExtension.length() > 0) {
@@ -198,6 +195,9 @@ public class BeansConfigId {
                             
                             return new BeansConfigId(file.getFileExtension(), project.getName(), packageName + typeName);
                         }
+                    } else {
+                        // element not on project's classpath
+                        return null;
                     }
                 }
             }
@@ -206,10 +206,10 @@ public class BeansConfigId {
             return null;
         }
         
-        // maybe it's ok to return null 
         if (obj == null) {
-            throw new IllegalArgumentException("Attempt to create a BeansConfigId from null argument");
+            return null;
         }
+        // maybe best to just return null here.
         throw new IllegalArgumentException("Attempt to create a BeansConfigId from an unexpected type: " + obj.getClass() + " toString: "  + obj);
     }
 }

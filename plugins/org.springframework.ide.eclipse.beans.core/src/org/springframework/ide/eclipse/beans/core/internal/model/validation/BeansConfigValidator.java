@@ -95,7 +95,7 @@ public class BeansConfigValidator extends AbstractValidator {
 		if (resource instanceof IFile) {
 
 			// First check for a beans config file
-			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs(BeansConfigId.create((IFile) resource), true);
+			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs((IFile) resource, true);
 			if (configs != null && configs.size() > 0) {
 				for (IBeansConfig beansConfig : configs) {
 					// Resolve imported config files to their root importing one

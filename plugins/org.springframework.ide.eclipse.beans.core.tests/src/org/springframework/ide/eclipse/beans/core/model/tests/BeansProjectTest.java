@@ -19,8 +19,11 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,9 +73,25 @@ public class BeansProjectTest {
 	}
 
 	private BeansConfigId getConfigIdForFileName(String fName) {
-	    return BeansConfigId.create(project.getFile(fName));
+	    return getConfigIdForFileName(fName, project);
 	}
 
+    private BeansConfigId getConfigIdForFileName(String fName, IProject proj) {
+        if (fName.charAt(0) == '/') {
+            // config from other project
+            return BeansConfigId.create(proj.getWorkspace().getRoot().getFile(new Path(fName)));
+        }
+        return BeansConfigId.create(proj.getFile(fName));
+    }
+
+    private BeansConfigId getConfigIdForTypeName(String tName) throws JavaModelException {
+	    return getConfigIdForTypeName(tName, javaProject);
+	}
+	
+    private BeansConfigId getConfigIdForTypeName(String tName, IJavaProject javaProj) throws JavaModelException {
+        return BeansConfigId.create(javaProj.findType(tName), javaProj.getProject());
+    }
+    
 	@Test
 	public void testBeansProjectXMLConfig() throws Exception {
 		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
@@ -80,7 +99,7 @@ public class BeansProjectTest {
 		Set<IBeansConfig> configs = beansProject.getConfigs();
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
-		assertEquals("basic-bean-config.xml", config.getElementName());
+		assertEquals("/beans-config-tests/basic-bean-config.xml", config.getElementName());
 		assertTrue(config instanceof XMLBeansConfig);
 	}
 	
@@ -96,39 +115,42 @@ public class BeansProjectTest {
 		Set<IBeansConfig> configs = set.getConfigs();
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
-		assertEquals("basic-bean-config.xml", config.getElementName());
+		assertEquals("/beans-config-tests/basic-bean-config.xml", config.getElementName());
 		assertTrue(config instanceof XMLBeansConfig);
 	}
 	
 	@Test
 	public void testBeansProjectXMLConfigWithExternalConfigSet() throws Exception {
 		IProject secondProject = StsTestUtil.createPredefinedProject("beans-config-tests-2", "org.springframework.ide.eclipse.beans.core.tests");
-		BeansProject secondBeansProject = new BeansProject(model, secondProject);
-		model.addProject(secondBeansProject);
-		
-		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		
-		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
-		configSet.addConfig(getConfigIdForFileName("basic-bean-config.xml"));
-		configSet.addConfig(getConfigIdForFileName("/beans-config-tests-2/second-bean-config.xml"));
-		beansProject.addConfigSet(configSet);
-		
-		IBeansConfigSet set = beansProject.getConfigSet("test-set");
-		Set<IBeansConfig> configs = set.getConfigs();
-		assertEquals(2, configs.size());
-		
-		secondProject.delete(true, null);
+		try {
+    		BeansProject secondBeansProject = new BeansProject(model, secondProject);
+    		model.addProject(secondBeansProject);
+    		
+    		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
+    		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml", secondProject), IBeansConfig.Type.MANUAL);
+    		
+    		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
+    		configSet.addConfig(getConfigIdForFileName("basic-bean-config.xml"));
+    		configSet.addConfig(getConfigIdForFileName("/beans-config-tests-2/second-bean-config.xml"));
+    		beansProject.addConfigSet(configSet);
+    		
+    		IBeansConfigSet set = beansProject.getConfigSet("test-set");
+    		Set<IBeansConfig> configs = set.getConfigs();
+    		assertEquals(2, configs.size());
+    		
+        } finally {
+            secondProject.delete(true, null);
+        }
 	}
 	
 	@Test
 	public void testBeansProjectJavaConfig() throws Exception {
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		Set<IBeansConfig> configs = beansProject.getConfigs();
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
-		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
+		assertEquals("org.test.spring.SimpleConfigurationClass", config.getElementName());
 		assertTrue(config instanceof BeansJavaConfig);
 		
 		IType type = javaProject.findType("org.test.spring.SimpleConfigurationClass");
@@ -139,14 +161,14 @@ public class BeansProjectTest {
 	public void testBeansProjectMixedConfigs() throws Exception {
 		Set<BeansConfigId> configs = new HashSet<BeansConfigId>();
 		configs.add(getConfigIdForFileName("basic-bean-config.xml"));
-		configs.add(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"));
+		configs.add(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"));
 		beansProject.setConfigs(configs);
 		
 		IBeansConfig xmlConfig = beansProject.getConfig(getConfigIdForFileName("basic-bean-config.xml"));
-		IBeansConfig javaConfig = beansProject.getConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"));
+		IBeansConfig javaConfig = beansProject.getConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"));
 		
-		assertEquals("basic-bean-config.xml", xmlConfig.getElementName());
-		assertEquals("java:org.test.spring.SimpleConfigurationClass", javaConfig.getElementName());
+		assertEquals("/beans-config-tests/basic-bean-config.xml", xmlConfig.getElementName());
+		assertEquals("org.test.spring.SimpleConfigurationClass", javaConfig.getElementName());
 
 		assertTrue(xmlConfig instanceof XMLBeansConfig);
 		assertTrue(javaConfig instanceof BeansJavaConfig);
@@ -157,25 +179,28 @@ public class BeansProjectTest {
 	
 	@Test
 	public void testBeansProjectMixedConfigSet() throws Exception {
-		IProject secondProject = StsTestUtil.createPredefinedProject("beans-config-tests-2", "org.springframework.ide.eclipse.beans.core.tests");
-		BeansProject secondBeansProject = new BeansProject(model, secondProject);
-		model.addProject(secondBeansProject);
-		
-		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
-		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		secondBeansProject.addConfig(getConfigIdForFileName("java:org.test.spring.ExternalConfigurationClass"), IBeansConfig.Type.MANUAL);
-		
-		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
-		configSet.addConfig(getConfigIdForFileName("basic-bean-config.xml"));
-		configSet.addConfig(getConfigIdForFileName("/beans-config-tests-2/java:org.test.spring.ExternalConfigurationClass"));
-		beansProject.addConfigSet(configSet);
-		
-		IBeansConfigSet set = beansProject.getConfigSet("test-set");
-		Set<IBeansConfig> configs = set.getConfigs();
-		assertEquals(2, configs.size());
-		
-		secondProject.delete(true, null);
+	    IProject secondProject = StsTestUtil.createPredefinedProject("beans-config-tests-2", "org.springframework.ide.eclipse.beans.core.tests");
+	    try {
+    		BeansProject secondBeansProject = new BeansProject(model, secondProject);
+    		IJavaProject secondJavaProject = JavaCore.create(secondProject);
+    		model.addProject(secondBeansProject);
+    		
+    		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
+    		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+    		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml"), IBeansConfig.Type.MANUAL);
+    		secondBeansProject.addConfig(getConfigIdForTypeName("org.test.spring.ExternalConfigurationClass", secondJavaProject), IBeansConfig.Type.MANUAL);
+    		
+    		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
+    		configSet.addConfig(getConfigIdForFileName("basic-bean-config.xml"));
+    		configSet.addConfig(getConfigIdForTypeName("org.test.spring.ExternalConfigurationClass", secondJavaProject));
+    		beansProject.addConfigSet(configSet);
+    		
+    		IBeansConfigSet set = beansProject.getConfigSet("test-set");
+    		Set<IBeansConfig> configs = set.getConfigs();
+    		assertEquals(2, configs.size());
+	    } finally {
+	        secondProject.delete(true, null);
+	    }
 	}
 	
 	@Test
@@ -208,28 +233,31 @@ public class BeansProjectTest {
 	@Test
 	public void testBeansProjectXMLConfigFileRemovedWithExternalConfigSet() throws Exception {
 		IProject secondProject = StsTestUtil.createPredefinedProject("beans-config-tests-2", "org.springframework.ide.eclipse.beans.core.tests");
-		BeansProject secondBeansProject = new BeansProject(model, secondProject);
-		model.addProject(secondBeansProject);
-		
-		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		
-		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
-		configSet.addConfig(getConfigIdForFileName("basic-bean-config.xml"));
-		configSet.addConfig(getConfigIdForFileName("/beans-config-tests-2/second-bean-config.xml"));
-		beansProject.addConfigSet(configSet);
-		
-		IFile configFile = (IFile) secondProject.findMember("second-bean-config.xml");
-		beansProject.removeConfig(configFile);
-		
-		IBeansConfigSet set = beansProject.getConfigSet("test-set");
-		Set<IBeansConfig> configs = set.getConfigs();
-		assertEquals(1, configs.size());
-		IBeansConfig config = configs.iterator().next();
-		assertEquals("basic-bean-config.xml", config.getElementName());
-		assertTrue(config instanceof XMLBeansConfig);
-		
-		secondProject.delete(true, null);
+		try {
+    		BeansProject secondBeansProject = new BeansProject(model, secondProject);
+    		model.addProject(secondBeansProject);
+    		
+    		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
+    		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml"), IBeansConfig.Type.MANUAL);
+    		
+    		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
+    		configSet.addConfig(getConfigIdForFileName("basic-bean-config.xml"));
+    		configSet.addConfig(getConfigIdForFileName("/beans-config-tests-2/second-bean-config.xml"));
+    		beansProject.addConfigSet(configSet);
+    		
+    		IFile configFile = (IFile) secondProject.findMember("second-bean-config.xml");
+    		beansProject.removeConfig(configFile);
+    		
+    		IBeansConfigSet set = beansProject.getConfigSet("test-set");
+    		Set<IBeansConfig> configs = set.getConfigs();
+    		assertEquals(1, configs.size());
+    		IBeansConfig config = configs.iterator().next();
+    		assertEquals("/beans-config-tests/basic-bean-config.xml", config.getElementName());
+    		assertTrue(config instanceof XMLBeansConfig);
+    		
+        } finally {
+            secondProject.delete(true, null);
+        }
 	}
 	
 	@Test
@@ -249,13 +277,13 @@ public class BeansProjectTest {
 		Set<IBeansConfig> configs = beansProject.getConfigs();
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
-		assertEquals("basic-bean-config.xml", config.getElementName());
+		assertEquals("/beans-config-tests/basic-bean-config.xml", config.getElementName());
 		assertTrue(config instanceof XMLBeansConfig);
 	}
 	
 	@Test
 	public void testBeansProjectJavaConfigFileRemoved() throws Exception {
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		IType type = javaProject.findType("org.test.spring.SimpleConfigurationClass");
 		beansProject.removeConfig((IFile) type.getResource());
@@ -266,8 +294,8 @@ public class BeansProjectTest {
 	
 	@Test
 	public void testBeansProjectJavaConfigFileRemovedViaName() throws Exception {
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
-		beansProject.removeConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"));
+		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+		beansProject.removeConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"));
 		
 		Set<IBeansConfig> configs = beansProject.getConfigs();
 		assertEquals(0, configs.size());
@@ -275,10 +303,10 @@ public class BeansProjectTest {
 
 	@Test
 	public void testBeansProjectJavaConfigFileRemovedWithConfigSet() throws Exception {
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
-		configSet.addConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"));
+		configSet.addConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"));
 		beansProject.addConfigSet(configSet);
 		
 		IType type = javaProject.findType("org.test.spring.SimpleConfigurationClass");
@@ -291,29 +319,31 @@ public class BeansProjectTest {
 	
 	@Test
 	public void testBeansProjectMixedConfigSetRemovedExternalJavaConfig() throws Exception {
-		IProject secondProject = StsTestUtil.createPredefinedProject("beans-config-tests-2", "org.springframework.ide.eclipse.beans.core.tests");
-		IJavaProject secondJavaProject = JdtUtils.getJavaProject(secondProject);
-		BeansProject secondBeansProject = new BeansProject(model, secondProject);
-		model.addProject(secondBeansProject);
-		
-		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
-		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		secondBeansProject.addConfig(getConfigIdForFileName("java:org.test.spring.ExternalConfigurationClass"), IBeansConfig.Type.MANUAL);
-		
-		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
-		configSet.addConfig(getConfigIdForFileName("basic-bean-config.xml"));
-		configSet.addConfig(getConfigIdForFileName("java:org.test.spring.ExternalConfigurationClass"));
-		beansProject.addConfigSet(configSet);
-		
-		IType type = secondJavaProject.findType("org.test.spring.ExternalConfigurationClass");
-		beansProject.removeConfig((IFile) type.getResource());
-		
-		IBeansConfigSet set = beansProject.getConfigSet("test-set");
-		Set<IBeansConfig> configs = set.getConfigs();
-		assertEquals(1, configs.size());
-		
-		secondProject.delete(true, null);
+	    IProject secondProject = StsTestUtil.createPredefinedProject("beans-config-tests-2", "org.springframework.ide.eclipse.beans.core.tests");
+	    try {
+    		IJavaProject secondJavaProject = JdtUtils.getJavaProject(secondProject);
+    		BeansProject secondBeansProject = new BeansProject(model, secondProject);
+    		model.addProject(secondBeansProject);
+    		
+    		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
+    		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+    		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml", secondProject), IBeansConfig.Type.MANUAL);
+    		secondBeansProject.addConfig(getConfigIdForTypeName("org.test.spring.ExternalConfigurationClass", secondJavaProject), IBeansConfig.Type.MANUAL);
+    		
+    		BeansConfigSet configSet = new BeansConfigSet(beansProject, "test-set", IBeansConfigSet.Type.MANUAL);
+    		configSet.addConfig(getConfigIdForFileName("basic-bean-config.xml"));
+    		configSet.addConfig(getConfigIdForTypeName("org.test.spring.ExternalConfigurationClass", secondJavaProject));
+    		beansProject.addConfigSet(configSet);
+    		
+    		IType type = secondJavaProject.findType("org.test.spring.ExternalConfigurationClass");
+    		beansProject.removeConfig((IFile) type.getResource());
+    		
+    		IBeansConfigSet set = beansProject.getConfigSet("test-set");
+    		Set<IBeansConfig> configs = set.getConfigs();
+    		assertEquals(1, configs.size());
+        } finally {
+            secondProject.delete(true, null);
+        }
 	}
 	
 	@Test
@@ -324,7 +354,7 @@ public class BeansProjectTest {
 		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile), false);
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
-		assertEquals("basic-bean-config.xml", config.getElementName());
+		assertEquals("/beans-config-tests/basic-bean-config.xml", config.getElementName());
 	}
 	
 	@Test
@@ -336,37 +366,37 @@ public class BeansProjectTest {
 		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile1), false);
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
-		assertEquals("basic-bean-config.xml", config.getElementName());
+		assertEquals("/beans-config-tests/basic-bean-config.xml", config.getElementName());
 
 		IFile xmlFile2 = (IFile) project.findMember("advanced-bean-config.xml");
 		configs = beansProject.getConfigs(BeansConfigId.create(xmlFile2), false);
 		assertEquals(1, configs.size());
 		config = configs.iterator().next();
-		assertEquals("advanced-bean-config.xml", config.getElementName());
+		assertEquals("/beans-config-tests/advanced-bean-config.xml", config.getElementName());
 	}
 	
 	@Test
 	public void testGetBeanConfigsMixed() throws Exception {
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
 		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
 
 		IFile xmlFile = (IFile) project.findMember("basic-bean-config.xml");
 		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile), false);
 		assertEquals(1, configs.size());
 		IBeansConfig config = configs.iterator().next();
-		assertEquals("basic-bean-config.xml", config.getElementName());
+		assertEquals("/beans-config-tests/basic-bean-config.xml", config.getElementName());
 
 		IFile javaFile = (IFile) project.findMember("src/org/test/spring/SimpleConfigurationClass.java");
 		configs = beansProject.getConfigs(BeansConfigId.create(javaFile), false);
 		assertEquals(1, configs.size());
 		config = configs.iterator().next();
-		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
+		assertEquals("org.test.spring.SimpleConfigurationClass", config.getElementName());
 	}
 	
 	@Test
 	public void testGetBeanConfigsTwoInnerClassConfigs() throws Exception {
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass1"), IBeansConfig.Type.MANUAL);
-		beansProject.addConfig(getConfigIdForFileName("java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass2"), IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.TwoInnerConfigurationClasses.InnerConfigClass1"), IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigIdForTypeName("org.test.spring.TwoInnerConfigurationClasses.InnerConfigClass2"), IBeansConfig.Type.MANUAL);
 
 		IFile javaFile = (IFile) project.findMember("src/org/test/spring/TwoInnerConfigurationClasses.java");
 		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(javaFile), false);
@@ -385,19 +415,21 @@ public class BeansProjectTest {
 	@Test
 	public void testGetBeanConfigsWithExternalFile() throws Exception {
 		IProject secondProject = StsTestUtil.createPredefinedProject("beans-config-tests-2", "org.springframework.ide.eclipse.beans.core.tests");
-		BeansProject secondBeansProject = new BeansProject(model, secondProject);
-		model.addProject(secondBeansProject);
-		
-		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		
-		IFile xmlFile = (IFile) secondProject.findMember("second-bean-config.xml");
-		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile), false);
-		assertEquals(1, configs.size());
-		IBeansConfig config = configs.iterator().next();
-		assertEquals("second-bean-config.xml", config.getElementName());
-		
-		secondProject.delete(true, null);
+		try {
+    		BeansProject secondBeansProject = new BeansProject(model, secondProject);
+    		model.addProject(secondBeansProject);
+    		
+    		beansProject.addConfig(getConfigIdForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
+    		secondBeansProject.addConfig(getConfigIdForFileName("second-bean-config.xml", secondProject), IBeansConfig.Type.MANUAL);
+    		
+    		IFile xmlFile = (IFile) secondProject.findMember("second-bean-config.xml");
+    		Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(xmlFile), false);
+    		assertEquals(1, configs.size());
+    		IBeansConfig config = configs.iterator().next();
+    		assertEquals("/beans-config-tests-2/second-bean-config.xml", config.getElementName());
+        } finally {
+            secondProject.delete(true, null);
+        }
 	}
 	
 	@Test

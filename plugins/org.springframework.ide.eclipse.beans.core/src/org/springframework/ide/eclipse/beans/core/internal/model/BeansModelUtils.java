@@ -448,7 +448,7 @@ public abstract class BeansModelUtils {
                 return project.getConfig(configId);
             }
 	    } else {
-	        contextProject.getConfig(configId);
+	        return contextProject.getConfig(configId);
 	    }
 	    return null;
 	}

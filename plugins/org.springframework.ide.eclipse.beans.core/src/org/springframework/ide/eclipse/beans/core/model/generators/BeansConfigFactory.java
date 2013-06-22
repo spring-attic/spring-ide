@@ -59,6 +59,9 @@ public class BeansConfigFactory {
     }
 
     public static IBeansConfig create(IBeansProject project, BeansConfigId id, IBeansConfig.Type type) {
+        if (id == null) {
+            return null;
+        }
 	    if (configGenerators == null) {
 	        configGenerators = initGenerators();
 	    }

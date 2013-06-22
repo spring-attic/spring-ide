@@ -163,7 +163,7 @@ public class AopReferenceModelUtils {
 			}
 
 		}
-		else if (BeansCoreUtils.isBeansConfig(BeansConfigId.create(resource, resource.getProject()), true)) {
+		else if (BeansCoreUtils.isBeansConfig(resource, true)) {
 			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils.getResourceModelElement(resource);
 			if (beansConfig instanceof IImportedBeansConfig) {
 				beansConfig = BeansModelUtils.getParentOfClass(beansConfig, IBeansConfig.class);

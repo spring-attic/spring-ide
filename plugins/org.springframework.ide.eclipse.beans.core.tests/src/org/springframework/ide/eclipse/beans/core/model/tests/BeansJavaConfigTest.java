@@ -94,7 +94,7 @@ public class BeansJavaConfigTest {
 		IType configClass = javaProject.findType(CLASS_NAME);
 		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigId.create(configClass, project), IBeansConfig.Type.MANUAL);
 		
-		assertEquals("java:org.test.spring.SimpleConfigurationClass", config.getElementName());
+		assertEquals(BeansConfigId.parse("java:org.test.spring.SimpleConfigurationClass", project), config.getId());
 		
 		IBean configBean = BeansModelUtils.getBean("simpleConfigurationClass", config);
 		assertEquals("simpleConfigurationClass", configBean.getElementName());
@@ -129,7 +129,7 @@ public class BeansJavaConfigTest {
 		IType configClass = javaProject.findType(ADVANCED_CLASS_NAME);
 		BeansJavaConfig config = new BeansJavaConfig(beansProject, configClass, BeansConfigId.create(configClass, project), IBeansConfig.Type.MANUAL);
 		
-		assertEquals("java:org.test.advanced.AdvancedConfigurationClass", config.getElementName());
+		assertEquals(BeansConfigId.parse("java:org.test.advanced.AdvancedConfigurationClass", project), config.getId());
 
 		IBean simpleBean = BeansModelUtils.getBean("simpleScannedBean", config);
 		assertEquals("simpleScannedBean", simpleBean.getElementName());

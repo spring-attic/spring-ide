@@ -14,8 +14,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +59,11 @@ public class BeansConfigDescriptionWriterTest {
 	    return BeansConfigId.create(project.getFile(fName));
 	}
 
-	@Test
+    private BeansConfigId getConfigForTypeName(String tName) throws JavaModelException {
+        return BeansConfigId.create(javaProject.findType(tName), project);
+    }
+
+    @Test
 	public void testBeansProjectDescriptionWriterWithXMLConfigsOnly() throws Exception {
 		beansProject.addConfig(getConfigForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
 		
@@ -70,13 +76,13 @@ public class BeansConfigDescriptionWriterTest {
 		String description = os.toString();
 		
 		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+		assertTrue("Description:\n" + description + "\nDoes not contain:\n" + configs, description.contains(configs));
 	}
 	
 	@Test
 	public void testBeansProjectDescriptionWriterWithMixedConfigs() throws Exception {
 		beansProject.addConfig(getConfigForFileName("basic-bean-config.xml"), IBeansConfig.Type.MANUAL);
-		beansProject.addConfig(getConfigForFileName("java:org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
+		beansProject.addConfig(getConfigForTypeName("org.test.spring.SimpleConfigurationClass"), IBeansConfig.Type.MANUAL);
 		
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		XMLWriter writer = new XMLWriter(os);
@@ -87,7 +93,7 @@ public class BeansConfigDescriptionWriterTest {
 		String description = os.toString();
 		
 		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t\t<config>java:org.test.spring.SimpleConfigurationClass</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+        assertTrue("Description:\n" + description + "\nDoes not contain:\n" + configs, description.contains(configs));
 	}
 	
 }

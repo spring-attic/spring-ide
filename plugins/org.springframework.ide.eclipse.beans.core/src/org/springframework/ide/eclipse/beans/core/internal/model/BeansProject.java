@@ -376,7 +376,12 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 
 		// External configs only remove from all config sets
-		return removeConfigFromConfigSets(getConfigId(file));
+		BeansConfigId id = BeansConfigId.create(file, this.project);
+		if (id == null) {
+		    // might be a java config file from a project not on this classpath
+		    id = BeansConfigId.create(file, file.getProject());
+		}
+        return removeConfigFromConfigSets(id);
 	}
 
 	/**
@@ -467,7 +472,10 @@ I	 * Removes the given beans config from the list of configs and from all config
 
 	public Set<IBeansConfig> getConfigs(BeansConfigId id, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
-		
+		if (id == null) {
+		    return beansConfigs;
+		}
+		// TODO FIXADE this seems like busywork.  Why are we looking in other projects for this config???
 		if (!this.project.getName().equals(id.project)) {
 			IBeansProject otherBeansProject = BeansCorePlugin.getModel().getProject(id.project);
 			if (otherBeansProject != null) {
@@ -481,7 +489,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		Set<IBeansConfig> ownConfigs = getConfigs();
 		if (ownConfigs != null) {
 			for (IBeansConfig config : ownConfigs) {
-				if (config.getElementResource() != null && config.getId().equals(id)) {
+				if (config.getElementResource() != null && id.equals(config.getId())) {
 					beansConfigs.add(config);
 				}
 			}
