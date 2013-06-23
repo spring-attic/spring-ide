@@ -58,6 +58,12 @@ public class TypeHierarchyEngineTest {
 	public void deleteProject() throws Exception {
 		project.delete(true, null);
 	}
+	
+	@Test
+	public void testDefaultPackageClass() throws Exception {
+		assertEquals("org.SimpleClass", engine.getSupertype(project, "DefaultPackageClass"));
+		assertTrue(engine.doesExtend("DefaultPackageClass", "org.SimpleClass", project));
+	}
 
 	@Test
 	public void testExtendsItselfObject() throws Exception {

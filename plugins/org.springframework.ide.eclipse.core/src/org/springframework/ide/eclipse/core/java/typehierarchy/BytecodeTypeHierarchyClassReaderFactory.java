@@ -38,7 +38,7 @@ public class BytecodeTypeHierarchyClassReaderFactory implements TypeHierarchyCla
 				if (url.toString().endsWith(".jar") || url.toString().endsWith(".zip")) {
 					try {
 						ZipFile zipFile = new ZipFile(new File(url.toURI()));
-						locations.add(new ZipClasspathElement(zipFile));
+						locations.add(new ClasspathElementZip(zipFile));
 						usedURLs.add(url);
 					} catch (Exception e) {
 						SpringCore.log(e);
@@ -47,7 +47,7 @@ public class BytecodeTypeHierarchyClassReaderFactory implements TypeHierarchyCla
 				else {
 					try {
 						File file = new File(url.toURI());
-						locations.add(new FileClasspathElement(file));
+						locations.add(new ClasspathElementDirectory(file));
 						usedURLs.add(url);
 					} catch (Exception e) {
 						SpringCore.log(e);

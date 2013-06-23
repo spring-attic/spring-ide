@@ -18,6 +18,6 @@ import java.io.InputStream;
  */
 public interface ClasspathElement {
 
-	public InputStream getStream(String classFileName) throws Exception;
+	public InputStream getStream(String fullyQualifiedClassFileName, String packageName, String classFileName) throws Exception;
 
 }

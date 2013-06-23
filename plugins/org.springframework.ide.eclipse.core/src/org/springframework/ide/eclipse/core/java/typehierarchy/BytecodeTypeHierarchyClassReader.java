@@ -33,12 +33,25 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 	}
 
 	public TypeHierarchyElement readTypeHierarchyInformation(char[] fullyQualifiedClassName, IProject project) {
-		String classFileName = new String(fullyQualifiedClassName) + ".class";
+		String fullyQualifiedClassFileName = new String(fullyQualifiedClassName) + ".class";
+		
+		String packageName = null;
+		String className = null;
+
+		int lastIndexOf = fullyQualifiedClassFileName.lastIndexOf('/');
+		if (lastIndexOf > -1) {
+			packageName = fullyQualifiedClassFileName.substring(0, lastIndexOf);
+			className = fullyQualifiedClassFileName.substring(lastIndexOf + 1);
+		}
+		else {
+			packageName = "";
+			className = fullyQualifiedClassFileName;
+		}
 
 		for (int i = 0; i < paths.length; i++) {
 			InputStream stream = null;
 			try {
-				stream = paths[i].getStream(classFileName);
+				stream = paths[i].getStream(fullyQualifiedClassFileName, packageName, className);
 				if (stream != null) {
 					return readTypeHierarchy(stream);
 				}
