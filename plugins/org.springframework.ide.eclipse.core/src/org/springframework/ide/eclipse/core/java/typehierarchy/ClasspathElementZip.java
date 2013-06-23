@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
@@ -27,6 +29,7 @@ public class ClasspathElementZip implements ClasspathElement {
 	
 	private ZipFile zipFile;
 	private Set<String> knownPackageNames;
+	private long lastModified;
 
 	public ClasspathElementZip(ZipFile zipFile) {
 		this.zipFile = zipFile;
@@ -42,19 +45,32 @@ public class ClasspathElementZip implements ClasspathElement {
 		return null;
 	}
 
+	public long lastModified() {
+		if (this.lastModified == 0)
+			this.lastModified = new File(this.zipFile.getName()).lastModified();
+		return this.lastModified;
+	}
+
 	private boolean isPackage(String qualifiedPackageName) {
 		if (this.knownPackageNames != null)
 			return this.knownPackageNames.contains(qualifiedPackageName);
 
 		try {
-			this.knownPackageNames = findPackageSet(this.zipFile);
+			this.knownPackageNames = findPackageSet();
 		} catch(Exception e) {
 			this.knownPackageNames = new HashSet<String>();
 		}
 		return this.knownPackageNames.contains(qualifiedPackageName);
 	}
 
-	private Set<String> findPackageSet(ZipFile zipFile) {
+	private Set<String> findPackageSet() {
+		String zipFileName = zipFile.getName();
+		long lastModified = lastModified();
+		long fileSize = new File(zipFileName).length();
+		PackageCacheEntry cacheEntry = (PackageCacheEntry) PackageCache.get(zipFileName);
+		if (cacheEntry != null && cacheEntry.lastModified == lastModified && cacheEntry.fileSize == fileSize)
+			return cacheEntry.packageSet;
+		
 		Set<String> packageSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 		packageSet.add(""); //$NON-NLS-1$
 		nextEntry : for (Enumeration e = zipFile.entries(); e.hasMoreElements(); ) {
@@ -70,7 +86,25 @@ public class ClasspathElementZip implements ClasspathElement {
 				last = packageName.lastIndexOf('/');
 			}
 		}
+
+		PackageCache.put(zipFileName, new PackageCacheEntry(lastModified, fileSize, packageSet));
 		return packageSet;
 	}
+	
+	// global zip file content cache
+	private static Map<String, PackageCacheEntry> PackageCache = new ConcurrentHashMap<String, PackageCacheEntry>();
+	
+	private static class PackageCacheEntry {
+		long lastModified;
+		long fileSize;
+		Set<String> packageSet;
+
+		public PackageCacheEntry(long lastModified, long fileSize, Set<String> packageSet) {
+			this.lastModified = lastModified;
+			this.fileSize = fileSize;
+			this.packageSet = packageSet;
+		}
+	}
+
 
 }
