@@ -17,6 +17,7 @@ import java.util.Set;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.ISelectionService;
@@ -27,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
@@ -78,6 +80,7 @@ public class AddToConfigSetAction extends CompoundContributionItem implements IW
 			super(configSet.getElementName());
 			this.configSet = configSet;
 			this.config = config;
+			setImageDescriptor(ImageDescriptor.createFromImage(BeansModelImages.getImage(configSet)));
 		}
 
 		@Override
