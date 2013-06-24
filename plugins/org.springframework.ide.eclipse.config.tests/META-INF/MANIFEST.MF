@@ -25,7 +25,8 @@ Require-Bundle: org.junit;bundle-version="4.8.0",
  org.eclipse.wst.sse.core,
  org.eclipse.wst.xml.ui,
  org.springframework.ide.eclipse,
- org.springframework.ide.eclipse.core
+ org.springframework.ide.eclipse.core,
+ org.springframework.ide.eclipse.beans.mylyn
 Export-Package: org.springframework.ide.eclipse.config.tests,
  org.springframework.ide.eclipse.config.tests.core,
  org.springframework.ide.eclipse.config.tests.core.contentassist,
