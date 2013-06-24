@@ -428,10 +428,10 @@ public final class Introspector {
 	public static Set<IField> getAllFields(IType type, boolean includeHierarchy) throws JavaModelException {
 		Map<String, IField> allFields = new HashMap<String, IField>();
 		while (type != null) {
-			for (IField method : type.getFields()) {
-				String key = method.getHandleIdentifier();
+			for (IField field : type.getFields()) {
+				String key = field.getHandleIdentifier();
 				if (!allFields.containsKey(key)) {
-					allFields.put(key, method);
+					allFields.put(key, field);
 				}
 			}
 			if (!includeHierarchy) break;
@@ -603,7 +603,7 @@ public final class Introspector {
 		return true;
 	}
 
-	private static IMethod[] getMethods(IType type) throws JavaModelException {
+	public static IMethod[] getMethods(IType type) throws JavaModelException {
 		if (type == null) {
 			return new IMethod[0];
 		}

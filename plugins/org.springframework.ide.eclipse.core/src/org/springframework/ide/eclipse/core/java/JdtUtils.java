@@ -281,11 +281,14 @@ public class JdtUtils {
 	 */
 	public static IField getField(IType type, String fieldName, boolean includeHierarchy) {
 		try {
-			Set<IField> fields = Introspector.getAllFields(type, includeHierarchy);
-			for (IField field : fields) {
-				if (field.getElementName().equals(fieldName)) {
-					return field;
+			while (type != null) {
+				for (IField field : type.getFields()) {
+					if (field.getElementName().equals(fieldName)) {
+						return field;
+					}
 				}
+				if (!includeHierarchy) break;
+				type = Introspector.getSuperType(type);
 			}
 		}
 		catch (JavaModelException e) {
@@ -525,15 +528,18 @@ public class JdtUtils {
 			methodName = methodName.substring(0, index);
 		}
 		try {
-			Set<IMethod> methods = Introspector.getAllMethods(type, includeHierarchy);
-			for (IMethod method : methods) {
-				if (method.getElementName().equals(methodName)
-						&& method.getParameterTypes().length == parameterTypes.length) {
-					String[] methodParameterTypes = getParameterTypesAsStringArray(method);
-					if (Arrays.deepEquals(parameterTypes, methodParameterTypes)) {
-						return method;
+			while (type != null) {
+				for (IMethod method : Introspector.getMethods(type)) {
+					if (method.getElementName().equals(methodName)
+							&& method.getParameterTypes().length == parameterTypes.length) {
+						String[] methodParameterTypes = getParameterTypesAsStringArray(method);
+						if (Arrays.deepEquals(parameterTypes, methodParameterTypes)) {
+							return method;
+						}
 					}
 				}
+				if (!includeHierarchy) break;
+				type = Introspector.getSuperType(type);
 			}
 
 			return Introspector.findMethod(type, methodName, parameterTypes.length, Public.YES, Static.DONT_CARE);
