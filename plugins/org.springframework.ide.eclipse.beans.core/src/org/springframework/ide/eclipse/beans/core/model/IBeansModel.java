@@ -82,18 +82,28 @@ public interface IBeansModel extends IBeansModelElement, IModel, ILazyInitialize
     IBeansConfig getConfig(BeansConfigId id, boolean includeImported);
 
     /**
-	 * Returns all beans configs for given config file. Includes imported
-	 * {@link IImportedBeansConfig} in the search if
-	 * <code>includeImported</code> is true.
-	 * 
-	 * @param configFile
-	 *            the config file a beans config is requested for
-	 * @param includeImported
-	 *            true if imported configs should be queried as well.
-	 * @since 2.0.3
-	 */
-	Set<IBeansConfig> getConfigs(IFile configFile, boolean includeImported);
+     * Returns all beans configs for given config file. Includes imported
+     * {@link IImportedBeansConfig}
+     * 
+     * @param configFile
+     *            the config file a beans config is requested for
+     * @since 2.0.3
+     */
+    Set<IBeansConfig> getConfigs(IFile configFile);
 	
+    /**
+     * Returns all beans configs for given config file. Includes imported
+     * {@link IImportedBeansConfig} in the search if
+     * <code>includeImported</code> is true.
+     * 
+     * @param configFile
+     *            the config file a beans config is requested for
+     * @param includeImported
+     *            true if imported configs should be queried as well.
+     * @since 2.0.3
+     */
+    Set<IBeansConfig> getConfigs(IFile configFile, boolean includeImported);
+
     /**
      * Returns a list of all configs which contain a bean with given bean class.
      */

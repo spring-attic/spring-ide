@@ -44,17 +44,8 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  */
 public class BeansJavaConfigTest {
 	
-	/**
-     * 
-     */
     private static final String PROFILE_CLASS_NAME = "org.test.profile.ProfileConfigurationClass";
-    /**
-     * 
-     */
     private static final String ADVANCED_CLASS_NAME = "org.test.advanced.AdvancedConfigurationClass";
-    /**
-     * 
-     */
     private static final String CLASS_NAME = "org.test.spring.SimpleConfigurationClass";
     private IProject project;
 	private IBeansModel model;

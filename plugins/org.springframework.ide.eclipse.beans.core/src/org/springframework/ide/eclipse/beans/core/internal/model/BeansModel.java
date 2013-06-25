@@ -270,6 +270,10 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 		return false;
 	}
+	
+	public Set<IBeansConfig> getConfigs(IFile configFile) {
+	    return getConfigs(configFile, true);
+	}
 
 	public Set<IBeansConfig> getConfigs(IFile configFile,
             boolean includeImported) {

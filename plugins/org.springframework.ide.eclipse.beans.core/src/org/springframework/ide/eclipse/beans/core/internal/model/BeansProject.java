@@ -427,7 +427,17 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 		try {
 			r.lock();
-			return (configs.containsKey(configId) || autoDetectedConfigs.containsKey(configId));
+			for (IBeansConfig config : configs.values()) {
+			    if (configId.contains(config.getId())) {
+			        return true;
+			    }
+			}
+			for (IBeansConfig config : autoDetectedConfigs.values()) {
+			    if (configId.contains(config.getId())) {
+			        return true;
+			    }
+			}
+			return false;
 		}
 		finally {
 			r.unlock();
@@ -437,12 +447,6 @@ I	 * Removes the given beans config from the list of configs and from all config
 	public boolean hasConfig(BeansConfigId configId, boolean includeImported) {
 		if (hasConfig(configId)) {
 			return true;
-		}
-		
-		for (IBeansConfig config : getConfigs()) {
-			if (configId.equals(config.getId())) {
-				return true;
-			}
 		}
 		
 		if (isImportsEnabled() && includeImported) {
@@ -489,7 +493,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		Set<IBeansConfig> ownConfigs = getConfigs();
 		if (ownConfigs != null) {
 			for (IBeansConfig config : ownConfigs) {
-				if (config.getElementResource() != null && id.equals(config.getId())) {
+				if (config.getElementResource() != null && id.contains(config.getId())) {
 					beansConfigs.add(config);
 				}
 			}
@@ -513,7 +517,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 		return beansConfigs;
 	}
-
+	
 	private void checkForImportedBeansConfig(BeansConfigId id, IBeansConfig bc, Set<IBeansConfig> beansConfigs) {
 		if (bc.getId() != null && bc.getId().equals(id)) {
 			beansConfigs.add(bc);

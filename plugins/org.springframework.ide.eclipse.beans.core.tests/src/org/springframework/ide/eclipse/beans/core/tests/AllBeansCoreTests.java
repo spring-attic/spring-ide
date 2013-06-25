@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaConfigTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectTest;
 import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfigRenameTypeRefactoringParticipantTest;
+import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfigRenameTypeRefactoringTest;
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
 import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 
@@ -62,6 +63,7 @@ import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 	BeansConfigFactoryTest.class,
 	BeansConfigDescriptionWriterTest.class,
 	BeansJavaConfigRenameTypeRefactoringParticipantTest.class,
+	BeansJavaConfigRenameTypeRefactoringTest.class,
 	ResourceChangeEventHandlerTest.class,
 	TypeHierarchyEngineTest.class
 })

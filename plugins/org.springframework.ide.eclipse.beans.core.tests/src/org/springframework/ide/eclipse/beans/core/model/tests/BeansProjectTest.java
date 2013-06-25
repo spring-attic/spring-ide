@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,7 +90,7 @@ public class BeansProjectTest {
 	}
 	
     private BeansConfigId getConfigIdForTypeName(String tName, IJavaProject javaProj) throws JavaModelException {
-        return BeansConfigId.create(javaProj.findType(tName), javaProj.getProject());
+        return BeansConfigId.create(javaProj.findType(tName, DefaultWorkingCopyOwner.PRIMARY, null), javaProj.getProject());
     }
     
 	@Test
@@ -406,11 +407,78 @@ public class BeansProjectTest {
 		IBeansConfig config1 = iterator.next();
 		IBeansConfig config2 = iterator.next();
 		
-		assertTrue("java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass1".equals(config1.getElementName()) ||
-				"java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass1".equals(config2.getElementName()));
-		assertTrue("java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass2".equals(config1.getElementName()) ||
-				"java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass2".equals(config2.getElementName()));
+		assertTrue("org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass1".equals(config1.getElementName()) ||
+				"org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass1".equals(config2.getElementName()));
+		assertTrue("org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass2".equals(config1.getElementName()) ||
+				"org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass2".equals(config2.getElementName()));
 	}
+	
+	@Test
+	
+	public void testGetBeanConfigsInnerInnerClassConfigs() throws Exception {
+       IProject secondProject = null;
+        try {
+    	    secondProject = StsTestUtil.createPredefinedProject("beans-config-tests-3", "org.springframework.ide.eclipse.beans.core.tests");
+            javaProject = JdtUtils.getJavaProject(secondProject);
+    	    beansProject = new BeansProject(model, secondProject);
+    	    model.addProject(beansProject);
+            
+    	    beansProject.addConfig(getConfigIdForTypeName("org.test.spring.OuterConfigurationClass.InnerConfigClass1"), IBeansConfig.Type.MANUAL);
+    	    beansProject.addConfig(getConfigIdForTypeName("org.test.spring.OuterConfigurationClass.InnerConfigClass2"), IBeansConfig.Type.MANUAL);
+    	    beansProject.addConfig(getConfigIdForTypeName("org.test.spring.OuterConfigurationClass.InnerConfigClass3.InnerInnerConfigClass"), IBeansConfig.Type.MANUAL);
+    	    
+    	    IFile javaFile = (IFile) secondProject.findMember("src/org/test/spring/OuterConfigurationClass.java");
+    	    Set<IBeansConfig> configs = beansProject.getConfigs(BeansConfigId.create(javaFile), false);
+    	    assertEquals(3, configs.size());
+    	    
+    	    Iterator<IBeansConfig> iterator = configs.iterator();
+    	    Set<String> configElementNames = new HashSet<String>();
+    	    configElementNames.add(iterator.next().getElementName());
+    	    configElementNames.add(iterator.next().getElementName());
+    	    configElementNames.add(iterator.next().getElementName());
+    	    
+    	    assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass1"));
+    	    assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass2"));
+    	    assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass3$InnerInnerConfigClass"));
+    
+    	    // now add another inner inner class with same name
+            beansProject.addConfig(getConfigIdForTypeName("org.test.spring.OuterConfigurationClass.InnerConfigClass4.InnerInnerConfigClass"), IBeansConfig.Type.MANUAL);
+    
+            configs = beansProject.getConfigs(BeansConfigId.create(javaFile), false);
+            assertEquals(4, configs.size());
+    
+            iterator = configs.iterator();
+            configElementNames = new HashSet<String>();
+            configElementNames.add(iterator.next().getElementName());
+            configElementNames.add(iterator.next().getElementName());
+            configElementNames.add(iterator.next().getElementName());
+            configElementNames.add(iterator.next().getElementName());
+    
+            assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass1"));
+            assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass2"));
+            assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass3$InnerInnerConfigClass"));
+            assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass4$InnerInnerConfigClass"));
+    	    
+    	    // now remove the inner inner class
+    	    beansProject.removeConfig(getConfigIdForTypeName("org.test.spring.OuterConfigurationClass.InnerConfigClass4.InnerInnerConfigClass"));
+    	    
+            configs = beansProject.getConfigs(BeansConfigId.create(javaFile), false);
+            assertEquals(3, configs.size());
+    
+            iterator = configs.iterator();
+            configElementNames = new HashSet<String>();
+            configElementNames.add(iterator.next().getElementName());
+            configElementNames.add(iterator.next().getElementName());
+            configElementNames.add(iterator.next().getElementName());
+    
+            assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass1"));
+            assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass2"));
+            assertTrue(configElementNames.contains("org.test.spring.OuterConfigurationClass$InnerConfigClass3$InnerInnerConfigClass"));
+        } finally {
+            secondProject.delete(true, null);
+        }
+	}
+	
 	
 	@Test
 	public void testGetBeanConfigsWithExternalFile() throws Exception {

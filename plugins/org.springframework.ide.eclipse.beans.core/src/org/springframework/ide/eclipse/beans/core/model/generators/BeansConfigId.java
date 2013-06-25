@@ -112,11 +112,42 @@ public class BeansConfigId {
         return true;
     }
 
+    /**
+     * Checks to see of the passed in configId is contained inside of this one
+     * @param other config id to check to see if it is contained by this one
+     * @return true iff other is contained inside of this
+     */
+    public boolean contains(BeansConfigId other) {
+        if (other.equals(this)) {
+            return true;
+        }
+        if (!this.project.equals(other.project)) {
+            return false;
+        }
+        if (!this.kind.equals(other.kind)) {
+            return false;
+        }
+        
+        // TODO FIXADE delegate to the config kind for this.
+        if (this.kind.equals(JavaConfigGenerator.JAVA_CONFIG_KIND)) {
+            String[] splits = other.name.split("\\$");
+            StringBuilder sb = new StringBuilder();
+            for (String split : splits) {
+                sb.append(sb.length() == 0 ? split : "$" + split);
+                if (this.name.equals(sb.toString())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     public static String getConfigKind(IFile file) {
         return file.getFileExtension();
     }
 
     public static BeansConfigId parse(String idString, IProject project) {
+        // TODO FIXADE delegate to the config kind for this.
     	if (idString.startsWith(JavaConfigGenerator.JAVA_CONFIG_KIND + ":")) {
     		return new BeansConfigId(JavaConfigGenerator.JAVA_CONFIG_KIND, project.getName(), idString.substring((JavaConfigGenerator.JAVA_CONFIG_KIND + ":").length()));
     	}
@@ -174,6 +205,7 @@ public class BeansConfigId {
                 project = file.getProject();
             }
         
+            // TODO FIXADE delegate to the config kind for this.
             if (!XMLConfigGenerator.XML_CONFIG_KIND.equals(file.getFileExtension()) && Util.isJavaLikeFileName(file.getName())) {
                 IJavaProject javaProject = JdtUtils.getJavaProject(project);
                 if (javaProject != null) {
