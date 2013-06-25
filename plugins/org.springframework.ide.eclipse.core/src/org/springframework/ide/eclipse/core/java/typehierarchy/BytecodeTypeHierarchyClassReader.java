@@ -50,23 +50,33 @@ public class BytecodeTypeHierarchyClassReader implements TypeHierarchyClassReade
 
 		for (int i = 0; i < paths.length; i++) {
 			InputStream stream = null;
-			try {
-				stream = paths[i].getStream(fullyQualifiedClassFileName, packageName, className);
-				if (stream != null) {
-					return readTypeHierarchy(stream);
-				}
-			} catch (Exception e) {
-			} finally {
-				if (stream != null) {
-					try {
-						stream.close();
-					} catch (IOException e) {
-						SpringCore.log(e);
+			synchronized(paths[i]) {
+				try {
+					stream = paths[i].getStream(fullyQualifiedClassFileName, packageName, className);
+					if (stream != null) {
+						return readTypeHierarchy(stream);
+					}
+				} catch (Exception e) {
+				} finally {
+					if (stream != null) {
+						try {
+							stream.close();
+						} catch (IOException e) {
+							SpringCore.log(e);
+						}
 					}
 				}
 			}
 		}
 		return null;
+	}
+
+	public void cleanup() {
+		for (int i = 0; i < paths.length; i++) {
+			synchronized(paths[i]) {
+				paths[i].cleanup();
+			}
+		}
 	}
 
 	public TypeHierarchyElement readTypeHierarchy(InputStream stream) {

@@ -170,7 +170,7 @@ public class RepositoryInformation {
 				interfaceNames = type.getSuperInterfaceNames();
 			}
 			else {
-				interfaceNames = SpringCore.getTypeHierarchyEngine().getInterfaces(type.getJavaProject().getProject(), type.getFullyQualifiedName());
+				interfaceNames = SpringCore.getTypeHierarchyEngine().getInterfaces(type.getJavaProject().getProject(), type.getFullyQualifiedName(), true);
 			}
 			
 			if (interfaceNames != null) {

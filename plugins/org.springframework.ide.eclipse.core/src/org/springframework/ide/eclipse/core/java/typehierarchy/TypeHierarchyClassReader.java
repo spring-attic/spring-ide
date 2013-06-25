@@ -19,5 +19,6 @@ import org.eclipse.core.resources.IProject;
 public interface TypeHierarchyClassReader {
 
 	public TypeHierarchyElement readTypeHierarchyInformation(char[] fullyQualifiedClassName, IProject project);
+	public void cleanup();
 
 }

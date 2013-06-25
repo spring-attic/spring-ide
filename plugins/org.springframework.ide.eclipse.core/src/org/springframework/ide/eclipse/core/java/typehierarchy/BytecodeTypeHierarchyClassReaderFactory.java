@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -37,8 +36,8 @@ public class BytecodeTypeHierarchyClassReaderFactory implements TypeHierarchyCla
 			if (!usedURLs.contains(url)) {
 				if (url.toString().endsWith(".jar") || url.toString().endsWith(".zip")) {
 					try {
-						ZipFile zipFile = new ZipFile(new File(url.toURI()));
-						locations.add(new ClasspathElementZip(zipFile));
+						String path = url.toURI().getPath();
+						locations.add(new ClasspathElementZip(path));
 						usedURLs.add(url);
 					} catch (Exception e) {
 						SpringCore.log(e);

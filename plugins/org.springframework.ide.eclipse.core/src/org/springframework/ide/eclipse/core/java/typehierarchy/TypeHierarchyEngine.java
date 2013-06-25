@@ -41,90 +41,123 @@ public class TypeHierarchyEngine {
 		this.classReaderFactory = classReaderFactory;
 	}
 	
+	public void cleanup(IProject project) {
+		TypeHierarchyClassReader reader = this.readers.get(project);
+		if (reader != null) {
+			reader.cleanup();
+		}
+	}
+	
+	public void cleanup() {
+		for (IProject project : this.readers.keySet()) {
+			clearCache(project);
+		}
+	}
+
 	public void clearCache(IProject project) {
+		cleanup(project);
 		this.readers.remove(project);
 		this.cache.remove(project);
 	}
 	
-	public String getSupertype(IType type) {
+	public String getSupertype(IType type, boolean cleanup) {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
 			IProject project = ((IJavaProject)ancestor).getProject();
-			return this.getSupertype(project, type.getFullyQualifiedName());
+			return this.getSupertype(project, type.getFullyQualifiedName(), cleanup);
 		}
 		return null;
 	}
 	
-	public String getSupertype(IProject project, String className) {
+	public String getSupertype(IProject project, String className, boolean cleanup) {
 		char[] typeName = className.replace('.', '/').toCharArray();
-		TypeHierarchyElement typeElement = getTypeElement(typeName, project);
-		if (typeElement != null && typeElement.superclassName != null) {
-			return new String(typeElement.superclassName).replace("/", ".");
-		}
-		return null;
-	}
-	
-	public String[] getInterfaces(IProject project, String className) {
-		char[] typeName = className.replace('.', '/').toCharArray();
-		TypeHierarchyElement typeElement = getTypeElement(typeName, project);
-		if (typeElement != null && typeElement.interfaces != null) {
-			String[] result = new String[typeElement.interfaces.length];
-			for (int i = 0; i < result.length; i++) {
-				result[i] = new String(typeElement.interfaces[i]).replace("/", ".");;
+		try {
+			TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+			if (typeElement != null && typeElement.superclassName != null) {
+				return new String(typeElement.superclassName).replace("/", ".");
 			}
-			return result;
+		}
+		finally {
+			if (cleanup) cleanup(project);
+		}
+		return null;
+	}
+	
+	public String[] getInterfaces(IProject project, String className, boolean cleanup) {
+		char[] typeName = className.replace('.', '/').toCharArray();
+		try {
+			TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+			if (typeElement != null && typeElement.interfaces != null) {
+				String[] result = new String[typeElement.interfaces.length];
+				for (int i = 0; i < result.length; i++) {
+					result[i] = new String(typeElement.interfaces[i]).replace("/", ".");;
+				}
+				return result;
+			}
+		}
+		finally {
+			if (cleanup) cleanup(project);
 		}
 		return null;
 	}
 
-	public boolean doesExtend(IType type, String className) {
+	public boolean doesExtend(IType type, String className, boolean cleanup) {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
 			IProject project = ((IJavaProject)ancestor).getProject();
-			return doesExtend(type.getFullyQualifiedName(), className, project);
+			return doesExtend(type.getFullyQualifiedName(), className, project, cleanup);
 		}
 		return false;
 	}
 	
-	public boolean doesExtend(String type, String className, IProject project) {
+	public boolean doesExtend(String type, String className, IProject project, boolean cleanup) {
 		char[] typeName = type.replace('.', '/').toCharArray();
 		char[] superTypeName = className.replace('.',  '/').toCharArray();
 	
-		do {
-			if (CharOperation.equals(typeName, superTypeName)) {
-				return true;
-			}
-			else {
-				TypeHierarchyElement typeElement = getTypeElement(typeName, project);
-				if (typeElement != null) {
-					typeName = typeElement.superclassName;
+		try {
+			do {
+				if (CharOperation.equals(typeName, superTypeName)) {
+					return true;
 				}
 				else {
-					typeName = null;
+					TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+					if (typeElement != null) {
+						typeName = typeElement.superclassName;
+					}
+					else {
+						typeName = null;
+					}
 				}
-			}
-		} while (typeName != null);
-		return false;
-	}
-	
-	public boolean doesImplement(final IType type, final String interfaceName) {
-		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
-		if (ancestor != null && ancestor instanceof IJavaProject) {
-			IProject project = ((IJavaProject)ancestor).getProject();
-			return doesImplement(type.getFullyQualifiedName(), interfaceName, project);
+			} while (typeName != null);
+		}
+		finally {
+			if (cleanup) cleanup(project);
 		}
 		return false;
 	}
 	
-	public boolean doesImplement(final String type, final String interfaceName, IProject project) {
+	public boolean doesImplement(final IType type, final String interfaceName, boolean cleanup) {
+		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
+		if (ancestor != null && ancestor instanceof IJavaProject) {
+			IProject project = ((IJavaProject)ancestor).getProject();
+			return doesImplement(type.getFullyQualifiedName(), interfaceName, project, cleanup);
+		}
+		return false;
+	}
+	
+	public boolean doesImplement(final String type, final String interfaceName, IProject project, boolean cleanup) {
 		char[] classTypeName = type.replace('.', '/').toCharArray();
 		char[] interfaceTypeName = interfaceName.replace('.',  '/').toCharArray();
 
-		// cached items first
-		boolean result = doesImplement(project, classTypeName, interfaceTypeName, true)
-				|| doesImplement(project, classTypeName, interfaceTypeName, false);
-
-		return result;
+		try {
+			// cached items first
+			boolean result = doesImplement(project, classTypeName, interfaceTypeName, true)
+					|| doesImplement(project, classTypeName, interfaceTypeName, false);
+			return result;
+		}
+		finally {
+			if (cleanup) cleanup(project);
+		}
 	}
 
 	protected boolean doesImplement(IProject project, char[] classTypeName, char[] interfaceTypeName, boolean cachedItemsOnly) {

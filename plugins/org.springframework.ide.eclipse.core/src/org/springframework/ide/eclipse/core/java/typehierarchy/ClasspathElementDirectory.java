@@ -45,6 +45,10 @@ public class ClasspathElementDirectory implements ClasspathElement {
 		}
 	}
 
+	public void cleanup() {
+		this.directoryCache.clear();
+	}
+
 	private boolean doesFileExist(String fullyQualifiedClassFileName, String packageName, String classFileName) {
 		String[] dirList = directoryList(packageName);
 		if (dirList == null) return false;

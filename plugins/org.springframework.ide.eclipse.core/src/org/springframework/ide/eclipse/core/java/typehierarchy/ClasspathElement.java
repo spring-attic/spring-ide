@@ -19,5 +19,6 @@ import java.io.InputStream;
 public interface ClasspathElement {
 
 	public InputStream getStream(String fullyQualifiedClassFileName, String packageName, String classFileName) throws Exception;
+	public void cleanup();
 
 }

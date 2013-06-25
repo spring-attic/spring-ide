@@ -11,10 +11,10 @@
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,11 +28,12 @@ import java.util.zip.ZipFile;
 public class ClasspathElementZip implements ClasspathElement {
 	
 	private ZipFile zipFile;
+	private String zipFileName;
 	private Set<String> knownPackageNames;
 	private long lastModified;
 
-	public ClasspathElementZip(ZipFile zipFile) {
-		this.zipFile = zipFile;
+	public ClasspathElementZip(String zipFileName) {
+		this.zipFileName = zipFileName;
 	}
 
 	public InputStream getStream(String fullyQualifiedClassFileName, String packageName, String classFileName) throws Exception {
@@ -43,6 +44,19 @@ public class ClasspathElementZip implements ClasspathElement {
 			return zipFile.getInputStream(entry);
 		}
 		return null;
+	}
+
+	public void cleanup() {
+		synchronized(this) {
+			if (this.zipFile != null) {
+				try {
+					this.zipFile.close();
+				} catch(IOException e) { // ignore it
+				}
+				this.zipFile = null;
+			}
+			this.knownPackageNames = null;
+		}
 	}
 
 	public long lastModified() {
@@ -56,15 +70,19 @@ public class ClasspathElementZip implements ClasspathElement {
 			return this.knownPackageNames.contains(qualifiedPackageName);
 
 		try {
-			this.knownPackageNames = findPackageSet();
+			synchronized(this) {
+				if (this.zipFile == null) {
+					this.zipFile = new ZipFile(this.zipFileName);
+				}
+				this.knownPackageNames = findPackageSet();
+			}
 		} catch(Exception e) {
-			this.knownPackageNames = new HashSet<String>();
+			this.knownPackageNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 		}
 		return this.knownPackageNames.contains(qualifiedPackageName);
 	}
 
 	private Set<String> findPackageSet() {
-		String zipFileName = zipFile.getName();
 		long lastModified = lastModified();
 		long fileSize = new File(zipFileName).length();
 		PackageCacheEntry cacheEntry = (PackageCacheEntry) PackageCache.get(zipFileName);
@@ -105,6 +123,5 @@ public class ClasspathElementZip implements ClasspathElement {
 			this.packageSet = packageSet;
 		}
 	}
-
 
 }

@@ -68,7 +68,7 @@ public final class Introspector {
 	 */
 	public static boolean doesExtend(IType type, String className) {
 		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
-			return SpringCore.getTypeHierarchyEngine().doesExtend(type, className);
+			return SpringCore.getTypeHierarchyEngine().doesExtend(type, className, true);
 		}
 		else {
 			return hasSuperType(type, className, false);
@@ -82,7 +82,7 @@ public final class Introspector {
 	 */
 	public static boolean doesImplement(IType type, String interfaceName) {
 		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
-			return SpringCore.getTypeHierarchyEngine().doesImplement(type, interfaceName);
+			return SpringCore.getTypeHierarchyEngine().doesImplement(type, interfaceName, true);
 		}
 		else {
 			return hasSuperType(type, interfaceName, true);
@@ -462,7 +462,7 @@ public final class Introspector {
 			}
 			else {
 				if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
-					String supertype = SpringCore.getTypeHierarchyEngine().getSupertype(type);
+					String supertype = SpringCore.getTypeHierarchyEngine().getSupertype(type, true);
 					if (supertype != null) {
 						return type.getJavaProject().findType(supertype);
 					}

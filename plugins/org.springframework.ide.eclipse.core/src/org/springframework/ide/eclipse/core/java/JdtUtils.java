@@ -121,7 +121,7 @@ public class JdtUtils {
 		}
 		
 		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
-			return SpringCore.getTypeHierarchyEngine().doesImplement(type, className) || SpringCore.getTypeHierarchyEngine().doesExtend(type, className);
+			return SpringCore.getTypeHierarchyEngine().doesImplement(type, className, true) || SpringCore.getTypeHierarchyEngine().doesExtend(type, className, true);
 		}
 		else {
 			return doesImplementWithJdt(resource, type, className);

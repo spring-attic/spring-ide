@@ -42,4 +42,7 @@ public class ClassloaderTypeHierarchyClassReader implements TypeHierarchyClassRe
 		return null;
 	}
 
+	public void cleanup() {
+	}
+
 }

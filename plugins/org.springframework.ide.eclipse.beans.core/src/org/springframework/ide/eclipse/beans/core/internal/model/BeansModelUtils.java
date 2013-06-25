@@ -1305,8 +1305,8 @@ public abstract class BeansModelUtils {
 									Set<String> allBeanClasses = config.getBeanClasses();
 									for (int i = 0; i < changedTypeNames.length; i++) {
 										for (String className : allBeanClasses) {
-											if (typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject())
-													|| typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject())) {
+											if (typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject(), false)
+													|| typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject(), false)) {
 												files.add(config);
 												configAdded = true;
 												break;
@@ -1315,6 +1315,8 @@ public abstract class BeansModelUtils {
 										if (configAdded) break;
 									}
 								}
+								
+								typeHierarchyEngine.cleanup(project.getProject());
 							}
 						}
 					}
@@ -1436,8 +1438,8 @@ public abstract class BeansModelUtils {
 										
 										if (className != null) {
 											for (int i = 0; i < changedTypeNames.length; i++) {
-												if (typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject())
-														|| typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject())) {
+												if (typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject(), false)
+														|| typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject(), false)) {
 													files.add(bean);
 													break;
 												}
@@ -1457,6 +1459,8 @@ public abstract class BeansModelUtils {
 										}
 									}
 								}
+								
+								typeHierarchyEngine.cleanup(project.getProject());
 							}
 						}
 					}
