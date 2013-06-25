@@ -105,6 +105,10 @@ public class PackageNameCompletionProposal extends AnnotationCompletionProposal 
 		AST ast = annotation.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
 
+		if (oldLiteral == null) {
+			return rewrite;
+		}
+
 		StringLiteral newValue = ast.newStringLiteral();
 		newValue.setLiteralValue(packageName);
 		ITrackedNodePosition newValuePosition = rewrite.track(newValue);
