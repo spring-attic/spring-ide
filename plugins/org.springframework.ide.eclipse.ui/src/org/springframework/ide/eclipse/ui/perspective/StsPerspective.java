@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -128,7 +128,6 @@ public class StsPerspective implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("ajprojectwizard");
 		layout.addNewWizardShortcut("com.springsource.sts.wizard.template");
-		layout.addNewWizardShortcut("org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject");
 		layout.addNewWizardShortcut("com.springsource.sts.roo.ui.wizard.newRooProjectWizard");
 		// layout.addNewWizardShortcut("org.codehaus.groovy.eclipse.ui.groovyProjectWizard");
 		layout.addNewWizardShortcut("org.grails.ide.eclipse.ui.wizard.newGrailsProjectWizard");

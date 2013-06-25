@@ -130,6 +130,12 @@
              id="com.springsource.sts.wizard.template">
        </newWizardShortcut>
     </perspectiveExtension>
+    <perspectiveExtension 
+          targetID="org.eclipse.ui.resourcePerspective">
+	   <newWizardShortcut
+             id="com.springsource.sts.wizard.template">
+       </newWizardShortcut>
+    </perspectiveExtension>
     <perspectiveExtension
           targetID="org.eclipse.jst.j2ee.J2EEPerspective">
        <newWizardShortcut

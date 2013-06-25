@@ -397,32 +397,10 @@
        	  <newWizardShortcut
              id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig">
           </newWizardShortcut>
-	      <newWizardShortcut
-             id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject">
-          </newWizardShortcut>
       </perspectiveExtension>
       <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
           <newWizardShortcut
              id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig">
-          </newWizardShortcut>
-	      <newWizardShortcut
-             id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject">
-          </newWizardShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension targetID="org.eclipse.jst.j2ee.J2EEPerspective">
-          <newWizardShortcut
-             id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject">
-          </newWizardShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-          <newWizardShortcut
-             id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject">
-          </newWizardShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-          targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
-          <newWizardShortcut
-          	 id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject">
           </newWizardShortcut>
       </perspectiveExtension>
     </extension>
