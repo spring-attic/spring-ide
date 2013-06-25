@@ -72,7 +72,8 @@ public class TypeHierarchyEngine {
 	public String getSupertype(IProject project, String className, boolean cleanup) {
 		char[] typeName = className.replace('.', '/').toCharArray();
 		try {
-			TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+			TypeHierarchyElementCache elementCache = getTypeHierarchyElementCache(project);
+			TypeHierarchyElement typeElement = getTypeElement(typeName, project, elementCache);
 			if (typeElement != null && typeElement.superclassName != null) {
 				return new String(typeElement.superclassName).replace("/", ".");
 			}
@@ -86,7 +87,8 @@ public class TypeHierarchyEngine {
 	public String[] getInterfaces(IProject project, String className, boolean cleanup) {
 		char[] typeName = className.replace('.', '/').toCharArray();
 		try {
-			TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+			TypeHierarchyElementCache elementCache = getTypeHierarchyElementCache(project);
+			TypeHierarchyElement typeElement = getTypeElement(typeName, project, elementCache);
 			if (typeElement != null && typeElement.interfaces != null) {
 				String[] result = new String[typeElement.interfaces.length];
 				for (int i = 0; i < result.length; i++) {
@@ -114,13 +116,15 @@ public class TypeHierarchyEngine {
 		char[] typeName = type.replace('.', '/').toCharArray();
 		char[] superTypeName = className.replace('.',  '/').toCharArray();
 	
+		TypeHierarchyElementCache elementCache = getTypeHierarchyElementCache(project);
+		
 		try {
 			do {
 				if (CharOperation.equals(typeName, superTypeName)) {
 					return true;
 				}
 				else {
-					TypeHierarchyElement typeElement = getTypeElement(typeName, project);
+					TypeHierarchyElement typeElement = getTypeElement(typeName, project, elementCache);
 					if (typeElement != null) {
 						typeName = typeElement.superclassName;
 					}
@@ -150,9 +154,11 @@ public class TypeHierarchyEngine {
 		char[] interfaceTypeName = interfaceName.replace('.',  '/').toCharArray();
 
 		try {
+			TypeHierarchyElementCache elementCache = getTypeHierarchyElementCache(project);
+			
 			// cached items first
-			boolean result = doesImplement(project, classTypeName, interfaceTypeName, true)
-					|| doesImplement(project, classTypeName, interfaceTypeName, false);
+			boolean result = doesImplement(project, classTypeName, interfaceTypeName, true, elementCache)
+					|| doesImplement(project, classTypeName, interfaceTypeName, false, elementCache);
 			return result;
 		}
 		finally {
@@ -160,9 +166,10 @@ public class TypeHierarchyEngine {
 		}
 	}
 
-	protected boolean doesImplement(IProject project, char[] classTypeName, char[] interfaceTypeName, boolean cachedItemsOnly) {
+	protected boolean doesImplement(final IProject project, char[] classTypeName, final char[] interfaceTypeName,
+			final boolean cachedItemsOnly, TypeHierarchyElementCache elementCache) {
 		do {
-			TypeHierarchyElement classTypeElement = getTypeElement(classTypeName, project);
+			TypeHierarchyElement classTypeElement = getTypeElement(classTypeName, project, elementCache);
 			if (classTypeElement != null) {
 				char[][] implementedInterfaces = classTypeElement.interfaces;
 				if (implementedInterfaces != null) {
@@ -177,8 +184,8 @@ public class TypeHierarchyEngine {
 							}
 						}
 						for (char[] interfaceToAnalyze : interfacesToAnalyze) {
-							if (!cachedItemsOnly || this.hasCacheElementFor(interfaceToAnalyze, project)) {
-								TypeHierarchyElement interfaceTypeElement = getTypeElement(interfaceToAnalyze, project);
+							if (!cachedItemsOnly || elementCache.get(interfaceToAnalyze) != null) {
+								TypeHierarchyElement interfaceTypeElement = getTypeElement(interfaceToAnalyze, project, elementCache);
 								if (interfaceTypeElement != null) {
 									char[][] superInterfaces = interfaceTypeElement.interfaces;
 									if (superInterfaces != null) {
@@ -190,7 +197,7 @@ public class TypeHierarchyEngine {
 					}
 				}
 				classTypeName = classTypeElement.superclassName;
-				if (cachedItemsOnly && classTypeName != null && !hasCacheElementFor(classTypeName, project)) {
+				if (cachedItemsOnly && classTypeName != null && elementCache.get(classTypeName) == null) {
 					classTypeName = null;
 				}
 			}
@@ -201,29 +208,24 @@ public class TypeHierarchyEngine {
 		return false;
 	}
 	
-	private boolean hasCacheElementFor(char[] fullyQualifiedClassName, IProject project) {
-		return this.cache.containsKey(project)
-				&& this.cache.get(project).get(fullyQualifiedClassName) != null;
-	}
-	
-	private TypeHierarchyElement getTypeElement(char[] fullyQualifiedClassName, IProject project) {
-		TypeHierarchyElementCache elementCache = this.cache.get(project);
-		if (elementCache == null) {
-			elementCache = new TypeHierarchyElementCache();
-			this.cache.put(project, elementCache);
-			
-		}
-		
+	private TypeHierarchyElement getTypeElement(char[] fullyQualifiedClassName, IProject project, TypeHierarchyElementCache elementCache) {
 		TypeHierarchyElement result = elementCache.get(fullyQualifiedClassName);
-		
 		if (result == null) {
 			result = getClassReader(project).readTypeHierarchyInformation(fullyQualifiedClassName, project);
 			if (result != null) {
 				elementCache.put(fullyQualifiedClassName, result);
 			}
 		}
-		
 		return result;
+	}
+
+	protected TypeHierarchyElementCache getTypeHierarchyElementCache(IProject project) {
+		TypeHierarchyElementCache elementCache = this.cache.get(project);
+		if (elementCache == null) {
+			elementCache = new TypeHierarchyElementCache();
+			this.cache.put(project, elementCache);
+		}
+		return elementCache;
 	}
 
 	private TypeHierarchyClassReader getClassReader(IProject project) {
