@@ -1293,20 +1293,32 @@ public abstract class BeansModelUtils {
 					try {
 						IType[] types = ((ICompilationUnit) element).getAllTypes();
 						String[] changedTypeNames = new String[types.length];
+						boolean[] changedTypeIsInterface = new boolean[types.length];
 						for (int i = 0; i < types.length; i++) {
 							changedTypeNames[i] = types[i].getFullyQualifiedName();
+							changedTypeIsInterface[i] = types[i].isInterface();
 						}
 						
 						for (IBeansProject project : projects) {
 							if (project != null) {
+
+								// don't look at projects that do not have the java element on their classpath
+								if (JdtUtils.isJavaProject(project.getProject()) && !JdtUtils.getJavaProject(project.getProject()).isOnClasspath(element)) {
+									continue;
+								}
+								
 								Set<IBeansConfig> configs = project.getConfigs();
 								for (IBeansConfig config : configs) {
 									boolean configAdded = false;
 									Set<String> allBeanClasses = config.getBeanClasses();
 									for (int i = 0; i < changedTypeNames.length; i++) {
 										for (String className : allBeanClasses) {
-											if (typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject(), false)
-													|| typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject(), false)) {
+											if (changedTypeIsInterface[i] && typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject(), false)) {
+												files.add(config);
+												configAdded = true;
+												break;
+											}
+											else if (!changedTypeIsInterface[i] && typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject(), false)) {
 												files.add(config);
 												configAdded = true;
 												break;
@@ -1423,12 +1435,20 @@ public abstract class BeansModelUtils {
 					try {
 						IType[] types = ((ICompilationUnit) element).getAllTypes();
 						String[] changedTypeNames = new String[types.length];
+						boolean[] changedTypeIsInterface = new boolean[types.length];
 						for (int i = 0; i < types.length; i++) {
 							changedTypeNames[i] = types[i].getFullyQualifiedName();
+							changedTypeIsInterface[i] = types[i].isInterface();
 						}
 						
 						for (IBeansProject project : projects) {
 							if (project != null) {
+								
+								// don't look at projects that do not have the java element on their classpath
+								if (JdtUtils.isJavaProject(project.getProject()) && !JdtUtils.getJavaProject(project.getProject()).isOnClasspath(element)) {
+									continue;
+								}
+								
 								Set<IBeansConfig> configs = project.getConfigs();
 								for (IBeansConfig config : configs) {
 									Set<IBean> allBeans = getBeans(config);
@@ -1438,8 +1458,11 @@ public abstract class BeansModelUtils {
 										
 										if (className != null) {
 											for (int i = 0; i < changedTypeNames.length; i++) {
-												if (typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject(), false)
-														|| typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject(), false)) {
+												if (changedTypeIsInterface[i] && typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject(), false)) {
+													files.add(bean);
+													break;
+												}
+												else if (!changedTypeIsInterface[i] && typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject(), false)) {
 													files.add(bean);
 													break;
 												}
