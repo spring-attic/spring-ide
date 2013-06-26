@@ -31,7 +31,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
  * 
  * @author Kris De Volder
  */
-public class GettingStartedGuide extends GithubRepoContent implements Describable, GSContent {
+public class GettingStartedGuide extends GithubRepoContent {
 
 	protected Repo repo;
 

@@ -25,6 +25,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
@@ -228,6 +229,18 @@ public class GuideImportWizardModel {
 			return g == null || g.isDownloaded(); 
 		}
 	};
+	
+	public LiveExpression<ValidationResult> downloadStatus = new Validator() {
+		@Override
+		protected ValidationResult compute() {
+			GSContent g = guide.getValue();
+			if (g == null) {
+				return ValidationResult.OK;
+			} else {
+				return g.getZip().getDownloadStatus();
+			}
+		}
+	};
 
 	/**
 	 * The description of the current guide.
@@ -266,6 +279,7 @@ public class GuideImportWizardModel {
 		buildTypeValidator.dependsOn(codesets);
 		
 		isDownloaded.dependsOn(guide);
+		downloadStatus.dependsOn(guide);
 		
 		description.dependsOn(guide);
 		

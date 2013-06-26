@@ -3,12 +3,6 @@
 <plugin>
   <extension
        point="com.springsource.sts.ide.ui.dashboard">
-    <part
-          class="org.springframework.ide.eclipse.gettingstarted.dashboard.GettingStartedGuidesDashboardPart"
-          id="com.springsource.sts.ide.help.dashboard.part.guides"
-          page="com.springsource.sts.ide.ui.dashboard.page.overview"
-          path="com.springsource.sts.ide.ui.dashboard.doc">
-    </part>
     <!-- 
         Example of pointing to a random web page to show content 
         Issue: navigation. User can navigate away from the page by clicking links. There's no obvious
@@ -16,20 +10,6 @@
         or we have to solve this issue by intercepting all the navigation events to handle them
         without loosing dashboard content. 
      -->
-    <page
-          class="org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage:http://sagan-design.businesscatalyst.com/guides-6.html"
-          id="org.springframework.ide.eclipse.gettingstarted.springhome"
-          label="Spring Home Page"
-          path="additions">
-    </page>
-    
-
-     <page
-          class="org.springframework.ide.eclipse.gettingstarted.dashboard.GuidesDashboardPageWithPreview"
-          id="org.springframework.ide.eclipse.gettingstarted.guideswp"
-          label="Guides WP"
-          path="additions">
-    </page>
     
     <page
           class="org.springframework.ide.eclipse.gettingstarted.dashboard.GuidesDashboardPage:https://github.com/springframework-meta"
@@ -68,6 +48,7 @@
          </description> 
          <selection class="org.eclipse.core.resources.IResource"/> 
       </wizard>
+<!--  This wizard is obsolete, subsumed by more general GSImportWizard above.
       <wizard
             category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
             class="org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizard"
@@ -78,7 +59,7 @@
             An import wizards that imports code associated with a Spring Getting Started Guide
          </description> 
          <selection class="org.eclipse.core.resources.IResource"/> 
-      </wizard>
+      </wizard> -->
       <category
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
             name="Spring">

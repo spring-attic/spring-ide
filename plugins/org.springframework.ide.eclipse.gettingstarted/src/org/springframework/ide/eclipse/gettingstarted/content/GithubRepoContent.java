@@ -10,10 +10,12 @@ import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 public abstract class GithubRepoContent implements GSContent {
 
 	protected DownloadManager downloader;
+	private DownloadableItem zip;
 	
 	protected GithubRepoContent(DownloadManager dl) {
 		this.downloader = dl;
@@ -35,17 +37,20 @@ public abstract class GithubRepoContent implements GSContent {
 	 * repo (master branch) can be downloaded. 
 	 */
 	public DownloadableItem getZip() {
-		String repoUrl = getRepo().getHtmlUrl(); 
-		//repoUrl is something like "https://github.com/springframework-meta/gs-consuming-rest-android"
-		//zipUrl is something like  "https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip" 
-		try {
-			DownloadableItem item = new DownloadableItem(new URL(repoUrl+"/archive/master.zip"), downloader);
-			item.setFileName(getRepo().getName());
-			return item;
-		} catch (MalformedURLException e) {
-			GettingStartedActivator.log(e);
-			return null;
+		if (zip==null) {
+			String repoUrl = getRepo().getHtmlUrl(); 
+			//repoUrl is something like "https://github.com/springframework-meta/gs-consuming-rest-android"
+			//zipUrl is something like  "https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip" 
+			try {
+				DownloadableItem item = new DownloadableItem(new URL(repoUrl+"/archive/master.zip"), downloader);
+				item.setFileName(getRepo().getName());
+				zip = item;
+			} catch (MalformedURLException e) {
+				GettingStartedActivator.log(e);
+				return null;
+			}
 		}
+		return zip;
 	}
 	
 	public String getName() {
@@ -80,6 +85,11 @@ public abstract class GithubRepoContent implements GSContent {
 
 	public boolean isDownloaded() {
 		return getZip().isDownloaded();
+	}
+	
+	@Override
+	public ValidationResult downloadStatus() {
+		return getZip().getDownloadStatus();
 	}
 	
 }

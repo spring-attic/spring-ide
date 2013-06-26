@@ -16,6 +16,7 @@ import java.util.List;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 import org.springframework.ide.eclipse.gettingstarted.wizard.GSImportWizard;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 /**
  * Interface that needs to be implemented by any content type that can be imported via
@@ -30,8 +31,21 @@ public interface GSContent extends Describable, DisplayNameable {
 
 	public List<CodeSet> getCodeSets() throws UIThreadDownloadDisallowed;
 	public CodeSet getCodeSet(String name) throws UIThreadDownloadDisallowed;
-	public boolean isDownloaded();
 	public URL getHomePage();
-	public DownloadableItem getZip();
+	
+	public DownloadableItem getZip(); //Some content may not be packaged in a zip. 
+									  // This method should be removed from the interface.
+									  //Shouldn't be needed to be used directly by client code if using codeset abstraction
+	
+	
+	public boolean isDownloaded();
+	
+	/**
+	 * If isDownloaded returns false, this may contain an explanation (if the
+	 * reason for isDownloaded false was some type of error that occurred 
+	 * during download. The message is retained as a download error status.
+	 */
+	public ValidationResult downloadStatus();
+
 	
 }
