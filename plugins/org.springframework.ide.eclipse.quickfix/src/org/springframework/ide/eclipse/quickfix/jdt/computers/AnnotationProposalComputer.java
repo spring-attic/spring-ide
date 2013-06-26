@@ -81,11 +81,6 @@ public abstract class AnnotationProposalComputer extends JavaCompletionProposalC
 		int invocationOffset = javaContext.getInvocationOffset();
 		String literalValue = value.getLiteralValue();
 		int length = invocationOffset - startPos;
-
-		if (length < 0) {
-			return null;
-		}
-
 		if (length > literalValue.length()) {
 			length = literalValue.length();
 			invocationOffset = startPos + length;
