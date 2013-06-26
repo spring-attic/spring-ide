@@ -24,6 +24,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
@@ -98,16 +101,35 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 		}
 	}
 
-	private void addHyperlinksHelper(String typeName, IProject project, List<IHyperlink> hyperlinksCollector) {
+	private void addHyperlinksHelper(final String typeName, final IProject project,
+			final List<IHyperlink> hyperlinksCollector) {
 		IBeansModel model = BeansCorePlugin.getModel();
 		IBeansProject springProject = model.getProject(project);
 		Set<IBeansConfig> configs = springProject.getConfigs();
+
 		// IBeansConfig config = BeansConfigFactory.create(springProject,
 		// BeansConfigFactory.JAVA_CONFIG_TYPE + typeName,
 		// IBeansConfig.Type.AUTO_DETECTED);
+
 		for (IBeansConfig config : configs) {
-			AutowireDependencyProvider autowireDependencyProvider = new AutowireDependencyProvider(config, config);
-			String[] beanNames = autowireDependencyProvider.getBeansForType(typeName);
+			final AutowireDependencyProvider autowireDependencyProvider = new AutowireDependencyProvider(config, config);
+			final String[][] beanNamesWrapper = new String[1][];
+
+			try {
+				IProjectClassLoaderSupport classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(
+						project.getProject(), BeansCorePlugin.getClassLoader());
+				autowireDependencyProvider.setProjectClassLoaderSupport(classLoaderSupport);
+				classLoaderSupport.executeCallback(new IProjectClassLoaderAwareCallback() {
+					public void doWithActiveProjectClassLoader() throws Throwable {
+						beanNamesWrapper[0] = autowireDependencyProvider.getBeansForType(typeName);
+					}
+				});
+			}
+			catch (Throwable e) {
+				BeansCorePlugin.log(e);
+			}
+
+			String[] beanNames = beanNamesWrapper[0];
 			for (final String beanName : beanNames) {
 				IBean bean = autowireDependencyProvider.getBean(beanName);
 				final IResource resource = bean.getElementResource();
