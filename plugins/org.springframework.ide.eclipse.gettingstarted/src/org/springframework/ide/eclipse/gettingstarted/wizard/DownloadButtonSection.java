@@ -26,8 +26,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
-import org.springframework.ide.eclipse.gettingstarted.guides.wizard.GuideImportWizardModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -44,12 +44,33 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
  */
 public class DownloadButtonSection extends WizardPageSection {
 
-	private GuideImportWizardModel model;
+	public static abstract class DownloadableModel {
+
+		/**
+		 * Reflects the state of the downloadable content. True when it is already downloaded
+		 * false otherwise.
+		 */
+		public final LiveExpression<Boolean> isDownloaded;
+		
+		public DownloadableModel(LiveExpression<Boolean> isDownloaded) {
+			this.isDownloaded = isDownloaded;
+		}
+		
+		/**
+		 * Subclass should implement to perform the download operation 
+		 * and update isDownloaded LiveExp as appropriate upon completion.
+		 */
+		public abstract void performDownload(IProgressMonitor monitor);
+
+	}
+
+	//
+	private DownloadableModel model;
 	private Button button;
 
 	public DownloadButtonSection(
 			WizardPageWithSections owner,
-			GuideImportWizardModel model) {
+			DownloadableModel model) {
 		super(owner);
 		this.model = model;
 	}
@@ -65,9 +86,9 @@ public class DownloadButtonSection extends WizardPageSection {
 		button.setText("Download");
 		enableDisable();
 		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).grab(true, false).applyTo(button);
-		model.isDownloaded.addListener(new ValueListener<Boolean>() {
+		model.isDownloaded.addListener(new UIValueListener<Boolean>() {
 			@Override
-			public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
+			protected void uiGotValue(LiveExpression<Boolean> exp, Boolean value) {
 				enableDisable();
 			}
 		});
@@ -101,16 +122,9 @@ public class DownloadButtonSection extends WizardPageSection {
 	 * already downloaded.
 	 */
 	private void enableDisable() {
-		final GithubRepoContent g = model.getGuide();
-		if (g!=null) {
-			Display dis = Display.getDefault();
-			if (dis!=null) {
-				dis.asyncExec(new Runnable() {
-					public void run() {
-						button.setEnabled(!g.isDownloaded());
-					}
-				});
-			}
+		Boolean isDown = model.isDownloaded.getValue();
+		if (isDown!=null) {
+			button.setEnabled(isDown);
 		}
 	}
 
