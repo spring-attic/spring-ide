@@ -1,7 +1,6 @@
 package org.springframework.ide.eclipse.quickfix.hypelrinks;
 
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -21,13 +20,11 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 
@@ -105,69 +102,36 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 			final List<IHyperlink> hyperlinksCollector) {
 		IBeansModel model = BeansCorePlugin.getModel();
 		IBeansProject springProject = model.getProject(project);
-		Set<IBeansConfig> configs = springProject.getConfigs();
 
-		// IBeansConfig config = BeansConfigFactory.create(springProject,
-		// BeansConfigFactory.JAVA_CONFIG_TYPE + typeName,
-		// IBeansConfig.Type.AUTO_DETECTED);
+		final AutowireDependencyProvider autowireDependencyProvider = new AutowireDependencyProvider(springProject,
+				springProject);
+		final String[][] beanNamesWrapper = new String[1][];
 
-		for (IBeansConfig config : configs) {
-			final AutowireDependencyProvider autowireDependencyProvider = new AutowireDependencyProvider(config, config);
-			final String[][] beanNamesWrapper = new String[1][];
-
-			try {
-				IProjectClassLoaderSupport classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(
-						project.getProject(), BeansCorePlugin.getClassLoader());
-				autowireDependencyProvider.setProjectClassLoaderSupport(classLoaderSupport);
-				classLoaderSupport.executeCallback(new IProjectClassLoaderAwareCallback() {
-					public void doWithActiveProjectClassLoader() throws Throwable {
-						beanNamesWrapper[0] = autowireDependencyProvider.getBeansForType(typeName);
-					}
-				});
-			}
-			catch (Throwable e) {
-				BeansCorePlugin.log(e);
-			}
-
-			String[] beanNames = beanNamesWrapper[0];
-			for (final String beanName : beanNames) {
-				IBean bean = autowireDependencyProvider.getBean(beanName);
-				final IResource resource = bean.getElementResource();
-				final int line = bean.getElementStartLine();
-				if (resource instanceof IFile) {
-					hyperlinksCollector.add(new IHyperlink() {
-
-						public void open() {
-							SpringUIUtils.openInEditor((IFile) resource, line);
-						}
-
-						public String getTypeLabel() {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						public String getHyperlinkText() {
-							return beanName;
-						}
-
-						public IRegion getHyperlinkRegion() {
-							return new IRegion() {
-
-								public int getOffset() {
-									// TODO Auto-generated method stub
-									return 0;
-								}
-
-								public int getLength() {
-									// TODO Auto-generated method stub
-									return 0;
-								}
-							};
-						}
-					});
+		try {
+			IProjectClassLoaderSupport classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project.getProject(),
+					BeansCorePlugin.getClassLoader());
+			autowireDependencyProvider.setProjectClassLoaderSupport(classLoaderSupport);
+			classLoaderSupport.executeCallback(new IProjectClassLoaderAwareCallback() {
+				public void doWithActiveProjectClassLoader() throws Throwable {
+					beanNamesWrapper[0] = autowireDependencyProvider.getBeansForType(typeName);
 				}
+			});
+		}
+		catch (Throwable e) {
+			BeansCorePlugin.log(e);
+		}
+
+		String[] beanNames = beanNamesWrapper[0];
+		for (final String beanName : beanNames) {
+			IBean bean = autowireDependencyProvider.getBean(beanName);
+			final IResource resource = bean.getElementResource();
+			final int line = bean.getElementStartLine();
+			if (resource instanceof IFile && line >= 0) {
+				hyperlinksCollector.add(new AutowireBeanHyperlink((IFile) resource, line, beanName,
+						beanNames.length == 1));
 			}
 		}
+		// }
 		// autowireDependencyProvider.getBeansForType()
 	}
 
