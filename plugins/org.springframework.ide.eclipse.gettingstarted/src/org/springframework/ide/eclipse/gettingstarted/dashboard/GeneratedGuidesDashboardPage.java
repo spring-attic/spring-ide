@@ -33,7 +33,6 @@ public class GeneratedGuidesDashboardPage extends GuidesDashboardPage {
 		generateHtml();
 		setName("JS Guides");
 		setHomeUrl(dashHtml.toURI().toString());
-		setUseJavaScript(true);
 	}
 	
 	private void generateHtml() throws URISyntaxException, IOException {

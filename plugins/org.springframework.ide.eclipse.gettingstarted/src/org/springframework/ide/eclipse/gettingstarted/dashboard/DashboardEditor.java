@@ -107,7 +107,7 @@ public class DashboardEditor extends EditorPart {
 	 */
 	protected List<IDashboardPage> createPages() {
 		List<IDashboardPage> pages = new ArrayList<IDashboardPage>();
-		pages.add(new WebDashboardPage("Getting Started", "http://sagan-design.businesscatalyst.com/guides-6.html"));
+		pages.add(new WebDashboardPage("Getting Started", "http://sagan.cfapps.io/guides/gs"));
 		pages.add(new DashboardExtensionsPage());
 		pages.add(new GuidesDashboardPageWithPreview());
 		try {
