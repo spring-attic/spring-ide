@@ -101,19 +101,6 @@ public class GettingStartedContent extends ContentManager {
 	}
 	
 	/**
-	 * Factory method to create a DownloadManager for a given content type name
-	 */
-	@Override
-	public DownloadManager downloadManagerFor(Class<?> contentType) {
-		return new DownloadManager(new AuthenticatedDownloader(), 
-				new File(
-						GettingStartedActivator.getDefault().getStateLocation().toFile(),
-						contentType.getSimpleName()
-				)
-		);		
-	}
-
-	/**
 	 * Get all getting started guides.
 	 */
 	public GettingStartedGuide[] getGuides() {

@@ -109,7 +109,7 @@ public class DownloadableItem {
 	}
 
 	public boolean isDownloaded() {
-		return downloader.isDownloaded(this);
+		return downloader!=null && downloader.isDownloaded(this);
 	}
 
 	/**

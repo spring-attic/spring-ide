@@ -25,7 +25,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.springframework.ide.eclipse.gettingstarted.content.ContentManager;
 import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
+import org.springframework.ide.eclipse.gettingstarted.content.GSZipFileCodeSet;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
@@ -69,7 +71,7 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 		protected List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
-			sections.add(new ChooseTypedContentSection(this, model.getGSContentSelectionModel(), model.getRawSelection(), GettingStartedContent.getInstance()));
+			sections.add(new ChooseTypedContentSection(this, model.getGSContentSelectionModel(), model.getRawSelection(), model.getContentManager()));
 			sections.add(new ValidatorSection(this, model.downloadStatus));
 			sections.add(new DescriptionSection(this, model.description));
 			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
@@ -147,6 +149,21 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 		dialog.setBlockOnOpen(true);
 		return dialog.open(); 
 	}
+	
+	public static int open(Shell shell, ContentManager cm, GSZipFileCodeSet content) {
+		GSImportWizard wiz = new GSImportWizard();
+		wiz.setContentManager(cm); //All available content
+		wiz.setItem(content); //Pre-selected content
+		WizardDialog dialog = new WizardDialog(shell, wiz);
+		dialog.setBlockOnOpen(true);
+		return dialog.open(); 
+	}
+	
+	
+
+	private void setContentManager(ContentManager cm) {
+		model.setContentManager(cm);
+	}
 
 	/**
 	 * Sets the default selection for the content item that is going to be imported. 
@@ -154,5 +171,5 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 	public void setItem(GSContent guide) {
 		this.model.setItem(guide);
 	}
-	
+
 }

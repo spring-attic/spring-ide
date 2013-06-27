@@ -14,19 +14,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
-import org.eclipse.swt.browser.CloseWindowListener;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
-import org.eclipse.swt.browser.WindowEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.springframework.ide.eclipse.gettingstarted.content.ContentManager;
+import org.springframework.ide.eclipse.gettingstarted.content.GSZipFileCodeSet;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
-import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
-import org.springframework.ide.eclipse.gettingstarted.github.auth.Credentials;
+import org.springframework.ide.eclipse.gettingstarted.util.URIParams;
 import org.springframework.ide.eclipse.gettingstarted.wizard.GSImportWizard;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
@@ -109,13 +109,13 @@ public class GuidesDashboardPage extends WebDashboardPage {
 		if ("github.com".equals(host)) {
 			Path path = new Path(uri.getPath());
 			String org = path.segment(0);
-			if ("springframework-meta".equals(org)) {
+//			if ("springframework-meta".equals(org)) {
 				String guideName = path.segment(1);
 				if (guideName !=null && guideName.startsWith("gs-")) {
 					//GuideImportWizard.open(getSite().getShell(), GettingStartedContent.getInstance().getGuide(guideName));
 					GSImportWizard.open(getShell(),  GettingStartedContent.getInstance().getGuide(guideName));
 					return true;
-				}
+//				}
 			}
 		}
 		return false;
@@ -125,23 +125,47 @@ public class GuidesDashboardPage extends WebDashboardPage {
 
 		@Override
 		public void changing(LocationEvent event) {
-			if (!useJavaScript) {
-				//try to detect when user clicks on guide links without help from the page.
-				try {
-					//Here we are interested only in URLs that look like a githubg 'guides' project.
-					//Example: https://github.com/springframework-meta/gs-messaging-redis
-					//Pattern: https://github.com/springframework-meta/gs-<name>
-					
-					URI uri = new URI(event.location);
-					boolean doneIt = importGuideUrl(uri);
-					if (doneIt) {
-						event.doit = false;
-						return;
+			try {
+				URI uri = new URI(event.location);
+				//zip file containing a codeset single codeset:
+				// https://github.com/kdvolder/gs-one-codeset/archive/master.zip?sts_codeset=true
+				Map<String, String> params = URIParams.parse(uri);
+				if (params.containsKey("sts_codeset")) {
+					if (uri.getPath().endsWith(".zip")) {
+						//zipfile codeset 
+						GSZipFileCodeSet content =  new GSZipFileCodeSet(uri);
+						GSImportWizard.open(getShell(), ContentManager.singleton(
+								GSZipFileCodeSet.class, "Zip File CodeSet" , content
+						), content);
 					}
-				} catch (URISyntaxException e) {
-					GettingStartedActivator.log(e);
 				}
+
+			} catch (URISyntaxException e) {
+				GettingStartedActivator.log(e);
 			}
+			
+			//Doing something special with urls that follow certain patterns
+			
+			//1: link to a gihub zip 
+			
+			
+//			if (!useJavaScript) {
+//				//try to detect when user clicks on guide links without help from the page.
+//				try {
+//					//Here we are interested only in URLs that look like a github 'guides' project.
+//					//Example: https://github.com/springframework-meta/gs-messaging-redis
+//					//Pattern: https://github.com/springframework-meta/gs-<name>
+//					
+//					URI uri = new URI(event.location);
+//					boolean doneIt = importGuideUrl(uri);
+//					if (doneIt) {
+//						event.doit = false;
+//						return;
+//					}
+//				} catch (URISyntaxException e) {
+//					GettingStartedActivator.log(e);
+//				}
+//			}
 			
 			//If we get here the event didn't get handled yet.
 			
@@ -156,18 +180,19 @@ public class GuidesDashboardPage extends WebDashboardPage {
 		}
 
 		private boolean allowNavigation(String location) {
-			//We white list some urls for navigation since they are needed to allow signing it with github at the moment
-			try {
-				if (location.startsWith("https://github.com/login?return_to")) {
-					return true;
-				} else if (location.equals("https://github.com/session")) {
-					return true;
-				} else if (new URI(location).equals(new URI(GuidesDashboardPage.this.getUrl()))) {
-					return true;
-				}
-			} catch (URISyntaxException e) {
-			}
-			return false;
+			return true; //ok to navigate anywhere now. We have a 'home' button.
+//			//We white list some urls for navigation since they are needed to allow signing it with github at the moment
+//			try {
+//				if (location.startsWith("https://github.com/login?return_to")) {
+//					return true;
+//				} else if (location.equals("https://github.com/session")) {
+//					return true;
+//				} else if (new URI(location).equals(new URI(GuidesDashboardPage.this.getUrl()))) {
+//					return true;
+//				}
+//			} catch (URISyntaxException e) {
+//			}
+//			return false;
 		}
 
 		@Override
@@ -182,23 +207,18 @@ public class GuidesDashboardPage extends WebDashboardPage {
 	@Override
 	protected void addBrowserHooks(Browser browser) {
 		super.addBrowserHooks(browser);
-		Credentials credentials = GithubClient.createDefaultCredentials();
-		credentials.apply(browser);
 		browser.addLocationListener(urlHandler);
 		
 
 		if (useJavaScript) {
 			importFun = new ImportJSFunction(browser);
 			//
-			browser.addCloseWindowListener(new CloseWindowListener() {
+			browser.addDisposeListener(new DisposeListener() {
 				@Override
-				public void close(WindowEvent event) {
-					//It doesn't look like this gets called.
-					System.out.println("Browser is closing");
+				public void widgetDisposed(DisposeEvent e) {
 					importFun.dispose();
 				}
 			});
-			
 		}
 		
 	}

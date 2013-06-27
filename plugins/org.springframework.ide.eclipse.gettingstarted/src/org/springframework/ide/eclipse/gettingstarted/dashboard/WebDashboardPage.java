@@ -119,6 +119,12 @@ public class WebDashboardPage extends ADashboardPage /* implements IExecutableEx
 		return name;
 	}
 	
+	public void setName(String string) {
+		this.name = string;
+	}
+
+
+	
 	public Shell getShell() {
 		return shell;
 	}

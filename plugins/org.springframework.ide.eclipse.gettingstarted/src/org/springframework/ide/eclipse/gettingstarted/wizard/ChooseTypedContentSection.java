@@ -84,7 +84,16 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		@Override
 		public Object[] getElements(Object e) {
 			if (e==content) {
-				return content.getTypes();
+				ContentType<?>[] types = content.getTypes();
+				if (types!=null) {
+					if (types.length==1) {
+						//If there's only one type of content. Then it looks better
+						//to just show those elements uncategorized.
+						return getChildren(types[0]);
+					} else {
+						return types;
+					}
+				}
 			}
 			return null;
 		}

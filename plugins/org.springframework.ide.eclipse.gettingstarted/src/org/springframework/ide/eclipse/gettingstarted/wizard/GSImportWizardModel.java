@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.content.ContentManager;
 import org.springframework.ide.eclipse.gettingstarted.content.Describable;
 import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
+import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
@@ -114,6 +115,14 @@ public class GSImportWizardModel {
 		}
 	}
 
+	/**
+	 * ContentManager instance that provides all the content that this wizard can import. 
+	 * By default this is content discovered automatically with the default content manager
+	 * instance. However it is possible to set the Content manager to browser / import
+	 * content provided another way.
+	 */
+	private ContentManager contentManager = GettingStartedContent.getInstance();
+	
 	/**
 	 * The chosen guide to import stuff from.
 	 */
@@ -263,7 +272,7 @@ public class GSImportWizardModel {
 	 * Indicates whether the user has selected the option to open the home page.
 	 */
 	private LiveVariable<Boolean> enableOpenHomePage = new LiveVariable<Boolean>(true);
-	
+
 	{
 		buildTypeValidator.dependsOn(guide);
 		buildTypeValidator.dependsOn(isDownloaded);
@@ -413,6 +422,14 @@ public class GSImportWizardModel {
 	 */
 	public LiveVariable<Object> getRawSelection() {
 		return this.rawSelection;
+	}
+
+	public ContentManager getContentManager() {
+		return contentManager;
+	}
+
+	public void setContentManager(ContentManager contentManager) {
+		this.contentManager = contentManager;
 	}
 
 }

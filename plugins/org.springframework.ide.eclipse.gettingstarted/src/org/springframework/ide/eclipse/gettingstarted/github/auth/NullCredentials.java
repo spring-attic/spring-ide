@@ -23,9 +23,4 @@ public class NullCredentials extends Credentials {
 		//No credentials so nothing to apply
 	}
 
-	@Override
-	public void apply(Browser browser) {
-		//No credentials so nothing to apply
-	}
-
 }

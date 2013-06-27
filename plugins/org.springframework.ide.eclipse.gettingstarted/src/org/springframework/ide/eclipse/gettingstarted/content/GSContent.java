@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.gettingstarted.content;
 import java.net.URL;
 import java.util.List;
 
+import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 import org.springframework.ide.eclipse.gettingstarted.wizard.GSImportWizard;
@@ -46,6 +47,8 @@ public interface GSContent extends Describable, DisplayNameable {
 	 * during download. The message is retained as a download error status.
 	 */
 	public ValidationResult downloadStatus();
+	
+	public void setDownloader(DownloadManager downloader);
 
 	
 }
