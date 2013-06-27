@@ -352,59 +352,34 @@ public class NewSpringProjectWizardMainPage extends WizardPage implements IWizar
 				return;
 			}
 
-			Template template = ((NewSpringProjectWizard) getWizard()).getModel().selectedTemplate.getValue();
-			int selectionIndex = -1;
 			String descriptorVersion = null;
+
+			Template template = ((NewSpringProjectWizard) getWizard()).getModel().selectedTemplate.getValue();
 
 			if (template != null) {
 				Descriptor descriptor = template.getItem().getLocalDescriptor();
 				if (descriptor == null) {
 					descriptor = template.getItem().getRemoteDescriptor();
 				}
-				if (descriptor != null && descriptor.getSpringVersion() != null) {
-					// if the template has a spring version defined, enable the
-					// spring version widget, as the template spring version can
-					// now
-					// be used for string substitution when processing a
-					// template.
-					// This allows
-					// a user to select another spring version that should be
-					// the
-					// replacement
-					// during the template processing
+				if (descriptor != null) {
 					descriptorVersion = descriptor.getSpringVersion();
-
-					SpringVersion resolvedVersion = SpringVersion.resolveSpringVersion(descriptorVersion);
-					if (resolvedVersion != null) {
-
-						String[] comboValues = springVersionCombo.getItems();
-						for (int i = 0; i < comboValues.length; i++) {
-							if (resolvedVersion.getDisplay().equals(comboValues[i])) {
-								selectionIndex = i;
-								break;
-							}
-						}
-					}
 				}
 			}
 
 			// Whether the spring version is in the combo list or not, the fact
 			// that
-			// there is a spring version in the descriptor should be enouch
+			// there is a spring version in the descriptor should be enough
 			// criteria
 			// to enable
-			// the widget
+			// the widget to allow users to select other versions. Otherwise
+			// disable the widget.
 			if (descriptorVersion != null) {
 				springVersionCombo.setEnabled(true);
-				if (selectionIndex >= 0) {
-					springVersionCombo.select(selectionIndex);
-				}
 			}
 			else {
 				springVersionCombo.select(0);
 				springVersionCombo.setEnabled(false);
 			}
-
 		}
 
 		@Override

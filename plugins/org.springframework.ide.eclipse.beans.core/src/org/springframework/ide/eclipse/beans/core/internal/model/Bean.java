@@ -340,39 +340,41 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	 * Lazily initialize this bean's data (constructor arguments, properties and inner beans).
 	 */
 	private void initBean() {
+		synchronized(this) {
 
-		// Retrieve this bean's constructor arguments
-		constructorArguments = new LinkedHashSet<IBeanConstructorArgument>();
-		ConstructorArgumentValues cargValues = definition.getConstructorArgumentValues();
-		for (Object cargValue : cargValues.getGenericArgumentValues()) {
-			IBeanConstructorArgument carg = new BeanConstructorArgument(this, (ValueHolder) cargValue);
-			constructorArguments.add(carg);
-		}
-		Map<?, ?> indexedCargValues = cargValues.getIndexedArgumentValues();
-		for (Object key : indexedCargValues.keySet()) {
-			ValueHolder vHolder = (ValueHolder) indexedCargValues.get(key);
-			IBeanConstructorArgument carg = new BeanConstructorArgument(this, ((Integer) key).intValue(), vHolder);
-			constructorArguments.add(carg);
-		}
-
-		// Retrieve this bean's properties
-		properties = new LinkedHashMap<String, IBeanProperty>();
-		for (PropertyValue propValue : definition.getPropertyValues().getPropertyValues()) {
-			IBeanProperty property = new BeanProperty(this, propValue);
-			properties.put(property.getElementName(), property);
-		}
-
-		// Retrieve this bean's method overrides
-		if (definition instanceof AbstractBeanDefinition) {
-			methodOverrides = new LinkedHashSet<IBeanMethodOverride>();
-			MethodOverrides mos = ((AbstractBeanDefinition) definition).getMethodOverrides();
-			if (mos != null) {
-				for (Object mo : mos.getOverrides()) {
-					if (mo instanceof LookupOverride) {
-						methodOverrides.add(new BeanLookupMethodOverride(this, (LookupOverride) mo));
-					}
-					else if (mo instanceof ReplaceOverride) {
-						methodOverrides.add(new BeanReplaceMethodOverride(this, (ReplaceOverride) mo));
+			// Retrieve this bean's constructor arguments
+			constructorArguments = new LinkedHashSet<IBeanConstructorArgument>();
+			ConstructorArgumentValues cargValues = definition.getConstructorArgumentValues();
+			for (Object cargValue : cargValues.getGenericArgumentValues()) {
+				IBeanConstructorArgument carg = new BeanConstructorArgument(this, (ValueHolder) cargValue);
+				constructorArguments.add(carg);
+			}
+			Map<?, ?> indexedCargValues = cargValues.getIndexedArgumentValues();
+			for (Object key : indexedCargValues.keySet()) {
+				ValueHolder vHolder = (ValueHolder) indexedCargValues.get(key);
+				IBeanConstructorArgument carg = new BeanConstructorArgument(this, ((Integer) key).intValue(), vHolder);
+				constructorArguments.add(carg);
+			}
+	
+			// Retrieve this bean's properties
+			properties = new LinkedHashMap<String, IBeanProperty>();
+			for (PropertyValue propValue : definition.getPropertyValues().getPropertyValues()) {
+				IBeanProperty property = new BeanProperty(this, propValue);
+				properties.put(property.getElementName(), property);
+			}
+	
+			// Retrieve this bean's method overrides
+			if (definition instanceof AbstractBeanDefinition) {
+				methodOverrides = new LinkedHashSet<IBeanMethodOverride>();
+				MethodOverrides mos = ((AbstractBeanDefinition) definition).getMethodOverrides();
+				if (mos != null) {
+					for (Object mo : mos.getOverrides()) {
+						if (mo instanceof LookupOverride) {
+							methodOverrides.add(new BeanLookupMethodOverride(this, (LookupOverride) mo));
+						}
+						else if (mo instanceof ReplaceOverride) {
+							methodOverrides.add(new BeanReplaceMethodOverride(this, (ReplaceOverride) mo));
+						}
 					}
 				}
 			}
