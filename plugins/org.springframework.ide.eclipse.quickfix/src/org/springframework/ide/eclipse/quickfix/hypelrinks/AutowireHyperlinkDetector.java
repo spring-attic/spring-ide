@@ -116,7 +116,7 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 
 			try {
 				IProjectClassLoaderSupport classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(
-						project.getProject(), BeansCorePlugin.getClassLoader());
+						project.getProject(), null);
 				autowireDependencyProvider.setProjectClassLoaderSupport(classLoaderSupport);
 				classLoaderSupport.executeCallback(new IProjectClassLoaderAwareCallback() {
 					public void doWithActiveProjectClassLoader() throws Throwable {

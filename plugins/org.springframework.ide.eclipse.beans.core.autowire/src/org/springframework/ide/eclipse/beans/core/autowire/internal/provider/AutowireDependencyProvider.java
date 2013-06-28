@@ -474,7 +474,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 
 	protected void createProjectClassLoaderSupport() {
 		if (this.classLoaderSupport == null) {
-			this.classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project.getProject(), BeansCorePlugin.getClassLoader());
+			this.classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project.getProject(), null);
 		}
 	}
 
