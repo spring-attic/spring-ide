@@ -13,12 +13,31 @@ public class AutowireBeanHyperlink implements IHyperlink {
 
 	private final String beanName;
 
-	private final boolean onlyCandidate;
+	private boolean onlyCandidate;
 
-	public AutowireBeanHyperlink(IFile file, int line, String beanName, boolean onlyCandidate) {
+	private boolean showFileName;
+
+	public AutowireBeanHyperlink(IFile file, int line, String beanName) {
 		this.file = file;
 		this.line = line;
 		this.beanName = beanName;
+		this.onlyCandidate = false;
+		this.showFileName = false;
+	}
+
+	public IFile getFile() {
+		return file;
+	}
+
+	public int getLine() {
+		return line;
+	}
+
+	public String getBeanName() {
+		return beanName;
+	}
+
+	public void setIsOnlyCandidate(boolean onlyCandidate) {
 		this.onlyCandidate = onlyCandidate;
 	}
 
@@ -35,7 +54,11 @@ public class AutowireBeanHyperlink implements IHyperlink {
 			return "Open Autowired Bean";
 		}
 
-		return "Open Autowired Bean Candidate: \"" + beanName + "\"";
+		if (!showFileName) {
+			return "Open Autowired Bean Candidate: \"" + beanName + "\"";
+		}
+
+		return "Open Autowired Bean Candidate: \"" + beanName + "\"" + " in " + file.getName();
 	}
 
 	public IRegion getHyperlinkRegion() {
@@ -51,6 +74,10 @@ public class AutowireBeanHyperlink implements IHyperlink {
 				return 0;
 			}
 		};
+	}
+
+	public void setShowFileName(boolean showFileName) {
+		this.showFileName = showFileName;
 	}
 
 }
