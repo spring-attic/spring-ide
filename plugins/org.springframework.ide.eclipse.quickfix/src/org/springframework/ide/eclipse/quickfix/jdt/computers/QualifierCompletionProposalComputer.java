@@ -29,11 +29,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.quickfix.Activator;
 import org.springframework.ide.eclipse.quickfix.jdt.proposals.QualifierCompletionProposal;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
-
 
 /**
  * @author Terry Denney

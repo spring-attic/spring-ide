@@ -78,7 +78,6 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
-
 /**
  * Utility class with helper methods for calculating quick fixes for bean
  * configuration files.
@@ -201,7 +200,7 @@ public class QuickfixUtils {
 	private static QuickfixSupport attributeQuickfixSupport;
 
 	private static ASTParser createASTParser(IJavaProject javaProject, ICompilationUnit cu, int kind) {
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
 		parser.setKind(kind);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
