@@ -71,7 +71,7 @@
 
 		<dist.name>Spring IDE</dist.name>
 		<dist.project>spring-ide</dist.project>
-		<dist.key>IDE</dist.key>
+		<dist.key>GSG_INTEGRATION</dist.key>
 		<dist.type>snapshot</dist.type>
 		<dist.pathpostfix>nightly</dist.pathpostfix>
 		<dist.path>${dist.type}/${dist.key}/${dist.pathpostfix}</dist.path>
@@ -95,7 +95,8 @@
 		     -->
 		<module>../../plugins/org.springframework.ide.eclipse.gettingstarted</module>
 		<module>../../plugins/org.springframework.ide.eclipse.gettingstarted.tests</module>
-
+		<module>../../features/org.springframework.ide.eclipse.gettingstarted.feature</module>
+		<module>../org.springframework.ide.eclipse.gettingstarted.site</module>
 	</modules>
 
 	<profiles>
