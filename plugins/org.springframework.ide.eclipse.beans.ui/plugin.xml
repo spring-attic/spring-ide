@@ -509,16 +509,6 @@
              id="org.springframework.ide.eclipse.beans.ui.addToNewConfigSet"
              name="%addToNewConfigSetCommand.name">
        </command>
-       <command
-             defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.AddToConfigSetHandler"
-             id="org.springframework.ide.eclipse.beans.ui.addToConfigSet"
-             name="%addToConfigSetCommand.name">
-       </command>
-       <command
-             defaultHandler="org.springframework.ide.eclipse.beans.ui.actions.RemoveFromConfigSetHandler"
-             id="org.springframework.ide.eclipse.beans.ui.removeFromConfigSet"
-             name="%removeFromConfigSetCommand.name">
-       </command>
     </extension>
     <extension
           point="org.eclipse.ui.menus">
@@ -550,10 +540,16 @@
                 </visibleWhen>
              </command>
              <menu
-                   commandId="org.springframework.ide.eclipse.beans.ui.addToConfigSet"
                    label="%addToConfigSetMenu.label">
                 <visibleWhen
-                      checkEnabled="true">
+                      checkEnabled="false">
+                   <iterate
+                         ifEmpty="false">
+                      <test
+                            property="org.springframework.ide.eclipse.beans.core.model.canAddToConfigSet"
+                            value="true">
+                      </test>
+                   </iterate>
                 </visibleWhen>
                 <dynamic
                       class="org.springframework.ide.eclipse.beans.ui.actions.AddToConfigSetAction"
@@ -561,10 +557,16 @@
                 </dynamic>
              </menu>
              <menu
-                   commandId="org.springframework.ide.eclipse.beans.ui.removeFromConfigSet"
                    label="%removeFromConfigSetMenu.label">
                 <visibleWhen
-                      checkEnabled="true">
+                      checkEnabled="false">
+                   <iterate
+                         ifEmpty="false">
+                      <test
+                            property="org.springframework.ide.eclipse.beans.core.model.isEmptyConfigSet"
+                            value="false">
+                      </test>
+                   </iterate>
                 </visibleWhen>
                 <dynamic
                       class="org.springframework.ide.eclipse.beans.ui.actions.RemoveFromConfigSetAction"
