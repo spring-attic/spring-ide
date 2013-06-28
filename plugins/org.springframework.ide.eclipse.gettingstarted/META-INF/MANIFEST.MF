@@ -31,7 +31,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.mylyn.discovery.ui,
  org.springsource.ide.eclipse.commons.configurator,
  org.eclipse.core.net,
- org.apache.commons.httpclient,
  org.apache.httpcomponents.httpcore,
  org.apache.httpcomponents.httpclient
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

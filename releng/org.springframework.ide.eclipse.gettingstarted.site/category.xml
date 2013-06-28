@@ -21,5 +21,14 @@
 		id="org.springframework.ide.eclipse.gettingstarted.feature" version="3.3.0.qualifier">
 		<category name="Spring Getting Started Integration" />
 	</feature>
+	
+	<!-- external dependencies -->
+	
+	<bundle id="org.codehaus.jackson.core" version="0.0.0"/>
+	<bundle id="org.codehaus.jackson.mapper" version="0.0.0"/>
+	<bundle id="org.apache.commons.codec" version="0.0.0"/>
+	<bundle id="org.apache.commons.io" version="0.0.0"/>
+	<bundle id="org.apache.httpcomponents.httpcore" version="0.0.0"/>
+	<bundle id="org.apache.httpcomponents.httpclient" version="0.0.0"/>
 
 </site>
