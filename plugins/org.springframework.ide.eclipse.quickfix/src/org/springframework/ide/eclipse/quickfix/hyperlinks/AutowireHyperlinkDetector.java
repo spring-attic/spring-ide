@@ -134,6 +134,7 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 				autowireDependencyProvider.setProjectClassLoaderSupport(classLoaderSupport);
 				classLoaderSupport.executeCallback(new IProjectClassLoaderAwareCallback() {
 					public void doWithActiveProjectClassLoader() throws Throwable {
+						autowireDependencyProvider.preloadClasses();
 						beanNamesWrapper[0] = autowireDependencyProvider.getBeansForType(typeName);
 					}
 				});
