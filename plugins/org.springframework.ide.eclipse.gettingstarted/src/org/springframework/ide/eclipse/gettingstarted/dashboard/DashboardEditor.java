@@ -108,17 +108,17 @@ public class DashboardEditor extends EditorPart {
 	protected List<IDashboardPage> createPages() {
 		List<IDashboardPage> pages = new ArrayList<IDashboardPage>();
 		pages.add(new WebDashboardPage("Getting Started", "http://sagan.cfapps.io/guides/gs"));
-		pages.add(new DashboardExtensionsPage());
-		pages.add(new GuidesDashboardPageWithPreview());
-		try {
-			pages.add(new GeneratedGuidesDashboardPage());
-		} catch (Exception e) {
-			GettingStartedActivator.log(e);
-		}
 		pages.add(new WebDashboardPage("News", "http://www.springsource.org/news-events"));
-		for (int i = 1; i < 3; i++) {
-			pages.add(new DemoDashboardPage("Demo "+i, "Contents for page "+i));
-		}
+		pages.add(new DashboardExtensionsPage());
+//		pages.add(new GuidesDashboardPageWithPreview());
+//		try {
+//			pages.add(new GeneratedGuidesDashboardPage());
+//		} catch (Exception e) {
+//			GettingStartedActivator.log(e);
+//		}
+//		for (int i = 1; i < 3; i++) {
+//			pages.add(new DemoDashboardPage("Demo "+i, "Contents for page "+i));
+//		}
 		return pages;
 	}
 
