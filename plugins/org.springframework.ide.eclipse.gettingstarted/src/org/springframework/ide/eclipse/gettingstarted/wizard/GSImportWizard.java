@@ -28,11 +28,10 @@ import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.ContentManager;
 import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
 import org.springframework.ide.eclipse.gettingstarted.content.GSZipFileCodeSet;
-import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.wizard.WizardImages;
+import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * Generic import wizard for different types of getting started content.
