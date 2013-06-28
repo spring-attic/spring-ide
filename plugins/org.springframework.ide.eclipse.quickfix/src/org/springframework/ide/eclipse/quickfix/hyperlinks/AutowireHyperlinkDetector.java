@@ -1,4 +1,14 @@
-package org.springframework.ide.eclipse.quickfix.hypelrinks;
+/*******************************************************************************
+ *  Copyright (c) 2013 GoPivotal, Inc.
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  Contributors:
+ *      GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.quickfix.hyperlinks;
 
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +39,10 @@ import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
+/**
+ * @author Terry Denney
+ * @since 3.3.0
+ */
 public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 
 	@Override
