@@ -23,14 +23,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.core;bundle-version="1.0.0";resolution:=optional,
  org.eclipse.m2e.jdt;bundle-version="1.0.0";resolution:=optional,
  org.eclipse.m2e.launching;bundle-version="1.0.0";resolution:=optional,
- org.eclipse.m2e.core.ui;bundle-version="1.0.0";resolution:=optional
+ org.eclipse.m2e.core.ui;bundle-version="1.0.0";resolution:=optional,
+ org.eclipse.m2e.maven.runtime;bundle-version="1.0.0";resolution:=optional
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: org.springframework.ide.eclipse.maven,
  org.springframework.ide.eclipse.maven.internal.legacyconversion
-Import-Package: org.apache.maven.artifact;resolution:=optional,
- org.apache.maven.model;resolution:=optional,
- org.apache.maven.project;resolution:=optional,
- org.codehaus.plexus.util.xml;resolution:=optional
