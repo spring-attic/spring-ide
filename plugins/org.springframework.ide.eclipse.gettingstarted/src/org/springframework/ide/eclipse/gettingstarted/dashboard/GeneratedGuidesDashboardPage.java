@@ -30,8 +30,8 @@ public class GeneratedGuidesDashboardPage extends GuidesDashboardPage {
 	public GeneratedGuidesDashboardPage() throws URISyntaxException, IOException {
 		URL entry = GettingStartedActivator.getDefault().getBundle().getEntry("resources/dashboard.html");
 		dashHtml = new File(FileLocator.toFileURL(entry).toURI());
-		generateHtml();
-		setName("JS Guides");
+		//generateHtml();
+		setName("Getting Started (alt)");
 		setHomeUrl(dashHtml.toURI().toString());
 	}
 	

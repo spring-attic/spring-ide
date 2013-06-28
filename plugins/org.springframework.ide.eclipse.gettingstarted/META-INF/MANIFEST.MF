@@ -39,3 +39,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.gettingstarted.content,
  org.springframework.ide.eclipse.gettingstarted.importing,
  org.springframework.ide.eclipse.gettingstarted.util
+Eclipse-BundleShape: dir
