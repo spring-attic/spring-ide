@@ -30,5 +30,6 @@
 	<bundle id="org.apache.commons.io" version="0.0.0"/>
 	<bundle id="org.apache.httpcomponents.httpcore" version="0.0.0"/>
 	<bundle id="org.apache.httpcomponents.httpclient" version="0.0.0"/>
+	<bundle id="org.springsource.ide.eclipse.commons.livexp" version="0.0.0"/>
 
 </site>
