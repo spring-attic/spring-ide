@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * different events.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 public class SpringResourceChangeListener implements IResourceChangeListener {
@@ -180,7 +181,7 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 									}
 								}
 								events.projectAdded((IProject) resource, eventType);
-								SpringCoreUtils.buildProject((IProject) resource);
+								SpringCoreUtils.buildFullProject((IProject) resource);
 								return Status.OK_STATUS;
 							}
 						};
