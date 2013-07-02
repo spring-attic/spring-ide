@@ -32,8 +32,8 @@ import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.LazyPackageCompletionProposal;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -282,8 +282,8 @@ public class BeansJavaCompletionUtils {
 						replacementString, prop.getJavaElement());
 			}
 		}
-		else if (comProposal instanceof LazyPackageCompletionProposal) {
-			LazyPackageCompletionProposal prop = (LazyPackageCompletionProposal) comProposal;
+		else if (comProposal instanceof LazyJavaCompletionProposal) {
+			LazyJavaCompletionProposal prop = (LazyJavaCompletionProposal) comProposal;
 			recorder.recordProposal(prop.getImage(), prop.getRelevance(), prop.getDisplayString(), prop
 					.getReplacementString(), prop.getJavaElement());
 		}
