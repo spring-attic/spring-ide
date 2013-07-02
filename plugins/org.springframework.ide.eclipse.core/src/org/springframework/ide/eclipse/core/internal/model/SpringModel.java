@@ -327,6 +327,8 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 						}
 					}
 					if (addedOrRemoved) {
+						SpringProjectContributionManager.classpathChanged(delta.getElement().getJavaProject().getProject().getName());
+						
 						for (ISpringProject project : SpringCore.getModel().getProjects()) {
 							IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
 							if (javaProject != null
