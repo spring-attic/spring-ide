@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2013 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal.maven;
 
@@ -101,11 +101,8 @@ public class RooProjectConfigurator extends AbstractSpringProjectConfigurator {
 			try {
 				// M2E 1.1 and greater
 				jobClass = Class.forName("org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob");
-				constr = jobClass.getConstructor(IProject[].class, boolean.class, boolean.class,
-						boolean.class, boolean.class);
-				job = (WorkspaceJob) constr.newInstance(new IProject[] { project }, 
-						MavenPlugin.getMavenConfiguration().isOffline(), false, true, true);
-
+				constr = jobClass.getConstructor(IProject[].class);
+				job = (WorkspaceJob) constr.newInstance((Object) new IProject[] { project });
 			} catch (ClassNotFoundException e) {
 				// M2E 1.0
 				jobClass = Class.forName("org.eclipse.m2e.core.ui.internal.UpdateConfigurationJob");
