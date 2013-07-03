@@ -94,7 +94,7 @@ public class DownloadManager {
 			FileOutputStream out = new FileOutputStream(targetPart);
 			try {
 				URL url = item.getURL();
-				//System.out.println("Downloading " + url + " to " + target);
+				System.out.println("Downloading " + url + " to " + target);
 
 				downloader.fetch(url, out);
 			}

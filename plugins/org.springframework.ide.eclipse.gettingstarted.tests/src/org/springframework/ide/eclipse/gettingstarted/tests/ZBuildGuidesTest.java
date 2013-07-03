@@ -23,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.gettingstarted.content.BuildType;
@@ -30,7 +31,9 @@ import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.gettingstarted.importing.ImportUtils;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 
 /**
  * An instance of this test verifies that a codesets for a given 
@@ -67,6 +70,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		StsTestUtil.setAutoBuilding(false);
 		if (buildType==BuildType.MAVEN && CLEAR_MAVEN_CACHE) {
 			File userHome = new File(System.getProperty("user.home"));
 			File m2 = new File(userHome, ".m2");
@@ -100,8 +104,13 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 			
 			ImportConfiguration importConf = ImportUtils.importConfig(guide, codeset);
 			String projectName = importConf.getProjectName();
-			IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(importConf);
-			importOp.run(new NullProgressMonitor());
+			final IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(importConf);
+//			buildJob(new GradleRunnable("import "+guide.getName() + " " + codeset.getName() + " "+buildType) {
+//				@Override
+//				public void doit(IProgressMonitor mon) throws Exception {
+					importOp.run(new NullProgressMonitor());
+//				}
+//			});
 	
 			//TODO: we are not checking if there are extra projects beyond the expected one.
 			IProject project = getProject(projectName);
@@ -119,6 +128,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 			GuidesStructureTest.validateZipStructure(g);
 			return true;
 		} catch (Throwable e) {
+//			e.printStackTrace();
 		}
 		return false;
 	}
