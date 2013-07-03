@@ -149,7 +149,4 @@ public class GradleStrategy extends ImportStrategy {
 	public IRunnableWithProgress createOperation(ImportConfiguration conf) {
 		return new GradleCodeSetImport2(conf);
 	}
-
-	
-	
 }

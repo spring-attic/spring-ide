@@ -141,6 +141,14 @@ public class GithubClient {
 		return get("/users/{userName}/repos", Repo[].class, userName);
 	}
 	
+	
+	/**
+	 * Get repos for the authenticated user. This seems to be the only way to list private repos
+	 * associated with a user. This only works over an authenticated github connection.
+	 */
+	public Repo[] getMyRepos() {
+		return get("/user/repos", Repo[].class);
+	}
 
 	/**
 	 * Fetch info about a repo identified by an owner and a name

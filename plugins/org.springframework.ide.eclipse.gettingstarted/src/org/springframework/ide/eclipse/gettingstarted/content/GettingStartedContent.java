@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.gettingstarted.content;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
@@ -33,7 +34,7 @@ public class GettingStartedContent extends ContentManager {
 	private static GettingStartedContent INSTANCE = null;
 	
 	private final static boolean ADD_REAL =  true;
-	private final static boolean ADD_MOCKS = (""+Platform.getLocation()).contains("kdvolder");
+	private final static boolean ADD_MOCKS = true;// (""+Platform.getLocation()).contains("kdvolder");
 	
 	public static GettingStartedContent getInstance() {
 		if (INSTANCE == null) {
@@ -50,24 +51,22 @@ public class GettingStartedContent extends ContentManager {
 			new ContentProvider<GettingStartedGuide>() {
 			@Override
 			public GettingStartedGuide[] fetch(DownloadManager downloader) {
-				List<GettingStartedGuide> guides = new ArrayList<GettingStartedGuide>();
+				LinkedHashMap<String, GettingStartedGuide> guides = new LinkedHashMap<String, GettingStartedGuide>();
 				if (ADD_MOCKS) {
-					addGuidesFrom(github.getUserRepos("kdvolder"), guides, downloader);
+					addGuidesFrom(github.getMyRepos(), guides, downloader);
 				}
 				if (ADD_REAL) {
 					addGuidesFrom(github.getOrgRepos("springframework-meta"), guides, downloader);
 				}
-				return guides.toArray(new GettingStartedGuide[guides.size()]);
+				return guides.values().toArray(new GettingStartedGuide[guides.size()]);
 			}
 			
-			private List<GettingStartedGuide> addGuidesFrom(Repo[] repos, List<GettingStartedGuide> guides, DownloadManager downloader) {
+			private LinkedHashMap<String, GettingStartedGuide> addGuidesFrom(Repo[] repos, LinkedHashMap<String, GettingStartedGuide> guides, DownloadManager downloader) {
 				for (Repo repo : repos) {
 					String name = repo.getName();
-					if (name.startsWith("gs-") && !name.equals("gs-redis-counters")) {
-						//TODO: gs-redis-counters is special. Has no codesets only a readme.md
-						//  can't deal with that right now. What should we do with this? 
-						//  Are there any others like it?
-						guides.add(new GettingStartedGuide(repo, downloader));
+//					System.out.println("repo : "+name + " "+repo.getUrl());
+					if (name.startsWith("gs-") && !guides.containsKey(name)) {
+						guides.put(name, new GettingStartedGuide(repo, downloader));
 					}
 				}
 				return guides;

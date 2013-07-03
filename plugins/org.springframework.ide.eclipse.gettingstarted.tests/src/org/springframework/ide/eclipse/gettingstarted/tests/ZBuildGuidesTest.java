@@ -13,11 +13,13 @@ package org.springframework.ide.eclipse.gettingstarted.tests;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.assertNoErrors;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.getProject;
 
+import java.io.File;
 import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -42,12 +44,15 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
  * @author Kris De Volder
  */
 public class ZBuildGuidesTest extends GuidesTestCase {
+	
+	//To flush out more dependency problems enable this: Be warned that it
+	// will take a lot longer to run each test!
+	private static final boolean CLEAR_MAVEN_CACHE = false;
+	
 	//Note the funny name of this class is an attempt to
 	// show test results at the bottom on bamboo builds.
 	// It looks like the tests reports are getting sorted
 	// alphabetically.
-	
-	private static Object lock = new Object();
 	
 	private CodeSet codeset;
 	private BuildType buildType;
@@ -62,6 +67,13 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		if (buildType==BuildType.MAVEN && CLEAR_MAVEN_CACHE) {
+			File userHome = new File(System.getProperty("user.home"));
+			File m2 = new File(userHome, ".m2");
+			if (m2.isDirectory()) {
+				FileUtils.deleteQuietly(m2);
+			}
+		}
 		System.out.println(">>> Setting up "+getName());
 		//Clean stuff from previous test: Delete any projects and their contents.
 		// We need to do this because imported maven and gradle projects will have the same name.
@@ -114,15 +126,18 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(ZBuildGuidesTest.class.getName());
 		for (GithubRepoContent g : GuidesTests.getGuides()) {
-			if (zipLooksOk(g)) {
-				//Avoid running build tests for zips that look like they have 'missing parts'
-				for (CodeSet cs : g.getCodeSets()) {
-					List<BuildType> buildTypes = cs.getBuildTypes();
-					for (BuildType bt : buildTypes) {
-						//Don't run tests for things we haven't yet implemented support for.
-						if (bt.getImportStrategy().isSupported()) {
-							GuidesTestCase test = new ZBuildGuidesTest(g, cs, bt);
-							suite.addTest(test);
+			if (!g.getName().contains("android")) {
+				//Skipping android tests for now... lots of problems there.
+				if (zipLooksOk(g)) {
+					//Avoid running build tests for zips that look like they have 'missing parts'
+					for (CodeSet cs : g.getCodeSets()) {
+						List<BuildType> buildTypes = cs.getBuildTypes();
+						for (BuildType bt : buildTypes) {
+							//Don't run tests for things we haven't yet implemented support for.
+							if (bt.getImportStrategy().isSupported()) {
+								GuidesTestCase test = new ZBuildGuidesTest(g, cs, bt);
+								suite.addTest(test);
+							}
 						}
 					}
 				}
