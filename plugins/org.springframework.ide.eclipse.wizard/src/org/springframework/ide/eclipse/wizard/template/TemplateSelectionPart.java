@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -142,7 +143,7 @@ public class TemplateSelectionPart extends WizardPageArea {
 	@Override
 	public Control createArea(Composite parent) {
 
-		initializeTemplates();
+		initialiseTemplatesFromContentManager();
 
 		Composite container = new Composite(parent, SWT.NONE);
 		GridLayoutFactory.fillDefaults().margins(0, 0).spacing(0, 0).applyTo(container);
@@ -194,7 +195,8 @@ public class TemplateSelectionPart extends WizardPageArea {
 					// therefore do not require download icon, since they are
 					// not downloaded
 					if (template instanceof SimpleProject
-							|| (template.getItem().isLocal() && !template.getItem().isNewerVersionAvailable())) {
+							|| ((template.getItem().isLocal() || TemplateUtils.hasBeenDownloaded(template)) && !template
+									.getItem().isNewerVersionAvailable())) {
 						return templateImage;
 					}
 
@@ -315,6 +317,9 @@ public class TemplateSelectionPart extends WizardPageArea {
 
 		});
 
+		refreshButton
+				.setToolTipText("Refresh the list of templates. Note that the current template selection will be cleared.");
+
 		Composite descriptionComposite = new Composite(container, SWT.NONE);
 		descriptionComposite.setLayout(new GridLayout());
 		descriptionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -365,16 +370,29 @@ public class TemplateSelectionPart extends WizardPageArea {
 
 		this.contentManagerListener = new PropertyChangeListener() {
 
-			public void propertyChange(PropertyChangeEvent arg0) {
+			public void propertyChange(PropertyChangeEvent event) {
 
-				initializeTemplates();
+				ContentManager manager = event.getSource() instanceof ContentManager ? (ContentManager) event
+						.getSource() : null;
+				final boolean hasTemplateContentChanged = manager != null && manager.isDirty();
+				if (hasTemplateContentChanged) {
 
-				// switch to UI thread
+					clearTemplateSelection();
+
+					// Only reinitialise templates if the manager is marked as
+					// dirty, as template contents may have changed, therefore
+					// new templates
+					// need to be created in the tree viewer
+					initialiseTemplatesFromContentManager();
+
+				}
+				// switch to UI thread to refresh the UI controls
 				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 					public void run() {
-						refreshPage();
+						refreshPage(hasTemplateContentChanged);
 					}
 				});
+
 			}
 
 		};
@@ -393,6 +411,21 @@ public class TemplateSelectionPart extends WizardPageArea {
 		expandCategory(SIMPLE_PROJECTS_CATEGORY);
 
 		return container;
+
+	}
+
+	protected void clearTemplateSelection() {
+		// Run synch in UI thread as it is most likely called from a non-worker
+		// thread
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				// clear any selection in the tree viewer as well.
+				if (treeViewer != null && !treeViewer.getTree().isDisposed()) {
+					treeViewer.setSelection(null);
+				}
+				setSeletectedTemplate(null);
+			}
+		});
 
 	}
 
@@ -428,9 +461,9 @@ public class TemplateSelectionPart extends WizardPageArea {
 	}
 
 	/**
-	 * Refreshes list of descriptors, and only refreshes the subset of
-	 * descriptors in the preference store if changes have been made in the
-	 * preference store (i.e., the content manager indicates dirty).
+	 * Refreshes list of descriptors, and clears any current template selection.
+	 * This is to avoid retaining template selections that may no longer be up
+	 * to date.
 	 */
 	protected void downloadDescriptors() {
 
@@ -439,29 +472,22 @@ public class TemplateSelectionPart extends WizardPageArea {
 		// exceptions
 		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				String error = null;
-				Exception e = null;
+				final String[] error = new String[1];
+				final Exception[] e = new Exception[1];
 				try {
 					wizard.getContainer().run(true, true, new DownloadDescriptorJob());
 				}
 				catch (InvocationTargetException ie) {
-					e = ie;
-					error = ErrorUtils.getErrorMessage("Failed to download template descriptors", e);
-
+					e[0] = ie;
+					error[0] = ErrorUtils.getErrorMessage("Failed to download template descriptors", e[0]);
 				}
 				catch (InterruptedException inte) {
-					e = inte;
-					error = "Download of descriptors interrupted";
+					e[0] = inte;
+					error[0] = "Download of descriptors interrupted";
 				}
 
-				if (error != null && e != null) {
-					final String errorMessage = error;
-					final Exception exception = e;
-					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							setError(errorMessage, exception);
-						}
-					});
+				if (error[0] != null && e[0] != null) {
+					setError(error[0], e[0]);
 				}
 			}
 		});
@@ -518,11 +544,15 @@ public class TemplateSelectionPart extends WizardPageArea {
 	}
 
 	/**
-	 * Note that is is sometimes run in a worker thread, therefore UI refreshes
-	 * that should occur when initialising templates should be executed through
-	 * UI jobs.
+	 * This initialises the templates directly from the content manager with
+	 * updated information. Any existing selections in the model are also
+	 * removed, as that template may no longer be valid.
+	 * 
+	 * Note that is is sometimes run in a worker thread, therefore any UI
+	 * callbacks must be performed as UI jobs.
+	 * 
 	 */
-	private void initializeTemplates() {
+	private void initialiseTemplatesFromContentManager() {
 
 		templates.clear();
 
@@ -553,7 +583,6 @@ public class TemplateSelectionPart extends WizardPageArea {
 			String templateId = item.getId();
 			if (!templateIds.contains(templateId)) {
 
-				// Handle templates that are simple project
 				Template template = new Template(item, null);
 
 				templates.add(template);
@@ -678,24 +707,43 @@ public class TemplateSelectionPart extends WizardPageArea {
 
 	}
 
-	private void refreshPage() {
+	private void refreshPage(boolean refreshAll) {
 
-		treeViewer.refresh(true);
+		// The content may have changed (e.g. if templates manually refreshed by
+		// the user)
+		// therefore invoke the content provider again to refresh the contents
+		// of the tree viewer
+		// with the new contents.
+		if (refreshAll) {
+			treeViewer.refresh(true);
 
-		boolean needsDownload = false;
-		for (Template template : templates) {
-			if (!(template instanceof SimpleProject) && !template.getItem().isLocal()) {
-				needsDownload = true;
-				break;
+			boolean needsDownload = false;
+			for (Template template : templates) {
+				if (!(template instanceof SimpleProject) && !template.getItem().isLocal()) {
+					needsDownload = true;
+					break;
+				}
 			}
+
+			expandCategory(SIMPLE_PROJECTS_CATEGORY);
+
+			legendImage.setVisible(needsDownload);
+			legendText.setVisible(needsDownload);
+			descriptionText.setText(""); //$NON-NLS-1$
+			refreshButton.setEnabled(true);
+		}
+		else {
+			refreshSelectedTemplateInViewer();
 		}
 
-		expandCategory(SIMPLE_PROJECTS_CATEGORY);
+	}
 
-		legendImage.setVisible(needsDownload);
-		legendText.setVisible(needsDownload);
-		descriptionText.setText(""); //$NON-NLS-1$
-		refreshButton.setEnabled(true);
+	public void refreshSelectedTemplateInViewer() {
+		Template selectedTemplate = model.selectedTemplate.getValue();
+		if (selectedTemplate != null && treeViewer != null && !treeViewer.getTree().isDisposed()) {
+			treeViewer.refresh(selectedTemplate, true);
+			treeViewer.setSelection(new StructuredSelection(selectedTemplate), true);
+		}
 	}
 
 	private void setDescription(Template template) {
