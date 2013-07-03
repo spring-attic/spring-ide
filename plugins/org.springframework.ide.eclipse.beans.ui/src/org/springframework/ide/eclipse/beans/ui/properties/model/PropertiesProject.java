@@ -69,7 +69,8 @@ public class PropertiesProject extends BeansProject {
 			configSets.put(configSet.getElementName(), new PropertiesConfigSet(this, configSet,
 					configSet.getType()));
 		}
-
+		
+		updateAllConfigsCache();
 	}
 
 	@Override
