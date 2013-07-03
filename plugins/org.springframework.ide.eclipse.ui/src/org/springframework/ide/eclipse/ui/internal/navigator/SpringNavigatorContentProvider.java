@@ -87,11 +87,9 @@ public class SpringNavigatorContentProvider implements ICommonContentProvider,
 		// Show virtual folder "Spring Elements" only in project explorer
 		if (SpringUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
 				.equals(providerID)) {
-			IProject project = SpringCoreUtils.getAdapter(parentElement,
-					IProject.class);
-			if (project != null) {
+			if (parentElement instanceof IProject) {
 				ISpringProject springProject = SpringCore.getModel()
-						.getProject(project);
+						.getProject((IProject) parentElement);
 				if (springProject != null) {
 					return new Object[] { springProject };
 				}
