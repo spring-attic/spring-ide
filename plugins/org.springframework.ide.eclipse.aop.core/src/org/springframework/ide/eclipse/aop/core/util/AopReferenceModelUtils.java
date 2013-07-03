@@ -123,8 +123,10 @@ public class AopReferenceModelUtils {
 	public static Set<IFile> getAffectedFilesFromBeansProject(IProject file) {
 		Set<IFile> affectedFiles = new HashSet<IFile>();
 		IBeansProject bp = BeansCorePlugin.getModel().getProject(file.getProject());
-		if (bp != null && bp.getConfigs() != null && bp.getConfigs().size() > 0) {
-			for (IBeansConfig config : bp.getConfigs()) {
+		
+		Set<IBeansConfig> configs = bp != null ? bp.getConfigs() : null;
+		if (configs != null && configs.size() > 0) {
+			for (IBeansConfig config : configs) {
 				affectedFiles.add((IFile) config.getElementResource());
 			}
 		}
