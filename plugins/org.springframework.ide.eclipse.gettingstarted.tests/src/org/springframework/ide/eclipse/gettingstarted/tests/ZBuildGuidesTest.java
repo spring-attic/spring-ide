@@ -126,22 +126,25 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(ZBuildGuidesTest.class.getName());
 		for (GithubRepoContent g : GuidesTests.getGuides()) {
-			if (!g.getName().contains("android")) {
-				//Skipping android tests for now... lots of problems there.
-				if (zipLooksOk(g)) {
-					//Avoid running build tests for zips that look like they have 'missing parts'
-					for (CodeSet cs : g.getCodeSets()) {
-						List<BuildType> buildTypes = cs.getBuildTypes();
-						for (BuildType bt : buildTypes) {
-							//Don't run tests for things we haven't yet implemented support for.
-							if (bt.getImportStrategy().isSupported()) {
-								GuidesTestCase test = new ZBuildGuidesTest(g, cs, bt);
-								suite.addTest(test);
+//			if (g.getName().contains("securing-web")) {
+//			if (g.getName().contains("accessing-facebook")) {
+				if (!g.getName().contains("android")) {
+					//Skipping android tests for now... lots of problems there.
+					if (zipLooksOk(g)) {
+						//Avoid running build tests for zips that look like they have 'missing parts'
+						for (CodeSet cs : g.getCodeSets()) {
+							List<BuildType> buildTypes = cs.getBuildTypes();
+							for (BuildType bt : buildTypes) {
+								//Don't run tests for things we haven't yet implemented support for.
+								if (bt.getImportStrategy().isSupported()) {
+									GuidesTestCase test = new ZBuildGuidesTest(g, cs, bt);
+									suite.addTest(test);
+								}
 							}
 						}
 					}
 				}
-			}
+//			}
 		}
 		return suite;
 	}
