@@ -34,7 +34,6 @@ import org.springframework.ide.eclipse.quickfix.validator.helper.BeansValidation
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 
-
 /**
  * Abstract class for validating bean reference attribute
  * @author Terry Denney
@@ -108,7 +107,8 @@ public class BeanReferenceValidator extends BeanValidator {
 
 		if (attribute.getLocalName().equals(BeansSchemaConstants.ATTR_DEPENDS_ON)) {
 			parentBean.getBeanDefinition().setDependsOn(
-					StringUtils.tokenizeToStringArray(text, BeanDefinitionParserDelegate.BEAN_NAME_DELIMITERS));
+					StringUtils.tokenizeToStringArray(text,
+							BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS));
 			element = parentBean;
 		}
 		else if (attribute.getLocalName().equals(BeansSchemaConstants.ATTR_PARENT)) {

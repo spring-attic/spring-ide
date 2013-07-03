@@ -19,6 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -84,8 +85,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	protected volatile String version = "2.0.0";
 
 	protected volatile Map<String, IBeansConfig> configs = new LinkedHashMap<String, IBeansConfig>();
-
 	protected volatile Map<String, IBeansConfig> autoDetectedConfigs = new LinkedHashMap<String, IBeansConfig>();
+	protected volatile Set<IBeansConfig> allConfigs = Collections.unmodifiableSet(new CopyOnWriteArraySet<IBeansConfig>());
 
 	protected volatile Map<String, Set<String>> autoDetectedConfigsByLocator = new LinkedHashMap<String, Set<String>>();
 
@@ -281,6 +282,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			}
 		}
 		finally {
+			updateAllConfigsCache();
 			w.unlock();
 		}
 
@@ -329,6 +331,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			}
 		}
 		finally {
+			updateAllConfigsCache();
 			w.unlock();
 		}
 		return false;
@@ -402,6 +405,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 				}
 			}
 			finally {
+				updateAllConfigsCache();
 				w.unlock();
 			}
 			removeConfigFromConfigSets(configName);
@@ -645,15 +649,16 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 		try {
 			r.lock();
-			Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>(configs.values());
-			beansConfigs.addAll(autoDetectedConfigs.values());
-			return beansConfigs;
+			return allConfigs;
+//			Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>(configs.values());
+//			beansConfigs.addAll(autoDetectedConfigs.values());
+//			return beansConfigs;
 		}
 		finally {
 			r.unlock();
 		}
 	}
-
+	
 	/**
 	 * Updates the {@link BeansConfigSet}s defined within this project.
 	 * <p>
@@ -829,6 +834,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			autoDetectedConfigSetsByLocator.clear();
 		}
 		finally {
+			updateAllConfigsCache();
 			w.unlock();
 		}
 	}
@@ -926,6 +932,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			}
 		}
 		finally {
+			updateAllConfigsCache();
 			w.unlock();
 		}
 	}
@@ -1012,6 +1019,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			}
 		}
 		finally {
+			updateAllConfigsCache();
 			w.unlock();
 		}
 	}
@@ -1094,6 +1102,16 @@ I	 * Removes the given beans config from the list of configs and from all config
 				}
 			}
 		}
+	}
+
+	/**
+	 * Update the internal cache for all configs in case something changed to this.configs or this.autoDetectedConfigs.
+	 * This has to be called in a write-guarded block.
+	 */
+	protected void updateAllConfigsCache() {
+		CopyOnWriteArraySet<IBeansConfig> newAllConfigs = new CopyOnWriteArraySet<IBeansConfig>(configs.values());
+		newAllConfigs.addAll(autoDetectedConfigs.values());
+		this.allConfigs = Collections.unmodifiableSet(newAllConfigs);
 	}
 
 	/**

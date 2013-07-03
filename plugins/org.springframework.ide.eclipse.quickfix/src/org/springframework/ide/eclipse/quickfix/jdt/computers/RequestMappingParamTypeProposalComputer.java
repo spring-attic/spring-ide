@@ -49,7 +49,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.quickfix.Activator;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 import org.springframework.ui.Model;
@@ -60,8 +59,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
-
 
 /**
  * Content assist proposal computer for showing user a list of allowable type

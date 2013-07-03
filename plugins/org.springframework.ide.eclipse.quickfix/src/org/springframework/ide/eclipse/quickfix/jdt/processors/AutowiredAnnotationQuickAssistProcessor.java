@@ -21,13 +21,13 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.springframework.ide.eclipse.quickfix.jdt.proposals.AddAutowireCompletionProposal;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
-
 
 /**
  * @author Terry Denney
@@ -81,7 +81,7 @@ public class AutowiredAnnotationQuickAssistProcessor extends AbstractAnnotationQ
 						.equals(((PrimitiveType) returnType).getPrimitiveTypeCode()))) {
 
 			// check if there is at least one parameter
-			List params = methodDecl.parameters();
+			List<SingleVariableDeclaration> params = methodDecl.parameters();
 			if (params != null && !params.isEmpty()) {
 				return super.isQuickfixAvailable(methodDecl, context);
 			}

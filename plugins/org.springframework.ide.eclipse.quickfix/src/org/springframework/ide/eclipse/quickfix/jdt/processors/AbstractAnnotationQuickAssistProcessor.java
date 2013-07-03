@@ -26,9 +26,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
-
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * @author Terry Denney

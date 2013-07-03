@@ -35,7 +35,6 @@ import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.springframework.ide.eclipse.config.core.IConfigEditor;
 import org.springframework.ide.eclipse.quickfix.QuickfixUtils;
 
-
 /**
  * @author Terry Denney
  * @author Martin Lippert
@@ -72,9 +71,9 @@ public class RemoveDeprecatedQuickFixProposal extends BeanAttributeQuickFixPropo
 		removeDeprecatedAnnotation(document, cu, decl);
 	}
 
-	@SuppressWarnings("unchecked")
 	// copied from
 	// org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor
+	@SuppressWarnings("rawtypes")
 	private Annotation findAnnotation(List modifiers) {
 		for (int i = 0; i < modifiers.size(); i++) {
 			Object curr = modifiers.get(i);

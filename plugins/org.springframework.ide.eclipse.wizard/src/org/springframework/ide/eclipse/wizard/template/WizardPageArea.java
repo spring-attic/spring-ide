@@ -64,12 +64,6 @@ public abstract class WizardPageArea {
 		return new Status(severity, WizardPlugin.PLUGIN_ID, message);
 	}
 
-	protected void notifyStatusChange(String message, int severity, boolean isAreaComplete) {
-		IStatus status = createStatus(message, severity);
-
-		notifyStatusChange(status, isAreaComplete);
-	}
-
 	protected void notifyStatusChange(IStatus status, boolean isAreaComplete) {
 		this.isAreaComplete = isAreaComplete;
 		validationStatus = status;

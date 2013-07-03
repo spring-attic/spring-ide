@@ -63,6 +63,12 @@ public class NewSpringProjectWizardMainPage extends WizardPage implements IWizar
 
 	}
 
+	public void refreshTemplateInUI() {
+		if (part != null) {
+			part.refreshSelectedTemplateInViewer();
+		}
+	}
+
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -218,7 +224,7 @@ public class NewSpringProjectWizardMainPage extends WizardPage implements IWizar
 	}
 
 	public void notifyStatusChange(WizardPageArea currentArea) {
-		// Otherwise, see if there are any other errors, and display them
+		// See if there are any other errors, and display them
 		WizardPageArea nonOKArea = getAreaBySeverity(IStatus.ERROR);
 		if (nonOKArea == null) {
 			nonOKArea = getAreaBySeverity(IStatus.WARNING);
@@ -257,25 +263,6 @@ public class NewSpringProjectWizardMainPage extends WizardPage implements IWizar
 		}
 
 		refreshUI();
-	}
-
-	@Override
-	public boolean isPageComplete() {
-		return super.isPageComplete() && !hasErrors();
-	}
-
-	protected boolean hasErrors() {
-		for (WizardPageArea area : wizardAreas) {
-			if (!area.isAreaComplete()) {
-				return true;
-			}
-			IStatus areaStatus = area.getValidationStatus();
-
-			if (areaStatus != null && areaStatus.getSeverity() == IStatus.ERROR) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@Override

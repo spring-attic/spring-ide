@@ -46,7 +46,7 @@
 			class="org.springframework.ide.eclipse.beans.core.internal.model.BeansModelPropertyTester"
 			id="org.springframework.ide.eclipse.beans.core.beansModelTester"
 			namespace="org.springframework.ide.eclipse.beans.core.model"
-			properties="isBeansConfig, isInfrstructureBean" 
+			properties="isBeansConfig, isInfrstructureBean, canAddToConfigSet, isEmptyConfigSet" 
 			type="java.lang.Object" />
 	</extension>
 	

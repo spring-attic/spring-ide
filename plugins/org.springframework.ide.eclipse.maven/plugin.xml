@@ -149,5 +149,32 @@
               class="org.springframework.ide.eclipse.maven.internal.legacyconversion.LegacyProjectChecker">
         </startup>
      </extension>
+     <extension
+           point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension
+              targetID="com.springsource.sts.ide.perspective">
+           <newWizardShortcut
+                 id="org.eclipse.m2e.core.wizards.Maven2ProjectWizard">
+           </newWizardShortcut>
+        </perspectiveExtension>
+        <perspectiveExtension
+              targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+           <newWizardShortcut
+                 id="org.eclipse.m2e.core.wizards.Maven2ProjectWizard">
+           </newWizardShortcut>
+        </perspectiveExtension>
+        <perspectiveExtension
+              targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+           <newWizardShortcut
+                 id="org.eclipse.m2e.core.wizards.Maven2ProjectWizard">
+           </newWizardShortcut>
+        </perspectiveExtension>
+        <perspectiveExtension
+              targetID="org.eclipse.jdt.ui.JavaPerspective">
+           <newWizardShortcut
+                 id="org.eclipse.m2e.core.wizards.Maven2ProjectWizard">
+           </newWizardShortcut>
+        </perspectiveExtension>
+     </extension>
      
 </plugin>

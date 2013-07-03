@@ -47,6 +47,7 @@ import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
  */
 public class AnnotationCompilationParticipant extends CompilationParticipant {
 
+	@SuppressWarnings("unchecked")
 	private List<String> findPathVariables(AbstractTypeDeclaration typeDecl) {
 		List<String> pathVariables = new ArrayList<String>();
 		List<BodyDeclaration> bodyDecls = typeDecl.bodyDeclarations();
@@ -111,6 +112,7 @@ public class AnnotationCompilationParticipant extends CompilationParticipant {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<String> findPathVariables(MethodDeclaration methodDecl) {
 		List<String> pathVariables = new ArrayList<String>();
 		List<SingleVariableDeclaration> params = methodDecl.parameters();
@@ -123,6 +125,7 @@ public class AnnotationCompilationParticipant extends CompilationParticipant {
 		return pathVariables;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void reconcile(ReconcileContext context) {
 		if (context.getDelta() == null) {

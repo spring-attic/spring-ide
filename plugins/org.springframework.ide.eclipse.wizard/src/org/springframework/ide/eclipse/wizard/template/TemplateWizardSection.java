@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.SimpleProjectFactory;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfo;
+import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoElement;
 
 /**
  * Section responsible for creating a Spring project from a template. Note that
@@ -69,7 +70,7 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
-
+		// Templates are downloaded only when a user clicks "Next"
 		if (page == getWizard().getMainPage()) {
 
 			final Template template = getWizard().getModel().selectedTemplate.getValue();
@@ -121,14 +122,22 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 						handleError(errors[0]);
 						return null;
 					}
+					
+					// Let the UI know that the template was downloaded. This is
+					// Only needed as long as the content manager does not fire
+					// a more accurate event indicating which template changed.
+					// Once the content manager is updated with that change,
+					// this
+					// call back is no longer needed
+					getWizard().getMainPage().refreshTemplateInUI();
 				}
 
 				WizardUIInfo info = getUIInfo(template);
 
-				if (!hasTemplateWizardPages()) {
+				if (info == null || !hasTemplateWizardPages()) {
 					// Update the buttons so that the "Next" button is disabled.
 					// This is done
-					// indirectly by the wizard which calls hasNext().. once
+					// indirectly by the wizard which calls hasNext() once
 					// again to determine the button states based on data
 					// already downloaded.
 					getWizard().getContainer().updateButtons();
@@ -142,10 +151,15 @@ public class TemplateWizardSection extends SpringProjectWizardSection {
 				ITemplateWizardPage firstPage = null;
 
 				try {
+
 					for (int i = 0; i < info.getPageCount(); i++) {
 
+						List<WizardUIInfoElement> pageElements = info.getElementsForPage(i);
+						if (pageElements == null || pageElements.isEmpty()) {
+							continue;
+						}
 						templatePage = new NewTemplateWizardPage(info.getPage(i).getDescription(), template,
-								new TemplateInputCollector(info.getElementsForPage(i)));
+								new TemplateInputCollector(pageElements));
 						templatePage.setWizard(getWizard());
 
 						// Always set a new first template page, as the template

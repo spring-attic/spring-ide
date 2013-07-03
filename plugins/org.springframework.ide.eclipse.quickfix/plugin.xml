@@ -317,7 +317,7 @@ public ${String} ${get}(${}) {
         point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
      <hyperlinkDetector
            activate="true"
-           class="org.springframework.ide.eclipse.quickfix.hypelrinks.AutowireHyperlinkDetector"
+           class="org.springframework.ide.eclipse.quickfix.hyperlinks.AutowireHyperlinkDetector"
            description="Hyperlink to possible Autowired beans"
            id="org.springframework.ide.eclipse.quickfix.AutowireHyperlink"
            name="Autowire Hyperlink Detector"

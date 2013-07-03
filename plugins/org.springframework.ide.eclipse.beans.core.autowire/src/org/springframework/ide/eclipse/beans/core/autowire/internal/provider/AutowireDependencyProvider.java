@@ -114,6 +114,10 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 
 	private Map<Class<?>, String> resolvableDependencies = new HashMap<Class<?>, String>();
 
+	private Class<?> factoryBeanClass;
+	private Class<?> objectFactoryClass;
+	private Class<?> providerClass;
+
 	public AutowireDependencyProvider(IBeansModelElement element, IBeansModelElement context) {
 		this.context = (context == null ? element : context);
 		this.element = element;
@@ -134,6 +138,9 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			this.classLoaderSupport.executeCallback(new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
 
 				public void doWithActiveProjectClassLoader() throws Throwable {
+					
+					// pre-load used classes
+					preloadClasses();
 
 					// fill in the resolvableDependencies
 					fillResolvableDependencies();
@@ -277,6 +284,23 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 		return autowiredBeanReferences;
 	}
 
+	public void preloadClasses() {
+		try {
+			factoryBeanClass = ClassUtils.loadClass(FactoryBean.class.getName());
+		} catch (ClassNotFoundException e) {
+		}
+
+		try {
+			objectFactoryClass = ClassUtils.loadClass(ObjectFactory.class.getName());
+		} catch (ClassNotFoundException e) {
+		}
+
+		try {
+			providerClass = ClassUtils.loadClass(Provider.class.getName());
+		} catch (ClassNotFoundException e) {
+		}
+	}
+
 	public boolean containsBean(String beanName) {
 		return getBean(beanName) != null;
 	}
@@ -329,14 +353,6 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 	public String[] getBeansForType(Class<?> requiredType) {
 		Set<String> matchingBeans = new HashSet<String>();
 		
-		Class<?> factoryBeanClass = null;
-		try {
-			factoryBeanClass = ClassUtils.loadClass(FactoryBean.class.getName());
-		}
-		catch (ClassNotFoundException e) {
-			return new String[0];
-		}
-		
 		for (IBean bean : beans) {
 			String beanClassName = ValidationRuleUtils.getBeanClassName(bean, context);
 			if (beanClassName != null) {
@@ -345,7 +361,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 					if (requiredType.isAssignableFrom(beanClass)) {
 						matchingBeans.add(bean.getElementName());
 					}
-					else if (factoryBeanClass.isAssignableFrom(beanClass)) {
+					else if (factoryBeanClass != null && factoryBeanClass.isAssignableFrom(beanClass)) {
 						if (isFactoryForType(beanClass, requiredType)) {
 							matchingBeans.add(bean.getElementName());
 						} 
@@ -392,13 +408,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			throws NoSuchBeanDefinitionException {
 
 		// Consider FactoryBeans as autowiring candidates.
-		boolean isFactoryBean = false;
-		try {
-			isFactoryBean = (descriptor != null && descriptor.getDependencyType() != null && ClassUtils.loadClass(FactoryBean.class.getName())
-					.isAssignableFrom(descriptor.getDependencyType()));
-		}
-		catch (ClassNotFoundException e) {
-		}
+		boolean isFactoryBean = (descriptor != null && descriptor.getDependencyType() != null && factoryBeanClass != null && factoryBeanClass.isAssignableFrom(descriptor.getDependencyType()));
 
 		if (isFactoryBean) {
 			beanName = BeanFactoryUtils.transformedBeanName(beanName);
@@ -474,7 +484,7 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 
 	protected void createProjectClassLoaderSupport() {
 		if (this.classLoaderSupport == null) {
-			this.classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project.getProject(), BeansCorePlugin.getClassLoader());
+			this.classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project.getProject(), null);
 		}
 	}
 
@@ -658,13 +668,9 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 	public void resolveDependency(DependencyDescriptor descriptor, Class<?> type, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 		descriptor.initParameterNameDiscovery(this.parameterNameDiscoverer);
-		try {
-			if (descriptor.getDependencyType().equals(ClassUtils.loadClass(ObjectFactory.class.getName())) || descriptor.getDependencyType().equals(
-					ClassUtils.loadClass(Provider.class.getName()))) {
-				descriptor.increaseNestingLevel();
-				type = descriptor.getDependencyType();
-			}
-		} catch (ClassNotFoundException e) {
+		if (descriptor.getDependencyType().equals(objectFactoryClass) || descriptor.getDependencyType().equals(providerClass)) {
+			descriptor.increaseNestingLevel();
+			type = descriptor.getDependencyType();
 		}
 		
 		try {
