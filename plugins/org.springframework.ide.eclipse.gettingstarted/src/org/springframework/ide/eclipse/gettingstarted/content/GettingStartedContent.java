@@ -10,16 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.content;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
-import org.eclipse.core.runtime.Platform;
-import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.gettingstarted.github.Repo;
-import org.springframework.ide.eclipse.gettingstarted.github.auth.AuthenticatedDownloader;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 
 /**
