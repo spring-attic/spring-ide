@@ -33,11 +33,11 @@
 		name="Simple Java"
 		kind="template"
 		category="Simple Projects"
-		version="1.0.0"
+		version="1.0.1"
 		requires="[0.0.0,4.0.0)"
 		local="false"
-		size="1560"
-		url="file:///template/simple-spring/org.springframework.templates.simple.java-1.0.0.zip">
+		size="1638"
+		url="file:///template/simple-spring/org.springframework.templates.simple.java-1.0.1.zip">
 		<description>Creates a simple Spring project using Java build without a top-level package, and with default Spring configuration and project natures.</description>
 	</descriptor>
 </descriptors>
