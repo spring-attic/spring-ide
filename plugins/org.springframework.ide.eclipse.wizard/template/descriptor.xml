@@ -5,13 +5,13 @@
 		name="Simple Spring Maven"
 		kind="template"
 		category="Simple Projects"
-		version="1.0.0"
+		version="1.0.1"
 		local="false"
 	    requires="[0.0.0,4.0.0)"
 		requiresbundle="org.eclipse.m2e.core"
 		springversion="3.2.3.RELEASE"
 		size="2973"
-		url="file:///template/simple-maven/org.springframework.templates.simple.spring.maven-1.0.0.zip">
+		url="file:///template/simple-maven/org.springframework.templates.simple.spring.maven-1.0.1.zip">
 		<description>Creates a simple Spring project using Maven that contains a basic set of Spring libraries.</description>
 	</descriptor>
 	<descriptor
@@ -19,13 +19,13 @@
 		name="Simple Spring Web Maven"
 		kind="template"
 		category="Simple Projects"
-		version="1.1.0"
+		version="1.1.1"
 		local="false"
 	    requires="[0.0.0,4.0.0)"
 		requiresbundle="org.eclipse.m2e.core"
 		springversion="3.2.3.RELEASE"
-		size="5650"
-		url="file:///template/simple-maven/org.springframework.templates.simple.spring.web.maven-1.1.0.zip">
+		size="6046"
+		url="file:///template/simple-maven/org.springframework.templates.simple.spring.web.maven-1.1.1.zip">
 		<description>Creates a simple Spring web project using Maven that contains a basic set of Spring web libraries.</description>
 	</descriptor>
 	<descriptor
