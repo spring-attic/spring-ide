@@ -48,10 +48,6 @@ import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
  */
 public class ZBuildGuidesTest extends GuidesTestCase {
 	
-	//To flush out more dependency problems enable this: Be warned that it
-	// will take a lot longer to run each test!
-	private static final boolean CLEAR_MAVEN_CACHE = false;
-	
 	//Note the funny name of this class is an attempt to
 	// show test results at the bottom on bamboo builds.
 	// It looks like the tests reports are getting sorted
@@ -71,23 +67,19 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		StsTestUtil.setAutoBuilding(false);
-		if (buildType==BuildType.MAVEN && CLEAR_MAVEN_CACHE) {
-			File userHome = new File(System.getProperty("user.home"));
-			File m2 = new File(userHome, ".m2");
-			if (m2.isDirectory()) {
-				FileUtils.deleteQuietly(m2);
-			}
-		}
 		System.out.println(">>> Setting up "+getName());
 		//Clean stuff from previous test: Delete any projects and their contents.
 		// We need to do this because imported maven and gradle projects will have the same name.
 		// And this cause clashes / errors.
-	
-		IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (IProject project : allProjects) {
-			project.refreshLocal(IResource.DEPTH_INFINITE, null);
-			project.delete(/*content*/true, /*force*/true, new NullProgressMonitor());
-		}
+		buildJob(new GradleRunnable("delete existing workspace projects") {
+			public void doit(IProgressMonitor mon) throws Exception {
+				IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+				for (IProject project : allProjects) {
+					project.refreshLocal(IResource.DEPTH_INFINITE, null);
+					project.delete(/*content*/true, /*force*/true, new NullProgressMonitor());
+				}
+			}
+		});
 		System.out.println("<<< Setting up "+getName());
 	}
 	
