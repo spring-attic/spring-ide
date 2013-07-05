@@ -122,6 +122,10 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 		IBeansModel model = BeansCorePlugin.getModel();
 		IBeansProject springProject = model.getProject(project);
 
+		if (springProject == null) {
+			return;
+		}
+
 		Set<IBeansConfig> configs = springProject.getConfigs();
 		Set<AutowireBeanHyperlink> hyperlinks = new HashSet<AutowireBeanHyperlink>();
 		for (IBeansConfig config : configs) {
