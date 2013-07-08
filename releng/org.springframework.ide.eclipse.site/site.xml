@@ -20,181 +20,181 @@
 	
 	<!-- Core features -->
 	<feature
-		url="features/org.springframework.ide.eclipse.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.feature" version="3.4.0.qualifier">
 		<category name="Core / Spring IDE" />
 	</feature>
 	
 	<!-- UAA -->
 	<feature
-		url="features/org.springframework.ide.eclipse.uaa.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.uaa.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.uaa.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.uaa.feature" version="3.4.0.qualifier">
         <category name="Core / Spring IDE"/>
     </feature>
 	
 	<!-- Dashboard -->
 	<feature 
-		url="features/org.springsource.ide.eclipse.dashboard_3.3.0.qualifier.jar" 
-		id="org.springsource.ide.eclipse.dashboard" version="3.3.0.qualifier">
+		url="features/org.springsource.ide.eclipse.dashboard_3.4.0.qualifier.jar" 
+		id="org.springsource.ide.eclipse.dashboard" version="3.4.0.qualifier">
 		<category name="Core / Spring IDE"/>
 	</feature>
 
 	<feature 
-		url="features/org.springsource.ide.eclipse.commons_3.3.0.qualifier.jar" 
-		id="org.springsource.ide.eclipse.commons" version="3.3.0.qualifier">
+		url="features/org.springsource.ide.eclipse.commons_3.4.0.qualifier.jar" 
+		id="org.springsource.ide.eclipse.commons" version="3.4.0.qualifier">
 	</feature>
 
 	<!-- Extensions features -->
 	<feature
-		url="features/org.springframework.ide.eclipse.aop.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.aop.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.aop.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.aop.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.osgi.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.osgi.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.osgi.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.osgi.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.security.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.security.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.security.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.security.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>
 
 	<feature
-		url="features/org.springframework.ide.eclipse.webflow.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.webflow.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.webflow.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.webflow.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>
 
 	<feature
-		url="features/org.springframework.ide.eclipse.batch.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.batch.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.batch.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.batch.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.integration.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.integration.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.integration.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.integration.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>	
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.roo.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.roo.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.roo.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.roo.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>	
 
 	<feature
-		url="features/org.springframework.ide.eclipse.maven.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.maven.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.maven.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.maven.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>	
 
 	<feature
-		url="features/org.springframework.ide.eclipse.data.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.data.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.data.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.data.feature" version="3.4.0.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>
 	
 	<!-- Extensions (Incubation) features -->	
 	<feature
-		url="features/org.springframework.ide.eclipse.autowire.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.autowire.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.autowire.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.autowire.feature" version="3.4.0.qualifier">
 		<category name="Extensions (Incubation) / Spring IDE" />
 	</feature>
 
 	<!-- Integration features -->
 	<feature
-		url="features/org.springframework.ide.eclipse.ajdt.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.ajdt.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.ajdt.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.ajdt.feature" version="3.4.0.qualifier">
 		<category name="Integrations / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.mylyn.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.mylyn.feature" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.mylyn.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.mylyn.feature" version="3.4.0.qualifier">
 		<category name="Integrations / Spring IDE" />
 	</feature>
 	
 	<!-- Resources features -->
 	<feature
-		url="features/org.springframework.ide.eclipse.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.aop.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.aop.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.aop.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.aop.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 
 	<feature
-		url="features/org.springframework.ide.eclipse.batch.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.batch.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.batch.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.batch.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.osgi.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.osgi.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.osgi.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.osgi.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.security.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.security.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.security.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.security.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 
 	<feature
-		url="features/org.springframework.ide.eclipse.webflow.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.webflow.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.webflow.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.webflow.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.autowire.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.autowire.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.autowire.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.autowire.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 
 	<feature
-		url="features/org.springframework.ide.eclipse.ajdt.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.ajdt.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.ajdt.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.ajdt.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 	
 	<feature
-		url="features/org.springframework.ide.eclipse.mylyn.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.mylyn.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.mylyn.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.mylyn.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 		
 	<feature
-		url="features/org.springframework.ide.eclipse.integration.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.integration.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.integration.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.integration.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>		
 		
 	<feature
-		url="features/org.springframework.ide.eclipse.roo.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.roo.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.roo.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.roo.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>		
 		
 	<feature
-		url="features/org.springframework.ide.eclipse.maven.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.maven.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.maven.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.maven.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>		
 		
 	<feature
-		url="features/org.springframework.ide.eclipse.data.feature.source_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.data.feature.source" version="3.3.0.qualifier">
+		url="features/org.springframework.ide.eclipse.data.feature.source_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.data.feature.source" version="3.4.0.qualifier">
 		<category name="Resources / Spring IDE" />
 	</feature>
 
