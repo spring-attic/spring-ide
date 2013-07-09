@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.content;
 
+import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.springframework.ide.eclipse.gettingstarted.github.auth.AuthenticatedDownloader;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 
 /**
@@ -29,7 +32,7 @@ import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
  * 
  * @author Kris De Volder
  */
-public abstract class ContentManager {
+public class ContentManager {
 	
 	private Map<Class<?>, TypedContentManager<?>>  byClass = new HashMap<Class<?>, TypedContentManager<?>>();
 	private List<ContentType<?>> types = new ArrayList<ContentType<?>>();
@@ -43,7 +46,17 @@ public abstract class ContentManager {
 		byClass.put(klass, new TypedContentManager<T>(downloader, provider));
 	}
 	
-	public abstract DownloadManager downloadManagerFor(Class<?> contentType);
+	/**
+	 * Factory method to create a DownloadManager for a given content type name
+	 */
+	public DownloadManager downloadManagerFor(Class<?> contentType) {
+		return new DownloadManager(new AuthenticatedDownloader(), 
+				new File(
+						GettingStartedActivator.getDefault().getStateLocation().toFile(),
+						contentType.getSimpleName()
+				)
+		);		
+	}
 	
 	/**
 	 * Fetch the content of a given type. May return null but only if no content provider has been 
@@ -68,5 +81,23 @@ public abstract class ContentManager {
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Creates a content manager that contains just a single content item.
+	 */
+	public static <T extends GSContent> ContentManager singleton(final Class<T> type, final String description, final T item) {
+		ContentManager cm = new ContentManager();
+		cm.register(type, description, new ContentProvider<T>() {
+			@Override
+			public T[] fetch(DownloadManager downloader) {
+				@SuppressWarnings("unchecked")
+				T[] array = (T[]) Array.newInstance(type, 1);
+				item.setDownloader(downloader);
+				array[0] = item;
+				return array;
+			}
+		});
+		return cm;
+	}
+	
 }

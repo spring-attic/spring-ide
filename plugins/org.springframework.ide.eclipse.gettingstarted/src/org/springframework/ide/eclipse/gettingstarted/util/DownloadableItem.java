@@ -1,19 +1,24 @@
+/*******************************************************************************
+ *  Copyright (c) 2013 GoPivotal, Inc.
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  Contributors:
+ *      GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.util;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager.DownloadRequestor;
-import org.springframework.util.Assert;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * A DownloadableItem is something that can be downloaded and
@@ -27,6 +32,8 @@ public class DownloadableItem {
 	private DownloadManager downloader;
 	private String name; //optional name. If set this name will be used as filename in the cache otherwise
 						// suitable name will be computed.
+	private ValidationResult downloadStatus = ValidationResult.OK; //error message if download failed. Otherwise contains 'OK'.
+												                   // Not
 	
 	public DownloadableItem(URL url, DownloadManager downloader) {
 		this.url = url;
@@ -47,17 +54,26 @@ public class DownloadableItem {
 	/**
 	 * Force the item to be downloaded to a local File. If an item is already downloaded
 	 * the cached local file will be returned immediately. Otherwise the method will block
-	 * until the download is complete.
+	 * until the download is complete or an error occurs.
 	 */
 	public File getFile() throws Exception {
-		final File[] fileBox = new File[1];
-		downloader.doWithDownload(this, new DownloadRequestor() {
-			public void exec(File downloadedFile) throws Exception {
-				fileBox[0] = downloadedFile;
-				//TODO; validate file contents?
-			}
-		});
-		return fileBox[0];
+		try {
+			final File[] fileBox = new File[1];
+			downloader.doWithDownload(this, new DownloadRequestor() {
+				public void exec(File downloadedFile) throws Exception {
+					fileBox[0] = downloadedFile;
+					//TODO; validate file contents?
+				}
+			});
+			downloadStatus = ValidationResult.OK;
+			return fileBox[0];
+		} catch (UIThreadDownloadDisallowed e) {
+			//Shouldn't affect download status since it means download was not attempted
+			throw e;
+		} catch (Exception e) {
+			downloadStatus = ValidationResult.error(ExceptionUtil.getMessage(e));
+			throw e;
+		}
 	}
 	
 	/**
@@ -93,7 +109,15 @@ public class DownloadableItem {
 	}
 
 	public boolean isDownloaded() {
-		return downloader.isDownloaded(this);
+		return downloader!=null && downloader.isDownloaded(this);
 	}
-	
+
+	/**
+	 * Error message if download failed. Other
+	 * @return
+	 */
+	public ValidationResult getDownloadStatus() {
+		return downloadStatus;
+	}
+
 }

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2013 GoPivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.content;
 
 import java.net.MalformedURLException;
@@ -10,13 +20,14 @@ import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadableItem;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
-public abstract class GithubRepoContent implements GSContent {
+public abstract class GithubRepoContent extends AGSContent {
 
-	protected DownloadManager downloader;
+	private DownloadableItem zip;
 	
 	protected GithubRepoContent(DownloadManager dl) {
-		this.downloader = dl;
+		super(dl);
 	}
 	
 	public URL getHomePage() {
@@ -35,17 +46,20 @@ public abstract class GithubRepoContent implements GSContent {
 	 * repo (master branch) can be downloaded. 
 	 */
 	public DownloadableItem getZip() {
-		String repoUrl = getRepo().getHtmlUrl(); 
-		//repoUrl is something like "https://github.com/springframework-meta/gs-consuming-rest-android"
-		//zipUrl is something like  "https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip" 
-		try {
-			DownloadableItem item = new DownloadableItem(new URL(repoUrl+"/archive/master.zip"), downloader);
-			item.setFileName(getRepo().getName());
-			return item;
-		} catch (MalformedURLException e) {
-			GettingStartedActivator.log(e);
-			return null;
+		if (zip==null) {
+			String repoUrl = getRepo().getHtmlUrl(); 
+			//repoUrl is something like "https://github.com/springframework-meta/gs-consuming-rest-android"
+			//zipUrl is something like  "https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip" 
+			try {
+				DownloadableItem item = new DownloadableItem(new URL(repoUrl+"/archive/master.zip"), downloader);
+				item.setFileName(getRepo().getName());
+				zip = item;
+			} catch (MalformedURLException e) {
+				GettingStartedActivator.log(e);
+				return null;
+			}
 		}
+		return zip;
 	}
 	
 	public String getName() {
@@ -68,18 +82,4 @@ public abstract class GithubRepoContent implements GSContent {
 		return getRepo().getDescription();
 	}
 
-	@Override
-	public CodeSet getCodeSet(String name) throws UIThreadDownloadDisallowed {
-		for (CodeSet cs : getCodeSets()) {
-			if (cs.getName().equals(name)) {
-				return cs;
-			}
-		}
-		return null;
-	}
-
-	public boolean isDownloaded() {
-		return getZip().isDownloaded();
-	}
-	
 }

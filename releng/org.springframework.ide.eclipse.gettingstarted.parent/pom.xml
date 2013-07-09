@@ -71,7 +71,7 @@
 
 		<dist.name>Spring IDE</dist.name>
 		<dist.project>spring-ide</dist.project>
-		<dist.key>IDE</dist.key>
+		<dist.key>GSG_INTEGRATION</dist.key>
 		<dist.type>snapshot</dist.type>
 		<dist.pathpostfix>nightly</dist.pathpostfix>
 		<dist.path>${dist.type}/${dist.key}/${dist.pathpostfix}</dist.path>
@@ -95,16 +95,14 @@
 		     -->
 		<module>../../plugins/org.springframework.ide.eclipse.gettingstarted</module>
 		<module>../../plugins/org.springframework.ide.eclipse.gettingstarted.tests</module>
-
+		<module>../../features/org.springframework.ide.eclipse.gettingstarted.feature</module>
+		<module>../org.springframework.ide.eclipse.gettingstarted.site</module>
 	</modules>
 
 	<profiles>
 
 		<profile>
 			<id>e37</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<p2.repository.name>Spring IDE for Eclipse 3.7</p2.repository.name>
 			</properties>
@@ -125,11 +123,6 @@
 					<url>http://download.eclipse.org/tools/ajdt/37/milestone/</url>
 				</repository>
 				<repository>
-				  <id>m2eclipse-legacy</id>
-				  <layout>p2</layout>
-				  <url>http://download.springsource.com/release/TOOLS/third-party/m2eclipse-012</url>
-				</repository>
-				<repository>
 					<id>orbit</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/</url>
@@ -147,6 +140,48 @@
 			</repositories>
 		</profile>
 
+		<profile>
+			<id>e42</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 3.7</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e42</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.2/</url>
+				</repository>
+				<repository>
+					<id>indigo</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/juno/</url>
+				</repository>
+				<repository>
+					<id>ajdt-e37</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/42/milestone/</url>
+				</repository>
+				<repository>
+					<id>orbit</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/</url>
+				</repository>
+		        <repository>
+		           <id>spring-ide-42</id>
+		          <layout>p2</layout>
+		           <url>http://dist.springsource.com/snapshot/TOOLS/nightly/e4.2</url>
+		        </repository>
+			</repositories>
+		</profile>
+				
 		<profile>
 			<id>bamboo-signing</id>
 			<properties>

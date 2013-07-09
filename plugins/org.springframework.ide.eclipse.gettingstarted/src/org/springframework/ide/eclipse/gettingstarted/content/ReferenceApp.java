@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.gettingstarted.util.DownloadManager;
 import org.springframework.ide.eclipse.gettingstarted.util.UIThreadDownloadDisallowed;
 
-public class ReferenceApp extends GithubRepoContent implements GSContent {
+public class ReferenceApp extends GithubRepoContent {
 
 	/**
 	 * We expect a readme file of sorts, at the root of the 

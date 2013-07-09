@@ -17,13 +17,11 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.internal.browser.BrowserViewer;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
-
-import org.eclipse.ui.internal.browser.BrowserViewer;
 
 /**
  * Try to hide platform related mess from client code that needs to create an SWT 
@@ -112,7 +110,18 @@ public class BrowserFactory {
 	private static BrowserFactoryImplementation implementation;
 
 	public static STSBrowserViewer create(Composite body) {
-		return implementation().create(body);
+		STSBrowserViewer viewer = implementation().create(body);
+		customizeBrowser(viewer.getBrowser());
+		return viewer;
+	}
+
+	/**
+	 * Add STS specific customizations to the browser to support integration of springsource.org
+	 * webpages when shown inside STS browser / Dashboard.
+	 */
+	public static void customizeBrowser(Browser browser) {
+		//Not platform-specific browser customizations added here.
+		new BrowserCusomizer(browser);
 	}
 
 	private static BrowserFactoryImplementation implementation() {

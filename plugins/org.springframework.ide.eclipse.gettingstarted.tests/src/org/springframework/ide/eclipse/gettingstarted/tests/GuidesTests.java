@@ -63,11 +63,11 @@ public class GuidesTests extends TestCase {
 		EG[] expected = {
 				new EG(
 						 "gs-authenticating-ldap",
-						 "authenticating a user against an LDAP server"
+						 "LDAP"
 				),
 				new EG(
-						"gs-consuming-rest-android",
-						"RESTful services on Android"				
+						"gs-accessing-facebook",
+						"Facebook"
 				)
 		};
 

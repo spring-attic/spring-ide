@@ -21,7 +21,7 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.io,
  org.springsource.ide.eclipse.gradle.core;resolution:=optional,
  org.apache.commons.logging,
- org.springsource.ide.eclipse.commons.livexp,
+ org.springsource.ide.eclipse.commons.livexp;bundle-version="3.3.0",
  org.springframework.ide.eclipse.wizard,
  org.springsource.ide.eclipse.commons.core,
  org.eclipse.ui.browser,
@@ -29,9 +29,13 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.mylyn.commons.ui,
  org.eclipse.mylyn.discovery.core,
  org.eclipse.mylyn.discovery.ui,
- org.springsource.ide.eclipse.commons.configurator
+ org.springsource.ide.eclipse.commons.configurator,
+ org.eclipse.core.net,
+ org.apache.httpcomponents.httpcore,
+ org.apache.httpcomponents.httpclient
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.gettingstarted.content,
  org.springframework.ide.eclipse.gettingstarted.importing,
  org.springframework.ide.eclipse.gettingstarted.util
+Eclipse-BundleShape: dir

@@ -11,11 +11,11 @@
 package org.springframework.ide.eclipse.gettingstarted.wizard;
 
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,6 +31,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -38,11 +39,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.internal.misc.StringMatcher;
 import org.eclipse.ui.internal.misc.StringMatcher.Position;
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.content.ContentManager;
 import org.springframework.ide.eclipse.gettingstarted.content.ContentType;
 import org.springframework.ide.eclipse.gettingstarted.content.Describable;
 import org.springframework.ide.eclipse.gettingstarted.content.DisplayNameable;
 import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
+import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -81,17 +84,31 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		@Override
 		public Object[] getElements(Object e) {
 			if (e==content) {
-				return content.getTypes();
+				ContentType<?>[] types = content.getTypes();
+				if (types!=null) {
+					if (types.length==1) {
+						//If there's only one type of content. Then it looks better
+						//to just show those elements uncategorized.
+						return getChildren(types[0]);
+					} else {
+						return types;
+					}
+				}
 			}
 			return null;
 		}
 
 		@Override
 		public Object[] getChildren(Object e) {
-			if (e instanceof ContentType<?>) {
-				return content.get((ContentType<?>)e);
+			try {
+				if (e instanceof ContentType<?>) {
+					return content.get((ContentType<?>)e);
+				}
+				return null;
+			} catch (Throwable error) {
+				GettingStartedActivator.log(error);
+				return new Object[] {error};
 			}
-			return null;
 		}
 
 		@Override
@@ -116,10 +133,18 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			if (element instanceof DisplayNameable) {
 				DisplayNameable item = (DisplayNameable) element;
 				return item.getDisplayName();
+			} else if (element instanceof Throwable) {
+				return ExceptionUtil.getMessage((Throwable) element);
 			}
 			return super.getText(element);
 		}
-
+		
+		public Image getImage(Object element) {
+			if (element instanceof Throwable) {
+				return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_ERROR);
+			}
+			return null;
+		}
 	};
 	
 	private class ChoicesFilter extends ViewerFilter {

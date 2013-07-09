@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.part.EditorPart;
+import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 
 /**
  * New Dashboard that will replace the old. On some yet to be determined
@@ -106,13 +107,20 @@ public class DashboardEditor extends EditorPart {
 	 */
 	protected List<IDashboardPage> createPages() {
 		List<IDashboardPage> pages = new ArrayList<IDashboardPage>();
-		pages.add(new WebDashboardPage("Getting Started", "http://sagan-design.businesscatalyst.com/guides-6.html"));
-		pages.add(new DashboardExtensionsPage());
-		pages.add(new GuidesDashboardPageWithPreview());
-		pages.add(new WebDashboardPage("News", "http://www.springsource.org/news-events"));
-		for (int i = 1; i < 3; i++) {
-			pages.add(new DemoDashboardPage("Demo "+i, "Contents for page "+i));
+		pages.add(new WebDashboardPage("Getting Started", "http://sagan.cfapps.io/guides/gs"));
+		
+		try {
+			pages.add(new GeneratedGuidesDashboardPage());
+		} catch (Exception e) {
+			GettingStartedActivator.log(e);
 		}
+		
+		pages.add(new WebDashboardPage("News", "http://www.springsource.org/news-events"));
+		pages.add(new DashboardExtensionsPage());
+//		pages.add(new GuidesDashboardPageWithPreview());
+//		for (int i = 1; i < 3; i++) {
+//			pages.add(new DemoDashboardPage("Demo "+i, "Contents for page "+i));
+//		}
 		return pages;
 	}
 

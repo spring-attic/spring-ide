@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.gettingstarted.content.ContentManager;
 import org.springframework.ide.eclipse.gettingstarted.content.Describable;
 import org.springframework.ide.eclipse.gettingstarted.content.GSContent;
+import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.gettingstarted.content.GettingStartedGuide;
 import org.springframework.ide.eclipse.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.gettingstarted.dashboard.WebDashboardPage;
@@ -114,6 +115,14 @@ public class GSImportWizardModel {
 		}
 	}
 
+	/**
+	 * ContentManager instance that provides all the content that this wizard can import. 
+	 * By default this is content discovered automatically with the default content manager
+	 * instance. However it is possible to set the Content manager to browser / import
+	 * content provided another way.
+	 */
+	private ContentManager contentManager = GettingStartedContent.getInstance();
+	
 	/**
 	 * The chosen guide to import stuff from.
 	 */
@@ -214,7 +223,7 @@ public class GSImportWizardModel {
 
 	};
 	
-	public LiveExpression<Boolean> isDownloaded = new LiveExpression<Boolean>(false) {
+	public final LiveExpression<Boolean> isDownloaded = new LiveExpression<Boolean>(false) {
 		@Override
 		protected Boolean compute() {
 			GSContent g = guide.getValue();
@@ -222,6 +231,18 @@ public class GSImportWizardModel {
 		}
 	};
 
+	public final LiveExpression<ValidationResult> downloadStatus = new Validator() {
+		@Override
+		protected ValidationResult compute() {
+			GSContent g = guide.getValue();
+			if (g == null) {
+				return ValidationResult.OK;
+			} else {
+				return g.getZip().getDownloadStatus();
+			}
+		}
+	};
+	
 	/**
 	 * The description of the current guide.
 	 */
@@ -251,7 +272,7 @@ public class GSImportWizardModel {
 	 * Indicates whether the user has selected the option to open the home page.
 	 */
 	private LiveVariable<Boolean> enableOpenHomePage = new LiveVariable<Boolean>(true);
-	
+
 	{
 		buildTypeValidator.dependsOn(guide);
 		buildTypeValidator.dependsOn(isDownloaded);
@@ -259,6 +280,7 @@ public class GSImportWizardModel {
 		buildTypeValidator.dependsOn(codesets);
 		
 		isDownloaded.dependsOn(guide);
+		downloadStatus.dependsOn(guide);
 		
 		description.dependsOn(rawSelection);
 		
@@ -276,15 +298,19 @@ public class GSImportWizardModel {
 	/**
 	 * Downloads currently selected guide content (if it is not already cached locally.
 	 */
-	public void performDownload(IProgressMonitor mon) throws Exception {
+	public void performDownload(IProgressMonitor mon) {
 		mon.beginTask("Downloading", 1);
 		try {
 			GSContent g = guide.getValue();
 			if (g!=null) {
 				g.getZip().getFile(); //This forces download
 			}
+		} catch (Exception e) {
+			//Don't throw exceptions they are now tracked via downloadStatus.
+			GettingStartedActivator.log(e); //Log for more details than downloadStatus message (i.e. stack trace).
 		} finally {
 			isDownloaded.refresh();
+			downloadStatus.refresh();
 			mon.done();
 		}
 	}
@@ -396,6 +422,14 @@ public class GSImportWizardModel {
 	 */
 	public LiveVariable<Object> getRawSelection() {
 		return this.rawSelection;
+	}
+
+	public ContentManager getContentManager() {
+		return contentManager;
+	}
+
+	public void setContentManager(ContentManager contentManager) {
+		this.contentManager = contentManager;
 	}
 
 }

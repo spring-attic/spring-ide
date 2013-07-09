@@ -99,25 +99,4 @@ public class BasicAuthCredentials extends Credentials {
 		}
 	}
 
-	@Override
-	public void apply(Browser browser) {
-		browser.addAuthenticationListener(new AuthenticationListener() {
-			
-			@Override
-			public void authenticate(AuthenticationEvent event) {
-				try {
-					URI uri = new URI(event.location);
-					if (matchHost(uri.getHost())) {
-						event.user = username;
-						event.password = passwd;
-					} else {
-						/* do nothing, let default prompter run */
-					}
-				} catch (URISyntaxException e) {
-					/* shouldn't happen. do nothing, let default prompter run */
-				}
-			}
-		});
-	}
-
 }

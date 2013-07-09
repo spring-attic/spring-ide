@@ -1,18 +1,20 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.github;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Proxy;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -22,6 +24,12 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.net.proxy.IProxyData;
+import org.eclipse.core.net.proxy.IProxyService;
+import org.omg.CORBA.Request;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.BasicAuthCredentials;
@@ -42,6 +50,8 @@ public class GithubClient {
 	
 	private static final Pattern GITHUB_HOST = Pattern.compile("(.*\\.|)github\\.com");
 		//pattern should match 'github.com' and api.github.com'
+	
+	private static final int CONNECT_TIMEOUT = 3000;
 
 	private static final boolean DEBUG = false;
 	
@@ -131,6 +141,14 @@ public class GithubClient {
 		return get("/users/{userName}/repos", Repo[].class, userName);
 	}
 	
+	
+	/**
+	 * Get repos for the authenticated user. This seems to be the only way to list private repos
+	 * associated with a user. This only works over an authenticated github connection.
+	 */
+	public Repo[] getMyRepos() {
+		return get("/user/repos", Repo[].class);
+	}
 
 	/**
 	 * Fetch info about a repo identified by an owner and a name
@@ -147,8 +165,22 @@ public class GithubClient {
 		return client.getForObject(addHost(url), type, vars);
 	}
 
+	protected static String getNormalisedProtocol(String protocol) {
+		return protocol.toUpperCase();
+	}
+	
 	private RestTemplate createRestTemplate() {
 		RestTemplate rest = new RestTemplate();
+		IProxyService proxyService = GettingStartedActivator.getDefault().getProxyService();
+		if (proxyService!=null && proxyService.isProxiesEnabled()) {
+			final IProxyData[] existingProxies = proxyService.getProxyData();
+			if (existingProxies != null && existingProxies.length>0) {
+				//TODO: Do some magic to configure proxies on the http request based on its url.
+				
+				//some interesting code in here:
+				//org.cloudfoundry.ide.eclipse.internal.server.core.CloudFoundryClientFactory.getProxy(URL)
+			}
+		}
 		
 		//Add authentication
 		rest = credentials.apply(rest);
@@ -238,6 +270,7 @@ public class GithubClient {
 		InputStream input = null;
 		try {
 			conn = url.openConnection();
+			conn.setConnectTimeout(CONNECT_TIMEOUT);
 			credentials.apply(conn);
 			conn.connect();
 			if (DEBUG) {

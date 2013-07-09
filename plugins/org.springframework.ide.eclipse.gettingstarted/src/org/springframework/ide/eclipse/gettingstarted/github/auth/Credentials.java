@@ -46,10 +46,4 @@ public abstract class Credentials {
 	 */
 	public abstract void apply(URLConnection conn);
 
-	/**
-	 * 
-	 * @param browser
-	 */
-	public abstract void apply(Browser browser);
-
 }
