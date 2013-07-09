@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springsource.ide.eclipse.commons.core.StatusHandler;
 
 /**
  * @author Terry Denney
@@ -68,26 +69,9 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 					addHyperlinksHelper(typeSignature, field, hyperlinksCollector);
 				}
 				catch (JavaModelException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					StatusHandler.log(e.getStatus());
 				}
 			}
-		}
-		else {
-
-			if (element instanceof IType) {
-				IType type = (IType) element;
-				if (!type.getElementName().equals("Autowired")) {
-					return;
-				}
-			}
-
-			IType type = getParentType(element);
-			if (type != null) {
-				String typeName = type.getFullyQualifiedName();
-				addHyperlinksHelper(typeName, element.getJavaProject().getProject(), hyperlinksCollector);
-			}
-
 		}
 	}
 
@@ -112,8 +96,7 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 			}
 		}
 		catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			StatusHandler.log(e.getStatus());
 		}
 	}
 
@@ -179,8 +162,6 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 			hyperlinks.iterator().next().setIsOnlyCandidate(true);
 		}
 		hyperlinksCollector.addAll(hyperlinks);
-		// }
-		// autowireDependencyProvider.getBeansForType()
 	}
 
 	private IType getParentType(IJavaElement element) {
