@@ -81,17 +81,19 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 			IType type = getParentType(element);
 			if (type != null) {
 				String[][] qualifiedTypeNames = type.resolveType(typeName);
-				for (String[] typeNameSegments : qualifiedTypeNames) {
-					StringBuilder qualifiedTypeName = new StringBuilder();
-					for (String typeNameSegment : typeNameSegments) {
-						if (qualifiedTypeName.length() > 0) {
-							qualifiedTypeName.append(".");
+				if (qualifiedTypeNames != null) {
+					for (String[] typeNameSegments : qualifiedTypeNames) {
+						StringBuilder qualifiedTypeName = new StringBuilder();
+						for (String typeNameSegment : typeNameSegments) {
+							if (qualifiedTypeName.length() > 0) {
+								qualifiedTypeName.append(".");
+							}
+							qualifiedTypeName.append(typeNameSegment);
 						}
-						qualifiedTypeName.append(typeNameSegment);
-					}
 
-					addHyperlinksHelper(qualifiedTypeName.toString(), element.getJavaProject().getProject(),
-							hyperlinksCollector);
+						addHyperlinksHelper(qualifiedTypeName.toString(), element.getJavaProject().getProject(),
+								hyperlinksCollector);
+					}
 				}
 			}
 		}
