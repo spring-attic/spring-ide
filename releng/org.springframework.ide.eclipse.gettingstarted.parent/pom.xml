@@ -94,6 +94,7 @@
 		     via feature, not published on update sites etc.
 		     -->
 		<module>../../plugins/org.springframework.ide.eclipse.gettingstarted</module>
+		<module>../../plugins/org.springframework.ide.eclipse.gettingstarted.browserinit</module>
 		<module>../../plugins/org.springframework.ide.eclipse.gettingstarted.tests</module>
 		<module>../../features/org.springframework.ide.eclipse.gettingstarted.feature</module>
 		<module>../org.springframework.ide.eclipse.gettingstarted.site</module>

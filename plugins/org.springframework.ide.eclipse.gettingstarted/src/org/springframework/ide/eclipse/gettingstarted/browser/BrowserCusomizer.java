@@ -90,7 +90,7 @@ public class BrowserCusomizer extends BrowserContext {
 		browser.addLocationListener(new UrlInterceptor(browser));
 
 		importFun = new ImportJSFunction(browser);
-		//
+		
 		browser.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
@@ -113,63 +113,68 @@ public class BrowserCusomizer extends BrowserContext {
 		
 		@Override
 		public void changing(LocationEvent event) {
-			try {
-				URI uri = new URI(event.location);
-				//zip file containing a codeset single codeset:
-				// https://github.com/kdvolder/gs-one-codeset/archive/master.zip?sts_codeset=true
-				Map<String, String> params = URIParams.parse(uri);
-				IPath path = new Path(uri.getPath());
-				String host = uri.getHost();
-				
-				//link to a gs project github zip file:
-				//https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip
-				if ("github.com".equals(host)) {
-					String fileName = path.lastSegment();
-					if ("master.zip".equals(fileName)) {
-						String projectName = path.segment(1);
-						if (projectName!=null && projectName.startsWith("gs-")) {
-							boolean doneIt = importGuideUrl(uri);
-							event.doit = !doneIt;
-						}
-					}
-				}
-			} catch (URISyntaxException e) {
-				GettingStartedActivator.log(e);
-			}
-			
-			//Doing something special with urls that follow certain patterns
-			
-			//1: link to a gihub zip 
+			System.out.println("Navigation: "+event.location);
 			
 			
-//			if (!useJavaScript) {
-//				//try to detect when user clicks on guide links without help from the page.
-//				try {
-//					//Here we are interested only in URLs that look like a github 'guides' project.
-//					//Example: https://github.com/springframework-meta/gs-messaging-redis
-//					//Pattern: https://github.com/springframework-meta/gs-<name>
-//					
-//					URI uri = new URI(event.location);
-//					boolean doneIt = importGuideUrl(uri);
-//					if (doneIt) {
-//						event.doit = false;
-//						return;
+//			//Be careful...any  exception thrown out of here have a nasty tendency to deadlock Eclipse 
+//			// (By crashing native UI thread maybe?)
+//			try {
+//				URI uri = new URI(event.location);
+//				//zip file containing a codeset single codeset:
+//				// https://github.com/kdvolder/gs-one-codeset/archive/master.zip?sts_codeset=true
+////				Map<String, String> params = URIParams.parse(uri);
+//				IPath path = new Path(uri.getPath());
+//				String host = uri.getHost();
+//				
+//				//link to a gs project github zip file:
+//				//https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip
+//				if ("github.com".equals(host)) {
+//					String fileName = path.lastSegment();
+//					if ("master.zip".equals(fileName)) {
+//						String projectName = path.segment(1);
+//						if (projectName!=null && projectName.startsWith("gs-")) {
+//							boolean doneIt = importGuideUrl(uri);
+//							event.doit = !doneIt;
+//						}
 //					}
-//				} catch (URISyntaxException e) {
-//					GettingStartedActivator.log(e);
 //				}
+//			} catch (Throwable e) {
+//				GettingStartedActivator.log(e);
 //			}
-			
-			//If we get here the event didn't get handled yet.
-			
-			//We should always avoid navigation in the dashboard because... the page will
-			//then no longer display the intended content. 
-			//To avoid this open the url in another browser instead.
-			if (!allowNavigation(event.location)) {
-				event.doit = false;
-				System.out.println("Navigation intercepted: "+event.location);
-				UiUtil.openUrl(event.location);
-			}
+//			
+//			//Doing something special with urls that follow certain patterns
+//			
+//			//1: link to a gihub zip 
+//			
+//			
+////			if (!useJavaScript) {
+////				//try to detect when user clicks on guide links without help from the page.
+////				try {
+////					//Here we are interested only in URLs that look like a github 'guides' project.
+////					//Example: https://github.com/springframework-meta/gs-messaging-redis
+////					//Pattern: https://github.com/springframework-meta/gs-<name>
+////					
+////					URI uri = new URI(event.location);
+////					boolean doneIt = importGuideUrl(uri);
+////					if (doneIt) {
+////						event.doit = false;
+////						return;
+////					}
+////				} catch (URISyntaxException e) {
+////					GettingStartedActivator.log(e);
+////				}
+////			}
+//			
+//			//If we get here the event didn't get handled yet.
+//			
+//			//We should always avoid navigation in the dashboard because... the page will
+//			//then no longer display the intended content. 
+//			//To avoid this open the url in another browser instead.
+//			if (!allowNavigation(event.location)) {
+//				event.doit = false;
+//				System.out.println("Navigation intercepted: "+event.location);
+//				UiUtil.openUrl(event.location);
+//			}
 		}
 
 		private boolean allowNavigation(String location) {

@@ -10,25 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.gettingstarted.util;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
+//import org.apache.http.NameValuePair;
+//import org.apache.http.client.utils.URLEncodedUtils;
 
 public class URIParams {
 	
-	public static Map<String, String> parse(URI uri) {
-		Map<String,String> map = new HashMap<String, String>();
-		List<NameValuePair> nvs = URLEncodedUtils.parse(uri, "UTF-8");
-		if (nvs!=null) {
-			for (NameValuePair nv : nvs) {
-				map.put(nv.getName(), nv.getValue());
-			}
-		}
-		return map;
-	}
+//	public static Map<String, String> parse(URI uri) {
+//		Map<String,String> map = new HashMap<String, String>();
+//		List<NameValuePair> nvs = URLEncodedUtils.parse(uri, "UTF-8");
+//		if (nvs!=null) {
+//			for (NameValuePair nv : nvs) {
+//				map.put(nv.getName(), nv.getValue());
+//			}
+//		}
+//		return map;
+//	}
 
 }

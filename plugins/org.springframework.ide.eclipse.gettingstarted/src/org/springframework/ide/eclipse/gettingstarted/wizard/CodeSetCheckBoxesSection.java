@@ -54,30 +54,32 @@ public class CodeSetCheckBoxesSection extends WizardPageSection {
 
 		@Override
 		public void createContents(Composite page) {
-			this.cb = new Button(page, SWT.CHECK);
-			cb.setText(name);
-			cb.setSelection(model.selecteds.contains(name));
-			GridDataFactory.fillDefaults().grab(true, false).applyTo(cb);
-			cb.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					handleSelection();
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
-					handleSelection();
-				}
-				
-				private void handleSelection() {
-					boolean add = cb.getSelection();
-					if (add) {
-						model.selecteds.add(name);
-					} else {
-						model.selecteds.remove(name);
+			if (page!=null && !page.isDisposed()) {
+				this.cb = new Button(page, SWT.CHECK);
+				cb.setText(name);
+				cb.setSelection(model.selecteds.contains(name));
+				GridDataFactory.fillDefaults().grab(true, false).applyTo(cb);
+				cb.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						handleSelection();
 					}
-				}
-			});
+	
+					@Override
+					public void widgetDefaultSelected(SelectionEvent e) {
+						handleSelection();
+					}
+					
+					private void handleSelection() {
+						boolean add = cb.getSelection();
+						if (add) {
+							model.selecteds.add(name);
+						} else {
+							model.selecteds.remove(name);
+						}
+					}
+				});
+			}
 		}
 		
 		@Override

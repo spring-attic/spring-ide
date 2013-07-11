@@ -13,8 +13,6 @@ package org.springframework.ide.eclipse.gettingstarted.github;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Proxy;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -26,10 +24,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
-import org.omg.CORBA.Request;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
 import org.springframework.ide.eclipse.gettingstarted.github.auth.BasicAuthCredentials;
@@ -53,7 +47,7 @@ public class GithubClient {
 	
 	private static final int CONNECT_TIMEOUT = 3000;
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	
 	private Credentials credentials;
 	private RestTemplate client;

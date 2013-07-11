@@ -30,12 +30,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.mylyn.discovery.core,
  org.eclipse.mylyn.discovery.ui,
  org.springsource.ide.eclipse.commons.configurator,
- org.eclipse.core.net,
- org.apache.httpcomponents.httpcore,
- org.apache.httpcomponents.httpclient
+ org.eclipse.core.net
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.eclipse.gettingstarted.content,
+Export-Package: org.springframework.ide.eclipse.gettingstarted,
+ org.springframework.ide.eclipse.gettingstarted.content,
  org.springframework.ide.eclipse.gettingstarted.importing,
  org.springframework.ide.eclipse.gettingstarted.util
 Eclipse-BundleShape: dir

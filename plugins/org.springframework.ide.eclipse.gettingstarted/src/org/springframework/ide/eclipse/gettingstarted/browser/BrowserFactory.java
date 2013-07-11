@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
@@ -22,6 +23,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.internal.browser.BrowserViewer;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+
+//TODO: This browserfactory works under the assumption that all browser are
+//  created via this factory. This can however not be guaranteed if browsers
+//  are created by non STS code. 
+//
+// Proper way to hook into browser initialization is documented here:
+// http://www.eclipse.org/swt/faq.php
+// in question "Q: How do I specify the default type of native renderer that is used by the Browser?"
 
 /**
  * Try to hide platform related mess from client code that needs to create an SWT 
@@ -61,44 +70,69 @@ public class BrowserFactory {
 	private static class LinuxBrowserFactoryImplementation extends BrowserFactoryImplementation {
 
 		//In Linux there are issues depending on what native libraries people have installed.
-		//We try to avoid these by using our own bundled version of xulrunner.
+		//We will try to avoid these by using our own bundled version of xulrunner.
 		
 		//Most of the info around how to do that is available from here
 		//www.eclipse.org/swt/faq.php
 		
 		LinuxBrowserFactoryImplementation() {
-			//To use xulrunner must use "mozilla" rather that "webkit".
-			String path = getXULRunnerPath();
-			if (path!=null) {
-				//Even if user has webkit libs... don't use... they seem often to cause crashes.
-				maybeSet("org.eclipse.swt.browser.DefaultType", "mozilla");
-				maybeSet("org.eclipse.swt.browser.XULRunnerPath", path);
-			}
+// All this code is now in BrowserInitializer wher it should be to ensure it runs before
+// any browser instantation even if it is done directly by Eclipse rather than STS code.
+			
+//			//To use xulrunner must use "mozilla" rather than "webkit".
+//			String path = getXULRunnerPath();
+//			if (path!=null) {
+//				//Even if user has webkit libs... don't use... they seem often to cause crashes.
+//				maybeSet("org.eclipse.swt.browser.DefaultType", "mozilla");
+//				maybeSet("org.eclipse.swt.browser.XULRunnerPath", path);
+//				
+//				//MacOS and windows browser picks up proxy info from the OS.
+//				//On Linux it needs to be done by setting two system properties
+//				//See: http://www.eclipse.org/swt/faq.php#browserproxy
+//				//Prop names: 'network.proxy_host' and 'network.proxy_port'.
+//				//Setting these will make browser use them for all http, https and ftp
+//				//connections. So its not possible to set them to different values.
+//				// (Note my xulrunner did seem to pickup on http proxy from OS without the
+//				//proxy. But not so for https).
+//
+//				
+//				maybeSet("org.eclipse.swt.browser.XULRunnerPath", path);
+//				
+//			}
+//
+//			Properties props = System.getProperties();
+//			for (Object _key : props.keySet()) {
+//				String key = (String) _key;
+//				if (key.toLowerCase().contains("prox")) {
+//					System.out.println(key+"="+props.getProperty(key));
+//				}
+//			}
+//			
 		}
 
-		private String getXULRunnerPath() {
-			String osArch = Platform.getOS()+"-"+Platform.getOSArch();
-			Bundle bundle = Platform.getBundle(XUL_RUNNER_BUNDLE);
-			if (bundle!=null) {
-				URL entry = bundle.getEntry(osArch);
-				try {
-					if (entry!=null) {
-						File file = new File(FileLocator.toFileURL(entry).toURI());
-						if (file.exists()) {
-							return file.getAbsolutePath();
-						}
-					}
-				} catch (URISyntaxException e) {
-					//Shouldn't be possible!
-					GettingStartedActivator.log(e);
-				} catch (IOException e) {
-					//Probaly thrown by new File(uri) call. It means the uri isn't pointing to a file.
-					// that probably means the bundle isn't 'exploded'.
-					GettingStartedActivator.log(new Error("Bundle '"+XUL_RUNNER_BUNDLE+"' not exploded?", e));
-				}
-			}
-			return null;
-		}
+//		private String getXULRunnerPath() {
+//			String osArch = Platform.getOS()+"-"+Platform.getOSArch();
+//			Bundle bundle = Platform.getBundle(XUL_RUNNER_BUNDLE);
+//			if (bundle!=null) {
+//				URL entry = bundle.getEntry(osArch);
+//				try {
+//					if (entry!=null) {
+//						File file = new File(FileLocator.toFileURL(entry).toURI());
+//						if (file.exists()) {
+//							return file.getAbsolutePath();
+//						}
+//					}
+//				} catch (URISyntaxException e) {
+//					//Shouldn't be possible!
+//					GettingStartedActivator.log(e);
+//				} catch (IOException e) {
+//					//Probaly thrown by new File(uri) call. It means the uri isn't pointing to a file.
+//					// that probably means the bundle isn't 'exploded'.
+//					GettingStartedActivator.log(new Error("Bundle '"+XUL_RUNNER_BUNDLE+"' not exploded?", e));
+//				}
+//			}
+//			return null;
+//		}
 
 //Actually, no need to override this. Code is same as superclass. The behavior is instead
 // controlled entirely by system props.

@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Browser Initializer Linux
+Bundle-SymbolicName: org.springframework.ide.eclipse.gettingstarted.browserinit
+Bundle-Version: 3.4.0.qualifier
+Bundle-Vendor: GoPivotal Inc.
+Fragment-Host: org.eclipse.swt
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.core.runtime
