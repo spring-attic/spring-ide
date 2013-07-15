@@ -65,21 +65,7 @@ public class JavaWizardSection extends SpringProjectWizardSection {
 	public IJavaElement getCreatedElement() {
 		return javaPageTwo.getJavaProject();
 	}
-
-	@Override
-	public boolean canFinish() {
-		boolean canFinish = super.canFinish();
-
-		if (canFinish) {
-			// Set the current project name and location URI in the Java
-			// specific
-			// pages before checking if the Java pages are complete
-			refreshProjectValues();
-			canFinish = springCreationPage.isPageComplete() && javaPageTwo.isPageComplete();
-		}
-		return canFinish;
-	}
-
+	
 	protected void refreshProjectValues() {
 		// Note to prevent infinite event triggering, do not set values if no
 		// changes have occurred.
