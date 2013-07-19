@@ -17,8 +17,8 @@
 
 	<!-- UAA -->
 	<feature
-		url="org.springframework.ide.eclipse.gettingstarted.feature_3.3.0.qualifier.jar"
-		id="org.springframework.ide.eclipse.gettingstarted.feature" version="3.3.0.qualifier">
+		url="org.springframework.ide.eclipse.gettingstarted.feature_3.4.0.qualifier.jar"
+		id="org.springframework.ide.eclipse.gettingstarted.feature" version="3.4.0.qualifier">
 		<category name="Spring Getting Started Integration" />
 	</feature>
 	
