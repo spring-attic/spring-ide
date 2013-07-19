@@ -37,6 +37,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Activator: org.springframework.ide.eclipse.quickfix.Activator
 Export-Package: org.springframework.ide.eclipse.quickfix,
+ org.springframework.ide.eclipse.quickfix.hyperlinks,
  org.springframework.ide.eclipse.quickfix.jdt,
  org.springframework.ide.eclipse.quickfix.jdt.computers,
  org.springframework.ide.eclipse.quickfix.jdt.processors,
