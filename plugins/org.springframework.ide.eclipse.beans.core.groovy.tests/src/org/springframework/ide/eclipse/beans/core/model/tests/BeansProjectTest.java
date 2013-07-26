@@ -352,7 +352,7 @@ public class BeansProjectTest {
 		IBeansConfig config = configs.iterator().next();
 		assertEquals("basic-bean-config.xml", config.getElementName());
 
-		IFile javaFile = (IFile) project.findMember("src/org/test/spring/SimpleConfigurationClass.java");
+		IFile javaFile = (IFile) project.findMember("src/org/test/spring/SimpleConfigurationClass.groovy");
 		configs = beansProject.getConfigs(javaFile, false);
 		assertEquals(1, configs.size());
 		config = configs.iterator().next();
@@ -364,7 +364,7 @@ public class BeansProjectTest {
 		beansProject.addConfig("java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass1", IBeansConfig.Type.MANUAL);
 		beansProject.addConfig("java:org.test.spring.TwoInnerConfigurationClasses$InnerConfigClass2", IBeansConfig.Type.MANUAL);
 
-		IFile javaFile = (IFile) project.findMember("src/org/test/spring/TwoInnerConfigurationClasses.java");
+		IFile javaFile = (IFile) project.findMember("src/org/test/spring/TwoInnerConfigurationClasses.groovy");
 		Set<IBeansConfig> configs = beansProject.getConfigs(javaFile, false);
 		assertEquals(2, configs.size());
 
