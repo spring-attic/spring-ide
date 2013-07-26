@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*******************************************************************************
+ * Copyright (c) 2005, 2013 Spring IDE Developers
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Spring IDE Developers - initial API and implementation
+ *******************************************************************************/
+ -->
+<feature
+      id="org.springframework.ide.eclipse.groovy.tests.feature"
+      label="%featureName"
+      version="3.4.0.qualifier"
+      provider-name="%providerName"
+      plugin="org.springframework.ide.eclipse">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseUrl">
+      %license
+   </license>
+
+   <requires>
+      <import feature="org.codehaus.groovy.eclipse.feature"/>
+      <import feature="org.codehaus.groovy.jdt.patch"/>
+   </requires>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.core.groovy.tests"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+</feature>
