@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.springframework.ide.eclipse.quickfix.hyperlinks.tests.AutowireHyperlinkProviderTest;
 import org.springframework.ide.eclipse.quickfix.processors.tests.NameSuggestionComparatorTest;
 import org.springframework.ide.eclipse.quickfix.proposals.tests.AddConfigSetQuickFixProposalTest;
 import org.springframework.ide.eclipse.quickfix.proposals.tests.AddConstructorArgQuickFixProposalTest;
@@ -41,7 +42,6 @@ import org.springframework.ide.eclipse.quickfix.validator.tests.NamespaceElement
 import org.springframework.ide.eclipse.quickfix.validator.tests.PlaceholderTest;
 import org.springframework.ide.eclipse.quickfix.validator.tests.PropertyAttributeValidationTest;
 
-
 /**
  * @author Terry Denney
  * @author Leo Dos Santos
@@ -51,7 +51,7 @@ import org.springframework.ide.eclipse.quickfix.validator.tests.PropertyAttribut
 public class AllQuickfixTests {
 
 	public static Test suite() {
-		IPreferenceStore store = new ScopedPreferenceStore(new InstanceScope(), "org.eclipse.ajdt.ui");
+		IPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.eclipse.ajdt.ui");
 		store.setValue("promptForAutoOpenCrossReference", false);
 
 		TestSuite suite = new TestSuite(AllQuickfixTests.class.getName());
@@ -95,6 +95,8 @@ public class AllQuickfixTests {
 		suite.addTest(new TestSuite(NameSuggestionComparatorTest.class));
 
 		suite.addTest(AllJDTQuickfixTests.suite());
+
+		suite.addTest(new TestSuite(AutowireHyperlinkProviderTest.class));
 
 		// $JUnit-END$
 		return suite;

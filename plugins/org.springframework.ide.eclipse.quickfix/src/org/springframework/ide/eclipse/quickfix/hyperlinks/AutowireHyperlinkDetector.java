@@ -114,56 +114,63 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 		Set<IBeansConfig> configs = springProject.getConfigs();
 		Set<AutowireBeanHyperlink> hyperlinks = new HashSet<AutowireBeanHyperlink>();
 		for (IBeansConfig config : configs) {
-			final AutowireDependencyProvider autowireDependencyProvider = new AutowireDependencyProvider(config, config);
-			final String[][] beanNamesWrapper = new String[1][];
-
-			try {
-				IProjectClassLoaderSupport classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(
-						project.getProject(), null);
-				autowireDependencyProvider.setProjectClassLoaderSupport(classLoaderSupport);
-				classLoaderSupport.executeCallback(new IProjectClassLoaderAwareCallback() {
-					public void doWithActiveProjectClassLoader() throws Throwable {
-						autowireDependencyProvider.preloadClasses();
-						beanNamesWrapper[0] = autowireDependencyProvider.getBeansForType(typeName);
-					}
-				});
-			}
-			catch (Throwable e) {
-				BeansCorePlugin.log(e);
-			}
-
-			String[] beanNames = beanNamesWrapper[0];
-			for (final String beanName : beanNames) {
-				IBean bean = autowireDependencyProvider.getBean(beanName);
-				final IResource resource = bean.getElementResource();
-				final int line = bean.getElementStartLine();
-				if (resource instanceof IFile) {
-					AutowireBeanHyperlink newHyperlink = new AutowireBeanHyperlink((IFile) resource, line, beanName);
-					boolean found = false;
-
-					for (AutowireBeanHyperlink hyperlink : hyperlinks) {
-						if (resource.equals(hyperlink.getFile()) && line == hyperlink.getLine()) {
-							if (!beanName.equals(hyperlink.getBeanName())) {
-								hyperlink.setShowFileName(true);
-								hyperlinks.add(newHyperlink);
-								newHyperlink.setShowFileName(true);
-								break;
-							}
-							found = true;
-						}
-					}
-
-					if (!found) {
-						hyperlinks.add(newHyperlink);
-					}
-				}
-			}
+			addHyperlinksHelper(config, typeName, project, hyperlinks);
 		}
 
 		if (hyperlinks.size() == 1) {
 			hyperlinks.iterator().next().setIsOnlyCandidate(true);
 		}
 		hyperlinksCollector.addAll(hyperlinks);
+	}
+
+	// public for testing
+	public void addHyperlinksHelper(IBeansConfig config, final String typeName, final IProject project,
+			final Set<AutowireBeanHyperlink> hyperlinks) {
+		final AutowireDependencyProvider autowireDependencyProvider = new AutowireDependencyProvider(config, config);
+		final String[][] beanNamesWrapper = new String[1][];
+
+		try {
+			IProjectClassLoaderSupport classLoaderSupport = JdtUtils.getProjectClassLoaderSupport(project.getProject(),
+					null);
+			autowireDependencyProvider.setProjectClassLoaderSupport(classLoaderSupport);
+			classLoaderSupport.executeCallback(new IProjectClassLoaderAwareCallback() {
+				public void doWithActiveProjectClassLoader() throws Throwable {
+					autowireDependencyProvider.preloadClasses();
+					beanNamesWrapper[0] = autowireDependencyProvider.getBeansForType(typeName);
+				}
+			});
+		}
+		catch (Throwable e) {
+			BeansCorePlugin.log(e);
+		}
+
+		String[] beanNames = beanNamesWrapper[0];
+		for (final String beanName : beanNames) {
+			IBean bean = autowireDependencyProvider.getBean(beanName);
+			final IResource resource = bean.getElementResource();
+			final int line = bean.getElementStartLine();
+			if (resource instanceof IFile) {
+				AutowireBeanHyperlink newHyperlink = new AutowireBeanHyperlink((IFile) resource, line, beanName);
+				boolean found = false;
+
+				for (AutowireBeanHyperlink hyperlink : hyperlinks) {
+					if (resource.equals(hyperlink.getFile()) && line == hyperlink.getLine()) {
+						if (!beanName.equals(hyperlink.getBeanName())) {
+							hyperlink.setShowFileName(true);
+							hyperlinks.add(newHyperlink);
+							newHyperlink.setShowFileName(true);
+							break;
+						}
+						found = true;
+					}
+				}
+
+				if (!found) {
+					hyperlinks.add(newHyperlink);
+				}
+			}
+		}
+
 	}
 
 	private IType getParentType(IJavaElement element) {

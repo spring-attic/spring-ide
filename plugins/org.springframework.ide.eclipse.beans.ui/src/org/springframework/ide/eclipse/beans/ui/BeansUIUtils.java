@@ -330,10 +330,14 @@ public final class BeansUIUtils {
 				BeansUIPlugin.DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
 	}
 	
+	/**
+	 * @since 3.3.0
+	 */
 	public static boolean isBeansConfigContentType(IFile file) {
-		IContentTypeManager contentTypeManager = Platform.getContentTypeManager();			
+		IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
+		InputStream contents = null;
 		try {
-			InputStream contents = file.getContents();
+			contents = file.getContents();
 			IContentType contentType = contentTypeManager.findContentTypeFor(contents, file.getName());
 			if (contentType != null && contentType.isKindOf(contentTypeManager.getContentType("com.springsource.sts.config.ui.beanConfigFile"))) {
 				return true;
@@ -342,8 +346,18 @@ public final class BeansUIUtils {
 			// if something goes wrong, treats the file as non spring content type
 		} catch (IOException e) {
 			// if something goes wrong, treats the file as non spring content type
+		} finally {
+			if (contents != null) {
+				try {
+					contents.close();
+				}
+				catch (IOException e) {
+				}
+			}
 		}
+
 		return false;
 	}
+	
 	
 }
