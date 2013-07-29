@@ -10,17 +10,24 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gettingstarted.preferences;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
@@ -81,6 +88,8 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
     private Button envAddButton;
     private Button envEditButton;
     private Button envRemoveButton;
+    private Button envUpButton;
+    private Button envDownButton;
 
 	public DashboardUrlsPreferenceSection(IPageWithSections owner) {
 		super(owner);
@@ -137,7 +146,7 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
         environmentTable.setLabelProvider(new URLBookmarkLabelProvider());
         environmentTable.addSelectionChangedListener(new ISelectionChangedListener() {
             public void selectionChanged(SelectionChangedEvent event) {
-                handleTableSelectionChanged(event);
+                handleTableSelectionChanged();
             }
         });
         environmentTable.addDoubleClickListener(new IDoubleClickListener() {
@@ -205,6 +214,7 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
                 handleEnvAddButtonSelected();
             }
         });
+        
         envEditButton = createPushButton(buttonComposite, "Edit", null); 
         envEditButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
@@ -212,6 +222,7 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
             }
         });
         envEditButton.setEnabled(false);
+        
         envRemoveButton = createPushButton(buttonComposite, "Remove", null); 
         envRemoveButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
@@ -219,9 +230,26 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
             }
         });
         envRemoveButton.setEnabled(false);
+        
+        envUpButton = createPushButton(buttonComposite, "Up", null); 
+        envUpButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                handleDirectionButtonSelected(-1);
+            }
+		});
+        envUpButton.setEnabled(false);
+
+        envDownButton = createPushButton(buttonComposite, "Down", null); 
+        envDownButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                handleDirectionButtonSelected(+1);
+            }
+		});
+        envDownButton.setEnabled(false);
     }
  	
-    /**
+
+	/**
      * Creates and returns a new push button with the given
      * label and/or image.
      * 
@@ -269,14 +297,35 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
      * Responds to a selection changed event in the environment table
      * @param event the selection change event
      */
-    private void handleTableSelectionChanged(SelectionChangedEvent event) {
-        int size = ((IStructuredSelection)event.getSelection()).size();
+    private void handleTableSelectionChanged() {
+    	int[] selecteds = environmentTable.getTable().getSelectionIndices();
+        int size = selecteds==null ? 0 : selecteds.length;
         envEditButton.setEnabled(size == 1);
         envRemoveButton.setEnabled(size > 0);
+        envUpButton.setEnabled(canMoveSelection(-1));
+        envDownButton.setEnabled(canMoveSelection(+1));
     }
     
-    
-    /**
+	private boolean canMoveSelection(int dir) {
+    	int[] selecteds = environmentTable.getTable().getSelectionIndices();
+    	if (selecteds!=null && selecteds.length>0) {
+        	int size = environmentTable.getTable().getItemCount();
+    		for (int i = 0; i < selecteds.length; i++) {
+				int moveTo = selecteds[i] + dir;
+				if (moveTo<0 || moveTo>=size) {
+					//not allowed to move out of range!
+					return false;
+				}
+			}
+    		//all selected elements are movable
+    		return true;
+    	}
+    	//nothing to move, empty selection
+		return false;
+	}
+
+
+	/**
      * Adds a new environment variable to the table.
      */
     private void handleEnvAddButtonSelected() {
@@ -341,23 +390,27 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
         String value = dialog.getStringValue(P_VALUE);
         
         if (name != null && value != null && name.length() > 0 && value.length() >0) {
-            addVariable(new URLBookmark(name.trim(), value.trim()));
+            addBookmark(new URLBookmark(name.trim(), value.trim()));
         }
     }
     
-    /**
-     * Attempts to add the given variable.
-     * @param variable the variable to add
-     * @return whether the variable was added
-     */
-    private boolean addVariable(URLBookmark variable) {
-    	//TODO: insert before selected element if selection is not empty
-        environmentTable.add(variable);
-        return true;
-    }
-    
-    
-    /**
+    private void addBookmark(URLBookmark urlBookmark) {
+    	ArrayList<URLBookmark> elements = new ArrayList<URLBookmark>(Arrays.asList((URLBookmark[])environmentTable.getInput()));
+    	int insertAt = environmentTable.getTable().getSelectionIndex();
+    	if (insertAt<0) {
+    		elements.add(urlBookmark);
+    	} else {
+    		elements.add(insertAt, urlBookmark);
+    	}
+    	environmentTable.setInput(elements.toArray(new URLBookmark[elements.size()]));
+    	if (insertAt>=0) {
+    		environmentTable.getTable().setSelection(insertAt);
+    	}
+    	handleTableSelectionChanged();
+	}
+
+
+	/**
      * Creates an editor for the value of the selected environment variable.
      */
     private void handleEnvEditButtonSelected() {
@@ -391,14 +444,53 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
      * Removes the selected environment variable from the table.
      */
     private void handleEnvRemoveButtonSelected() {
-        IStructuredSelection sel = (IStructuredSelection) environmentTable.getSelection();
-        environmentTable.getControl().setRedraw(false);
-        for (Iterator i = sel.iterator(); i.hasNext(); ) {
-            URLBookmark var = (URLBookmark) i.next();   
-            environmentTable.remove(var);
-        }
-        environmentTable.getControl().setRedraw(true);
+    	Table table = environmentTable.getTable();
+        
+        int[] _selecteds = table.getSelectionIndices();
+        Set<Integer> selecteds = new HashSet<Integer>();
+        for (Integer s : _selecteds) {
+			selecteds.add(s);
+		}
+        
+        
+        URLBookmark[] elements = (URLBookmark[]) environmentTable.getInput();
+        URLBookmark[] newElements = new URLBookmark[elements.length - selecteds.size()];
+        int dst=0;
+        for (int src = 0; src < elements.length; src++) {
+        	if (selecteds.contains(src)) {
+        		//skip (so it is deleted)
+        	} else {
+        		//keep (so it is not deleted)
+        		newElements[dst++] = elements[src];
+        	}
+		}
+        environmentTable.setInput(newElements);
+        environmentTable.setSelection(StructuredSelection.EMPTY);
+    	handleTableSelectionChanged(); //programatic selection changes don't fire events we must trigger this ourselves.
     }
+    
+    protected void handleDirectionButtonSelected(int dir) {
+    	Table table = environmentTable.getTable();
+        
+        int[] selecteds = table.getSelectionIndices();
+        if (selecteds!=null && selecteds.length>0) {
+        	URLBookmark[] elements = (URLBookmark[]) environmentTable.getInput();
+        	int size = elements.length;
+        	for (int i = 0; i < selecteds.length; i++) {
+				int src = selecteds[i];
+				int dst = src+dir;
+				if (dst>=0 && dst<size) {
+					URLBookmark temp = elements[dst];
+					elements[dst] = elements[src];
+					elements[src] = temp;
+					selecteds[i] = dst;
+				}
+			}
+        	environmentTable.setInput(elements);
+        	table.setSelection(selecteds);
+        	handleTableSelectionChanged();
+        }
+	}
       
     /**
      * Label provider for the environment table
