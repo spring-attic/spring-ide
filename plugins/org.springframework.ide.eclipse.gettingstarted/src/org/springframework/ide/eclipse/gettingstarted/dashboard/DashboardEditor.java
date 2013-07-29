@@ -26,6 +26,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.part.EditorPart;
 import org.springframework.ide.eclipse.gettingstarted.GettingStartedActivator;
+import org.springframework.ide.eclipse.gettingstarted.preferences.URLBookmark;
 
 /**
  * New Dashboard that will replace the old. On some yet to be determined
@@ -107,21 +108,28 @@ public class DashboardEditor extends EditorPart {
 	 */
 	protected List<IDashboardPage> createPages() {
 		List<IDashboardPage> pages = new ArrayList<IDashboardPage>();
-		pages.add(new WebDashboardPage("Getting Started", "http://sagan.cfapps.io/guides/gs"));
+		addDashboadWebPages(pages);
 		
-		try {
-			pages.add(new GeneratedGuidesDashboardPage());
-		} catch (Exception e) {
-			GettingStartedActivator.log(e);
-		}
+//		try {
+//			pages.add(new GeneratedGuidesDashboardPage());
+//		} catch (Exception e) {
+//			GettingStartedActivator.log(e);
+//		}
 		
-		pages.add(new WebDashboardPage("News", "http://www.springsource.org/news-events"));
 		pages.add(new DashboardExtensionsPage());
 //		pages.add(new GuidesDashboardPageWithPreview());
 //		for (int i = 1; i < 3; i++) {
 //			pages.add(new DemoDashboardPage("Demo "+i, "Contents for page "+i));
 //		}
 		return pages;
+	}
+
+	private void addDashboadWebPages(List<IDashboardPage> pages) {
+		URLBookmark[] bookmarks = GettingStartedActivator.getDefault().getPreferences().getDashboardWebPages();
+
+		for (URLBookmark bm : bookmarks) {
+			pages.add(new WebDashboardPage(bm.getName(), bm.getUrl()));
+		}
 	}
 
 	@Override

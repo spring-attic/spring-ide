@@ -165,16 +165,16 @@ public class GithubClient {
 	
 	private RestTemplate createRestTemplate() {
 		RestTemplate rest = new RestTemplate();
-		IProxyService proxyService = GettingStartedActivator.getDefault().getProxyService();
-		if (proxyService!=null && proxyService.isProxiesEnabled()) {
-			final IProxyData[] existingProxies = proxyService.getProxyData();
-			if (existingProxies != null && existingProxies.length>0) {
-				//TODO: Do some magic to configure proxies on the http request based on its url.
-				
-				//some interesting code in here:
-				//org.cloudfoundry.ide.eclipse.internal.server.core.CloudFoundryClientFactory.getProxy(URL)
-			}
-		}
+//		IProxyService proxyService = GettingStartedActivator.getDefault().getProxyService();
+//		if (proxyService!=null && proxyService.isProxiesEnabled()) {
+//			final IProxyData[] existingProxies = proxyService.getProxyData();
+//			if (existingProxies != null && existingProxies.length>0) {
+//				//TODO: Do some magic to configure proxies on the http request based on its url.
+//				
+//				//some interesting code in here:
+//				//org.cloudfoundry.ide.eclipse.internal.server.core.CloudFoundryClientFactory.getProxy(URL)
+//			}
+//		}
 		
 		//Add authentication
 		rest = credentials.apply(rest);

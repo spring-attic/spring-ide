@@ -30,7 +30,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.mylyn.discovery.core,
  org.eclipse.mylyn.discovery.ui,
  org.springsource.ide.eclipse.commons.configurator,
- org.eclipse.core.net
+ org.eclipse.core.net,
+ org.eclipse.debug.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.gettingstarted,
