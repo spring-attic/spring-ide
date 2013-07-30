@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping({"/index1.htm", "/index2.htm"})
+@RequestMapping(["/index1.htm", "/index2.htm"])
 public class CombinedCaseSuperclass {
 
 	public Object getBeanInstance() {

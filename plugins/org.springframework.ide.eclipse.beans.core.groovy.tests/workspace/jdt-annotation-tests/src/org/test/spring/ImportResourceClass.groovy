@@ -6,6 +6,6 @@ import org.springframework.context.annotation.ImportResource;
 
 @Configuration
 @ImportResource("classpath:/com/acme/database-config.xml")
-@Import(value={SimpleConfigurationClass.class, SimpleBeanClass.class})
+@Import(value=[SimpleConfigurationClass.class, SimpleBeanClass.class])
 public class ImportResourceClass {
 }
