@@ -3,7 +3,7 @@ package org.test.spring;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping({"/index3.htm", "/index4.htm", "/index5.htm"})
+@RequestMapping(["/index3.htm", "/index4.htm", "/index5.htm"])
 public class CombinedCaseSubclass extends CombinedCaseSuperclass {
 	
 	@Bean
