@@ -1,10 +1,13 @@
 Setting Up STS - GSG integration
 ================================
 
+Note: the format of the web page in the new dashboard is very much
+in flux, changing all the time. We know at the moment it looks a bit crappy.
+
 1. Download and install STS 3.3.0.RELEASE from
    http://www.springsource.org/downloads/sts-ggts
    
-2. Edit STS.ini and add (at end):
+2. Temporary: Edit STS.ini and add (at end):
 
 -Dgithub.user.name=XXXXXXX
 -Dgithub.user.password=XXXXXXX
@@ -16,7 +19,7 @@ is a *member* of *springsource.meta* org.
 
 http://dist.springframework.org/snapshot/GSG_INTEGRATION/nightly/
 
-Intsall everything under 'Spring Getting Started Integration'.
+Install everything under 'Spring Getting Started Integration'.
 
 4. Restart STS
 5. Close and reopen Dashboard (if the old dashboard is still open).
@@ -24,10 +27,20 @@ Intsall everything under 'Spring Getting Started Integration'.
 Notes:
  - New Dahsboard URLs can be configured via 
  Window >> Preferences >> SpringSource >> Dashboard (New)
- - Browsing GSG content in the dahsboard an extra link should
+ - Browsing GSG content in the dashboard an extra link should
    appear underneath the 'Donwload Zip' button.
    Click the button should open a Wizard to import GSG content
    with the correct guide preselected.
+ - If clicking link does not open the wizard. It means the
+   particular content was not found. The most likely cause of
+   this is incorrect github credentials. 
+   Another cause may be the sagan pages are out of synch and
+   displaying conten that can't be discovered on github 
+   springsource.meta org.
+ - 'Import' links only appear in Dashboard not the standard
+   Eclipse 'Internal Web Browser'.
+ - github credentials will not be needed anymore when the
+   springsource.meta project become publically accessible.
 
 Linux Users only
 ================
@@ -43,9 +56,9 @@ Symptoms include
   - JVM Crashes (when using internal web browser)
   
 To rememedy do the following:
-  - Download XULRunner 10.0.2 and unpack
+  - Download XULRunner 10.0.2 (http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/10.0.2/runtimes/) and unpack
   - Add the following arguments to STS.ini
-  
+
 -Dorg.eclipse.swt.browser.XULRunnerPath=<path-to-unpack-location>/xulrunner-10.0.2
 -Dorg.eclipse.swt.browser.DefaultType=mozilla
 
