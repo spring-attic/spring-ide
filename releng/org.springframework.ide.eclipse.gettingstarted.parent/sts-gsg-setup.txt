@@ -1,10 +1,13 @@
 Setting Up STS - GSG integration
 ================================
 
+Note: the format of the web page in the new dashboard is very much
+in flux, changing all the time. We know at the moment it looks a bit crappy.
+
 1. Download and install STS 3.3.0.RELEASE from
    http://www.springsource.org/downloads/sts-ggts
    
-2. Edit STS.ini and add (at end):
+2. Temporary: Edit STS.ini and add (at end):
 
 -Dgithub.user.name=XXXXXXX
 -Dgithub.user.password=XXXXXXX
@@ -24,7 +27,7 @@ Install everything under 'Spring Getting Started Integration'.
 Notes:
  - New Dahsboard URLs can be configured via 
  Window >> Preferences >> SpringSource >> Dashboard (New)
- - Browsing GSG content in the dahsboard an extra link should
+ - Browsing GSG content in the dashboard an extra link should
    appear underneath the 'Donwload Zip' button.
    Click the button should open a Wizard to import GSG content
    with the correct guide preselected.
@@ -37,7 +40,7 @@ Notes:
  - 'Import' links only appear in Dashboard not the standard
    Eclipse 'Internal Web Browser'.
  - github credentials will not be needed anymore when the
-   springsource.metat project become publically accessible.
+   springsource.meta project become publically accessible.
 
 Linux Users only
 ================
