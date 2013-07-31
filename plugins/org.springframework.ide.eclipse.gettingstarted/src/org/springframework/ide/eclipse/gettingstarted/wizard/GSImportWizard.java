@@ -143,12 +143,21 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 	 */
 	public static int open(Shell shell, GSContent guide) {
 		GSImportWizard wiz = new GSImportWizard();
+		wiz.setEnableOpenHomePage(false);
 		wiz.setItem(guide);
 		WizardDialog dialog = new WizardDialog(shell, wiz);
 		dialog.setBlockOnOpen(true);
 		return dialog.open(); 
 	}
 	
+	/**
+	 * Can be called before opening the wizard to change the default value
+	 * for the option to open content homepage after importing.
+	 */
+	public void setEnableOpenHomePage(boolean enable) {
+		model.getEnableOpenHomePage().setValue(enable);
+	}
+
 	public static int open(Shell shell, ContentManager cm, GSZipFileCodeSet content) {
 		GSImportWizard wiz = new GSImportWizard();
 		wiz.setContentManager(cm); //All available content
