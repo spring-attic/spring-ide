@@ -30,10 +30,14 @@ Notes:
    with the correct guide preselected.
  - If clicking link does not open the wizard. It means the
    particular content was not found. The most likely cause of
-   this is incorrect hithub credentials. 
+   this is incorrect github credentials. 
    Another cause may be the sagan pages are out of synch and
    displaying conten that can't be discovered on github 
    springsource.meta org.
+ - 'Import' links only appear in Dashboard not the standard
+   Eclipse 'Internal Web Browser'.
+ - github credentials will not be needed anymore when the
+   springsource.metat project become publically accessible.
 
 Linux Users only
 ================
