@@ -380,7 +380,7 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
             }
         }; 
         dialog.addTextField(P_VARIABLE, null, false);
-        dialog.addVariablesField(P_VALUE, null, true);
+        dialog.addTextField(P_VALUE, null, true);
         
         if (dialog.open() != Window.OK) {
             return;
@@ -423,7 +423,7 @@ public class DashboardUrlsPreferenceSection extends PrefsPageSection {
         String value= var.getUrl();
         MultipleInputDialog dialog= new MultipleInputDialog(getShell(), "Edit"); 
         dialog.addTextField(P_VARIABLE, originalName, false);
-        dialog.addVariablesField(P_VALUE, value, true);
+        dialog.addTextField(P_VALUE, value, true);
         
         if (dialog.open() != Window.OK) {
             return;
