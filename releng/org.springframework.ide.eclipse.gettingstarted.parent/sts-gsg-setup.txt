@@ -1,0 +1,55 @@
+Setting Up STS - GSG integration
+================================
+
+1. Download and install STS 3.3.0.RELEASE from
+   http://www.springsource.org/downloads/sts-ggts
+   
+2. Edit STS.ini and add (at end):
+
+-Dgithub.user.name=XXXXXXX
+-Dgithub.user.password=XXXXXXX
+
+Use a username and password for a github user that
+is a *member* of *springsource.meta* org.
+
+3. Install New Dashboard from update site:
+
+http://dist.springframework.org/snapshot/GSG_INTEGRATION/nightly/
+
+Intsall everything under 'Spring Getting Started Integration'.
+
+4. Restart STS
+5. Close and reopen Dashboard (if the old dashboard is still open).
+
+Notes:
+ - New Dahsboard URLs can be configured via 
+ Window >> Preferences >> SpringSource >> Dashboard (New)
+ - Browsing GSG content in the dahsboard an extra link should
+   appear underneath the 'Donwload Zip' button.
+   Click the button should open a Wizard to import GSG content
+   with the correct guide preselected.
+
+Linux Users only
+================
+
+On some linux platforms there are issues using the Eclipse 
+embedded webbrowser widget. The problems are caused by
+native libraries that are either not installed or the
+wrong version in your particular flavor/install of Linux.
+
+Symptoms include 
+  - Blank Welcome page
+  - New Dahsboard not working
+  - JVM Crashes (when using internal web browser)
+  
+To rememedy do the following:
+  - Download XULRunner 10.0.2 and unpack
+  - Add the following arguments to STS.ini
+  
+-Dorg.eclipse.swt.browser.XULRunnerPath=<path-to-unpack-location>/xulrunner-10.0.2
+-Dorg.eclipse.swt.browser.DefaultType=mozilla
+
+Downloading xulrunner and setting XULRunnerPath may not be necessary on all flavors of
+Linux. It may be sufficient just to set browser.DefaultType.
+However downloading and setting XULRunner path is a surefire way of ensuring a Eclipse compatible
+XULRunner.
