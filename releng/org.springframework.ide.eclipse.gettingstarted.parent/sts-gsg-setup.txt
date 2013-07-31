@@ -16,7 +16,7 @@ is a *member* of *springsource.meta* org.
 
 http://dist.springframework.org/snapshot/GSG_INTEGRATION/nightly/
 
-Intsall everything under 'Spring Getting Started Integration'.
+Install everything under 'Spring Getting Started Integration'.
 
 4. Restart STS
 5. Close and reopen Dashboard (if the old dashboard is still open).
