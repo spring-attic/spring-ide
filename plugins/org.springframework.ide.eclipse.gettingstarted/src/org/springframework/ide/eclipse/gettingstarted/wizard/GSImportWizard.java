@@ -14,7 +14,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -111,31 +115,56 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 //		addPage(pageTwo);
 	}
 
+	
+	
+
 	@Override
 	public boolean performFinish() {
-		try {
-			//IMPORTANT: fork must be true or invalid thread access will ensue for gradle imports.
-			// This is because the gradle import will send progress events from worker threads.
-			// and the non-forked run will pass a UI-direct progress monitor to the runnable!
-			getContainer().run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
+		Job job = new Job("Import Getting Started Content") {
+			@Override
+			protected IStatus run(IProgressMonitor mon) {
+				try {
 					model.performFinish(mon);
-							//new UIThreadProgressAdapter(getShell().getDisplay(), mon));
+					return Status.OK_STATUS;
+				} catch (Throwable e) {
+					return ExceptionUtil.status(e);
 				}
-			});
-			return true;
-		} catch (InterruptedException e) {
-			GettingStartedActivator.log(e);
-		} catch (InvocationTargetException e) {
-			String msg = ExceptionUtil.getMessage(e);
-			if (msg!=null && !"".equals(msg)) {
-				MessageDialog.openError(getShell(), "Error performing the import", msg);
 			}
-			GettingStartedActivator.log(e);
-		}
-		return false;
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		job.setPriority(Job.BUILD);
+		job.setUser(true); //shows progress in default eclipse config
+		job.schedule();
+		return true;
 	}
+	
+	
+//Old Version of performFinish that uses an "In Dialog Progress Bar". Dialog stays open until import is
+// complete:
+//	@Override
+//	public boolean performFinish() {
+//		try {
+//			//IMPORTANT: fork must be true or invalid thread access will ensue for gradle imports.
+//			// This is because the gradle import will send progress events from worker threads.
+//			// and the non-forked run will pass a UI-direct progress monitor to the runnable!
+//			getContainer().run(true, false, new IRunnableWithProgress() {
+//				@Override
+//				public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
+//					model.performFinish(mon);
+//				}
+//			});
+//			return true;
+//		} catch (InterruptedException e) {
+//			GettingStartedActivator.log(e);
+//		} catch (InvocationTargetException e) {
+//			String msg = ExceptionUtil.getMessage(e);
+//			if (msg!=null && !"".equals(msg)) {
+//				MessageDialog.openError(getShell(), "Error performing the import", msg);
+//			}
+//			GettingStartedActivator.log(e);
+//		}
+//		return false;
+//	}
 
 	/**
 	 * Open the wizard and block until it is closed by the user. Returns the exit code of

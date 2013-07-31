@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.gettingstarted.content;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
@@ -164,6 +166,22 @@ public class GettingStartedGuide extends GithubRepoContent {
 			buf.append(' ');
 		}
 		return buf.toString();
+	}
+	
+	@Override
+	public URL getHomePage() {
+		//Looks like this now: http://sagan.cfapps.io/guides/gs/device-detection/content
+		try {
+			String gsGuideName = getName();
+			if (gsGuideName.startsWith("gs-")) {
+				String guideName = gsGuideName.substring(3);
+				return new URL("http://sagan.cfapps.io/guides/gs/"+guideName+"/content");
+			}
+		} catch (MalformedURLException e) {
+			GettingStartedActivator.log(e);
+		}
+		//Fallback on default implementation if custom logic failed
+		return super.getHomePage();
 	}
 	
 	/**
