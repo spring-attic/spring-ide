@@ -28,6 +28,12 @@ Notes:
    appear underneath the 'Donwload Zip' button.
    Click the button should open a Wizard to import GSG content
    with the correct guide preselected.
+ - If clicking link does not open the wizard. It means the
+   particular content was not found. The most likely cause of
+   this is incorrect hithub credentials. 
+   Another cause may be the sagan pages are out of synch and
+   displaying conten that can't be discovered on github 
+   springsource.meta org.
 
 Linux Users only
 ================
