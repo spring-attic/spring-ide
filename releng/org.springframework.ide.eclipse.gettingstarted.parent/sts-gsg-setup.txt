@@ -43,9 +43,9 @@ Symptoms include
   - JVM Crashes (when using internal web browser)
   
 To rememedy do the following:
-  - Download XULRunner 10.0.2 and unpack
+  - Download XULRunner 10.0.2 (http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/10.0.2/runtimes/) and unpack
   - Add the following arguments to STS.ini
-  
+
 -Dorg.eclipse.swt.browser.XULRunnerPath=<path-to-unpack-location>/xulrunner-10.0.2
 -Dorg.eclipse.swt.browser.DefaultType=mozilla
 
