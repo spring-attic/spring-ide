@@ -131,7 +131,7 @@ public class GSImportWizard extends Wizard implements IImportWizard {
 				}
 			}
 		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		//job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		job.setPriority(Job.BUILD);
 		job.setUser(true); //shows progress in default eclipse config
 		job.schedule();
