@@ -94,7 +94,8 @@ public class BeansConfigFactory {
 	}
 
 	public static boolean isJavaConfigFile(IFile file) {
-		return file != null && (file.getFileExtension().equals("java") || file.getFileExtension().equals("class"));
+		return file != null && (file.getFileExtension().equals("java") || file.getFileExtension().equals("class") 
+				|| file.getFileExtension().equals("groovy"));
 	}
 
 }
