@@ -56,7 +56,8 @@ public class JdtClassMetadataTest {
 		
 		ClassMetadata metadata = metadataReader.getClassMetadata();
 		assertEquals("org.test.spring.NoAnnotations", metadata.getClassName());
-		assertEquals(0, metadata.getInterfaceNames().length);
+		assertEquals(1, metadata.getInterfaceNames().length);
+		assertEquals("groovy.lang.GroovyObject", metadata.getInterfaceNames()[0]);
 
 		assertFalse(metadata.hasEnclosingClass());
 		assertNull(metadata.getEnclosingClassName());
@@ -92,7 +93,8 @@ public class JdtClassMetadataTest {
 		
 		ClassMetadata metadata = metadataReader.getClassMetadata();
 		assertEquals("org.test.spring.SubClassOfBinaryType", metadata.getClassName());
-		assertEquals(0, metadata.getInterfaceNames().length);
+		assertEquals(1, metadata.getInterfaceNames().length);
+		assertEquals("groovy.lang.GroovyObject", metadata.getInterfaceNames()[0]);
 		
 		assertFalse(metadata.hasEnclosingClass());
 		assertNull(metadata.getEnclosingClassName());
