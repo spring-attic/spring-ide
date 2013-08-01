@@ -330,7 +330,10 @@ public final class SpringCoreUtils {
 
 	public static DocumentBuilder getDocumentBuilder() {
 		try {
-			return getDocumentBuilderFactory().newDocumentBuilder();
+			DocumentBuilderFactory documentBuilderFactory = getDocumentBuilderFactory();
+			documentBuilderFactory.setExpandEntityReferences(false);
+
+			return documentBuilderFactory.newDocumentBuilder();
 		}
 		catch (Exception e) {
 			SpringCore.log(e);

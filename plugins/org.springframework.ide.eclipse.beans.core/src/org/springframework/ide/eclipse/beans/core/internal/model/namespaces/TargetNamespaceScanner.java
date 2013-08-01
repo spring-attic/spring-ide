@@ -41,6 +41,7 @@ public class TargetNamespaceScanner {
 		try {
 			DocumentBuilderFactory factory = SpringCoreUtils.getDocumentBuilderFactory();
 			factory.setValidating(false);
+			factory.setExpandEntityReferences(false);
 			
 			factory.setFeature("http://xml.org/sax/features/validation", false);
 			factory.setFeature("http://apache.org/xml/features/validation/dynamic", false);
