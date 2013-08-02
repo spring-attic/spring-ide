@@ -94,7 +94,7 @@
 		<module>plugins/org.springframework.ide.eclipse.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core.tests</module>
-		<module>plugins/org.springframework.ide.eclipse.beans.core.groovy.tests</module>
+		<!--<module>plugins/org.springframework.ide.eclipse.beans.core.groovy.tests</module>-->
 		<module>plugins/org.springframework.ide.eclipse.beans.core.metadata</module>
 		<module>plugins/org.springframework.ide.eclipse.ui</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui</module>
