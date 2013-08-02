@@ -94,6 +94,7 @@
 		<module>plugins/org.springframework.ide.eclipse.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core.tests</module>
+		<module>plugins/org.springframework.ide.eclipse.beans.core.groovy.tests</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core.metadata</module>
 		<module>plugins/org.springframework.ide.eclipse.ui</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui</module>
@@ -317,6 +318,11 @@
 					<id>swtbot</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e3.7/</url>
 				</repository>
 			</repositories>
 		</profile>

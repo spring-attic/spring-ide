@@ -23,6 +23,23 @@
 	  <testSuite>org.springframework.ide.eclipse.beans.core.groovy.tests</testSuite>
 	  <testClass>org.springframework.ide.eclipse.beans.core.groovy.tests.AllBeansCoreTests</testClass>
 	  <argLine>-Xmx512m</argLine>
+	  <dependencies>
+	  	<dependency>
+	  		<type>eclipse-feature</type>
+	  		<artifactId>org.codehaus.groovy.eclipse.feature</artifactId>
+	  		<version>0.0.0</version>
+	  	</dependency>
+	  	<dependency>
+	  		<type>eclipse-feature</type>
+	  		<artifactId>org.codehaus.groovy.jdt.patch</artifactId>
+	  		<version>0.0.0</version>
+	  	</dependency>
+	  	<dependency>
+		 	<type>p2-installable-unit</type>
+		 	<artifactId>org.eclipse.jdt.feature.group</artifactId>
+		 	<version>0.0.0</version>
+	  	</dependency>
+	  </dependencies>
 	</configuration>
       </plugin>
 
