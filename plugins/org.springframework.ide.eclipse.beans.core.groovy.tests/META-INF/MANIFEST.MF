@@ -16,9 +16,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.context,
  org.springframework.web,
  org.springframework.ide.eclipse.beans.core.metadata,
+ org.springframework.ide.eclipse.metadata,
  org.springframework.ide.eclipse.beans.ui.refactoring,
  org.eclipse.ltk.core.refactoring,
- org.eclipse.jdt.core.manipulation
+ org.eclipse.jdt.core.manipulation,
+ javax.persistence,
+ org.springframework.orm
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Spring IDE Developers
