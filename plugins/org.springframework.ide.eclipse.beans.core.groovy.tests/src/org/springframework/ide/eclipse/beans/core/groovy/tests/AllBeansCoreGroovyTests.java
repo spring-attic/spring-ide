@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.resources.tests
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigDescriptionWriterTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigFactoryTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigTest;
-import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaConfigTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaGroovyConfigTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectTest;
 import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfigRenameTypeRefactoringParticipantTest;
 
@@ -37,13 +37,13 @@ import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfi
 	JdtBasedAnnotationMetadataTest.class,
 	JdtClassMetadataTest.class,
 	BeansConfigTest.class,
-	BeansJavaConfigTest.class,
+	BeansJavaGroovyConfigTest.class,
 	BeansProjectTest.class,
 	BeansConfigFactoryTest.class,
 	BeansConfigDescriptionWriterTest.class,
 	BeansJavaConfigRenameTypeRefactoringParticipantTest.class,
 	ResourceChangeEventHandlerTest.class,
 })
-public class AllBeansCoreTests {
+public class AllBeansCoreGroovyTests {
 	// goofy junit4, no class body needed
 }

@@ -21,7 +21,7 @@
 	<configuration>
 	  <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 	  <testSuite>org.springframework.ide.eclipse.beans.core.groovy.tests</testSuite>
-	  <testClass>org.springframework.ide.eclipse.beans.core.groovy.tests.AllBeansCoreTests</testClass>
+	  <testClass>org.springframework.ide.eclipse.beans.core.groovy.tests.AllBeansCoreGroovyTests</testClass>
 	  <argLine>-Xmx512m</argLine>
 	  <dependencies>
 	  	<dependency>

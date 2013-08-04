@@ -42,7 +42,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class BeansJavaConfigTest {
+public class BeansJavaGroovyConfigTest {
 	
 	private IProject project;
 	private IBeansModel model;
