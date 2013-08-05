@@ -277,8 +277,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 					allBeans.addAll(bc.getBeans());
 				}
 			}
-
-			return Collections.unmodifiableSet(new LinkedHashSet<IBean>(allBeans));
+			return Collections.unmodifiableSet(allBeans);
 		}
 		finally {
 			r.unlock();
@@ -292,7 +291,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 		if (isBeanClass(className)) {
 			return Collections.unmodifiableSet(getBeanClassesMap().get(className));
 		}
-		return new HashSet<IBean>();
+		return Collections.emptySet();
 	}
 
 	/**
@@ -310,8 +309,7 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 					allComponents.addAll(bc.getComponents());
 				}
 			}
-
-			return Collections.unmodifiableSet(new LinkedHashSet<IBeansComponent>(allComponents));
+			return Collections.unmodifiableSet(allComponents);
 		}
 		finally {
 			r.unlock();
