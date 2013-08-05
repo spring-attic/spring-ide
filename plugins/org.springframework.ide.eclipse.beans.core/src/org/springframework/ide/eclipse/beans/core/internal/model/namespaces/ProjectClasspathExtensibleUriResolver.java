@@ -263,10 +263,10 @@ public class ProjectClasspathExtensibleUriResolver implements
 		InputStream contents = null;
 		try {
 			contents = file.getContents();
-			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory builderFactory = DocumentBuilderFactory
+					.newInstance();
 			builderFactory.setValidating(false);
 			builderFactory.setNamespaceAware(true);
-			builderFactory.setExpandEntityReferences(false);
 
 			DocumentBuilder builder = builderFactory.newDocumentBuilder();
 			Document doc = builder.parse(contents);
