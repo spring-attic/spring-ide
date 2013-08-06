@@ -37,7 +37,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @since 3.3.0
  */
 @SuppressWarnings("restriction")
-public class BeansJavaConfigRenameTypeRefactoringParticipantTest {
+public class BeansJavaGroovyConfigRenameTypeRefactoringParticipantTest {
 	
 	private IProject project;
 	private BeansModel model;

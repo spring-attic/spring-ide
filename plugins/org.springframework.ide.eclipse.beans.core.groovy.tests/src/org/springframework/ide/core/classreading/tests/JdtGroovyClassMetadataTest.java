@@ -33,7 +33,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Martin Lippert
  * @since 3.2.0
  */
-public class JdtClassMetadataTest {
+public class JdtGroovyClassMetadataTest {
 	
 	private IProject project;
 	private IJavaProject javaProject;

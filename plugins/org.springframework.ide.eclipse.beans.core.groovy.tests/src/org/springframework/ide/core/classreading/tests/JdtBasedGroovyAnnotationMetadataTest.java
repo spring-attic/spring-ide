@@ -46,7 +46,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Martin Lippert
  * @since 3.2.0
  */
-public class JdtBasedAnnotationMetadataTest {
+public class JdtBasedGroovyAnnotationMetadataTest {
 	
 	private IProject project;
 	private CachingClassReaderFactory classReaderFactory;

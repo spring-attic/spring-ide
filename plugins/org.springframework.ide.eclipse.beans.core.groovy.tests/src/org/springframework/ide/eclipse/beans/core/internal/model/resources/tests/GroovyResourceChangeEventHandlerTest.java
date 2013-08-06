@@ -40,7 +40,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class ResourceChangeEventHandlerTest {
+public class GroovyResourceChangeEventHandlerTest {
 	
 	private IProject project;
 	private BeansModel model;

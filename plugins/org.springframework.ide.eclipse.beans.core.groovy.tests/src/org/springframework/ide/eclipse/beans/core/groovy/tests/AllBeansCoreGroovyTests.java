@@ -13,16 +13,16 @@ package org.springframework.ide.eclipse.beans.core.groovy.tests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.springframework.ide.core.classreading.tests.JdtAnnotationMetadataTest;
-import org.springframework.ide.core.classreading.tests.JdtBasedAnnotationMetadataTest;
-import org.springframework.ide.core.classreading.tests.JdtClassMetadataTest;
-import org.springframework.ide.eclipse.beans.core.internal.model.resources.tests.ResourceChangeEventHandlerTest;
-import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigDescriptionWriterTest;
-import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigFactoryTest;
-import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigTest;
+import org.springframework.ide.core.classreading.tests.JdtGroovyAnnotationMetadataTest;
+import org.springframework.ide.core.classreading.tests.JdtBasedGroovyAnnotationMetadataTest;
+import org.springframework.ide.core.classreading.tests.JdtGroovyClassMetadataTest;
+import org.springframework.ide.eclipse.beans.core.internal.model.resources.tests.GroovyResourceChangeEventHandlerTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansGroovyConfigDescriptionWriterTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansGroovyConfigFactoryTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansGroovyConfigTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansJavaGroovyConfigTest;
-import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectTest;
-import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfigRenameTypeRefactoringParticipantTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansGroovyProjectTest;
+import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaGroovyConfigRenameTypeRefactoringParticipantTest;
 
 /**
  * Test suite for <code>beans.core</code> plugin.
@@ -33,16 +33,16 @@ import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfi
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-	JdtAnnotationMetadataTest.class,
-	JdtBasedAnnotationMetadataTest.class,
-	JdtClassMetadataTest.class,
-	BeansConfigTest.class,
+	JdtGroovyAnnotationMetadataTest.class,
+	JdtBasedGroovyAnnotationMetadataTest.class,
+	JdtGroovyClassMetadataTest.class,
+	BeansGroovyConfigTest.class,
 	BeansJavaGroovyConfigTest.class,
-	BeansProjectTest.class,
-	BeansConfigFactoryTest.class,
-	BeansConfigDescriptionWriterTest.class,
-	BeansJavaConfigRenameTypeRefactoringParticipantTest.class,
-	ResourceChangeEventHandlerTest.class,
+	BeansGroovyProjectTest.class,
+	BeansGroovyConfigFactoryTest.class,
+	BeansGroovyConfigDescriptionWriterTest.class,
+	BeansJavaGroovyConfigRenameTypeRefactoringParticipantTest.class,
+	GroovyResourceChangeEventHandlerTest.class,
 })
 public class AllBeansCoreGroovyTests {
 	// goofy junit4, no class body needed
