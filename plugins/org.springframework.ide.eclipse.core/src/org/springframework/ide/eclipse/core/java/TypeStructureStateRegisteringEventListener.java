@@ -101,7 +101,7 @@ public class TypeStructureStateRegisteringEventListener extends ProjectContribut
 		ResourceTreeVisitor visitor = new ResourceTreeVisitor(contributor);
 		project.accept(visitor);
 
-		// recored type strcutures for all collected class files
+		// record type strcutures for all collected class files
 		SpringCore.getTypeStructureCache().recordTypeStructures(project,
 				visitor.getResources().toArray(new IResource[visitor.getResources().size()]));
 	}
