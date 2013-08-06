@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <toc label="Spring Documentation" topic="http://www.springsource.org/documentation">
+   <topic href="http://static.springsource.org/sts/nan/latest/NewAndNoteworthy.html" label="STS/GGTS - New and Noteworthy">
+   </topic>
 	<!-- 
 	<anchor id="spring_additions" />
 	<anchor id="additions" />
