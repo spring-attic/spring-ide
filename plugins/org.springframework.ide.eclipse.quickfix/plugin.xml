@@ -216,7 +216,7 @@ public ${String} ${post}(${Object} ${formObject}, ${BindingResult} ${bindingResu
      </template>
      <template
            autoinsert="true"
-           contextTypeId="xml_all"
+           contextTypeId="xml_tag"
            description="DispatcherServlet declaration"
            id="com.springsource.sts.quickfix.dispatcherservlet"
            name="dispatcherservlet">
@@ -242,7 +242,7 @@ public ${String} ${post}(${Object} ${formObject}, ${BindingResult} ${bindingResu
      
      <template
            autoinsert="true"
-           contextTypeId="xml_all"
+           contextTypeId="xml_tag"
            description="ContextLoaderListener"
            id="com.springsource.sts.quickfix.contextloaderlistener"
            name="contextloaderlistener">
