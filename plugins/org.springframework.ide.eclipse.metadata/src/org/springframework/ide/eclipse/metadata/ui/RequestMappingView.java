@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.metadata.ui;
 
@@ -657,14 +657,14 @@ public class RequestMappingView extends ViewPart implements ISelectionListener,
 					} else if (event.getSource() instanceof IProject) {
 						project = (IProject) event.getSource();
 					}
-
-					if (project != null
-							&& BeansModelUtils
-									.getParentOfClass(element,
-											IBeansProject.class).getProject()
-									.equals(project)) {
-						element = null;
-						internalSetInput();
+					
+					IBeansProject beansProject = BeansModelUtils.getParentOfClass(element, IBeansProject.class);
+					if (beansProject != null) {
+						IProject elementProject = beansProject.getProject();
+						if (project != null && elementProject != null && elementProject.equals(project)) {
+							element = null;
+							internalSetInput();
+						}
 					}
 				} else if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
 					IResourceDelta delta = event.getDelta();
