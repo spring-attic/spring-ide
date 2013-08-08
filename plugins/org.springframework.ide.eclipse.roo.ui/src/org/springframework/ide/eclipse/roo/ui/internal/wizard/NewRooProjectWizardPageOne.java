@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal.wizard;
 
@@ -354,11 +354,11 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 			List<String> provider = new ArrayList<String>();
 			dependencyManagementCombo.setEnabled(false);
 
-			if (DependencyManagementUtils.IS_M2ECLIPSE_PRESENT || LegacyDependencyManagementUtils.IS_M2ECLIPSE_PRESENT) {
+			if (DependencyManagementUtils.IS_M2ECLIPSE_PRESENT) {
 				provider.add("Full Maven build");
 				dependencyManagementCombo.setEnabled(true);
 			}
-			if (DependencyManagementUtils.IS_STS_MAVEN_PRESENT || LegacyDependencyManagementUtils.IS_STS_MAVEN_PRESENT) {
+			if (DependencyManagementUtils.IS_STS_MAVEN_PRESENT) {
 				provider.add("Dependency management only");
 				dependencyManagementCombo.setEnabled(true);
 			}
@@ -976,8 +976,7 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 		Control rooHomeControl = rooInstallGroup.createControl(composite);
 		rooHomeControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		if (DependencyManagementUtils.IS_M2ECLIPSE_PRESENT || DependencyManagementUtils.IS_STS_MAVEN_PRESENT
-				|| LegacyDependencyManagementUtils.IS_M2ECLIPSE_PRESENT || LegacyDependencyManagementUtils.IS_STS_MAVEN_PRESENT) {
+		if (DependencyManagementUtils.IS_M2ECLIPSE_PRESENT || DependencyManagementUtils.IS_STS_MAVEN_PRESENT) {
 			Control dependencyManagementControl = dependencyManagementGroup.createControl(composite);
 			dependencyManagementControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}

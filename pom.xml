@@ -176,7 +176,6 @@
 
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
-		<module>plugins/org.springframework.ide.eclipse.maven.legacy</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature</module>
 
 		<!-- sources -->
@@ -303,11 +302,6 @@
 					<id>ajdt-e37</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/tools/ajdt/37/milestone/</url>
-				</repository>
-				<repository>
-				  <id>m2eclipse-legacy</id>
-				  <layout>p2</layout>
-				  <url>http://download.springsource.com/release/TOOLS/third-party/m2eclipse-012</url>
 				</repository>
 				<repository>
 					<id>orbit</id>
