@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 Spring IDE Developers
+ * Copyright (c) 2006 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
@@ -25,6 +29,7 @@ import org.w3c.dom.Node;
  * <code>org.springframework.ide.eclipse.beans.ui.editor</code> extension point.
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Leo Dos Santos
  * @since 2.0
  */
 @SuppressWarnings("restriction")
@@ -99,6 +104,23 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 			processor.addTagInsertionProposals(this, request, childPosition);
 		}
 		super.addTagInsertionProposals(request, childPosition);
+		filterTagInsertionProposals(request);
+	}
+	
+	private void filterTagInsertionProposals(ContentAssistRequest request) {
+		List proposals = request.getProposals();
+		Iterator iter = proposals.iterator();
+		while (iter.hasNext()) {
+			Object obj = iter.next();
+			if (obj instanceof TemplateProposal) {
+				TemplateProposal proposal = (TemplateProposal) obj;
+				String display = proposal.getDisplayString();
+				if (display.startsWith("dispatcherservlet")
+						|| display.startsWith("contextloaderlistener")) {
+					iter.remove();
+				}
+			}
+		}
 	}
 
 	public ITextViewer getTextViewer() {
