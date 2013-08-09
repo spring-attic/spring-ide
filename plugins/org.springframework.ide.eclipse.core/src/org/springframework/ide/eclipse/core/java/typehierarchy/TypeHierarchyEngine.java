@@ -29,6 +29,8 @@ public class TypeHierarchyEngine {
 	public static final String ENABLE_PROPERTY = "org.springframework.ide.eclipse.core.java.enableTypeHierarchyEngine";
 	
 	private TypeHierarchyClassReaderFactory classReaderFactory;
+	private TypeHierarchyElementCacheFactory elementCacheFactory;
+
 	private Map<IProject, TypeHierarchyElementCache> cache;
 	private Map<IProject, TypeHierarchyClassReader> readers;
 	
@@ -39,6 +41,10 @@ public class TypeHierarchyEngine {
 
 	public void setClassReaderFactory(TypeHierarchyClassReaderFactory classReaderFactory) {
 		this.classReaderFactory = classReaderFactory;
+	}
+	
+	public void setTypeHierarchyElementCacheFactory(TypeHierarchyElementCacheFactory elementCacheFactory) {
+		this.elementCacheFactory = elementCacheFactory;
 	}
 	
 	public void cleanup(IProject project) {
@@ -119,14 +125,25 @@ public class TypeHierarchyEngine {
 		TypeHierarchyElementCache elementCache = getTypeHierarchyElementCache(project);
 		
 		try {
+			TypeHierarchyElement typeElement = null;
+			TypeHierarchyElement previousTypeElement = null;
+
 			do {
 				if (CharOperation.equals(typeName, superTypeName)) {
 					return true;
 				}
 				else {
-					TypeHierarchyElement typeElement = getTypeElement(typeName, project, elementCache);
+					if (typeElement == null) {
+						typeElement = getTypeElement(typeName, project, elementCache);
+						if (previousTypeElement != null) {
+							previousTypeElement.superclassElement = typeElement;
+						}
+					}
+					previousTypeElement = typeElement;
+
 					if (typeElement != null) {
 						typeName = typeElement.superclassName;
+						typeElement = typeElement.superclassElement;
 					}
 					else {
 						typeName = null;
@@ -168,36 +185,50 @@ public class TypeHierarchyEngine {
 
 	protected boolean doesImplement(final IProject project, char[] classTypeName, final char[] interfaceTypeName,
 			final boolean cachedItemsOnly, TypeHierarchyElementCache elementCache) {
+		
+		TypeHierarchyElement classTypeElement = getTypeElement(classTypeName, project, elementCache);
 		do {
-			TypeHierarchyElement classTypeElement = getTypeElement(classTypeName, project, elementCache);
 			if (classTypeElement != null) {
-				char[][] implementedInterfaces = classTypeElement.interfaces;
-				if (implementedInterfaces != null) {
-					ArrayDeque<char[][]> interfaceStack = new ArrayDeque<char[][]>();
-					interfaceStack.add(implementedInterfaces);
-					
-					while (!interfaceStack.isEmpty()) {
-						char[][] interfacesToAnalyze = interfaceStack.pop();
-						for (char[] interfaceToAnalyze : interfacesToAnalyze) {
+				if (classTypeElement.interfaces != null) {
+					ArrayDeque<TypeHierarchyElement> elementStack = new ArrayDeque<TypeHierarchyElement>();
+					elementStack.add(classTypeElement);
+
+					while (!elementStack.isEmpty()) {
+						TypeHierarchyElement element = elementStack.pop();
+						for (char[] interfaceToAnalyze : element.interfaces) {
 							if (CharOperation.equals(interfaceToAnalyze, interfaceTypeName)) {
 								return true;
 							}
 						}
-						for (char[] interfaceToAnalyze : interfacesToAnalyze) {
-							if (!cachedItemsOnly || elementCache.get(interfaceToAnalyze) != null) {
-								TypeHierarchyElement interfaceTypeElement = getTypeElement(interfaceToAnalyze, project, elementCache);
-								if (interfaceTypeElement != null) {
-									char[][] superInterfaces = interfaceTypeElement.interfaces;
-									if (superInterfaces != null) {
-										interfaceStack.add(superInterfaces);
-									}
+
+						for (int i = 0; i < element.interfaces.length; i++) {
+							char[] interfaceToAnalyze = element.interfaces[i];
+							TypeHierarchyElement interfaceToAnalyzeElement = element.interfacesElements[i];
+
+							if (!cachedItemsOnly || interfaceToAnalyzeElement != null || elementCache.get(interfaceToAnalyze) != null) {
+								if (interfaceToAnalyzeElement == null) {
+									interfaceToAnalyzeElement = getTypeElement(interfaceToAnalyze, project, elementCache);
+									element.interfacesElements[i] = interfaceToAnalyzeElement;
+								}
+								if (interfaceToAnalyzeElement != null && interfaceToAnalyzeElement.interfaces != null) {
+									elementStack.add(interfaceToAnalyzeElement);
 								}
 							}
 						}
 					}
 				}
+				
 				classTypeName = classTypeElement.superclassName;
-				if (cachedItemsOnly && classTypeName != null && elementCache.get(classTypeName) == null) {
+				
+				TypeHierarchyElement superClassTypeElement = classTypeElement.superclassElement;
+				if (superClassTypeElement == null && classTypeName != null && (!cachedItemsOnly || elementCache.get(classTypeName) != null)) {
+					superClassTypeElement = getTypeElement(classTypeName, project, elementCache);
+					classTypeElement.superclassElement = superClassTypeElement;
+				}
+				
+				classTypeElement = superClassTypeElement;
+				
+				if (cachedItemsOnly && classTypeName != null && classTypeElement == null && elementCache.get(classTypeName) == null) {
 					classTypeName = null;
 				}
 			}
@@ -222,7 +253,7 @@ public class TypeHierarchyEngine {
 	protected TypeHierarchyElementCache getTypeHierarchyElementCache(IProject project) {
 		TypeHierarchyElementCache elementCache = this.cache.get(project);
 		if (elementCache == null) {
-			elementCache = new TypeHierarchyElementCache();
+			elementCache = this.elementCacheFactory.createTypeHierarchyElementCache();
 			this.cache.put(project, elementCache);
 		}
 		return elementCache;

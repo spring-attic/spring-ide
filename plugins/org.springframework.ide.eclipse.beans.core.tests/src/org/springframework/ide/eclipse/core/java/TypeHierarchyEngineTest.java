@@ -26,9 +26,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ide.eclipse.core.java.typehierarchy.BytecodeTypeHierarchyClassReaderFactory;
+import org.springframework.ide.eclipse.core.java.typehierarchy.DirectTypeHierarchyElementCacheFactory;
 import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyClassReader;
 import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyClassReaderFactory;
 import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyElement;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyElementCache;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyElementCacheFactory;
 import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -42,6 +45,7 @@ public class TypeHierarchyEngineTest {
 	private IJavaProject javaProject;
 	private TypeHierarchyEngine engine;
 	private BytecodeTypeHierarchyClassReaderFactory classReaderFactory;
+	private DirectTypeHierarchyElementCacheFactory elementCacheFactory;
 
 	@Before
 	public void createProject() throws Exception {
@@ -49,9 +53,11 @@ public class TypeHierarchyEngineTest {
 		javaProject = JdtUtils.getJavaProject(project);
 		
 		classReaderFactory = new BytecodeTypeHierarchyClassReaderFactory();
+		elementCacheFactory = new DirectTypeHierarchyElementCacheFactory();
 
 		engine = new TypeHierarchyEngine();
 		engine.setClassReaderFactory(classReaderFactory);
+		engine.setTypeHierarchyElementCacheFactory(elementCacheFactory);
 	}
 	
 	@After
@@ -239,6 +245,27 @@ public class TypeHierarchyEngineTest {
 		assertFalse(reader.classAccessed("org/InterfaceB"));
 	}
 	
+	@Test
+	public void testDontAccessCacheTwiceForClassHierarchy() throws Exception {
+		AccessLoggingTypeHierarchyElementCacheFactory cacheFactory = new AccessLoggingTypeHierarchyElementCacheFactory();
+		engine.setTypeHierarchyElementCacheFactory(cacheFactory);
+		
+		IType type = javaProject.findType("org.sub.ClassABCD");
+		assertTrue(engine.doesExtend(type, "org.ClassA", true));
+		
+		AccessLoggingTypeHierarchyElementCache[] caches = cacheFactory.getCaches();
+		assertEquals(1, caches.length);
+		
+		assertEquals(1, caches[0].classAccessed("org/sub/ClassABCD"));
+		assertEquals(1, caches[0].classAccessed("org/sub/ClassB"));
+		assertEquals(0, caches[0].classAccessed("org/ClassA"));
+		
+		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
+		assertEquals(2, caches[0].classAccessed("org/sub/ClassABCD")); // first class is always accessed
+		assertEquals(1, caches[0].classAccessed("org/sub/ClassB")); // this is not being accessed again
+		assertEquals(1, caches[0].classAccessed("org/ClassA")); // this one is accessed for the first time
+	}
+	
 	private static class AccessLoggingClassReaderFactory implements TypeHierarchyClassReaderFactory {
 		
 		private TypeHierarchyClassReaderFactory readerFactory;
@@ -286,6 +313,48 @@ public class TypeHierarchyEngineTest {
 		
 	}
  	
+	private static class AccessLoggingTypeHierarchyElementCacheFactory implements TypeHierarchyElementCacheFactory {
+		
+		private List<AccessLoggingTypeHierarchyElementCache> caches;
+
+		public AccessLoggingTypeHierarchyElementCacheFactory() {
+			this.caches = new ArrayList<AccessLoggingTypeHierarchyElementCache>();
+		}
+
+		public TypeHierarchyElementCache createTypeHierarchyElementCache() {
+			AccessLoggingTypeHierarchyElementCache cache = new AccessLoggingTypeHierarchyElementCache();
+			caches.add(cache);
+			return cache;
+		}
+		
+		public AccessLoggingTypeHierarchyElementCache[] getCaches() {
+			return (AccessLoggingTypeHierarchyElementCache[]) caches.toArray(new AccessLoggingTypeHierarchyElementCache[caches.size()]);
+		}
+		
+	}
+	
+	private static class AccessLoggingTypeHierarchyElementCache extends TypeHierarchyElementCache {
+		
+		private List<String> accessLog = new ArrayList<String>();
+
+		@Override
+		public TypeHierarchyElement get(char[] fullyQualifiedClassName) {
+			accessLog.add(new String(fullyQualifiedClassName));
+			return super.get(fullyQualifiedClassName);
+		}
+		
+		public int classAccessed(String className) {
+			int result = 0;
+			for (String accessedClass : accessLog) {
+				if (accessedClass.equals(className)) {
+					result++;
+				}
+			}
+			return result;
+		}
+		
+	}
+	
 //	@Test
 //	public void testExternalClassFile() throws Exception {
 //		BytecodeTypeHierarchyClassReader reader = new BytecodeTypeHierarchyClassReader(null);

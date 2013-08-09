@@ -23,13 +23,20 @@ public class TypeHierarchyElement {
 	
 	public final char[] className;
 	public final char[] superclassName;
+	public TypeHierarchyElement superclassElement; // lazy set
+	
 	public final char[][] interfaces;
+	public TypeHierarchyElement[] interfacesElements; // array initialized, but elements being set lazy
 	
 	public TypeHierarchyElement(char[] className, char[] superclassName, char[][] interfaces) {
 		super();
 		this.className = className;
 		this.superclassName = superclassName;
+		
 		this.interfaces = interfaces;
+		if (this.interfaces != null) {
+			this.interfacesElements = new TypeHierarchyElement[this.interfaces.length];
+		}
 	}
 	
 	@Override

@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.core.internal.model.SpringModel;
 import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.TypeStructureCache;
 import org.springframework.ide.eclipse.core.java.typehierarchy.BytecodeTypeHierarchyClassReaderFactory;
+import org.springframework.ide.eclipse.core.java.typehierarchy.DirectTypeHierarchyElementCacheFactory;
 import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyResourceChangeListener;
 import org.springframework.ide.eclipse.core.model.ISpringModel;
@@ -97,6 +98,7 @@ public class SpringCore extends Plugin {
 		typeStructureCache = new TypeStructureCache();
 		typeHierarchyEngine = new TypeHierarchyEngine();
 		typeHierarchyEngine.setClassReaderFactory(new BytecodeTypeHierarchyClassReaderFactory());
+		typeHierarchyEngine.setTypeHierarchyElementCacheFactory(new DirectTypeHierarchyElementCacheFactory());
 		TypeHierarchyResourceChangeListener resetListener = new TypeHierarchyResourceChangeListener();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resetListener, IResourceChangeEvent.PRE_BUILD);
 		
