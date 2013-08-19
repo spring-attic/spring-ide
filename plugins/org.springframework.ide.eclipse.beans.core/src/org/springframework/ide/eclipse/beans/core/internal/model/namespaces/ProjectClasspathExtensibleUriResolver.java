@@ -267,6 +267,10 @@ public class ProjectClasspathExtensibleUriResolver implements
 					.newInstance();
 			builderFactory.setValidating(false);
 			builderFactory.setNamespaceAware(true);
+			
+			builderFactory.setFeature("http://xml.org/sax/features/validation", false);
+			builderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+			builderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 
 			DocumentBuilder builder = builderFactory.newDocumentBuilder();
 			Document doc = builder.parse(contents);
