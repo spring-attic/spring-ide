@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Spring IDE Developers
+ * Copyright (c) 2008 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -462,11 +462,11 @@ public class ExternalFile extends AbstractResource implements IFile {
 	}
 
 	public boolean contains(ISchedulingRule rule) {
-		return false;
+		return this == rule;
 	}
 
 	public boolean isConflicting(ISchedulingRule rule) {
-		return false;
+		return this == rule;
 	}
 
 	public String getDescription() {
