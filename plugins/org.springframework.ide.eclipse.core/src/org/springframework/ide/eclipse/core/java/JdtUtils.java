@@ -359,19 +359,27 @@ public class JdtUtils {
 	 */
 	public static IType getJavaType(IProject project, String className) {
 		IJavaProject javaProject = JdtUtils.getJavaProject(project);
+
 		if (className != null) {
+
 			// For inner classes replace '$' by '.'
+			String unchangedClassName = null;
 			int pos = className.lastIndexOf('$');
 			if (pos > 0) {
+				unchangedClassName = className;
 				className = className.replace('$', '.');
 			}
+
 			try {
 				IType type = null;
 				// First look for the type in the Java project
 				if (javaProject != null) {
-					// TODO CD not sure why we need
 					type = javaProject.findType(className, new NullProgressMonitor());
-					// type = javaProject.findType(className);
+					
+					if (type == null && unchangedClassName != null) {
+						type = findTypeWithInnerClassesInvolved(javaProject, unchangedClassName, new NullProgressMonitor());
+					}
+					
 					if (type != null) {
 						return type;
 					}
@@ -382,6 +390,11 @@ public class JdtUtils {
 					IJavaProject refJavaProject = JdtUtils.getJavaProject(refProject);
 					if (refJavaProject != null) {
 						type = refJavaProject.findType(className);
+
+						if (type == null && unchangedClassName != null) {
+							type = findTypeWithInnerClassesInvolved(javaProject, unchangedClassName, new NullProgressMonitor());
+						}
+
 						if (type != null) {
 							return type;
 						}
@@ -397,6 +410,37 @@ public class JdtUtils {
 		}
 
 		return null;
+	}
+
+	protected static IType findTypeWithInnerClassesInvolved(IJavaProject javaProject, String fullClassName, NullProgressMonitor progressMonitor) throws JavaModelException {
+		IType result = javaProject.findType(fullClassName, progressMonitor);
+/*		
+		if (result == null || !result.exists()) {
+			String mainClassName = fullClassName.substring(0, fullClassName.indexOf('$'));
+			IType mainClass = javaProject.findType(mainClassName, progressMonitor);
+			
+			if (mainClass != null && mainClass.exists() && !mainClass.isBinary()) {
+				IType outerClass = mainClass;
+				
+				String innerClasses = fullClassName.substring(fullClassName.indexOf('$') + 1);
+				StringTokenizer innerClassTokens = new StringTokenizer(innerClasses, "$");
+				while (innerClassTokens.hasMoreTokens()) {
+					String innerClass = innerClassTokens.nextToken();
+
+					try {
+						int anonymousInnerClassNo = Integer.parseInt(innerClass);
+						outerClass = outerClass.getType("", anonymousInnerClassNo);
+					}
+					catch (NumberFormatException e) {
+						outerClass = outerClass.getType(innerClass);
+					}
+				};
+				
+				result = outerClass;
+			}
+		}
+*/
+		return result;
 	}
 
 	public static final IType getJavaTypeForMethodReturnType(IMethod method, IType contextType) {

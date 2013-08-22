@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.tests.BeansModelUtilsTes
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectTest;
 import org.springframework.ide.eclipse.beans.ui.refactoring.tests.BeansJavaConfigRenameTypeRefactoringParticipantTest;
 import org.springframework.ide.eclipse.core.java.IntrospectorTest;
+import org.springframework.ide.eclipse.core.java.JdtUtilsTest;
 import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 
 /**
@@ -52,6 +53,7 @@ import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 	RequiredPropertyRuleTest.class,
 	NamespaceElementsRuleTest.class,
 	IntrospectorTest.class,
+	JdtUtilsTest.class,
 	AutowireDependencyProviderTest.class,
 	CommonAnnotationInjectionMetadataProviderTests.class,
 	JdtAnnotationMetadataTest.class,
