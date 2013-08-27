@@ -98,8 +98,12 @@ public class AddAsBeanConfigAction extends AbstractHandler {
 					IType type = (IType) element;
 					IProject project = type.getJavaProject().getProject();
 					if (isBeansProject(project) && !isBeansConfig(type)) {
-						IAnnotation annotation = type.getAnnotation("Configuration");
-						if (annotation != null && annotation.exists()) {
+						IAnnotation configurationAnnotation = type.getAnnotation("Configuration");
+						IAnnotation componentAnnotation = type.getAnnotation("Component");
+						IAnnotation beanAnnotation = type.getAnnotation("Bean");
+						if ((configurationAnnotation != null && configurationAnnotation.exists()) 
+							|| (componentAnnotation != null && componentAnnotation.exists())
+							|| (beanAnnotation != null && beanAnnotation.exists())) {
 							selectedItems.add(type);
 						}
 					}
