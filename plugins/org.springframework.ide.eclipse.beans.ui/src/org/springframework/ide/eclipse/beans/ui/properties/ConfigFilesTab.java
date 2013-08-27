@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -526,9 +527,22 @@ public class ConfigFilesTab {
 	
 	private Set<IType> searchForJavaConfigs(IJavaSearchScope scope) {
 		final Set<IType> annotatedTypes = new HashSet<IType>();
-		SearchPattern pattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
+		SearchPattern configurationPattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
 				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern componentPattern = SearchPattern.createPattern( "org.springframework.stereotype.Component",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern beanPattern = SearchPattern.createPattern("org.springframework.context.annotation.Bean",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+//		SearchPattern importPattern = SearchPattern.createPattern("org.springframework.context.annotation.Import",
+//				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+//				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		
+		SearchPattern pattern = SearchPattern.createOrPattern(configurationPattern, componentPattern);
+		pattern = SearchPattern.createOrPattern(pattern, beanPattern);
+//		pattern = SearchPattern.createOrPattern(pattern, importPattern);
 
 		SearchRequestor requestor = new SearchRequestor() {
 			@Override
@@ -537,6 +551,11 @@ public class ConfigFilesTab {
 					Object element = match.getElement();
 					if (element instanceof IType) {
 						annotatedTypes.add((IType) element);
+					} else if (element instanceof IMethod) {
+						IType type = ((IMethod) element).getDeclaringType();
+						if (type != null) {
+							annotatedTypes.add(type);
+						}
 					}
 				}
 			}
