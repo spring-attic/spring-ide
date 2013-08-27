@@ -536,13 +536,13 @@ public class ConfigFilesTab {
 		SearchPattern beanPattern = SearchPattern.createPattern("org.springframework.context.annotation.Bean",
 				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-//		SearchPattern importPattern = SearchPattern.createPattern("org.springframework.context.annotation.Import",
-//				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-//				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern importPattern = SearchPattern.createPattern("org.springframework.context.annotation.Import",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 		
 		SearchPattern pattern = SearchPattern.createOrPattern(configurationPattern, componentPattern);
 		pattern = SearchPattern.createOrPattern(pattern, beanPattern);
-//		pattern = SearchPattern.createOrPattern(pattern, importPattern);
+		pattern = SearchPattern.createOrPattern(pattern, importPattern);
 
 		SearchRequestor requestor = new SearchRequestor() {
 			@Override

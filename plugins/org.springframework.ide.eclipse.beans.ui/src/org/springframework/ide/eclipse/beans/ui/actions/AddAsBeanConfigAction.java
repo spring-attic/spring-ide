@@ -101,9 +101,11 @@ public class AddAsBeanConfigAction extends AbstractHandler {
 						IAnnotation configurationAnnotation = type.getAnnotation("Configuration");
 						IAnnotation componentAnnotation = type.getAnnotation("Component");
 						IAnnotation beanAnnotation = type.getAnnotation("Bean");
+						IAnnotation importAnnotation = type.getAnnotation("Import");
 						if ((configurationAnnotation != null && configurationAnnotation.exists()) 
 							|| (componentAnnotation != null && componentAnnotation.exists())
-							|| (beanAnnotation != null && beanAnnotation.exists())) {
+							|| (beanAnnotation != null && beanAnnotation.exists())
+							|| (importAnnotation != null && importAnnotation.exists())) {
 							selectedItems.add(type);
 						}
 					}
