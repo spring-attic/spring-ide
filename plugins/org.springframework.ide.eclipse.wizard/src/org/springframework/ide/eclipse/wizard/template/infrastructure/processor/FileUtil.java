@@ -24,7 +24,9 @@ import java.nio.channels.FileChannel;
 public abstract class FileUtil {
 	private static String[] BINARY_EXTENSIONS = new String[] { "jar", "gif", "jpg", "jpeg", ".class", "png" };
 
+	@Deprecated
 	public static void copy(File source, File target) throws IOException {
+		// TODO: copy in FileUtil in commons, this one should be removed.
 		FileInputStream sourceOutStream = new FileInputStream(source);
 		FileOutputStream targetOutStream = new FileOutputStream(target);
 		FileChannel sourceChannel = sourceOutStream.getChannel();
@@ -36,7 +38,9 @@ public abstract class FileUtil {
 		targetOutStream.close();
 	}
 
+	@Deprecated
 	public static boolean isBinaryFile(File file) {
+		// TODO: copy in FileUtil in commons, this one should be removed.
 		String extension = FileUtil.getExtension(file);
 		if (extension != null) {
 			for (String binaryExtension : BINARY_EXTENSIONS) {
@@ -48,7 +52,9 @@ public abstract class FileUtil {
 		return false;
 	}
 
+	@Deprecated
 	public static String getExtension(File file) {
+		// TODO: copy in FileUtil in commons, this one should be removed.
 		String fileName = file.getName();
 		int extensionIndex = fileName.lastIndexOf('.');
 		if (extensionIndex == -1) {
