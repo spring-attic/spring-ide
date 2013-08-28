@@ -31,6 +31,7 @@ import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -82,6 +83,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		ReaderEventListenerForwardingBeanDefinitionRegistry registry = new ReaderEventListenerForwardingBeanDefinitionRegistry(
 				postProcessingContext.getBeanDefinitionRegistry(), postProcessingContext
 						.getBeansConfigRegistrySupport(), sourceExtractor);
+		registry.setBeanClassLoader(classLoader);
 		
 		processor.processConfigBeanDefinitions(registry);
 	}
@@ -107,7 +109,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 	 * {@link #registerBeanDefinition(String, BeanDefinition)} calls to
 	 * {@link IBeansConfigRegistrationSupport#registerComponent()}.
 	 */
-	class ReaderEventListenerForwardingBeanDefinitionRegistry implements BeanDefinitionRegistry {
+	class ReaderEventListenerForwardingBeanDefinitionRegistry extends DefaultListableBeanFactory implements BeanDefinitionRegistry {
 
 		private final BeanDefinitionRegistry registry;
 
@@ -256,6 +258,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 			registry.removeBeanDefinition(beanName);
 		}
+
 	}
 
 	@SuppressWarnings("serial")
