@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
@@ -44,6 +45,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
+import org.springframework.ide.eclipse.beans.core.model.locate.IBeansConfigLocator;
+import org.springframework.ide.eclipse.beans.core.model.locate.IJavaConfigLocator;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -63,6 +66,7 @@ import org.springframework.util.ObjectUtils;
  * @author Dave Watkins
  * @author Christian Dupuis
  * @author Martin Lippert
+ * @author Leo Dos Santos
  */
 public class BeansProject extends AbstractResourceModelElement implements IBeansProject, ILazyInitializedModelElement {
 
@@ -1055,7 +1059,8 @@ I	 * Removes the given beans config from the list of configs and from all config
 					}
 
 					public void run() throws Exception {
-						Set<IFile> files = locator.getBeansConfigLocator().locateBeansConfigs(getProject(), null);
+						IBeansConfigLocator configLocator = locator.getBeansConfigLocator();
+						Set<IFile> files = configLocator.locateBeansConfigs(getProject(), null);
 						for (IFile file : files) {
 							BeansConfig config = new BeansConfig(BeansProject.this, file.getProjectRelativePath()
 									.toString(), Type.AUTO_DETECTED);
@@ -1068,6 +1073,17 @@ I	 * Removes the given beans config from the list of configs and from all config
 							String configSet = locator.getBeansConfigLocator().getBeansConfigSetName(files);
 							if (configSet.length() > 0) {
 								configSetName[0] = configSet;
+							}
+						}
+						if (configLocator instanceof IJavaConfigLocator) {
+							Set<IType> types = ((IJavaConfigLocator) configLocator).locateJavaConfigs(getProject(), null);
+							for (IType type : types) {
+								IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(),
+										Type.AUTO_DETECTED);
+								String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
+								if (!hasConfig(configName)) {
+									detectedConfigs.put(configName, config);
+								}
 							}
 						}
 					}

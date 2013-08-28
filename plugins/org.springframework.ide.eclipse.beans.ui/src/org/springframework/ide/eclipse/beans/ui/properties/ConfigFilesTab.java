@@ -19,7 +19,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -27,17 +26,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchMatch;
-import org.eclipse.jdt.core.search.SearchParticipant;
-import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
@@ -89,19 +82,20 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.beans.core.model.locate.ProjectScanningBeansConfigLocator;
+import org.springframework.ide.eclipse.beans.core.model.locate.ProjectScanningJavaConfigLocator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.dialogs.FilteredElementTreeSelectionDialog;
 import org.springframework.ide.eclipse.ui.dialogs.StorageSelectionValidator;
 import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
+import org.springsource.ide.eclipse.commons.core.JdtUtils;
 import org.springsource.ide.eclipse.commons.core.SpringCorePreferences;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
@@ -490,7 +484,7 @@ public class ConfigFilesTab {
 		IJavaProject javaProj = JdtUtils.getJavaProject(project.getProject());
 		if (javaProj != null) {
 			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj });
-			Set<IType> annotatedTypes = searchForJavaConfigs(scope);
+			Set<IType> annotatedTypes = JdtUtils.searchForJavaConfigs(scope);
 			final Set<String> filteredResults = new HashSet<String>();
 			for (IType type : annotatedTypes) {
 				filteredResults.add(type.getPackageFragment().getElementName() + "/" + type.getTypeQualifiedName('.'));
@@ -523,52 +517,6 @@ public class ConfigFilesTab {
 			}
 		}
 		return dialog;
-	}
-	
-	private Set<IType> searchForJavaConfigs(IJavaSearchScope scope) {
-		final Set<IType> annotatedTypes = new HashSet<IType>();
-		SearchPattern configurationPattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		SearchPattern componentPattern = SearchPattern.createPattern( "org.springframework.stereotype.Component",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		SearchPattern beanPattern = SearchPattern.createPattern("org.springframework.context.annotation.Bean",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		SearchPattern importPattern = SearchPattern.createPattern("org.springframework.context.annotation.Import",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		
-		SearchPattern pattern = SearchPattern.createOrPattern(configurationPattern, componentPattern);
-		pattern = SearchPattern.createOrPattern(pattern, beanPattern);
-		pattern = SearchPattern.createOrPattern(pattern, importPattern);
-
-		SearchRequestor requestor = new SearchRequestor() {
-			@Override
-			public void acceptSearchMatch(SearchMatch match) throws CoreException {
-				if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
-					Object element = match.getElement();
-					if (element instanceof IType) {
-						annotatedTypes.add((IType) element);
-					} else if (element instanceof IMethod) {
-						IType type = ((IMethod) element).getDeclaringType();
-						if (type != null) {
-							annotatedTypes.add(type);
-						}
-					}
-				}
-			}
-		};
-		
-		try {
-			new SearchEngine().search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, 
-					scope, requestor, null);
-		} catch (CoreException e) {
-			StatusHandler.log(new Status(IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 
-					"An error occurred while searching for Java config files.", e));
-		}
-		return annotatedTypes;
 	}
 	
 	/**
@@ -666,12 +614,8 @@ public class ConfigFilesTab {
 					ProjectScanningBeansConfigLocator locator = new ProjectScanningBeansConfigLocator(fileSuffixes);
 					files.addAll(locator.locateBeansConfigs(project.getProject(), monitor));
 					
-					IJavaProject javaProj = JdtUtils.getJavaProject(project.getProject());
-					if (javaProj != null) {
-						IJavaSearchScope sources = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj }, 
-								IJavaSearchScope.SOURCES);
-						files.addAll(searchForJavaConfigs(sources));
-					}
+					ProjectScanningJavaConfigLocator javaLocator = new ProjectScanningJavaConfigLocator();
+					files.addAll(javaLocator.locateJavaConfigs(project.getProject(), monitor));
 				}
 			};
 

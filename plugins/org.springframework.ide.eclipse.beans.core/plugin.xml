@@ -233,5 +233,16 @@
           </projectNature> -->
        </resolverExtension>
     </extension>
+    <extension
+          point="org.springframework.ide.eclipse.beans.core.beansconfiglocators">
+       <beansConfigLocator
+             class="org.springframework.ide.eclipse.beans.core.model.locate.ProjectScanningJavaConfigLocator"
+             description="Detects Spring configurations from Java files annotated with @Configuration, @Component, @Bean or @Import"
+             enabledByDefault="true"
+             id="annotatedJavaConfigLocator"
+             name="Auto detection for annotated Java Spring Configuration files"
+             order="5">
+       </beansConfigLocator>
+    </extension>
 
 </plugin>
