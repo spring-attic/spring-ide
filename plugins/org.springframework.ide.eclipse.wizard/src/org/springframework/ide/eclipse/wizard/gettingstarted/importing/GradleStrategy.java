@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
 
-import static org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression.constant;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
+import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
-import org.springsource.ide.eclipse.gradle.core.wizards.NewGradleProjectOperation;
 
 /**
  * Importer strategy implementation for importing CodeSets into the workspace and set them
@@ -67,38 +68,38 @@ public class GradleStrategy extends ImportStrategy {
 	}
 
 
-	/**
-	 * Implements the import by means of 'NewGradleProjectOperation'
-	 */
-	private static class GradleCodeSetImport implements IRunnableWithProgress {
-
-		private final NewGradleProjectOperation op;
-
-		public GradleCodeSetImport(ImportConfiguration conf) {
-			this.op = new NewGradleProjectOperation();
-
-			//Get the present values from the ImportConfiguration.
-			String location = conf.getLocation();
-			final String projectName = conf.getProjectName();
-			final CodeSet codeset = conf.getCodeSet();
-
-			//Use these values to populate the
-			op.setProjectNameField(constant(projectName));
-			op.setLocationField(constant(location));
-			op.setSampleProjectField(constant(asSample(projectName, codeset)));
-		}
-
-
-		//@Override
-		public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
-			try {
-				op.perform(mon);
-			} catch (CoreException e) {
-				throw new InvocationTargetException(e);
-			}
-		}
-
-	}
+//	/**
+//	 * Implements the import by means of 'NewGradleProjectOperation'
+//	 */
+//	private static class GradleCodeSetImport implements IRunnableWithProgress {
+//
+//		private final NewGradleProjectOperation op;
+//
+//		public GradleCodeSetImport(ImportConfiguration conf) {
+//			this.op = new NewGradleProjectOperation();
+//
+//			//Get the present values from the ImportConfiguration.
+//			String location = conf.getLocation();
+//			final String projectName = conf.getProjectName();
+//			final CodeSet codeset = conf.getCodeSet();
+//
+//			//Use these values to populate the
+//			op.setProjectNameField(constant(projectName));
+//			op.setLocationField(constant(location));
+//			op.setSampleProjectField(constant(asSample(projectName, codeset)));
+//		}
+//
+//
+//		//@Override
+//		public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
+//			try {
+//				op.perform(mon);
+//			} catch (CoreException e) {
+//				throw new InvocationTargetException(e);
+//			}
+//		}
+//
+//	}
 
 	/**
 	 * Alternate implementation that uses GradleImportOperation. This is able customise a
@@ -121,7 +122,7 @@ public class GradleStrategy extends ImportStrategy {
 
 		//@Override
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			monitor.beginTask("Import "+projectName, 2);
+			monitor.beginTask("Import "+projectName, 3);
 			try {
 				//1:
 				SampleProject sample = asSample(projectName, codeset);
@@ -136,11 +137,34 @@ public class GradleStrategy extends ImportStrategy {
 
 				ErrorHandler eh = ErrorHandler.forImportWizard();
 				importOp.perform(eh, new SubProgressMonitor(monitor, 1));
+
+				//3: add spring nature
+				addPringNature(importOp.getProjects(), eh, new SubProgressMonitor(monitor, 1));
+
 				eh.rethrowAsCore();
 			} catch (CoreException e) {
 				throw new InvocationTargetException(e);
 			} finally {
 				monitor.done();
+			}
+		}
+
+		private void addPringNature(GradleProject[] projects, ErrorHandler eh, IProgressMonitor mon) {
+			mon.beginTask("Add spring natures", projects.length);
+			try {
+				for (GradleProject gp : projects) {
+					IProject p = gp.getProject();
+					//Should really not be be null if it was actually imported... but...
+					if (p!=null) {
+						try {
+							NatureUtils.ensure(p, new SubProgressMonitor(mon, 1), SpringCoreUtils.NATURE_ID);
+						} catch (CoreException e) {
+							eh.handleError(e);
+						}
+					}
+				}
+			} finally {
+				mon.done();
 			}
 		}
 	}

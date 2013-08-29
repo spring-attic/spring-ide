@@ -42,7 +42,7 @@ Require-Bundle: org.eclipse.ui,
  org.codehaus.jackson.core,
  org.codehaus.jackson.mapper,
  org.apache.commons.logging,
- org.springsource.ide.eclipse.gradle.core;resolution:=optional,
+ org.springsource.ide.eclipse.gradle.core;bundle-version="3.4.0";resolution:=optional,
  org.apache.httpcomponents.httpclient;bundle-version="4.2.5"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-LazyStart: true

@@ -22,7 +22,7 @@ public enum BuildType {
 	      "Can not use Maven: M2E (Eclipse Maven Tooling) is not installed"
 	),
 	GRADLE("build.gradle",
-			"org.springsource.ide.eclipse.commons.gettingstarted.importing.GradleStrategy",
+			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GradleStrategy",
 			"Can not use Gradle: STS Gradle Tooling is not installed. You can install it from the STS Dashboard."
 	);
 //	MAVEN("pom.xml", new NullImportStrategy("Maven"));
