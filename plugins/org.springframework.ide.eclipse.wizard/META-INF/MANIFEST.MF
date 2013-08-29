@@ -35,7 +35,15 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.frameworks.ui,
  org.eclipse.wst.common.project.facet.ui,
  org.springframework.ide.eclipse.ui,
- org.springsource.ide.eclipse.commons.livexp
+ org.springsource.ide.eclipse.commons.livexp,
+ org.apache.commons.io,
+ org.apache.commons.codec,
+ org.springframework.web,
+ org.codehaus.jackson.core,
+ org.codehaus.jackson.mapper,
+ org.apache.commons.logging,
+ org.springsource.ide.eclipse.gradle.core;resolution:=optional,
+ org.apache.httpcomponents.httpclient;bundle-version="4.2.5"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-LazyStart: true
 Bundle-ClassPath: .,
@@ -44,6 +52,8 @@ Bundle-ClassPath: .,
  lib/com.thoughtworks.xstream_1.3.0.v20100826-1640.jar
 Export-Package: org.springframework.ide.eclipse.wizard,
  org.springframework.ide.eclipse.wizard.core,
+ org.springframework.ide.eclipse.wizard.gettingstarted.boot,
+ org.springframework.ide.eclipse.wizard.gettingstarted.content,
  org.springframework.ide.eclipse.wizard.template,
  org.springframework.ide.eclipse.wizard.template.infrastructure,
  org.springframework.ide.eclipse.wizard.template.infrastructure.processor,

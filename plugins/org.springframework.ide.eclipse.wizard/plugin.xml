@@ -69,6 +69,17 @@
           preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
           project="true">
     </wizard>
+   <wizard
+         category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+         icon="icons/full/etool16/new_template_project_obj.png"
+         class="org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizard"
+         hasPages="true"
+         id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard"
+         name="Spring Boot Starter"
+         project="true">
+       <description>Create new Spring Boot Project via the Spring Initializr Web Service</description>
+   </wizard>
+    
     <wizard
           category="org.springframework.ide.eclipse.beans.ui.wizards.category"
           class="org.springframework.ide.eclipse.wizard.ui.BeanWizard"
@@ -76,7 +87,32 @@
           id="com.springsource.sts.wizard.bean"
           name="Spring Bean Definition">
     </wizard>
+    
  </extension>
+ 
+<extension 
+     point="org.eclipse.ui.importWizards"> 
+      <wizard
+            category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
+            class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.GSImportWizard"
+            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic"
+            name="Getting Started Content"> 
+         <!-- icon ?? -->
+         <description> 
+            An import wizards that imports code associated with a Spring Getting Started Guide
+         </description> 
+         <selection class="org.eclipse.core.resources.IResource"/> 
+      </wizard>
+      
+      <category
+            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
+            name="Spring">
+      </category> 
+</extension>
+
+
+ 
+ 
 <extension
        point="org.eclipse.ui.navigator.navigatorContent">
     <navigatorContent

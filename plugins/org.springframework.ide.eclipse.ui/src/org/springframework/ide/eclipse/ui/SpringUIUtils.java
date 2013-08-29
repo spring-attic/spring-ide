@@ -527,13 +527,7 @@ public final class SpringUIUtils {
 				url = new URL(location);
 			}
 			if (WebBrowserPreference.getBrowserChoice() == WebBrowserPreference.EXTERNAL) {
-				try {
-					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench()
-							.getBrowserSupport();
-					support.getExternalBrowser().openURL(url);
-				}
-				catch (Exception e) {
-				}
+				openUrlInExternalBrowser(url);
 			}
 			else {
 				IWebBrowser browser = null;
@@ -561,6 +555,16 @@ public final class SpringUIUtils {
 					"Browser could not be initiated");
 		}
 		catch (MalformedURLException e) {
+		}
+	}
+
+	private static void openUrlInExternalBrowser(URL url) {
+		try {
+			IWorkbenchBrowserSupport support = PlatformUI.getWorkbench()
+					.getBrowserSupport();
+			support.getExternalBrowser().openURL(url);
+		}
+		catch (Exception e) {
 		}
 	}
 
