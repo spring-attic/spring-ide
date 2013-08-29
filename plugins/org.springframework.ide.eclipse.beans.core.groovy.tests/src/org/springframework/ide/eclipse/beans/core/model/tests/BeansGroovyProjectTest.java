@@ -34,6 +34,8 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -61,6 +63,11 @@ public class BeansGroovyProjectTest {
 		
 		realModel = (BeansModel) BeansCorePlugin.getModel();
 		BeansCorePlugin.setModel(model);
+		
+		// disable automatic configuration of Java configs
+		for (BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory.getBeansConfigLocatorDefinitions()) {
+			locator.setEnabled(false, project);
+		}
 	}
 	
 	@After
