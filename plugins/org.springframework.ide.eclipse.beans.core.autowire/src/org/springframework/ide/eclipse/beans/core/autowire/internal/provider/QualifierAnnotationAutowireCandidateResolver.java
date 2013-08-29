@@ -254,4 +254,9 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		return null;
 	}
 
+	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
