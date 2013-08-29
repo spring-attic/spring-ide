@@ -30,6 +30,8 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel.ResourceChangeEventHandler;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
+import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -61,6 +63,11 @@ public class ResourceChangeEventHandlerTest {
 				changedEvents.add(event);
 			}
 		});
+		
+		// disable automatic configuration of Java configs
+		for (BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory.getBeansConfigLocatorDefinitions()) {
+			locator.setEnabled(false, project);
+		}
 	}
 	
 	@After
