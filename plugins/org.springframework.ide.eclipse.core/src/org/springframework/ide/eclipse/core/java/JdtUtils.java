@@ -28,9 +28,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -48,6 +50,13 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -57,6 +66,7 @@ import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngi
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
+import org.springsource.ide.eclipse.commons.core.StatusHandler;
 
 /**
  * Utility class that provides several helper methods for working with Eclipse's JDT.
@@ -985,5 +995,56 @@ public class JdtUtils {
 			weavingClassLoader = ProjectClassLoaderCache.getClassLoader(project, parentClassLoader);
 		}
 	}
+	
+	public static Set<IType> searchForJavaConfigs(IJavaSearchScope scope) {
+		final Set<IType> annotatedTypes = new HashSet<IType>();
+		SearchPattern configurationPattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern componentPattern = SearchPattern.createPattern( "org.springframework.stereotype.Component",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern beanPattern = SearchPattern.createPattern("org.springframework.context.annotation.Bean",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern importPattern = SearchPattern.createPattern("org.springframework.context.annotation.Import",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern bootAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.EnableAutoConfiguration",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+
+		SearchPattern pattern = SearchPattern.createOrPattern(configurationPattern, componentPattern);
+		pattern = SearchPattern.createOrPattern(pattern, beanPattern);
+		pattern = SearchPattern.createOrPattern(pattern, importPattern);
+		pattern = SearchPattern.createOrPattern(pattern, bootAutoConfigPattern);
+
+		SearchRequestor requestor = new SearchRequestor() {
+			@Override
+			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
+					Object element = match.getElement();
+					if (element instanceof IType) {
+						annotatedTypes.add((IType) element);
+					} else if (element instanceof IMethod) {
+						IType type = ((IMethod) element).getDeclaringType();
+						if (type != null) {
+							annotatedTypes.add(type);
+						}
+					}
+				}
+			}
+		};
+
+		try {
+			new SearchEngine().search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
+					scope, requestor, null);
+		} catch (CoreException e) {
+			StatusHandler.log(new Status(IStatus.ERROR, SpringCore.PLUGIN_ID,
+					"An error occurred while searching for Java config files.", e));
+		}
+		return annotatedTypes;
+	}
+
 
 }

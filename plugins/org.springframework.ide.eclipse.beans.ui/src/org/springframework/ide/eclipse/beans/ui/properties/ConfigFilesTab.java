@@ -484,7 +484,7 @@ public class ConfigFilesTab {
 		IJavaProject javaProj = JdtUtils.getJavaProject(project.getProject());
 		if (javaProj != null) {
 			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj });
-			Set<IType> annotatedTypes = JdtUtils.searchForJavaConfigs(scope);
+			Set<IType> annotatedTypes =org.springframework.ide.eclipse.core.java.JdtUtils.searchForJavaConfigs(scope);
 			final Set<String> filteredResults = new HashSet<String>();
 			for (IType type : annotatedTypes) {
 				filteredResults.add(type.getPackageFragment().getElementName() + "/" + type.getTypeQualifiedName('.'));
