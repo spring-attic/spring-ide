@@ -41,7 +41,12 @@ public class ProjectScanningJavaConfigLocator implements IJavaConfigLocator {
 		if (javaProj != null) {
 			IJavaSearchScope sources = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj },
 					IJavaSearchScope.SOURCES);
-			types.addAll(org.springframework.ide.eclipse.core.java.JdtUtils.searchForJavaConfigs(sources));
+			Set<IType> candidates = org.springframework.ide.eclipse.core.java.JdtUtils.searchForJavaConfigs(sources);
+			for (IType candidate : candidates) {
+				if (!candidate.getElementName().contains("Test")) {
+					types.add(candidate);
+				}
+			}
 		}
 		return types;
 	}
