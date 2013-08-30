@@ -96,8 +96,8 @@
             category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
             class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.GSImportWizard"
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic"
+            icon="icons/full/etool16/new_template_project_obj.png"
             name="Getting Started Content"> 
-         <!-- icon ?? -->
          <description> 
             An import wizards that imports code associated with a Spring Getting Started Guide
          </description> 
