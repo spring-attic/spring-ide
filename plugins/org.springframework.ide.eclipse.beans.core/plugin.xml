@@ -238,9 +238,17 @@
        <beansConfigLocator
              class="org.springframework.ide.eclipse.beans.core.model.locate.ProjectScanningJavaConfigLocator"
              description="Detects Spring configurations from Java files annotated with @Configuration, @Component, @Bean or @Import"
-             enabledByDefault="true"
+             enabledByDefault="false"
              id="annotatedJavaConfigLocator"
-             name="Auto detection for annotated Java Spring Configuration files"
+             name="Auto detection for annotated Java Spring configuration files"
+             order="6">
+       </beansConfigLocator>
+       <beansConfigLocator
+             class="org.springframework.ide.eclipse.beans.core.model.locate.AutoConfigurationJavaConfigLocator"
+             description="Detects Spring configurations from Java files annotated with @EnableAutoConfiguration"
+             enabledByDefault="true"
+             id="bootJavaConfigLocator"
+             name="Auto detection for Spring Boot configuration files"
              order="5">
        </beansConfigLocator>
     </extension>

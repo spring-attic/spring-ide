@@ -72,6 +72,7 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
  * Utility class that provides several helper methods for working with Eclipse's JDT.
  * @author Christian Dupuis
  * @author Martin Lippert
+ * @author Leo Dos Santos
  * @since 2.0
  */
 public class JdtUtils {
@@ -996,29 +997,8 @@ public class JdtUtils {
 		}
 	}
 	
-	public static Set<IType> searchForJavaConfigs(IJavaSearchScope scope) {
+	public static Set<IType> searchForJavaConfigs(SearchPattern pattern, IJavaSearchScope scope) {
 		final Set<IType> annotatedTypes = new HashSet<IType>();
-		SearchPattern configurationPattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		SearchPattern componentPattern = SearchPattern.createPattern( "org.springframework.stereotype.Component",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		SearchPattern beanPattern = SearchPattern.createPattern("org.springframework.context.annotation.Bean",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		SearchPattern importPattern = SearchPattern.createPattern("org.springframework.context.annotation.Import",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		SearchPattern bootAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.EnableAutoConfiguration",
-				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-
-		SearchPattern pattern = SearchPattern.createOrPattern(configurationPattern, componentPattern);
-		pattern = SearchPattern.createOrPattern(pattern, beanPattern);
-		pattern = SearchPattern.createOrPattern(pattern, importPattern);
-		pattern = SearchPattern.createOrPattern(pattern, bootAutoConfigPattern);
-
 		SearchRequestor requestor = new SearchRequestor() {
 			@Override
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
@@ -1044,6 +1024,30 @@ public class JdtUtils {
 					"An error occurred while searching for Java config files.", e));
 		}
 		return annotatedTypes;
+	}
+	
+	public static Set<IType> searchForJavaConfigs(IJavaSearchScope scope) {
+		SearchPattern configurationPattern = SearchPattern.createPattern("org.springframework.context.annotation.Configuration",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern componentPattern = SearchPattern.createPattern( "org.springframework.stereotype.Component",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern beanPattern = SearchPattern.createPattern("org.springframework.context.annotation.Bean",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern importPattern = SearchPattern.createPattern("org.springframework.context.annotation.Import",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern bootAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.EnableAutoConfiguration",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+
+		SearchPattern pattern = SearchPattern.createOrPattern(configurationPattern, componentPattern);
+		pattern = SearchPattern.createOrPattern(pattern, beanPattern);
+		pattern = SearchPattern.createOrPattern(pattern, importPattern);
+		pattern = SearchPattern.createOrPattern(pattern, bootAutoConfigPattern);
+		return searchForJavaConfigs(pattern, scope);
 	}
 
 
