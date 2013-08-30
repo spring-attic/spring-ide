@@ -60,7 +60,7 @@ public class ContentManager {
 						WizardPlugin.getDefault().getStateLocation().toFile(),
 						contentType.getSimpleName()
 				)
-		);
+		).clearCache();
 	}
 
 	/**

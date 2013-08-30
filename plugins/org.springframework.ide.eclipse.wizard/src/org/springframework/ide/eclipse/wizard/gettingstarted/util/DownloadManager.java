@@ -66,9 +66,10 @@ public class DownloadManager {
 		}
 	}
 
-	public void clearCache() {
+	public DownloadManager clearCache() {
 		FileUtils.deleteQuietly(cacheDirectory);
 		cacheDirectory.mkdirs();
+		return this;
 	}
 
 	/**
