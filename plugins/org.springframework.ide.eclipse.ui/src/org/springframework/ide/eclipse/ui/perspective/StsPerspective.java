@@ -128,6 +128,7 @@ public class StsPerspective implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("ajprojectwizard");
 		layout.addNewWizardShortcut("com.springsource.sts.wizard.template");
+		layout.addNewWizardShortcut("org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard");
 		layout.addNewWizardShortcut("com.springsource.sts.roo.ui.wizard.newRooProjectWizard");
 		// layout.addNewWizardShortcut("org.codehaus.groovy.eclipse.ui.groovyProjectWizard");
 		layout.addNewWizardShortcut("org.grails.ide.eclipse.ui.wizard.newGrailsProjectWizard");
