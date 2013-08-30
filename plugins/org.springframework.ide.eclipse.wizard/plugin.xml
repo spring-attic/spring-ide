@@ -75,7 +75,7 @@
          class="org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizard"
          hasPages="true"
          id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard"
-         name="Spring Boot Starter"
+         name="Spring Starter"
          project="true">
        <description>Create new Spring Boot Project via the Spring Initializr Web Service</description>
    </wizard>
