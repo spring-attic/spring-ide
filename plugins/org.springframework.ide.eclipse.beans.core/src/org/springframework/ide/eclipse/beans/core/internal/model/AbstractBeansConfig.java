@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -41,6 +40,7 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 
 /**
  * This class gathers common functionality for core model components representing a single instance of xml configuration
@@ -50,6 +50,16 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  * @author Martin Lippert
  */
 public abstract class AbstractBeansConfig extends AbstractResourceModelElement implements IBeansConfig {
+
+	/** The annotation-config element */
+	private static final String ANNOTATION_CONFIG_ELEMENT_NAME = "annotation-config";
+
+	/** The component-scan element */
+	private static final String COMPONENT_SCAN_ELEMENT_NAME = "component-scan";
+
+	/** The context namespace URI */
+	private static final String CONTEXT_NAMESPACE_URI = "http://www.springframework.org/schema/context";
+
 
 	/** List of aliases (in registration order) */
 	protected volatile Map<String, IBeanAlias> aliases = new LinkedHashMap<String, IBeanAlias>();
@@ -696,6 +706,35 @@ public abstract class AbstractBeansConfig extends AbstractResourceModelElement i
 			}
 		}
 		return beanClassesMap;
+	}
+
+	public boolean doesAnnotationScanning() {
+		for (IBeansComponent component : this.getComponents()) {
+			boolean result = doesAnnotationScanning(component);
+			if (result) return true;
+		}
+		return false;
+	}
+	
+	private boolean doesAnnotationScanning(IBeansComponent component) {
+		if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
+			XmlSourceLocation location = (XmlSourceLocation) component.getElementSourceLocation();
+			if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
+					&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
+				return true;
+			}
+			else if (ANNOTATION_CONFIG_ELEMENT_NAME.equals(location.getLocalName())
+					&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
+				return true;
+			}
+		}
+		
+		for (IBeansComponent childComponent : component.getComponents()) {
+			boolean result = doesAnnotationScanning(childComponent);
+			if (result) return true;
+		}
+		
+		return false;
 	}
 
 	/**

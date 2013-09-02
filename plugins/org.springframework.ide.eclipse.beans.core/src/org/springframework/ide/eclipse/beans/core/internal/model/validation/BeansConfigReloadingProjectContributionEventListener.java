@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
@@ -43,7 +42,6 @@ import org.springframework.ide.eclipse.core.java.ITypeStructureCache;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.TypeStructureState;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
-import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.ide.eclipse.core.project.IProjectContributionEventListener;
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
@@ -57,15 +55,6 @@ import org.springframework.ide.eclipse.core.project.ProjectContributionEventList
  * @since 2.2.5
  */
 public class BeansConfigReloadingProjectContributionEventListener extends ProjectContributionEventListenerAdapter {
-
-	/** The annotation-config element */
-	private static final String ANNOTATION_CONFIG_ELEMENT_NAME = "annotation-config";
-
-	/** The component-scan element */
-	private static final String COMPONENT_SCAN_ELEMENT_NAME = "component-scan";
-
-	/** The context namespace URI */
-	private static final String CONTEXT_NAMESPACE_URI = "http://www.springframework.org/schema/context";
 
 	private TypeStructureState structureState = null;
 
@@ -160,9 +149,8 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 				if (JdtUtils.isJavaProject(beansProject.getProject())
 						&& JdtUtils.getJavaProject(beansProject.getProject()).isOnClasspath(resource)) {
 					for (IBeansConfig config : beansProject.getConfigs()) {
-						for (IBeansComponent component : config.getComponents()) {
-							resetComponentScanningOrAnnotationConfigConfigs(
-									config, component);
+						if (config.doesAnnotationScanning()) {
+							propagateToConfigsFromConfigSet(config, false);
 						}
 					}
 				}
@@ -182,25 +170,6 @@ public class BeansConfigReloadingProjectContributionEventListener extends Projec
 			else {
 				propagateToConfigsFromConfigSet(bc, true);
 			}
-		}
-	}
-
-	private void resetComponentScanningOrAnnotationConfigConfigs(
-			IBeansConfig config, IBeansComponent component) {
-		if (component.getElementSourceLocation() instanceof XmlSourceLocation) {
-			XmlSourceLocation location = (XmlSourceLocation) component.getElementSourceLocation();
-			if (COMPONENT_SCAN_ELEMENT_NAME.equals(location.getLocalName())
-					&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
-				propagateToConfigsFromConfigSet(config, false);
-			}
-			else if (ANNOTATION_CONFIG_ELEMENT_NAME.equals(location.getLocalName())
-					&& CONTEXT_NAMESPACE_URI.equals(location.getNamespaceURI())) {
-				propagateToConfigsFromConfigSet(config, false);
-			}
-		}
-		
-		for (IBeansComponent childComponent : component.getComponents()) {
-			resetComponentScanningOrAnnotationConfigConfigs(config, childComponent);
 		}
 	}
 
