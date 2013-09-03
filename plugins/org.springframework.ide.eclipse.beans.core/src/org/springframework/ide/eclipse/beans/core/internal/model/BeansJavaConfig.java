@@ -443,4 +443,8 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		}
 	}
 
+	public boolean doesAnnotationScanning() {
+		return true;
+	}
+
 }

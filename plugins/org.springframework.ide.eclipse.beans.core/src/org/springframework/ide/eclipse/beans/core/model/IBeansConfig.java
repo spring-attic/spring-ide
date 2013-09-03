@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 Spring IDE Developers
+ * Copyright (c) 2004, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * This interface provides information for a Spring beans configuration.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @author Martin Lippert
  */
 public interface IBeansConfig extends IBeansModelElement, IResourceModelElement, IBeanClassAware {
 
@@ -88,4 +89,11 @@ public interface IBeansConfig extends IBeansModelElement, IResourceModelElement,
 	 * @since 2.2.5 
 	 */
 	void unregisterEventListener(IBeansConfigEventListener configEventListener);
+
+	/**
+	 * checks whether this beans config scans for annotations or not
+	 * @since 3.4.0
+	 */
+	boolean doesAnnotationScanning();
+
 }
