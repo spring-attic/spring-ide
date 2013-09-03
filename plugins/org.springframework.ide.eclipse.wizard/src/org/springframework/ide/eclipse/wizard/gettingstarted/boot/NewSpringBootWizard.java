@@ -66,7 +66,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	public class PageOne extends WizardPageWithSections {
 
 		protected PageOne() {
-			super("page1", "New Spring Boot Project", null);
+			super("page1", "New Spring Starter Project", null);
 		}
 
 		@Override
