@@ -116,7 +116,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 
 	@Override
 	public void createContents(Composite page) {
-		this.group = new Group(page, SWT.BORDER);
+		this.group = new Group(page, SWT.NONE);
 		this.group.setText(model.getLabel());
 		GridLayout layout = createLayout();
 		group.setLayout(layout);
