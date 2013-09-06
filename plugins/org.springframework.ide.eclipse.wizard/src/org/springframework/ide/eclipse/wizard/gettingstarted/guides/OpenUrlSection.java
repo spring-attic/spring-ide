@@ -44,7 +44,7 @@ public class OpenUrlSection extends WizardPageSection {
 	public void createContents(Composite page) {
 		final Composite comp;
 		if (sectionLabel!=null) {
-			Group group = new Group(page, SWT.BORDER);
+			Group group = new Group(page, SWT.NONE);
 			group.setText(sectionLabel);
 			comp = group;
 		} else {
