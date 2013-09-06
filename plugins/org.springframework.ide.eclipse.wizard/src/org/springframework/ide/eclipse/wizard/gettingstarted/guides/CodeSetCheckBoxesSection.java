@@ -126,6 +126,11 @@ public class CodeSetCheckBoxesSection extends WizardPageSection {
 		options.addListener(new UIValueListener<String[]>() {
 			@Override
 			public void uiGotValue(LiveExpression<String[]> exp, String[] names) {
+				if (group==null || !group.isDisposed()) {
+					//Don't bother. The UI is already gone.
+					options.removeListener(this);
+					return;
+				}
 				if (names==null) {
 					names = new String[0];
 				}
