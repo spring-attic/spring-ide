@@ -89,7 +89,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					.columns(3)
 			);
 
-			sections.add(new GroupSection(this, "Initializr Site Info",
+			sections.add(new GroupSection(this, "Site Info",
 					new StringFieldSection(this, "Base Url", model.baseUrl, model.baseUrlValidator),
 					new DescriptionSection(this, model.downloadUrl).label("Full Url").readOnly(false)
 			));
