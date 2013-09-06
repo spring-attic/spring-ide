@@ -79,6 +79,25 @@
          project="true">
        <description>Create new Spring Starter Project via the Spring Initializr Web Service</description>
    </wizard>
+      
+      <!-- an 'alias' for the GS import wizard that shows up in the File >> New menu -->
+      <wizard
+            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+            class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.GSImportWizard"
+            icon="icons/full/etool16/new_template_project_obj.png"
+            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias"
+            name="Import Spring Getting Started Content"
+            project="true"> 
+         <description> 
+            An import wizards that imports code associated with a Spring Getting Started Guide
+         </description> 
+         <selection class="org.eclipse.core.resources.IResource"/> 
+      </wizard>
+      
+      <category
+            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
+            name="Spring">
+      </category> 
     
     <wizard
           category="org.springframework.ide.eclipse.beans.ui.wizards.category"
@@ -97,7 +116,7 @@
             class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.GSImportWizard"
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic"
             icon="icons/full/etool16/new_template_project_obj.png"
-            name="Getting Started Content"> 
+            name="Spring Getting Started Content"> 
          <description> 
             An import wizards that imports code associated with a Spring Getting Started Guide
          </description> 

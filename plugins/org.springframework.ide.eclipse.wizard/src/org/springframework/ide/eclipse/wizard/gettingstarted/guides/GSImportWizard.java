@@ -23,6 +23,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IImportWizard;
+import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.ContentManager;
@@ -42,7 +43,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
  *
  * @author Kris De Volder
  */
-public class GSImportWizard extends Wizard implements IImportWizard {
+public class GSImportWizard extends Wizard implements IImportWizard, INewWizard {
 
 	private final GSImportWizardModel model = new GSImportWizardModel();
 
