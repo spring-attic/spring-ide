@@ -4,13 +4,34 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springsource.ide.eclipse.commons</groupId>
-		<artifactId>org.springsource.ide.eclipse.commons.parent</artifactId>
+		<groupId>org.springframework.ide.eclipse</groupId>
+		<artifactId>org.springframework.ide.eclipse.parent</artifactId>
 		<version>3.4.0-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>org.springsource.ide.eclipse.commons.gettingstarted.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 	<name>org.springsource.ide.eclipse.commons.gettingstarted.tests</name>
+
+	<!--  note that this plugin is built separately from spring-ide. It consumes spring-ide from update site.
+	  -->
+
+    <profiles>
+		<profile>
+			<id>e43</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<!-- add repositories so we can build/run tests in this plugin without building spring-ide -->
+			<repositories>
+				<repository>
+					<id>spring-ide</id>
+					<layout>p2</layout>
+					<url>http://dist.springframework.org/snapshot/IDE/nightly/</url>
+				</repository>
+			</repositories>
+		</profile>
+    </profiles>
 
 	<build>
 		<plugins>

@@ -322,6 +322,45 @@
 		</profile>
 
 		<profile>
+			<id>e43</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 4.3</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e43</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.3/</url>
+				</repository>
+				<repository>
+					<id>indigo</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/kepler/</url>
+				</repository>
+				<repository>
+					<id>ajdt-e37</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/43/milestone/</url>
+				</repository>
+				<repository>
+					<id>orbit</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.3/</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
 			<id>bamboo-signing</id>
 			<properties>
 				<signing.store.password>${env.bamboo_signing_store_password}</signing.store.password>
