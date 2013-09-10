@@ -30,7 +30,7 @@ public class GettingStartedContent extends ContentManager {
 	private static GettingStartedContent INSTANCE = null;
 
 	private final static boolean ADD_REAL =  true;
-	private final static boolean ADD_MOCKS = true;// (""+Platform.getLocation()).contains("kdvolder");
+	private final static boolean ADD_MOCKS = false; // (""+Platform.getLocation()).contains("kdvolder")
 
 	public static GettingStartedContent getInstance() {
 		//TODO: propagate progress monitor. Make sure this isn't called in UIThread. It may
