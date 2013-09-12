@@ -391,4 +391,10 @@
 	  	</viewContribution> 
 	</extension>
 
+    <!-- provide url where to read 'StsProperties' from. Mostly these properties drive the dashboard. -->
+    <extension point="org.springsource.ide.commons.core.properties">
+       <fromUrl priority="200" url="http://dist.springsource.com/release/STS/discovery/sts.properties">
+       </fromUrl>
+    </extension>
+
 </plugin>
