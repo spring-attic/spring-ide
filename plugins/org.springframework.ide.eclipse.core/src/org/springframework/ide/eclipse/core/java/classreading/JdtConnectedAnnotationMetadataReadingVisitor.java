@@ -60,6 +60,10 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 	}
 
 	private IMethod getMethodFromSignature(final String name, final String desc) {
+		if (System.getProperty("spring-tooling.scanning.verbose", "false").equals("true")) {
+			System.out.println("spring-tooling.scanning - findMethodFromSignature - type: " + this.type.getFullyQualifiedName() + " - method: " + name + " - signature: " + desc);
+		}
+		
 		Type[] parameterTypes = Type.getArgumentTypes(desc);
 
 		IMethod method = null;
@@ -80,6 +84,9 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 			if (isConstructor(name)) {
 				method = JdtUtils.getConstructor(type, parameters.toArray(new String[parameters.size()]));
 			} else {
+				if (System.getProperty("spring-tooling.scanning.verbose", "false").equals("true")) {
+					System.out.println("spring-tooling.scanning - deep dive to find method - type: " + this.type.getFullyQualifiedName() + " - method: " + name + " - signature: " + desc);
+				}
 				method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]), false);
 			}
 		}
