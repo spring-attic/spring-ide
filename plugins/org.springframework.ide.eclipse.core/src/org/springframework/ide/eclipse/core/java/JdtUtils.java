@@ -883,8 +883,15 @@ public class JdtUtils {
 	}
 
 	public static String resolveClassNameBySignature(String className, IType type) {
-		className = Signature.toString(className).replace('$', '.');
-		return resolveClassName(className, type);
+		// in case the type is already resolved
+		if (className != null && className.length() > 0 && className.charAt(0) == Signature.C_RESOLVED) {
+			return Signature.toString(className).replace('$', '.');
+		}
+		// otherwise do the resolving
+		else {
+			className = Signature.toString(className).replace('$', '.');
+			return resolveClassName(className, type);
+		}
 	}
 
 	public static void visitTypeAst(IType type, ASTVisitor visitor) {
