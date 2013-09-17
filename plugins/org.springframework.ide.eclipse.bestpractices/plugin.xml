@@ -89,13 +89,13 @@
 	<!-- Specifies the marker image that appears along the left side of the editor -->
     <extension point="org.eclipse.ui.ide.markerImageProviders">
 	    <imageprovider 
-	  		markertype="com.springsource.sts.bestpractices.problemmarker" 
+	  		markertype="org.springframework.ide.eclipse.bestpractices.problemmarker" 
 	  		icon="icons/view16/springsource_marker.gif" 
 	  		id="com.springsource.sts.bestPracticeMarkerProvider" /> 
     </extension> 
     
     <extension point="org.eclipse.core.resources.markers"
-			id="com.springsource.sts.bestpractices.problemmarker"
+			id="org.springframework.ide.eclipse.bestpractices.problemmarker"
 			name="Spring IDE Problem Marker">
 		<super type="org.springframework.ide.eclipse.core.problemmarker" />
 		<attribute name="ruleId"/>
@@ -107,7 +107,7 @@
 		<type 
         	name="com.springsource.sts.bestpractices.problemmarker.annotation" 
          	super="org.eclipse.ui.workbench.texteditor.info" 
-         	markerType="com.springsource.sts.bestpractices.problemmarker"/> 
+         	markerType="org.springframework.ide.eclipse.bestpractices.problemmarker"/> 
     </extension> 
     <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"> 
       	<specification
@@ -177,7 +177,7 @@
 	       </action>
 	       <filter
 	             name="type"
-	             value="com.springsource.sts.bestpractices.problemmarker">
+	             value="org.springframework.ide.eclipse.bestpractices.problemmarker">
 	       </filter>
 	    </objectContribution>
 	 </extension>
