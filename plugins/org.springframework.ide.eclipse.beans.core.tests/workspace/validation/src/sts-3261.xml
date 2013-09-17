@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+		
+	<!-- These should give an error -->
+	<bean id="autowireEmpty" class="org.springframework.Factory" />
+	<bean id="autowireDefault" class="org.springframework.Factory" autowire="default" />
+	<!-- This should pass -->
+	<bean id="autowireConstructor" class="org.springframework.Factory" autowire="constructor" />
+		
+	<beans default-autowire="default">
+		<!-- These should give an error -->
+		<bean id="autowireEmptyParentDefault" class="org.springframework.Factory" />
+		<bean id="autowireDefaultParentDefault" class="org.springframework.Factory" autowire="default" />
+		<!-- This should pass -->
+		<bean id="autowireConstructorParentDefault" class="org.springframework.Factory" autowire="constructor" />
+	</beans>
+	
+	<!-- All should pass -->
+	<beans default-autowire="constructor">
+		<bean id="autowireEmptyParentConstructor" class="org.springframework.Factory" />
+		<bean id="autowireDefaultParentConstructr" class="org.springframework.Factory" autowire="default"/>
+		<bean id="autowireConstructorParentConstructor" class="org.springframework.Factory" autowire="constructor" />
+	</beans>
+	
+</beans>

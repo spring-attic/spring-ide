@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.beans.core.autowire.CommonAnnotationInjec
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.tests.ResourceChangeEventHandlerTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentRuleTest;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentRulesAutowireTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRuleTest;
@@ -41,6 +42,7 @@ import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
  * @author Christian Dupuis
  * @author Tomasz Zarna
  * @author Martin Lippert
+ * @author Leo Dos Santos
  * @since 2.0.3
  */
 @RunWith(Suite.class)
@@ -48,6 +50,7 @@ import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 	BeansCoreUtilsTest.class,
 	BeanClassRuleTest.class,
 	BeanConstructorArgumentRuleTest.class,
+	BeanConstructorArgumentRulesAutowireTest.class,
 	BeanPropertyRuleTest.class,
 	BeanInitDestroyMethodRuleTest.class,
 	RequiredPropertyRuleTest.class,
