@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -49,9 +50,13 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		try {
 			model = new NewSpringBootWizardModel();
 		} catch (Exception e) {
+			MessageDialog.openError(workbench.getActiveWorkbenchWindow().getShell(), "Error opening the wizard",
+					ExceptionUtil.getMessage(e)+"\n\n"+
+					"Note that this wizard uses a webservice and needs internet access.\n"+
+					"A more detailed error message may be found in the Eclipse error log."
+			);
 			//Ensure exception is logged. (Eclipse UI may not log it!).
 			WizardPlugin.log(e);
-			//rethrow, attempts to proceed without model will just throw NPE anyhow.
 			throw new Error(e);
 		}
 	}
