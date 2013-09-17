@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.quickfix.validator.helper;
 
@@ -42,10 +42,10 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 
 /**
  * @author Terry Denney
@@ -333,15 +333,47 @@ public class BeanHelper extends Bean implements IBean {
 
 		String factoryBean = BeansEditorUtils.getAttribute(node, "factory-bean");
 		String factoryMethod = BeansEditorUtils.getAttribute(node, "factory-method");
+		String autowireValue = BeansEditorUtils.getAttribute(node, "autowire");
 
-		if (org.springframework.util.StringUtils.hasText(factoryBean)) {
+		if (StringUtils.hasText(factoryBean)) {
 			bd.setFactoryBeanName(factoryBean);
 		}
-		if (org.springframework.util.StringUtils.hasText(factoryMethod)) {
+		if (StringUtils.hasText(factoryMethod)) {
 			bd.setFactoryMethodName(factoryMethod);
+		}
+		if (StringUtils.hasText(autowireValue)) {
+			bd.setAutowireMode(getAutowireMode(node, autowireValue));
 		}
 
 		return bd;
+	}
+
+	private static int getAutowireMode(Node node, String autowireValue) {
+		String att = autowireValue;
+		if ("default".equals(att)) {
+			Node parent = node.getParentNode();
+			if (parent != null) {
+				String defaultAutowire = BeansEditorUtils.getAttribute(parent, "default-autowire");
+				if (StringUtils.hasText(defaultAutowire)) {
+					att = defaultAutowire;
+				}
+			}
+		}
+		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
+		if ("byName".equals(att)) {
+			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
+		}
+		else if ("byType".equals(att)) {
+			autowire = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
+		}
+		else if ("constructor".equals(att)) {
+			autowire = AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR;
+		}
+		else if ("autodetect".equals(att)) {
+			autowire = AbstractBeanDefinition.AUTOWIRE_AUTODETECT;
+		}
+		// Else leave default value.
+		return autowire;
 	}
 
 	private static String getClassName(IDOMNode node) {
