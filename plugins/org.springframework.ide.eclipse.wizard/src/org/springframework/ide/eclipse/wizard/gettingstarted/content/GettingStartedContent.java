@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -72,6 +74,29 @@ public class GettingStartedContent extends ContentManager {
 			}
 		);
 
+		register(TutorialGuide.class, TutorialGuide.GUIDE_DESCRIPTION_TEXT,
+			new ContentProvider<TutorialGuide>() {
+//				@Override
+				public TutorialGuide[] fetch(DownloadManager downloader) {
+					LinkedHashMap<String, TutorialGuide> guides = new LinkedHashMap<String, TutorialGuide>();
+					addGuidesFrom(github.getOrgRepos("spring-guides"), guides, downloader);
+					return guides.values().toArray(new TutorialGuide[guides.size()]);
+				}
+
+				private LinkedHashMap<String, TutorialGuide> addGuidesFrom(Repo[] repos, LinkedHashMap<String, TutorialGuide> guides, DownloadManager downloader) {
+					for (Repo repo : repos) {
+						String name = repo.getName();
+	//					System.out.println("repo : "+name + " "+repo.getUrl());
+						if (name.startsWith("tut-") && !guides.containsKey(name)) {
+							guides.put(name, new TutorialGuide(stsProps, repo, downloader));
+						}
+					}
+					return guides;
+				}
+			}
+		);
+
+
 		//References apps: are discoverable because we maintain a list of json metadata
 		//that can be downloaded from some external url.
 		register(ReferenceApp.class, ReferenceApp.REFERENCE_APP_DESCRIPTION,
@@ -98,27 +123,46 @@ public class GettingStartedContent extends ContentManager {
 		});
 	}
 
+
+
 	/**
 	 * Get all getting started guides.
 	 */
-	public GettingStartedGuide[] getGuides() {
+	public GettingStartedGuide[] getGSGuides() {
 		return get(GettingStartedGuide.class);
+	}
+
+	/**
+	 * Get all tutorial guides
+	 */
+	public TutorialGuide[] getTutorials() {
+		return get(TutorialGuide.class);
 	}
 
 	public ReferenceApp[] getReferenceApps() {
 		return get(ReferenceApp.class);
 	}
 
-	public GettingStartedGuide getGuide(String guideName) {
-		GettingStartedGuide[] guides = getGuides();
-		if (guides!=null) {
-			for (GettingStartedGuide g : guides) {
-				if (guideName.equals(g.getName())) {
-					return g;
-				}
-			}
-		}
-		return null;
+	/**
+	 * Get all guide content (i.e. tutorials + gs)
+	 */
+	public GithubRepoContent[] getAllGuides() {
+		ArrayList<GithubRepoContent> all = new ArrayList<GithubRepoContent>();
+		all.addAll(Arrays.asList(getTutorials()));
+		all.addAll(Arrays.asList(getGSGuides()));
+		return all.toArray(new GithubRepoContent[all.size()]);
 	}
+
+//	public GettingStartedGuide getGuide(String guideName) {
+//		GettingStartedGuide[] guides = getGuides();
+//		if (guides!=null) {
+//			for (GettingStartedGuide g : guides) {
+//				if (guideName.equals(g.getName())) {
+//					return g;
+//				}
+//			}
+//		}
+//		return null;
+//	}
 
 }

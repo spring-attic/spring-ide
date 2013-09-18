@@ -96,7 +96,8 @@ public class GuidesTests extends TestCase {
 //	}
 	
 	public static GithubRepoContent[] getGuides() {
-		return GettingStartedContent.getInstance().getGuides();
+//		return GettingStartedContent.getInstance().getTutorials();
+		return GettingStartedContent.getInstance().getAllGuides();
 	}
 
 	private void assertAtLeast(EG[] expected, GithubRepoContent[] guides) {
