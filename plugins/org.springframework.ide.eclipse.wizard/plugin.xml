@@ -219,7 +219,7 @@
              page="com.springsource.sts.ide.ui.new.dashboard.page.overview"
              path="com.springsource.sts.ide.ui.dashboard.doc">
        </part>
-    </extension> -->
+    </extension> 
     
   <extension
        point="com.springsource.sts.ide.ui.dashboard">
@@ -230,7 +230,7 @@
           path="com.springsource.sts.ide.ui.dashboard.doc">
     </part>
  </extension>
-    
+   --> 
     
     <extension
          point="org.eclipse.ui.preferencePages">
