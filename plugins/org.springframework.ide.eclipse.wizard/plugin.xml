@@ -210,36 +210,17 @@
        </newWizardShortcut>
     </perspectiveExtension>
  </extension>
- 
-<!--     <extension
-          point="com.springsource.sts.ide.ui.dashboard">
-       <part
-             class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsDashboardPart"
-             id="com.springsource.sts.ide.help.dashboard.part.samples"
-             page="com.springsource.sts.ide.ui.new.dashboard.page.overview"
-             path="com.springsource.sts.ide.ui.dashboard.doc">
-       </part>
-    </extension> 
-    
-  <extension
-       point="com.springsource.sts.ide.ui.dashboard">
-    <part
-          class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsDashboardPart"
-          id="com.springsource.sts.ide.help.dashboard.part.samples"
-          page="com.springsource.sts.ide.ui.dashboard.page.overview"
-          path="com.springsource.sts.ide.ui.dashboard.doc">
-    </part>
- </extension>
-   --> 
     
     <extension
          point="org.eclipse.ui.preferencePages">
+      <!--
       <page
             category="org.springframework.ide.eclipse.ui.preferencePage"
             class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsPreferencePage"
             id="com.springsource.sts.help.ui.examplepreferencepage"
             name="Example Projects">
       </page>
+      -->
       <page
             category="org.springframework.ide.eclipse.ui.preferencePage"
             class="org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage"
