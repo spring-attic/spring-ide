@@ -163,18 +163,16 @@ public class GithubClient {
 	 */
 	private static <T> String getNextPageUrl(ResponseEntity<T> entity) {
 		List<String> linkHeader = entity.getHeaders().get("Link");
-		//Example of header String:
-		//<https://api.github.com/organizations/4161866/repos?page=2>; rel="next", <https://api.github.com/organizations/4161866/repos?page=2>; rel="last"
-		Pattern nextPat = Pattern.compile("<([^<]*)>;\\s*rel=\"next\"");
-		for (String string : linkHeader) {
-			System.out.println(string);
-			Matcher m = nextPat.matcher(string);
-			if (m.find()) {
-				String all = m.group();
-				String url = m.group(1);
-				System.out.println("all = "+all);
-				System.out.println("url = "+url);
-				return url;
+		if (linkHeader!=null) {
+			//Example of header String:
+			//<https://api.github.com/organizations/4161866/repos?page=2>; rel="next", <https://api.github.com/organizations/4161866/repos?page=2>; rel="last"
+			Pattern nextPat = Pattern.compile("<([^<]*)>;\\s*rel=\"next\"");
+			for (String string : linkHeader) {
+				System.out.println(string);
+				Matcher m = nextPat.matcher(string);
+				if (m.find()) {
+					return m.group(1);
+				}
 			}
 		}
 		return null; //no pagination info found
