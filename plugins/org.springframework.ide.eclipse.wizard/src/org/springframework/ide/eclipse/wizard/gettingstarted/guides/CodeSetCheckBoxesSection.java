@@ -151,6 +151,9 @@ public class CodeSetCheckBoxesSection extends WizardPageSection {
 					subsections[0] = new CommentSection(owner, "No codesets");
 					subsections[0].createContents(group);
 				}
+				GridLayout newLayout = createLayout();
+				newLayout.numColumns = names.length>2 ? 3 : 2;
+				group.setLayout(newLayout);
 				for (int i = 0; i < names.length; i++) {
 					subsections[i] = new CheckBox(owner, names[i], model);
 					if (isNewName(names[i])) {
