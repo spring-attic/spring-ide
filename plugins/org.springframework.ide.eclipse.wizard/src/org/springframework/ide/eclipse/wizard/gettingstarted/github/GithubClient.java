@@ -13,15 +13,18 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.github;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.http.HttpRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -93,7 +96,9 @@ public class GithubClient {
 	 * Fetch info about repos under a given organization.
 	 */
 	public Repo[] getOrgRepos(String orgName) {
-		return get("/orgs/{orgName}/repos?per_page=100", Repo[].class, orgName);
+		return get("/orgs/{orgName}/repos", Repo[].class, orgName);
+
+//		return get("/orgs/{orgName}/repos?per_page=100", Repo[].class, orgName);
 	}
 
 	/**
@@ -123,13 +128,56 @@ public class GithubClient {
 	 * Helper method to fetch json data from some url (or url template)
 	 * and parse the data into an object of a given type.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T get(String url, Class<T> type, Object... vars) {
 		url = addHost(url);
-		try {
-			return client.getForObject(addHost(url), type, vars);
-		} catch (HttpServerErrorException e) {
-			throw new Error("Error reading: "+url);
+		if (type.isArray()) {
+			Class<?> componentType = type.getComponentType();
+			//Assume this means we have to support response pagination as described in:
+			//http://developer.github.com/v3/#pagination
+			ArrayList<Object> results = new ArrayList<Object>();
+			do {
+				ResponseEntity<T> entity = client.getForEntity(url, type, vars);
+				Object[] pageResults = (Object[])entity.getBody(); //cast is safe because T is an array type.
+				for (Object r : pageResults) {
+					results.add(r);
+				}
+				url = getNextPageUrl(entity);
+			} while (url!=null);
+			return (T) results.toArray((Object[])Array.newInstance(componentType, results.size()));
+		} else {
+			try {
+				return client.getForObject(url, type, vars);
+			} catch (HttpServerErrorException e) {
+				throw new Error("Error reading: "+url);
+			}
 		}
+	}
+
+
+	/**
+	 * Get the url of the next page in a paginated result.
+	 * May return null if there is no next page.
+	 * <p>
+	 * See http://developer.github.com/v3/#pagination
+	 */
+	private static <T> String getNextPageUrl(ResponseEntity<T> entity) {
+		List<String> linkHeader = entity.getHeaders().get("Link");
+		//Example of header String:
+		//<https://api.github.com/organizations/4161866/repos?page=2>; rel="next", <https://api.github.com/organizations/4161866/repos?page=2>; rel="last"
+		Pattern nextPat = Pattern.compile("<([^<]*)>;\\s*rel=\"next\"");
+		for (String string : linkHeader) {
+			System.out.println(string);
+			Matcher m = nextPat.matcher(string);
+			if (m.find()) {
+				String all = m.group();
+				String url = m.group(1);
+				System.out.println("all = "+all);
+				System.out.println("url = "+url);
+				return url;
+			}
+		}
+		return null; //no pagination info found
 	}
 
 	protected static String getNormalisedProtocol(String protocol) {
@@ -238,6 +286,17 @@ public class GithubClient {
 					//ignore.
 				}
 			}
+		}
+	}
+
+	/**
+	 * For some quick add-hoc testing
+	 */
+	public static void main(String[] args) {
+		GithubClient gh = new GithubClient();
+		for (int i = 0; i < 5; i++) {
+			Repo[] repos = gh.getOrgRepos("spring-guides");
+			System.out.println(repos.length);
 		}
 	}
 

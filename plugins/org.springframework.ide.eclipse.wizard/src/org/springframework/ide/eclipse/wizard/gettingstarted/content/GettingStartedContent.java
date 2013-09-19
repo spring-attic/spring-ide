@@ -12,9 +12,11 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.Repo;
 import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
@@ -34,6 +36,9 @@ public class GettingStartedContent extends ContentManager {
 	private final static boolean ADD_REAL =  true;
 	private final static boolean ADD_MOCKS = false; // (""+Platform.getLocation()).contains("kdvolder")
 
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder")
+				|| (""+Platform.getLocation()).contains("bamboo");
+
 	public static GettingStartedContent getInstance() {
 		//TODO: propagate progress monitor. Make sure this isn't called in UIThread. It may
 		// hang downloading properties if user has no or poor internet access.
@@ -44,6 +49,33 @@ public class GettingStartedContent extends ContentManager {
 	}
 
 	private final GithubClient github = new GithubClient();
+
+
+	/**
+	 * We need this in multiple places. So cache it to avoid asking for it multiple times in a row.
+	 */
+	private Repo[] cachedRepos = null;
+
+	private Repo[] getGuidesRepos() {
+		if (cachedRepos==null) {
+			Repo[] repos = github.getOrgRepos("spring-guides");
+			if (DEBUG) {
+				Arrays.sort(repos, new Comparator<Repo>() {
+					public int compare(Repo o1, Repo o2) {
+						return o1.getName().compareTo(o2.getName());
+					}
+				});
+				System.out.println("==== spring-guides-repos ====");
+				int count = 1;
+				for (Repo r : repos) {
+					System.out.println(count++ + ":" + r.getName());
+				}
+				System.out.println("==== spring-guides-repos ====");
+			}
+			cachedRepos = repos;
+		}
+		return cachedRepos;
+	}
 
 	private GettingStartedContent(final StsProperties stsProps) {
 		//Guides: are discoverable because they are all repos in org on github
@@ -56,7 +88,7 @@ public class GettingStartedContent extends ContentManager {
 						addGuidesFrom(github.getMyRepos(), guides, downloader);
 					}
 					if (ADD_REAL) {
-						addGuidesFrom(github.getOrgRepos("spring-guides"), guides, downloader);
+						addGuidesFrom(getGuidesRepos(), guides, downloader);
 					}
 					return guides.values().toArray(new GettingStartedGuide[guides.size()]);
 				}
@@ -79,7 +111,7 @@ public class GettingStartedContent extends ContentManager {
 //				@Override
 				public TutorialGuide[] fetch(DownloadManager downloader) {
 					LinkedHashMap<String, TutorialGuide> guides = new LinkedHashMap<String, TutorialGuide>();
-					addGuidesFrom(github.getOrgRepos("spring-guides"), guides, downloader);
+					addGuidesFrom(getGuidesRepos(), guides, downloader);
 					return guides.values().toArray(new TutorialGuide[guides.size()]);
 				}
 
