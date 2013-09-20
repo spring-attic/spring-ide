@@ -76,8 +76,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
