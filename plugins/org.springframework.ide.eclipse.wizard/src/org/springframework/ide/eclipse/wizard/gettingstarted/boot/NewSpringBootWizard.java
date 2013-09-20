@@ -41,6 +41,10 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 	private NewSpringBootWizardModel model;
 
+	private IStructuredSelection selection;
+
+	private WorkingSetSection workingSetSection;
+
 	public NewSpringBootWizard() throws Exception {
 		setDefaultPageImageDescriptor(IMAGE);
 	}
@@ -49,6 +53,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		try {
 			model = new NewSpringBootWizardModel();
+			this.selection = selection;
 		} catch (Exception e) {
 			MessageDialog.openError(workbench.getActiveWorkbenchWindow().getShell(), "Error opening the wizard",
 					ExceptionUtil.getMessage(e)+"\n\n"+
@@ -65,7 +70,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	public void addPages() {
 		super.addPages();
 		addPage(new PageOne());
-//		addPage(pageTwo);
+		addPage(new PageTwo());
 	}
 
 	public class PageOne extends WizardPageWithSections {
@@ -94,10 +99,27 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					.columns(3)
 			);
 
+			return sections;
+		}
+
+	}
+
+	public class PageTwo extends WizardPageWithSections {
+
+		protected PageTwo() {
+			super("page2", "New Spring Starter Project", null);
+		}
+
+		@Override
+		protected List<WizardPageSection> createSections() {
+			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+
 			sections.add(new GroupSection(this, "Site Info",
 					new StringFieldSection(this, "Base Url", model.baseUrl, model.baseUrlValidator),
 					new DescriptionSection(this, model.downloadUrl).label("Full Url").readOnly(false)
 			));
+
+			sections.add(workingSetSection = new WorkingSetSection(this, selection));
 
 			return sections;
 		}
@@ -106,6 +128,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 	@Override
 	public boolean performFinish() {
+		model.setWorkingSets(workingSetSection.getWorkingSets()); //must be in ui thread. Don't put in job!
 		Job job = new Job("Import Getting Started Content") {
 			@Override
 			protected IStatus run(IProgressMonitor mon) {

@@ -21,12 +21,17 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
@@ -111,22 +116,27 @@ public class NewSpringBootWizardModel {
 	public final LiveExpression<ValidationResult> baseUrlValidator;
 
 	public final LiveVariable<String> downloadUrl = new LiveVariable<String>();
+	private IWorkingSet[] workingSets = new IWorkingSet[0];
 
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
-		mon.beginTask("Importing "+baseUrl, 1);
+		mon.beginTask("Importing "+baseUrl, 4);
 		DownloadManager downloader = null;
 		try {
 			downloader = new DownloadManager().allowUIThread(allowUIThread);
 
 			DownloadableItem zip = new DownloadableItem(newURL(downloadUrl .getValue()), downloader);
-			CodeSet cs = CodeSet.fromZip(projectName.getValue(), zip, new Path("/"));
+			String projectNameValue = projectName.getValue();
+			CodeSet cs = CodeSet.fromZip(projectNameValue, zip, new Path("/"));
 
 			IRunnableWithProgress oper = BuildType.MAVEN.getImportStrategy().createOperation(ImportUtils.importConfig(
 					new Path(location.getValue()),
-					projectName.getValue(),
+					projectNameValue,
 					cs
 			));
-			oper.run(new SubProgressMonitor(mon, 1));
+			oper.run(new SubProgressMonitor(mon, 3));
+
+			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectNameValue);
+			addToWorkingSets(project, new SubProgressMonitor(mon, 1));
 
 		} catch (IOException e) {
 			throw new InvocationTargetException(e);
@@ -135,6 +145,19 @@ public class NewSpringBootWizardModel {
 				downloader.dispose();
 			}
 			mon.done();
+		}
+	}
+
+	private void addToWorkingSets(IProject project, IProgressMonitor monitor) {
+		monitor.beginTask("Add '"+project.getName()+"' to working sets", 1);
+		try {
+			if (workingSets==null || workingSets.length==0) {
+				return;
+			}
+			IWorkingSetManager wsm = PlatformUI.getWorkbench().getWorkingSetManager();
+			wsm.addToWorkingSets(project, workingSets);
+		} finally {
+			monitor.done();
 		}
 	}
 
@@ -323,6 +346,10 @@ public class NewSpringBootWizardModel {
 
 	public FieldModel<String> getProjectName() {
 		return projectName;
+	}
+
+	public void setWorkingSets(IWorkingSet[] workingSets) {
+		this.workingSets = workingSets;
 	}
 
 }
