@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 Spring IDE Developers
+ * Copyright (c) 2004 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -315,7 +315,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			// IMPORTANT: the following block needs to stay before the w.lock()
 			// as it could otherwise create a runtime deadlock
 			ResourceLoader resourceLoader = null;
-			if (((IBeansProject) getElementParent()).isImportsEnabled()) {
+			if (getElementParent() instanceof IBeansProject && ((IBeansProject) getElementParent()).isImportsEnabled()) {
 				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject(),
 						JdtUtils.getClassLoader(file.getProject(), BeansCorePlugin.getClassLoader()));
 			}
