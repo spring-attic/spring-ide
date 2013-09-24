@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors;
 
@@ -89,7 +89,6 @@ import org.springsource.ide.eclipse.commons.ui.UiStatusHandler;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-
 
 /**
  * @author Leo Dos Santos
@@ -174,7 +173,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 
 	private Set<String> selectedNamespaceUris;
 
-	private IFileEditorInput fileInput;
+	private IEditorInput editorInput;
 
 	private IFile resource;
 
@@ -248,8 +247,10 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 	@Override
 	protected void addPages() {
 		createSourcePage();
-		createPreNamespacePages();
-		createNamespacePages();
+		if (resource instanceof IFile) {
+			createPreNamespacePages();
+			createNamespacePages();
+		}
 		loadActivePage();
 	}
 
@@ -625,18 +626,6 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 		IDE.gotoMarker(sourceEditor, marker);
 	}
 
-	/**
-	 * The <code>MultiPageEditorExample</code> implementation of this method
-	 * checks that the input is an instance of <code>IFileEditorInput</code>.
-	 */
-	@Override
-	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException {
-		if (!(editorInput instanceof IFileEditorInput)) {
-			throw new PartInitException(Messages.getString("SpringConfigEditor.EDITOR_INPUT_ERROR")); //$NON-NLS-1$
-		}
-		super.init(site, editorInput);
-	}
-
 	private boolean isNamespaceChange() {
 		Set<String> namespaceUris = selectedNamespaceUris;
 		selectedNamespaceUris = readNamespacesFromFile();
@@ -792,30 +781,32 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 	}
 
 	private void resolveModel() {
-		resource = fileInput.getFile();
-		IStructuredModel structModel = StructuredModelManager.getModelManager().getExistingModelForEdit(resource);
-		if (structModel == null) {
-			try {
-				structModel = StructuredModelManager.getModelManager().getModelForEdit(resource);
+		if (editorInput instanceof IFileEditorInput) {
+			resource = ((IFileEditorInput) editorInput).getFile();
+			IStructuredModel structModel = StructuredModelManager.getModelManager().getExistingModelForEdit(resource);
+			if (structModel == null) {
+				try {
+					structModel = StructuredModelManager.getModelManager().getModelForEdit(resource);
+				}
+				catch (IOException e) {
+					StatusHandler.log(new Status(IStatus.ERROR, ConfigUiPlugin.PLUGIN_ID, Messages
+							.getString("SpringConfigEditor.ERROR_LOADING_EDITOR_MODEL"), e)); //$NON-NLS-1$
+				}
+				catch (CoreException e) {
+					StatusHandler.log(new Status(IStatus.ERROR, ConfigUiPlugin.PLUGIN_ID, Messages
+							.getString("SpringConfigEditor.ERROR_LOADING_EDITOR_MODEL"), e)); //$NON-NLS-1$
+				}
 			}
-			catch (IOException e) {
-				StatusHandler.log(new Status(IStatus.ERROR, ConfigUiPlugin.PLUGIN_ID, Messages
-						.getString("SpringConfigEditor.ERROR_LOADING_EDITOR_MODEL"), e)); //$NON-NLS-1$
-			}
-			catch (CoreException e) {
-				StatusHandler.log(new Status(IStatus.ERROR, ConfigUiPlugin.PLUGIN_ID, Messages
-						.getString("SpringConfigEditor.ERROR_LOADING_EDITOR_MODEL"), e)); //$NON-NLS-1$
-			}
-		}
 
-		if (structModel != null) {
-			if (structModel instanceof IDOMModel) {
-				releaseModel();
-				model = (IDOMModel) structModel;
-				domDocument = model.getDocument();
-			}
-			else {
-				structModel.releaseFromEdit();
+			if (structModel != null) {
+				if (structModel instanceof IDOMModel) {
+					releaseModel();
+					model = (IDOMModel) structModel;
+					domDocument = model.getDocument();
+				}
+				else {
+					structModel.releaseFromEdit();
+				}
 			}
 		}
 		headerMessage.updateMessage();
@@ -877,10 +868,15 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 	}
 
 	private void setInputHelper(IEditorInput input) {
-		fileInput = (IFileEditorInput) input;
+		editorInput = input;
 		resolveModel();
-		activePageKey = SpringConfigPreferenceConstants.PREF_ACTIVE_PAGE_INDEX
-				+ ":" + resource.getFullPath().toString(); //$NON-NLS-1$
+		if (resource != null) {
+			activePageKey = SpringConfigPreferenceConstants.PREF_ACTIVE_PAGE_INDEX
+					+ ":" + resource.getFullPath().toString(); //$NON-NLS-1$
+		}
+		else {
+			activePageKey = SpringConfigPreferenceConstants.PREF_ACTIVE_PAGE_INDEX;
+		}
 	}
 
 	@Override
