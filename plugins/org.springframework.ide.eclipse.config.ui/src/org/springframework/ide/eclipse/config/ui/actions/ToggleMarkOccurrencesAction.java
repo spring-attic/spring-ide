@@ -1,16 +1,15 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.actions;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -37,11 +35,8 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.xml.core.internal.document.AttrImpl;
-import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -57,7 +52,6 @@ import org.springframework.ide.eclipse.core.internal.model.SpringProject;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 
 /**
  * This action toggles the mark occurrences for bean references.
@@ -120,34 +114,14 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 
 	private Set<OccurrenceLocation> findBeanReference(String beanName, BeansValidationContext context)
 			throws BadLocationException {
-		IFile file = editor.getResourceFile();
 		Set<OccurrenceLocation> result = new HashSet<OccurrenceLocation>();
-
-		IStructuredModel model = null;
-		try {
-			model = StructuredModelManager.getModelManager().getModelForRead(file);
-
-			if (model != null) {
-				IDOMDocument document = ((DOMModelImpl) model).getDocument();
-				if (document != null) {
-					NodeList nodes = document.getDocumentElement().getChildNodes();
-					for (int i = 0; i < nodes.getLength(); i++) {
-						result.addAll(findBeanReference(beanName, nodes.item(i), context));
-					}
-				}
-
+		IDOMDocument document = editor.getDomDocument();
+		if (document != null) {
+			NodeList nodes = document.getDocumentElement().getChildNodes();
+			for (int i = 0; i < nodes.getLength(); i++) {
+				result.addAll(findBeanReference(beanName, nodes.item(i), context));
 			}
 		}
-		catch (IOException e) {
-		}
-		catch (CoreException e) {
-		}
-		finally {
-			if (model != null) {
-				model.releaseFromRead();
-			}
-		}
-
 		return result;
 	}
 
@@ -254,8 +228,8 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 
 				if (attribute != null && attribute.getStartOffset() <= offset && attribute.getEndOffset() >= offset) {
 					if (context != null) {
-						List<ToolAnnotationData> toolAnnotations = context.getToolAnnotation(node, attribute
-								.getLocalName());
+						List<ToolAnnotationData> toolAnnotations = context.getToolAnnotation(node,
+								attribute.getLocalName());
 						for (ToolAnnotationData toolAnnotation : toolAnnotations) {
 							if ("ref".equals(toolAnnotation.getKind())) { //$NON-NLS-1$
 								return attribute.getNodeValue();
@@ -348,8 +322,8 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 	}
 
 	private void updateAnnotations(Set<OccurrenceLocation> locations) {
-		IAnnotationModel annotationModel = editor.getSourcePage().getDocumentProvider().getAnnotationModel(
-				editor.getEditorInput());
+		IAnnotationModel annotationModel = editor.getSourcePage().getDocumentProvider()
+				.getAnnotationModel(editor.getEditorInput());
 		if (annotationModel == null) {
 			return;
 		}
@@ -362,8 +336,8 @@ public class ToggleMarkOccurrencesAction extends Action implements IPropertyChan
 		}
 
 		if (annotationModel instanceof IAnnotationModelExtension) {
-			((IAnnotationModelExtension) annotationModel).replaceAnnotations(annotations
-					.toArray(new Annotation[annotations.size()]), newAnnotations);
+			((IAnnotationModelExtension) annotationModel).replaceAnnotations(
+					annotations.toArray(new Annotation[annotations.size()]), newAnnotations);
 		}
 		else {
 			for (Annotation annotation : annotations) {

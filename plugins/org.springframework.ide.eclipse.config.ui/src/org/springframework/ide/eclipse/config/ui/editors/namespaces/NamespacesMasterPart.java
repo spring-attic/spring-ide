@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.namespaces;
 
@@ -56,7 +56,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-
 
 /**
  * @author Leo Dos Santos
@@ -248,25 +247,27 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 	private synchronized List<INamespaceDefinition> getNamespaceDefinitionList() {
 		if ((namespaceDefinitionList == null || namespaceDefinitionList.size() == 0) && !loading) {
 			loading = true;
-			NamespaceUtils.getNamespaceDefinitions(getConfigEditor().getResourceFile().getProject(),
-					new NamespaceUtils.INamespaceDefinitionTemplate() {
-						public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions,
-								IProject project) {
-							List<INamespaceDefinition> newNamespaceDefinitions = new ArrayList<INamespaceDefinition>(
-									Arrays.asList(namespaceDefinitions));
-							NamespacesMasterPart.this.namespaceDefinitionList = triggerLoadNamespaceDefinitionList(newNamespaceDefinitions);
-							Display.getDefault().asyncExec(new Runnable() {
-								public void run() {
-									if (getViewer().getControl() != null && !getViewer().getControl().isDisposed()) {
-										getViewer().setInput(getConfigEditor().getDomDocument());
-										refresh();
+			if (getConfigEditor().getResourceFile() != null) {
+				NamespaceUtils.getNamespaceDefinitions(getConfigEditor().getResourceFile().getProject(),
+						new NamespaceUtils.INamespaceDefinitionTemplate() {
+							public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions,
+									IProject project) {
+								List<INamespaceDefinition> newNamespaceDefinitions = new ArrayList<INamespaceDefinition>(
+										Arrays.asList(namespaceDefinitions));
+								NamespacesMasterPart.this.namespaceDefinitionList = triggerLoadNamespaceDefinitionList(newNamespaceDefinitions);
+								Display.getDefault().asyncExec(new Runnable() {
+									public void run() {
+										if (getViewer().getControl() != null && !getViewer().getControl().isDisposed()) {
+											getViewer().setInput(getConfigEditor().getDomDocument());
+											refresh();
+										}
 									}
-								}
-							});
-							loading = false;
-							lazyInitializationLatch.countDown();
-						}
-					});
+								});
+								loading = false;
+								lazyInitializationLatch.countDown();
+							}
+						});
+			}
 		}
 		return namespaceDefinitionList;
 	}
