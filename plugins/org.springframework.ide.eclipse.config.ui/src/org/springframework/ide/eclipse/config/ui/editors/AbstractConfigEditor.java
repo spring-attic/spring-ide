@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -171,7 +172,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 
 	private final SpringConfigHeaderMessage headerMessage;
 
-	private Set<String> selectedNamespaceUris;
+	private Set<String> selectedNamespaceUris = Collections.emptySet();
 
 	private IEditorInput editorInput;
 
