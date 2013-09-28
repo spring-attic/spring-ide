@@ -65,12 +65,12 @@ public class GettingStartedContent extends ContentManager {
 						return o1.getName().compareTo(o2.getName());
 					}
 				});
-				System.out.println("==== spring-guides-repos ====");
-				int count = 1;
-				for (Repo r : repos) {
-					System.out.println(count++ + ":" + r.getName());
-				}
-				System.out.println("==== spring-guides-repos ====");
+//				System.out.println("==== spring-guides-repos ====");
+//				int count = 1;
+//				for (Repo r : repos) {
+//					System.out.println(count++ + ":" + r.getName());
+//				}
+//				System.out.println("==== spring-guides-repos ====");
 			}
 			cachedRepos = repos;
 		}
