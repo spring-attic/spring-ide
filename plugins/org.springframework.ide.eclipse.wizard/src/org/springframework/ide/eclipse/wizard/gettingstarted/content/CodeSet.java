@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
@@ -35,7 +35,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
  * This means it is possible to create CodeSet instances without having to pay the
  * cost of downloading the Zip file upfront. Some operations on CodeSets however
  * will force download to be attempted.
- * 
+ *
  * @author Kris De Volder
  */
 public abstract class CodeSet {
@@ -51,11 +51,11 @@ public abstract class CodeSet {
 		public abstract boolean isDirectory();
 
 		public abstract InputStream getData() throws IOException;
-		
+
 	}
 
 	public static abstract class Processor<T> {
-		
+
 		/**
 		 * Do some work an a ZipEntry in a CodeSet.
 		 */
@@ -72,15 +72,15 @@ public abstract class CodeSet {
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public static CodeSet fromZip(String name, DownloadableItem zip, IPath root) {
 		return new ZipFileCodeSet(name, zip, root);
 	}
-	
+
 	/**
 	 * Fetch list of build types that are supported by the CodeSet. Note that
-	 * determining this information requires inspecting some of the directory 
-	 * entries in the CodeSet and therefore it requires downloading the 
+	 * determining this information requires inspecting some of the directory
+	 * entries in the CodeSet and therefore it requires downloading the
 	 * content / zip / repo the CodeSet is contained in (unless it is
 	 * already cached locally).
 	 */
@@ -95,11 +95,11 @@ public abstract class CodeSet {
 		}
 		return buildTypes;
 	}
-	
+
 	/**
 	 * Returns true if content for this codeset can be downloaded and
 	 * contains some data.
-     * 
+     *
      * If the CodeSet was not previously downloaded this will force a
      * download.
 	 */
@@ -107,16 +107,16 @@ public abstract class CodeSet {
 
 	/**
 	 * Returns true if this codeset has a file with a given path.
-	 * 
+	 *
      * If the CodeSet was not previously downloaded this will force a
      * download.
-	 * @throws UIThreadDownloadDisallowed 
+	 * @throws UIThreadDownloadDisallowed
 	 */
 	public abstract boolean hasFile(IPath path) throws UIThreadDownloadDisallowed;
-	
+
 	/**
 	 * Returns true if this codeset has a folder with a given path.
-	 * 
+	 *
      * If the CodeSet was not previously downloaded this will force a
      * download.
 	 */
@@ -146,6 +146,7 @@ public abstract class CodeSet {
 			}
 		}
 		each(new CodeSet.Processor<Void>() {
+			@Override
 			public Void doit(CodeSetEntry e) throws Exception {
 				IPath path = e.getPath();
 				File target = new File(location, path.toString());
@@ -172,5 +173,5 @@ public abstract class CodeSet {
 	 * it might open and close a zipfile for a ZipFileCodeSet).
 	 */
 	public abstract <T> T readFileEntry(String path, Processor<T> processor) throws Exception;
-	
+
 }

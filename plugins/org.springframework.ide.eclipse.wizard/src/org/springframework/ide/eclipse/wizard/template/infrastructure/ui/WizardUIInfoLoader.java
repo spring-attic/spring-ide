@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template.infrastructure.ui;
 
@@ -54,7 +54,7 @@ public class WizardUIInfoLoader {
 	 * info, otherwise a CoreException is thrown. The download process is meant
 	 * to be separate from the wizard UI info parsing, as they may occur at
 	 * separate stages.
-	 * 
+	 *
 	 * @param template
 	 * @return non-null Wizard ui info, or throws exception if an error occurred
 	 * while resolving the info.

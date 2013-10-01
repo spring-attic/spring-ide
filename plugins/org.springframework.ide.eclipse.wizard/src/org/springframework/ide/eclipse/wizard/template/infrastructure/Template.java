@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.template.infrastructure;
 
@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springsource.ide.eclipse.commons.content.core.ContentItem;
 
 /**
- * 
+ *
  * Template of a project, which requires a content item from a content manager
  * that handles template descriptors. In addition, when a template is created,
  * it has an explicit API that fetches the templata data. This should be called
@@ -45,7 +45,7 @@ public class Template implements ITemplateElement {
 	private final ContentItem item;
 
 	/**
-	 * 
+	 *
 	 * @param item content item contains metadata about the template parsed from
 	 * a template descriptor file. Cannot be null.
 	 * @param icon optional: its the icon shown in the template viewer
@@ -58,7 +58,7 @@ public class Template implements ITemplateElement {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return description of what type of template project would be created
 	 * using this template
 	 */

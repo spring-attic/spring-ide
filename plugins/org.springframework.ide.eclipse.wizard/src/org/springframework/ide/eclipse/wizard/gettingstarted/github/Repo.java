@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.github;
 
@@ -18,25 +18,25 @@ public class Repo extends IdAble {
 
 	@JsonProperty("name")
 	private String name;
-	
+
 	@JsonProperty("full_name")
 	private String fullName;
-	
+
 	@JsonProperty("private")
 	private boolean isPrivate;
-	
+
 	@JsonProperty("html_url")
 	private String htmlUrl;
-	
+
 	@JsonProperty("description")
 	private String description;
-	
+
 	@JsonProperty("fork")
 	private boolean isFork;
-	
+
 	@JsonProperty("url")
 	private String url;
-	
+
 	private Owner owner;
 
 	public String getName() {
@@ -63,7 +63,7 @@ public class Repo extends IdAble {
 	public String getUrl() {
 		return url;
 	}
-	
+
 	public String getHtmlUrl() {
 		return htmlUrl;
 	}
