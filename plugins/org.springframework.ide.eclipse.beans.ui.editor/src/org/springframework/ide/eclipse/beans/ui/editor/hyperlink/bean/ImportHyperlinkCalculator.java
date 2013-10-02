@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Spring IDE Developers
+ * Copyright (c) 2009 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IMultiHyperlinkCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 import org.w3c.dom.Node;
 
 /**

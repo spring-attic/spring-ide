@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,13 +38,15 @@ public class WebflowBeanReferenceHyperlinkCalculator implements IHyperlinkCalcul
 			Node parentNode, IDocument document, ITextViewer textViewer,
 			IRegion hyperlinkRegion, IRegion cursor) {
 		IFile file = BeansEditorUtils.getFile(document);
-		IWebflowConfig config = Activator.getModel().getProject(file.getProject()).getConfig(
-				file);
-		if (config != null) {
-			Set<IBean> beans = WebflowModelUtils.getBeans(config);
-			for (IBean bean : beans) {
-				if (bean.getElementName().equals(target)) {
-					return new ExternalBeanHyperlink(bean, hyperlinkRegion);
+		if (file != null && file.exists()) {
+			IWebflowConfig config = Activator.getModel().getProject(file.getProject()).getConfig(
+					file);
+			if (config != null) {
+				Set<IBean> beans = WebflowModelUtils.getBeans(config);
+				for (IBean bean : beans) {
+					if (bean.getElementName().equals(target)) {
+						return new ExternalBeanHyperlink(bean, hyperlinkRegion);
+					}
 				}
 			}
 		}

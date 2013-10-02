@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Spring IDE Developers
+ * Copyright (c) 2010 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,29 +46,31 @@ public class WebflowActionMethodHyperlinkCalculator implements IHyperlinkCalcula
 		if (BeansEditorUtils.hasAttribute(node, "bean")) {
 			String bean = BeansEditorUtils.getAttribute(node, "bean");
 			IFile file = BeansEditorUtils.getFile(document);
-			String className = null;
-			IWebflowConfig config = Activator.getModel().getProject(file.getProject()).getConfig(
-					file);
-			if (config != null) {
-				Set<IBean> beans = WebflowModelUtils.getBeans(config);
-				for (IBean modelBean : beans) {
-					if (modelBean.getElementName().equals(bean)) {
-						className = BeansModelUtils.getBeanClass(modelBean, null);
+			if (file != null && file.exists()) {
+				IWebflowConfig config = Activator.getModel().getProject(file.getProject()).getConfig(
+						file);
+				if (config != null) {
+					String className = null;
+					Set<IBean> beans = WebflowModelUtils.getBeans(config);
+					for (IBean modelBean : beans) {
+						if (modelBean.getElementName().equals(bean)) {
+							className = BeansModelUtils.getBeanClass(modelBean, null);
+						}
 					}
-				}
-				IType type = JdtUtils.getJavaType(file.getProject(), className);
-				if (type != null) {
-					try {
-						Set<IMethod> methods = Introspector.getAllMethods(type);
-						if (methods != null) {
-							for (IMethod method : methods) {
-								if (method.getElementName().equals(target)) {
-									return new JavaElementHyperlink(hyperlinkRegion, method);
+					IType type = JdtUtils.getJavaType(file.getProject(), className);
+					if (type != null) {
+						try {
+							Set<IMethod> methods = Introspector.getAllMethods(type);
+							if (methods != null) {
+								for (IMethod method : methods) {
+									if (method.getElementName().equals(target)) {
+										return new JavaElementHyperlink(hyperlinkRegion, method);
+									}
 								}
 							}
 						}
-					}
-					catch (JavaModelException e) {
+						catch (JavaModelException e) {
+						}
 					}
 				}
 			}
