@@ -90,6 +90,7 @@ import org.w3c.dom.NodeList;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @author Terry Denney
+ * @author Leo Dos Santos
  */
 @SuppressWarnings("restriction")
 public class BeansEditorUtils {
@@ -463,55 +464,57 @@ public class BeansEditorUtils {
 	public static final Set<IBean> getBeansFromConfigSets(IFile file) {
 		Set<IBean> beans = new HashSet<IBean>();
 		Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
-		IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
-
-		Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(file, true);
-		for (IBeansConfig config : allConfigs) {
-			if (config instanceof IImportedBeansConfig) {
-				IBeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config, IBeansConfig.class);
-				configs.add(rootBeansConfig);
-			}
-		}
-
-		if (project != null) {
-			Set<IBeansConfigSet> configSets = project.getConfigSets();
-
-			for (IBeansConfigSet configSet : configSets) {
-				if (configSet.hasConfig(file) || !BeansCoreUtils.isBeansConfig(file)) {
-					Set<IBeansConfig> bcs = configSet.getConfigs();
-					configs.addAll(bcs);
+		
+		if (file != null && file.exists()) {
+			IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
+			Set<IBeansConfig> allConfigs = BeansCorePlugin.getModel().getConfigs(file, true);
+			for (IBeansConfig config : allConfigs) {
+				if (config instanceof IImportedBeansConfig) {
+					IBeansConfig rootBeansConfig = BeansModelUtils.getParentOfClass(config, IBeansConfig.class);
+					configs.add(rootBeansConfig);
 				}
-				Set<IBeansConfig> tempConfigs = new HashSet<IBeansConfig>(configs);
-				for (IBeansConfig config : tempConfigs) {
-					if (configSet.hasConfig(config.getElementName())) {
+			}
+
+			if (project != null) {
+				Set<IBeansConfigSet> configSets = project.getConfigSets();
+
+				for (IBeansConfigSet configSet : configSets) {
+					if (configSet.hasConfig(file) || !BeansCoreUtils.isBeansConfig(file)) {
 						Set<IBeansConfig> bcs = configSet.getConfigs();
 						configs.addAll(bcs);
 					}
+					Set<IBeansConfig> tempConfigs = new HashSet<IBeansConfig>(configs);
+					for (IBeansConfig config : tempConfigs) {
+						if (configSet.hasConfig(config.getElementName())) {
+							Set<IBeansConfig> bcs = configSet.getConfigs();
+							configs.addAll(bcs);
+						}
+					}
 				}
 			}
-		}
-
-		if (BeansCoreUtils.isBeansConfig(file, true)) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
-			if (config instanceof IImportedBeansConfig) {
-				configs.add(BeansModelUtils.getParentOfClass(config, IBeansConfig.class));
-			}
-			else {
-				configs.add(config);
-			}
-		}
-
-		for (IBeansConfig bc : configs) {
-			Set<IBean> bs = bc.getBeans();
-			for (IBean b : bs) {
-				if (!b.getElementResource().equals(file)) {
-					beans.add(b);
+			
+			if (BeansCoreUtils.isBeansConfig(file, true)) {
+				IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+				if (config instanceof IImportedBeansConfig) {
+					configs.add(BeansModelUtils.getParentOfClass(config, IBeansConfig.class));
+				}
+				else {
+					configs.add(config);
 				}
 			}
- 			
-			Set<IBeansComponent> components = bc.getComponents();
-			for (IBeansComponent component : components) {
-				getBeansFromComponent(file, component, beans);
+			
+			for (IBeansConfig bc : configs) {
+				Set<IBean> bs = bc.getBeans();
+				for (IBean b : bs) {
+					if (!b.getElementResource().equals(file)) {
+						beans.add(b);
+					}
+				}
+	 			
+				Set<IBeansComponent> components = bc.getComponents();
+				for (IBeansComponent component : components) {
+					getBeansFromComponent(file, component, beans);
+				}
 			}
 		}
 		return beans;
@@ -549,14 +552,14 @@ public class BeansEditorUtils {
 		if (factoryBean == null && factoryMethod == null && parent == null) {
 			return className;
 		}
-		else if (className != null && factoryMethod != null && factoryBean == null) {
+		else if (className != null && factoryMethod != null && factoryBean == null && file != null) {
 			// Factory method on bean class
 			return resolveClassNameFromFactoryMethod(factoryMethod, className, file.getProject());
 		}
-		else if (factoryMethod != null && factoryBean != null) {
+		else if (factoryMethod != null && factoryBean != null && file != null) {
 			// Factory method on factory bean
 			String factoryClass = getClassNameForBean(file, document, factoryBean);
-			if (factoryClass != null) {
+			if (factoryClass != null && file != null) {
 				return resolveClassNameFromFactoryMethod(factoryMethod, factoryClass, file.getProject());
 			}
 			return null;
@@ -654,7 +657,7 @@ public class BeansEditorUtils {
 			return;
 		}
 
-		if (className != null) {
+		if (className != null && file != null) {
 			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			if (type != null && !classNames.contains(type)) {
 				classNames.add(type);
