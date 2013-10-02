@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Spring IDE Developers
+ * Copyright (c) 2011 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,31 +62,32 @@ public class ConstructorArgNameHyperlinkCalculator implements IHyperlinkCalculat
 		if ("bean".equals(parentName) && StringUtils.hasText(target)) {
 			IFile file = BeansEditorUtils.getFile(document);
 			String className = BeansEditorUtils.getClassNameForBean(file, node.getOwnerDocument(), parentNode);
-			IType type = JdtUtils.getJavaType(file.getProject(), className);
-			
-			if (type != null) {
-				IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
-				if (config != null && parentNode instanceof Element) {
-					IModelElement element = BeansModelUtils.getModelElement((Element) parentNode, config);
-					int argIndex = getArgumentIndex(node);
-					if (argIndex >= 0) {
-						if (element instanceof IBean) {
-							IBean bean = (IBean) element;
-							int count = bean.getConstructorArguments().size();
-							if (count > 0) {
-								try {
-									Set<IMethod> methods = Introspector.getConstructors(type, count, false);
-									Iterator<IMethod> iter = methods.iterator();
-									while (iter.hasNext()) {
-										IMethod candidate = iter.next();
-										if (target.equalsIgnoreCase(candidate.getParameterNames()[argIndex])) {
-											// return new JavaElementHyperlink(hyperlinkRegion, candidate.getParameters()[argIndex]);
-											// TODO: just a temporary workaround for making this Eclipse 3.6 compatible
-											return new JavaElementHyperlink(hyperlinkRegion, candidate);
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
+				if (type != null) {
+					IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+					if (config != null && parentNode instanceof Element) {
+						IModelElement element = BeansModelUtils.getModelElement((Element) parentNode, config);
+						int argIndex = getArgumentIndex(node);
+						if (argIndex >= 0) {
+							if (element instanceof IBean) {
+								IBean bean = (IBean) element;
+								int count = bean.getConstructorArguments().size();
+								if (count > 0) {
+									try {
+										Set<IMethod> methods = Introspector.getConstructors(type, count, false);
+										Iterator<IMethod> iter = methods.iterator();
+										while (iter.hasNext()) {
+											IMethod candidate = iter.next();
+											if (target.equalsIgnoreCase(candidate.getParameterNames()[argIndex])) {
+												// return new JavaElementHyperlink(hyperlinkRegion, candidate.getParameters()[argIndex]);
+												// TODO: just a temporary workaround for making this Eclipse 3.6 compatible
+												return new JavaElementHyperlink(hyperlinkRegion, candidate);
+											}
 										}
+									} catch (JavaModelException e) {
+										// do nothing
 									}
-								} catch (JavaModelException e) {
-									// do nothing
 								}
 							}
 						}

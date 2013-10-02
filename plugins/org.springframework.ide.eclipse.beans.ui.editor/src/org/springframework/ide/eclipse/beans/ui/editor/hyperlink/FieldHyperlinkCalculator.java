@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,28 +37,30 @@ public class FieldHyperlinkCalculator implements IHyperlinkCalculator {
 		if (ix > 0) {
 			String typeName = target.substring(0, ix);
 			IFile file = BeansEditorUtils.getFile(document);
-			IType type = JdtUtils.getJavaType(file.getProject(), typeName);
-			if (type != null) {
-				try {
-					IField[] fields = type.getFields();
-					for (IField field : fields) {
-						if (target.endsWith('.' + field.getElementName())) {
-							return new JavaElementHyperlink(hyperlinkRegion,
-									field);
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(file.getProject(), typeName);
+				if (type != null) {
+					try {
+						IField[] fields = type.getFields();
+						for (IField field : fields) {
+							if (target.endsWith('.' + field.getElementName())) {
+								return new JavaElementHyperlink(hyperlinkRegion,
+										field);
+							}
 						}
 					}
-				}
-				catch (JavaModelException e) {
-				}
-				
-				// if we reach here no matching field could be located
-				return new JavaElementHyperlink(hyperlinkRegion, type);
-			}
-			// fallback
-			else {
-				type = JdtUtils.getJavaType(file.getProject(), target);
-				if (type != null) {
+					catch (JavaModelException e) {
+					}
+					
+					// if we reach here no matching field could be located
 					return new JavaElementHyperlink(hyperlinkRegion, type);
+				}
+				// fallback
+				else {
+					type = JdtUtils.getJavaType(file.getProject(), target);
+					if (type != null) {
+						return new JavaElementHyperlink(hyperlinkRegion, type);
+					}
 				}
 			}
 		}

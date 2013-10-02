@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,9 +40,11 @@ public class ClassHyperlinkCalculator implements IHyperlinkCalculator {
 		}
 		
 		IFile file = BeansEditorUtils.getFile(document);
+		if (file != null && file.exists()) {
 		IType type = JdtUtils.getJavaType(file.getProject(), target);
-		if (type != null) {
-			return new JavaElementHyperlink(hyperlinkRegion, type);
+			if (type != null) {
+				return new JavaElementHyperlink(hyperlinkRegion, type);
+			}
 		}
 		
 		return null;

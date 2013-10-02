@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,13 +51,15 @@ public class RepositoriesReferenceableElementLocator extends DefaultReferenceabl
 			}
 		}
 
-		for (String name : SpringDataUtils.getRepositoryBeanIds(file.getProject())) {
-			Set<Node> nodes = result.get(name);
-			if (nodes == null) {
-				nodes = new HashSet<Node>();
-				result.put(name, nodes);
+		if (file != null && file.exists()) {
+			for (String name : SpringDataUtils.getRepositoryBeanIds(file.getProject())) {
+				Set<Node> nodes = result.get(name);
+				if (nodes == null) {
+					nodes = new HashSet<Node>();
+					result.put(name, nodes);
+				}
+				nodes.add(springDataElement);
 			}
-			nodes.add(springDataElement);
 		}
 
 		return result;

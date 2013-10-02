@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Spring IDE Developers
+ * Copyright (c) 2008 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,9 @@ import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IHyperlinkCalcu
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Node;
 
 /**
@@ -43,15 +43,17 @@ public class InitDestroyMethodHyperlinkCalculator implements IHyperlinkCalculato
 		IFile file = BeansEditorUtils.getFile(document);
 		String className = BeansEditorUtils
 				.getClassNameForBean(file, node.getOwnerDocument(), node);
-		IType type = JdtUtils.getJavaType(file.getProject(), className);
-		try {
-			IMethod method = Introspector.findMethod(type, target, -1, Public.DONT_CARE,
-					Static.DONT_CARE);
-			if (method != null) {
-				return new JavaElementHyperlink(hyperlinkRegion, method);
+		if (file != null && file.exists()) {
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
+			try {
+				IMethod method = Introspector.findMethod(type, target, -1, Public.DONT_CARE,
+						Static.DONT_CARE);
+				if (method != null) {
+					return new JavaElementHyperlink(hyperlinkRegion, method);
+				}
 			}
-		}
-		catch (JavaModelException e) {
+			catch (JavaModelException e) {
+			}
 		}
 		return null;
 	}
