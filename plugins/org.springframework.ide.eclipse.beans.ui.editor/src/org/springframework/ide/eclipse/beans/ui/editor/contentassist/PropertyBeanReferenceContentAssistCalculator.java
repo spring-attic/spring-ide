@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -41,29 +42,30 @@ public class PropertyBeanReferenceContentAssistCalculator extends
 			IContentAssistProposalRecorder recorder) {
 		if (context.getParentNode() != null
 				&& "bean".equals(context.getParentNode().getLocalName())) {
-
-			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+			IFile file = context.getFile();
+			String className = BeansEditorUtils.getClassNameForBean(file, context
 					.getDocument(), context.getParentNode());
-			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
-
-			String propertyName = BeansEditorUtils.getAttribute(context.getNode(), "name");
-			if (propertyName != null) {
-				try {
-					IMethod method = Introspector.getWritableProperty(type, propertyName);
-					if (method != null) {
-						// It is safe to assume that we have one parameter since
-						// this is a property setter
-						String parameterTypeName = JdtUtils.resolveClassNameBySignature(method
-								.getParameterTypes()[0], type);
-						if (parameterTypeName != null) {
-							IType parameterType = JdtUtils.getJavaType(context.getFile()
-									.getProject(), parameterTypeName);
-							return JdtUtils
-									.getFlatListOfClassAndInterfaceNames(parameterType, type);
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
+				String propertyName = BeansEditorUtils.getAttribute(context.getNode(), "name");
+				if (propertyName != null) {
+					try {
+						IMethod method = Introspector.getWritableProperty(type, propertyName);
+						if (method != null) {
+							// It is safe to assume that we have one parameter since
+							// this is a property setter
+							String parameterTypeName = JdtUtils.resolveClassNameBySignature(method
+									.getParameterTypes()[0], type);
+							if (parameterTypeName != null) {
+								IType parameterType = JdtUtils.getJavaType(context.getFile()
+										.getProject(), parameterTypeName);
+								return JdtUtils
+										.getFlatListOfClassAndInterfaceNames(parameterType, type);
+							}
 						}
 					}
-				}
-				catch (JavaModelException e) {
+					catch (JavaModelException e) {
+					}
 				}
 			}
 		}

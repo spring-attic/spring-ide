@@ -105,45 +105,48 @@ public class BeansJavaCompletionUtils {
 		}
 
 		try {
-			ICompilationUnit unit = createSourceCompilationUnit(context.getFile(), prefix);
-
-			char enclosingChar = (prefix.lastIndexOf('$') > 0 ? '$' : '.');
-			prefix = prefix.replace('$', '.');
-
-			// Code completion below only provides public and protected inner classes; therefore
-			// we manually add the private inner classes if possible
-			if (prefix.lastIndexOf('.') > 0) {
-				String rootClass = prefix.substring(0, prefix.lastIndexOf('.'));
-				IType type = JdtUtils.getJavaType(context.getFile().getProject(), rootClass);
-				if (type != null) {
-					for (IType innerType : type.getTypes()) {
-						if (Flags.isPrivate(innerType.getFlags())
-								&& innerType.getFullyQualifiedName('.').startsWith(prefix)) {
-							recorder.recordProposal(JAVA_LABEL_PROVIDER.getImage(innerType), 10, JAVA_LABEL_PROVIDER
-									.getText(innerType), innerType.getFullyQualifiedName(enclosingChar), innerType);
+			IFile file = context.getFile();
+			if (file != null && file.exists()) {
+				ICompilationUnit unit = createSourceCompilationUnit(file, prefix);
+	
+				char enclosingChar = (prefix.lastIndexOf('$') > 0 ? '$' : '.');
+				prefix = prefix.replace('$', '.');
+	
+				// Code completion below only provides public and protected inner classes; therefore
+				// we manually add the private inner classes if possible
+				if (prefix.lastIndexOf('.') > 0) {
+					String rootClass = prefix.substring(0, prefix.lastIndexOf('.'));
+					IType type = JdtUtils.getJavaType(file.getProject(), rootClass);
+					if (type != null) {
+						for (IType innerType : type.getTypes()) {
+							if (Flags.isPrivate(innerType.getFlags())
+									&& innerType.getFullyQualifiedName('.').startsWith(prefix)) {
+								recorder.recordProposal(JAVA_LABEL_PROVIDER.getImage(innerType), 10, JAVA_LABEL_PROVIDER
+										.getText(innerType), innerType.getFullyQualifiedName(enclosingChar), innerType);
+							}
 						}
 					}
 				}
-			}
-
-			String sourceStart = CLASS_SOURCE_START + prefix;
-			String packageName = null;
-			int dot = prefix.lastIndexOf('.');
-			if (dot > -1) {
-				packageName = prefix.substring(0, dot);
-				sourceStart = "package " + packageName + ";\n" + sourceStart;
-			}
-			String source = sourceStart + CLASS_SOURCE_END;
-			setContents(unit, source);
-
-			BeansJavaCompletionProposalCollector collector = new BeansJavaCompletionProposalCollector(unit, flags);
-			unit.codeComplete(sourceStart.length(), collector, DefaultWorkingCopyOwner.PRIMARY);
-
-			IJavaCompletionProposal[] props = collector.getJavaCompletionProposals();
-
-			ICompletionProposal[] proposals = order(props);
-			for (ICompletionProposal comProposal : proposals) {
-				processJavaCompletionProposal(recorder, comProposal, packageName, enclosingChar);
+	
+				String sourceStart = CLASS_SOURCE_START + prefix;
+				String packageName = null;
+				int dot = prefix.lastIndexOf('.');
+				if (dot > -1) {
+					packageName = prefix.substring(0, dot);
+					sourceStart = "package " + packageName + ";\n" + sourceStart;
+				}
+				String source = sourceStart + CLASS_SOURCE_END;
+				setContents(unit, source);
+	
+				BeansJavaCompletionProposalCollector collector = new BeansJavaCompletionProposalCollector(unit, flags);
+				unit.codeComplete(sourceStart.length(), collector, DefaultWorkingCopyOwner.PRIMARY);
+	
+				IJavaCompletionProposal[] props = collector.getJavaCompletionProposals();
+	
+				ICompletionProposal[] proposals = order(props);
+				for (ICompletionProposal comProposal : proposals) {
+					processJavaCompletionProposal(recorder, comProposal, packageName, enclosingChar);
+				}
 			}
 		}
 		catch (Exception e) {
@@ -165,46 +168,49 @@ public class BeansJavaCompletionUtils {
 			return;
 		}
 
-		IType type = JdtUtils.getJavaType(context.getFile().getProject(), typeName);
-		try {
-			if (type != null && context.getFile().getProject().hasNature(JavaCore.NATURE_ID)) {
-
-				// Make sure that JDT's type filter preferences are applied
-				if (!TypeFilter.isFiltered(type)) {
-					ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(context.getFile().getProject()),
-							new NullProgressMonitor());
-					IType[] types = hierachy.getAllSubtypes(type);
-					Map<String, IType> sortMap = new HashMap<String, IType>();
-					for (IType foundType : types) {
-						if ((foundType.getFullyQualifiedName().startsWith(prefix) || foundType.getElementName()
-								.startsWith(prefix))
-								&& !sortMap.containsKey(foundType.getFullyQualifiedName())
-								&& !Flags.isAbstract(foundType.getFlags())) {
-
-							boolean accepted = false;
-							if ((flags & BeansJavaCompletionUtils.FLAG_CLASS) != 0
-									&& !Flags.isInterface(foundType.getFlags())) {
-								accepted = true;
-							}
-							else if ((flags & BeansJavaCompletionUtils.FLAG_INTERFACE) != 0
-									&& Flags.isInterface(foundType.getFlags())) {
-								accepted = true;
-							}
-							if (accepted) {
-								recorder.recordProposal(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS), 10,
-										foundType.getElementName() + " - "
-												+ foundType.getPackageFragment().getElementName(), foundType
-												.getFullyQualifiedName(), foundType);
-								sortMap.put(foundType.getFullyQualifiedName(), foundType);
+		IFile file = context.getFile();
+		if (file != null && file.exists()) {
+			IType type = JdtUtils.getJavaType(file.getProject(), typeName);
+			try {
+				if (type != null && file.getProject().hasNature(JavaCore.NATURE_ID)) {
+	
+					// Make sure that JDT's type filter preferences are applied
+					if (!TypeFilter.isFiltered(type)) {
+						ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(file.getProject()),
+								new NullProgressMonitor());
+						IType[] types = hierachy.getAllSubtypes(type);
+						Map<String, IType> sortMap = new HashMap<String, IType>();
+						for (IType foundType : types) {
+							if ((foundType.getFullyQualifiedName().startsWith(prefix) || foundType.getElementName()
+									.startsWith(prefix))
+									&& !sortMap.containsKey(foundType.getFullyQualifiedName())
+									&& !Flags.isAbstract(foundType.getFlags())) {
+	
+								boolean accepted = false;
+								if ((flags & BeansJavaCompletionUtils.FLAG_CLASS) != 0
+										&& !Flags.isInterface(foundType.getFlags())) {
+									accepted = true;
+								}
+								else if ((flags & BeansJavaCompletionUtils.FLAG_INTERFACE) != 0
+										&& Flags.isInterface(foundType.getFlags())) {
+									accepted = true;
+								}
+								if (accepted) {
+									recorder.recordProposal(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS), 10,
+											foundType.getElementName() + " - "
+													+ foundType.getPackageFragment().getElementName(), foundType
+													.getFullyQualifiedName(), foundType);
+									sortMap.put(foundType.getFullyQualifiedName(), foundType);
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-		catch (JavaModelException e) {
-		}
-		catch (CoreException e) {
+			catch (JavaModelException e) {
+			}
+			catch (CoreException e) {
+			}
 		}
 	}
 

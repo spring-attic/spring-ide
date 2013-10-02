@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -46,26 +47,29 @@ public class PropertyValueContentAssistCalculator extends ClassContentAssistCalc
 				&& "bean".equals(context.getParentNode().getLocalName())) {
 			String propertyName = BeansEditorUtils.getAttribute(context.getNode(), "name");
 			if (StringUtils.hasText(propertyName)) {
-				String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+				IFile file = context.getFile();
+				String className = BeansEditorUtils.getClassNameForBean(file, context
 						.getDocument(), context.getParentNode());
-				IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
-				if (type != null) {
-					try {
-						IMethod method = Introspector.getWritableProperty(type, propertyName);
-						if (method != null) {
-							// Since we got a java bean setter there needs to one parameter
-							String parameterType = JdtUtils.resolveClassNameBySignature(method
-									.getParameterTypes()[0], type);
-
-							// Class and String can be converted in Class instances
-							if (Class.class.getName().equals(parameterType)
-									|| String.class.getName().equals(parameterType)) {
-								super.computeProposals(context, recorder);
+				if (file != null && file.exists()) {
+					IType type = JdtUtils.getJavaType(file.getProject(), className);
+					if (type != null) {
+						try {
+							IMethod method = Introspector.getWritableProperty(type, propertyName);
+							if (method != null) {
+								// Since we got a java bean setter there needs to one parameter
+								String parameterType = JdtUtils.resolveClassNameBySignature(method
+										.getParameterTypes()[0], type);
+	
+								// Class and String can be converted in Class instances
+								if (Class.class.getName().equals(parameterType)
+										|| String.class.getName().equals(parameterType)) {
+									super.computeProposals(context, recorder);
+								}
 							}
 						}
-					}
-					catch (JavaModelException e) {
-						// do nothing
+						catch (JavaModelException e) {
+							// do nothing
+						}
 					}
 				}
 			}

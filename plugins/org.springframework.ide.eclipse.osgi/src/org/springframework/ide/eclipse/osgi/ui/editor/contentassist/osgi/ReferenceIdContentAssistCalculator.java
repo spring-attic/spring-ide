@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Spring IDE Developers
+ * Copyright (c) 2009 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.osgi.ui.editor.contentassist.osgi;
 
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractIdContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
@@ -64,12 +65,15 @@ public class ReferenceIdContentAssistCalculator extends AbstractIdContentAssistC
 	 */
 	private void createProposalsForClassName(IContentAssistContext context, IContentAssistProposalRecorder recorder,
 			String className) {
-		IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
-		if (type != null) {
-			createBeanIdProposals(context, recorder, type.getFullyQualifiedName());
-			Set<IType> allInterfaces = Introspector.getAllImplementedInterfaces(type);
-			for (IType interf : allInterfaces) {
-				createBeanIdProposals(context, recorder, interf.getFullyQualifiedName());
+		IFile file = context.getFile();
+		if (file != null && file.exists()) {
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
+			if (type != null) {
+				createBeanIdProposals(context, recorder, type.getFullyQualifiedName());
+				Set<IType> allInterfaces = Introspector.getAllImplementedInterfaces(type);
+				for (IType interf : allInterfaces) {
+					createBeanIdProposals(context, recorder, interf.getFullyQualifiedName());
+				}
 			}
 		}
 	}

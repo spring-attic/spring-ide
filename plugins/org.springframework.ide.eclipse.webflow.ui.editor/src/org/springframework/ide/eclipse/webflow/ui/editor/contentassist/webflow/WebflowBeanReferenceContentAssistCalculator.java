@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,12 +39,13 @@ public class WebflowBeanReferenceContentAssistCalculator implements IContentAssi
 
 		IFile file = context.getFile();
 		BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(recorder);
-
+		if (file != null && file.exists()) {
 		IWebflowConfig config = Activator.getModel().getProject(file.getProject()).getConfig(file);
-		if (config != null) {
-			Set<IBean> beans = WebflowModelUtils.getBeans(config);
-			for (IBean bean : beans) {
-				requestor.acceptSearchMatch(bean, file, matchString);
+			if (config != null) {
+				Set<IBean> beans = WebflowModelUtils.getBeans(config);
+				for (IBean bean : beans) {
+					requestor.acceptSearchMatch(bean, file, matchString);
+				}
 			}
 		}
 	}

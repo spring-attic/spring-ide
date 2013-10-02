@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractIdContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
@@ -40,10 +41,13 @@ public class BeanIdContentAssistCalculator extends AbstractIdContentAssistCalcul
 			createBeanIdProposals(context, recorder, className);
 
 			// add interface proposals
-			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
-			Set<IType> allInterfaces = Introspector.getAllImplementedInterfaces(type);
-			for (IType interf : allInterfaces) {
-				createBeanIdProposals(context, recorder, interf.getFullyQualifiedName());
+			IFile file = context.getFile();
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
+				Set<IType> allInterfaces = Introspector.getAllImplementedInterfaces(type);
+				for (IType interf : allInterfaces) {
+					createBeanIdProposals(context, recorder, interf.getFullyQualifiedName());
+				}
 			}
 		}
 	}
