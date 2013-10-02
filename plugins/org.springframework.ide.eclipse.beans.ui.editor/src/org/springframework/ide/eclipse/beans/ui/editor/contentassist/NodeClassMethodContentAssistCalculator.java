@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.IMethodFilter;
@@ -33,9 +34,12 @@ public abstract class NodeClassMethodContentAssistCalculator extends MethodConte
 	protected final IType calculateType(IContentAssistContext context) {
 		Node node = getClassNode(context);
 		if (node != null) {
-			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+			IFile file = context.getFile();
+			String className = BeansEditorUtils.getClassNameForBean(file, context
 					.getDocument(), node);
-			return JdtUtils.getJavaType(context.getFile().getProject(), className);
+			if (file != null && file.exists()) {
+				return JdtUtils.getJavaType(file.getProject(), className);
+			}
 		}
 		return null;
 	}

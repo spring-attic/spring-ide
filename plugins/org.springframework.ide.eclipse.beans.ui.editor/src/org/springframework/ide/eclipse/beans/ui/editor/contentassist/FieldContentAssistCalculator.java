@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,19 +39,21 @@ public class FieldContentAssistCalculator extends ClassContentAssistCalculator {
 		if (ix > 0) {
 			String typeName = matchString.substring(0, ix);
 			IFile file = context.getFile();
-			IType type = JdtUtils.getJavaType(file.getProject(), typeName);
-			if (type != null) {
-				try {
-					IField[] fields = type.getFields();
-					for (IField field : fields) {
-						if (Flags.isStatic(field.getFlags()) && Flags.isPublic(field.getFlags())) {
-							acceptSearchMatch(recorder, field, typeName);
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(file.getProject(), typeName);
+				if (type != null) {
+					try {
+						IField[] fields = type.getFields();
+						for (IField field : fields) {
+							if (Flags.isStatic(field.getFlags()) && Flags.isPublic(field.getFlags())) {
+								acceptSearchMatch(recorder, field, typeName);
+							}
 						}
 					}
+					catch (JavaModelException e) {
+					}
+					return;
 				}
-				catch (JavaModelException e) {
-				}
-				return;
 			}
 		}
 		super.computeProposals(context, recorder);

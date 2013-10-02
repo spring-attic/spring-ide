@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils;
 import org.springframework.ide.eclipse.beans.core.namespaces.ToolAnnotationUtils.ToolAnnotationData;
@@ -36,8 +37,8 @@ import org.w3c.dom.Node;
  * <p>
  * Adding the following annotation will trigger a bean reference content assist search:
  * <pre>
- * &lt;tool:annotation kind=“ref”&gt;
- * &lt;tool:expected-type type=“org.springframework.aop.Pointcut”/&gt;
+ * &lt;tool:annotation kind="ref"&gt;
+ * &lt;tool:expected-type type="org.springframework.aop.Pointcut"/&gt;
  * &lt;/tool:annotation&gt;
  * </pre>
  * <p>
@@ -45,8 +46,8 @@ import org.w3c.dom.Node;
  * proposals might be further narrowed to those implementing the interface specified:
  * <pre>
  * &lt;tool:annotation&gt;
- * &lt;tool:expected-type type=“java.lang.Class”/&gt;
- * &lt;tool:assignable-to type=“java.util.List”/&gt;
+ * &lt;tool:expected-type type="java.lang.Class"/&gt;
+ * &lt;tool:assignable-to type="java.util.List"/&gt;
  * &lt;/tool:annotation&gt;
  * </pre>
  * @author Christian Dupuis
@@ -152,7 +153,11 @@ public class ToolAnnotationBasedContentAssistProcessor implements IAnnotationBas
 		 */
 		@Override
 		protected IType calculateType(IContentAssistContext context) {
-			return JdtUtils.getJavaType(context.getFile().getProject(), className);
+			IFile file = context.getFile();
+			if (file != null && file.exists()) {
+				return JdtUtils.getJavaType(file.getProject(), className);
+			}
+			return null;
 		}
 	}
 }

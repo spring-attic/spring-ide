@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.webflow.ui.editor.contentassist.webflow;
 
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -40,18 +41,21 @@ public abstract class WebflowActionMethodContentAssistCalculator extends
 	protected final IType calculateType(IContentAssistContext context) {
 		if (BeansEditorUtils.hasAttribute(context.getNode(), "bean")) {
 			String className = null;
-			IWebflowConfig config = Activator.getModel().getProject(context.getFile().getProject())
-					.getConfig(context.getFile());
-
-			if (config != null) {
-				Set<IBean> beans = WebflowModelUtils.getBeans(config);
-				for (IBean bean : beans) {
-					if (bean.getElementName().equals(
-							BeansEditorUtils.getAttribute(context.getNode(), "bean"))) {
-						className = BeansModelUtils.getBeanClass(bean, null);
+			IFile file = context.getFile();
+			if (file != null && file.exists()) {
+				IWebflowConfig config = Activator.getModel().getProject(file.getProject())
+						.getConfig(file);
+	
+				if (config != null) {
+					Set<IBean> beans = WebflowModelUtils.getBeans(config);
+					for (IBean bean : beans) {
+						if (bean.getElementName().equals(
+								BeansEditorUtils.getAttribute(context.getNode(), "bean"))) {
+							className = BeansModelUtils.getBeanClass(bean, null);
+						}
 					}
+					return JdtUtils.getJavaType(file.getProject(), className);
 				}
-				return JdtUtils.getJavaType(context.getFile().getProject(), className);
 			}
 		}
 		return null;

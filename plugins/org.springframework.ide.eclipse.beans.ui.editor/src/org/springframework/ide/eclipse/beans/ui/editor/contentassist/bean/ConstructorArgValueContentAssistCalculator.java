@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Spring IDE Developers
+ * Copyright (c) 2011 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -55,48 +56,51 @@ public class ConstructorArgValueContentAssistCalculator extends ClassContentAssi
 				&& "bean".equals(context.getParentNode().getLocalName())) {
 			String propertyName = BeansEditorUtils.getAttribute(context.getNode(), "name");
 			if (StringUtils.hasText(propertyName)) {
-				String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+				IFile file = context.getFile();
+				String className = BeansEditorUtils.getClassNameForBean(file, context
 						.getDocument(), context.getParentNode());
-				IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
-				if (type != null) {
-					try {
-						IBeansConfig config = BeansCorePlugin.getModel().getConfig(context.getFile());
-						if (config != null && context.getParentNode() instanceof Element) {
-							IModelElement element = BeansModelUtils.getModelElement((Element) context.getParentNode(), config);
-							int argIndex = getArgumentIndex(context.getNode());
-							if (argIndex >= 0) {
-								if (element instanceof IBean) {
-									IBean bean = (IBean) element;
-									int count = bean.getConstructorArguments().size();
-									if (count > 0) {
-										IMethod method = null;
-										Set<IMethod> methods = Introspector.getConstructors(type, count, false);
-										if (methods.size() == 1) {
-											IMethod[] array = methods.toArray(new IMethod[]{});
-											IMethod candidate = array[0];
-											if (isConstructorArgComputable(type, candidate, argIndex)) {
-												method = candidate;
-											}
-										} else {
-											Iterator<IMethod> iter = methods.iterator();
-											while (iter.hasNext()) {
-												IMethod candidate = iter.next();
+				if (file != null && file.exists()) {
+					IType type = JdtUtils.getJavaType(file.getProject(), className);
+					if (type != null) {
+						try {
+							IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+							if (config != null && context.getParentNode() instanceof Element) {
+								IModelElement element = BeansModelUtils.getModelElement((Element) context.getParentNode(), config);
+								int argIndex = getArgumentIndex(context.getNode());
+								if (argIndex >= 0) {
+									if (element instanceof IBean) {
+										IBean bean = (IBean) element;
+										int count = bean.getConstructorArguments().size();
+										if (count > 0) {
+											IMethod method = null;
+											Set<IMethod> methods = Introspector.getConstructors(type, count, false);
+											if (methods.size() == 1) {
+												IMethod[] array = methods.toArray(new IMethod[]{});
+												IMethod candidate = array[0];
 												if (isConstructorArgComputable(type, candidate, argIndex)) {
 													method = candidate;
-													break;
+												}
+											} else {
+												Iterator<IMethod> iter = methods.iterator();
+												while (iter.hasNext()) {
+													IMethod candidate = iter.next();
+													if (isConstructorArgComputable(type, candidate, argIndex)) {
+														method = candidate;
+														break;
+													}
 												}
 											}
-										}
-										if (method != null) {
-											super.computeProposals(context, recorder);
+											if (method != null) {
+												super.computeProposals(context, recorder);
+											}
 										}
 									}
 								}
 							}
 						}
-					}
-					catch (JavaModelException e) {
-						// do nothing
+						catch (JavaModelException e) {
+							// do nothing
+						}
 					}
 				}
 			}

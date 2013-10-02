@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -44,12 +45,14 @@ public class PropertyNameContentAssistCalculator implements IContentAssistCalcul
 
 		if (context.getParentNode() != null
 				&& "bean".equals(context.getParentNode().getLocalName())) {
-
-			String className = BeansEditorUtils.getClassNameForBean(context.getFile(), context
+			IFile file = context.getFile();
+			String className = BeansEditorUtils.getClassNameForBean(file, context
 					.getDocument(), context.getParentNode());
-			IType type = JdtUtils.getJavaType(context.getFile().getProject(), className);
-			if (type != null) {
-				addPropertyNameAttributeValueProposals(recorder, context.getMatchString(), "", type);
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
+				if (type != null) {
+					addPropertyNameAttributeValueProposals(recorder, context.getMatchString(), "", type);
+				}
 			}
 		}
 	}

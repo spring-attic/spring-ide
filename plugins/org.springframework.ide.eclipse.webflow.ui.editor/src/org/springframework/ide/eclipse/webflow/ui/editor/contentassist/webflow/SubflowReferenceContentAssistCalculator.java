@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 Spring IDE Developers
+ * Copyright (c) 2007 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,17 +42,19 @@ public class SubflowReferenceContentAssistCalculator implements IContentAssistCa
 
 	private void acceptSearchMatch(IContentAssistProposalRecorder recorder, String flowId,
 			IFile file, String prefix) {
-		IWebflowConfig config = Activator.getModel().getProject(file.getProject())
-				.getConfig(flowId);
-		String fileName = "";
-		if (config != null) {
-			fileName = config.getResource().getProjectRelativePath().toString();
+		if (file != null && file.exists()) {
+			IWebflowConfig config = Activator.getModel().getProject(file.getProject())
+					.getConfig(flowId);
+			String fileName = "";
+			if (config != null) {
+				fileName = config.getResource().getProjectRelativePath().toString();
+			}
+			String displayText = flowId + " - " + fileName;
+	
+			Image image = WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
+	
+			recorder.recordProposal(image, RELEVANCE, displayText, flowId, config);
 		}
-		String displayText = flowId + " - " + fileName;
-
-		Image image = WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
-
-		recorder.recordProposal(image, RELEVANCE, displayText, flowId, config);
 	}
 
 }

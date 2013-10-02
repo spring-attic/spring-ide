@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,9 +35,9 @@ import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHype
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
@@ -80,9 +80,11 @@ public class ToolAnnotationBasedHyperlinkDetector extends AbstractAnnotationBase
 			
 			// only return hyperlink if no xml Java hyperlink will be created to avoid duplicates
 			if (detectedHyperlinks == null || detectedHyperlinks.length == 0) {
-				IType type = JdtUtils.getJavaType(file.getProject(), target);
-				if (type != null) {
-					return new JavaElementHyperlink(hyperlinkRegion, type);
+				if (file != null && file.exists()) {
+					IType type = JdtUtils.getJavaType(file.getProject(), target);
+					if (type != null) {
+						return new JavaElementHyperlink(hyperlinkRegion, type);
+					}
 				}
 			}
 		}
@@ -99,15 +101,17 @@ public class ToolAnnotationBasedHyperlinkDetector extends AbstractAnnotationBase
 	}
 
 	private IHyperlink createMethodHyperlink(String target, IRegion hyperlinkRegion, IFile file, String className) {
-		IType type = JdtUtils.getJavaType(file.getProject(), className);
-		try {
-			IMethod method = Introspector.findMethod(type, target, -1, Public.DONT_CARE, Static.DONT_CARE);
-			if (method != null) {
-				return new JavaElementHyperlink(hyperlinkRegion, method);
+		if (file != null && file.exists()) {
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
+			try {
+				IMethod method = Introspector.findMethod(type, target, -1, Public.DONT_CARE, Static.DONT_CARE);
+				if (method != null) {
+					return new JavaElementHyperlink(hyperlinkRegion, method);
+				}
 			}
-		}
-		catch (JavaModelException e) {
-			// ignore this here
+			catch (JavaModelException e) {
+				// ignore this here
+			}
 		}
 		return null;
 	}

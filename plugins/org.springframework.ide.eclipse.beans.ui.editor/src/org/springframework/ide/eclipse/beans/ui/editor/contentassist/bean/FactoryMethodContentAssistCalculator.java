@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,14 +91,17 @@ public class FactoryMethodContentAssistCalculator implements IContentAssistCalcu
 				IType type = calculateType(context);
 				try {
 					// Add special valueOf methods for Enum types
-					if (type.isEnum()) {
-						IType enumType = JdtUtils.getJavaType(context.getFile().getProject(), Enum.class.getName());
-						Set<String> proposedMethods = new HashSet<String>();
-						for (IMethod method : Introspector.findAllMethods(enumType, context
-								.getMatchString(), filter)) {
-							if (!proposedMethods.contains(method.getElementName())) {
-								proposedMethods.add(method.getElementName());
-								createMethodProposal(recorder, method);
+					if (type != null && type.isEnum()) {
+						IFile contextFile = context.getFile();
+						if (contextFile != null && contextFile.exists()) {
+							IType enumType = JdtUtils.getJavaType(context.getFile().getProject(), Enum.class.getName());
+							Set<String> proposedMethods = new HashSet<String>();
+							for (IMethod method : Introspector.findAllMethods(enumType, context
+									.getMatchString(), filter)) {
+								if (!proposedMethods.contains(method.getElementName())) {
+									proposedMethods.add(method.getElementName());
+									createMethodProposal(recorder, method);
+								}
 							}
 						}
 					}
@@ -109,7 +112,10 @@ public class FactoryMethodContentAssistCalculator implements IContentAssistCalcu
 
 			@Override
 			protected IType calculateType(IContentAssistContext context) {
-				return JdtUtils.getJavaType(file.getProject(), factoryClassName);
+				if (file != null && file.exists()) {
+					return JdtUtils.getJavaType(file.getProject(), factoryClassName);
+				}
+				return null;
 			}
 		};
 
