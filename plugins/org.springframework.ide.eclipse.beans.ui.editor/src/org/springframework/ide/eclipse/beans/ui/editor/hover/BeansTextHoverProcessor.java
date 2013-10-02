@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Spring IDE Developers
+ * Copyright (c) 2005 - 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,9 +35,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -48,6 +48,7 @@ import org.w3c.dom.Node;
  * editor
  * @author Christian Dupuis
  * @author Torsten Juergeleit
+ * @author Leo Dos Santos
  */
 @SuppressWarnings("restriction")
 public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
@@ -140,7 +141,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		String result = null;
 		if ("class".equals(attName) && attributes.getNamedItem("class") != null) {
 			String className = attributes.getNamedItem("class").getNodeValue();
-			if (className != null) {
+			if (className != null && file != null) {
 				IType type = JdtUtils.getJavaType(file.getProject(), className);
 				if (type != null) {
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(type);
@@ -233,38 +234,41 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 					.getNodeValue();
 			String className = BeansEditorUtils.getClassNameForBean(
 					file, xmlnode.getOwnerDocument(), xmlnode);
-			IType type = JdtUtils.getJavaType(file.getProject(), className);
-			if (type != null) {
-				try {
-					IMethod[] methods = type.getMethods();
-					for (IMethod method : methods) {
-						if (method.getElementName().equals(factoryMethod)) {
-							BeansJavaDocUtils utils = new BeansJavaDocUtils(
-									method);
-							result = utils.getJavaDoc();
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
+				if (type != null) {
+					try {
+						IMethod[] methods = type.getMethods();
+						for (IMethod method : methods) {
+							if (method.getElementName().equals(factoryMethod)) {
+								BeansJavaDocUtils utils = new BeansJavaDocUtils(
+										method);
+								result = utils.getJavaDoc();
+							}
 						}
 					}
-				}
-				catch (JavaModelException e) {
+					catch (JavaModelException e) {
+					}
 				}
 			}
-
 		}
 		if ("init-method".equals(attName) || "destroy-method".equals(attName)) {
 			String factoryMethod = attributes.getNamedItem(attName)
 					.getNodeValue();
 			String className = BeansEditorUtils.getClassNameForBean(
 					file, xmlnode.getOwnerDocument(), xmlnode);
-			IType type = JdtUtils.getJavaType(file.getProject(), className);
-			try {
-				IMethod method = Introspector.findMethod(type, factoryMethod,
-						0, Public.DONT_CARE, Static.DONT_CARE);
-				if (method != null) {
-					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
-					result = utils.getJavaDoc();
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
+				try {
+					IMethod method = Introspector.findMethod(type, factoryMethod,
+							0, Public.DONT_CARE, Static.DONT_CARE);
+					if (method != null) {
+						BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
+						result = utils.getJavaDoc();
+					}
 				}
-			}
-			catch (JavaModelException e) {
+				catch (JavaModelException e) {
+				}
 			}
 		}
 		else if (("lookup-method".equals(xmlnode.getNodeName()) && "name"
@@ -276,16 +280,18 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 			String className = BeansEditorUtils.getClassNameForBean(
 					file, xmlnode.getOwnerDocument(), 
 					xmlnode.getParentNode());
-			IType type = JdtUtils.getJavaType(file.getProject(), className);
-			try {
-				IMethod method = Introspector.findMethod(type, factoryMethod,
-						0, Public.DONT_CARE, Static.DONT_CARE);
-				if (method != null) {
-					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
-					result = utils.getJavaDoc();
+			if (file != null && file.exists()) {
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
+				try {
+					IMethod method = Introspector.findMethod(type, factoryMethod,
+							0, Public.DONT_CARE, Static.DONT_CARE);
+					if (method != null) {
+						BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
+						result = utils.getJavaDoc();
+					}
 				}
-			}
-			catch (JavaModelException e) {
+				catch (JavaModelException e) {
+				}
 			}
 		}
 		if (result != null && !"".equals(result)) {
