@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-Vendor: %providerName
-Bundle-Version: 3.4.0.qualifier
+Bundle-Version: 3.5.0.qualifier
 Bundle-Localization: plugin
 Bundle-Name: %pluginName
 Bundle-ManifestVersion: 2

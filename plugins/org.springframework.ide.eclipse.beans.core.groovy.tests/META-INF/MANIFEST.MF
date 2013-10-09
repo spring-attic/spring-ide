@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE Beans Core Groovy Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.core.groovy.tests
-Bundle-Version: 3.4.0.qualifier
+Bundle-Version: 3.5.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.core.groovy.tests.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.core,
