@@ -21,7 +21,7 @@
 				<configuration>
 					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 					<testSuite>org.springframework.ide.eclipse.boot.test</testSuite>
-					<testClass>org.springframework.ide.eclipse.boot.SpringBootProjectTests</testClass>
+					<testClass>org.springframework.ide.eclipse.boot.test.SpringBootProjectTests</testClass>
 					<argLine>-Xmx512m</argLine>
 				</configuration>
 			</plugin>

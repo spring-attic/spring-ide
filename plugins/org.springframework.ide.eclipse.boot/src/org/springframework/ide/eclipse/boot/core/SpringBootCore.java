@@ -8,13 +8,13 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot;
+package org.springframework.ide.eclipse.boot.core;
 
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.springframework.ide.eclipse.boot.internal.MavenSpringBootProject;
+import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 
 public class SpringBootCore {
 

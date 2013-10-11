@@ -4,7 +4,7 @@ Bundle-Name: Boot
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot
 Bundle-Vendor: GoPivotal Inc.
 Bundle-Version: 3.4.0.qualifier
-Bundle-Activator: org.springframework.ide.eclipse.boot.BootActivator
+Bundle-Activator: org.springframework.ide.eclipse.boot.core.BootActivator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -16,4 +16,4 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.eclipse.boot
+Export-Package: org.springframework.ide.eclipse.boot.core

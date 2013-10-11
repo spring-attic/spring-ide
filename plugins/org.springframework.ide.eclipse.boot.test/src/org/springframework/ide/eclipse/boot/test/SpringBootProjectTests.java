@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot;
+package org.springframework.ide.eclipse.boot.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +23,9 @@ import junit.framework.TestCase;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
-import org.springframework.ide.eclipse.boot.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 

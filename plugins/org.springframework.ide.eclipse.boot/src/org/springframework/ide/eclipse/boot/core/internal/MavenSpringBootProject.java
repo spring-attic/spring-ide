@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.internal;
+package org.springframework.ide.eclipse.boot.core.internal;
 
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
@@ -43,10 +43,10 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
-import org.springframework.ide.eclipse.boot.IMavenCoordinates;
-import org.springframework.ide.eclipse.boot.MavenCoordinates;
-import org.springframework.ide.eclipse.boot.SpringBootStarter;
-import org.springframework.ide.eclipse.boot.StarterId;
+import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
+import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
+import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.core.StarterId;
 import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot;
+package org.springframework.ide.eclipse.boot.core;
 
 /**
  * Identifies a boot starter within the scope of a project (i.e. this is a 'key' that can

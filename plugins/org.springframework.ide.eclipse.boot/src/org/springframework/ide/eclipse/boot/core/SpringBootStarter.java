@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot;
+package org.springframework.ide.eclipse.boot.core;
 
 import org.eclipse.core.runtime.Assert;
 
