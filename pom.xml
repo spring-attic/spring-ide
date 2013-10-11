@@ -178,6 +178,10 @@
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature</module>
 
+		<!-- boot -->
+		<module>plugins/org.springframework.ide.eclipse.boot</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
+
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.aop.feature.source</module>
