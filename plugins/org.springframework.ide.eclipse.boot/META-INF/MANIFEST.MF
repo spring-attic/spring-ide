@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Boot
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot;singleton:=true
 Bundle-Vendor: GoPivotal Inc.
-Bundle-Version: 3.4.0.qualifier
+Bundle-Version: 3.5.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.core.BootActivator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
