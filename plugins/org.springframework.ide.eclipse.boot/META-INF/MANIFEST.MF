@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Boot
-Bundle-SymbolicName: org.springframework.ide.eclipse.boot
+Bundle-SymbolicName: org.springframework.ide.eclipse.boot;singleton:=true
 Bundle-Vendor: GoPivotal Inc.
 Bundle-Version: 3.4.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.core.BootActivator
@@ -13,7 +13,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.core.ui,
  org.eclipse.text,
  org.eclipse.wst.xml.core,
- org.springsource.ide.eclipse.commons.core
+ org.springsource.ide.eclipse.commons.core,
+ org.springsource.ide.eclipse.commons.frameworks.ui,
+ org.eclipse.core.expressions,
+ org.eclipse.jdt.core,
+ org.springsource.ide.eclipse.commons.livexp
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core

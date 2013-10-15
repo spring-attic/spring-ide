@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.core;
 
 import org.eclipse.core.runtime.Assert;
+import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 /**
  * A 'SpringBootStarter is maven style dependency that can be added to 
@@ -18,7 +19,7 @@ import org.eclipse.core.runtime.Assert;
  * 
  * @author Kris De Volder
  */
-public class SpringBootStarter {
+public class SpringBootStarter implements Ilabelable {
 	
 	/**
 	 * ArtifactId prefix to recognize when a dependency is a spring-boot-starter.
@@ -93,6 +94,14 @@ public class SpringBootStarter {
 			return false;
 		return true;
 	}
-	
+
+	/**
+	 * Provides a nice label that can be shown UI to identify a starter. By implementing this
+	 * interface we don't need to provide custom label providers in many contexts. 
+	 */
+	@Override
+	public String getLabel() {
+		return getName();
+	}
 
 }

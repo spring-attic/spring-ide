@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <!-- this extension point is deprecated but since the hosting menu still uses it we
+           have no choice (unless we convert to hosting menu and all contributions to the new
+           mechanism -->
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.springframework.ide.eclipse.beans.ui.actions.springProject">
+         <visibility>
+            <objectState
+                  name="nature"
+                  value="org.springframework.ide.eclipse.core.springnature">
+            </objectState>
+         </visibility>
+         <action
+               label="Edit Boot Starters"
+               class="org.springframework.ide.eclipse.boot.ui.EditStartersAction"
+               enablesFor="1"
+               menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
+               id="org.springframework.ide.eclipse.boot.ui.EditStartersAction">
+         </action>
+      </objectContribution>
+  </extension>
+
+<!--   
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.springframework.ide.eclipse.beans.ui.actions.springProject">
+   
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+			locationURI="menu:org.springframework.ide.eclipse.ui.tools">
+			locationURI="popup:org.eclipse.ui.popup.any?after=additions" 
+             <command
+                   commandId="org.springframework.ide.eclipse.boot.EditStartersCommand"
+                   style="push">
+                <visibleWhen
+                      checkEnabled="true">
+                </visibleWhen>
+             </command>      
+      </menuContribution>
+   </extension>
+-->
+</plugin>
