@@ -48,7 +48,7 @@ public class EditStartersAction extends AbstractActionDelegate {
 			EditStartersDialog.openFor(getSelectedProject(), getShell());
 		} catch (CoreException e) {
 			BootActivator.log(e);
-			MessageDialog.openError(getShell(), "Error", "The dialog could not be opened because of an error: "+ExceptionUtil.getMessage(e)+"\n\n"
+			MessageDialog.openError(getShell(), "Error", ExceptionUtil.getMessage(e)+"\n\n"
 					+ "Check the error log for more details");
 		}
 	}

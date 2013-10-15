@@ -12,10 +12,16 @@
             adaptable="true"
             id="org.springframework.ide.eclipse.beans.ui.actions.springProject">
          <visibility>
-            <objectState
-                  name="nature"
-                  value="org.springframework.ide.eclipse.core.springnature">
-            </objectState>
+            <and>
+		        <objectState
+		              name="nature"
+		              value="org.springframework.ide.eclipse.core.springnature">
+		        </objectState>
+		        <objectState
+		              name="nature"
+		              value="org.eclipse.m2e.core.maven2Nature">
+		        </objectState>
+            </and>
          </visibility>
          <action
                label="Edit Boot Starters"

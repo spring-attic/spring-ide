@@ -15,14 +15,21 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
+import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 
 public class SpringBootCore {
+
+	private static final String M2E_NATURE = "org.eclipse.m2e.core.maven2Nature";
 
 	/**
 	 * @return a SpringBoot centric view on a eclipse project.
 	 */
 	public static ISpringBootProject create(IProject project) throws CoreException {
-		return new MavenSpringBootProject(project);
+		if (project.hasNature(M2E_NATURE)) {
+			return new MavenSpringBootProject(project);
+		} else {
+			throw ExceptionUtil.coreException("This feature is only implemented for m2e enabled maven projects");
+		}
 	}
 	
 }
