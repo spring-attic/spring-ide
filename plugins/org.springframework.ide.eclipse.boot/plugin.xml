@@ -27,28 +27,4 @@
       </objectContribution>
   </extension>
 
-<!--   
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            id="org.springframework.ide.eclipse.beans.ui.actions.springProject">
-   
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-			locationURI="menu:org.springframework.ide.eclipse.ui.tools">
-			locationURI="popup:org.eclipse.ui.popup.any?after=additions" 
-             <command
-                   commandId="org.springframework.ide.eclipse.boot.EditStartersCommand"
-                   style="push">
-                <visibleWhen
-                      checkEnabled="true">
-                </visibleWhen>
-             </command>      
-      </menuContribution>
-   </extension>
--->
 </plugin>
