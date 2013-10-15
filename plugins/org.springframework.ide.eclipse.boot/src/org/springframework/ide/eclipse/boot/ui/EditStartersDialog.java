@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.EditStartersModel;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
@@ -22,6 +23,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseMultipleSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
 /**
