@@ -27,4 +27,81 @@
       </objectContribution>
   </extension>
 
+  <!-- run as boot support -->
+  
+<extension
+       point="org.eclipse.core.expressions.propertyTesters">
+    <propertyTester
+          class="org.springframework.ide.eclipse.boot.core.BootPropertyTester"
+          id="org.springsource.ide.eclipse.boot.BootPropertyTester"
+          namespace="org.springsource.ide.eclipse.boot"
+          properties="isBootProject,isBootResource"
+          type="org.eclipse.core.resources.IResource">
+    </propertyTester>
+ </extension>
+
+ <extension
+       point="org.eclipse.debug.ui.launchShortcuts">
+    <shortcut
+          class="org.springframework.ide.eclipse.boot.ui.BootLaunchShortcut"
+          description="Run or Debug as a Standalone Spring Boot Application"
+          id="org.springsource.ide.eclipse.boot.BootLaunchShortcut"
+          icon="platform:/plugin/org.springsource.ide.eclipse.commons.ui/icons/rss/springsource.png"
+          label="Spring Boot App"
+          modes="run, debug">
+        <contextualLaunch>
+           <enablement>
+             <count value="1"/>
+             <iterate>
+           	   <adapt type="org.eclipse.core.resources.IResource">
+           	      <test
+                        property="org.springsource.ide.eclipse.boot.isBootResource"
+                        value="true">
+           	      </test>
+           	   </adapt>
+             </iterate>
+           </enablement>
+        </contextualLaunch>
+        <configurationType
+               id="org.eclipse.jdt.launching.localJavaApplication">
+         </configurationType>
+        <description
+               description="Run as Spring Boot App"
+               mode="run">
+         </description>
+         <description
+               description="Debug as Spring Boot App"
+               mode="debug">
+         </description>
+    </shortcut>
+ </extension>
+ 
+   <extension point="org.eclipse.ui.commands">
+      <command
+            name="Debug Spring Boot App"
+            description="Debug Spring Boot App"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.springsource.ide.eclipse.boot.BootLaunchShortcut.debug">
+      </command>
+      <command
+            name="Run Spring Boot App"
+            description="Run Spring Boot App"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.springsource.ide.eclipse.boot.BootLaunchShortcut.run">
+      </command>
+   </extension>
+   <extension point="org.eclipse.ui.bindings">
+       <key
+            sequence="M2+M3+X B"
+            commandId="org.springsource.ide.eclipse.boot.BootLaunchShortcut.run"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+   </extension>
+   <extension point="org.eclipse.ui.bindings">
+       <key
+            sequence="M2+M3+D B"
+            commandId="org.springsource.ide.eclipse.boot.BootLaunchShortcut.debug"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+   </extension>
+  
+
 </plugin>

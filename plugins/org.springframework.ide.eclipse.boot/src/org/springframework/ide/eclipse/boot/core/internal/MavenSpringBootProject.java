@@ -58,7 +58,7 @@ import org.w3c.dom.Element;
 public class MavenSpringBootProject extends SpringBootProject {
 	
 	//TODO: all of this code completely ignores the version infos in SpringBootStarter objects.
-	// This is ok assuming that versions always follow the 'managed' verwsion in parent pom.
+	// This is ok assuming that versions always follow the 'managed' version in parent pom.
 	// If that is not the case then... ??
 
 	private static final List<SpringBootStarter> NO_STARTERS = Arrays
@@ -131,26 +131,9 @@ public class MavenSpringBootProject extends SpringBootProject {
 			throws CoreException {
 		try {
 			List<SpringBootStarter> starters = getBootStarters();
-			boolean changed = starters.add(starter);
+			boolean changed = starters.remove(starter);
 			if (changed) {
-				// We are assuming that version of starter matches the 'managed'
-				// version in parent pom so the
-				// version doesn't need to be set.
-
-				IFile file = getPomFile();
-				performOnDOMDocument(new OperationTuple(file, new Operation() {
-					public void process(Document document) {
-						Element depsEl = getChild(
-								document.getDocumentElement(), DEPENDENCIES);
-						Element dep = findChild(
-								depsEl,
-								DEPENDENCY,
-								childEquals(GROUP_ID, starter.getGroupId()),
-								childEquals(ARTIFACT_ID,
-										starter.getArtifactId()));
-						depsEl.removeChild(dep);
-					}
-				}));
+				setStarters(starters);
 			}
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);
@@ -164,25 +147,8 @@ public class MavenSpringBootProject extends SpringBootProject {
 			List<SpringBootStarter> starters = getBootStarters();
 			boolean changed = starters.add(starter);
 			if (changed) {
-				// We are assuming that version of starter matches the 'managed'
-				// version in parent pom so the
-				// version doesn't need to be set.
-
-				IFile file = getPomFile();
-				performOnDOMDocument(new OperationTuple(file, new Operation() {
-					public void process(Document document) {
-						Element depsEl = getChild(
-								document.getDocumentElement(), DEPENDENCIES);
-						/* Element dep = */PomHelper.createDependency(depsEl,
-								starter.getGroupId(), starter.getArtifactId(),
-								null);
-					}
-				}));
+				setStarters(starters);
 			}
-
-			// if (changed) {
-			// setBootStarters(starters);
-			// }
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);
 		}
@@ -203,7 +169,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 							document.getDocumentElement(), DEPENDENCIES);
 					List<Element> children = findChilds(depsEl, DEPENDENCY);
 					for (Element c : children) {
-						//We only care about 'starter' dependencies. Leave everythung else alone.
+						//We only care about 'starter' dependencies. Leave everything else alone.
 						// Also... don't touch nodes that are already there, unless they are to
 						// be removed. This way we don't mess up versions, comments or other stuff
 						// that a user may have inserted via manual edits.

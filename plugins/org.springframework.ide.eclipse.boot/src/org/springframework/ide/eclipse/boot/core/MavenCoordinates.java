@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
-
 public class MavenCoordinates implements IMavenCoordinates {
 
 	private final String group;

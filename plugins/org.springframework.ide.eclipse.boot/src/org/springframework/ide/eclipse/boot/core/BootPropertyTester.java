@@ -22,10 +22,6 @@ import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
 public class BootPropertyTester extends PropertyTester {
 	
-	//TODO: this code is copied from commmons. But it belongs in here along with the other code
-	//  related to spring boot that still lives in commons. 
-	//  All the boot code in commons should be removed and moved here.
-
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
