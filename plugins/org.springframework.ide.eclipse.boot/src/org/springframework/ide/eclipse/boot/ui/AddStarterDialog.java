@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * GoPivotal, Inc. - initial API and implementation
+ *     GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.ui;
 
@@ -15,26 +15,21 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
-import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-import org.springsource.ide.eclipse.commons.livexp.ui.ChooseMultipleSection;
+import org.springframework.ide.eclipse.boot.core.dialogs.AddStarterModel;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.InfoFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
-/**
- * @author Kris De Volder
- */
-public class EditStartersDialog extends DialogWithSections {
+public class AddStarterDialog  extends DialogWithSections {
 
-	public EditStartersModel model;
+	private AddStarterModel model;
 
-	public EditStartersDialog(EditStartersModel model, Shell shell) {
-		super("Edit Spring Boot Starters", model, shell);
+	public AddStarterDialog(AddStarterModel model, Shell shell) {
+		super("Add Spring Starter to pom", model, shell);
 		this.model = model;
 	}
 	
@@ -42,13 +37,13 @@ public class EditStartersDialog extends DialogWithSections {
 	protected List<WizardPageSection> createSections() throws CoreException {
 		//return super.createSections();
 		return Arrays.asList(
-				new CommentSection(this, "Project: "+model.getProjectName()),
-				new ChooseMultipleSection<SpringBootStarter>(this, "Starters", model.getAvailableStarters(), model.starters, Validator.constant(ValidationResult.OK))
+				new InfoFieldSection(this, "Project", model.getProjectName()),
+				new ChooseOneSection<SpringBootStarter>(this, "Starters", model.getAvailableStarters(), model.chosen, model.validator)
 		);
 	}
 
 	public static int openFor(IProject selectedProject, Shell shell) throws CoreException {
-		return new EditStartersDialog(new EditStartersModel(selectedProject), shell).open();
+		return new AddStarterDialog(new AddStarterModel(selectedProject), shell).open();
 	}
-
+	
 }

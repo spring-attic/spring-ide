@@ -24,7 +24,6 @@ import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.Abstr
 
 public class EditStartersAction extends AbstractActionDelegate {
 	
-	
 	@Override
 	public void selectionChanged(IAction action, ISelection sel) {
 		super.selectionChanged(action, sel);
