@@ -49,7 +49,7 @@ public class GithubClient {
 	private static final Pattern GITHUB_HOST = Pattern.compile("(.*\\.|)github\\.com");
 		//pattern should match 'github.com' and api.github.com'
 
-	private static final int CONNECT_TIMEOUT = 3000;
+	private static final int CONNECT_TIMEOUT = 10000;
 
 	private static final boolean DEBUG = false;
 	private static final boolean LOG_GITHUB_RATE_LIMIT = false;
