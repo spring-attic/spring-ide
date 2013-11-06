@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.dialogs.AddStarterModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSection;
-import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.InfoFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
