@@ -57,9 +57,15 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class MavenSpringBootProject extends SpringBootProject {
 	
-	//TODO: all of this code completely ignores the version infos in SpringBootStarter objects.
+	//TODO: all of the starter manipulation code completely ignores the version infos in SpringBootStarter objects.
 	// This is ok assuming that versions always follow the 'managed' version in parent pom.
 	// If that is not the case then... ??
+	
+	//TODO: the code adding raw maven deps has the oposite problem. It includes version numbers even
+	//  when they are unnecessary (managed by parent pom).
+	
+	//TODO: properly handle pom manipulation when pom file is open / dirty in an editor.
+	// minimum requirement: detect and prohibit by throwing an error.
 
 	private static final List<SpringBootStarter> NO_STARTERS = Arrays
 			.asList(new SpringBootStarter[0]);
@@ -154,6 +160,32 @@ public class MavenSpringBootProject extends SpringBootProject {
 		}
 	}
 
+	@Override
+	public void addMavenDependency(final MavenCoordinates dep) throws CoreException {
+		try {
+			IFile file = getPomFile();
+			performOnDOMDocument(new OperationTuple(file, new Operation() {
+				public void process(Document document) {
+					Element depsEl = getChild(
+							document.getDocumentElement(), DEPENDENCIES);
+					if (depsEl==null) {
+						//TODO: handle this case
+					} else {
+						//TODO: if version is managed in parent pom and matches version we are trying to add
+						//  then we should leave version blank.
+						PomHelper.createDependency(depsEl,
+								dep.getGroupId(), 
+								dep.getArtifactId(),
+								dep.getVersion()
+						);
+					}
+				}
+			}));
+		} catch (Throwable e) {
+			throw ExceptionUtil.coreException(e);
+		}
+	}
+	
 	@Override
 	public void setStarters(Collection<SpringBootStarter> _starters) throws CoreException {
 		try {

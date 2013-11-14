@@ -222,5 +222,16 @@
       </menuContribution>
    </extension>
   
+   <!-- TODO this extension point won't allow us to provide discovery on a per project basis. So it isn't quite right but
+        it is all we got for now so let's get something working and then fix that later -->
+   <extension
+         id="springBootExternalTypes"
+         point="org.spring.ide.eclipse.completions.externaltypes">
+      <typeSource
+            class="org.springframework.ide.eclipse.boot.completions.SpringBootTypeDiscovery">
+      </typeSource>
+   </extension>
+  
+  
 
 </plugin>

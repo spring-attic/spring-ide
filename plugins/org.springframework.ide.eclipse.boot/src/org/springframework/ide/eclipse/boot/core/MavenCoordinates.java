@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import org.eclipse.core.runtime.Assert;
+
 public class MavenCoordinates implements IMavenCoordinates {
 
 	private final String group;
@@ -20,6 +22,24 @@ public class MavenCoordinates implements IMavenCoordinates {
 		this.group = group;
 		this.artifact = artifact;
 		this.version = version;
+	}
+
+	/**
+	 * Parse from a string like: 		
+	 * org.springframework:spring-core:jar:4.0.0.RC1
+	 * <p>
+	 * We are really only interested in jars. So if the dependency is not a jar
+	 * then returns null.
+	 */
+	public static MavenCoordinates parse(String artifact) {
+		String[] pieces = artifact.split(":");
+		if (pieces.length==4) {
+			String type = pieces[2];
+			if ("jar".equals(type)) {
+				return new MavenCoordinates(pieces[0], pieces[1], pieces[3]);
+			}
+		}
+		throw new IllegalArgumentException("Unsupported artifact string: '"+artifact+"'");
 	}
 
 	@Override
