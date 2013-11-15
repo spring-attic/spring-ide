@@ -3,22 +3,19 @@ package org.springframework.ide.eclipse.boot.completions;
 import java.io.File;
 import java.net.URI;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
-import java.util.TreeMap;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
-import org.codehaus.plexus.util.StringInputStream;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
@@ -40,12 +37,16 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Kris De Volder
  */
 public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
+	
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	public class DGraphTypeSouce implements ExternalTypeSource {
+	public static class DGraphTypeSource implements ExternalTypeSource {
 
+		private MultiMap dgraph;
 		private ExternalType type;
 
-		public DGraphTypeSouce(ExternalType type) {
+		public DGraphTypeSource(MultiMap dgraph, ExternalType type) {
+			this.dgraph = dgraph;
 			this.type = type;
 		}
 
@@ -84,18 +85,25 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 
 	//TODO: should generate data based on spring boot version of project. For now we just have a sample file that's hard-coded here.
 	private static final URI XML_DATA_LOCATION = new File("/home/kdvolder/workspaces-sts/spring-ide/fun-with-maven/boot-completion-data.txt").toURI();
-	
+
 	private MultiMap dgraph = new MultiValueMap();
 	
 	private final class MyHandler extends DefaultHandler {
 		Stack<Object> path = new Stack<Object>();
+		
+		/**
+		 * Map used to 'reuse' strings if they have the same content. We expect a packag name to be used
+		 * many times (depending on the number of types in the package). So reusing the Stirng
+		 * objects could save memory. 
+		 */
+		private HashMap<String, String> strings = new HashMap<String, String>();
 
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			Object parentElement = peek();
 			Object thisElement = null;
 			if (qName.equals("artifact")) {
-				MavenCoordinates artifact = MavenCoordinates.parse(attributes.getValue("id"));
+				MavenCoordinates artifact = MavenCoordinates_parse(attributes.getValue("id"));
 				if (artifact!=null) {
 					thisElement = artifact;
 					if (parentElement!=null) {
@@ -104,7 +112,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 					}
 				}
 			} else if (qName.equals("type")) {
-				ExternalType type = new ExternalType(attributes.getValue("id"));
+				ExternalType type = ExternalType_parse(attributes.getValue("id"));
 				thisElement = type;
 				Assert.isLegal(parentElement instanceof MavenCoordinates, "parent of a type should be an artifact (that contains it) but it was: "+parentElement);
 				dgraph.put(thisElement, parentElement);
@@ -113,6 +121,17 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			path.push(thisElement); //Yes we might push some null's but that makes it easier to ensure pops and pushes are
 									// 'balanced' as it keeps the 'when to push and pop' logic very simple (i.e. always push on startElement and
 									// always pop on endElement
+		}
+
+		private ExternalType ExternalType_parse(String fqName) {
+			int split = fqName.lastIndexOf('.');
+			if (split>0) {
+				String name = fqName.substring(split+1);
+				String packageName = fqName.substring(0, split);
+				return new ExternalType(intern(name),intern(packageName));
+			} else {
+				throw new IllegalArgumentException("Invalid fqName: "+fqName);
+			}
 		}
 
 		@Override
@@ -129,7 +148,36 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 
 		public void dispose() {
 			Assert.isLegal(path.isEmpty(), "Bug: pops and pushes are out of whack!");
+			strings = null;
 		}
+		
+		/**
+		 * Parse from a string like: 		
+		 * org.springframework:spring-core:jar:4.0.0.RC1
+		 * <p>
+		 * We are really only interested in jars. So if the dependency is not a jar
+		 * then returns null.
+		 */
+		public MavenCoordinates MavenCoordinates_parse(String artifact) {
+			String[] pieces = artifact.split(":");
+			if (pieces.length==4) {
+				String type = pieces[2];
+				if ("jar".equals(type)) {
+					return new MavenCoordinates(intern(pieces[0]), intern(pieces[1]), intern(pieces[3]));
+				}
+			}
+			throw new IllegalArgumentException("Unsupported artifact string: '"+artifact+"'");
+		}
+
+		private String intern(String string) {
+			String existing = strings.get(string);
+			if (existing==null) {
+				strings.put(string, string);
+				existing = string;
+			}
+			return existing;
+		}
+		
 	}
 
 
@@ -142,6 +190,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		handler.dispose(); 
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void getTypes(Requestor<ExternalTypeEntry> requestor) {
 		Set nodes = dgraph.keySet();
@@ -149,11 +198,42 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			//Not all nodes in the graph represent types. Fewer of them represent artifacts.
 			if (node instanceof ExternalType) {
 				ExternalType type = (ExternalType) node;
-				requestor.receive(new ExternalTypeEntry(type, new DGraphTypeSouce(type)));
+				requestor.receive(new ExternalTypeEntry(type, new DGraphTypeSource(dgraph, type)));
+			}
+
+			if (DEBUG) {
+				if (node instanceof MavenCoordinates) {
+					Set ancestors = getAncestors(dgraph, node); 
+					if (!ancestors.isEmpty()) {
+						System.out.println(node+" has ancestors: ");
+						for (Object anc : ancestors) {
+							System.out.println("   "+anc);
+						}
+					}
+				}
+			}
+		}
+		
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Set getAncestors(MultiMap dgraph, Object node) {
+		Set ancestors = new HashSet();
+		collectAncestors(dgraph, node, ancestors);
+		return ancestors;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static void collectAncestors(MultiMap dgraph, Object node, Set ancestors) {
+		Collection parents = (Collection) dgraph.get(node);
+		if (parents!=null && !parents.isEmpty()) {
+			for (Object parent : parents) {
+				boolean isNew = ancestors.add(parent);
+				if (isNew) {
+					collectAncestors(dgraph, parent, ancestors);
+				}
 			}
 		}
 	}
-	
-	
 
 }
