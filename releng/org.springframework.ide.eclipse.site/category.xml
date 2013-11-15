@@ -211,6 +211,7 @@
 		<bundle id="edu.emory.mathcs.backport" version="0.0.0"/>
 		<bundle id="edu.emory.mathcs.backport.source" version="0.0.0"/>
 		<bundle id="org.aopalliance" version="0.0.0"/>
+		
 		<bundle id="org.apache.commons.codec" version="0.0.0"/>
 		<bundle id="org.apache.commons.codec.source" version="0.0.0"/>
 		<bundle id="org.apache.commons.collections" version="0.0.0"/>
@@ -223,10 +224,14 @@
 		<bundle id="org.apache.httpcomponents.httpclient.source" version="0.0.0"/>
 		<bundle id="org.apache.httpcomponents.httpcore" version="0.0.0"/>
 		<bundle id="org.apache.httpcomponents.httpcore.source" version="0.0.0"/>
+		
 		<bundle id="org.codehaus.jackson.core" version="0.0.0"/>
 		<bundle id="org.codehaus.jackson.core.source" version="0.0.0"/>
 		<bundle id="org.codehaus.jackson.mapper" version="0.0.0"/>
 		<bundle id="org.codehaus.jackson.mapper.source" version="0.0.0"/>
+
+		<bundle id="org.objectweb.asm" version="0.0.0"/>
+		<bundle id="org.objectweb.asm.source" version="0.0.0"/>
 
 		<bundle id="org.springframework.aop" version="0.0.0"/>
 		<bundle id="org.springframework.aop.source" version="0.0.0"/>

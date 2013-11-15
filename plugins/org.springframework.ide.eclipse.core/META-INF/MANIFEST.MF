@@ -82,3 +82,7 @@ Import-Package: org.apache.commons.logging,
 DynamicImport-Package: *
 Bundle-ClassPath: .,
  lib/xbean-nonlocking-classloader-3.7.jar
+Require-Bundle: org.aspectj.runtime,
+ org.aspectj.weaver,
+ org.objectweb.asm,
+ org.aopalliance
