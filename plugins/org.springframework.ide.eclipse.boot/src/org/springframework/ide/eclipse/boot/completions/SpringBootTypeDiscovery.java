@@ -1,5 +1,6 @@
 package org.springframework.ide.eclipse.boot.completions;
 
+import java.beans.DesignMode;
 import java.io.File;
 import java.net.URI;
 import java.util.Collection;
@@ -21,6 +22,8 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.ui.ChooseDependencyDialog;
+import org.springsource.ide.eclipse.commons.completions.externaltype.AbstractExternalTypeSource;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscovery;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeEntry;
@@ -40,16 +43,17 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	public static class DGraphTypeSource implements ExternalTypeSource {
+	public static class DGraphTypeSource extends AbstractExternalTypeSource {
 
-		private MultiMap dgraph;
+		private DirectedGraph dgraph;
 		private ExternalType type;
 
-		public DGraphTypeSource(MultiMap dgraph, ExternalType type) {
+		public DGraphTypeSource(DirectedGraph dgraph, ExternalType type) {
 			this.dgraph = dgraph;
 			this.type = type;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void addToClassPath(IJavaProject project, IProgressMonitor mon) {
 			try {
@@ -57,10 +61,10 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 				//TODO only one way to add to classpath out of a potential multiple ways to add the type is implemented.
 				ISpringBootProject bootProject = SpringBootCore.create(project);
 
-				Collection<MavenCoordinates> sources = (Collection<MavenCoordinates>) dgraph.get(type);
-				for (MavenCoordinates source : sources) {
+				Collection<MavenCoordinates> sources = (Collection<MavenCoordinates>) dgraph.getDescendants(type);
+				MavenCoordinates source = chooseSource(sources);
+				if (source!=null) {
 					bootProject.addMavenDependency(source);
-					break;
 				}
 				
 //				IFile pomFile = project.getProject().getFile("pom.xml");
@@ -81,12 +85,75 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 				BootActivator.log(e);
 			}
 		}
+
+		/**
+		 * Open a dialog to let user choose one of the several ways a type can get added to
+		 * the classpath. 
+		 * <p>
+		 * If only one choice is available the dialog is skipped and that choice is returned immediately.
+		 * <p>
+		 * If the collection of choices is empty then the dialog is also skipped and null is returned.
+		 */
+		private MavenCoordinates chooseSource(Collection<MavenCoordinates> sources) {
+			if (sources!=null) {
+				if (sources.size()==1) {
+					for (MavenCoordinates mavenCoordinates : sources) {
+						return mavenCoordinates;
+					}
+				} else if (sources.isEmpty()) {
+					return null;
+				}
+				//There are at least 2 choices available. Offer them to the user.
+				return ChooseDependencyDialog.openOn("Choose a Dependency",
+						"Type "+type.getFullyQualifiedName()+" is not yet on the classpath.\n"+
+						"How do you want to add it?",
+						sources
+				);
+			}
+			return null;
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public String getDescription() {
+			//The dgraph map actually contains inverted dependency edges so we have to
+			// get 'descendants' to actually get the 'ancestors' in the real dgraph.
+			Set ancestors = dgraph.getDescendants(type);
+			if (!ancestors.isEmpty()) {
+				StringBuilder description = new StringBuilder();
+				description.append(
+						"Add type <b>"+type.getName()+"</b> from<br>"+ 
+						"package <b>"+type.getPackage()+"</b><br>"+
+						"to the classpath via one of the following:<p>");
+				description.append("<ul>");
+				for (Object object : ancestors) {
+					description.append(toHtml(object));
+				}
+				description.append("</ul>");
+				return description.toString();
+			}
+			return null;
+		}
+
+		private String toHtml(Object object) {
+			if (object instanceof MavenCoordinates) {
+				MavenCoordinates artifact = (MavenCoordinates) object;
+				StringBuilder html = new StringBuilder();
+				html.append("<li>");
+				html.append("<b>"+artifact.getArtifactId()+"</b><br>");
+				html.append("group: "+artifact.getGroupId()+"<br>");
+				html.append("version: "+artifact.getVersion());
+				html.append("</li>");
+				return html.toString();
+			}
+			return object.toString();
+		}
 	}
 
-	//TODO: should generate data based on spring boot version of project. For now we just have a sample file that's hard-coded here.
+	//TODO: should generate or obtain this data based on spring boot version of project. For now we just have a sample file that's hard-coded here.
 	private static final URI XML_DATA_LOCATION = new File("/home/kdvolder/workspaces-sts/spring-ide/fun-with-maven/boot-completion-data.txt").toURI();
 
-	private MultiMap dgraph = new MultiValueMap();
+	private DirectedGraph dgraph = new DirectedGraph();
 	
 	private final class MyHandler extends DefaultHandler {
 		Stack<Object> path = new Stack<Object>();
@@ -108,14 +175,14 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 					thisElement = artifact;
 					if (parentElement!=null) {
 						Assert.isLegal(parentElement instanceof MavenCoordinates, "parent of artifact should always be another artififact");
-						dgraph.put(thisElement, parentElement);
+						dgraph.addEdge(thisElement, parentElement);
 					}
 				}
 			} else if (qName.equals("type")) {
 				ExternalType type = ExternalType_parse(attributes.getValue("id"));
 				thisElement = type;
 				Assert.isLegal(parentElement instanceof MavenCoordinates, "parent of a type should be an artifact (that contains it) but it was: "+parentElement);
-				dgraph.put(thisElement, parentElement);
+				dgraph.addEdge(thisElement, parentElement);
 			}
 			//else { ... something we don't care about ... }
 			path.push(thisElement); //Yes we might push some null's but that makes it easier to ensure pops and pushes are
@@ -182,6 +249,8 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 
 
 	public SpringBootTypeDiscovery() throws Exception {
+		//Should parsing be done lazyly?
+		// Alternatively the callers of this contructor could do it from a job.
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		SAXParser saxParser = factory.newSAXParser();
 		MyHandler handler = new MyHandler();
@@ -193,9 +262,14 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void getTypes(Requestor<ExternalTypeEntry> requestor) {
-		Set nodes = dgraph.keySet();
+		Set nodes = dgraph.getNonLeafNodes();
+		//We are only interested in 'type' nodes. These should always have pointer to
+		// at least one maven artifact that contains them. Therefore type nodes are
+		// never leaf nodes.
 		for (Object node : nodes) {
-			//Not all nodes in the graph represent types. Fewer of them represent artifacts.
+
+			//Not all non-leaf nodes in the graph represent types. Some (fewer) of them represent artifacts
+			// that were added to the graph because they are depended on by other artifacts.
 			if (node instanceof ExternalType) {
 				ExternalType type = (ExternalType) node;
 				requestor.receive(new ExternalTypeEntry(type, new DGraphTypeSource(dgraph, type)));
@@ -203,7 +277,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 
 			if (DEBUG) {
 				if (node instanceof MavenCoordinates) {
-					Set ancestors = getAncestors(dgraph, node); 
+					Set ancestors = dgraph.getDescendants(node); 
 					if (!ancestors.isEmpty()) {
 						System.out.println(node+" has ancestors: ");
 						for (Object anc : ancestors) {
@@ -215,25 +289,4 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		}
 		
 	}
-
-	@SuppressWarnings("rawtypes")
-	private static Set getAncestors(MultiMap dgraph, Object node) {
-		Set ancestors = new HashSet();
-		collectAncestors(dgraph, node, ancestors);
-		return ancestors;
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static void collectAncestors(MultiMap dgraph, Object node, Set ancestors) {
-		Collection parents = (Collection) dgraph.get(node);
-		if (parents!=null && !parents.isEmpty()) {
-			for (Object parent : parents) {
-				boolean isNew = ancestors.add(parent);
-				if (isNew) {
-					collectAncestors(dgraph, parent, ancestors);
-				}
-			}
-		}
-	}
-
 }
