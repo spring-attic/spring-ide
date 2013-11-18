@@ -3,6 +3,7 @@ package org.springframework.ide.eclipse.boot.completions;
 import java.beans.DesignMode;
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -105,8 +106,8 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 				}
 				//There are at least 2 choices available. Offer them to the user.
 				return ChooseDependencyDialog.openOn("Choose a Dependency",
-						"Type "+type.getFullyQualifiedName()+" is not yet on the classpath.\n"+
-						"How do you want to add it?",
+						"How do you want to add <b>"+type.getName()
+						+"</b> from <b>"+type.getPackage()+"</b> to your classpath?",
 						sources
 				);
 			}
@@ -151,7 +152,15 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	}
 
 	//TODO: should generate or obtain this data based on spring boot version of project. For now we just have a sample file that's hard-coded here.
-	private static final URI XML_DATA_LOCATION = new File("/home/kdvolder/workspaces-sts/spring-ide/fun-with-maven/boot-completion-data.txt").toURI();
+//	private static final URI XML_DATA_LOCATION = new File("/home/kdvolder/workspaces-sts/spring-ide/fun-with-maven/boot-completion-data.txt").toURI();
+	private static URI XML_DATA_LOCATION;
+	static {
+		try {
+			XML_DATA_LOCATION = new URI("platform:/plugin/org.springframework.ide.eclipse.boot/resources/boot-completion-data.txt");
+		} catch (URISyntaxException e) {
+			BootActivator.log(e);
+		}
+	}
 
 	private DirectedGraph dgraph = new DirectedGraph();
 	
@@ -220,18 +229,18 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		
 		/**
 		 * Parse from a string like: 		
-		 * org.springframework:spring-core:jar:4.0.0.RC1
+		 * org.springframework:spring-core:4.0.0.RC1
 		 * <p>
 		 * We are really only interested in jars. So if the dependency is not a jar
 		 * then returns null.
 		 */
 		public MavenCoordinates MavenCoordinates_parse(String artifact) {
 			String[] pieces = artifact.split(":");
-			if (pieces.length==4) {
-				String type = pieces[2];
-				if ("jar".equals(type)) {
-					return new MavenCoordinates(intern(pieces[0]), intern(pieces[1]), intern(pieces[3]));
-				}
+			if (pieces.length==3) {
+//				String type = pieces[2];
+//				if ("jar".equals(type)) {
+					return new MavenCoordinates(intern(pieces[0]), intern(pieces[1]), intern(pieces[2]));
+//				}
 			}
 			throw new IllegalArgumentException("Unsupported artifact string: '"+artifact+"'");
 		}

@@ -37,12 +37,15 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
+import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
@@ -69,6 +72,8 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	private static final List<SpringBootStarter> NO_STARTERS = Arrays
 			.asList(new SpringBootStarter[0]);
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private IProject project;
 
@@ -159,6 +164,38 @@ public class MavenSpringBootProject extends SpringBootProject {
 			throw ExceptionUtil.coreException(e);
 		}
 	}
+	
+	/**
+	 * Determine the 'managed' version, if any, associate with a given dependency.
+	 * @return Version string or null.
+	 */
+	private String getManagedVersion(MavenCoordinates dep) {
+		try {
+			DependencyManagement managedDeps = getMavenProject().getDependencyManagement();
+			if (managedDeps!=null) {
+				List<Dependency> deps = managedDeps.getDependencies();
+				if (deps!=null && !deps.isEmpty()) {
+					for (Dependency d : deps) {
+						if ("jar".equals(d.getType())) {
+							if (dep.getArtifactId().equals(d.getArtifactId()) && dep.getGroupId().equals(d.getGroupId())) {
+								return d.getVersion();
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return null;
+	}
+	
+
+	private void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
 
 	@Override
 	public void addMavenDependency(final MavenCoordinates dep) throws CoreException {
@@ -173,10 +210,15 @@ public class MavenSpringBootProject extends SpringBootProject {
 					} else {
 						//TODO: if version is managed in parent pom and matches version we are trying to add
 						//  then we should leave version blank.
+						String version = dep.getVersion();
+						String managedVersion = getManagedVersion(dep);
+						if (managedVersion!=null && managedVersion.equals(version)) {
+							version = null; //Don't include version in pom if it matches the managed version.
+						}
 						PomHelper.createDependency(depsEl,
 								dep.getGroupId(), 
 								dep.getArtifactId(),
-								dep.getVersion()
+								version
 						);
 					}
 				}

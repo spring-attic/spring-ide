@@ -40,7 +40,8 @@ public class ChooseDependencyDialog extends DialogWithSections {
 	@Override
 	protected List<WizardPageSection> createSections() throws CoreException {
 		return Arrays.asList(
-				new CommentSection(this, message),
+				new StyledCommentSection(this, message), 
+				//new CommentSection(this, message),
 				new ChooseOneSection<MavenCoordinates>(this, /*label*/null,
 						model.availableChoices,
 						model.selected,
