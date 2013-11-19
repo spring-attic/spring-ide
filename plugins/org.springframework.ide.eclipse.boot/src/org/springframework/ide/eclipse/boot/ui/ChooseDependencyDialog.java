@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.StyledCommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
 public class ChooseDependencyDialog extends DialogWithSections {
