@@ -124,7 +124,22 @@ public class StyledCommentSection extends WizardPageSection {
 	
 	@Override
 	public void createContents(Composite page) {
-		StyledText label = new StyledText(page, SWT.READ_ONLY|SWT.WRAP);
+		StyledText label = new StyledText(page, SWT.READ_ONLY|SWT.WRAP) {
+			/**
+			 * Prevents this control for getting keyboard focus because, since it is readonly
+			 * it makes no sense to give it keyboard focus.
+			 * <p>
+			 * By doing this next widget will be given focus instead. That's usually what you want.
+			 */
+			@Override
+			public boolean setFocus() {
+				return false;
+			};
+			@Override
+			public boolean forceFocus() {
+				return false;
+			}
+		};
 		label.setBackground(label.getParent().getBackground());
 		StyledString content = new StyledString();
 		parse(htmlText, content, label.getFont());
