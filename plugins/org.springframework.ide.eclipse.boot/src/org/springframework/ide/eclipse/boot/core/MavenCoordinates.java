@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
-import org.eclipse.core.runtime.Assert;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
@@ -85,6 +84,6 @@ public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
 
 	@Override
 	public String getLabel() {
-		return toString();
+		return artifact;
 	}
 }
