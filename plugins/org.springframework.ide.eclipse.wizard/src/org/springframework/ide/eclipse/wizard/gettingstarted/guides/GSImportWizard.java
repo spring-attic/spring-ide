@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.ContentManager;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.GSContent;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.GSZipFileCodeSet;
-import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 

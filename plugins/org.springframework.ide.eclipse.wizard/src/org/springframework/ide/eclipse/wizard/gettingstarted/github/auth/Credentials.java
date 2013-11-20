@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.github.auth;
 
 import java.net.URLConnection;
 
-import org.eclipse.swt.browser.Browser;
 import org.springframework.web.client.RestTemplate;
 
 /**

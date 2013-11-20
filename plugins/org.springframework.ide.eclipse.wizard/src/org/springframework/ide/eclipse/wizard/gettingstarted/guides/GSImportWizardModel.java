@@ -36,7 +36,7 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportCon
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportUtils;
 import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
-import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;

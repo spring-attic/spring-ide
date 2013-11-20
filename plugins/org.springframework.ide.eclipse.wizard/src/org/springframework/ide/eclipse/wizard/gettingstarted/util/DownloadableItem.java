@@ -17,7 +17,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager.DownloadRequestor;
-import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 /**

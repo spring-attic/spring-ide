@@ -45,7 +45,7 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.ContentType
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.Describable;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.DisplayNameable;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.GSContent;
-import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
