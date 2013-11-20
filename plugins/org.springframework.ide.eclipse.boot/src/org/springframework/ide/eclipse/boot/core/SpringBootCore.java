@@ -14,8 +14,9 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
-import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 public class SpringBootCore {
 
@@ -30,6 +31,10 @@ public class SpringBootCore {
 		} else {
 			throw ExceptionUtil.coreException("This feature is only implemented for m2e enabled maven projects");
 		}
+	}
+
+	public static ISpringBootProject create(IJavaProject project) throws CoreException {
+		return create(project.getProject());
 	}
 	
 }

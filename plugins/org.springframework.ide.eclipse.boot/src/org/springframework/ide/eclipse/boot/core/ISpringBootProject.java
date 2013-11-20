@@ -67,5 +67,13 @@ public interface ISpringBootProject {
 	 */
 	public void setStarters(Collection<SpringBootStarter> values) throws CoreException;
 
+	/**
+	 * Modify project's classpath to add a given maven style dependency.
+	 * The way this dependency is added may depend on the type of project. E.g.
+	 * for a maven project it will be added to the project's pom file in the
+	 * dependencies section.
+	 */
+	public void addMavenDependency(MavenCoordinates dep) throws CoreException;
+
   
 }

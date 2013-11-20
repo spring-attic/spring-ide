@@ -21,7 +21,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui,
  org.eclipse.jdt.core,
  org.eclipse.jdt.debug.ui,
- org.eclipse.jdt.launching
+ org.eclipse.jdt.launching,
+ org.springsource.ide.eclipse.commons.completions;bundle-version="3.5.0",
+ org.apache.commons.collections,
+ org.springsource.ide.eclipse.commons.frameworks.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core
