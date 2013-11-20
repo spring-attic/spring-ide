@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.ui;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -30,8 +30,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.springframework.ide.eclipse.boot.core.internal.PomParser;
-import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
 //TODO: This code doesn't belong in commons but in spring-ide in a plugin
 //  dedicated to spring-boot support. Either that or it should be made
@@ -39,8 +38,6 @@ import org.springsource.ide.eclipse.commons.core.util.ExceptionUtil;
 
 @SuppressWarnings("restriction")
 public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
-
-	private static final String MAIN_CLASS_PROP = "start-class";
 
 	@Override
 	protected IType[] findTypes(Object[] elements, IRunnableContext context)
@@ -55,18 +52,10 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 				}
 			}
 			if (e instanceof IJavaElement) {
-				IJavaProject p = ((IJavaElement)e).getJavaProject();
-				IFile pomFile = p.getProject().getFile("pom.xml");
-				if (pomFile.exists()) {
-					PomParser pomParser = new PomParser(pomFile);
-					String starterClassName = pomParser.getProperty(MAIN_CLASS_PROP);
-					if (starterClassName!=null) {
-						IType mainType = p.findType(starterClassName);
-						if (mainType!=null) {
-							return new IType[] { mainType };
-						}
-						throw ExceptionUtil.coreException("'pom.xml' defines '"+MAIN_CLASS_PROP+"' as '"+starterClassName+"' but it could not be found");
-					}
+				IJavaProject jp = ((IJavaElement)e).getJavaProject();
+				IType main = MainTypeFinder.findMainType(jp, new NullProgressMonitor());
+				if (main!=null) {
+					return new IType[] { main };
 				}
 			}
 		}
