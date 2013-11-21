@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.ui;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -29,7 +32,9 @@ import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
 //TODO: This code doesn't belong in commons but in spring-ide in a plugin
@@ -52,11 +57,23 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 				}
 			}
 			if (e instanceof IJavaElement) {
-				IJavaProject jp = ((IJavaElement)e).getJavaProject();
-				IType main = MainTypeFinder.findMainType(jp, new NullProgressMonitor());
-				if (main!=null) {
-					return new IType[] { main };
+				final IJavaProject jp = ((IJavaElement)e).getJavaProject();
+				final IType[][] result = new IType[][] { null };
+				try {
+					context.run(/*fork*/false, /*true*/false, new IRunnableWithProgress() {
+						@Override
+						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+							try {
+								result[0] = MainTypeFinder.guessMainTypes(jp, monitor);
+							} catch (CoreException e) {
+								throw new InvocationTargetException(e);
+							}
+						}
+					});
+				} catch (InvocationTargetException exception) {
+					throw ExceptionUtil.coreException(exception);
 				}
+				return result[0];
 			}
 		}
 		//This isn't the best thing to to do as it searches also in all the library jars for main types. But it is
