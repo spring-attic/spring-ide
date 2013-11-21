@@ -22,6 +22,11 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
+import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
+import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
+import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 
 /**
  * Importer strategy implementation for importing CodeSets into the workspace and set them
