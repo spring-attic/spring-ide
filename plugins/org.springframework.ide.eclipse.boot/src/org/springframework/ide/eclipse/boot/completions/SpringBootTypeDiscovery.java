@@ -84,11 +84,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 				ISpringBootProject bootProject = SpringBootCore.create(project);
 
 				Collection<MavenCoordinates> sources;
-				if (transitive) {
-					sources = (Collection<MavenCoordinates>) dgraph.getDescendants(type);
-				} else {
-					sources = dgraph.getSuccessors(type);
-				}
+				sources = getProviders();
 				MavenCoordinates source = chooseSource(sources);
 				if (source!=null) {
 					bootProject.addMavenDependency(source, preferManagedVersion);
@@ -96,6 +92,17 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			} catch (Exception e) {
 				BootActivator.log(e);
 			}
+		}
+
+		@SuppressWarnings("unchecked")
+		public Collection<MavenCoordinates> getProviders() {
+			Collection<MavenCoordinates> sources;
+			if (transitive) {
+				sources = (Collection<MavenCoordinates>) dgraph.getDescendants(type);
+			} else {
+				sources = dgraph.getSuccessors(type);
+			}
+			return sources;
 		}
 
 		/**
@@ -130,7 +137,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		public String getDescription() {
 			//The dgraph map actually contains inverted dependency edges so we have to
 			// get 'descendants' to actually get the 'ancestors' in the real dgraph.
-			Set ancestors = dgraph.getDescendants(type);
+			Collection<MavenCoordinates> ancestors = getProviders();
 			if (!ancestors.isEmpty()) {
 				StringBuilder description = new StringBuilder();
 				description.append(
@@ -273,7 +280,6 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		}
 		
 	}
-
 
 	public SpringBootTypeDiscovery() throws Exception {
 		//Should parsing be done lazyly?
