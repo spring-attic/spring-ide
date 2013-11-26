@@ -60,7 +60,7 @@ public class DirectedGraph {
 	 *     result into (this allows client to determine the type of collection used 
 	 *     (e.g. HashSet versus LinkedHashSet).
 	 */
-	private Set getDescendants(Object node, Set descendants) {
+	private Set<Object> getDescendants(Object node, Set<Object> descendants) {
 		Assert.isLegal(descendants.isEmpty());
 		collectDescendants(node, descendants);
 		return descendants;
@@ -68,9 +68,9 @@ public class DirectedGraph {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void collectDescendants(Object node, Set ancestors) {
-		Collection parents = (Collection) dgraph.get(node);
-		if (parents!=null && !parents.isEmpty()) {
-			for (Object parent : parents) {
+		Collection children = (Collection) dgraph.get(node);
+		if (children!=null && !children.isEmpty()) {
+			for (Object parent : children) {
 				boolean isNew = ancestors.add(parent);
 				if (isNew) {
 					collectDescendants(parent, ancestors);

@@ -1,20 +1,27 @@
+/*******************************************************************************
+ * Copyright (c) 2013 GoPivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.completions;
 
-import java.beans.DesignMode;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.collections.MultiMap;
-import org.apache.commons.collections.map.MultiValueMap;
+import org.apache.xerces.impl.dtd.models.DFAContentModel;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -28,7 +35,6 @@ import org.springsource.ide.eclipse.commons.completions.externaltype.AbstractExt
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscovery;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeEntry;
-import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeSource;
 import org.springsource.ide.eclipse.commons.completions.util.Requestor;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -44,7 +50,23 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	public static class DGraphTypeSource extends AbstractExternalTypeSource {
+	/**
+	 * If this option is 'true' then when a dependency is added the managedVersion is 
+	 * never overridden (i.e. an explicit version is only inserted in the pom
+	 * if there is no managed version).
+	 * 
+	 * If this opprion is 'false' then a version dependency will be included in the 
+	 * pom if it does not match the managed version).
+	 */
+	private boolean preferManagedVersion;
+	
+	/**
+	 * If this option is selecte transitive dependencies are considered. If is not
+	 * selected then only a jar that directly provides a type will be suggested.
+	 */
+	private boolean transitive = false;
+	
+	public class DGraphTypeSource extends AbstractExternalTypeSource {
 
 		private DirectedGraph dgraph;
 		private ExternalType type;
@@ -59,29 +81,18 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		public void addToClassPath(IJavaProject project, IProgressMonitor mon) {
 			try {
 				//TODO: progress monitor handling
-				//TODO only one way to add to classpath out of a potential multiple ways to add the type is implemented.
 				ISpringBootProject bootProject = SpringBootCore.create(project);
 
-				Collection<MavenCoordinates> sources = (Collection<MavenCoordinates>) dgraph.getDescendants(type);
+				Collection<MavenCoordinates> sources;
+				if (transitive) {
+					sources = (Collection<MavenCoordinates>) dgraph.getDescendants(type);
+				} else {
+					sources = dgraph.getSuccessors(type);
+				}
 				MavenCoordinates source = chooseSource(sources);
 				if (source!=null) {
-					bootProject.addMavenDependency(source);
+					bootProject.addMavenDependency(source, preferManagedVersion);
 				}
-				
-//				IFile pomFile = project.getProject().getFile("pom.xml");
-//				
-//				
-//				if (sources!=null && !sources.isEmpty()) {
-//					//TODO: replace with proper mechanism to add dependencies to pom file.
-//				
-//					StringBuilder comments = new StringBuilder();
-//					comments.append("\n<!-- ============================ -->\n");
-//					for (MavenCoordinates source : sources) {
-//						comments.append("<!-- "+source+"-->\n");
-//					}
-//					
-//					pomFile.appendContents(new StringInputStream(comments.toString()), true/*force*/, true/*keepHistory*/, new NullProgressMonitor());  
-//				}
 			} catch (Exception e) {
 				BootActivator.log(e);
 			}
@@ -155,10 +166,17 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 //	private static final URI XML_DATA_LOCATION = new File("/home/kdvolder/workspaces-sts/spring-ide/fun-with-maven/boot-completion-data.txt").toURI();
 	private static URI XML_DATA_LOCATION;
 	static {
-		try {
-			XML_DATA_LOCATION = new URI("platform:/plugin/org.springframework.ide.eclipse.boot/resources/boot-completion-data.txt");
-		} catch (URISyntaxException e) {
-			BootActivator.log(e);
+		//For convenient testing:
+		File testFile = new File("/home/kdvolder/git/spring-boot-maven-analyzer/boot-completion-data.txt");
+		if (testFile.isFile()) {
+			XML_DATA_LOCATION = testFile.toURI();
+		} else {
+			try {
+				//Use data embedded in this plugin:
+				XML_DATA_LOCATION = new URI("platform:/plugin/org.springframework.ide.eclipse.boot/resources/boot-completion-data.txt");
+			} catch (URISyntaxException e) {
+				BootActivator.log(e);
+			}
 		}
 	}
 

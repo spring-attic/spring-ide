@@ -190,7 +190,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 		return null;
 	}
 	
-
 	private void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
@@ -198,7 +197,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	}
 
 	@Override
-	public void addMavenDependency(final MavenCoordinates dep) throws CoreException {
+	public void addMavenDependency(final MavenCoordinates dep, final boolean preferManagedVersion) throws CoreException {
 		try {
 			IFile file = getPomFile();
 			performOnDOMDocument(new OperationTuple(file, new Operation() {
@@ -208,12 +207,15 @@ public class MavenSpringBootProject extends SpringBootProject {
 					if (depsEl==null) {
 						//TODO: handle this case
 					} else {
-						//TODO: if version is managed in parent pom and matches version we are trying to add
-						//  then we should leave version blank.
 						String version = dep.getVersion();
 						String managedVersion = getManagedVersion(dep);
-						if (managedVersion!=null && managedVersion.equals(version)) {
-							version = null; //Don't include version in pom if it matches the managed version.
+						if (managedVersion!=null) {
+							//Decide whether we can/should inherit the managed version or override it.
+							if (preferManagedVersion || managedVersion.equals(version)) {
+								version = null; 
+							}
+						} else {
+							//No managed version. We have to include a version in xml added to the pom.
 						}
 						PomHelper.createDependency(depsEl,
 								dep.getGroupId(), 

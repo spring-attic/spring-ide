@@ -73,7 +73,7 @@ public interface ISpringBootProject {
 	 * for a maven project it will be added to the project's pom file in the
 	 * dependencies section.
 	 */
-	public void addMavenDependency(MavenCoordinates dep) throws CoreException;
+	public void addMavenDependency(MavenCoordinates dep, boolean preferManagedVersion) throws CoreException;
 
   
 }
