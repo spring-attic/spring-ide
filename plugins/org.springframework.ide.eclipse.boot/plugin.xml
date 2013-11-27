@@ -228,7 +228,7 @@
          id="springBootExternalTypes"
          point="org.spring.ide.eclipse.completions.externaltypes">
       <typeSource
-            class="org.springframework.ide.eclipse.boot.completions.SpringBootTypeDiscovery">
+            class="org.springframework.ide.eclipse.boot.completions.SpringBootTypeDiscoveryFactory">
       </typeSource>
    </extension>
   
