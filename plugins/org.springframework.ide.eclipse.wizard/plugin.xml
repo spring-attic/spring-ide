@@ -228,12 +228,14 @@
             name="Template Projects">
       </page>
       </extension>
+ <!-- This extension point is not yet available in commons master. So its use
+     should not yet be in spring-ide master either. 
     <extension
           point="org.springsource.ide.common.dashboard.browser.function">
        <function
              class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.OpenGSFunction"
              id="org.springframework.ide.wizard.gettingstarted.openGuide">
        </function>
-    </extension>
+    </extension> -->
       
 </plugin>
