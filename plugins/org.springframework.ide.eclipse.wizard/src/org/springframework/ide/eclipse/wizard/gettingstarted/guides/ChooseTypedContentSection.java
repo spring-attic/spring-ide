@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.internal.misc.StringMatcher;
 import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
@@ -269,16 +268,6 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		treeviewer.setContentProvider(contentProvider);
 		treeviewer.setInput(content);
 		treeviewer.expandAll();
-		if (category != null) {
-			treeviewer.collapseAll();
-			for (TreeItem item : treeviewer.getTree().getItems()) {
-				if (item.getText().equals(category)) {
-					item.setExpanded(true);
-				}
-			}
-		} else {
-			treeviewer.expandAll();
-		}
 
 		if (fieldNameLabel!=null) {
 			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
@@ -298,6 +287,21 @@ public class ChooseTypedContentSection extends WizardPageSection {
 				if (initialFilterText!=null) {
 					searchBox.setText(initialFilterText);
 					updateFilter();
+				}
+				if (category!=null) {
+					//System.out.println(category);
+					ContentType<?> expand = null;
+					ContentType<?>[] contentTypes = content.getTypes();
+					for (ContentType<?> contentType : contentTypes) {
+						//TODO: Miles(?) Searching by display name seems like a bad idea
+						if (contentType.getDisplayName().equals(category)) {
+							expand = contentType;
+							break;
+						}
+					}
+					if (expand!=null) {
+						treeviewer.setExpandedElements(new Object[] { expand });
+					}
 				}
 			}
 		});
