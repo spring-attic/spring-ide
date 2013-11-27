@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.Repo;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 
 /**
  * Singleton class. The instance of this class provides access to all the

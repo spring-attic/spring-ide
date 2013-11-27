@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadableItem;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 /**
  * 'Standalon' content item that contains just a single codeset taken from a zip file downloaded from

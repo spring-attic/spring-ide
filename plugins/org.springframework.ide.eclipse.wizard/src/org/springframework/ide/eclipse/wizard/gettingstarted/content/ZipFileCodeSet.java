@@ -22,8 +22,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadableItem;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 /**
  * A CodeSet stored in a Downloadable Zip File. The interesting data in the

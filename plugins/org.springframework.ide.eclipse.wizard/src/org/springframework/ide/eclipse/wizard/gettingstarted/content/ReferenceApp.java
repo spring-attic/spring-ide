@@ -16,8 +16,8 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.GithubClient;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.Repo;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 public class ReferenceApp extends GithubRepoContent {
 

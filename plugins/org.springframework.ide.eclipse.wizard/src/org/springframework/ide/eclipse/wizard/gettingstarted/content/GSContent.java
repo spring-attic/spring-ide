@@ -14,9 +14,9 @@ import java.net.URL;
 import java.util.List;
 
 import org.springframework.ide.eclipse.wizard.gettingstarted.guides.GSImportWizard;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadableItem;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 /**

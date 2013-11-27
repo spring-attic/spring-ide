@@ -26,9 +26,9 @@ import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet.CodeSetEntry;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.Repo;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 /**

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 public abstract class AGSContent implements GSContent {
@@ -38,7 +38,7 @@ public abstract class AGSContent implements GSContent {
 
 	//@Override
 	public ValidationResult downloadStatus() {
-		return getZip().getDownloadStatus();
+		return ValidationResult.from(getZip().getDownloadStatus());
 	}
 
 	//@Override

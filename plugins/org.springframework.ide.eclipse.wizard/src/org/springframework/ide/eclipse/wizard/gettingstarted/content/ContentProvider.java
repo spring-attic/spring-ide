@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 
 /**
  * An instance of this interface implements some method of discovering

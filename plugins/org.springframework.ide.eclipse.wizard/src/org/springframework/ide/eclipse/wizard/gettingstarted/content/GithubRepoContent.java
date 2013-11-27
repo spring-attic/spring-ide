@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.Repo;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadableItem;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 
 public abstract class GithubRepoContent extends AGSContent {
 

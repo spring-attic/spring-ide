@@ -35,8 +35,8 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.GettingStar
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportUtils;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -277,7 +277,7 @@ public class GSImportWizardModel {
 			if (g == null) {
 				return ValidationResult.OK;
 			} else {
-				return g.getZip().getDownloadStatus();
+				return ValidationResult.from(g.getZip().getDownloadStatus());
 			}
 		}
 	};

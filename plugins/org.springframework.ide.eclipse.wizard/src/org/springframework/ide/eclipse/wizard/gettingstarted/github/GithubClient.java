@@ -32,10 +32,10 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.auth.BasicAuthCredentials;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.auth.Credentials;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.auth.NullCredentials;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.IOUtil;
 import org.springframework.ide.eclipse.wizard.gettingstarted.util.Spring3MappingJacksonHttpMessageConverter;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 /**
  * A GithubClient instance needs to configured with some credentials and then it is able to

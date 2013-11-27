@@ -21,7 +21,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.auth.AuthenticatedDownloader;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 
 /**
  * An instance of the class manages lists of content of different types.

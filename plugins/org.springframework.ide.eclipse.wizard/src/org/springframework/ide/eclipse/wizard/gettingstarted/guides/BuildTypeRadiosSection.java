@@ -87,7 +87,7 @@ public class BuildTypeRadiosSection extends GroupSection {
 
 	@Override
 	protected GridLayout createLayout() {
-		return new GridLayout(2, true);
+		return new GridLayout(3, true);
 	}
 
 	public BuildTypeRadiosSection(WizardPageWithSections owner, SelectionModel<BuildType> selection) {

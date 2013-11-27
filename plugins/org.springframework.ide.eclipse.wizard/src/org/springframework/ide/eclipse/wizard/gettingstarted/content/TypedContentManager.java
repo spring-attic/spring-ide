@@ -15,7 +15,7 @@ import java.io.IOException;
 
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.auth.AuthenticatedDownloader;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 
 /**
  * Abstract base class for implementing a content manager for a given type of

@@ -15,7 +15,7 @@ import java.io.OutputStream;
 import java.net.URL;
 
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.GithubClient;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.DownloadManager.DownloadService;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager.DownloadService;
 
 /**
  * For now we need to authenticate to be able to download guides from github.
