@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.internal.misc.StringMatcher;
 import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
@@ -227,6 +228,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	private final LiveVariable<Object> rawSelection;
 	private TreeViewer treeviewer;
 	private String initialFilterText;
+	private String category;
 
 	public ChooseTypedContentSection(IPageWithSections owner, SelectionModel<GSContent> selection,
 			LiveVariable<Object> rawSelection, ContentManager content) {
@@ -267,6 +269,16 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		treeviewer.setContentProvider(contentProvider);
 		treeviewer.setInput(content);
 		treeviewer.expandAll();
+		if (category != null) {
+			treeviewer.collapseAll();
+			for (TreeItem item : treeviewer.getTree().getItems()) {
+				if (item.getText().equals(category)) {
+					item.setExpanded(true);
+				}
+			}
+		} else {
+			treeviewer.expandAll();
+		}
 
 		if (fieldNameLabel!=null) {
 			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
@@ -344,6 +356,9 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		}
 	}
 
+	public void setCategory(String category) {
+		this.category = category;
+	}
 
 	private void updateFilter() {
 		filter.setSearchTerm(searchBox.getText());

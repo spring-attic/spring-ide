@@ -228,5 +228,12 @@
             name="Template Projects">
       </page>
       </extension>
+    <extension
+          point="org.springsource.ide.common.dashboard.browser.function">
+       <function
+             class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.OpenGSFunction"
+             id="org.springframework.ide.wizard.gettingstarted.openGuide">
+       </function>
+    </extension>
       
 </plugin>

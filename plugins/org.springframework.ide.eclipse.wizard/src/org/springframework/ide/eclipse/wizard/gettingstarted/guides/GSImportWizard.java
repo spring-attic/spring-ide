@@ -56,6 +56,7 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 	   //TODO: Get our own icon for GSG wizard
 
 	private final PageOne pageOne = new PageOne(model);
+	private String focusItem;
 
 	public class PageOne extends WizardPageWithSections {
 
@@ -72,12 +73,12 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
 			sections.add(getContentChooser());
+			contentChooser.setCategory(focusItem);
 			sections.add(new ValidatorSection(this, model.downloadStatus));
 			sections.add(new DescriptionSection(this, model.description));
 			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
 			sections.add(new CodeSetCheckBoxesSection(this, model.validCodesetNames, model.getCodeSetModel()));
 			sections.add(new OpenUrlSection(this, "Home Page", model.homePage, model.getEnableOpenHomePage()));
-
 			return sections;
 		}
 
@@ -122,6 +123,7 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 	public void addPages() {
 		super.addPages();
 		addPage(pageOne);
+
 //		addPage(pageTwo);
 	}
 
@@ -179,6 +181,7 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 	public static int open(Shell shell, GSContent guide) {
 		return open(shell, guide, true, false);
 	}
+
 	/**
 	 * Open the wizard and block until it is closed by the user. Returns the exit code of
 	 * the wizard (e.g. indicating OK or CANCEL).
@@ -186,9 +189,24 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 	public static int open(Shell shell, GSContent guide, boolean synchronous, boolean enableOpenHomepage) {
 		GSImportWizard wiz = new GSImportWizard();
 		wiz.setEnableOpenHomePage(enableOpenHomepage);
-		wiz.setItem(guide);
+		if (guide != null) {
+			wiz.setItem(guide);
+		}
 		WizardDialog dialog = new WizardDialog(shell, wiz);
 		dialog.setBlockOnOpen(synchronous);
+		return dialog.open();
+	}
+
+	/**
+	 * Open the wizard and block until it is closed by the user. Returns the exit code of
+	 * the wizard (e.g. indicating OK or CANCEL).
+	 */
+	public static int open(Shell shell, String focusItem) {
+		GSImportWizard wiz = new GSImportWizard();
+		wiz.setEnableOpenHomePage(true);
+		wiz.setFocusItem(focusItem);
+		WizardDialog dialog = new WizardDialog(shell, wiz);
+		dialog.setBlockOnOpen(true);
 		return dialog.open();
 	}
 
@@ -221,6 +239,10 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 		if (guide!=null) {
 			pageOne.setFilterText(guide.getDisplayName());
 		}
+	}
+
+	public void setFocusItem(String focusItem) {
+		this.focusItem = focusItem;
 	}
 
 }
