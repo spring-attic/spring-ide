@@ -24,7 +24,13 @@ public enum BuildType {
 	GRADLE("build.gradle",
 			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GradleStrategy",
 			"Can not use Gradle: STS Gradle Tooling is not installed. You can install it from the STS Dashboard."
+	),
+	GROOVY_CLI("app.groovy",
+			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GeneralProjectStrategy",
+			"Can not use Spring Boot Groovy CLI because ...",
+			"Spring CLI"
 	);
+
 //	MAVEN("pom.xml", new NullImportStrategy("Maven"));
 //	ECLIPSE(".project", ImportStrategy.ECLIPSE);
 
@@ -39,12 +45,19 @@ public enum BuildType {
 	private String klass; //Class name for import strategy. May not be able to classload if requisite tooling isn't installed.
 	private String notInstalledMessage; //Message tailored to the particular tooling that is needed for an
 	private ImportStrategy importStrategy;
+	private String displayName;
 
 	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
 		this.buildScriptPath = new Path(buildScriptPath);
 		this.klass = importStrategyClass;
 		this.notInstalledMessage = notInstalledMessage;
 	}
+
+	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage, String displayName) {
+		this(buildScriptPath, importStrategyClass, notInstalledMessage);
+		this.displayName = displayName;
+	}
+
 
 	public IPath getBuildScript() {
 		return buildScriptPath;
@@ -65,8 +78,11 @@ public enum BuildType {
 	}
 
 	public String displayName() {
-		String name = name();
-		return name.substring(0,1) + name.substring(1).toLowerCase();
+		if (displayName==null) {
+			String name = name();
+			displayName = name.substring(0,1) + name.substring(1).toLowerCase();
+		}
+		return displayName;
 	}
 
 	public static final BuildType DEFAULT = MAVEN;
