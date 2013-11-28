@@ -631,6 +631,19 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 	}
 
+	public Set<String> getAutoConfigNames() {
+		if (!this.modelPopulated) {
+			populateModel();
+		}
+		try {
+			r.lock();
+			return new LinkedHashSet<String>(autoDetectedConfigs.keySet());
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
 	public Set<String> getManualConfigSetNames() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -638,6 +651,19 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return new LinkedHashSet<String>(configSets.keySet());
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	public Set<String> getAutoConfigSetNames() {
+		if (!this.modelPopulated) {
+			populateModel();
+		}
+		try {
+			r.lock();
+			return new LinkedHashSet<String>(autoDetectedConfigSets.keySet());
 		}
 		finally {
 			r.unlock();
