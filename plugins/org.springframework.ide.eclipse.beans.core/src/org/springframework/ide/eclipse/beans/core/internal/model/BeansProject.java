@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -28,8 +29,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
@@ -50,11 +54,13 @@ import org.springframework.ide.eclipse.beans.core.model.locate.IJavaConfigLocato
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -103,6 +109,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	protected volatile Map<String, String> autoDetectedConfigSetsByLocator = new LinkedHashMap<String, String>();
 
 	protected volatile IBeansConfigEventListener eventListener;
+
+	private boolean isAutoConfigStatePersisted = false;
 
 	public BeansProject(IBeansModel model, IProject project) {
 		super(model, project.getName());
@@ -329,7 +337,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					return true;
 				}
 				else if (type == IBeansConfig.Type.AUTO_DETECTED && !autoDetectedConfigs.containsKey(configName)) {
-					populateAutoDetectedConfigsAndConfigSets();
+					populateAutoDetectedConfigsAndConfigSets(null);
 					return true;
 				}
 			}
@@ -631,6 +639,19 @@ I	 * Removes the given beans config from the list of configs and from all config
 		}
 	}
 
+	public Set<String> getAutoConfigNames() {
+		if (!this.modelPopulated) {
+			populateModel();
+		}
+		try {
+			r.lock();
+			return new LinkedHashSet<String>(autoDetectedConfigs.keySet());
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
 	public Set<String> getManualConfigSetNames() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -638,6 +659,19 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return new LinkedHashSet<String>(configSets.keySet());
+		}
+		finally {
+			r.unlock();
+		}
+	}
+
+	public Set<String> getAutoConfigSetNames() {
+		if (!this.modelPopulated) {
+			populateModel();
+		}
+		try {
+			r.lock();
+			return new LinkedHashSet<String>(autoDetectedConfigSets.keySet());
 		}
 		finally {
 			r.unlock();
@@ -1005,18 +1039,26 @@ I	 * Removes the given beans config from the list of configs and from all config
 				}
 			}
 
-			// Add auto detected configs and config sets
-			populateAutoDetectedConfigsAndConfigSets();
-
 			// Remove all invalid config names from this project's config sets
+			Map<IBeansConfigSet, Set<String>> removedConfigsFromSets = new HashMap<IBeansConfigSet, Set<String>>();
 			IBeansModel model = BeansCorePlugin.getModel();
 			for (IBeansConfigSet configSet : configSets.values()) {
 				for (String configName : configSet.getConfigNames()) {
 					if (!hasConfig(configName) && model.getConfig(configName) == null) {
 						((BeansConfigSet) configSet).removeConfig(configName);
+						
+						Set<String> removedConfigs = removedConfigsFromSets.get(configSet);
+						if (removedConfigs == null) {
+							removedConfigs = new HashSet<String>();
+							removedConfigsFromSets.put(configSet, removedConfigs);
+						}
+						removedConfigs.add(configName);
 					}
 				}
 			}
+			
+			// Add auto detected configs and config sets
+			populateAutoDetectedConfigsAndConfigSets(removedConfigsFromSets);
 
 			for (IBeansConfig config : configs.values()) {
 				config.registerEventListener(eventListener);
@@ -1032,9 +1074,39 @@ I	 * Removes the given beans config from the list of configs and from all config
 	 * Runs the registered detectors and registers {@link IBeansConfig} and {@link IBeansConfigSet} with this project.
 	 * <p>
 	 * This method should only be called with having a write lock.
+	 * @param removedConfigsFromSets 
 	 */
-	private void populateAutoDetectedConfigsAndConfigSets() {
+	protected void populateAutoDetectedConfigsAndConfigSets(final Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
+		
+		Job job = new Job("populate auto detected configs") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					w.lock();
 
+					populateAutoDetectedConfigsAndConfigSetsInternally();
+					restoreConfigSetState(removedConfigsFromSets);
+				}
+				finally {
+					updateAllConfigsCache();
+					w.unlock();
+				}
+				((AbstractModel)(BeansCorePlugin.getModel())).notifyListeners(BeansProject.this, ModelChangeEvent.Type.CHANGED);
+				return Status.OK_STATUS;
+			}
+			
+			@Override
+			public boolean belongsTo(Object family) {
+				return family.equals("populateAutoConfigsJobFamily");
+			}
+		};
+		
+		job.setPriority(Job.BUILD);
+		job.setRule(project.getProject());
+		job.schedule();
+	}
+	
+	protected void populateAutoDetectedConfigsAndConfigSetsInternally() {
 		for (IBeansConfig config : autoDetectedConfigs.values()) {
 			config.unregisterEventListener(eventListener);
 		}
@@ -1105,7 +1177,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 					// Create a config set for auto detected configs if desired by the extension
 					if (configSetName[0] != null && configSetName[0].length() > 0) {
 
-						IBeansConfigSet configSet = new BeansConfigSet(this, configSetName[0], configNamesByLocator,
+						IBeansConfigSet configSet = new BeansConfigSet(BeansProject.this, configSetName[0], configNamesByLocator,
 								IBeansConfigSet.Type.AUTO_DETECTED);
 
 						// configure the created IBeansConfig
@@ -1119,7 +1191,21 @@ I	 * Removes the given beans config from the list of configs and from all config
 			}
 		}
 	}
-
+	
+	protected void restoreConfigSetState(Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
+		if (removedConfigsFromSets != null) {
+			IBeansModel model = BeansCorePlugin.getModel();
+			for (IBeansConfigSet configSet : removedConfigsFromSets.keySet()) {
+				Set<String> removedConfigs = removedConfigsFromSets.get(configSet);
+				for(String removedConfig : removedConfigs) {
+					if (hasConfig(removedConfig) || model.getConfig(removedConfig) != null) {
+						((BeansConfigSet) configSet).addConfig(removedConfig);
+					}
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Update the internal cache for all configs in case something changed to this.configs or this.autoDetectedConfigs.
 	 * This has to be called in a write-guarded block.
@@ -1221,6 +1307,14 @@ I	 * Removes the given beans config from the list of configs and from all config
 		finally {
 			r.unlock();
 		}
+	}
+
+	public boolean isAutoConfigStatePersisted() {
+		return this.isAutoConfigStatePersisted;
+	}
+
+	public void setAutoConfigStatePersisted(boolean autoConfigPersisted) {
+		this.isAutoConfigStatePersisted = autoConfigPersisted;
 	}
 
 }
