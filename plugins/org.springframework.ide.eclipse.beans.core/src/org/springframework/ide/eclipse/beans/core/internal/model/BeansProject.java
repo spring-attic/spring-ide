@@ -104,6 +104,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 	protected volatile IBeansConfigEventListener eventListener;
 
+	private boolean isAutoConfigStatePersisted = false;
+
 	public BeansProject(IBeansModel model, IProject project) {
 		super(model, project.getName());
 		this.project = project;
@@ -1247,6 +1249,14 @@ I	 * Removes the given beans config from the list of configs and from all config
 		finally {
 			r.unlock();
 		}
+	}
+
+	public boolean isAutoConfigStatePersisted() {
+		return this.isAutoConfigStatePersisted;
+	}
+
+	public void setAutoConfigStatePersisted(boolean autoConfigPersisted) {
+		this.isAutoConfigStatePersisted = autoConfigPersisted;
 	}
 
 }

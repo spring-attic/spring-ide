@@ -25,6 +25,8 @@ public interface IBeansProjectDescriptionConstants {
 	String CONFIG_SUFFIX = "configSuffix";
 	String CONFIGS = "configs";
 	String CONFIG = "config";
+	String AUTOCONFIGS = "autoconfigs";
+	String AUTOCONFIG = "autoconfig";
 	String FILE = "file";
 	String CONFIG_SETS = "configSets";
 	String OVERRIDING = "allowBeanDefinitionOverriding";

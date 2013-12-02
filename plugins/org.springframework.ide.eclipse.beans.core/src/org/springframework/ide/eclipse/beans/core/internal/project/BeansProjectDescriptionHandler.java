@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigFactory;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -36,8 +35,8 @@ import org.xml.sax.helpers.DefaultHandler;
 public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		IBeansProjectDescriptionConstants {
 	protected enum State { INITIAL, PROJECT_DESC, CONFIG_EXTENSIONS,
-		CONFIG_EXTENSION, CONFIG_SUFFIXES, CONFIG_SUFFIX, CONFIGS, 
-		CONFIG, CONFIG_SETS, CONFIG_SET, CONFIG_SET_NAME, CONFIG_SET_OVERRIDING, 
+		CONFIG_EXTENSION, CONFIG_SUFFIXES, CONFIG_SUFFIX, CONFIGS, AUTOCONFIGS,
+		CONFIG, AUTOCONFIG, CONFIG_SETS, CONFIG_SET, CONFIG_SET_NAME, CONFIG_SET_OVERRIDING, 
 		CONFIG_SET_INCOMPLETE, CONFIG_SET_CONFIGS,CONFIG_SET_CONFIG, VERSION, 
 		PLUGIN_VERSION, ENABLE_IMPORTS, PROFILES, PROFILE
 	}
@@ -80,6 +79,9 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 				state = State.CONFIG_SUFFIXES;
 			} else if (elementName.equals(CONFIGS)) {
 				state = State.CONFIGS;
+			} else if (elementName.equals(AUTOCONFIGS)) {
+				state = State.AUTOCONFIGS;
+				project.setAutoConfigStatePersisted(true);
 			} else if (elementName.equals(CONFIG_SETS)) {
 				state = State.CONFIG_SETS;
 			} else if (elementName.equals(ENABLE_IMPORTS)) {
@@ -102,6 +104,10 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.CONFIGS) {
 			if (elementName.equals(CONFIG)) {
 				state = State.CONFIG;
+			}
+		} else if (state == State.AUTOCONFIGS) {
+			if (elementName.equals(AUTOCONFIG)) {
+				state = State.AUTOCONFIG;
 			}
 		} else if (state == State.CONFIG_SETS) {
 			if (elementName.equals(CONFIG_SET)) {
@@ -177,6 +183,10 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 			if (elementName.equals(CONFIGS)) {
 				state = State.PROJECT_DESC;
 			}
+		} else if (state == State.AUTOCONFIGS) {
+			if (elementName.equals(AUTOCONFIGS)) {
+				state = State.PROJECT_DESC;
+			}
 		} else if (state == State.CONFIG) {
 			if (elementName.equals(CONFIG)) {
 				String config = charBuffer.toString().trim();
@@ -191,6 +201,11 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 				}
 				project.addConfig(config, IBeansConfig.Type.MANUAL);
 				state = State.CONFIGS;
+			}
+		} else if (state == State.AUTOCONFIG) {
+			if (elementName.equals(AUTOCONFIG)) {
+				// TODO: set auto configs correctly
+				state = State.AUTOCONFIGS;
 			}
 		} else if (state == State.CONFIG_SETS) {
 			if (elementName.equals(CONFIG_SETS)) {
