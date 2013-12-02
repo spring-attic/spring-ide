@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -203,6 +204,36 @@ public class BeansProjectAutoConfigTest {
 
 			autoConfigs = beansProject.getAutoConfigNames();
 			assertEquals(1, autoConfigs.size());
+		} finally {
+			project.delete(true, null);
+		}
+	}
+	
+	@Test
+	public void testBeansProjectOneXMLAutoConfigIncludedInConfigSet() throws Exception {
+		IProject project = StsTestUtil.createPredefinedProject("beans-autoconfig-xml-in-config-set-tests", "org.springframework.ide.eclipse.beans.core.tests");
+
+		try {
+			BeansProject beansProject = new BeansProject(model, project);
+			model.addProject(beansProject);
+
+			beansProject.getConfigs();
+			IJobManager jobMan = Job.getJobManager();
+			jobMan.join("populateAutoConfigsJobFamily", null);
+
+			Set<IBeansConfig> configs = beansProject.getConfigs();
+			assertEquals(1, configs.size());
+
+			Set<String> autoConfigs = beansProject.getAutoConfigNames();
+			assertEquals(1, autoConfigs.size());
+
+			Set<String> autoConfigSetNames = beansProject.getAutoConfigSetNames();
+			assertEquals(0, autoConfigSetNames.size());
+			
+			IBeansConfigSet set = beansProject.getConfigSet("test-set");
+			Set<String> configNamesInSet = set.getConfigNames();
+			assertEquals(1, configNamesInSet.size());
+			assertEquals("WebContent/WEB-INF/spring/root-context.xml", configNamesInSet.iterator().next());
 		} finally {
 			project.delete(true, null);
 		}

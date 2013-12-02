@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -336,7 +337,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					return true;
 				}
 				else if (type == IBeansConfig.Type.AUTO_DETECTED && !autoDetectedConfigs.containsKey(configName)) {
-					populateAutoDetectedConfigsAndConfigSets();
+					populateAutoDetectedConfigsAndConfigSets(null);
 					return true;
 				}
 			}
@@ -1038,18 +1039,26 @@ I	 * Removes the given beans config from the list of configs and from all config
 				}
 			}
 
-			// Add auto detected configs and config sets
-			populateAutoDetectedConfigsAndConfigSets();
-
 			// Remove all invalid config names from this project's config sets
+			Map<IBeansConfigSet, Set<String>> removedConfigsFromSets = new HashMap<IBeansConfigSet, Set<String>>();
 			IBeansModel model = BeansCorePlugin.getModel();
 			for (IBeansConfigSet configSet : configSets.values()) {
 				for (String configName : configSet.getConfigNames()) {
 					if (!hasConfig(configName) && model.getConfig(configName) == null) {
 						((BeansConfigSet) configSet).removeConfig(configName);
+						
+						Set<String> removedConfigs = removedConfigsFromSets.get(configSet);
+						if (removedConfigs == null) {
+							removedConfigs = new HashSet<String>();
+							removedConfigsFromSets.put(configSet, removedConfigs);
+						}
+						removedConfigs.add(configName);
 					}
 				}
 			}
+			
+			// Add auto detected configs and config sets
+			populateAutoDetectedConfigsAndConfigSets(removedConfigsFromSets);
 
 			for (IBeansConfig config : configs.values()) {
 				config.registerEventListener(eventListener);
@@ -1065,13 +1074,23 @@ I	 * Removes the given beans config from the list of configs and from all config
 	 * Runs the registered detectors and registers {@link IBeansConfig} and {@link IBeansConfigSet} with this project.
 	 * <p>
 	 * This method should only be called with having a write lock.
+	 * @param removedConfigsFromSets 
 	 */
-	protected void populateAutoDetectedConfigsAndConfigSets() {
+	protected void populateAutoDetectedConfigsAndConfigSets(final Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
 		
 		Job job = new Job("populate auto detected configs") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				populateAutoDetectedConfigsAndConfigSetsInternally();
+				try {
+					w.lock();
+
+					populateAutoDetectedConfigsAndConfigSetsInternally();
+					restoreConfigSetState(removedConfigsFromSets);
+				}
+				finally {
+					updateAllConfigsCache();
+					w.unlock();
+				}
 				((AbstractModel)(BeansCorePlugin.getModel())).notifyListeners(BeansProject.this, ModelChangeEvent.Type.CHANGED);
 				return Status.OK_STATUS;
 			}
@@ -1088,96 +1107,102 @@ I	 * Removes the given beans config from the list of configs and from all config
 	}
 	
 	protected void populateAutoDetectedConfigsAndConfigSetsInternally() {
-		try {
-			w.lock();
+		for (IBeansConfig config : autoDetectedConfigs.values()) {
+			config.unregisterEventListener(eventListener);
+		}
 
-			for (IBeansConfig config : autoDetectedConfigs.values()) {
-				config.unregisterEventListener(eventListener);
-			}
+		autoDetectedConfigs.clear();
+		autoDetectedConfigsByLocator.clear();
+		locatorByAutoDetectedConfig.clear();
+		autoDetectedConfigSets.clear();
+		autoDetectedConfigSetsByLocator.clear();
 
-			autoDetectedConfigs.clear();
-			autoDetectedConfigsByLocator.clear();
-			locatorByAutoDetectedConfig.clear();
-			autoDetectedConfigSets.clear();
-			autoDetectedConfigSetsByLocator.clear();
+		// Add auto detected beans configs
+		for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory.getBeansConfigLocatorDefinitions()) {
+			if (locator.isEnabled(getProject()) && locator.getBeansConfigLocator().supports(getProject())) {
+				final Map<String, IBeansConfig> detectedConfigs = new HashMap<String, IBeansConfig>();
+				final String[] configSetName = new String[1];
 
-			// Add auto detected beans configs
-			for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory.getBeansConfigLocatorDefinitions()) {
-				if (locator.isEnabled(getProject()) && locator.getBeansConfigLocator().supports(getProject())) {
-					final Map<String, IBeansConfig> detectedConfigs = new HashMap<String, IBeansConfig>();
-					final String[] configSetName = new String[1];
+				// Prevent extension contribution from crashing the model creation
+				SafeRunner.run(new ISafeRunnable() {
 
-					// Prevent extension contribution from crashing the model creation
-					SafeRunner.run(new ISafeRunnable() {
+					public void handleException(Throwable exception) {
+						// nothing to handle here
+					}
 
-						public void handleException(Throwable exception) {
-							// nothing to handle here
+					public void run() throws Exception {
+						IBeansConfigLocator configLocator = locator.getBeansConfigLocator();
+						Set<IFile> files = configLocator.locateBeansConfigs(getProject(), null);
+						for (IFile file : files) {
+							BeansConfig config = new BeansConfig(BeansProject.this, file.getProjectRelativePath()
+									.toString(), Type.AUTO_DETECTED);
+							String configName = getConfigName(file);
+							if (!hasConfig(configName)) {
+								detectedConfigs.put(configName, config);
+							}
 						}
-
-						public void run() throws Exception {
-							IBeansConfigLocator configLocator = locator.getBeansConfigLocator();
-							Set<IFile> files = configLocator.locateBeansConfigs(getProject(), null);
-							for (IFile file : files) {
-								BeansConfig config = new BeansConfig(BeansProject.this, file.getProjectRelativePath()
-										.toString(), Type.AUTO_DETECTED);
-								String configName = getConfigName(file);
+						if (files.size() > 1) {
+							String configSet = locator.getBeansConfigLocator().getBeansConfigSetName(files);
+							if (configSet.length() > 0) {
+								configSetName[0] = configSet;
+							}
+						}
+						if (configLocator instanceof IJavaConfigLocator) {
+							Set<IType> types = ((IJavaConfigLocator) configLocator).locateJavaConfigs(getProject(), null);
+							for (IType type : types) {
+								IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(),
+										Type.AUTO_DETECTED);
+								String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
 								if (!hasConfig(configName)) {
 									detectedConfigs.put(configName, config);
 								}
 							}
-							if (files.size() > 1) {
-								String configSet = locator.getBeansConfigLocator().getBeansConfigSetName(files);
-								if (configSet.length() > 0) {
-									configSetName[0] = configSet;
-								}
-							}
-							if (configLocator instanceof IJavaConfigLocator) {
-								Set<IType> types = ((IJavaConfigLocator) configLocator).locateJavaConfigs(getProject(), null);
-								for (IType type : types) {
-									IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(),
-											Type.AUTO_DETECTED);
-									String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
-									if (!hasConfig(configName)) {
-										detectedConfigs.put(configName, config);
-									}
-								}
-							}
 						}
-					});
+					}
+				});
 
-					if (detectedConfigs.size() > 0) {
-						Set<String> configNamesByLocator = new LinkedHashSet<String>();
+				if (detectedConfigs.size() > 0) {
+					Set<String> configNamesByLocator = new LinkedHashSet<String>();
 
-						for (Map.Entry<String, IBeansConfig> detectedConfig : detectedConfigs.entrySet()) {
-							autoDetectedConfigs.put(detectedConfig.getKey(), detectedConfig.getValue());
-							detectedConfig.getValue().registerEventListener(eventListener);
-							configNamesByLocator.add(getConfigName((IFile) detectedConfig.getValue().getElementResource()));
-							locatorByAutoDetectedConfig.put(getConfigName((IFile) detectedConfig.getValue()
-									.getElementResource()), locator.getNamespaceUri() + "." + locator.getId());
-						}
-						autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(),
-								configNamesByLocator);
+					for (Map.Entry<String, IBeansConfig> detectedConfig : detectedConfigs.entrySet()) {
+						autoDetectedConfigs.put(detectedConfig.getKey(), detectedConfig.getValue());
+						detectedConfig.getValue().registerEventListener(eventListener);
+						configNamesByLocator.add(getConfigName((IFile) detectedConfig.getValue().getElementResource()));
+						locatorByAutoDetectedConfig.put(getConfigName((IFile) detectedConfig.getValue()
+								.getElementResource()), locator.getNamespaceUri() + "." + locator.getId());
+					}
+					autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(),
+							configNamesByLocator);
 
-						// Create a config set for auto detected configs if desired by the extension
-						if (configSetName[0] != null && configSetName[0].length() > 0) {
+					// Create a config set for auto detected configs if desired by the extension
+					if (configSetName[0] != null && configSetName[0].length() > 0) {
 
-							IBeansConfigSet configSet = new BeansConfigSet(BeansProject.this, configSetName[0], configNamesByLocator,
-									IBeansConfigSet.Type.AUTO_DETECTED);
+						IBeansConfigSet configSet = new BeansConfigSet(BeansProject.this, configSetName[0], configNamesByLocator,
+								IBeansConfigSet.Type.AUTO_DETECTED);
 
-							// configure the created IBeansConfig
-							locator.getBeansConfigLocator().configureBeansConfigSet(configSet);
+						// configure the created IBeansConfig
+						locator.getBeansConfigLocator().configureBeansConfigSet(configSet);
 
-							autoDetectedConfigSets.put(configSetName[0], configSet);
-							autoDetectedConfigSetsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(),
-									configSetName[0]);
-						}
+						autoDetectedConfigSets.put(configSetName[0], configSet);
+						autoDetectedConfigSetsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(),
+								configSetName[0]);
 					}
 				}
 			}
 		}
-		finally {
-			updateAllConfigsCache();
-			w.unlock();
+	}
+	
+	protected void restoreConfigSetState(Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
+		if (removedConfigsFromSets != null) {
+			IBeansModel model = BeansCorePlugin.getModel();
+			for (IBeansConfigSet configSet : removedConfigsFromSets.keySet()) {
+				Set<String> removedConfigs = removedConfigsFromSets.get(configSet);
+				for(String removedConfig : removedConfigs) {
+					if (hasConfig(removedConfig) || model.getConfig(removedConfig) != null) {
+						((BeansConfigSet) configSet).addConfig(removedConfig);
+					}
+				}
+			}
 		}
 	}
 	
