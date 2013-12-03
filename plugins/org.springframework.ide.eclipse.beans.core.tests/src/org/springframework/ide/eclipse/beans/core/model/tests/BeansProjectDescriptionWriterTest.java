@@ -29,7 +29,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class BeansConfigDescriptionWriterTest {
+public class BeansProjectDescriptionWriterTest {
 	
 	private IProject project;
 	private BeansModel model;
@@ -66,6 +66,23 @@ public class BeansConfigDescriptionWriterTest {
 	
 	@Test
 	public void testBeansProjectDescriptionWriterWithMixedConfigs() throws Exception {
+		beansProject.addConfig("basic-bean-config.xml", IBeansConfig.Type.MANUAL);
+		beansProject.addConfig("java:org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
+		
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		XMLWriter writer = new XMLWriter(os);
+		BeansProjectDescriptionWriter.write(beansProject, writer);
+		writer.flush();
+		writer.close();
+		
+		String description = os.toString();
+		
+		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t\t<config>java:org.test.spring.SimpleConfigurationClass</config>\n\t</configs>";
+		assertTrue(description.contains(configs));
+	}
+	
+	@Test
+	public void testBeansProjectDescriptionWriterWithMixedAutoConfigs() throws Exception {
 		beansProject.addConfig("basic-bean-config.xml", IBeansConfig.Type.MANUAL);
 		beansProject.addConfig("java:org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
 		

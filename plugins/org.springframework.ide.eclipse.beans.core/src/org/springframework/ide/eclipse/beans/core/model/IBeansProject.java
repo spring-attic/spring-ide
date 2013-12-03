@@ -149,5 +149,15 @@ public interface IBeansProject extends IBeansModelElement, IResourceModelElement
 	 */
 	@Deprecated
 	boolean isUpdatable();
+	
+	/**
+	 * Returns true if this projects settings for auto-configured bean configs is persisted.
+	 * The persistence for the auto-config beans configs were introduced with version 3.5.0
+	 * and therefore the IDE needs to treat older projects differently
+	 * 
+	 * @return true, if the auto-config state was read from persistent project storage (.springBeans file)
+	 * @since 3.5.0
+	 */
+	boolean isAutoConfigStatePersisted();
 
 }
