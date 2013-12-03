@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.ReferenceApp;
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 /**
  * This tests performs a quick validation that downloaded zip file contains

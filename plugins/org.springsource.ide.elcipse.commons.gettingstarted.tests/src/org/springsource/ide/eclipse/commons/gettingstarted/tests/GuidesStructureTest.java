@@ -21,10 +21,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.GithubRepoContent;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
-
-import org.springframework.ide.eclipse.wizard.gettingstarted.util.UIThreadDownloadDisallowed;
 
 /**
  * This tests performs a quick validation that downloaded Guides zip file contains
