@@ -83,7 +83,7 @@ public class BeansProjectDescriptionWriterTest {
 	
 	@Test
 	public void testBeansProjectDescriptionWriterWithMixedAutoConfigs() throws Exception {
-		beansProject.addConfig("basic-bean-config.xml", IBeansConfig.Type.AUTO_DETECTED);
+		beansProject.addConfig("basic-bean-config.xml", IBeansConfig.Type.MANUAL);
 		beansProject.addConfig("java:org.test.spring.SimpleConfigurationClass", IBeansConfig.Type.MANUAL);
 		
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
