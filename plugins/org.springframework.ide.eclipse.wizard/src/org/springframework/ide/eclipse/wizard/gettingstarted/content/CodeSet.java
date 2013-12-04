@@ -85,13 +85,18 @@ public abstract class CodeSet {
 	 * already cached locally).
 	 */
 	public List<BuildType> getBuildTypes() throws UIThreadDownloadDisallowed {
+		//Only use 'default' build type if no other build type works.
 		if (buildTypes==null) {
 			buildTypes = new ArrayList<BuildType>();
 			for (BuildType type : BuildType.values()) {
-				if (hasFile(type.getBuildScript())) {
+				IPath scriptFile = type.getBuildScript();
+				if (scriptFile!=null && hasFile(scriptFile)) {
 					buildTypes.add(type);
 				}
 			}
+		}
+		if (buildTypes.isEmpty()) {
+			buildTypes.add(BuildType.GENERAL);
 		}
 		return buildTypes;
 	}
@@ -161,11 +166,26 @@ public abstract class CodeSet {
 	}
 
 	public ValidationResult validateBuildType(BuildType buildType) throws UIThreadDownloadDisallowed {
-		String bs = buildType.getBuildScript().toString();
-		if (!hasFile(bs)) {
-			return ValidationResult.error(buildType.displayName()+" is not supported: there is no '"+bs+"'");
+		List<BuildType> validBuildTypes = getBuildTypes();
+		if (validBuildTypes.contains(buildType)) {
+			return ValidationResult.OK;
 		}
-		return ValidationResult.OK;
+		//Not valid formulate a nice explanation
+		IPath expectedScript = buildType.getBuildScript();
+		if (expectedScript!=null) {
+			return ValidationResult.error("Can't use '"+buildType.displayName()+"': There is no '"+expectedScript+"'");
+		} else {
+			StringBuilder message = new StringBuilder("Should be imported as ");
+			boolean first = true;
+			for (BuildType bt : validBuildTypes) {
+				if (!first) {
+					message.append(" or ");
+				}
+				message.append("'"+bt.displayName()+"'");
+				first = false;
+			}
+			return ValidationResult.error(message.toString());
+		}
 	}
 
 	/**

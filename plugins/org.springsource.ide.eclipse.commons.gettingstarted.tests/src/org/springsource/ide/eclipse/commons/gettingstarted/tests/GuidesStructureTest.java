@@ -39,6 +39,29 @@ public class GuidesStructureTest extends GuidesTestCase {
 		super(guide);
 	}
 
+	/**
+	 * List of names of guides that are not expected to have build logic (pom or build.gradle).
+	 * This list is here to make sure only projects for which it is in fact expected can pass
+	 * the test without providing a build script.
+	 */
+	private static String [] generalProjects = {
+		"gs-consuming-rest-ios",
+		"gs-consuming-rest-angular-js",
+		"gs-consuming-rest-backbone",
+		"gs-consuming-rest-jquery",
+		"gs-consuming-rest-restjs",
+		"gs-consuming-rest-sencha"
+	};
+	
+	private static boolean isGeneral(String name) {
+		for (String n : generalProjects) {
+			if (name.equals(n)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	@Override
 	protected void runTest() throws Throwable {
 		System.out.println("=== validating guide zip structure: "+guide.getName()+" ====");
@@ -49,6 +72,7 @@ public class GuidesStructureTest extends GuidesTestCase {
 
 	public static void validateZipStructure(final GithubRepoContent guide) throws Throwable {
 		try {
+			final boolean expectGeneral = isGeneral(guide.getName());
 			buildJob(new GradleRunnable("validate "+guide) {
 				@Override
 				public void doit(IProgressMonitor mon) throws Exception {
@@ -82,7 +106,16 @@ public class GuidesStructureTest extends GuidesTestCase {
 						
 						boolean isGradle = codeset.hasFile("build.gradle");
 						boolean isMaven = codeset.hasFile("pom.xml");
-						assertTrue("Codeset "+codesetName+" has neither a build.gradle nor a pom.xml", isGradle||isMaven);
+						if (!expectGeneral) {
+							assertTrue("Codeset "+codesetName+" has neither a build.gradle nor a pom.xml", isGradle||isMaven);
+						} else {
+							if (isGradle) {
+								fail("Expecting a 'general' project but found a 'build.gradle'");
+							} 
+							if (isMaven) {
+								fail("Expecting a 'general' project but found a 'pom.xml'");
+							}
+						}
 	
 						if (previousCodesetName!=null) {
 							//Ensure next codeset is consistent with previous one

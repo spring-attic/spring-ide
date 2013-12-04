@@ -25,10 +25,17 @@ public enum BuildType {
 			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GradleStrategy",
 			"Can not use Gradle: STS Gradle Tooling is not installed. You can install it from the STS Dashboard."
 	),
-	GROOVY_CLI("app.groovy",
+//	GROOVY_CLI("app.groovy",
+//			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GeneralProjectStrategy",
+//			"NA", //This message doesn't matter because
+//															  // project imports as 'resources' so no
+//															  // particular tooling is needed.
+//			"Spring CLI"
+//	),
+	GENERAL(null,
 			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GeneralProjectStrategy",
-			"Can not use Spring Boot Groovy CLI because ...",
-			"Spring CLI"
+			"NA",
+			"General"
 	);
 
 //	MAVEN("pom.xml", new NullImportStrategy("Maven"));
@@ -48,7 +55,9 @@ public enum BuildType {
 	private String displayName;
 
 	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
-		this.buildScriptPath = new Path(buildScriptPath);
+		if (buildScriptPath!=null) {
+			this.buildScriptPath = new Path(buildScriptPath);
+		}
 		this.klass = importStrategyClass;
 		this.notInstalledMessage = notInstalledMessage;
 	}
@@ -85,9 +94,13 @@ public enum BuildType {
 		return displayName;
 	}
 
+	/**
+	 * The option that is preferred by the UI as the initial selection.
+	 */
 	public static final BuildType DEFAULT = MAVEN;
 
 	public String getNotInstalledMessage() {
 		return notInstalledMessage;
 	}
+
 }
