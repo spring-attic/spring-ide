@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +48,7 @@ public class SpringBootProjectTests extends TestCase {
 	 */
 	private static final String BOOT_STARTER_VERSION = "0.5.0.BUILD-SNAPSHOT";
 
-	private static final long MAVEN_POM_REFRESH_TIMEOUT = 20*1000;
+	private static final long MAVEN_POM_REFRESH_TIMEOUT = 60*1000;
 	
 	private static String projectName;
 	private static ISpringBootProject project;
@@ -68,6 +69,16 @@ public class SpringBootProjectTests extends TestCase {
 			for (SpringBootStarter s : project.getKnownStarters()) {
 				knownStarters.put(s.getName(), s);
 			}
+			assertFalse(knownStarters.isEmpty());
+			
+			assertInitialStarters(project);
+			project.setStarters(Collections.<SpringBootStarter> emptySet());
+			new ACondition("all starters removed") {
+				public boolean test() throws Exception {
+					assertTrue(project.getBootStarters().isEmpty());
+					return true;
+				}
+			}.waitFor(MAVEN_POM_REFRESH_TIMEOUT);
 		}
 	}
 	
@@ -82,7 +93,8 @@ public class SpringBootProjectTests extends TestCase {
 	
 	public void testAddAndRemoveBootStarter() throws Exception {
 //		List<SpringBootStarter> starters = project.getBootStarters();
-		assertTrue(project.getBootStarters().isEmpty()); //Expect no starters applied initially.
+		//spring initializer now produces a spring-boot project with the 'test' starter applied by default.
+		assertTrue(project.getBootStarters().isEmpty());
 		project.addStarter(knownStarters.get("web"));
 		//WARNING: presumably m2e model updates are asynchronous and we don't really know when the changes will be visible!
 		//  the next assertion may fail when running at 'full speed'.
@@ -101,6 +113,14 @@ public class SpringBootProjectTests extends TestCase {
 				return true;
 			}
 		}.waitFor(MAVEN_POM_REFRESH_TIMEOUT);
+	}
+
+	private void assertInitialStarters(ISpringBootProject project) throws Exception {
+		//Old: initial project has no starters applied
+		//assertTrue(project.getBootStarters().isEmpty());
+		
+		//Now: the 'test' starter is applied by default.
+		assertStarters(project, Arrays.asList(knownStarters.get("test")));
 	}
 
 	private void assertContainsStarters(List<SpringBootStarter> starters, String... artifactIds) {
@@ -127,7 +147,7 @@ public class SpringBootProjectTests extends TestCase {
 	}
 	
 	public void testSetStarters() throws Exception {
-		assertTrue(project.getBootStarters().isEmpty()); //Expect no starters applied initially.
+		assertTrue(project.getBootStarters().isEmpty());
 		
 		project.setStarters(knownStarters.values());
 		new ACondition("all known starters added") {
