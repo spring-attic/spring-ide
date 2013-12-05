@@ -46,7 +46,7 @@ public class GuidesStructureTest extends GuidesTestCase {
 	 */
 	private static String [] generalProjects = {
 		"gs-consuming-rest-ios",
-		"gs-consuming-rest-angular-js",
+		"gs-consuming-rest-angularjs",
 		"gs-consuming-rest-backbone",
 		"gs-consuming-rest-jquery",
 		"gs-consuming-rest-restjs",
