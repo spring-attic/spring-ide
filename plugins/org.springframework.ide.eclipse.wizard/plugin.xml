@@ -184,11 +184,23 @@
        <newWizardShortcut
              id="com.springsource.sts.wizard.template">
        </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
+       </newWizardShortcut>
     </perspectiveExtension>
     <perspectiveExtension 
           targetID="org.eclipse.ui.resourcePerspective">
 	   <newWizardShortcut
              id="com.springsource.sts.wizard.template">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
        </newWizardShortcut>
     </perspectiveExtension>
     <perspectiveExtension
@@ -196,17 +208,35 @@
        <newWizardShortcut
              id="com.springsource.sts.wizard.template">
        </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
+       </newWizardShortcut>
     </perspectiveExtension>
     <perspectiveExtension
           targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
        <newWizardShortcut
              id="com.springsource.sts.wizard.template">
        </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
+       </newWizardShortcut>
     </perspectiveExtension>
     <perspectiveExtension
           targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
        <newWizardShortcut
              id="com.springsource.sts.wizard.template">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
        </newWizardShortcut>
     </perspectiveExtension>
  </extension>
