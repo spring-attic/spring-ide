@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2013 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.metadata.locate;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -89,7 +88,7 @@ public class DynamicWebProjectBeansConfigLocator extends AbstractJavaProjectPath
 	private static final String SERVLET_CONTEXT_SUFFIX = "-servlet.xml"; //$NON-NLS-1$
 
 	/** The detected file patterns to search for */
-	private List<String> filePatterns = new ArrayList<String>();
+	private Set<String> filePatterns = new ConcurrentSkipListSet<String>();
 
 	private final XPathExpression servletExpression;
 
@@ -271,7 +270,7 @@ public class DynamicWebProjectBeansConfigLocator extends AbstractJavaProjectPath
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected List<String> getAllowedFilePatterns() {
+	protected Set<String> getAllowedFilePatterns() {
 		return filePatterns;
 	}
 
