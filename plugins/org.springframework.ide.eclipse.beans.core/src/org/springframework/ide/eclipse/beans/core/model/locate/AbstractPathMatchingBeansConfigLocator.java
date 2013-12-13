@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 Spring IDE Developers
+ * Copyright (c) 2008, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.beans.core.model.locate;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
@@ -169,7 +168,7 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 	/**
 	 * Method to provide file patterns that should be used for searching.
 	 */
-	protected abstract List<String> getAllowedFilePatterns();
+	protected abstract Set<String> getAllowedFilePatterns();
 
 	/**
 	 * Locates matching files in the given <code>folder</code>. Walks down the file tree until no

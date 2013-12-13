@@ -101,36 +101,29 @@ public class RequestMappingParamTypeProposalComputer extends JavaCompletionPropo
 						int invocationOffset = context.getInvocationOffset();
 						AssistContext assistContext = new AssistContext(cu, invocationOffset, 0);
 						ASTNode node = assistContext.getCoveringNode();
-
 						// cursor is at the beginning of an empty param list
 						// [method(^)}
 						if (node instanceof MethodDeclaration) {
 							MethodDeclaration methodDecl = (MethodDeclaration) node;
 							if (ProposalCalculatorUtil.hasAnnotation("RequestMapping", methodDecl)) {
-
-								boolean found = true;
-								int startIndex = invocationOffset;
-								IDocument document = sourceViewer.getDocument();
-
-								while (!found && startIndex > methodDecl.getStartPosition()) {
-									try {
-										char currChar = document.getChar(startIndex);
-										if (Character.isWhitespace(currChar)) {
-											startIndex--;
-										}
-										if ('(' == currChar) {
-											found = true;
-										}
-									}
-									catch (BadLocationException e) {
-										StatusHandler.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-												e.getMessage(), e));
-										break;
+								try {
+									// We need to discover if we're actually
+									// inside the parameter declaration -- node
+									// is reported as MethodDeclaration when
+									// we're inside annotation
+									IDocument document = sourceViewer.getDocument();
+									int relativeOffset = invocationOffset - methodDecl.getStartPosition();
+									String methodText = document.get(methodDecl.getStartPosition(),
+											methodDecl.getLength());
+									String methodName = methodDecl.getName().getFullyQualifiedName();
+									int getterLocation = methodText.indexOf(methodName) + methodName.length();
+									if (getterLocation < relativeOffset) {
+										return getProposals(methodDecl, "", invocationOffset, null, javaContext);
 									}
 								}
-
-								if (found) {
-									return getProposals(methodDecl, "", invocationOffset, null, javaContext);
+								catch (BadLocationException e) {
+									StatusHandler
+											.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
 								}
 							}
 						}

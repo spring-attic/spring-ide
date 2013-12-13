@@ -46,7 +46,7 @@ Import-Package: org.aspectj.lang.annotation,
  org.springframework.util;version="[3.0.5.RELEASE,4.1.0)",
  org.springframework.web.context;version="[3.0.5.RELEASE,4.1.0)",
  org.springframework.web.context.support;version="[3.0.5.RELEASE,4.1.0)"
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

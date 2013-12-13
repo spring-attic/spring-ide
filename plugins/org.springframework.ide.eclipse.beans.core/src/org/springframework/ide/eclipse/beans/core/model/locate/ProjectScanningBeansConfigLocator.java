@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008, 2013 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -62,10 +63,10 @@ public class ProjectScanningBeansConfigLocator extends
 	private Map<IProject, NamespaceHandlerResolver> namespaceResoverCache = new HashMap<IProject, NamespaceHandlerResolver>();
 
 	/** Configured file patters derived from the configured file patterns */
-	private List<String> configuredFilePatterns = null;
+	private Set<String> configuredFilePatterns = null;
 
 	/** Configured file extensions from the dialog */
-	private List<String> configuredFileExtensions = null;
+	private Set<String> configuredFileExtensions = null;
 
 	/** The project this locator operates on */
 	private IProject project = null;
@@ -76,8 +77,9 @@ public class ProjectScanningBeansConfigLocator extends
 	 * @param configuredFileSuffixes
 	 */
 	public ProjectScanningBeansConfigLocator(String configuredFileSuffixes) {
-		configuredFilePatterns = new ArrayList<String>();
-		configuredFileExtensions = new ArrayList<String>();
+		configuredFilePatterns = new ConcurrentSkipListSet<String>();
+		configuredFileExtensions = new ConcurrentSkipListSet<String>();
+
 		for (String filePattern : StringUtils
 				.commaDelimitedListToStringArray(configuredFileSuffixes)) {
 			filePattern = filePattern.trim();
@@ -214,7 +216,7 @@ public class ProjectScanningBeansConfigLocator extends
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected List<String> getAllowedFilePatterns() {
+	protected Set<String> getAllowedFilePatterns() {
 		return configuredFilePatterns;
 	}
 
@@ -222,7 +224,7 @@ public class ProjectScanningBeansConfigLocator extends
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected List<String> getAllowedFileExtensions() {
+	protected Set<String> getAllowedFileExtensions() {
 		return configuredFileExtensions;
 	}
 

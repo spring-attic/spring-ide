@@ -126,7 +126,9 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 			else if (node instanceof SingleMemberAnnotation) {
 				SingleMemberAnnotation singleMemberAnnotation = (SingleMemberAnnotation) node;
 				Expression expression = singleMemberAnnotation.getValue();
-				locationInfo = getLocationInformation((StringLiteral) expression, javaContext);
+				if (expression instanceof StringLiteral) {
+					locationInfo = getLocationInformation((StringLiteral) expression, javaContext);
+				}
 			}
 
 			if (locationInfo == null) {
