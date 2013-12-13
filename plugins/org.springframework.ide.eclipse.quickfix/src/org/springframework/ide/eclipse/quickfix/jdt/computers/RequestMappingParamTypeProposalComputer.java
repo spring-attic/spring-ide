@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
@@ -99,7 +100,7 @@ public class RequestMappingParamTypeProposalComputer extends JavaCompletionPropo
 					if (viewer instanceof SourceViewer) {
 						SourceViewer sourceViewer = (SourceViewer) viewer;
 						int invocationOffset = context.getInvocationOffset();
-						AssistContext assistContext = new AssistContext(cu, invocationOffset, 0);
+						AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0, SharedASTProvider.WAIT_NO);
 						ASTNode node = assistContext.getCoveringNode();
 						// cursor is at the beginning of an empty param list
 						// [method(^)}
