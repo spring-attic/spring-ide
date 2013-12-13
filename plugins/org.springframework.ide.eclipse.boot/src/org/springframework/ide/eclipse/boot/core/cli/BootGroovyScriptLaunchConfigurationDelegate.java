@@ -32,6 +32,7 @@ import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 
 public class BootGroovyScriptLaunchConfigurationDelegate extends LaunchConfigurationDelegate {
 	
@@ -89,7 +90,7 @@ public class BootGroovyScriptLaunchConfigurationDelegate extends LaunchConfigura
 		return getSpringBootInstall().getHome();
 	}
 
-	public static BootInstall getSpringBootInstall() throws Exception {
+	public static IBootInstall getSpringBootInstall() throws Exception {
 		return BootInstallManager.getInstance().getDefaultInstall();
 	}
 

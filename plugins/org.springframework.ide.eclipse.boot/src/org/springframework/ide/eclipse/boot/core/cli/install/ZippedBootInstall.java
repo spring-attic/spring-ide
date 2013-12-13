@@ -8,10 +8,9 @@
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.core.cli;
+package org.springframework.ide.eclipse.boot.core.cli.install;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
@@ -27,15 +26,15 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.Down
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 /**
- * An instance of this class represent a boot installation that can be
- * used to launch a 'app.groovy' spring Groovy CLI script.
+ * A Boot Installation that is located in a zip file. It must be unzipped locally 
+ * before it can be used.
  * <p>
- * The install may need to be fetched remotely befor it can be used.
- * This is done automatically the first time it is needed.
+ * This class takes care of downloading and unzipping it automatically to to
+ * cache directory located in the workspace.
  * 
  * @author Kris De Volder
  */
-public class BootInstall {
+public class ZippedBootInstall extends BootInstall {
 
 	/**
 	 * TODO: DownloadableZipItem should probably be moved to commons
@@ -61,9 +60,9 @@ public class BootInstall {
 				} catch (Throwable e) {
 					BootActivator.log(e);
 				}
-				//Ensure that filename is at least set to something.
+				//Ensure that filename is at least set to something that ends with .zip
 				if (fileName==null) {
-					fileName = super.getFileName();
+					fileName = super.getFileName()+".zip";
 				}
 			}
 			return fileName;
@@ -98,9 +97,7 @@ public class BootInstall {
 				final File[] fileBox = new File[1];
 				downloader.doWithDownload(this, new DownloadRequestor() {
 					public void exec(File zipFile) throws Exception {
-						String zipPath = zipFile.toString();
-						Assert.isTrue(zipPath.endsWith(".zip"));
-						File unzipDir = new File(zipPath.substring(0, zipPath.length()-4/*4=".zip".length()*/));
+						File unzipDir = getUnzipDir();
 						unzip(zipFile, unzipDir);
 						fileBox[0] = unzipDir;
 					}
@@ -115,25 +112,26 @@ public class BootInstall {
 				throw e;
 			}
 		}
-
-
-	}
-
-	private static final FilenameFilter JAR_FILE_FILTER = new FilenameFilter() {
+		
 		@Override
-		public boolean accept(File dir, String name) {
-			return name.toLowerCase().endsWith(".jar");
+		public void clearCache() {
+			synchronized (downloader) {
+				super.clearCache();
+				File unzipDir = zip.getUnzipDir();
+				FileUtils.deleteQuietly(unzipDir);
+			}
 		}
-	};
+	}
 
 	private DownloadableItem zip;
 	private File home; //Will be set once the install is unzipped and ready for use.
-	private File[] bootLibJars; //Set once we determined the location of the spring-boot jar(s) for this install.
 
-	public BootInstall(DownloadManager downloader, String url) throws Exception {
-		this.zip = new DownloadableZipItem(new URL(url), downloader);
+	public ZippedBootInstall(DownloadManager downloader, String uri, String name) throws Exception {
+		super(uri, name);
+		this.zip = new DownloadableZipItem(new URL(uri), downloader);
 	}
 
+	@Override
 	public File getHome() throws Exception {
 		if (home==null) {
 			File unzipped = zip.getFile();
@@ -150,16 +148,27 @@ public class BootInstall {
 		return home;
 	}
 
-	public File[] getBootLibJars() throws Exception {
-		//Example: .../installs/spring-boot-cli-0.5.0.M6-bin/spring-0.5.0.M6/lib/spring-boot-cli-0.5.0.M6.jar
-		
-		if (bootLibJars==null) {
-			File home = getHome(); //Example: .../installs/spring-boot-cli-0.5.0.M6-bin/spring-0.5.0.M6/
-			//Expect to find spring-boot-cli-<version> in lib folder.
-			bootLibJars = new File(home, "lib").listFiles(JAR_FILE_FILTER);
+	@Override
+	public String getUrl() {
+		return uriString;
+	}
+	
+	@Override
+	protected boolean mayRequireDownload() {
+		//We can do better than just looking at the url (as the super method does).
+		//We can see whether or not the zip file was dowloaded already or not.
+		if (zip!=null) {
+			return !zip.isDownloaded();
+		} else {
+			return super.mayRequireDownload();
 		}
-		
-		return bootLibJars;
+	}
+
+	@Override
+	public void clearCache() {
+		if (zip!=null) {
+			zip.clearCache();
+		}
 	}
 
 }
