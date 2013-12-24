@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    GoPivotal, Inc. - initial API and implementation
+ *   GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.guides;
 
