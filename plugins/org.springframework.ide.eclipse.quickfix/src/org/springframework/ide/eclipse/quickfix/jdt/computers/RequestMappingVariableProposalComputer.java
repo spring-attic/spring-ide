@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.core.SourceRefElement;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -98,7 +99,8 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 			ICompilationUnit cu = javaContext.getCompilationUnit();
 			SourceViewer sourceViewer = (SourceViewer) javaContext.getViewer();
 			int invocationOffset = javaContext.getInvocationOffset();
-			AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0);
+			AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0,
+					SharedASTProvider.WAIT_NO);
 			ASTNode node = ((SourceRefElement) a).findNode(assistContext.getASTRoot());
 
 			if (node == null) {
@@ -108,7 +110,6 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 			if (!(node instanceof Annotation)) {
 				return proposals;
 			}
-			Annotation annotation = (Annotation) node;
 
 			LocationInformation locationInfo = null;
 			if (node instanceof NormalAnnotation) {
@@ -160,10 +161,12 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 
 				if (found) {
 					ISourceRange sourceRange = element.getSourceRange();
+					//Now get the 'real' ast.
 					assistContext = new AssistContext(javaContext.getCompilationUnit(), sourceViewer,
-							sourceRange.getOffset(), sourceRange.getLength());
+							sourceRange.getOffset(), sourceRange.getLength(), SharedASTProvider.WAIT_YES);
 
 					node = assistContext.getCoveringNode();
+					Annotation annotation = (Annotation) ((SourceRefElement) a).findNode(assistContext.getASTRoot());
 
 					if (content.endsWith("}")) {
 						content = content.substring(0, content.length() - 1);
