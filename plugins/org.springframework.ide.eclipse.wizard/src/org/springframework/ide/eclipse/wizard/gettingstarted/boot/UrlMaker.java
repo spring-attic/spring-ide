@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.client.utils.URIBuilder;
-import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -58,28 +55,22 @@ public class UrlMaker extends LiveExpression<String> {
 		} else {
 			baseUrl = baseUrl.trim();
 		}
-		try {
-			URIBuilder builder = new URIBuilder(baseUrl);
-			for (FieldModel<String> f : inputs) {
-				String paramValue = f.getValue();
-				if (paramValue!=null) {
-					builder.addParameter(f.getName(), paramValue);
-				}
+		SimpleUriBuilder builder = new SimpleUriBuilder(baseUrl);
+		for (FieldModel<String> f : inputs) {
+			String paramValue = f.getValue();
+			if (paramValue!=null) {
+				builder.addParameter(f.getName(), paramValue);
 			}
-
-			for (MultiSelectionFieldModel<String> mf : multiInputs) {
-				String name = mf.getName();
-				for (String selectedValue : mf.getSelecteds().getValues()) {
-					builder.addParameter(name, selectedValue);
-				}
-			}
-
-			return builder.toString();
-		} catch (URISyntaxException e) {
-			//most likely baseUrl is unparseable. Can't add params then.
-			WizardPlugin.log(e);
-			return baseUrl;
 		}
+
+		for (MultiSelectionFieldModel<String> mf : multiInputs) {
+			String name = mf.getName();
+			for (String selectedValue : mf.getSelecteds().getValues()) {
+				builder.addParameter(name, selectedValue);
+			}
+		}
+
+		return builder.toString();
 	}
 
 }
