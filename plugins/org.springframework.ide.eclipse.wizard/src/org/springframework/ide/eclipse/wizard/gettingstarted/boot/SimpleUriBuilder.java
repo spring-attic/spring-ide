@@ -19,11 +19,11 @@ import org.springframework.ide.eclipse.wizard.WizardPlugin;
  * Why roll our own? Because we can't yet depend on the later versions of appache httpcomponents
  * in STS because an older version ships with Eclipse.
  * <p>
- * Mising old-and new httplibs is suspected of causing this bug:
+ * Mixing old-and new appache httplibs is suspected of causing this bug:
  * https://issuetracker.springsource.com/browse/STS-3647
  *
- * When Eclipse moves on to more recent versions httpcomponents we can delete this class
- * and use that instead.
+ * When Eclipse moves on to more recent versions of httpcomponents we can delete this class
+ * and use its UriBuilder instead.
  *
  * @author Kris De Volder
  */
