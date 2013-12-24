@@ -42,9 +42,8 @@ Require-Bundle: org.eclipse.ui,
  org.codehaus.jackson.mapper,
  org.apache.commons.logging,
  org.springsource.ide.eclipse.gradle.core;bundle-version="3.4.0";resolution:=optional,
- org.apache.httpcomponents.httpclient;bundle-version="4.2.5",
  org.springsource.ide.eclipse.commons.gettingstarted;bundle-version="3.5.0";resolution:=optional
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Bundle-ClassPath: .,
  lib/jettison-1.0-RC2.jar,
