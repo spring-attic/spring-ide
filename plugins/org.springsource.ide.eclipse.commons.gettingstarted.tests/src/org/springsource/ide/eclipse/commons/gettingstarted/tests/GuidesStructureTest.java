@@ -50,7 +50,8 @@ public class GuidesStructureTest extends GuidesTestCase {
 		"gs-consuming-rest-backbone",
 		"gs-consuming-rest-jquery",
 		"gs-consuming-rest-restjs",
-		"gs-consuming-rest-sencha"
+		"gs-consuming-rest-sencha",
+		"gs-messaging-stomp-msgsjs"
 	};
 	
 	private static boolean isGeneral(String name) {
