@@ -14,6 +14,7 @@ import java.net.URL;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
@@ -21,7 +22,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -35,11 +36,13 @@ public class OpenUrlSection extends WizardPageSection {
 	private final LiveExpression<URL> url;
 	private final LiveVariable<Boolean> enableOpen;
 	private final String sectionLabel;
+	private GSImportWizard wizard;
 
-	public OpenUrlSection(WizardPageWithSections owner, String sectionLabel,
+	public OpenUrlSection(GSImportWizard wizard, WizardPageWithSections owner, String sectionLabel,
 			LiveExpression<URL> url,
 			LiveVariable<Boolean> enableOpenOnFinish) {
 		super(owner);
+		this.wizard = wizard;
 		this.sectionLabel = sectionLabel;
 		this.url = url;
 		this.enableOpen = enableOpenOnFinish;
@@ -64,7 +67,7 @@ public class OpenUrlSection extends WizardPageSection {
 		comp.setLayout(new GridLayout(3, false));
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(comp);
 
-		final Label label = new Label(comp, SWT.NONE);
+		final Link label = new Link(comp, SWT.NONE);
 		final Button checkbox = new Button(comp, SWT.CHECK);
 		checkbox.setText("Open");
 		checkbox.setToolTipText("Open the url after finishing this wizard");
@@ -72,11 +75,22 @@ public class OpenUrlSection extends WizardPageSection {
 		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).grab(true, false).applyTo(label);
 		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(checkbox);
 
+		label.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				wizard.openHomePage(true);
+			}
+		});
+
 		url.addListener(new ValueListener<URL>() {
 			public void gotValue(LiveExpression<URL> exp, URL value) {
-				String txt = value==null ? "<no home page url>" : value.toString();
-				label.setText(txt);
+				if (value == null ) {
+					label.setText("(None)");
+				} else {
+					label.setText("<a href=\"" + value + "\">" + value + "</a>");
+				}
 				checkbox.setEnabled(value!=null);
+
 				//Size requirements for label may have changed:
 				comp.layout(new Control[] {label});
 			}

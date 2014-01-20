@@ -117,5 +117,4 @@ public class ImportUtils {
 			return ValidationResult.error(ExceptionUtil.getMessage(e));
 		}
 	}
-
 }

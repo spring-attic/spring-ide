@@ -402,10 +402,7 @@ public class GSImportWizardModel {
 				}
 			}
 			if (enableOpenHomePage.getValue()) {
-				URL url = homePage.getValue();
-				if (url!=null) {
-					openUrl(url.toString());
-				}
+				openHomePage();
 			}
 			return true;
 		} catch (UIThreadDownloadDisallowed e) {
@@ -415,6 +412,13 @@ public class GSImportWizardModel {
 			return false;
 		} finally {
 			mon.done();
+		}
+	}
+
+	public void openHomePage() {
+		URL url = homePage.getValue();
+		if (url!=null) {
+			openUrl(url.toString());
 		}
 	}
 

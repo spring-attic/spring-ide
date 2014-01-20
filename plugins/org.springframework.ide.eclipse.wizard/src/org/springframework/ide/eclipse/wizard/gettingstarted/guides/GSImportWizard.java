@@ -45,6 +45,12 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
  */
 public class GSImportWizard extends Wizard implements IImportWizard, INewWizard {
 
+	private static class DialogCallback {
+		WizardDialog dialog;
+	}
+
+	private DialogCallback callback;
+
 	private final GSImportWizardModel model = new GSImportWizardModel();
 
 	public GSImportWizard() {
@@ -78,7 +84,7 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 			sections.add(new DescriptionSection(this, model.description));
 			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
 			sections.add(new CodeSetCheckBoxesSection(this, model.validCodesetNames, model.getCodeSetModel()));
-			sections.add(new OpenUrlSection(this, "Home Page", model.homePage, model.getEnableOpenHomePage()));
+			sections.add(new OpenUrlSection(GSImportWizard.this, this, "Home Page", model.homePage, model.getEnableOpenHomePage()));
 			return sections;
 		}
 
@@ -92,6 +98,13 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 
 		public void setFilterText(String text) {
 			getContentChooser().setFilterText(text);
+		}
+	}
+
+	public void openHomePage(boolean close) {
+		model.openHomePage();
+		if (close) {
+			callback.dialog.close();
 		}
 	}
 
@@ -179,22 +192,7 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 	 * the wizard (e.g. indicating OK or CANCEL).
 	 */
 	public static int open(Shell shell, GSContent guide) {
-		return open(shell, guide, true, false);
-	}
-
-	/**
-	 * Open the wizard and block until it is closed by the user. Returns the exit code of
-	 * the wizard (e.g. indicating OK or CANCEL).
-	 */
-	public static int open(Shell shell, GSContent guide, boolean synchronous, boolean enableOpenHomepage) {
-		GSImportWizard wiz = new GSImportWizard();
-		wiz.setEnableOpenHomePage(enableOpenHomepage);
-		if (guide != null) {
-			wiz.setItem(guide);
-		}
-		WizardDialog dialog = new WizardDialog(shell, wiz);
-		dialog.setBlockOnOpen(synchronous);
-		return dialog.open();
+		return open(shell, guide, null, true, false);
 	}
 
 	/**
@@ -202,11 +200,26 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 	 * the wizard (e.g. indicating OK or CANCEL).
 	 */
 	public static int open(Shell shell, String focusItem) {
+		return open(shell, null, focusItem, true, true);
+	}
+
+	/**
+	 * Open the wizard and block until it is closed by the user. Returns the exit code of
+	 * the wizard (e.g. indicating OK or CANCEL).
+	 */
+	private static int open(Shell shell, GSContent guide, String focusItem, boolean synchronous, boolean enableOpenHomepage) {
 		GSImportWizard wiz = new GSImportWizard();
-		wiz.setEnableOpenHomePage(true);
-		wiz.setFocusItem(focusItem);
+		wiz.setEnableOpenHomePage(enableOpenHomepage);
+		if (guide != null) {
+			wiz.setItem(guide);
+		}
+		if (focusItem != null) {
+			wiz.setFocusItem(focusItem);
+		}
 		WizardDialog dialog = new WizardDialog(shell, wiz);
-		dialog.setBlockOnOpen(true);
+		dialog.setBlockOnOpen(synchronous);
+		wiz.callback = new DialogCallback();
+		wiz.callback.dialog = dialog;
 		return dialog.open();
 	}
 
