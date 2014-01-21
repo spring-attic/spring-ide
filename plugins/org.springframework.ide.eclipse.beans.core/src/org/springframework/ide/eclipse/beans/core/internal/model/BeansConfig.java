@@ -407,7 +407,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 						}
 						
 						@Override
-						protected XmlReaderContext createReaderContext(Resource resource) {
+						public XmlReaderContext createReaderContext(Resource resource) {
 							return new ProfileAwareReaderContext(resource, problemReporter, eventListener,
 									sourceExtractor, this, namespaceHandlerResolver);
 						}
@@ -564,7 +564,6 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPersistableElement.class) {
@@ -1268,7 +1267,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		 * {@inheritDoc}
 		 */
 		@Override
-		protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+		protected BeanDefinitionParserDelegate createDelegate(XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
 			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext, environment);
 			delegate.initDefaults(root, parentDelegate);
 			return delegate;
@@ -1324,7 +1323,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				// then ultimately reset this.delegate back to its original (parent) reference.
 				// this behavior emulates a stack of delegates without actually necessitating one.
 				BeanDefinitionParserDelegate parent = this.delegate;
-				this.delegate = createHelper(getReaderContext(), root, parent);
+				this.delegate = createDelegate(getReaderContext(), root, parent);
 	
 				preProcessXml(root);
 				parseBeanDefinitions(root, this.delegate);
