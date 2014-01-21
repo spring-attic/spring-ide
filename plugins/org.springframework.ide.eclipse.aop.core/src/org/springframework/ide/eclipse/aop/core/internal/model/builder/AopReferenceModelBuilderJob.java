@@ -587,7 +587,7 @@ public class AopReferenceModelBuilderJob extends Job {
 				if (t.getCause() != null) {
 					handleException(t.getCause(), info, bean, file);
 				}
-				else {
+				else if (!t.getMessage().contains("sun.reflect.annotation.TypeNotPresentException")) {
 					Activator.log(t);
 					AopReferenceModelMarkerUtils.createProblemMarker(file, Activator.getFormattedMessage(
 							"AopReferenceModelBuilder.exceptionFromReflection", t.getMessage()),

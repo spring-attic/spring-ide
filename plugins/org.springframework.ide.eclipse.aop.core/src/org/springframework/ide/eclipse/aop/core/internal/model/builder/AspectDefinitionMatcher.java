@@ -267,33 +267,32 @@ public class AspectDefinitionMatcher {
 
 		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass.getName());
 
-		// TODO CD here is room for speed improvements by collecting all valid methods in one go and then ask for
+		// TODO CD here is room for speed improvements by collecting all valid
+		// methods in one go and then ask for
 		// matches
 		ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 
 				if (checkMethod(targetClass, method, info.isProxyTargetClass()) && !matchingMethods.contains(method)) {
 					try {
-						boolean matches = (Boolean) ClassUtils.invokeMethod(aspectJExpressionPointcut, "matches",
-								method, targetClass);
+						boolean matches = (Boolean) ClassUtils.invokeMethod(aspectJExpressionPointcut, "matches", method, targetClass);
 						if (matches) {
 							addMatchingJdtMethod(matchingMethods, jdtTargetType, method);
 						}
-						// If in proxy interface mode we can match on methods from the interface rather then the actual
+						// If in proxy interface mode we can match on methods
+						// from the interface rather then the actual
 						// class
 						else if (!info.isProxyTargetClass()) {
-							Class[] targetInterfaces = org.springframework.util.ClassUtils
-									.getAllInterfacesForClass(targetClass);
+							Class[] targetInterfaces = org.springframework.util.ClassUtils.getAllInterfacesForClass(targetClass);
 
 							if (targetInterfaces != null) {
 								for (Class targetInterface : targetInterfaces) {
 									Method[] targetInterfaceMethods = targetInterface.getMethods();
 									for (Method targetInterfaceMethod : targetInterfaceMethods) {
-										Method targetMethodGuess = AopUtils.getMostSpecificMethod(
-												targetInterfaceMethod, targetClass);
+										Method targetMethodGuess = AopUtils.getMostSpecificMethod(targetInterfaceMethod, targetClass);
 										if (method.equals(targetMethodGuess)) {
-											matches = (Boolean) ClassUtils.invokeMethod(aspectJExpressionPointcut,
-													"matches", targetInterfaceMethod, targetInterface);
+											matches = (Boolean) ClassUtils.invokeMethod(aspectJExpressionPointcut, "matches", targetInterfaceMethod,
+													targetInterface);
 											if (matches) {
 												addMatchingJdtMethod(matchingMethods, jdtTargetType, method);
 											}
@@ -302,15 +301,12 @@ public class AspectDefinitionMatcher {
 								}
 							}
 						}
-					}
-					catch (Throwable e) {
+					} catch (Throwable e) {
 						if (e instanceof IllegalArgumentException) {
 							throw (IllegalArgumentException) e;
-						}
-						else if (e instanceof IllegalAccessException) {
+						} else if (e instanceof IllegalAccessException) {
 							throw (IllegalAccessException) e;
-						}
-						else {
+						} else {
 							// get the original exception out
 							throw new RuntimeException(e);
 						}
@@ -318,14 +314,14 @@ public class AspectDefinitionMatcher {
 				}
 			}
 
-			private void addMatchingJdtMethod(final Set<IMethod> matchingMethods, final IType jdtTargetType,
-					Method method) {
+			private void addMatchingJdtMethod(final Set<IMethod> matchingMethods, final IType jdtTargetType, Method method) {
 				IMethod jdtMethod = JdtUtils.getMethod(jdtTargetType, method.getName(), method.getParameterTypes());
 				if (jdtMethod != null) {
 					matchingMethods.add(jdtMethod);
 				}
 			}
 		});
+			
 		return matchingMethods;
 	}
 
