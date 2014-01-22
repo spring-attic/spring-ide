@@ -25,8 +25,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Spring IDE Developers
 Bundle-ClassPath: .
-Export-Package: org.springframework.context.support,
- org.springframework.ide.eclipse.beans.ui.livegraph,
+Export-Package: org.springframework.ide.eclipse.beans.ui.livegraph,
  org.springframework.ide.eclipse.beans.ui.livegraph.actions,
  org.springframework.ide.eclipse.beans.ui.livegraph.model,
  org.springframework.ide.eclipse.beans.ui.livegraph.views
+Import-Package: org.springframework.context.support;version="4.0.0.20131212-RELEASE"
