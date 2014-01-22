@@ -86,19 +86,22 @@ public abstract class CodeSet {
 	 */
 	public List<BuildType> getBuildTypes() throws UIThreadDownloadDisallowed {
 		//Only use 'default' build type if no other build type works.
-		if (buildTypes==null) {
-			buildTypes = new ArrayList<BuildType>();
+		if (this.buildTypes==null) {
+			//Careful if the code in here throws (e.g. because not yet downloaded and in UI thread...
+			//then do NOT stick an empty list into this.buildTypes!
+			ArrayList<BuildType> buildTypes = new ArrayList<BuildType>();
 			for (BuildType type : BuildType.values()) {
 				IPath scriptFile = type.getBuildScript();
 				if (scriptFile!=null && hasFile(scriptFile)) {
 					buildTypes.add(type);
 				}
 			}
+			if (buildTypes.isEmpty()) {
+				buildTypes.add(BuildType.GENERAL);
+			}
+			this.buildTypes = buildTypes;
 		}
-		if (buildTypes.isEmpty()) {
-			buildTypes.add(BuildType.GENERAL);
-		}
-		return buildTypes;
+		return this.buildTypes;
 	}
 
 	/**
