@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:twitter="http://www.springframework.org/schema/integration/twitter"
+    xmlns:file="http://www.springframework.org/schema/integration/file"
+    xsi:schemaLocation="http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+        http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file-2.2.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/integration/twitter http://www.springframework.org/schema/integration/twitter/spring-integration-twitter-2.2.xsd">
+
+    <twitter:search-inbound-channel-adapter id="tweets"
+            query="#HelloWorld"
+            twitter-template="twitterTemplate" x="100" y="450">
+        <int:poller fixed-rate="5000"/>
+    </twitter:search-inbound-channel-adapter>
+
+    <int:transformer
+            input-channel="tweets"
+            expression="payload.fromUser + '  :  ' + payload.text + @newline"
+            output-channel="files" x="200" y="500"/>
+
+    <file:outbound-channel-adapter id="files"
+            mode="APPEND"
+            charset="UTF-8"
+            directory="/tmp/si"
+            filename-generator-expression="'HelloWorld'" x="400" y="250"/>
+
+</beans>
