@@ -136,7 +136,7 @@ public class GettingStartedContent extends ContentManager {
 
 //			@Override
 			public ReferenceApp[] fetch(DownloadManager downloader) {
-				ReferenceAppMetaData[] infos = github.get("https://raw.github.com/kdvolder/spring-reference-apps-meta/master/reference-apps.json", ReferenceAppMetaData[].class);
+				ReferenceAppMetaData[] infos = github.get(stsProps.get("spring.reference.app.discovery.url"), ReferenceAppMetaData[].class);
 				ReferenceApp[] apps = new ReferenceApp[infos.length];
 				for (int i = 0; i < apps.length; i++) {
 					//TODO: it could be quite costly to create all these since each one
