@@ -13,4 +13,4 @@ Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.springframework.ide.eclipse.beans.osgibridge
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

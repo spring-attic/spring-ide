@@ -15,7 +15,7 @@ Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.model.builder,
  org.springframework.ide.eclipse.aop.core.util
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.aopalliance.aop,
  org.aopalliance.intercept,

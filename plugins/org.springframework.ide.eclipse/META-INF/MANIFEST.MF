@@ -5,4 +5,4 @@ Bundle-SymbolicName: org.springframework.ide.eclipse
 Bundle-Version: 3.5.0.qualifier
 Bundle-Localization: plugin
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

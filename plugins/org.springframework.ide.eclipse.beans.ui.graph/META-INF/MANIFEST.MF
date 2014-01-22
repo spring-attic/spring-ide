@@ -57,6 +57,6 @@ Export-Package: org.springframework.ide.eclipse.beans.ui.graph,
  org.springframework.ide.eclipse.beans.ui.graph.figures,
  org.springframework.ide.eclipse.beans.ui.graph.model,
  org.springframework.ide.eclipse.beans.ui.graph.parts
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.draw2d;bundle-version="3.5.0"

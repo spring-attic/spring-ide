@@ -56,7 +56,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.util,
  org.springframework.util.xml,
  org.w3c.dom
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

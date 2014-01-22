@@ -54,7 +54,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.core.model,
  org.w3c.dom
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.springframework.ide.eclipse.blueprint.ui.namespaces,
  org.springframework.ide.eclipse.osgi,
  org.springframework.ide.eclipse.osgi.ui.editor,

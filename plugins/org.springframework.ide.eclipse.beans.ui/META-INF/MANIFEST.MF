@@ -106,7 +106,7 @@ Export-Package: org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.ui.navigator,
  org.springframework.ide.eclipse.beans.ui.properties,
  org.springframework.ide.eclipse.beans.ui.wizards
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.springframework.ide.eclipse.beans.core,
  org.springsource.ide.eclipse.commons.ui,

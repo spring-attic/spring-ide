@@ -51,7 +51,7 @@ Export-Package:
  org.springframework.ide.eclipse.data.internal.validation;x-internal:=true,
  org.springframework.ide.eclipse.data.jdt.core,
  org.springframework.ide.eclipse.data.metadata.ui
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
 Import-Package: org.apache.commons.logging
 Bundle-Activator: org.springframework.ide.eclipse.data.internal.DataCorePlugin

@@ -77,5 +77,5 @@ Export-Package:
  org.springframework.ide.eclipse.webflow.ui.editor.faces,
  org.springframework.ide.eclipse.webflow.ui.editor.hyperlink.webflow,
  org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

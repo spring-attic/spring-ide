@@ -13,7 +13,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springsource.ide.eclipse.commons.tests.util,
  org.springsource.ide.eclipse.commons.core,
  org.junit;bundle-version="4.8.0"
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.springframework.ide.eclipse.bestpractices.tests;x-internal:=true,
  org.springframework.ide.eclipse.bestpractices.tests.ruletests;x-internal:=true
 Bundle-ActivationPolicy: lazy

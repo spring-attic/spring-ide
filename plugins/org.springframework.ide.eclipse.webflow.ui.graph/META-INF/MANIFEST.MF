@@ -95,5 +95,5 @@ Export-Package: org.springframework.ide.eclipse.webflow.ui.graph,
  org.springframework.ide.eclipse.webflow.ui.graph.parts,
  org.springframework.ide.eclipse.webflow.ui.graph.policies,
  org.springframework.ide.eclipse.webflow.ui.graph.preferences
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

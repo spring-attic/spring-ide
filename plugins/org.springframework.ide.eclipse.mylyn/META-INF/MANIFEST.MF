@@ -33,7 +33,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.beans.ui.editor.contentassist,
  org.springframework.ide.eclipse.core.model
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.springframework.ide.eclipse.mylyn,
  org.springframework.ide.eclipse.mylyn.ui,
  org.springframework.ide.eclipse.mylyn.ui.actions,

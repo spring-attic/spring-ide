@@ -26,5 +26,5 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.beans.ui.editor,
  org.springframework.ide.eclipse.config.core
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.springframework.ide.eclipse.internal.bestpractices.springiderules

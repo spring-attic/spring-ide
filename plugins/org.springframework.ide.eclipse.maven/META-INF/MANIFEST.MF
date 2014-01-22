@@ -26,7 +26,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.core.ui;bundle-version="1.0.0";resolution:=optional,
  org.springsource.ide.eclipse.commons.ui,
  org.springsource.ide.eclipse.commons.core
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

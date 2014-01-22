@@ -45,5 +45,5 @@ Export-Package: org.springframework.ide.eclipse.beans.ui.search,
  org.springframework.ide.eclipse.beans.ui.search.internal,
  org.springframework.ide.eclipse.beans.ui.search.internal.queries
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

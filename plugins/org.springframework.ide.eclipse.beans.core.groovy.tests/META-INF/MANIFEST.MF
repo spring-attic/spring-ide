@@ -22,6 +22,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.core.manipulation,
  javax.persistence,
  org.springframework.orm
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Spring IDE Developers

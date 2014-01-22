@@ -33,7 +33,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.core.ui;bundle-version="1.0.0";resolution:=optional,
  org.eclipse.m2e.maven.runtime;bundle-version="1.0.0";resolution:=optional,
  org.eclipse.m2e.jdt;bundle-version="1.0.0";resolution:=optional
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy;exclude:="org.springframework.ide.eclipse.roo.ui.internal.listener"
 Bundle-Localization: plugin
