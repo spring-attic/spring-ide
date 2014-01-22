@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 Spring IDE Developers
+ * Copyright (c) 2012, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -460,8 +460,14 @@ public class JdtAnnotationMetadataTest {
 		assertEquals(AnnotationAttributes[].class, attributes.get("excludeFilters").getClass());
 		AnnotationAttributes[] excludeFilters = (AnnotationAttributes[]) attributes.get("excludeFilters");
 		assertEquals(1, excludeFilters.length);
-		assertEquals(2, excludeFilters[0].size());
+
+		assertEquals(3, excludeFilters[0].size());
+		
+		String[] pattern = (String[]) excludeFilters[0].get("pattern");
+		assertEquals(0, pattern.length);
+
 		assertEquals(FilterType.ANNOTATION, excludeFilters[0].get("type"));
+
 		Class<?>[] filterTypes = (Class[]) excludeFilters[0].get("value");
 		assertEquals(3, filterTypes.length);
 		assertTrue(filterTypes[0].equals(Service.class)
@@ -486,8 +492,15 @@ public class JdtAnnotationMetadataTest {
 		assertEquals(AnnotationAttributes[].class, attributes.get("excludeFilters").getClass());
 		AnnotationAttributes[] excludeFilters = (AnnotationAttributes[]) attributes.get("excludeFilters");
 		assertEquals(1, excludeFilters.length);
-		assertEquals(1, excludeFilters[0].size());
+		
+		assertEquals(3, excludeFilters[0].size());
 		assertEquals(FilterType.ANNOTATION, excludeFilters[0].get("type"));
+
+		String[] pattern = (String[]) excludeFilters[0].get("pattern");
+		assertEquals(0, pattern.length);
+
+		Class<?>[] filterTypes = (Class[]) excludeFilters[0].get("value");
+		assertEquals(0, filterTypes.length);
 	}
 
 	private boolean containsMethodReference(Set<MethodMetadata> methods, IMethod method) {
