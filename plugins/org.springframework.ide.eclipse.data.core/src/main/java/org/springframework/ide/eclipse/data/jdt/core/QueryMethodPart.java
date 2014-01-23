@@ -39,19 +39,18 @@ class QueryMethodPart {
 	public QueryMethodPart(String source, Class<?> domainType) {
 
 		this.source = source;
-
-		try {
-
-			Part part = new Part(source, domainType);
-			this.path = part.getProperty();
-			this.seed = null;
-			this.type = part.getType();
-
-		} catch (PropertyReferenceException e) {
-
-			this.path = e.getBaseProperty();
-			this.seed = e.getPropertyName();
-			this.type = null;
+		
+		if (source != null && source.length() > 0) {
+			try {
+				Part part = new Part(source, domainType);
+				this.path = part.getProperty();
+				this.seed = null;
+				this.type = part.getType();
+			} catch (PropertyReferenceException e) {
+				this.path = e.getBaseProperty();
+				this.seed = e.getPropertyName();
+				this.type = null;
+			}
 		}
 	}
 
