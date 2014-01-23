@@ -11,9 +11,9 @@
 package org.springframework.ide.eclipse.wizard.gettingstarted.guides;
 
 import org.eclipse.ui.PlatformUI;
-import org.springsource.ide.eclipse.commons.javafx.browser.IJavaFxBrowserFunction;
+import org.springsource.ide.eclipse.commons.browser.IBrowserFunction;
 
-public class OpenGSFunction implements IJavaFxBrowserFunction {
+public class OpenGSFunction implements IBrowserFunction {
 
 	public void call(String argument) {
 		GSImportWizard.open(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), argument);
