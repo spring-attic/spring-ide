@@ -17,11 +17,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.Callable;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.xerces.impl.dtd.models.DFAContentModel;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -31,11 +31,13 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.ui.ChooseDependencyDialog;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.completions.externaltype.AbstractExternalTypeSource;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscovery;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeEntry;
 import org.springsource.ide.eclipse.commons.completions.util.Requestor;
+import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -48,6 +50,21 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	
+	private static StsProperties stsProps = StsProperties.getInstance();
+	
+	/**
+	 * When requesting graph data from webservice we may have to retry... because
+	 * the webservice may return a 'I am busy' result while it is computing the data.
+	 * This constant specifies the 'retry interval'. I.e the time we wait in between
+	 * retries.
+	 */
+	private static final int RETRY_INTERVAL = 10*1000;
+	
+	/**
+	 *  Retries are not unlimited. When this timelimit is reached we stop retrying.
+	 */
+	private static final int RETRY_TIMELIMIT = 2 * 60 * 1000;
+	
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	/**
@@ -55,14 +72,19 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	 * never overridden (i.e. an explicit version is only inserted in the pom
 	 * if there is no managed version).
 	 * 
-	 * If this opprion is 'false' then a version dependency will be included in the 
+	 * If this option is 'false' then a version dependency will be included in the 
 	 * pom if it does not match the managed version).
 	 */
-	private boolean preferManagedVersion;
+	private boolean preferManagedVersion = true;
 	
 	/**
-	 * If this option is selecte transitive dependencies are considered. If is not
+	 * If this option is selected transitive dependencies are considered. If is not
 	 * selected then only a jar that directly provides a type will be suggested.
+	 * <p>
+	 * Note that even when this option deselected, spring-boot-starters will be suggested
+	 * for some types because of the graph simplification algorithm that transforms the
+	 * graph such that it appears as though those types are provided directly by
+	 * the starter. 
 	 */
 	private boolean transitive = false;
 	
@@ -169,8 +191,8 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		}
 	}
 
-	//TODO: should generate or obtain this data based on spring boot version of project. For now we just have a sample file that's hard-coded here.
-//	private static final URI XML_DATA_LOCATION = new File("/home/kdvolder/workspaces-sts/spring-ide/fun-with-maven/boot-completion-data.txt").toURI();
+	//TODO: should generate or obtain this data based on spring boot version of project. For now only use rest api call that 
+	// retrieves type graph data for default version of spring boot.
 	private static URI XML_DATA_LOCATION;
 	static {
 		//For convenient testing:
@@ -180,16 +202,15 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		} else {
 			try {
 				//Use data embedded in this plugin:
-				XML_DATA_LOCATION = new URI("platform:/plugin/org.springframework.ide.eclipse.boot/resources/boot-completion-data.txt");
+				//XML_DATA_LOCATION = new URI("platform:/plugin/org.springframework.ide.eclipse.boot/resources/boot-completion-data.txt");
+				XML_DATA_LOCATION = new URI(stsProps.get("spring.boot.typegraph.url"));
 			} catch (URISyntaxException e) {
 				BootActivator.log(e);
 			}
 		}
 	}
 
-	private DirectedGraph dgraph = new DirectedGraph();
-	
-	private final class MyHandler extends DefaultHandler {
+	private static class MyHandler extends DefaultHandler {
 		Stack<Object> path = new Stack<Object>();
 		
 		/**
@@ -198,6 +219,12 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		 * objects could save memory. 
 		 */
 		private HashMap<String, String> strings = new HashMap<String, String>();
+
+		private DirectedGraph dgraph;
+
+		public MyHandler(DirectedGraph dgraph) {
+			this.dgraph = dgraph;
+		}
 
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -262,10 +289,14 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		public MavenCoordinates MavenCoordinates_parse(String artifact) {
 			String[] pieces = artifact.split(":");
 			if (pieces.length==3) {
-//				String type = pieces[2];
-//				if ("jar".equals(type)) {
-					return new MavenCoordinates(intern(pieces[0]), intern(pieces[1]), intern(pieces[2]));
-//				}
+				//e.g: org.springframework:spring-core:4.0.0.RC1
+				return new MavenCoordinates(intern(pieces[0]), intern(pieces[1]), intern(pieces[2]));
+			} else if (pieces.length==4) {
+				//e.g: org.springframework:spring-core:jar:4.0.0.RC1
+				String type = pieces[2];
+				if ("jar".equals(type)) {
+					return new MavenCoordinates(intern(pieces[0]), intern(pieces[1]), intern(pieces[3]));
+				}
 			}
 			throw new IllegalArgumentException("Unsupported artifact string: '"+artifact+"'");
 		}
@@ -281,45 +312,75 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		
 	}
 
-	public SpringBootTypeDiscovery() throws Exception {
-		//Should parsing be done lazyly?
-		// Alternatively the callers of this contructor could do it from a job.
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		SAXParser saxParser = factory.newSAXParser();
-		MyHandler handler = new MyHandler();
-		saxParser.parse(XML_DATA_LOCATION.toString(), handler);
-		
-		handler.dispose(); 
+	public SpringBootTypeDiscovery() {
 	}
 	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void getTypes(Requestor<ExternalTypeEntry> requestor) {
-		Set nodes = dgraph.getNonLeafNodes();
-		//We are only interested in 'type' nodes. These should always have pointer to
-		// at least one maven artifact that contains them. Therefore type nodes are
-		// never leaf nodes.
-		for (Object node : nodes) {
-
-			//Not all non-leaf nodes in the graph represent types. Some (fewer) of them represent artifacts
-			// that were added to the graph because they are depended on by other artifacts.
-			if (node instanceof ExternalType) {
-				ExternalType type = (ExternalType) node;
-				requestor.receive(new ExternalTypeEntry(type, new DGraphTypeSource(dgraph, type)));
-			}
-
-			if (DEBUG) {
-				if (node instanceof MavenCoordinates) {
-					Set ancestors = dgraph.getDescendants(node); 
-					if (!ancestors.isEmpty()) {
-						System.out.println(node+" has ancestors: ");
-						for (Object anc : ancestors) {
-							System.out.println("   "+anc);
+		try {
+			DirectedGraph dgraph = createGraph();
+			Set nodes = dgraph.getNonLeafNodes();
+			//We are only interested in 'type' nodes. These should always have pointer to
+			// at least one maven artifact that contains them. Therefore type nodes are
+			// never leaf nodes.
+			for (Object node : nodes) {
+	
+				//Not all non-leaf nodes in the graph represent types. Some (fewer) of them represent artifacts
+				// that were added to the graph because they are depended on by other artifacts.
+				if (node instanceof ExternalType) {
+					ExternalType type = (ExternalType) node;
+					requestor.receive(new ExternalTypeEntry(type, new DGraphTypeSource(dgraph, type)));
+				}
+	
+				if (DEBUG) {
+					if (node instanceof MavenCoordinates) {
+						Set ancestors = dgraph.getDescendants(node); 
+						if (!ancestors.isEmpty()) {
+							System.out.println(node+" has ancestors: ");
+							for (Object anc : ancestors) {
+								System.out.println("   "+anc);
+							}
 						}
 					}
 				}
 			}
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
+	}
+
+	private DirectedGraph createGraph() throws Exception {
+		return RetryUtil.retry(RETRY_INTERVAL, RETRY_TIMELIMIT, new Callable<DirectedGraph>() {
+			public DirectedGraph call() throws Exception {
+				DirectedGraph dgraph = new DirectedGraph();
+				
+				SAXParserFactory factory = SAXParserFactory.newInstance();
+				SAXParser saxParser = factory.newSAXParser();
+				MyHandler handler = new MyHandler(dgraph);
+				try {
+					saxParser.parse(XML_DATA_LOCATION.toString(), handler);
+				} finally {
+					handler.dispose();
+				}
+				return dgraph;
+			}
+		});
+	}
+
+	private DirectedGraph createGraphMaybe() throws Exception {
+		//Should parsing be done lazyly?
+		// Alternatively the callers of this contructor could do it from a job.
+		DirectedGraph dgraph = new DirectedGraph();
 		
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		SAXParser saxParser = factory.newSAXParser();
+		MyHandler handler = new MyHandler(dgraph);
+		try {
+			saxParser.parse(XML_DATA_LOCATION.toString(), handler);
+		} finally {
+			handler.dispose();
+		}
+		return dgraph;
 	}
 }
