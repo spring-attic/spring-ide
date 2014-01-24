@@ -74,6 +74,5 @@ public interface ISpringBootProject {
 	 * dependencies section.
 	 */
 	public void addMavenDependency(MavenCoordinates dep, boolean preferManagedVersion) throws CoreException;
-
-  
+	
 }

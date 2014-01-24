@@ -50,6 +50,9 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	
+	private static final long SECOND = 1000;
+	private static final long MINUTE = 60 * SECOND;
+
 	private static StsProperties stsProps = StsProperties.getInstance();
 	
 	/**
@@ -58,14 +61,14 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	 * This constant specifies the 'retry interval'. I.e the time we wait in between
 	 * retries.
 	 */
-	private static final int RETRY_INTERVAL = 10*1000;
+	private static final long RETRY_INTERVAL = 15 * SECOND; 
 	
 	/**
 	 *  Retries are not unlimited. When this timelimit is reached we stop retrying.
 	 */
-	private static final int RETRY_TIMELIMIT = 2 * 60 * 1000;
+	private static final long RETRY_TIMELIMIT = 5 * MINUTE;
 	
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false;// (""+Platform.getLocation()).contains("kdvolder");
 
 	/**
 	 * If this option is 'true' then when a dependency is added the managedVersion is 
