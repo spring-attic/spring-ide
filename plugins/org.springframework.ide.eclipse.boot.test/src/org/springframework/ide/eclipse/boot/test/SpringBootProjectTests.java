@@ -21,13 +21,12 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 public class SpringBootProjectTests extends TestCase {
@@ -46,7 +45,7 @@ public class SpringBootProjectTests extends TestCase {
 	 * The version number in here should be the version of spring boot used by projects created 
 	 * via the spring intializer app.
 	 */
-	private static final String BOOT_STARTER_VERSION = "0.5.0.BUILD-SNAPSHOT";
+	private static final String BOOT_STARTER_VERSION = "1.0.0.BUILD-SNAPSHOT";
 
 	private static final long MAVEN_POM_REFRESH_TIMEOUT = 60*1000;
 	
