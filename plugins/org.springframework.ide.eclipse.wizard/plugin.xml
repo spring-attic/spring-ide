@@ -259,10 +259,11 @@
       </page>
       </extension>
     <extension
-          point="org.springsource.ide.common.dashboard.browser.function">
+          point="org.springsource.ide.browser.function.browserToEclipse">
        <function
              class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.OpenGSFunction"
-             id="org.springframework.ide.wizard.gettingstarted.openGuide">
+             id="org.springframework.openGuideWizard"
+             urlExpression=".*\.html">
        </function>
     </extension>
       
