@@ -90,6 +90,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	 * the starter. 
 	 */
 	private boolean transitive = false;
+	private String bootVersion;
 	
 	public class DGraphTypeSource extends AbstractExternalTypeSource {
 
@@ -198,18 +199,12 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	// retrieves type graph data for default version of spring boot.
 	private static URI XML_DATA_LOCATION;
 	static {
-		//For convenient testing:
-		File testFile = new File("/home/kdvolder/git/spring-boot-maven-analyzer/boot-completion-data.txt");
-		if (testFile.isFile()) {
-			XML_DATA_LOCATION = testFile.toURI();
-		} else {
-			try {
-				//Use data embedded in this plugin:
-				//XML_DATA_LOCATION = new URI("platform:/plugin/org.springframework.ide.eclipse.boot/resources/boot-completion-data.txt");
-				XML_DATA_LOCATION = new URI(stsProps.get("spring.boot.typegraph.url"));
-			} catch (URISyntaxException e) {
-				BootActivator.log(e);
-			}
+		try {
+			//Use data embedded in this plugin:
+			//XML_DATA_LOCATION = new URI("platform:/plugin/org.springframework.ide.eclipse.boot/resources/boot-completion-data.txt");
+			XML_DATA_LOCATION = new URI(stsProps.get("spring.boot.typegraph.url"));
+		} catch (URISyntaxException e) {
+			BootActivator.log(e);
 		}
 	}
 
@@ -315,9 +310,11 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		
 	}
 
-	public SpringBootTypeDiscovery() {
+	public SpringBootTypeDiscovery(String bootVersion) {
+		Assert.isNotNull(bootVersion);
+		this.bootVersion = bootVersion;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void getTypes(Requestor<ExternalTypeEntry> requestor) {
@@ -362,7 +359,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 				SAXParser saxParser = factory.newSAXParser();
 				MyHandler handler = new MyHandler(dgraph);
 				try {
-					saxParser.parse(XML_DATA_LOCATION.toString(), handler);
+					saxParser.parse(XML_DATA_LOCATION.toString()+"/"+bootVersion, handler);
 				} finally {
 					handler.dispose();
 				}

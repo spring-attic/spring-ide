@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.completions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscovery;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscoveryFactory;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
@@ -20,29 +25,33 @@ public class SpringBootTypeDiscoveryFactory implements ExternalTypeDiscoveryFact
 
 	public SpringBootTypeDiscoveryFactory() {
 	}
-
-	/**
-	 * TODO: Right now we only have a single instance that is used for any spring project. 
-	 * However, it should really be an instance per SpringBoot version that is used by a project.
-	 * <p>
-	 * This doesn't make much sense yet because we don't have a way to create the suggestion data
-	 * file based on a spring boot version.
-	 */
-	private SpringBootTypeDiscovery instance = null;
+	
+	private Map<String, SpringBootTypeDiscovery> instances;
 	
 	@Override
-	public synchronized ExternalTypeDiscovery discoveryFor(IJavaProject project) {
-		if (isApplicable(project)) {
+	public ExternalTypeDiscovery discoveryFor(IJavaProject jproject) {
+		if (isApplicable(jproject)) {
 			try {
-				if (instance==null) {
-					instance = new SpringBootTypeDiscovery();
-				}
-				return instance;
+				ISpringBootProject project = SpringBootCore.create(jproject);
+				return discoveryFor(project.getBootVersion());
 			} catch (Exception e) {
 				BootActivator.log(e);
 			}
+			return discoveryFor(SpringBootCore.getDefaultBootVersion());
 		}
 		return null;
+	}
+
+	private synchronized ExternalTypeDiscovery discoveryFor(String bootVersion) {
+		if (instances==null) {
+			instances = new HashMap<String, SpringBootTypeDiscovery>();
+		}
+		SpringBootTypeDiscovery existing = instances.get(bootVersion);
+		if (existing==null) {
+			existing = new SpringBootTypeDiscovery(bootVersion);
+			instances.put(bootVersion, existing);
+		}
+		return existing;
 	}
 
 	private boolean isApplicable(IJavaProject project) {

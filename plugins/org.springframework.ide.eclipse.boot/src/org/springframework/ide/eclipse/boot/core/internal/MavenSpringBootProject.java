@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * GoPivotal, Inc. - initial API and implementation
+ * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core.internal;
 
@@ -46,6 +46,7 @@ import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.StarterId;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -272,5 +273,24 @@ public class MavenSpringBootProject extends SpringBootProject {
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);
 		}
+	}
+
+	@Override
+	public String getBootVersion() {
+		try {
+			return getBootVersion(getMavenProject().getDependencies());
+		} catch (Exception e) {
+			BootActivator.log(e);
+			return SpringBootCore.getDefaultBootVersion();
+		}
+	}
+
+	private String getBootVersion(List<Dependency> dependencies) {
+		for (Dependency dep : dependencies) {
+			if (dep.getArtifactId().startsWith("spring-boot") && dep.getGroupId().equals("org.springframework.boot")) {
+				return dep.getVersion();
+			}
+		}
+		return SpringBootCore.getDefaultBootVersion();
 	}
 }
