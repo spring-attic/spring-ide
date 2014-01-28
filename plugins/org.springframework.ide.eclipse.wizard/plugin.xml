@@ -266,5 +266,13 @@
              urlExpression=".*\.html">
        </function>
     </extension>
+    <extension
+          point="org.springsource.ide.eclipse.gradle.core.projectConfigurators">
+       <configurator
+             class="org.springframework.ide.eclipse.wizard.gettingstarted.importing.SpringProjectConfigurator"
+             id="org.springframework.ide.eclipse.springproject"
+             name="Spring">
+       </configurator>
+    </extension>
       
 </plugin>
