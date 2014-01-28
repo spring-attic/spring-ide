@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,6 +151,103 @@ public class BeansProjectAutoConfigTest {
 		} finally {
 			project.delete(true, null);
 		}
+	}
+
+	@Test
+	public void testBeansProjectOneXMLAutoConfigDeletedByLocator() throws Exception {
+		IProject project = StsTestUtil.createPredefinedProject("beans-autoconfig-xml-tests", "org.springframework.ide.eclipse.beans.core.tests");
+
+		try {
+			BeansProject beansProject = new BeansProject(model, project);
+			model.addProject(beansProject);
+
+			beansProject.getConfigs();
+			IJobManager jobMan = Job.getJobManager();
+			jobMan.join("populateAutoConfigsJobFamily", null);
+
+			Set<IBeansConfig> configs = beansProject.getConfigs();
+			assertEquals(1, configs.size());
+			
+			beansProject.removeAutoDetectedConfigs("org.springframework.ide.eclipse.metadata.webAppBeansConfigLocator");
+			
+			configs = beansProject.getConfigs();
+			assertEquals(0, configs.size());
+		} finally {
+			project.delete(true, null);
+		}
+	}
+
+	@Test
+	public void testBeansProjectOneManualConfigOneSpringBootAutoConfigOneXmlAutoConfig() throws Exception {
+		IProject project = StsTestUtil.createPredefinedProject("beans-autoconfig-java-and-xml-tests", "org.springframework.ide.eclipse.beans.core.tests");
+
+		try {
+			BeansProject beansProject = new BeansProject(model, project);
+			model.addProject(beansProject);
+
+			beansProject.getConfigs();
+			IJobManager jobMan = Job.getJobManager();
+			jobMan.join("populateAutoConfigsJobFamily", null);
+
+			Set<IBeansConfig> configs = beansProject.getConfigs();
+			assertEquals(3, configs.size());
+
+			int manualConfig = 0;
+			int autoConfig = 0;
+
+			for (IBeansConfig config : configs) {
+				if (config.getType() == IBeansConfig.Type.MANUAL) {
+					manualConfig++;
+				} else if (config.getType() == IBeansConfig.Type.AUTO_DETECTED) {
+					autoConfig++;
+				}
+			}
+
+			assertEquals(1, manualConfig);
+			assertEquals(2, autoConfig);
+
+			Set<String> autoConfigs = beansProject.getAutoConfigNames();
+			assertEquals(2, autoConfigs.size());
+			
+			assertTrue(autoConfigs.contains("java:org.test.advanced.SpringBootConfigClass"));
+			assertTrue(autoConfigs.contains("WebContent/WEB-INF/spring/root-context.xml"));
+
+			Set<String> autoConfigSetNames = beansProject.getAutoConfigSetNames();
+			assertEquals(0, autoConfigSetNames.size());
+		} finally {
+			project.delete(true, null);
+		}
+
+	}
+
+	@Test
+	public void testBeansProjectOneManualConfigOneSpringBootAutoConfigOneXmlAutoConfigDeleteByLocator() throws Exception {
+		IProject project = StsTestUtil.createPredefinedProject("beans-autoconfig-java-and-xml-tests", "org.springframework.ide.eclipse.beans.core.tests");
+
+		try {
+			BeansProject beansProject = new BeansProject(model, project);
+			model.addProject(beansProject);
+
+			beansProject.getConfigs();
+			IJobManager jobMan = Job.getJobManager();
+			jobMan.join("populateAutoConfigsJobFamily", null);
+
+			Set<IBeansConfig> configs = beansProject.getConfigs();
+			assertEquals(3, configs.size());
+
+			Set<String> autoConfigs = beansProject.getAutoConfigNames();
+			assertEquals(2, autoConfigs.size());
+
+			beansProject.removeAutoDetectedConfigs("org.springframework.ide.eclipse.metadata.webAppBeansConfigLocator");
+
+			autoConfigs = beansProject.getAutoConfigNames();
+			assertEquals(1, autoConfigs.size());
+			
+			assertTrue(autoConfigs.contains("java:org.test.advanced.SpringBootConfigClass"));
+		} finally {
+			project.delete(true, null);
+		}
+
 	}
 
 	@Test

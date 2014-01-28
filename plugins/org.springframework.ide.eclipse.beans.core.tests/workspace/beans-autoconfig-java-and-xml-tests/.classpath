@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/org.springframework.aop_3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.beans_3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.context_3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.core_3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.transaction_3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.web_3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-boot-0.5.0.M6.jar"/>
+	<classpathentry kind="lib" path="lib/spring-boot-autoconfigure-0.5.0.M6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
