@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 Spring IDE Developers
+ * Copyright (c) 2012, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -354,8 +354,8 @@ public class JdtGroovyAnnotationMetadataTest {
 		assertEquals(0, ((String[])methodAttributes.get("value")).length);
 		assertEquals(0, ((String[])methodAttributes.get("produces")).length);
 		assertEquals(2, ((Object[])methodAttributes.get("method")).length);
-		assertEquals(RequestMethod.GET, ((Object[])methodAttributes.get("method"))[0]);
-		assertEquals(RequestMethod.POST, ((Object[])methodAttributes.get("method"))[1]);
+		assertEquals(RequestMethod.GET.toString(), ((Object[])methodAttributes.get("method"))[0].toString());
+		assertEquals(RequestMethod.POST.toString(), ((Object[])methodAttributes.get("method"))[1].toString());
 		assertEquals(0, ((String[])methodAttributes.get("params")).length);
 		assertEquals(0, ((String[])methodAttributes.get("consumes")).length);
 	}
