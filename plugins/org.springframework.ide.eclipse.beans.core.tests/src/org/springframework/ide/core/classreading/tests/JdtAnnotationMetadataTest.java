@@ -353,8 +353,8 @@ public class JdtAnnotationMetadataTest {
 		assertEquals(0, ((String[])methodAttributes.get("value")).length);
 		assertEquals(0, ((String[])methodAttributes.get("produces")).length);
 		assertEquals(2, ((Object[])methodAttributes.get("method")).length);
-		assertEquals(RequestMethod.GET, ((Object[])methodAttributes.get("method"))[0]);
-		assertEquals(RequestMethod.POST, ((Object[])methodAttributes.get("method"))[1]);
+		assertEquals(RequestMethod.GET.toString(), ((Object[])methodAttributes.get("method"))[0].toString());
+		assertEquals(RequestMethod.POST.toString(), ((Object[])methodAttributes.get("method"))[1].toString());
 		assertEquals(0, ((String[])methodAttributes.get("params")).length);
 		assertEquals(0, ((String[])methodAttributes.get("consumes")).length);
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
@@ -73,7 +74,6 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.CachingJdtMetadataReaderFactory;
-import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -196,7 +196,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 					return;
 				}
 				
-				final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), JdtMetadataReaderFactory.class.getClassLoader());
+				final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), ApplicationContext.class.getClassLoader());
 				
 				if (cl.getResource(this.configClass.getFullyQualifiedName().replace('.', '/') + ".class") == null) {
 					return;
