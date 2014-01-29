@@ -29,7 +29,6 @@ public class SpringProjectConfigurator implements IProjectConfigurator {
 	private static final String SPRING_NAME = "spring-core"; //$NON-NLS-1$
 	private static final String SPRING_GROUP = "org.springframework"; //$NON-NLS-1$
 
-	@Override
 	public void configure(IProjectConfigurationRequest request, IProgressMonitor monitor) throws Exception {
 		for (ExternalDependency dependency : request.getGradleModel().getClasspath()) {
 			GradleModuleVersion moduleVersion = dependency.getGradleModuleVersion();
