@@ -8,9 +8,10 @@
  * Contributors:
  *     GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.wizard.gettingstarted.guides;
+package org.springframework.ide.eclipse.wizard.gettingstarted.guides.ext;
 
 import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.wizard.gettingstarted.guides.GSImportWizard;
 import org.springsource.ide.eclipse.commons.browser.IBrowserToEclipseFunction;
 
 public class OpenGSFunction implements IBrowserToEclipseFunction {
