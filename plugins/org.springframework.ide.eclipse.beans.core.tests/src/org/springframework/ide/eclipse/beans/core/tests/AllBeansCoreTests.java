@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Spring IDE Developers
+ * Copyright (c) 2005, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.validation.rule
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRuleTest;
+import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectAutoConfigTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectDescriptionWriterTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigFactoryTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansConfigTest;
@@ -65,6 +66,7 @@ import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 	BeansConfigTest.class,
 	BeansJavaConfigTest.class,
 	BeansProjectTest.class,
+	BeansProjectAutoConfigTest.class,
 	BeansConfigFactoryTest.class,
 	BeansProjectDescriptionWriterTest.class,
 	BeansJavaConfigRenameTypeRefactoringParticipantTest.class,
