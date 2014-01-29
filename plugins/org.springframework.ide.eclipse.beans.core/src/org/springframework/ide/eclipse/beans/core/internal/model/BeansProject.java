@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 Spring IDE Developers
+ * Copyright (c) 2004, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,10 +64,13 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This class holds information for a Spring Beans project. The information is lazily read from the corresponding
- * project description XML file defined in {@link IBeansProject#DESCRIPTION_FILE}.
+ * This class holds information for a Spring Beans project. The information is
+ * lazily read from the corresponding project description XML file defined in
+ * {@link IBeansProject#DESCRIPTION_FILE}.
  * <p>
- * The information can be persisted by calling the method {@link #saveDescription()}.
+ * The information can be persisted by calling the method
+ * {@link #saveDescription()}.
+ * 
  * @author Torsten Juergeleit
  * @author Dave Watkins
  * @author Christian Dupuis
@@ -184,8 +187,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * Updates the list of config suffixes belonging to this project.
 	 * <p>
-	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param suffixes list of config suffixes
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * 
+	 * @param suffixes
+	 *            list of config suffixes
 	 */
 	public void setConfigSuffixes(Set<String> suffixes) {
 		if (!this.modelPopulated) {
@@ -195,8 +201,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			w.lock();
 			configSuffixes.clear();
 			configSuffixes.addAll(suffixes);
-		}
-		finally {
+		} finally {
 			w.unlock();
 		}
 	}
@@ -212,8 +217,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					configSuffixes.add(suffix);
 					return true;
 				}
-			}
-			finally {
+			} finally {
 				w.unlock();
 			}
 		}
@@ -227,8 +231,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		try {
 			r.lock();
 			return Collections.unmodifiableSet(configSuffixes);
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -245,8 +248,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		try {
 			r.lock();
 			return getConfigSuffixes().contains(suffix);
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -260,11 +262,14 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	}
 
 	/**
-	 * Updates the list of configs (by name) belonging to this project. From all removed configs the Spring IDE problem
-	 * markers are deleted.
+	 * Updates the list of configs (by name) belonging to this project. From all
+	 * removed configs the Spring IDE problem markers are deleted.
 	 * <p>
-	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param configNames list of config names
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * 
+	 * @param configNames
+	 *            list of config names
 	 */
 	public void setConfigs(Set<String> configNames) {
 		if (!this.modelPopulated) {
@@ -292,8 +297,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			for (String configName : configNames) {
 				configs.put(configName, BeansConfigFactory.create(this, configName, Type.MANUAL));
 			}
-		}
-		finally {
+		} finally {
 			updateAllConfigsCache();
 			w.unlock();
 		}
@@ -309,19 +313,25 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * Adds the given beans config file's name to the list of configs.
 	 * <p>
-	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param file the config file to add
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * 
+	 * @param file
+	 *            the config file to add
 	 * @return <code>true</code> if config file was added to this project
 	 */
 	public boolean addConfig(IFile file, IBeansConfig.Type type) {
 		return addConfig(this.getConfigName(file), type);
 	}
-	
+
 	/**
 	 * Adds the given beans config to the list of configs.
 	 * <p>
-	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param configName the config name to add
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * 
+	 * @param configName
+	 *            the config name to add
 	 * @return <code>true</code> if config was added to this project
 	 */
 	public boolean addConfig(String configName, IBeansConfig.Type type) {
@@ -335,14 +345,12 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					IBeansConfig config = BeansConfigFactory.create(this, configName, type);
 					addConfig(config);
 					return true;
-				}
-				else if (type == IBeansConfig.Type.AUTO_DETECTED && !autoDetectedConfigs.containsKey(configName)) {
+				} else if (type == IBeansConfig.Type.AUTO_DETECTED && !autoDetectedConfigs.containsKey(configName)) {
 					populateAutoDetectedConfigsAndConfigSets(null);
 					return true;
 				}
 			}
-		}
-		finally {
+		} finally {
 			updateAllConfigsCache();
 			w.unlock();
 		}
@@ -352,8 +360,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * Adds the given beans config to the list of configs.
 	 * <p>
-	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param config the config to add
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * 
+	 * @param config
+	 *            the config to add
 	 * @return <code>true</code> if config file was added to this project
 	 */
 	private boolean addConfig(IBeansConfig config) {
@@ -362,7 +373,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		if (configs.containsKey(configName)) {
 			return false;
 		}
-		
+
 		configs.put(configName, config);
 		config.registerEventListener(eventListener);
 
@@ -377,10 +388,14 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	}
 
 	/**
-I	 * Removes the given beans config from the list of configs and from all config sets.
+	 * I * Removes the given beans config from the list of configs and from all
+	 * config sets.
 	 * <p>
-	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param file the config file to remove
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * 
+	 * @param file
+	 *            the config file to remove
 	 * @return <code>true</code> if config was removed to this project
 	 */
 	public boolean removeConfig(IFile file) {
@@ -393,10 +408,14 @@ I	 * Removes the given beans config from the list of configs and from all config
 	}
 
 	/**
-	 * Removes the given beans config from the list of configs and from all config sets.
+	 * Removes the given beans config from the list of configs and from all
+	 * config sets.
 	 * <p>
-	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param configName the config name to remove
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * 
+	 * @param configName
+	 *            the config name to remove
 	 * @return <code>true</code> if config was removed to this project
 	 */
 	public boolean removeConfig(String configName) {
@@ -415,8 +434,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 				if (locatorId != null && autoDetectedConfigsByLocator.containsKey(locatorId)) {
 					autoDetectedConfigsByLocator.get(locatorId).remove(configName);
 				}
-			}
-			finally {
+			} finally {
 				updateAllConfigsCache();
 				w.unlock();
 			}
@@ -437,23 +455,22 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return (configs.containsKey(configName) || autoDetectedConfigs.containsKey(configName));
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
-	
+
 	public boolean hasConfig(IFile configFile, String configName, boolean includeImported) {
 		if (hasConfig(configName)) {
 			return true;
 		}
-		
+
 		for (IBeansConfig config : getConfigs()) {
 			if (config.getElementResource() != null && config.getElementResource().equals(configFile)) {
 				return true;
 			}
 		}
-		
+
 		if (isImportsEnabled() && includeImported) {
 			try {
 				r.lock();
@@ -462,8 +479,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 						return true;
 					}
 				}
-			}
-			finally {
+			} finally {
 				r.unlock();
 			}
 		}
@@ -481,7 +497,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 
 	public Set<IBeansConfig> getConfigs(IFile file, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
-		
+
 		if (file.getProject() != null && !this.project.equals(file.getProject())) {
 			IBeansProject otherBeansProject = BeansCorePlugin.getModel().getProject(file.getProject());
 			if (otherBeansProject != null) {
@@ -491,7 +507,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 				}
 			}
 		}
-		
+
 		Set<IBeansConfig> ownConfigs = getConfigs();
 		if (ownConfigs != null) {
 			for (IBeansConfig config : ownConfigs) {
@@ -500,9 +516,11 @@ I	 * Removes the given beans config from the list of configs and from all config
 				}
 			}
 		}
-		
-		// make sure that we run into the next block only if <import> support is enabled
-		// not executing the block will safe lots of execution time as configuration files don't
+
+		// make sure that we run into the next block only if <import> support is
+		// enabled
+		// not executing the block will safe lots of execution time as
+		// configuration files don't
 		// need to get loaded.
 		if ((isImportsEnabled() && includeImported)) {
 			try {
@@ -512,8 +530,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 						checkForImportedBeansConfig(file, bc, beansConfigs);
 					}
 				}
-			}
-			finally {
+			} finally {
 				r.unlock();
 			}
 		}
@@ -577,8 +594,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 						return beansConfig;
 					}
 				}
-			}
-			finally {
+			} finally {
 				r.unlock();
 			}
 
@@ -600,13 +616,11 @@ I	 * Removes the given beans config from the list of configs and from all config
 			r.lock();
 			if (configs.containsKey(configName)) {
 				return configs.get(configName);
-			}
-			else if (autoDetectedConfigs.containsKey(configName)) {
+			} else if (autoDetectedConfigs.containsKey(configName)) {
 				return autoDetectedConfigs.get(configName);
 			}
 			return null;
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -620,8 +634,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			Set<String> configNames = new LinkedHashSet<String>(configs.keySet());
 			configNames.addAll(autoDetectedConfigs.keySet());
 			return configNames;
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -633,8 +646,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return new LinkedHashSet<String>(configs.keySet());
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -646,8 +658,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return new LinkedHashSet<String>(autoDetectedConfigs.keySet());
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -659,8 +670,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return new LinkedHashSet<String>(configSets.keySet());
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -672,8 +682,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return new LinkedHashSet<String>(autoDetectedConfigSets.keySet());
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -688,20 +697,23 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return allConfigs;
-//			Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>(configs.values());
-//			beansConfigs.addAll(autoDetectedConfigs.values());
-//			return beansConfigs;
-		}
-		finally {
+			// Set<IBeansConfig> beansConfigs = new
+			// LinkedHashSet<IBeansConfig>(configs.values());
+			// beansConfigs.addAll(autoDetectedConfigs.values());
+			// return beansConfigs;
+		} finally {
 			r.unlock();
 		}
 	}
-	
+
 	/**
 	 * Updates the {@link BeansConfigSet}s defined within this project.
 	 * <p>
-	 * The modified project description has to be saved to disk by calling {@link #saveDescription()}.
-	 * @param configSets list of {@link BeansConfigSet} instances
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * 
+	 * @param configSets
+	 *            list of {@link BeansConfigSet} instances
 	 */
 	public void setConfigSets(Set<IBeansConfigSet> configSets) {
 		if (!this.modelPopulated) {
@@ -713,8 +725,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			for (IBeansConfigSet configSet : configSets) {
 				this.configSets.put(configSet.getElementName(), configSet);
 			}
-		}
-		finally {
+		} finally {
 			w.unlock();
 		}
 	}
@@ -735,8 +746,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 
 				return true;
 			}
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 		return false;
@@ -746,8 +756,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			w.lock();
 			configSets.remove(configSetName);
-		}
-		finally {
+		} finally {
 			w.unlock();
 		}
 	}
@@ -762,8 +771,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 		try {
 			r.lock();
 			return configSets.containsKey(configSetName);
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -782,8 +790,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 				return set;
 			}
 			return autoDetectedConfigSets.get(configSetName);
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -800,8 +807,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			Set<IBeansConfigSet> configSets = new LinkedHashSet<IBeansConfigSet>(this.configSets.values());
 			configSets.addAll(autoDetectedConfigSets.values());
 			return configSets;
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
@@ -843,8 +849,8 @@ I	 * Removes the given beans config from the list of configs and from all config
 	}
 
 	/**
-	 * Writes the current project description to the corresponding XML file defined in
-	 * {@link IBeansProject#DESCRIPTION_FILE}.
+	 * Writes the current project description to the corresponding XML file
+	 * defined in {@link IBeansProject#DESCRIPTION_FILE}.
 	 */
 	public void saveDescription() {
 
@@ -855,8 +861,9 @@ I	 * Removes the given beans config from the list of configs and from all config
 	}
 
 	/**
-	 * Resets the internal data. Any further access to the data of this instance of {@link BeansProject} leads to
-	 * reloading of this beans project's config description file.
+	 * Resets the internal data. Any further access to the data of this instance
+	 * of {@link BeansProject} leads to reloading of this beans project's config
+	 * description file.
 	 */
 	public void reset() {
 		try {
@@ -870,8 +877,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 			locatorByAutoDetectedConfig.clear();
 			autoDetectedConfigSets.clear();
 			autoDetectedConfigSetsByLocator.clear();
-		}
-		finally {
+		} finally {
 			updateAllConfigsCache();
 			w.unlock();
 		}
@@ -910,10 +916,9 @@ I	 * Removes the given beans config from the list of configs and from all config
 	public String toString() {
 		try {
 			r.lock();
-			return "Project=" + getElementName() + ", ConfigExtensions=" + configSuffixes + ", Configs="
-					+ configs.values() + ", ConfigsSets=" + configSets;
-		}
-		finally {
+			return "Project=" + getElementName() + ", ConfigExtensions=" + configSuffixes + ", Configs=" + configs.values() + ", ConfigsSets="
+					+ configSets;
+		} finally {
 			r.unlock();
 		}
 	}
@@ -968,8 +973,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 				autoDetectedConfigSets.remove(configSet);
 				autoDetectedConfigSetsByLocator.remove(configSet);
 			}
-		}
-		finally {
+		} finally {
 			updateAllConfigsCache();
 			w.unlock();
 		}
@@ -1001,23 +1005,24 @@ I	 * Removes the given beans config from the list of configs and from all config
 					hasRemoved = true;
 				}
 			}
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 		return hasRemoved;
 	}
 
 	/**
-	 * Returns the config name from given file. If the file belongs to this project then the config name is the
-	 * project-relative path of the given file otherwise it's the workspace-relative path with a leading '/'.
+	 * Returns the config name from given file. If the file belongs to this
+	 * project then the config name is the project-relative path of the given
+	 * file otherwise it's the workspace-relative path with a leading '/'.
 	 */
 	private String getConfigName(IFile file) {
 		return BeansConfigFactory.getConfigName(file, this.project);
 	}
 
 	/**
-	 * Populate the project's model with the information read from project description (an XML file defined in
+	 * Populate the project's model with the information read from project
+	 * description (an XML file defined in
 	 * {@link ISpringProject.DESCRIPTION_FILE}).
 	 */
 	private void populateModel() {
@@ -1046,7 +1051,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 				for (String configName : configSet.getConfigNames()) {
 					if (!hasConfig(configName) && model.getConfig(configName) == null) {
 						((BeansConfigSet) configSet).removeConfig(configName);
-						
+
 						Set<String> removedConfigs = removedConfigsFromSets.get(configSet);
 						if (removedConfigs == null) {
 							removedConfigs = new HashSet<String>();
@@ -1056,74 +1061,69 @@ I	 * Removes the given beans config from the list of configs and from all config
 					}
 				}
 			}
-			
+
 			// Add auto detected configs and config sets
 			populateAutoDetectedConfigsAndConfigSets(removedConfigsFromSets);
 
 			for (IBeansConfig config : configs.values()) {
 				config.registerEventListener(eventListener);
 			}
-		}
-		finally {
+		} finally {
 			updateAllConfigsCache();
 			w.unlock();
 		}
 	}
 
 	/**
-	 * Runs the registered detectors and registers {@link IBeansConfig} and {@link IBeansConfigSet} with this project.
+	 * Runs the registered detectors and registers {@link IBeansConfig} and
+	 * {@link IBeansConfigSet} with this project.
 	 * <p>
 	 * This method should only be called with having a write lock.
-	 * @param removedConfigsFromSets 
+	 * 
+	 * @param removedConfigsFromSets
 	 */
 	protected void populateAutoDetectedConfigsAndConfigSets(final Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
-		
+
 		Job job = new Job("populate auto detected configs") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					w.lock();
-
 					populateAutoDetectedConfigsAndConfigSetsInternally();
+
+					w.lock();
 					restoreConfigSetState(removedConfigsFromSets);
-				}
-				finally {
+				} finally {
 					updateAllConfigsCache();
 					w.unlock();
 				}
-				((AbstractModel)(BeansCorePlugin.getModel())).notifyListeners(BeansProject.this, ModelChangeEvent.Type.CHANGED);
+				((AbstractModel) (BeansCorePlugin.getModel())).notifyListeners(BeansProject.this, ModelChangeEvent.Type.CHANGED);
 				return Status.OK_STATUS;
 			}
-			
+
 			@Override
 			public boolean belongsTo(Object family) {
 				return family.equals("populateAutoConfigsJobFamily");
 			}
 		};
-		
+
 		job.setPriority(Job.BUILD);
 		job.setRule(project.getProject());
 		job.schedule();
 	}
-	
+
 	protected void populateAutoDetectedConfigsAndConfigSetsInternally() {
-		for (IBeansConfig config : autoDetectedConfigs.values()) {
-			config.unregisterEventListener(eventListener);
-		}
 
-		autoDetectedConfigs.clear();
-		autoDetectedConfigsByLocator.clear();
-		locatorByAutoDetectedConfig.clear();
-		autoDetectedConfigSets.clear();
-		autoDetectedConfigSetsByLocator.clear();
+		final Map<BeansConfigLocatorDefinition, Map<String, IBeansConfig>> newAutoConfigs = new HashMap<BeansConfigLocatorDefinition, Map<String, IBeansConfig>>();
+		final Map<BeansConfigLocatorDefinition, String> newConfigSetNames = new HashMap<BeansConfigLocatorDefinition, String>();
 
-		// Add auto detected beans configs
+		// Find  auto detected beans configs
 		for (final BeansConfigLocatorDefinition locator : BeansConfigLocatorFactory.getBeansConfigLocatorDefinitions()) {
 			if (locator.isEnabled(getProject()) && locator.getBeansConfigLocator().supports(getProject())) {
 				final Map<String, IBeansConfig> detectedConfigs = new HashMap<String, IBeansConfig>();
-				final String[] configSetName = new String[1];
+				newAutoConfigs.put(locator, detectedConfigs);
 
-				// Prevent extension contribution from crashing the model creation
+				// Prevent extension contribution from crashing the model
+				// creation
 				SafeRunner.run(new ISafeRunnable() {
 
 					public void handleException(Throwable exception) {
@@ -1133,25 +1133,26 @@ I	 * Removes the given beans config from the list of configs and from all config
 					public void run() throws Exception {
 						IBeansConfigLocator configLocator = locator.getBeansConfigLocator();
 						Set<IFile> files = configLocator.locateBeansConfigs(getProject(), null);
+						
 						for (IFile file : files) {
-							BeansConfig config = new BeansConfig(BeansProject.this, file.getProjectRelativePath()
-									.toString(), Type.AUTO_DETECTED);
+							BeansConfig config = new BeansConfig(BeansProject.this, file.getProjectRelativePath().toString(), Type.AUTO_DETECTED);
 							String configName = getConfigName(file);
 							if (!hasConfig(configName)) {
 								detectedConfigs.put(configName, config);
 							}
 						}
+
 						if (files.size() > 1) {
 							String configSet = locator.getBeansConfigLocator().getBeansConfigSetName(files);
 							if (configSet.length() > 0) {
-								configSetName[0] = configSet;
+								newConfigSetNames.put(locator, configSet);
 							}
 						}
+
 						if (configLocator instanceof IJavaConfigLocator) {
 							Set<IType> types = ((IJavaConfigLocator) configLocator).locateJavaConfigs(getProject(), null);
 							for (IType type : types) {
-								IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(),
-										Type.AUTO_DETECTED);
+								IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(), Type.AUTO_DETECTED);
 								String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
 								if (!hasConfig(configName)) {
 									detectedConfigs.put(configName, config);
@@ -1160,6 +1161,35 @@ I	 * Removes the given beans config from the list of configs and from all config
 						}
 					}
 				});
+			}
+		}
+
+		setAutoDetectedConfigs(newAutoConfigs, newConfigSetNames);
+	}
+
+	protected void setAutoDetectedConfigs(Map<BeansConfigLocatorDefinition, Map<String, IBeansConfig>> newAutoConfigs,
+			Map<BeansConfigLocatorDefinition, String> newConfigSetNames) {
+
+		try {
+			w.lock();
+
+			for (IBeansConfig config : autoDetectedConfigs.values()) {
+				config.unregisterEventListener(eventListener);
+			}
+
+			autoDetectedConfigs.clear();
+			autoDetectedConfigsByLocator.clear();
+			locatorByAutoDetectedConfig.clear();
+			autoDetectedConfigSets.clear();
+			autoDetectedConfigSetsByLocator.clear();
+
+			Iterator<BeansConfigLocatorDefinition> locators = newAutoConfigs.keySet().iterator();
+			while (locators.hasNext()) {
+
+				BeansConfigLocatorDefinition locator = locators.next();
+
+				Map<String, IBeansConfig> detectedConfigs = newAutoConfigs.get(locator);
+				String configSetName = newConfigSetNames.get(locator);
 
 				if (detectedConfigs.size() > 0) {
 					Set<String> configNamesByLocator = new LinkedHashSet<String>();
@@ -1168,36 +1198,39 @@ I	 * Removes the given beans config from the list of configs and from all config
 						autoDetectedConfigs.put(detectedConfig.getKey(), detectedConfig.getValue());
 						detectedConfig.getValue().registerEventListener(eventListener);
 						configNamesByLocator.add(getConfigName((IFile) detectedConfig.getValue().getElementResource()));
-						locatorByAutoDetectedConfig.put(getConfigName((IFile) detectedConfig.getValue()
-								.getElementResource()), locator.getNamespaceUri() + "." + locator.getId());
+						locatorByAutoDetectedConfig.put(getConfigName((IFile) detectedConfig.getValue().getElementResource()),
+								locator.getNamespaceUri() + "." + locator.getId());
 					}
-					autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(),
-							configNamesByLocator);
+					autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(), configNamesByLocator);
 
-					// Create a config set for auto detected configs if desired by the extension
-					if (configSetName[0] != null && configSetName[0].length() > 0) {
+					// Create a config set for auto detected configs if desired
+					// by the extension
+					if (configSetName != null && configSetName.length() > 0) {
 
-						IBeansConfigSet configSet = new BeansConfigSet(BeansProject.this, configSetName[0], configNamesByLocator,
+						IBeansConfigSet configSet = new BeansConfigSet(BeansProject.this, configSetName, configNamesByLocator,
 								IBeansConfigSet.Type.AUTO_DETECTED);
 
 						// configure the created IBeansConfig
 						locator.getBeansConfigLocator().configureBeansConfigSet(configSet);
 
-						autoDetectedConfigSets.put(configSetName[0], configSet);
-						autoDetectedConfigSetsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(),
-								configSetName[0]);
+						autoDetectedConfigSets.put(configSetName, configSet);
+						autoDetectedConfigSetsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(), configSetName);
 					}
 				}
+
 			}
+
+		} finally {
+			w.unlock();
 		}
 	}
-	
+
 	protected void restoreConfigSetState(Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
 		if (removedConfigsFromSets != null) {
 			IBeansModel model = BeansCorePlugin.getModel();
 			for (IBeansConfigSet configSet : removedConfigsFromSets.keySet()) {
 				Set<String> removedConfigs = removedConfigsFromSets.get(configSet);
-				for(String removedConfig : removedConfigs) {
+				for (String removedConfig : removedConfigs) {
 					if (hasConfig(removedConfig) || model.getConfig(removedConfig) != null) {
 						((BeansConfigSet) configSet).addConfig(removedConfig);
 					}
@@ -1205,10 +1238,11 @@ I	 * Removes the given beans config from the list of configs and from all config
 			}
 		}
 	}
-	
+
 	/**
-	 * Update the internal cache for all configs in case something changed to this.configs or this.autoDetectedConfigs.
-	 * This has to be called in a write-guarded block.
+	 * Update the internal cache for all configs in case something changed to
+	 * this.configs or this.autoDetectedConfigs. This has to be called in a
+	 * write-guarded block.
 	 */
 	protected void updateAllConfigsCache() {
 		CopyOnWriteArraySet<IBeansConfig> newAllConfigs = new CopyOnWriteArraySet<IBeansConfig>(configs.values());
@@ -1217,8 +1251,10 @@ I	 * Removes the given beans config from the list of configs and from all config
 	}
 
 	/**
-	 * Default implementation of {@link IBeansConfigEventListener} that handles events and propagates those to
-	 * {@link IBeansConfigSet}s and other {@link IBeansConfig}.
+	 * Default implementation of {@link IBeansConfigEventListener} that handles
+	 * events and propagates those to {@link IBeansConfigSet}s and other
+	 * {@link IBeansConfig}.
+	 * 
 	 * @author Christian Dupuis
 	 * @since 2.2.5
 	 */
@@ -1303,8 +1339,7 @@ I	 * Removes the given beans config from the list of configs and from all config
 				}
 			}
 			return true;
-		}
-		finally {
+		} finally {
 			r.unlock();
 		}
 	}
