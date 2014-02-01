@@ -109,7 +109,7 @@
     <shortcut
           class="org.springframework.ide.eclipse.boot.ui.BootGroovyScriptLaunchShortcut"
           description="Run or Debug as a Spring Boot CLI Script"
-          id="org.springsource.ide.eclipse.boot.BootLaunchShortcut"
+          id="org.springsource.ide.eclipse.boot.BootLaunchGroovyScriptShortcut"
           icon="platform:/plugin/org.springsource.ide.eclipse.commons.ui/icons/rss/springsource.png"
           label="Spring Groovy CLI"
           modes="run"> <!-- debug not yet support -->
