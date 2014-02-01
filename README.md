@@ -22,7 +22,7 @@
   Second, you can install Spring IDE manually from this udpate site:
 
   http://dist.springsource.com/release/TOOLS/update/e4.2 (for Eclipse Juno 4.2)
-  http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse Indigo 3.7)  
+  http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse Indigo 3.7)
   http://dist.springsource.com/release/TOOLS/update/e3.6 (for Eclipse Helios 3.6)
 
 ## Installation (Milestone)
