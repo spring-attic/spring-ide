@@ -64,7 +64,7 @@
           class="org.springframework.ide.eclipse.boot.ui.BootLaunchShortcut"
           description="Run or Debug as a Standalone Spring Boot Application"
           id="org.springsource.ide.eclipse.boot.BootLaunchShortcut"
-          icon="platform:/plugin/org.springsource.ide.eclipse.commons.ui/icons/rss/springsource.png"
+          icon="resources/icons/spring.png"
           label="Spring Boot App"
           modes="run, debug">
         <contextualLaunch>
@@ -110,7 +110,7 @@
           class="org.springframework.ide.eclipse.boot.ui.BootGroovyScriptLaunchShortcut"
           description="Run or Debug as a Spring Boot CLI Script"
           id="org.springsource.ide.eclipse.boot.BootLaunchGroovyScriptShortcut"
-          icon="platform:/plugin/org.springsource.ide.eclipse.commons.ui/icons/rss/springsource.png"
+          icon="resources/icons/spring.png"
           label="Spring Groovy CLI"
           modes="run"> <!-- debug not yet support -->
         <contextualLaunch>
