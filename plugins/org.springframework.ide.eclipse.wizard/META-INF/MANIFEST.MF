@@ -43,7 +43,8 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.logging,
  org.springsource.ide.eclipse.gradle.core;bundle-version="3.4.0";resolution:=optional,
  org.springsource.ide.eclipse.commons.gettingstarted;bundle-version="3.5.0";resolution:=optional,
- org.springsource.ide.eclipse.gradle.toolingapi;bundle-version="[3.5.0,4.0.0)";resolution:=optional
+ org.springsource.ide.eclipse.gradle.toolingapi;bundle-version="[3.5.0,4.0.0)";resolution:=optional,
+ org.springsource.ide.eclipse.commons.browser;bundle-version="[3.5.0,4.0.0)";resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Bundle-ClassPath: .,
