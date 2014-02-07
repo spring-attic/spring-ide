@@ -60,8 +60,16 @@ public class LiveBeansModelGenerator {
 	public static LiveBeansModel connectToModel(JMXConnector connector, LiveBeansSession session) throws CoreException {
 		try {
 			String appName = session.getApplicationName();
-			if (connector != null && appName != null && appName.length() > 0) {
-				ObjectName name = ObjectName.getInstance("", "application", "/".concat(appName));
+			if (connector != null) {
+				ObjectName name;
+				if (appName == null || appName.length() == 0) {
+					// Standalone apps like spring-boot will have an empty app
+					// name. Deal with that situation.
+					name = ObjectName.getInstance("", "application", "");
+				}
+				else {
+					name = ObjectName.getInstance("", "application", "/".concat(appName));
+				}
 				MBeanServerConnection connection = connector.getMBeanServerConnection();
 				// Test the MBean's existence before proceeding. Will throw
 				// InstanceNotFoundException

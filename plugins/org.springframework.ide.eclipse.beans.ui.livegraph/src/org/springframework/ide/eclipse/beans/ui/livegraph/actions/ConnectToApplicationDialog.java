@@ -29,9 +29,9 @@ public class ConnectToApplicationDialog extends Dialog {
 
 	private Label description;
 
-	private String serviceUrl;
+	private String serviceUrl = "service:jmx:rmi:///jndi/rmi://127.0.0.1:6969/jmxrmi";
 
-	private String appName;
+	private String appName = "";
 
 	private String username;
 
@@ -66,6 +66,7 @@ public class ConnectToApplicationDialog extends Dialog {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(serviceLabel);
 
 		final Text serviceText = new Text(composite, SWT.BORDER);
+		serviceText.setText(serviceUrl);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).hint(350, SWT.DEFAULT)
 				.applyTo(serviceText);
 		serviceText.addModifyListener(new ModifyListener() {
@@ -86,6 +87,7 @@ public class ConnectToApplicationDialog extends Dialog {
 		final Text appText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).hint(350, SWT.DEFAULT)
 				.applyTo(appText);
+		appText.setText(appName);
 		appText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				appName = appText.getText();
@@ -149,7 +151,7 @@ public class ConnectToApplicationDialog extends Dialog {
 			description.setText("Enter a valid JMX service URL");
 			getButton(OK).setEnabled(false);
 		}
-		else if (appName == null || appName.length() == 0) {
+		else if (appName == null /* || appName.length() == 0 */) {
 			description.setText("Enter an application name");
 			getButton(OK).setEnabled(false);
 		}

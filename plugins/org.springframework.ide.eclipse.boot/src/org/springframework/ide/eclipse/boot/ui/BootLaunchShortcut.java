@@ -11,12 +11,12 @@
 package org.springframework.ide.eclipse.boot.ui;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -37,13 +37,13 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
-//TODO: This code doesn't belong in commons but in spring-ide in a plugin
-//  dedicated to spring-boot support. Either that or it should be made
-//  more generally useful for other things than boot apps.
-
 @SuppressWarnings("restriction")
 public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 
+	private static final String VM_ARGS 
+			= "-Dspring.liveBeansView.mbeanDomain\n" //enable live beans construction
+			+ "-Dcom.sun.management.jmxremote"; //enable jmx to access the beans
+			
 	@Override
 	protected IType[] findTypes(Object[] elements, IRunnableContext context)
 			throws InterruptedException, CoreException {
@@ -95,6 +95,7 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 					type.getTypeQualifiedName('.')));
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, type.getFullyQualifiedName());
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
+			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, VM_ARGS);
 			wc.setMappedResources(new IResource[] {type.getUnderlyingResource()});
 			config = wc.doSave();
 		} catch (CoreException exception) {
