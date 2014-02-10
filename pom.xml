@@ -322,6 +322,11 @@
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e3.7/</url>
 				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e3.7/</url>
+				</repository>
 			</repositories>
 		</profile>
 
@@ -361,6 +366,11 @@
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.3/</url>
 				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e3.7/</url>
+				</repository>
 			</repositories>
 		</profile>
 
@@ -375,11 +385,6 @@
 	</profiles>
 
 	<repositories>
-		<repository>
-			<id>eclipse-integration-commons</id>
-			<layout>p2</layout>
-			<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
-		</repository>
 		<repository>
 			<id>eclipse-integration-gradle</id>
 			<layout>p2</layout>
