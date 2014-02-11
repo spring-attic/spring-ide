@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.ui;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -37,12 +37,36 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
+
 @SuppressWarnings("restriction")
 public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
+	
+	/**
+	 * Launch configuration id of the configs created by this shortcut.
+	 */
+	public static final String LAUNCH_CONFIG_TYPE_ID = 
+			IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION;
 
-	private static final String VM_ARGS 
-			= "-Dspring.liveBeansView.mbeanDomain\n" //enable live beans construction
-			+ "-Dcom.sun.management.jmxremote"; //enable jmx to access the beans
+	public static final String JMX_PORT_PROP = "com.sun.management.jmxremote.port";
+	
+	/**
+	 * VM args that enable 'live bean graph' and jmx.
+	 * @throws UnsupportedEncodingException 
+	 */
+	public static String liveBeanVmArgs(int jmxPort) {
+		return liveBeanVmArgs(""+jmxPort);
+	}
+	
+	public static String liveBeanVmArgs(String jmxPort) {
+		return
+				"-Dspring.liveBeansView.mbeanDomain\n" + //enable live beans construction
+				"-Dcom.sun.management.jmxremote\n" + //enable jmx to access the beans
+				"-D"+ JMX_PORT_PROP +"="+jmxPort + "\n" +
+				"-Dcom.sun.management.jmxremote.authenticate=false\n" +
+				"-Dcom.sun.management.jmxremote.ssl=false\n";
+	}
+
+	
 			
 	@Override
 	protected IType[] findTypes(Object[] elements, IRunnableContext context)
@@ -80,6 +104,11 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 		// only a fallback option if the above code failed. (Or should we rather signal an error instead?)
 		return super.findTypes(elements, context);
 	}
+	
+	@Override
+	protected ILaunchConfigurationType getConfigurationType() {
+		return getLaunchManager().getLaunchConfigurationType(LAUNCH_CONFIG_TYPE_ID);		
+	}
 
 	/**
 	 * Overridden, copied and changed to alter the generated launch configuration name.
@@ -89,13 +118,14 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 		ILaunchConfiguration config = null;
 		ILaunchConfigurationWorkingCopy wc = null;
 		try {
+			int jmxPort = (int) (5000 + Math.random()*60000); //TODO: better way to pick this port?
 			ILaunchConfigurationType configType = getConfigurationType();
 			String projectName = type.getJavaProject().getElementName();
 			wc = configType.newInstance(null, projectName+" - "+getLaunchManager().generateLaunchConfigurationName(
 					type.getTypeQualifiedName('.')));
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, type.getFullyQualifiedName());
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
-			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, VM_ARGS);
+			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, liveBeanVmArgs(jmxPort));
 			wc.setMappedResources(new IResource[] {type.getUnderlyingResource()});
 			config = wc.doSave();
 		} catch (CoreException exception) {

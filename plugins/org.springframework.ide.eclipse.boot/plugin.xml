@@ -307,5 +307,28 @@
          name="Spring Boot">
    		</page>
    	</extension>
+   	
+   <extension
+         point="org.eclipse.ui.popupMenus">
+   	      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="com.springsource.sts.roo.ui.actions.rooProject">
+         <visibility>
+         	<!-- TODO: only allow this for spring boot projects? -->
+	        <objectState
+	              name="nature"
+	              value="org.springframework.ide.eclipse.core.springnature">
+	        </objectState>
+         </visibility>
+         <action
+               label="Open Live Beans Graph"
+               class="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"
+               enablesFor="+"
+               menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
+               id="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction">
+         </action>
+      </objectContribution>
+   	</extension>
 
 </plugin>
