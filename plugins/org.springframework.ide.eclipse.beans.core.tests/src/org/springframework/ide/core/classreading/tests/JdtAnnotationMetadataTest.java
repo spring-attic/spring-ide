@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationScopeMetadataResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -59,11 +60,15 @@ public class JdtAnnotationMetadataTest {
 	
 	private IProject project;
 	private IJavaProject javaProject;
+	private ClassLoader classloader;
+	private JdtMetadataReaderFactory factory;
 
 	@Before
 	public void createProject() throws Exception {
 		project = StsTestUtil.createPredefinedProject("jdt-annotation-tests", "org.springframework.ide.eclipse.beans.core.tests");
 		javaProject = JdtUtils.getJavaProject(project);
+		classloader = JdtUtils.getClassLoader(project, ApplicationContext.class.getClassLoader());
+		factory = new JdtMetadataReaderFactory(javaProject, classloader);
 	}
 	
 	@After
@@ -73,7 +78,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testNoAnnotations() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.NoAnnotations");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -89,7 +93,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testSimpleConfigurationClass() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SimpleConfigurationClass");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -114,7 +117,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testSimpleBeanClass() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SimpleBeanClass");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -162,7 +164,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testSimpleBeanClassWithAutowireAttribute() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SimpleBeanClassWithAttribute");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -196,7 +197,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testSimpleFieldAnnotation() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SimpleFieldAnnotation");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -210,7 +210,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testImportResourceSpecialCase() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.ImportResourceClass");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -258,7 +257,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testSubClassWithoutAnnotation() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SubClassWithoutAnnotation");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -274,7 +272,6 @@ public class JdtAnnotationMetadataTest {
 	
 	@Test
 	public void testOverriddenMethodWithoutAnnotation() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.OverriddenMethodWithoutAnnotation");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -292,7 +289,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testSuperclassWithMethodAnnotation() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SimpleBeanClassSubclass");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -312,7 +308,6 @@ public class JdtAnnotationMetadataTest {
 	
 	@Test
 	public void testAdvancedControllerCases() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.ControllerAdvancedRequestMapping");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -361,7 +356,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testMethodIdentification() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.MethodIdentificationSupertype");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -393,7 +387,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testAutowiredConstructor() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.AutowiredConstructorClass");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -412,7 +405,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testComponentScanAnnotation() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.ComponentScanClass");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -451,7 +443,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testAdvancedComponentScanAnnotation() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.AdvancedComponentScanClass");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
@@ -483,7 +474,6 @@ public class JdtAnnotationMetadataTest {
 
 	@Test
 	public void testAdvancedComponentScanAnnotationWithEmptyArray() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.AdvancedComponentScanClassWithEmptyArray");
 		
 		AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();

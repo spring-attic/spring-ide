@@ -14,7 +14,6 @@ import java.io.IOException;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -32,9 +31,9 @@ public class JdtMetadataReaderFactory implements MetadataReaderFactory {
 	private final ClassLoader classloader;
 	private final CachingClassReaderFactory classReaderFactory;
 
-	public JdtMetadataReaderFactory(IJavaProject project) {
+	public JdtMetadataReaderFactory(IJavaProject project, ClassLoader classloader) {
 		this.project = project;
-		this.classloader = JdtUtils.getClassLoader(this.project.getProject(), ApplicationContext.class.getClassLoader());
+		this.classloader = classloader;
 		this.classReaderFactory = new CachingClassReaderFactory(this.classloader);
 	}
 

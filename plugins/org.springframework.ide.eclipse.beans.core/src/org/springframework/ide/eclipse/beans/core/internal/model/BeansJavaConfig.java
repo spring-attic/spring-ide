@@ -216,7 +216,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 	
 						try {
 							registerAnnotationProcessors(eventListener);
-							registerBean(eventListener);
+							registerBean(eventListener, cl);
 	
 							IBeansConfigPostProcessor[] postProcessors = BeansConfigPostProcessorFactory.createPostProcessor(ConfigurationClassPostProcessor.class.getName());
 							for (IBeansConfigPostProcessor postProcessor : postProcessors) {
@@ -339,13 +339,13 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		}
 	}
 
-	public void registerBean(ReaderEventListener eventListener) throws IOException {
+	public void registerBean(ReaderEventListener eventListener, ClassLoader classloader) throws IOException {
 		IJavaProject project = this.configClass.getJavaProject();
 		if (project == null) {
 			return;
 		}
 
-		CachingJdtMetadataReaderFactory metadataReaderFactory = new CachingJdtMetadataReaderFactory(project);
+		CachingJdtMetadataReaderFactory metadataReaderFactory = new CachingJdtMetadataReaderFactory(project, classloader);
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(this.configClass.getFullyQualifiedName());
 
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(metadataReader.getAnnotationMetadata());

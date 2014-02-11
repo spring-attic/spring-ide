@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -36,11 +37,15 @@ public class JdtClassMetadataTest {
 	
 	private IProject project;
 	private IJavaProject javaProject;
+	private ClassLoader classloader;
+	private JdtMetadataReaderFactory factory;
 
 	@Before
 	public void createProject() throws Exception {
 		project = StsTestUtil.createPredefinedProject("jdt-annotation-tests", "org.springframework.ide.eclipse.beans.core.tests");
 		javaProject = JdtUtils.getJavaProject(project);
+		classloader = JdtUtils.getClassLoader(project, ApplicationContext.class.getClassLoader());
+		factory = new JdtMetadataReaderFactory(javaProject, classloader);
 	}
 	
 	@After
@@ -50,7 +55,6 @@ public class JdtClassMetadataTest {
 
 	@Test
 	public void testSimpleClass() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.NoAnnotations");
 		
 		ClassMetadata metadata = metadataReader.getClassMetadata();
@@ -70,7 +74,6 @@ public class JdtClassMetadataTest {
 
 	@Test
 	public void testSubClass() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SubClassWithoutAnnotation");
 		
 		ClassMetadata metadata = metadataReader.getClassMetadata();
@@ -86,7 +89,6 @@ public class JdtClassMetadataTest {
 
 	@Test
 	public void testSubClassOfBinaryType() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SubClassOfBinaryType");
 		
 		ClassMetadata metadata = metadataReader.getClassMetadata();
@@ -102,7 +104,6 @@ public class JdtClassMetadataTest {
 
 	@Test
 	public void testSubtypeOfGenericSupertype() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.GenericSubtype");
 		
 		ClassMetadata metadata = metadataReader.getClassMetadata();
@@ -118,7 +119,6 @@ public class JdtClassMetadataTest {
 
 	@Test
 	public void testPlainInterface() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.PlainInterface");
 		
 		ClassMetadata metadata = metadataReader.getClassMetadata();
@@ -134,7 +134,6 @@ public class JdtClassMetadataTest {
 
 	@Test
 	public void testSubInterface() throws Exception {
-		JdtMetadataReaderFactory factory = new JdtMetadataReaderFactory(javaProject);
 		MetadataReader metadataReader = factory.getMetadataReader("org.test.spring.SubInterface");
 		
 		ClassMetadata metadata = metadataReader.getClassMetadata();
