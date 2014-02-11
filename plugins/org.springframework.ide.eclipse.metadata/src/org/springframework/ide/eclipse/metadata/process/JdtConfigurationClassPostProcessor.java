@@ -33,7 +33,6 @@ import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -68,16 +67,16 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		if (project == null) {
 			return;
 		}
+		
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		ConfigurationClassPostProcessor processor = new ConfigurationClassPostProcessor();
 		DelegatingSourceExtractor sourceExtractor = new DelegatingSourceExtractor(project.getProject());
 
 		processor.setEnvironment(new ToolingAwareEnvironment());
 		processor.setSourceExtractor(sourceExtractor);
-		processor.setMetadataReaderFactory(new CachingJdtMetadataReaderFactory(project));
+		processor.setMetadataReaderFactory(new CachingJdtMetadataReaderFactory(project, classLoader));
 		processor.setProblemReporter(new JdtAnnotationMetadataProblemReporter(postProcessingContext));
-		
-		ClassLoader classLoader = JdtUtils.getClassLoader(project.getProject(),  ApplicationContext.class.getClassLoader());
 		processor.setResourceLoader(new DefaultResourceLoader(classLoader));
 
 		ReaderEventListenerForwardingBeanDefinitionRegistry registry = new ReaderEventListenerForwardingBeanDefinitionRegistry(
