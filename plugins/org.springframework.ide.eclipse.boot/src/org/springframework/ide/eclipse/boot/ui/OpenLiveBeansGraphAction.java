@@ -10,28 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.ui;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGenerator;
@@ -40,6 +33,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;
+import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 	
@@ -112,12 +106,13 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 			if (jmxPortProp!=null) {
 				//Looks like JMX is enabled via VM args.
 				
-				//If user created multiple launch configs for a project we are likely to grab
+				//If user created multiple launch configs for a single project we are likely to grab
 				// the wrong one if we don't also check whether the launch config actually has
 				// active launches.
 				
 				for (ILaunch l : LaunchUtils.getLaunches(c)) {
 					if (!l.isTerminated()) {
+						//Okay: Active launch found
 						return "service:jmx:rmi:///jndi/rmi://" + HOST + ":" + jmxPortProp + "/jmxrmi";
 					}
 				}
