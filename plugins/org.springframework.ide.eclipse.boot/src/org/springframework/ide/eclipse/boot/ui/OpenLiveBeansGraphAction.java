@@ -96,29 +96,47 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 		}
 	}
 	
-	private String getServiceUrl(IProject project) {
+	/**
+	 * Determine JMX service url to be used to connect live bean graph on a running JMX-enabled process
+	 * associated with given project.
+	 * 
+	 * @return url never null
+	 * @throws CoreException with an explanation error message if url can not be determined.
+	 */
+	private String getServiceUrl(IProject project) throws CoreException {
 		//The service url is derived from the jmxport property of an active launch associated 
 		// with the property. Therefore, we look for a launch that is associated with project 
 		// and sets the corresponding system property as one of its VMArguments.
 
+		boolean hasActiveProcess = false; //set to true if at least one active process is found
+										// used to create a better error message on failure.
+		
 		for (ILaunchConfiguration c : getLaunchConfigs(project)) {
 			String jmxPortProp = getVMSystemProp(c, BootLaunchShortcut.JMX_PORT_PROP); 
-			if (jmxPortProp!=null) {
-				//Looks like JMX is enabled via VM args.
-				
-				//If user created multiple launch configs for a single project we are likely to grab
-				// the wrong one if we don't also check whether the launch config actually has
-				// active launches.
-				
-				for (ILaunch l : LaunchUtils.getLaunches(c)) {
-					if (!l.isTerminated()) {
-						//Okay: Active launch found
+			for (ILaunch l : LaunchUtils.getLaunches(c)) {
+				if (!l.isTerminated()) {
+					hasActiveProcess = true;
+					
+					if (jmxPortProp!=null) {
+						//Looks like JMX is enabled via VM args.
+						
 						return "service:jmx:rmi:///jndi/rmi://" + HOST + ":" + jmxPortProp + "/jmxrmi";
 					}
 				}
 			}
 		}
-		return null;
+		if (hasActiveProcess) {
+			//There's a active process but looks like JMX arguments are missing
+			throw ExceptionUtil.coreException("Didn't find a JMX-enabled process for project '"+project.getName()+"'\n"+
+					"To open the livebeans graph a process must be run with the following VM arguments:\n\n"
+					+ BootLaunchShortcut.liveBeanVmArgs("${jmxPort}")
+			);
+		} else {
+			throw ExceptionUtil.coreException("No active process found for project '"+project.getName()+"'\n"+
+					"The Live Bean Graph is created at runtime. The project must be running to open it.\n"+
+					"Run your project with the 'Run As >> Spring Boot App' context menu then try opening the view again."
+			);
+		}
 	}
 
 	/**
