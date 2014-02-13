@@ -76,7 +76,7 @@ public class LiveBeansJsonParser {
 		for (int i = 0; i < beansArray.length(); i++) {
 			JSONObject beanJson = beansArray.getJSONObject(i);
 			if (beanJson != null && beanJson.has(LiveBean.ATTR_BEAN)) {
-				LiveBean bean = new LiveBean(beanJson.getString(LiveBean.ATTR_BEAN));
+				LiveBean bean = new LiveBean(session, beanJson.getString(LiveBean.ATTR_BEAN));
 				bean.addAttribute(LiveBeansContext.ATTR_CONTEXT, context.getLabel());
 				if (beanJson.has(LiveBean.ATTR_SCOPE)) {
 					bean.addAttribute(LiveBean.ATTR_SCOPE, beanJson.getString(LiveBean.ATTR_SCOPE));
@@ -126,7 +126,7 @@ public class LiveBeansJsonParser {
 							bean.addDependency(dependencyBean);
 						}
 						else {
-							LiveBean dependentBean = new LiveBean(dependency, true);
+							LiveBean dependentBean = new LiveBean(session, dependency, true);
 							if (session.getApplicationName() != null) {
 								dependentBean.addAttribute(LiveBean.ATTR_APPLICATION, session.getApplicationName());
 							}

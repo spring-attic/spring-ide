@@ -82,7 +82,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 				);
 			}
 
-			LiveBeansModel model = LiveBeansModelGenerator.connectToModel(serviceUrl, /*username*/null, /*password*/null, /*appName*/"");
+			LiveBeansModel model = LiveBeansModelGenerator.connectToModel(serviceUrl, /*username*/null, /*password*/null, /*appName*/"", project);
 			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
 					.showView(LiveBeansGraphView.VIEW_ID);
 			if (part instanceof LiveBeansGraphView) {

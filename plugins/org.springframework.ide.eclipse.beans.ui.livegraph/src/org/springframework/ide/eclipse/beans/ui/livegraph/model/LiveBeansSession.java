@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 
+import org.eclipse.core.resources.IProject;
+
 /**
  * @author Leo Dos Santos
  */
@@ -22,12 +24,15 @@ public class LiveBeansSession {
 	private final String password;
 
 	private final String appName;
+	
+	private final IProject project;
 
-	public LiveBeansSession(String serviceUrl, String username, String password, String appName) {
+	public LiveBeansSession(String serviceUrl, String username, String password, String appName, IProject project) {
 		this.serviceUrl = serviceUrl;
 		this.username = username;
 		this.password = password;
 		this.appName = appName;
+		this.project = project;
 	}
 
 	public String getApplicationName() {
@@ -44,6 +49,10 @@ public class LiveBeansSession {
 
 	public String getUsername() {
 		return username;
+	}
+
+	public IProject getProject() {
+		return project;
 	}
 
 }

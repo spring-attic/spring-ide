@@ -32,6 +32,8 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 
 	public static final String ATTR_APPLICATION = "application name";
 
+	private final LiveBeansSession session;
+
 	private final String beanId;
 
 	private String displayName;
@@ -42,12 +44,13 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 
 	private final boolean innerBean;
 
-	public LiveBean(String id) {
-		this(id, false);
+	public LiveBean(LiveBeansSession session, String id) {
+		this(session, id, false);
 	}
 
-	public LiveBean(String id, boolean innerBean) {
+	public LiveBean(LiveBeansSession session, String id, boolean innerBean) {
 		super();
+		this.session = session;
 		this.beanId = id;
 		this.innerBean = innerBean;
 		dependencies = new HashSet<LiveBean>();
@@ -111,6 +114,10 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 
 	public boolean isInnerBean() {
 		return innerBean;
+	}
+
+	public LiveBeansSession getSession() {
+		return session;
 	}
 
 }

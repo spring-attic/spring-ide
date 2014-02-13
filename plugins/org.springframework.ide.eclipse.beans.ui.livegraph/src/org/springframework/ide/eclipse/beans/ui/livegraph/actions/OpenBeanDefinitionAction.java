@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jst.ws.internal.common.ResourceUtils;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansSession;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
@@ -40,9 +41,9 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 		super("Open Bean Definition File");
 	}
 
-	private void openXmlFiles(List<String> contexts, String appName) {
+	private void openXmlFiles(List<String> contexts, LiveBeansSession session) {
 		try {
-			IProject[] projects = findProjects(appName);
+			IProject[] projects = findProjects(session);
 			for (IProject project : projects) {
 				IPath[] paths = ResourceUtils.getAllJavaSourceLocations(project);
 				if (paths.length > 0) {
@@ -68,12 +69,12 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 	public void run() {
 		IStructuredSelection selection = getStructuredSelection();
 		List elements = selection.toList();
-		String appName = null;
+		LiveBeansSession session = null;
 		final List<String> contexts = new ArrayList<String>();
 		for (Object obj : elements) {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
-				appName = bean.getApplicationName();
+				session = bean.getSession();
 				String resource = bean.getResource();
 				if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
 					String resourcePath = extractResourcePath(resource);
@@ -88,15 +89,15 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 						}
 					}
 					else if (resourcePath.endsWith(".class")) {
-						openInEditor(appName, extractClassName(resourcePath));
+						openInEditor(session, extractClassName(resourcePath));
 					}
 				}
 			}
 		}
 
-		if (appName != null) {
+		if (session != null) {
 			// Find the XML files in the workspace and open them
-			openXmlFiles(contexts, appName);
+			openXmlFiles(contexts, session);
 		}
 	}
 

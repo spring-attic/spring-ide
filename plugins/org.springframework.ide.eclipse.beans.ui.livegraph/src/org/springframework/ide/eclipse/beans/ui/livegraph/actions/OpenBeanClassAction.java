@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
+import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansSession;
 
 /**
  * @author Leo Dos Santos
@@ -31,7 +32,7 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 		for (Object obj : elements) {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
-				String appName = bean.getApplicationName();
+				LiveBeansSession appName = bean.getSession();
 				String beanClass = bean.getBeanType();
 				if (appName != null) {
 					if (beanClass != null && beanClass.trim().length() > 0) {
@@ -71,7 +72,7 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 						return true;
 					}
 					else {
-						return hasTypeInProject(bean.getApplicationName(), bean.getId());
+						return hasTypeInProject(bean.getSession(), bean.getId());
 					}
 				}
 			}

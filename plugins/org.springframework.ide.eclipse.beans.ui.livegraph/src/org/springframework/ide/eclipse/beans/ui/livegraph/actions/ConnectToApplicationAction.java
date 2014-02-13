@@ -42,7 +42,7 @@ public class ConnectToApplicationAction extends Action {
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			try {
 				LiveBeansModel model = LiveBeansModelGenerator.connectToModel(dialog.getServiceUrl(),
-						dialog.getUsername(), dialog.getPassword(), dialog.getApplicationName());
+						dialog.getUsername(), dialog.getPassword(), dialog.getApplicationName(), /*project*/null);
 				view.setInput(model);
 			}
 			catch (CoreException e) {

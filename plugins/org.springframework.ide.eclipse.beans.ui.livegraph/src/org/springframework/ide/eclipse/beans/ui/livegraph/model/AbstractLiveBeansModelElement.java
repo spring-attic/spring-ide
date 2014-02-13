@@ -24,7 +24,7 @@ public abstract class AbstractLiveBeansModelElement implements IAdaptable {
 	protected final Map<String, String> attributes;
 
 	public AbstractLiveBeansModelElement() {
-		attributes = new HashMap<String, String>();
+		this.attributes = new HashMap<String, String>();
 	}
 
 	public void addAttribute(String key, String value) {
