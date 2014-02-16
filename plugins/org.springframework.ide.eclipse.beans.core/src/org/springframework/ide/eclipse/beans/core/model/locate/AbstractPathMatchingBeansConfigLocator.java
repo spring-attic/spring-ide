@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 Spring IDE Developers
+ * Copyright (c) 2008, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,7 +196,8 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 		if (!resource.isDerived()) {
 			String filePath = removeRootDir(resource.getFullPath(), rootDir);
 			for (String pattern : getAllowedFilePatterns()) {
-				if (getAllowedFileExtensions().contains(resource.getFileExtension())
+				String fileExtension = resource.getFileExtension();
+				if (fileExtension != null && getAllowedFileExtensions().contains(fileExtension)
 						&& matches(filePath, pattern)) {
 					files.add(resource);
 				}
