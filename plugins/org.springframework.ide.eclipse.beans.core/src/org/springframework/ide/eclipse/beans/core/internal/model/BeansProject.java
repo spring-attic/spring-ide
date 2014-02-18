@@ -62,6 +62,7 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.util.ObjectUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * This class holds information for a Spring Beans project. The information is
@@ -1171,6 +1172,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			Map<BeansConfigLocatorDefinition, String> newConfigSetNames) {
 
 		try {
+
 			w.lock();
 
 			for (IBeansConfig config : autoDetectedConfigs.values()) {
@@ -1222,6 +1224,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 		} finally {
 			w.unlock();
+			
+			SpringCoreUtils.buildFullProject(project);
 		}
 	}
 
