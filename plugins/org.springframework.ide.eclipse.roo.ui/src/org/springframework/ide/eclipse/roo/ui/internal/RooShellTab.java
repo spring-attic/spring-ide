@@ -46,11 +46,15 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -243,7 +247,7 @@ public class RooShellTab {
 		return item;
 	}
 
-	public void addTypeFieldAssistToText(Text text) {
+	public void addTypeFieldAssistToText(final Text text) {
 		int bits = SWT.TOP | SWT.LEFT;
 		ControlDecoration controlDecoration = new ControlDecoration(text, bits);
 		controlDecoration.setMarginWidth(0);
@@ -256,7 +260,7 @@ public class RooShellTab {
 		// Create the proposal provider
 		RooShellProposalProvider proposalProvider = new RooShellProposalProvider(text);
 		TextContentAdapter textContentAdapter = new TextContentAdapter();
-		ContentProposalAdapter adapter = new ContentProposalAdapter(text, textContentAdapter, proposalProvider,
+		final RooContentProposalAdapter adapter = new RooContentProposalAdapter(text, textContentAdapter, proposalProvider,
 				KeyStroke.getInstance(SWT.CTRL, SWT.SPACE), null);
 		ILabelProvider labelProvider = new LabelProvider();
 		adapter.setLabelProvider(labelProvider);
@@ -266,6 +270,11 @@ public class RooShellTab {
 
 			public void proposalAccepted(IContentProposal proposal) {
 				lastCompletionProposal = proposal.getContent();
+			}
+		});
+		text.addControlListener(new ControlAdapter() {
+			public void controlResized(ControlEvent e) {
+				adapter.setPopupSize(new Point(text.getBounds().width, 200));
 			}
 		});
 	}
@@ -717,6 +726,7 @@ public class RooShellTab {
 					i = entry.getKey().length();
 				}
 			}
+			System.out.println("description = "+description);
 			return description;
 		}
 	}
