@@ -11,16 +11,16 @@
  *     Kris De Volder - Bugfix: side popup sometimes overlaps main popup obscuring the most interesting information.
  *******************************************************************************/
 
+package org.springframework.ide.eclipse.roo.ui.internal;
+
 //Copied from org.eclipse.jface.fieldassist.ContentProposalAdapter.
 //Reason:
-// We want to change how the secondary popup's bounds are computed in order 
-// to fix bug 
+//We want to change how the secondary popup's bounds are computed in order 
+//to fix bug 
 //The meaningfull change is very small. It is marked by 
 //Comments: //>>> BUGFIX STS ... //<<< BUGFIX STS
 //We should submit this upstream. Once accepted this entire class can be deleted and
-// we can go back to using the original.
-
-package org.springframework.ide.eclipse.roo.ui.internal;
+//we can go back to using the original.
 
 import java.util.ArrayList;
 
