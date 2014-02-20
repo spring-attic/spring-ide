@@ -1,44 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beansProjectDescription>
 	<version>1</version>
-	<pluginVersion><![CDATA[2.2.7.qualifier]]></pluginVersion>
+	<pluginVersion><![CDATA[3.5.0.201402030809-M2]]></pluginVersion>
 	<configSuffixes>
 		<configSuffix><![CDATA[xml]]></configSuffix>
 	</configSuffixes>
 	<enableImports><![CDATA[false]]></enableImports>
 	<configs>
-		<config>src/org/springframework/beans/factory/annotation/testResourceInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testExtendedResourceInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testExtendedResourceInjectionWithOverriding-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testExtendedResourceInjectionWithSkippedOverriddenMethods-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testOptionalResourceInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testOptionalResourceInjectionWithNoDependencies-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testConstructorResourceInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testConstructorResourceInjectionWithMultipleCandidates-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testConstructorResourceInjectionWithMultipleCandidatesAsCollection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testConstructorInjectionWithMap-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testFieldInjectionWithMap-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testMethodInjectionWithMap-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndMultipleMatches-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testMethodInjectionWithMapAndNoMatches-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testObjectFactoryInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testObjectFactoryQualifierInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredFieldResourceInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredFieldResourceInjectionFailsWhenNoDependencyFound-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjectionFailsWhenNoDependencyFound-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationRequiredMethodResourceInjectionFailsWhenMultipleDependenciesFound-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalFieldResourceInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalFieldResourceInjectionWhenNoDependencyFound-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjection-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjectionWhenNoDependencyFound-context.xml</config>
-		<config>src/org/springframework/beans/factory/annotation/testCustomAnnotationOptionalMethodResourceInjectionWhenMultipleDependenciesFound-context.xml</config>
-		<config>src/org/springframework/context/annotation/testResourceInjection-context.xml</config>
-		<config>src/org/springframework/context/annotation/testExtendedResourceInjection-context.xml</config>
-		<config>src/org/springframework/context/annotation/testExtendedResourceInjectionWithOverriding-context.xml</config>
-		<config>src/org/springframework/context/annotation/testExtendedEjbInjection-context.xml</config>
 	</configs>
+	<autoconfigs>
+	</autoconfigs>
 	<configSets>
 	</configSets>
 </beansProjectDescription>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Spring IDE Developers
+ * Copyright (c) 2005, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.autowire;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -22,6 +23,7 @@ import org.eclipse.core.resources.IProject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.AutowireDependencyProvider;
 import org.springframework.ide.eclipse.beans.core.autowire.internal.provider.FactoryBeanTypeResolverExtensions;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
@@ -31,7 +33,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -43,8 +44,9 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 public class AutowireDependencyProviderTest {
 	
 	private IProject project;
-	private IBeansModel model;
+	private BeansModel model;
 	private IBeansProject beansProject;
+	private BeansModel modelBackup;
 
 	@Before
 	public void createProject() throws Exception {
@@ -52,11 +54,15 @@ public class AutowireDependencyProviderTest {
 		
 		model = new BeansModel();
 		beansProject = new BeansProject(model, project);
+		
+		modelBackup = (BeansModel) BeansCorePlugin.getModel();
+		BeansCorePlugin.setModel(model);
 	}
 	
 	@After
 	public void deleteProject() throws Exception {
 		project.delete(true, null);
+		BeansCorePlugin.setModel(modelBackup);
 	}
 
 	@Test
@@ -420,7 +426,7 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
