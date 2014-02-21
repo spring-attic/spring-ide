@@ -322,11 +322,12 @@
 	        </objectState>
          </visibility>
          <action
-               label="Open Live Beans Graph"
-               class="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"
-               enablesFor="+"
-               menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
-               id="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction">
+                   class="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"
+                   enablesFor="+"
+                   icon="resources/icons/live-beans-graph.png"
+                   id="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"
+                   label="Open Live Beans Graph"
+                   menubarPath="org.springframework.ide.eclipse.ui.tools/group0">
          </action>
       </objectContribution>
    	</extension>
