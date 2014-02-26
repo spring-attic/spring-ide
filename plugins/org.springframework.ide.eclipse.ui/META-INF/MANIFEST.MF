@@ -84,4 +84,5 @@ Export-Package: org.springframework.ide.eclipse.ui,
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.ui.browser
+Require-Bundle: org.eclipse.ui.browser,
+ org.springsource.ide.eclipse.commons.ui

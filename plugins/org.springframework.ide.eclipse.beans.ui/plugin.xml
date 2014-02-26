@@ -409,7 +409,7 @@
 	 	<page id="org.springframework.ide.eclipse.beans.ui.preferencePage"
   	      	name="%beansSupportPreferencePage.name"
 	      	class="org.springframework.ide.eclipse.beans.ui.preferences.BeansPreferencePage"
-	      	category="org.springframework.ide.eclipse.ui.preferencePage">
+	      	category="org.springsource.ide.eclipse.commons.preferencePage">
       		<keywordReference
             	id="org.springframework.ide.eclipse.beans.ui.keywords">
       		</keywordReference>

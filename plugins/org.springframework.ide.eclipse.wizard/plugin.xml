@@ -245,14 +245,14 @@
          point="org.eclipse.ui.preferencePages">
       <!--
       <page
-            category="org.springframework.ide.eclipse.ui.preferencePage"
+            category="org.springsource.ide.eclipse.commons.preferencePage"
             class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsPreferencePage"
             id="com.springsource.sts.help.ui.examplepreferencepage"
             name="Example Projects">
       </page>
       -->
       <page
-            category="org.springframework.ide.eclipse.ui.preferencePage"
+            category="org.springsource.ide.eclipse.commons.preferencePage"
             class="org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage"
             id="com.springsource.sts.help.ui.templatepreferencepage"
             name="Template Projects">

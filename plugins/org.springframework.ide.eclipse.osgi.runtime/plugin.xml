@@ -39,7 +39,7 @@
 			id="com.springsource.sts.ide.osgi.ui.preferencePage" 
 			name="%preferencePage.name"
 			class="org.springframework.ide.eclipse.osgi.runtime.ui.OSGiRuntimePreferencePage"
-			category="org.springframework.ide.eclipse.ui.preferencePage">
+			category="org.springsource.ide.eclipse.commons.preferencePage">
      <keywordReference
            id="com.springsource.sts.ide.osgi.ui.keywords">
      </keywordReference>

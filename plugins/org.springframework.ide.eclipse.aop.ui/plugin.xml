@@ -267,7 +267,7 @@
 	 	<page id="org.springframework.ide.eclipse.aop.ui.preferencePage"
   	      	name="AOP Support"
 	      	class="org.springframework.ide.eclipse.aop.ui.preferences.AopPreferencePage"
-	      	category="org.springframework.ide.eclipse.ui.preferencePage">
+	      	category="org.springsource.ide.eclipse.commons.preferencePage">
 	      	<keywordReference
             	id="org.springframework.ide.eclipse.aop.ui.keywords">
       		</keywordReference>

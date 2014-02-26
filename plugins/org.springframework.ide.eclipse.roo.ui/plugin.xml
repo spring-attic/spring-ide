@@ -204,7 +204,7 @@
    
     <extension point="org.eclipse.ui.preferencePages">
 	 	<page
-         category="org.springframework.ide.eclipse.ui.preferencePage"
+         category="org.springsource.ide.eclipse.commons.preferencePage"
          class="org.springframework.ide.eclipse.roo.ui.internal.properties.RooInstallPreferencePage"
          id="com.springsource.sts.roo.ui.preferencePage"
          name="%projectPropertyPage">

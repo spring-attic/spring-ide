@@ -104,7 +104,7 @@
          point="org.eclipse.ui.propertyPages">
       <page
             id="org.springframework.ide.eclipse.ui.projectPropertyPage"
-            name="%projectPropertyPage"
+            name="%projectPropertyCategory"
             class="org.springframework.ide.eclipse.ui.dialogs.ProjectPropertyPage"
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject">
@@ -126,6 +126,7 @@
     <extension point="org.eclipse.ui.preferencePages">
 	 	<page id="org.springframework.ide.eclipse.ui.preferencePage"
  			name="%projectPropertyPage"
+ 			category="org.springsource.ide.eclipse.commons.preferencePage"
     		class="org.springframework.ide.eclipse.ui.dialogs.ProjectPropertyPage">
       <keywordReference
             id="org.springframework.ide.eclipse.ui.keywords">

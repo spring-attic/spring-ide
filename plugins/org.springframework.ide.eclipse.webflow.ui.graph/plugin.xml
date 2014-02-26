@@ -139,7 +139,7 @@
 	 	<page id="org.springframework.ide.eclipse.webflow.ui.graph.preferencePage"
   	      	name="Web Flow Support"
 	      	class="org.springframework.ide.eclipse.webflow.ui.graph.preferences.WebflowGraphColorPreferencePage"
-	      	category="org.springframework.ide.eclipse.ui.preferencePage">
+	      	category="org.springsource.ide.eclipse.commons.preferencePage">
    		     <keywordReference
             	id="org.springframework.ide.eclipse.webflow.ui.keywords">
       		</keywordReference>

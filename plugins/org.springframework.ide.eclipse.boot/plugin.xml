@@ -301,7 +301,7 @@
 
     <extension point="org.eclipse.ui.preferencePages">
 	 	<page
-         category="org.springframework.ide.eclipse.ui.preferencePage"
+         category="org.springsource.ide.eclipse.commons.preferencePage"
          class="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
          id="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
          name="Spring Boot">
