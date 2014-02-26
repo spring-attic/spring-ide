@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,7 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		IMethod method = getMethodFromSignature(name, desc);
-		return new JdtConnectedMethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap, method, Type.getReturnType(desc).getClassName());
+		return new JdtConnectedMethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataSet, method, Type.getReturnType(desc).getClassName());
 	}
 
 	@Override
