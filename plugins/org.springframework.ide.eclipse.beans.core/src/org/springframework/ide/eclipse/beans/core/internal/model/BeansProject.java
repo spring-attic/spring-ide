@@ -1197,11 +1197,13 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 					Set<String> configNamesByLocator = new LinkedHashSet<String>();
 
 					for (Map.Entry<String, IBeansConfig> detectedConfig : detectedConfigs.entrySet()) {
-						autoDetectedConfigs.put(detectedConfig.getKey(), detectedConfig.getValue());
+						String configName = detectedConfig.getKey();
+
+						autoDetectedConfigs.put(configName, detectedConfig.getValue());
 						detectedConfig.getValue().registerEventListener(eventListener);
-						configNamesByLocator.add(getConfigName((IFile) detectedConfig.getValue().getElementResource()));
-						locatorByAutoDetectedConfig.put(getConfigName((IFile) detectedConfig.getValue().getElementResource()),
-								locator.getNamespaceUri() + "." + locator.getId());
+
+						configNamesByLocator.add(configName);
+						locatorByAutoDetectedConfig.put(configName, locator.getNamespaceUri() + "." + locator.getId());
 					}
 					autoDetectedConfigsByLocator.put(locator.getNamespaceUri() + "." + locator.getId(), configNamesByLocator);
 
