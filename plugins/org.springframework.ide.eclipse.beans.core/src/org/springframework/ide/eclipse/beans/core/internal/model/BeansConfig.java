@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 - 2013 Spring IDE Developers
+ * Copyright (c) 2004, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -385,7 +385,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 							try {
 								// Delegate actual processing to XmlBeanDefinitionReader
-								return super.loadBeanDefinitions(encodedResource);
+								int loadedBeans = 0;
+								if (encodedResource.getResource().exists()) {
+									loadedBeans = super.loadBeanDefinitions(encodedResource);
+								}
+								return loadedBeans;
 							}
 							finally {
 								// Reset currently processed resource before leaving
