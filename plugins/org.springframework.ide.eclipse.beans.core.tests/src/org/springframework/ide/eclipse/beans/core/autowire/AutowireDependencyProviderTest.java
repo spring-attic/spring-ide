@@ -76,11 +76,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 2);
+		assertEquals(2, refs.size());
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
 			assertTrue(Arrays.asList(allowedRefs.get(ref.getBeanName())).contains(
@@ -101,11 +101,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 7);
+		assertEquals(7, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -127,11 +127,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 6);
+		assertEquals(6, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -152,11 +152,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 6);
+		assertEquals(6, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -179,11 +179,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 9);
+		assertEquals(9, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -200,7 +200,7 @@ public class AutowireDependencyProviderTest {
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 	}
 
 	@Test
@@ -216,11 +216,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 6);
+		assertEquals(6, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -242,11 +242,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 4);
+		assertEquals(4, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -268,11 +268,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 4);
+		assertEquals(4, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -293,11 +293,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 2);
+		assertEquals(2, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -318,11 +318,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 2);
+		assertEquals(2, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -342,11 +342,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 2);
+		assertEquals(2, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -367,11 +367,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 2);
+		assertEquals(2, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -393,11 +393,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 2);
+		assertEquals(2, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -412,7 +412,7 @@ public class AutowireDependencyProviderTest {
 
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 	}
 
 	@Test
@@ -430,7 +430,7 @@ public class AutowireDependencyProviderTest {
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -450,11 +450,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -474,11 +474,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("customBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -493,9 +493,9 @@ public class AutowireDependencyProviderTest {
 
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 
-		assertTrue(provider.getValidationProblems().size() == 1);
+		assertEquals(1, provider.getValidationProblems().size());
 	}
 
 	@Test
@@ -509,11 +509,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("customBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -528,9 +528,9 @@ public class AutowireDependencyProviderTest {
 
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 
-		assertTrue(provider.getValidationProblems().size() == 1);
+		assertEquals(1, provider.getValidationProblems().size());
 	}
 
 	@Test
@@ -540,9 +540,9 @@ public class AutowireDependencyProviderTest {
 
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 
-		assertTrue(provider.getValidationProblems().size() == 1);
+		assertEquals(1, provider.getValidationProblems().size());
 	}
 
 	@Test
@@ -551,7 +551,7 @@ public class AutowireDependencyProviderTest {
 
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 	}
 
 	@Test
@@ -560,9 +560,9 @@ public class AutowireDependencyProviderTest {
 
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 
-		assertTrue(provider.getValidationProblems().size() == 1);
+		assertEquals(1, provider.getValidationProblems().size());
 	}
 
 	@Test
@@ -576,11 +576,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("customBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
@@ -595,9 +595,9 @@ public class AutowireDependencyProviderTest {
 
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 
-		assertTrue(provider.getValidationProblems().size() == 0);
+		assertEquals(0, provider.getValidationProblems().size());
 	}
 
 	@Test
@@ -606,9 +606,9 @@ public class AutowireDependencyProviderTest {
 
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 
-		assertTrue(provider.getValidationProblems().size() == 1);
+		assertEquals(1, provider.getValidationProblems().size());
 	}
 
 	@Test
@@ -622,11 +622,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("annotatedBean", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
 			assertTrue(Arrays.asList(allowedRefs.get(ref.getBeanName())).contains(
@@ -644,7 +644,7 @@ public class AutowireDependencyProviderTest {
 		AutowireDependencyProvider provider = new AutowireDependencyProvider(config, config);
 		FactoryBeanTypeResolverExtensions.setFactoryBeanTypeResolvers(new IFactoryBeanTypeResolver[0]);
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
-		assertTrue(references.size() == 0);
+		assertEquals(0, references.size());
 	}
 
 	@Test
@@ -672,11 +672,11 @@ public class AutowireDependencyProviderTest {
 		Map<IBean, Set<IBeanReference>> references = provider.resolveAutowiredDependencies();
 		IBean bean = BeansModelUtils.getBean("autowiredBeanWithUnknownType", config);
 
-		assertTrue(references.size() == 1);
+		assertEquals(1, references.size());
 		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
 			assertTrue(Arrays.asList(allowedRefs.get(ref.getBeanName())).contains(
@@ -699,7 +699,7 @@ public class AutowireDependencyProviderTest {
 //		assertTrue(references.containsKey(bean));
 
 		Set<IBeanReference> refs = references.get(bean);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 		for (IBeanReference ref : refs) {
 			assertTrue(allowedRefs.containsKey(ref.getBeanName()));
 			assertTrue(Arrays.asList(allowedRefs.get(ref.getBeanName())).contains(
