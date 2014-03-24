@@ -105,7 +105,7 @@ public abstract class SpringDataUtils {
 	 * @return
 	 */
 	public static boolean isRepositoryBean(IBean bean) {
-		return bean.getProperty("repositoryInterface") != null;
+		return bean != null ? bean.getProperty("repositoryInterface") != null : false;
 //		IBeansProject project = BeansModelUtils.getProject(bean);
 //		return getRepositoryBeansFor(project.getProject()).contains(bean);
 	}
@@ -180,9 +180,12 @@ public abstract class SpringDataUtils {
 	 * @return
 	 */
 	public static String asText(IBean bean) {
-
-		String typeName = isRepositoryBean(bean) ? getRepositoryInterfaceName(bean) : bean.getClassName();
-
-		return String.format("%s [%s]", bean.getElementName(), typeName);
+		if (bean != null) {
+			String typeName = isRepositoryBean(bean) ? getRepositoryInterfaceName(bean) : bean.getClassName();
+			return String.format("%s [%s]", bean.getElementName(), typeName);
+		}
+		else {
+			return "[unknown]";
+		}
 	}
 }
