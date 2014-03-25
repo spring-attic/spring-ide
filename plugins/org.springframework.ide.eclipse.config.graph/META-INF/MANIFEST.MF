@@ -9,7 +9,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.forms,
  org.eclipse.ui.views,
- org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.gef,
  org.eclipse.wst.sse.core,
@@ -33,3 +32,7 @@ Export-Package: org.springframework.ide.eclipse.config.graph,
  org.springframework.ide.eclipse.config.graph.parts,
  org.springframework.ide.eclipse.config.graph.policies
 Bundle-Localization: plugin
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.preferences,
+ org.eclipse.osgi.util,
+ org.osgi.framework

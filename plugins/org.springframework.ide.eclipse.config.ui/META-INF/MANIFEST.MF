@@ -10,7 +10,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.ui.forms,
  org.eclipse.ui.views,
- org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.core.expressions,
  org.eclipse.jface.text,
@@ -128,3 +127,9 @@ Export-Package: org.springframework.ide.eclipse.config.ui,
  org.springframework.ide.eclipse.config.ui.widgets,
  org.springframework.ide.eclipse.config.ui.wizards
 Bundle-Localization: plugin
+Import-Package: org.eclipse.core.internal.content,
+ org.eclipse.core.internal.runtime,
+ org.eclipse.core.runtime,
+ org.eclipse.core.runtime.content,
+ org.eclipse.osgi.util,
+ org.osgi.framework

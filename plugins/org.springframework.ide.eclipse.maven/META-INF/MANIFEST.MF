@@ -6,7 +6,6 @@ Bundle-Version: 3.5.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.maven.MavenCorePlugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.debug.core,
@@ -35,4 +34,9 @@ Export-Package: org.springframework.ide.eclipse.maven,
 Import-Package: org.apache.maven.artifact;resolution:=optional,
  org.apache.maven.model;resolution:=optional,
  org.apache.maven.project;resolution:=optional,
- org.codehaus.plexus.util.xml;resolution:=optional
+ org.codehaus.plexus.util.xml;resolution:=optional,
+ org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
+ org.eclipse.core.runtime.preferences,
+ org.eclipse.osgi.util,
+ org.osgi.framework

@@ -7,10 +7,11 @@ Bundle-Activator: org.springframework.ide.eclipse.osgi.targetdefinition.Activato
 Bundle-Localization: plugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
  org.eclipse.pde.core,
  org.eclipse.core.variables
-Import-Package: org.springframework.util
+Import-Package: org.eclipse.core.runtime,
+ org.osgi.framework,
+ org.springframework.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.osgi.targetdefinition

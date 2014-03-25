@@ -7,7 +7,6 @@ Bundle-Activator: org.springframework.ide.eclipse.config.core.ConfigCorePlugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
- org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jface.text,
  org.eclipse.wst.sse.core,
@@ -27,3 +26,6 @@ Export-Package: org.springframework.ide.eclipse.config.core,
  org.springframework.ide.eclipse.config.core.preferences,
  org.springframework.ide.eclipse.config.core.schemas
 Bundle-Localization: plugin
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.osgi.util,
+ org.osgi.framework

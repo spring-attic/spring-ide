@@ -5,7 +5,6 @@ Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui.livegraph;singleto
 Bundle-Version: 3.5.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.zest.core;bundle-version="[1.0.0,2.0.0)",
  org.eclipse.zest.layouts;bundle-version="[1.0.0,2.0.0)",
@@ -29,4 +28,7 @@ Export-Package: org.springframework.ide.eclipse.beans.ui.livegraph,
  org.springframework.ide.eclipse.beans.ui.livegraph.actions,
  org.springframework.ide.eclipse.beans.ui.livegraph.model,
  org.springframework.ide.eclipse.beans.ui.livegraph.views
-Import-Package: org.springframework.context.support;version="4.0.0.20131212-RELEASE"
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
+ org.osgi.framework,
+ org.springframework.context.support;version="4.0.0.20131212-RELEASE"

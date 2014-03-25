@@ -6,7 +6,6 @@ Bundle-Vendor: GoPivotal Inc.
 Bundle-Version: 3.5.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.core.BootActivator
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.m2e.core,
  org.eclipse.m2e.maven.runtime,
@@ -32,3 +31,8 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
+ org.eclipse.core.runtime.preferences,
+ org.osgi.framework,
+ org.osgi.service.prefs

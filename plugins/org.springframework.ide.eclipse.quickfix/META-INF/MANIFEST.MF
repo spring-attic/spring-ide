@@ -4,8 +4,7 @@ Bundle-Name: Spring IDE Quick Fixes
 Bundle-SymbolicName: org.springframework.ide.eclipse.quickfix;singleton:=true
 Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: Spring IDE Developers
-Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.core.resources,
+Require-Bundle: org.eclipse.core.resources,
  org.eclipse.jface.text,
  org.eclipse.ui,
  org.eclipse.ui.ide,
@@ -49,3 +48,6 @@ Export-Package: org.springframework.ide.eclipse.quickfix,
  org.springframework.ide.eclipse.quickfix.rename,
  org.springframework.ide.eclipse.quickfix.validator,
  org.springframework.ide.eclipse.quickfix.validator.helper
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.osgi.util,
+ org.osgi.framework

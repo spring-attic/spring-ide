@@ -9,7 +9,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.jdt.ui,
  org.eclipse.core.filesystem,
- org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.wst.server.core,
  org.eclipse.jdt.launching,
@@ -37,6 +36,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy;exclude:="org.springframework.ide.eclipse.roo.ui.internal.listener"
 Bundle-Localization: plugin
-Import-Package: org.springframework.ide.eclipse.maven;resolution:=optional
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
+ org.eclipse.osgi.util,
+ org.osgi.framework,
+ org.springframework.ide.eclipse.maven;resolution:=optional
 Export-Package: org.springframework.ide.eclipse.roo.ui,
  org.springframework.ide.eclipse.roo.ui.internal
