@@ -51,7 +51,8 @@ public class GuidesStructureTest extends GuidesTestCase {
 		"gs-consuming-rest-jquery",
 		"gs-consuming-rest-restjs",
 		"gs-consuming-rest-sencha",
-		"gs-messaging-stomp-msgsjs"
+		"gs-messaging-stomp-msgsjs",
+		"gs-spring-boot-cli-and-js"
 	};
 	
 	private static boolean isGeneral(String name) {

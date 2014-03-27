@@ -29,6 +29,11 @@
 					<layout>p2</layout>
 					<url>http://dist.springframework.org/snapshot/IDE/nightly/</url>
 				</repository>
+				<repository>
+					<id>greclipse</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.3-j8/</url>
+				</repository>
 			</repositories>
 		</profile>
     </profiles>
@@ -45,7 +50,8 @@
 					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 					<testSuite>org.springsource.ide.eclipse.commons.gettingstarted.tests</testSuite>
 					<testClass>org.springsource.ide.eclipse.commons.gettingstarted.tests.AllGettingStartedTests</testClass>
-					<argLine>-Dgithub.user.name=${github.user.name} -Dgithub.user.password=${github.user.password} -Xmx1024m -XX:MaxPermSize=256m</argLine>
+					<argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+<!-- 					<argLine>-Dgithub.user.name=${github.user.name} -Dgithub.user.password=${github.user.password} -Xmx1024m -XX:MaxPermSize=256m</argLine> -->
 				</configuration>
 			</plugin>
 
