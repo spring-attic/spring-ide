@@ -47,4 +47,5 @@ Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.preferences,
  org.eclipse.osgi.service.resolver,
  org.eclipse.osgi.util,
- org.osgi.service.prefs
+ org.osgi.service.prefs,
+ org.osgi.framework

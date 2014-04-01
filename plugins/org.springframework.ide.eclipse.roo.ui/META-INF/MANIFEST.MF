@@ -38,6 +38,7 @@ Bundle-ActivationPolicy: lazy;exclude:="org.springframework.ide.eclipse.roo.ui.i
 Bundle-Localization: plugin
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
+ org.eclipse.core.runtime.preferences,
  org.eclipse.osgi.util,
  org.osgi.framework,
  org.springframework.ide.eclipse.maven;resolution:=optional
