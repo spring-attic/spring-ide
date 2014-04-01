@@ -18,7 +18,6 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryField;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.env.IBinaryNestedType;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
-import org.eclipse.jdt.internal.compiler.env.IBinaryTypeAnnotation;
 
 /**
  * Implementation that can hold structural information about Java class files.
@@ -184,10 +183,6 @@ class TypeStructure implements IBinaryType {
 	}
 
 	public char[] getEnclosingMethod() {
-		return null;
-	}
-
-	public IBinaryTypeAnnotation[] getTypeAnnotations() {
 		return null;
 	}
 
