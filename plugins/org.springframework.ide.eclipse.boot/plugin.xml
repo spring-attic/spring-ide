@@ -96,7 +96,7 @@
  
  <extension point="org.eclipse.debug.core.launchConfigurationTypes">
     <launchConfigurationType
-        name="Spring Groovy CLI"
+        name="Spring Boot CLI Script"
         delegate="org.springframework.ide.eclipse.boot.core.cli.BootGroovyScriptLaunchConfigurationDelegate"
         category="org.eclipse.ui.externaltools"
         modes="run"
@@ -111,7 +111,7 @@
           description="Run or Debug as a Spring Boot CLI Script"
           id="org.springsource.ide.eclipse.boot.BootLaunchGroovyScriptShortcut"
           icon="resources/icons/spring.png"
-          label="Spring Groovy CLI"
+          label="Spring Boot CLI Script"
           modes="run"> <!-- debug not yet support -->
         <contextualLaunch>
            <enablement>
@@ -130,12 +130,12 @@
                id="org.eclipse.jdt.launching.localJavaApplication">
          </configurationType>
         <description
-               description="Run as Spring Groovy CLI Script"
+               description="Run as Spring Boot CLI Script"
                mode="run">
          </description>
 <!--     Debugging is not yet supported.
          <description
-               description="Debug as Spring Boot App"
+               description="Debug as Spring Boot CLI Script"
                mode="debug">
          </description> -->
     </shortcut>

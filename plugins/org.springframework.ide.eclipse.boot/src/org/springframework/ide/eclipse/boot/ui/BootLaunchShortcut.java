@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.ui;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
@@ -51,7 +50,6 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 	
 	/**
 	 * VM args that enable 'live bean graph' and jmx.
-	 * @throws UnsupportedEncodingException 
 	 */
 	public static String liveBeanVmArgs(int jmxPort) {
 		return liveBeanVmArgs(""+jmxPort);
