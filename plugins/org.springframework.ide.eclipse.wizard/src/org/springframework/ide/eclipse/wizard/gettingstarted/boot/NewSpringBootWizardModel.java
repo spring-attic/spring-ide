@@ -120,7 +120,7 @@ public class NewSpringBootWizardModel {
 	private IWorkingSet[] workingSets = new IWorkingSet[0];
 
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
-		mon.beginTask("Importing "+baseUrl, 4);
+		mon.beginTask("Importing "+baseUrl.getValue(), 4);
 		DownloadManager downloader = null;
 		try {
 			downloader = new DownloadManager().allowUIThread(allowUIThread);
