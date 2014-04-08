@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Spring IDE Developers
+ * Copyright (c) 2011, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,10 @@ public class TargetNamespaceScanner {
 			return null;
 		}
 
+		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 		try {
+			Thread.currentThread().setContextClassLoader(TargetNamespaceScanner.class.getClassLoader());
+			
 			DocumentBuilderFactory factory = SpringCoreUtils.getDocumentBuilderFactory();
 			factory.setValidating(false);
 			
@@ -49,6 +52,7 @@ public class TargetNamespaceScanner {
 			
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			Document doc = docBuilder.parse(url.openStream());
+			
 			return doc.getDocumentElement().getAttribute("targetNamespace");
 		} catch (SAXException e) {
 			BeansCorePlugin.log(e);
@@ -56,6 +60,9 @@ public class TargetNamespaceScanner {
 			BeansCorePlugin.log(e);
 		} catch (ParserConfigurationException e) {
 			BeansCorePlugin.log(e);
+		}
+		finally {
+			Thread.currentThread().setContextClassLoader(ccl);
 		}
 		return null;
 	}
