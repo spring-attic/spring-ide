@@ -58,7 +58,7 @@ public abstract class AbstractOpenResourceAction extends BaseSelectionListenerAc
 			resourcePath = resourcePath.substring(index + length);
 		}
 		resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf(".class"));
-		resourcePath = resourcePath.replace(File.separator, ".");
+		resourcePath = resourcePath.replaceAll("\\\\|\\/", "."); //Tolerate both '/' and '\'.
 		return resourcePath;
 	}
 
