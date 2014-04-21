@@ -86,4 +86,5 @@ Bundle-ClassPath: .,
 Require-Bundle: org.aspectj.runtime,
  org.aspectj.weaver,
  org.objectweb.asm,
- org.aopalliance
+ org.aopalliance,
+ org.eclipse.jdt.core

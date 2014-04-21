@@ -28,7 +28,13 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryType;
  * @since 2.2.0
  */
 @SuppressWarnings("restriction")
-class TypeStructure implements IBinaryType {
+class TypeStructure extends org.eclipse.jdt.internal.core.hierarchy.HierarchyBinaryType implements IBinaryType {
+	
+	//Hack Alert! 
+	// We extend 'HierarchyBinaryType' because we have no other way to get/provide an implementation of
+	// 'getTypeAnnotations' method that exist only in versions of JDT that have Java 8 support.
+	// This hack allows us to keep this class compatible with JDT with/without Java 8 support
+	// at the same time.
 	
 	static char[][] NoInterface = CharOperation.NO_CHAR_CHAR;
 
@@ -77,7 +83,20 @@ class TypeStructure implements IBinaryType {
 	IBinaryAnnotation[] annotations;
 
 	public TypeStructure(ClassFileReader cfr) {
-
+		//It shouldn't really matter what arguments we provide to the constructor
+		// since this class implements all the methods, except for getTypeAnnotations,
+		// which just returns 'null'. So all that really matters is we pass in 
+		// something that doesn't make the super constructor crash. We will nevertheless
+		// try our best to pass in sensible values.
+		super(
+				cfr.getModifiers(),
+				computeQualification(cfr),
+				cfr.getSourceName(),
+				cfr.getEnclosingTypeName(),
+				(char[][])null,
+				'?' //?? appears not used in super class, so not sure what its for
+		);
+		
 		this.enclosingTypeName = cfr.getEnclosingTypeName();
 		this.isLocal = cfr.isLocal();
 		this.isAnonymous = cfr.isAnonymous();
@@ -104,6 +123,16 @@ class TypeStructure implements IBinaryType {
 		this.superclassName = cfr.getSuperclassName(); // slashes...
 		interfaces = cfr.getInterfaceNames();
 
+	}
+	
+	private static char[] computeQualification(ClassFileReader cfr) {
+		String qualifiedName = new String(cfr.getName());
+		int pos = qualifiedName.lastIndexOf('/');
+		if (pos==-1) {
+			return null;
+		} else {
+			return qualifiedName.substring(pos+1).toCharArray();
+		}
 	}
 
 	public char[] getEnclosingTypeName() {
