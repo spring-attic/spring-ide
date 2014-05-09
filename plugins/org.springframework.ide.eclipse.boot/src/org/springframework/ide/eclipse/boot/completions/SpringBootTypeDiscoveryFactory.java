@@ -13,8 +13,10 @@ package org.springframework.ide.eclipse.boot.completions;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscovery;
@@ -54,10 +56,10 @@ public class SpringBootTypeDiscoveryFactory implements ExternalTypeDiscoveryFact
 		return existing;
 	}
 
-	private boolean isApplicable(IJavaProject project) {
-		//Maybe this should only apply to spring boot projects. But for now allow it to apply
-		// to any spring project.
-		return SpringCoreUtils.hasNature(project.getProject(), SpringCoreUtils.NATURE_ID);
+	private boolean isApplicable(IJavaProject javaProject) {
+		IProject project = javaProject.getProject();
+		return SpringCoreUtils.hasNature(project, SpringCoreUtils.NATURE_ID) && 
+				BootPropertyTester.isBootProject(project);
 	}
 
 }
