@@ -80,6 +80,8 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
+import org.apache.commons.logging.LogFactory;
+
 /**
  * This class defines a Spring beans configuration based on a Spring JavaConfig class.
  * 
@@ -226,6 +228,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 						finally {
 							// Reset the context classloader
 							Thread.currentThread().setContextClassLoader(threadClassLoader);
+							LogFactory.release(cl); //Otherwise permgen leak?
 						}
 						return 0;
 					}
