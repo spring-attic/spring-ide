@@ -338,7 +338,10 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 //								SpringCoreUtils.buildProject(project.getProject());
 								
 								// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=375365
-								SpringCoreUtils.buildProject(project.getProject(), "org.eclipse.wst.validation.validationbuilder");
+								// This bug was fixed in Eclipse 3.5.M5 and the call below is bad... causing lots of little 'single project builds' when
+								// importing many projects at once (see https://jira.spring.io/browse/IDE-1329, https://issuetracker.springsource.com/browse/STS-3786). 
+								// So commented out.
+								// SpringCoreUtils.buildProject(project.getProject(), "org.eclipse.wst.validation.validationbuilder");
 							}
 						}
 					}
