@@ -1227,7 +1227,9 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		} finally {
 			w.unlock();
 			
-			SpringCoreUtils.buildFullProject(project);
+			//The commented line below was a fix for 'STS-3541: added additional project build after asynchronous beans config scanning'
+			// It was removed because it appears to cause 'endless builds' by spawning many small 'single project builds in large workspace. 
+			// SpringCoreUtils.buildFullProject(project);
 		}
 	}
 
