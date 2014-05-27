@@ -36,7 +36,6 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.livexp,
  org.apache.commons.io,
  org.apache.commons.codec,
- org.springframework.web,
  org.codehaus.jackson.core,
  org.codehaus.jackson.mapper,
  org.apache.commons.logging,
@@ -65,4 +64,9 @@ Export-Package: org.springframework.ide.eclipse.wizard,
  org.springframework.ide.eclipse.wizard.template.util,
  org.springframework.ide.eclipse.wizard.ui
 Bundle-ActivationPolicy: lazy
-Import-Package: org.springframework.util;version="[4.0.0,4.1.0)"
+Import-Package: org.springframework.http;version="[4.0.0,4.1.0)",
+ org.springframework.util;version="[4.0.0,4.1.0)",
+ org.springframework.http.client;version="[4.0.0,4.1.0)",
+ org.springframework.http.converter;version="[4.0.0,4.1.0)",
+ org.springframework.web.client;version="[4.0.0,4.1.0)",
+ org.springframework.http.client.support;version="[4.0.0,4.1.0)"
