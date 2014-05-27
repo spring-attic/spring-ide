@@ -43,12 +43,12 @@ public class StsPerspective implements IPerspectiveFactory {
 		IFolderLayout serverFolder = layout.createFolder("server", IPageLayout.BOTTOM, (float) 0.80, "left");
 		serverFolder.addView("org.eclipse.wst.server.ui.ServersView");
 
-		IFolderLayout tasklistFolder = layout.createFolder("topright", IPageLayout.RIGHT, (float) 0.75, editorArea); //$NON-NLS-1$
-		tasklistFolder.addView("org.eclipse.mylyn.tasks.ui.views.tasks");
-		IFolderLayout springFolder = layout.createFolder("spring", IPageLayout.BOTTOM, (float) 0.50, "topright");
+//		IFolderLayout tasklistFolder = layout.createFolder("topright", IPageLayout.RIGHT, (float) 0.75, editorArea); //$NON-NLS-1$
+//		tasklistFolder.addView("org.eclipse.mylyn.tasks.ui.views.tasks");
+		IFolderLayout springFolder = layout.createFolder("topright", IPageLayout.RIGHT, (float) 0.75, editorArea);
 		springFolder.addView("org.springframework.ide.eclipse.ui.navigator.springExplorer");
 
-		IFolderLayout outlineFolder = layout.createFolder("middleright", IPageLayout.BOTTOM, (float) 0.55, "topright"); //$NON-NLS-1$
+		IFolderLayout outlineFolder = layout.createFolder("middleright", IPageLayout.TOP, (float) 0.50, "topright"); //$NON-NLS-1$
 		outlineFolder.addView(IPageLayout.ID_OUTLINE);
 		outlineFolder.addPlaceholder(TemplatesView.ID);
 
