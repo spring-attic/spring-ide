@@ -26,6 +26,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.guides.ChooseOneSectionCombo;
 import org.springframework.ide.eclipse.wizard.gettingstarted.guides.DescriptionSection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
@@ -73,6 +74,24 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		addPage(new PageTwo());
 	}
 
+	private WizardPageSection createRadioGroupsSection(WizardPageWithSections owner) {
+		boolean notEmpty = false;
+		ArrayList<WizardPageSection> radioSections = new ArrayList<WizardPageSection>();
+		for (RadioGroup radioGroup : model.getRadioGroups().getGroups()) {
+			if (radioGroup.getRadios().length>1) {
+				//Don't add a UI elements for something that offers no real choice
+				radioSections.add(
+					new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
+				);
+				notEmpty = true;
+			}
+		}
+		if (notEmpty) {
+			return new GroupSection(owner, null, radioSections.toArray(new WizardPageSection[radioSections.size()])).columns(2);
+		}
+		return null;
+	}
+
 	public class PageOne extends WizardPageWithSections {
 
 		protected PageOne() {
@@ -85,7 +104,11 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 			FieldModel<String> projectName = model.getProjectName();
 			sections.add(new StringFieldSection(this, projectName));
-			sections.add(new ProjectLocationSection(this, model.getLocation(), projectName.getVariable(), model.getLocationValidator()));
+
+			WizardPageSection radios = createRadioGroupsSection(this);
+			if (radios!=null) {
+				sections.add(radios);
+			}
 
 			for (FieldModel<String> f : model.stringInputs) {
 				//caution! we already created the section for projectName because we want it at the top
@@ -96,7 +119,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 			sections.add(
 				new CheckBoxesSection<String>(this, model.style)
-					.columns(3)
+					.columns(4)
 			);
 
 			return sections;
@@ -114,12 +137,14 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		protected List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
+			FieldModel<String> projectName = model.getProjectName();
+			sections.add(new ProjectLocationSection(this, model.getLocation(), projectName.getVariable(), model.getLocationValidator()));
+			sections.add(workingSetSection = new WorkingSetSection(this, selection));
+
 			sections.add(new GroupSection(this, "Site Info",
 					new StringFieldSection(this, "Base Url", model.baseUrl, model.baseUrlValidator),
 					new DescriptionSection(this, model.downloadUrl).label("Full Url").readOnly(false)
 			));
-
-			sections.add(workingSetSection = new WorkingSetSection(this, selection));
 
 			return sections;
 		}

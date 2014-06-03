@@ -16,14 +16,14 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 /**
- * A model capable of holding a value (selected by the user in a UI) 
+ * A model capable of holding a value (selected by the user in a UI)
  * of a given type and some validation logic associated with that value.
  */
 public class SelectionModel<T> {
-	
+
 	public final LiveVariable<T> selection;
 	public final LiveExpression<ValidationResult> validator;
-	
+
 	public SelectionModel(LiveVariable<T> selection,
 			LiveExpression<ValidationResult> validator) {
 		super();

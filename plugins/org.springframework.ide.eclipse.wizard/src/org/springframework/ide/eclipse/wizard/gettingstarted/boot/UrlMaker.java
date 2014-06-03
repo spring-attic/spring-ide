@@ -23,6 +23,7 @@ public class UrlMaker extends LiveExpression<String> {
 
 	private final List<FieldModel<String>> inputs = new ArrayList<FieldModel<String>>();
 	private final List<MultiSelectionFieldModel<String>> multiInputs = new ArrayList<MultiSelectionFieldModel<String>>();
+	private final List<FieldModel<RadioInfo>> radioInputs = new ArrayList<FieldModel<RadioInfo>>();
 
 	private final LiveExpression<String> baseUrl;
 
@@ -47,6 +48,12 @@ public class UrlMaker extends LiveExpression<String> {
 		return this;
 	}
 
+	public UrlMaker addField(RadioGroup group) {
+		this.radioInputs.add(group);
+		dependsOn(group.getVariable());
+		return this;
+	}
+
 	@Override
 	protected String compute() {
 		String baseUrl = this.baseUrl.getValue();
@@ -60,6 +67,16 @@ public class UrlMaker extends LiveExpression<String> {
 			String paramValue = f.getValue();
 			if (paramValue!=null) {
 				builder.addParameter(f.getName(), paramValue);
+			}
+		}
+
+		for (FieldModel<RadioInfo> f : radioInputs) {
+			RadioInfo radio = f.getValue();
+			if (radio!=null) {
+				String paramValue = radio.getValue();
+				if (paramValue!=null) {
+					builder.addParameter(f.getName(), paramValue);
+				}
 			}
 		}
 

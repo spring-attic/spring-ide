@@ -10,19 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.guides;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.SimpleLabelProvider;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
 public abstract class ChooseOneSection extends WizardPageSection {
 
-	protected LabelProvider labelProvider = new LabelProvider();
+	protected ILabelProvider labelProvider = new SimpleLabelProvider();
 
 	public ChooseOneSection(IPageWithSections owner) {
 		super(owner);
 	}
 
-	public ChooseOneSection setLabelProvider(LabelProvider p) {
+	public ChooseOneSection setLabelProvider(ILabelProvider p) {
 		this.labelProvider = p;
 		return this;
 	}

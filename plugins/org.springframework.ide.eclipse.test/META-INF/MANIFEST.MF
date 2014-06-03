@@ -18,6 +18,8 @@ Require-Bundle: org.junit;bundle-version="4.8.0",
  org.springframework.context,
  org.springframework.beans,
  org.springframework.web,
- org.springframework.ide.eclipse.beans.core.metadata
+ org.springframework.ide.eclipse.beans.core.metadata,
+ org.springsource.ide.eclipse.commons.frameworks.test.util,
+ org.springsource.ide.eclipse.commons.frameworks.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Spring IDE Developers

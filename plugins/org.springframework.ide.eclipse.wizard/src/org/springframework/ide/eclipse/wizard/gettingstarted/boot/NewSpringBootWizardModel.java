@@ -14,8 +14,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,6 +39,7 @@ import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportUtils;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
@@ -52,9 +57,10 @@ import org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectNam
 import org.springsource.ide.eclipse.commons.livexp.core.validators.UrlValidator;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.xml.sax.SAXException;
 
 /**
@@ -64,18 +70,29 @@ import org.xml.sax.SAXException;
  */
 public class NewSpringBootWizardModel {
 
+	private static final Map<String,String> KNOWN_GROUP_LABELS = new HashMap<String, String>();
+	static {
+		KNOWN_GROUP_LABELS.put("type", "Type:");
+		KNOWN_GROUP_LABELS.put("packaging", "Packaging:");
+		KNOWN_GROUP_LABELS.put("javaVersion", "Java Version:");
+		KNOWN_GROUP_LABELS.put("language", "Language:");
+	}
+
 	private final URLConnectionFactory urlConnectionFactory;
 	private final String FORM_URL;
-	private final String DOWNLOAD_URL;
+	private String DOWNLOAD_URL; //Derived from 'FORM_URL' by downloading and parsing the form and finding the 'action' in the <form> element
 
-	public NewSpringBootWizardModel() throws IOException, ParserConfigurationException, SAXException {
+	public NewSpringBootWizardModel() throws Exception {
 		this(new URLConnectionFactory(), StsProperties.getInstance(new NullProgressMonitor()));
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps) throws IOException, ParserConfigurationException, SAXException {
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps) throws Exception {
+		this(urlConnectionFactory, stsProps.get("spring.initializr.form.url"));
+	}
+
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String formUrl) throws Exception {
 		this.urlConnectionFactory = urlConnectionFactory;
-		this.FORM_URL = stsProps.get("spring.initializr.form.url");
-		this.DOWNLOAD_URL = stsProps.get("spring.initializr.download.url");
+		this.FORM_URL = formUrl;
 		discoverOptions(stringInputs, style);
 
 		projectName = stringInputs.getField("name");
@@ -92,11 +109,37 @@ public class NewSpringBootWizardModel {
 			computedUrl.addField(param);
 		}
 		computedUrl.addField(style);
+		for (RadioGroup group : radioGroups.getGroups()) {
+			computedUrl.addField(group);
+		}
 		computedUrl.addListener(new ValueListener<String>() {
 			public void gotValue(LiveExpression<String> exp, String value) {
 				downloadUrl.setValue(value);
 			}
 		});
+
+		addBuildTypeValidator();
+	}
+
+	/**
+	 * If this wizard has a 'type' radioGroup to select the build type then add a validator to check if the
+	 * build type is supported.
+	 */
+	private void addBuildTypeValidator() {
+		RadioGroup buildTypeGroup = getRadioGroups().getGroup("type");
+		if (buildTypeGroup!=null) {
+			buildTypeGroup.validator(new Validator() {
+				@Override
+				protected ValidationResult compute() {
+					BuildType bt = getBuildType();
+					if (!bt.getImportStrategy().isSupported()) {
+						//This means some required STS component like m2e or gradle tooling is not installed
+						return ValidationResult.error(bt.getNotInstalledMessage());
+					}
+					return ValidationResult.OK;
+				}
+			}.dependsOn(buildTypeGroup.getVariable()));
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -118,6 +161,7 @@ public class NewSpringBootWizardModel {
 
 	public final LiveVariable<String> downloadUrl = new LiveVariable<String>();
 	private IWorkingSet[] workingSets = new IWorkingSet[0];
+	private RadioGroups radioGroups = new RadioGroups();
 
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
@@ -129,7 +173,7 @@ public class NewSpringBootWizardModel {
 			String projectNameValue = projectName.getValue();
 			CodeSet cs = CodeSet.fromZip(projectNameValue, zip, new Path("/"));
 
-			IRunnableWithProgress oper = BuildType.MAVEN.getImportStrategy().createOperation(ImportUtils.importConfig(
+			IRunnableWithProgress oper = getImportStrategy().createOperation(ImportUtils.importConfig(
 					new Path(location.getValue()),
 					projectNameValue,
 					cs
@@ -147,6 +191,37 @@ public class NewSpringBootWizardModel {
 			}
 			mon.done();
 		}
+	}
+
+	/**
+	 * Get currently selected import strategy.
+	 * Never returns null (some default is returned in any case).
+	 */
+	public ImportStrategy getImportStrategy() {
+		return getBuildType().getImportStrategy();
+	}
+
+	/**
+	 * Gets the currently selected BuildType.
+	 * Never returns null (some default is returned in any case).
+	 */
+	public BuildType getBuildType() {
+		RadioGroup buildTypeRadios = getRadioGroups().getGroup("type");
+		if (buildTypeRadios!=null) {
+			RadioInfo selected = buildTypeRadios.getSelection().selection.getValue();
+			if (selected!=null) {
+				if ("gradle.zip".equals(selected.getValue())) {
+					return BuildType.GRADLE;
+				} else if ("starter.zip".equals(selected.getValue())) {
+					return BuildType.MAVEN;
+				} else {
+					//Uknown build type, import it as a general project which is better than nothing
+					return BuildType.GENERAL;
+				}
+			}
+		}
+		//Old initialzr app doesn't have button to specify build type... it is always maven
+		return BuildType.MAVEN;
 	}
 
 	private void addToWorkingSets(IProject project, IProgressMonitor monitor) {
@@ -167,8 +242,9 @@ public class NewSpringBootWizardModel {
 	 * @throws IOException
 	 * @throws ParserConfigurationException
 	 * @throws SAXException
+	 * @throws URISyntaxException
 	 */
-	private void discoverOptions(FieldArrayModel<String> fields, MultiSelectionFieldModel<String> style) throws IOException, ParserConfigurationException, SAXException {
+	private void discoverOptions(FieldArrayModel<String> fields, MultiSelectionFieldModel<String> style) throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
 		URLConnection conn = null;
 		InputStream input = null;
 		try {
@@ -181,6 +257,13 @@ public class NewSpringBootWizardModel {
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(input);
 
+			NodeList forms = doc.getElementsByTagName("form"); //Should really just be one form.
+			Assert.isLegal(forms.getLength()==1, "Unexpected number of <form> elements at: "+FORM_URL);
+			for (int i = 0; i < forms.getLength(); i++) {
+				Node form = forms.item(i);
+				discoverDownloadUrl(form);
+			}
+
 			NodeList inputs = doc.getElementsByTagName("input");
 			for (int i = 0; i < inputs.getLength(); i++) {
 				Node node = inputs.item(i);
@@ -188,6 +271,8 @@ public class NewSpringBootWizardModel {
 					discoverCheckboxOption(style, node);
 				} else if (isStringInput(node)) {
 					discoverStringField(fields, node);
+				} else if (isRadio(node)) {
+					disoverRadio(radioGroups, node);
 				}
 			}
 		} finally {
@@ -200,15 +285,77 @@ public class NewSpringBootWizardModel {
 		}
 	}
 
+	private void disoverRadio(RadioGroups radioGroups, Node node) {
+		//<label>Packaging</label>
+		//<label class="radio">
+		//     <input type="radio" name="packaging" value="jar" checked="true"/>   <--- node is here
+		//     Jar
+		//</label>
+
+		String groupName = DomUtils.getAttributeValue(node, "name");
+		String value = DomUtils.getAttributeValue(node, "value");
+		boolean isChecked = DomUtils.getAttributeValue(node, "checked", false);
+		RadioInfo radio = new RadioInfo(groupName, value, isChecked);
+		RadioGroup group = radioGroups.ensureGroup(groupName);
+		String groupLabel = getGroupLabel(groupName);
+		if (groupLabel!=null) { //Skip unknown groups.
+			group.label(groupLabel);
+			if (include(radio)) {
+				String label = getInputLabel(node);
+				if (label!=null) {
+					radio.setLabel(label);
+				}
+				group.add(radio);
+			}
+		}
+
+	}
+
+	/**
+	 * Defines some special cases of radio buttons on the form that we should ignore.
+	 */
+	protected boolean include(RadioInfo radio) {
+		if ("type".equals(radio.getGroupName())) {
+			//We can only import specifically supported build types. I.e:
+			// 'starter.zip' meaning 'maven' projects
+			// 'gradle.zip' meaning 'gradle' projects.
+
+			//We only support 'zipped project' imports. Not isolated build files.
+			String value = radio.getValue();
+			return "gradle.zip".equals(value) || "starter.zip".equals(value);
+		}
+		//By default always include new radios added to the web wizard.
+		return true;
+	}
+
+	/**
+	 * Determine the download url from the submit button on the form.
+	 * @param button
+	 * @throws URISyntaxException
+	 */
+	private void discoverDownloadUrl(Node form) throws URISyntaxException {
+		//<form id="form" action="/starter.zip" method="get">
+		String action = DomUtils.getAttributeValue(form, "action");
+		URI formUri = new URI(FORM_URL);
+		this.DOWNLOAD_URL = formUri.resolve(action).toString();
+	}
+
 	/**
 	 * Tries to find a 'label text' associated with a given input node. May return null
 	 * if the node is not found in the expected place or if it contains no text.
 	 */
-	private String getInputLabel(Node input) {
+	public static String getInputLabel(Node input) {
 		Node labelNode = getParentLabel(input);
 		if (labelNode==null) {
 			labelNode = getSiblingsLabel(input);
 		}
+		if (labelNode!=null) {
+			return getLabelText(labelNode);
+		}
+		return null;
+	}
+
+	private static String getLabelText(Node labelNode) {
 		if (labelNode!=null) {
 			NodeList children = labelNode.getChildNodes();
 			StringBuilder text = new StringBuilder();
@@ -231,9 +378,18 @@ public class NewSpringBootWizardModel {
 	}
 
 	/**
+	 * We only have labels for 'known' radio groups. Searchin for them in
+	 * the html is too hard (and would be terribly fragile).
+	 */
+	protected String getGroupLabel(String groupName) {
+		return KNOWN_GROUP_LABELS.get(groupName);
+	}
+
+
+	/**
 	 * Try to find a label node that is the parent of a given input node.
 	 */
-	private Node getParentLabel(Node input) {
+	public static Node getParentLabel(Node input) {
 		Node labelNode = input.getParentNode();
 		if (labelNode!=null) {
 			if (isLabel(labelNode)) {
@@ -247,7 +403,7 @@ public class NewSpringBootWizardModel {
 	/**
 	 * Try to find a label node that is sibling preceding a given input node.
 	 */
-	private Node getSiblingsLabel(Node input) {
+	public static Node getSiblingsLabel(Node input) {
 		while (input!=null) {
 			if (isLabel(input)) {
 				return input;
@@ -257,7 +413,7 @@ public class NewSpringBootWizardModel {
 		return null;
 	}
 
-	private boolean isLabel(Node labelNode) {
+	public static boolean isLabel(Node labelNode) {
 		String tagName = XmlUtils.getTagName(labelNode);
 		return "label".equals(tagName);
 	}
@@ -269,9 +425,9 @@ public class NewSpringBootWizardModel {
 		        JPA
 		   </label>
 		 */
-		String name = getAttributeValue(checkbox, "name");
+		String name = DomUtils.getAttributeValue(checkbox, "name");
 		if (style.getName().equals(name)) {
-			String styleValue = getAttributeValue(checkbox, "value");
+			String styleValue = DomUtils.getAttributeValue(checkbox, "value");
 			if (styleValue!=null) {
 				String styleLabel = getInputLabel(checkbox);
 				style.choice(styleLabel==null?styleValue:styleLabel, styleValue);
@@ -283,9 +439,9 @@ public class NewSpringBootWizardModel {
 		//We have found a 'text' input node. For example:
 		/* <label for="name">Name:</label> <input id="name" type="text" value="demo" name="name"/>
 		 */
-		String name = getAttributeValue(node, "name");
+		String name = DomUtils.getAttributeValue(node, "name");
 		if (name!=null) {
-			String defaultValue = getAttributeValue(node, "value");
+			String defaultValue = DomUtils.getAttributeValue(node, "value");
 			StringFieldModel field = new StringFieldModel(name, defaultValue==null?"":defaultValue);
 			String label = getInputLabel(node);
 			if (label!=null) {
@@ -296,27 +452,18 @@ public class NewSpringBootWizardModel {
 	}
 
 	private boolean isCheckbox(Node node) {
-		String type = getAttributeValue(node, "type");
+		String type = DomUtils.getAttributeValue(node, "type");
 		return "checkbox".equals(type);
 	}
 
-	private boolean isStringInput(Node node) {
-		String type = getAttributeValue(node, "type");
-		return "text".equals(type);
+	private boolean isRadio(Node node) {
+		String type = DomUtils.getAttributeValue(node, "type");
+		return "radio".equals(type);
 	}
 
-	private static String getAttributeValue(Node node, String attribName ) {
-		NamedNodeMap attribs = node.getAttributes();
-		if (attribs!=null) {
-			Node value = attribs.getNamedItem(attribName);
-			if (value!=null) {
-				short nodeType = value.getNodeType();
-				if (nodeType==Node.ATTRIBUTE_NODE) {
-					return value.getNodeValue();
-				}
-			}
-		}
-		return null;
+	private boolean isStringInput(Node node) {
+		String type = DomUtils.getAttributeValue(node, "type");
+		return "text".equals(type);
 	}
 
 	private URL newURL(String value) {
@@ -351,6 +498,10 @@ public class NewSpringBootWizardModel {
 
 	public void setWorkingSets(IWorkingSet[] workingSets) {
 		this.workingSets = workingSets;
+	}
+
+	public RadioGroups getRadioGroups() {
+		return this.radioGroups;
 	}
 
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.guides;
 
+import static org.springsource.ide.eclipse.commons.livexp.ui.UIConstants.FIELD_LABEL_WIDTH_HINT;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -50,8 +52,15 @@ public class ChooseOneSectionCombo<T> extends ChooseOneSection {
 		Composite field = new Composite(page, SWT.NONE);
 		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(2).create();
 		field.setLayout(layout);
+
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(field);
+
 		Label fieldNameLabel = new Label(field, SWT.NONE);
 		fieldNameLabel.setText(label);
+        GridDataFactory.fillDefaults()
+        	.hint(FIELD_LABEL_WIDTH_HINT, SWT.DEFAULT)
+        	.align(SWT.BEGINNING, SWT.CENTER)
+        	.applyTo(fieldNameLabel);
 
 		final Combo combo = new Combo(field, SWT.READ_ONLY);
 		combo.setItems(getLabels());
