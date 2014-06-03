@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
-import static org.junit.Assert.assertNotEquals;
-
-import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -155,7 +152,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	private void assertRealLabel(String label) {
 		assertNotNull(label); //have a label
-		assertNotEquals("", label.trim()); //label not empty
+		assertFalse("".equals(label.trim())); //label not empty
 		assertTrue(Character.isUpperCase(label.charAt(0))); //'real' label, not just the default taken from the name.
 	}
 
