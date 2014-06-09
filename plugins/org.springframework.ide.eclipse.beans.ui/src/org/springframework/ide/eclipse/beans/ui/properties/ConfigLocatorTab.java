@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
@@ -132,6 +133,14 @@ public class ConfigLocatorTab {
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
+		if (!BeansCorePlugin.getDefault().isAutoDetectionEnabled()) {
+			//We allow users to edit these settings... even though they have been all globally disabled.
+			//At least warn the user of this. 
+			Label warning = new Label(composite, SWT.WRAP);
+			warning.setText("Warning: Autodetection has been globally disabled. Editing these setting will have no effect!");
+			warning.setForeground(warning.getDisplay().getSystemColor(SWT.COLOR_RED));
+		}
+		
 		Label beansLabel = new Label(composite, SWT.NONE);
 		beansLabel.setText(BeansUIPlugin
 				.getResourceString("ConfigurationPropertyPage.tabConfigLocators.description"));

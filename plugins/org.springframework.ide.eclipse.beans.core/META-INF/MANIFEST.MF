@@ -116,4 +116,5 @@ Export-Package: org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.namespaces
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.apache.commons.logging
+Require-Bundle: org.apache.commons.logging,
+ org.eclipse.jface

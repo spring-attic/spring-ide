@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.preferences;
 
+import java.util.Set;
+
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IntegerFieldEditor;
@@ -26,6 +28,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
 /**
@@ -38,6 +41,8 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 	private RadioGroupFieldEditor radioEditor;
 
 	private BooleanFieldEditor graphEditorInnerBeans;
+	
+	private BooleanFieldEditor disableAutoDetection;
 
 	private FieldEditor graphEditorInfrastructureBeans;
 
@@ -138,6 +143,11 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		graphEditorExtendedContent.setPage(this);
 		graphEditorExtendedContent.setPreferenceStore(getPreferenceStore());
 		graphEditorExtendedContent.load();
+		
+		disableAutoDetection = new BooleanFieldEditor(BeansCorePlugin.DISABLE_AUTO_DETECTION, "Disable Auto Config Detection", entryTable);
+		disableAutoDetection.setPage(this);
+		disableAutoDetection.setPreferenceStore(BeansCorePlugin.getDefault().getPreferenceStore());
+		disableAutoDetection.load();
 
 		return entryTable;
 	}
@@ -152,6 +162,7 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		graphEditorInnerBeans.loadDefault();
 		graphEditorInfrastructureBeans.loadDefault();
 		configTimeout.loadDefault();
+		disableAutoDetection.loadDefault();
 	}
 
 	public boolean performOk() {
@@ -160,7 +171,7 @@ public class BeansPreferencePage extends PreferencePage implements IWorkbenchPre
 		graphEditorInnerBeans.store();
 		graphEditorInfrastructureBeans.store();
 		graphEditorExtendedContent.store();
-
+		disableAutoDetection.store();
 		return super.performOk();
 	}
 

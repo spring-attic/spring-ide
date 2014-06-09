@@ -108,6 +108,11 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	private AtomicInteger threadCount = new AtomicInteger(0);
 	private static final String THREAD_NAME_TEMPLATE = "Background Thread-%s (%s/%s.%s.%s)";
 
+	/**
+	 * Preference ID to globally disable any beans auto detection scanning.
+	 */
+	public static final String DISABLE_AUTO_DETECTION = BeansCorePlugin.class.getName()+".DISABLE_AUTO_DETECTION";
+
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
 
@@ -460,5 +465,9 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 				break;
 			}
 		}
+	}
+
+	public boolean isAutoDetectionEnabled() {
+		return !getPreferenceStore().getBoolean(DISABLE_AUTO_DETECTION);
 	}
 }

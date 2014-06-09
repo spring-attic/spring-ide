@@ -77,9 +77,9 @@ public class BeansConfigLocatorFactory {
 	}
 
 	/**
-	 * Returns if there is at least one {@link IBeansConfigLocator} is enabled for the given
+	 * Returns if there is at least one {@link IBeansConfigLocator} is supported for the given
 	 * <code>project</code>.
-	 * @return true if at least one {@link IBeansConfigLocator} is enabled for the given
+	 * @return true if at least one {@link IBeansConfigLocator} is supported for the given
 	 * <code>project</code>
 	 */
 	public static boolean hasEnabledBeansConfigLocatorDefinitions(IProject project) {

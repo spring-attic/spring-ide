@@ -1084,32 +1084,33 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	 * @param removedConfigsFromSets
 	 */
 	protected void populateAutoDetectedConfigsAndConfigSets(final Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
-
-		Job job = new Job("populate auto detected configs") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					populateAutoDetectedConfigsAndConfigSetsInternally();
-
-					w.lock();
-					restoreConfigSetState(removedConfigsFromSets);
-				} finally {
-					updateAllConfigsCache();
-					w.unlock();
+		if (BeansCorePlugin.getDefault().isAutoDetectionEnabled()) {
+			Job job = new Job("populate auto detected configs") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						populateAutoDetectedConfigsAndConfigSetsInternally();
+	
+						w.lock();
+						restoreConfigSetState(removedConfigsFromSets);
+					} finally {
+						updateAllConfigsCache();
+						w.unlock();
+					}
+					((AbstractModel) (BeansCorePlugin.getModel())).notifyListeners(BeansProject.this, ModelChangeEvent.Type.CHANGED);
+					return Status.OK_STATUS;
 				}
-				((AbstractModel) (BeansCorePlugin.getModel())).notifyListeners(BeansProject.this, ModelChangeEvent.Type.CHANGED);
-				return Status.OK_STATUS;
-			}
-
-			@Override
-			public boolean belongsTo(Object family) {
-				return family.equals("populateAutoConfigsJobFamily");
-			}
-		};
-
-		job.setPriority(Job.BUILD);
-		job.setRule(project.getProject());
-		job.schedule();
+	
+				@Override
+				public boolean belongsTo(Object family) {
+					return family.equals("populateAutoConfigsJobFamily");
+				}
+			};
+	
+			job.setPriority(Job.BUILD);
+			job.setRule(project.getProject());
+			job.schedule();
+		}
 	}
 
 	protected void populateAutoDetectedConfigsAndConfigSetsInternally() {

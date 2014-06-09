@@ -29,6 +29,8 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.events.IFacetedProjectEvent;
@@ -50,6 +52,7 @@ import org.springframework.ide.eclipse.core.io.ExternalFile;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
 
@@ -88,6 +91,23 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	public BeansModel() {
 		super(null, IBeansModel.ELEMENT_NAME);
 		projects = new ConcurrentHashMap<IProject, IBeansProject>();
+		BeansCorePlugin.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+
+			public void propertyChange(PropertyChangeEvent event) {
+				if (event.getProperty().equals(BeansCorePlugin.DISABLE_AUTO_DETECTION)) {
+					//boolean enable = BeansCorePlugin.getDefault().isAutoDetectionEnabled();
+					for (IModelElement me : getProjects()) {
+						if (me instanceof BeansProject) {
+							BeansProject p = (BeansProject) me;
+							p.reset();
+							((BeansModel) p.getElementParent()).notifyListeners(p,
+									ModelChangeEvent.Type.CHANGED);
+						}
+					}
+				}
+			}
+			
+		});
 	}
 
 	@Override
