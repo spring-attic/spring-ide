@@ -32,12 +32,13 @@
         <category name="Core / Spring IDE"/>
     </feature>
 	
-	<!-- Dashboard -->
+	<!-- Dashboard removed, not eclipse version independent anymore. Keeping it on this site causes
+	     trouble in product builds consuming this site 
 	<feature 
 		url="features/org.springsource.ide.eclipse.dashboard_3.6.0.qualifier.jar" 
 		id="org.springsource.ide.eclipse.dashboard" version="3.6.0.qualifier">
 		<category name="Core / Spring IDE"/>
-	</feature>
+	</feature> -->
 
 	<feature 
 		url="features/org.springsource.ide.eclipse.commons_3.6.0.qualifier.jar" 
