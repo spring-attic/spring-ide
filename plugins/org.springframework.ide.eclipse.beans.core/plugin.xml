@@ -105,6 +105,11 @@
 	            </property>
 	            <message id="CLASS_NOT_CLASS" label="Class is interface" severity="WARNING" />
 	            <message id="CLASS_NOT_FOUND" label="Class not found" severity="ERROR" />
+           <message
+                 id="CLASS_NOT_CONCRETE"
+                 label="Class is abstract"
+                 severity="WARNING">
+           </message>
      	    </rule>
 		    <rule id="toolAnnotation"
             		class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRule"

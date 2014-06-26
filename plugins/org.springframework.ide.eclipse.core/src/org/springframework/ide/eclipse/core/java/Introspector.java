@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 Spring IDE Developers
+ * Copyright (c) 2007, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -239,21 +239,14 @@ public final class Introspector {
 	 */
 	public static IMethod findMethod(IType type, String methodName, int argCount, Public publics, Static statics)
 			throws JavaModelException {
-		if (type != null && type.isInterface()) {
-			IMethod method = findMethodOnType(type, methodName, argCount, publics, statics);
+		for (IType itrType = type; itrType != null; itrType = getSuperType(itrType)) {
+			IMethod method = findMethodOnType(itrType, methodName, argCount, publics, statics);
 			if (method != null) {
 				return method;
-			}
-			for (IType interfaceType : getAllImplementedInterfaces(type)) {
-				return findMethod(interfaceType, methodName, argCount, publics, statics);
 			}
 		}
-		while (type != null) {
-			IMethod method = findMethodOnType(type, methodName, argCount, publics, statics);
-			if (method != null) {
-				return method;
-			}
-			type = getSuperType(type);
+		for (IType interfaceType : getAllImplementedInterfaces(type)) {
+			return findMethod(interfaceType, methodName, argCount, publics, statics);
 		}
 		return null;
 	}
