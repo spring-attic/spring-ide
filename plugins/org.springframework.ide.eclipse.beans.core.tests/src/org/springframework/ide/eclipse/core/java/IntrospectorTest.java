@@ -179,6 +179,33 @@ public class IntrospectorTest {
 		project.delete(true, null);
 	}
 
+	@Test
+	public void testFindSpecificMethod() throws CoreException, IOException {
+		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
+		IMethod method = Introspector.findMethod(foo, "getDao", 0, Public.YES, Static.NO);
+		assertNotNull(method);
+		
+		project.delete(true, null);
+	}
+
+	@Test
+	public void testFindSpecificMethodFromInterfaces() throws CoreException, IOException {
+		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		IType foo = JdtUtils.getJavaType(project, "org.springframework.AbstractClass");
+
+		IMethod method1 = Introspector.findMethod(foo, "method1", 0, Public.YES, Static.NO);
+		assertNotNull(method1);
+		
+		IMethod method2 = Introspector.findMethod(foo, "method2", 0, Public.YES, Static.NO);
+		assertNotNull(method2);
+
+		IMethod method3 = Introspector.findMethod(foo, "method3", 0, Public.YES, Static.NO);
+		assertNotNull(method3);
+
+		project.delete(true, null);
+	}
+
 	private void checkResult(Set<IMethod> methods, int expectedSize) {
 		assertTrue("Expected " + expectedSize + " methods to be found. actual is: "
 				+ methods.toArray().length, methods.toArray().length == expectedSize);

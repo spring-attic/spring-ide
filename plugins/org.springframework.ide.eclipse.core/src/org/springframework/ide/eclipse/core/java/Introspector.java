@@ -246,7 +246,10 @@ public final class Introspector {
 			}
 		}
 		for (IType interfaceType : getAllImplementedInterfaces(type)) {
-			return findMethod(interfaceType, methodName, argCount, publics, statics);
+			IMethod method = findMethod(interfaceType, methodName, argCount, publics, statics);
+			if (method != null) {
+				return method;
+			}
 		}
 		return null;
 	}
