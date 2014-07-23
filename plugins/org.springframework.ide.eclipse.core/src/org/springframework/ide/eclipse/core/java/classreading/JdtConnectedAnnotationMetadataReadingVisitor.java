@@ -10,18 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.classreading;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 
 /**
@@ -50,89 +45,12 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		IMethod method = getMethodFromSignature(name, desc);
-		return new JdtConnectedMethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataSet, method, Type.getReturnType(desc).getClassName());
+		return new JdtConnectedMethodMetadataReadingVisitor(type, name, access, desc, this.getClassName(), this.classLoader, this.methodMetadataSet, Type.getReturnType(desc).getClassName());
 	}
 
 	@Override
 	public boolean isAnnotated(String annotationType) {
 		return !ImportResource.class.getName().equals(annotationType) && super.isAnnotated(annotationType);
-	}
-
-	private IMethod getMethodFromSignature(final String name, final String desc) {
-		if (System.getProperty("spring-tooling.scanning.verbose", "false").equals("true")) {
-			System.out.println("spring-tooling.scanning - findMethodFromSignature - type: " + this.type.getFullyQualifiedName() + " - method: " + name + " - signature: " + desc);
-		}
-		
-		Type[] parameterTypes = Type.getArgumentTypes(desc);
-
-		IMethod method = null;
-		if (isConstructor(name)) {
-			method = quickCheckForConstructor(parameterTypes);
-		} else {
-			method = quickCheckForMethod(name, parameterTypes);
-		}
-
-		if (method == null) {
-			List<String> parameters = new ArrayList<String>();
-			if (parameterTypes != null && parameterTypes.length > 0) {
-				for (Type parameterType : parameterTypes) {
-					parameters.add(parameterType.getClassName());
-				}
-			}
-
-			if (isConstructor(name)) {
-				method = JdtUtils.getConstructor(type, parameters.toArray(new String[parameters.size()]));
-			} else {
-				if (System.getProperty("spring-tooling.scanning.verbose", "false").equals("true")) {
-					System.out.println("spring-tooling.scanning - deep dive to find method - type: " + this.type.getFullyQualifiedName() + " - method: " + name + " - signature: " + desc);
-				}
-				method = JdtUtils.getMethod(type, name, parameters.toArray(new String[parameters.size()]), false);
-			}
-		}
-		return method;
-	}
-
-	private boolean isConstructor(String name) {
-		return "<init>".equals(name);
-	}
-
-	private IMethod quickCheckForMethod(String name, Type[] parameterTypes) {
-		IMethod result = null;
-		try {
-			IMethod[] methods = type.getMethods();
-			for (IMethod method : methods) {
-				if (method.getElementName().equals(name) && method.getParameterTypes().length == parameterTypes.length) {
-					if (result == null) {
-						result = method;
-					} else {
-						return null;
-					}
-				}
-
-			}
-		} catch (JavaModelException e) {
-		}
-		return result;
-	}
-
-	private IMethod quickCheckForConstructor(Type[] parameterTypes) {
-		IMethod result = null;
-		try {
-			IMethod[] methods = type.getMethods();
-			for (IMethod method : methods) {
-				if (method.isConstructor() && method.getParameterTypes().length == parameterTypes.length) {
-					if (result == null) {
-						result = method;
-					} else {
-						return null;
-					}
-				}
-
-			}
-		} catch (JavaModelException e) {
-		}
-		return result;
 	}
 
 }
