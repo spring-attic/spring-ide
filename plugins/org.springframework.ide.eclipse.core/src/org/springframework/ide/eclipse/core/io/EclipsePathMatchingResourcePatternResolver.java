@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 Spring IDE Developers
+ * Copyright (c) 2008, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,9 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 
 	private final Map<String, Resource[]> resolvedResources = new ConcurrentHashMap<String, Resource[]>();
 
+	private IJavaProject javaProject;
+	private IPackageFragmentRoot[] roots;
+
 	public EclipsePathMatchingResourcePatternResolver(IProject project) {
 		this(project, JdtUtils.getClassLoader(project, null));
 	}
@@ -97,8 +100,13 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 			Resource resource = patternResolver.getResource(location);
 			if (resource != null) {
 				try {
-					IJavaProject javaProject = JdtUtils.getJavaProject(project);
-					IPackageFragmentRoot[] roots = javaProject.getAllPackageFragmentRoots();
+					// initialize and cache javaProject and package fragment roots
+					// because they are expensive at runtime
+					if (javaProject == null || roots == null) {
+						javaProject = JdtUtils.getJavaProject(project);
+						roots = javaProject.getAllPackageFragmentRoots();
+					}
+					
 					Resource newResource = processRawResource(roots, resource);
 					if (newResource != null) {
 						resource = newResource;
@@ -142,8 +150,12 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 			Set<Resource> foundResources = new HashSet<Resource>();
 
 			try {
-				IJavaProject javaProject = JdtUtils.getJavaProject(project);
-				IPackageFragmentRoot[] roots = javaProject.getAllPackageFragmentRoots();
+				// initialize and cache javaProject and package fragment roots
+				// because they are expensive at runtime
+				if (javaProject == null || roots == null) {
+					javaProject = JdtUtils.getJavaProject(project);
+					roots = javaProject.getAllPackageFragmentRoots();
+				}
 
 				for (Resource resource : resources) {
 					Resource newResource = processRawResource(roots, resource);
