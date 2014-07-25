@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 Spring IDE Developers
+ * Copyright (c) 2006, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,7 @@ public final class BeansModelImages implements BeansModelImageFlags {
 				|| element instanceof IBeansProject) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROJECT);
 		} else if (element instanceof BeansConfig) {
-			Image image = WorkbenchLabelProvider.getDecoratingWorkbenchLabelProvider().getImage(((BeansConfig) element).getElementResource());
+			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
 			if (isDecorationg) {
 				image = getDecoratedImage(image, element, context);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,17 @@ public class BeansConfigFactory {
 	
 	public static final String JAVA_CONFIG_TYPE = "java:";
 
+	/**
+	 * @since 3.3.0
+	 */
 	public static IBeansConfig create(IBeansProject project, String name, IBeansConfig.Type type) {
+		return create(project, name, type, true);
+	}
+	
+	/**
+	 * @since 3.6.1
+	 */
+	public static IBeansConfig create(IBeansProject project, String name, IBeansConfig.Type type, boolean removeProjectPrefixFromName) {
 		if (name != null && name.startsWith(JAVA_CONFIG_TYPE)) {
 			String className = name.substring(JAVA_CONFIG_TYPE.length());
 			IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
@@ -45,7 +55,7 @@ public class BeansConfigFactory {
 			}
 		}
 		else {
-			if (name != null && name.length() > 0 && name.charAt(0) == '/') {
+			if (removeProjectPrefixFromName && name != null && name.length() > 0 && name.charAt(0) == '/') {
 				String projectPath = '/' + project.getElementName() + '/';
 				if (name.startsWith(projectPath)) {
 					name = name.substring(projectPath.length());
@@ -56,6 +66,9 @@ public class BeansConfigFactory {
 		return null;
 	}
 	
+	/**
+	 * @since 3.3.0
+	 */
 	public static String getConfigName(IFile file, IProject project) {
 		String configName;
 	
@@ -93,6 +106,9 @@ public class BeansConfigFactory {
 		return configName;
 	}
 
+	/**
+	 * @since 3.3.0
+	 */
 	public static boolean isJavaConfigFile(IFile file) {
 		return file != null && (file.getFileExtension().equals("java") || file.getFileExtension().equals("class") 
 				|| file.getFileExtension().equals("groovy"));
