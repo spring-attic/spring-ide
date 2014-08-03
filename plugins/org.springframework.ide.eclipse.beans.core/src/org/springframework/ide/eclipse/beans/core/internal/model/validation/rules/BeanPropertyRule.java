@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
@@ -41,6 +42,7 @@ import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Terry Denney
+ * @author Martin Lippert
  * @since 2.0
  */
 public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRule implements
@@ -55,6 +57,8 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 	}
 
 	public void validate(IBeanProperty property, IBeansValidationContext context, IProgressMonitor monitor) {
+		TypeHierarchyEngine typeEngine = getTypeHierarchyEngine(context);
+		
 		IBean bean = (IBean) property.getElementParent();
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean, context.getContextElement());
 		String mergedClassName = mergedBd.getBeanClassName();
@@ -76,7 +80,7 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 		// then on the factory bean itself.
 
 		if (type != null && !mergedBd.isAbstract()
-				&& !JdtUtils.doesImplement(context.getRootElementResource(), type, ScriptFactory.class.getName())) {
+				&& !JdtUtils.doesImplement(context.getRootElementResource(), type, ScriptFactory.class.getName(), typeEngine)) {
 			validateProperty(property, type, context);
 		}
 	}

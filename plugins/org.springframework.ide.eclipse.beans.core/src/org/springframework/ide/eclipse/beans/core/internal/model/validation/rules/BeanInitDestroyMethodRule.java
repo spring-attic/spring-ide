@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 
 /**
  * Validates a given {@link IBean}'s init and destroy method. Skips factory beans.
@@ -31,6 +32,8 @@ public class BeanInitDestroyMethodRule extends AbstractBeanMethodValidationRule 
 
 	@Override
 	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
+		TypeHierarchyEngine typeEngine = getTypeHierarchyEngine(context);
+		
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean).getBeanDefinition();
 		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils.getMergedBeanDefinition(bean,
 				context.getContextElement());
@@ -41,7 +44,7 @@ public class BeanInitDestroyMethodRule extends AbstractBeanMethodValidationRule 
 		if (type != null) {
 
 			// For non-factory beans validate bean's init-method and destroy-method
-			if (!JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())) {
+			if (!JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName(), typeEngine)) {
 				if (mergedBd.isEnforceInitMethod()) {
 					validateMethod(bean, type, MethodType.INIT, bd.getInitMethodName(), 0, Static.DONT_CARE, context);
 				}

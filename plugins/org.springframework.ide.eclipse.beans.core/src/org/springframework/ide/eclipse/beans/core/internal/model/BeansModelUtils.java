@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Spring IDE Developers
+ * Copyright (c) 2005, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,7 +70,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IProfileAwareBeansComponent;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -1270,14 +1269,14 @@ public abstract class BeansModelUtils {
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
 	 */
-	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource, IProgressMonitor monitor) {
+	public static Set<IBeansConfig> getConfigsByContainingTypes(IResource resource, TypeHierarchyEngine typeEngine, IProgressMonitor monitor) {
 		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
-			return getConfigsByContainingTypesUsingTypeHierarchyEngine(resource, monitor);
+			return getConfigsByContainingTypesUsingTypeHierarchyEngine(resource, typeEngine, monitor);
 		}
 		return getConfigsByContainingTypesJDT(resource, monitor);
 	}
 	
-	protected static Set<IBeansConfig> getConfigsByContainingTypesUsingTypeHierarchyEngine(IResource resource, IProgressMonitor monitor) {
+	protected static Set<IBeansConfig> getConfigsByContainingTypesUsingTypeHierarchyEngine(IResource resource, TypeHierarchyEngine typeEngine, IProgressMonitor monitor) {
 		Set<IBeansConfig> files = new LinkedHashSet<IBeansConfig>();
 
 		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
@@ -1287,8 +1286,6 @@ public abstract class BeansModelUtils {
 
 				IJavaElement element = JavaCore.create(resource);
 				if (element instanceof ICompilationUnit && element.getJavaProject().isOnClasspath(element)) {
-
-					TypeHierarchyEngine typeHierarchyEngine = SpringCore.getTypeHierarchyEngine();
 					
 					try {
 						IType[] types = ((ICompilationUnit) element).getAllTypes();
@@ -1313,12 +1310,12 @@ public abstract class BeansModelUtils {
 									Set<String> allBeanClasses = config.getBeanClasses();
 									for (int i = 0; i < changedTypeNames.length; i++) {
 										for (String className : allBeanClasses) {
-											if (changedTypeIsInterface[i] && typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject(), false)) {
+											if (changedTypeIsInterface[i] && typeEngine.doesImplement(className, changedTypeNames[i], project.getProject())) {
 												files.add(config);
 												configAdded = true;
 												break;
 											}
-											else if (!changedTypeIsInterface[i] && typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject(), false)) {
+											else if (!changedTypeIsInterface[i] && typeEngine.doesExtend(className, changedTypeNames[i], project.getProject())) {
 												files.add(config);
 												configAdded = true;
 												break;
@@ -1328,7 +1325,7 @@ public abstract class BeansModelUtils {
 									}
 								}
 								
-								typeHierarchyEngine.cleanup(project.getProject());
+//								typeHierarchyEngine.cleanup(project.getProject());
 							}
 						}
 					}
@@ -1412,14 +1409,14 @@ public abstract class BeansModelUtils {
 	 * This implementation considers <b>all</b> inner classes as potential bean classes as well.
 	 * @since 2.0.5
 	 */
-	public static Set<IBean> getBeansByContainingTypes(IResource resource, IProgressMonitor monitor) {
+	public static Set<IBean> getBeansByContainingTypes(IResource resource, TypeHierarchyEngine typeEngine, IProgressMonitor monitor) {
 		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
-			return getBeansByContainingTypesUsingTypeHierarchyEngine(resource, monitor);
+			return getBeansByContainingTypesUsingTypeHierarchyEngine(resource, typeEngine, monitor);
 		}
 		return getBeansByContainingTypesJDT(resource, monitor);
 	}
 	
-	protected static Set<IBean> getBeansByContainingTypesUsingTypeHierarchyEngine(IResource resource, IProgressMonitor monitor) {
+	protected static Set<IBean> getBeansByContainingTypesUsingTypeHierarchyEngine(IResource resource, TypeHierarchyEngine typeEngine, IProgressMonitor monitor) {
 		Set<IBean> files = new LinkedHashSet<IBean>();
 
 		if (resource != null && resource.isAccessible() && resource.isSynchronized(IResource.DEPTH_ZERO)
@@ -1430,8 +1427,6 @@ public abstract class BeansModelUtils {
 				IJavaElement element = JavaCore.create(resource);
 				if (element instanceof ICompilationUnit && element.getJavaProject().isOnClasspath(element)) {
 
-					TypeHierarchyEngine typeHierarchyEngine = SpringCore.getTypeHierarchyEngine();
-					
 					try {
 						IType[] types = ((ICompilationUnit) element).getAllTypes();
 						String[] changedTypeNames = new String[types.length];
@@ -1458,11 +1453,11 @@ public abstract class BeansModelUtils {
 										
 										if (className != null) {
 											for (int i = 0; i < changedTypeNames.length; i++) {
-												if (changedTypeIsInterface[i] && typeHierarchyEngine.doesImplement(className, changedTypeNames[i], project.getProject(), false)) {
+												if (changedTypeIsInterface[i] && typeEngine.doesImplement(className, changedTypeNames[i], project.getProject())) {
 													files.add(bean);
 													break;
 												}
-												else if (!changedTypeIsInterface[i] && typeHierarchyEngine.doesExtend(className, changedTypeNames[i], project.getProject(), false)) {
+												else if (!changedTypeIsInterface[i] && typeEngine.doesExtend(className, changedTypeNames[i], project.getProject())) {
 													files.add(bean);
 													break;
 												}
@@ -1483,7 +1478,7 @@ public abstract class BeansModelUtils {
 									}
 								}
 								
-								typeHierarchyEngine.cleanup(project.getProject());
+//								typeHierarchyEngine.cleanup(project.getProject());
 							}
 						}
 					}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,10 +31,13 @@ public class TypeHierarchyEngine {
 	private TypeHierarchyClassReaderFactory classReaderFactory;
 	private TypeHierarchyElementCacheFactory elementCacheFactory;
 
-	private Map<IProject, TypeHierarchyElementCache> cache;
-	private Map<IProject, TypeHierarchyClassReader> readers;
+	private final Map<IProject, TypeHierarchyElementCache> cache;
+	private final Map<IProject, TypeHierarchyClassReader> readers;
+
+	private final boolean autoCleanup;
 	
-	public TypeHierarchyEngine() {
+	public TypeHierarchyEngine(boolean autoCleanup) {
+		this.autoCleanup = autoCleanup;
 		this.cache = new ConcurrentHashMap<IProject, TypeHierarchyElementCache>();
 		this.readers = new ConcurrentHashMap<IProject, TypeHierarchyClassReader>();
 	}
@@ -56,7 +59,7 @@ public class TypeHierarchyEngine {
 	
 	public void cleanup() {
 		for (IProject project : this.readers.keySet()) {
-			clearCache(project);
+			cleanup(project);
 		}
 	}
 
@@ -66,16 +69,22 @@ public class TypeHierarchyEngine {
 		this.cache.remove(project);
 	}
 	
-	public String getSupertype(IType type, boolean cleanup) {
+	public void clearCache() {
+		for (IProject project : this.readers.keySet()) {
+			clearCache(project);
+		}
+	}
+
+	public String getSupertype(IType type) {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
 			IProject project = ((IJavaProject)ancestor).getProject();
-			return this.getSupertype(project, type.getFullyQualifiedName(), cleanup);
+			return this.getSupertype(project, type.getFullyQualifiedName());
 		}
 		return null;
 	}
 	
-	public String getSupertype(IProject project, String className, boolean cleanup) {
+	public String getSupertype(IProject project, String className) {
 		char[] typeName = className.replace('.', '/').toCharArray();
 		try {
 			TypeHierarchyElementCache elementCache = getTypeHierarchyElementCache(project);
@@ -85,12 +94,12 @@ public class TypeHierarchyEngine {
 			}
 		}
 		finally {
-			if (cleanup) cleanup(project);
+			if (autoCleanup) cleanup(project);
 		}
 		return null;
 	}
 	
-	public String[] getInterfaces(IProject project, String className, boolean cleanup) {
+	public String[] getInterfaces(IProject project, String className) {
 		char[] typeName = className.replace('.', '/').toCharArray();
 		try {
 			TypeHierarchyElementCache elementCache = getTypeHierarchyElementCache(project);
@@ -104,21 +113,21 @@ public class TypeHierarchyEngine {
 			}
 		}
 		finally {
-			if (cleanup) cleanup(project);
+			if (autoCleanup) cleanup(project);
 		}
 		return null;
 	}
 
-	public boolean doesExtend(IType type, String className, boolean cleanup) {
+	public boolean doesExtend(IType type, String className) {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
 			IProject project = ((IJavaProject)ancestor).getProject();
-			return doesExtend(type.getFullyQualifiedName(), className, project, cleanup);
+			return doesExtend(type.getFullyQualifiedName(), className, project);
 		}
 		return false;
 	}
 	
-	public boolean doesExtend(String type, String className, IProject project, boolean cleanup) {
+	public boolean doesExtend(String type, String className, IProject project) {
 		char[] typeName = type.replace('.', '/').toCharArray();
 		char[] superTypeName = className.replace('.',  '/').toCharArray();
 	
@@ -152,21 +161,21 @@ public class TypeHierarchyEngine {
 			} while (typeName != null);
 		}
 		finally {
-			if (cleanup) cleanup(project);
+			if (autoCleanup) cleanup(project);
 		}
 		return false;
 	}
 	
-	public boolean doesImplement(final IType type, final String interfaceName, boolean cleanup) {
+	public boolean doesImplement(final IType type, final String interfaceName) {
 		IJavaElement ancestor = type.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (ancestor != null && ancestor instanceof IJavaProject) {
 			IProject project = ((IJavaProject)ancestor).getProject();
-			return doesImplement(type.getFullyQualifiedName(), interfaceName, project, cleanup);
+			return doesImplement(type.getFullyQualifiedName(), interfaceName, project);
 		}
 		return false;
 	}
 	
-	public boolean doesImplement(final String type, final String interfaceName, IProject project, boolean cleanup) {
+	public boolean doesImplement(final String type, final String interfaceName, IProject project) {
 		char[] classTypeName = type.replace('.', '/').toCharArray();
 		char[] interfaceTypeName = interfaceName.replace('.',  '/').toCharArray();
 
@@ -179,7 +188,7 @@ public class TypeHierarchyEngine {
 			return result;
 		}
 		finally {
-			if (cleanup) cleanup(project);
+			if (autoCleanup) cleanup(project);
 		}
 	}
 

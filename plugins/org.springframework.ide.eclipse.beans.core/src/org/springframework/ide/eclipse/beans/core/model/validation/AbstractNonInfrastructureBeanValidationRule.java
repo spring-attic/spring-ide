@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Spring IDE Developers
+ * Copyright (c) 2007, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,10 @@ package org.springframework.ide.eclipse.beans.core.model.validation;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
@@ -73,4 +76,22 @@ public abstract class AbstractNonInfrastructureBeanValidationRule {
 			IBeansValidationContext context) {
 		return true;
 	}
+
+	/**
+	 * Extracts the TypeHierarchyEngine instance from the validation context
+	 * 
+	 * @param context
+	 * @return
+	 */
+	protected TypeHierarchyEngine getTypeHierarchyEngine(IBeansValidationContext context) {
+		TypeHierarchyEngine typeEngine = null;
+		if (context instanceof AbstractValidationContext) {
+			typeEngine = ((AbstractValidationContext) context).get(TypeHierarchyEngine.class);
+		}
+		if (typeEngine == null) {
+			typeEngine = SpringCore.getTypeHierarchyEngine();
+		}
+		return typeEngine;
+	}
+
 }

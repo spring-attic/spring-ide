@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,9 +96,11 @@ public class SpringCore extends Plugin {
 		plugin = this;
 		model = new SpringModel();
 		typeStructureCache = new TypeStructureCache();
-		typeHierarchyEngine = new TypeHierarchyEngine();
+
+		typeHierarchyEngine = new TypeHierarchyEngine(true);
 		typeHierarchyEngine.setClassReaderFactory(new BytecodeTypeHierarchyClassReaderFactory());
 		typeHierarchyEngine.setTypeHierarchyElementCacheFactory(new DirectTypeHierarchyElementCacheFactory());
+
 		TypeHierarchyResourceChangeListener resetListener = new TypeHierarchyResourceChangeListener();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resetListener, IResourceChangeEvent.PRE_BUILD);
 		

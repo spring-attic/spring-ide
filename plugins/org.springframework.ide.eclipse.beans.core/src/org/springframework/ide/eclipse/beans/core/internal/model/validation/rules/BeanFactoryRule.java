@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 import org.springframework.scripting.ScriptFactory;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
@@ -37,6 +38,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 
 	@Override
 	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
+		TypeHierarchyEngine typeEngine = getTypeHierarchyEngine(context);
+		
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean).getBeanDefinition();
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean, context.getContextElement());
 		String mergedClassName = mergedBd.getBeanClassName();
@@ -47,7 +50,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 				context.error(bean, "NO_FACTORY_METHOD", "A factory bean requires a factory method");
 			}
 			else {
-				validateFactoryBean(bean, bd.getFactoryBeanName(), bd.getFactoryMethodName(), context);
+				validateFactoryBean(bean, bd.getFactoryBeanName(), bd.getFactoryMethodName(), context, typeEngine);
 			}
 		}
 
@@ -69,11 +72,11 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 					if (type.isEnum()) {
 						if (!"valueOf".equals(methodName) && (argCount == 0 || argCount > 2)) {
 							validateFactoryMethod(bean, mergedClassName, methodName, argCount, Static.DONT_CARE,
-									context);
+									context, typeEngine);
 						}
 					}
 					else {
-						validateFactoryMethod(bean, mergedClassName, methodName, argCount, Static.YES, context);
+						validateFactoryMethod(bean, mergedClassName, methodName, argCount, Static.YES, context, typeEngine);
 					}
 				}
 			}
@@ -91,7 +94,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 
 	}
 
-	protected void validateFactoryBean(IBean bean, String beanName, String methodName, IBeansValidationContext context) {
+	protected void validateFactoryBean(IBean bean, String beanName, String methodName, IBeansValidationContext context, TypeHierarchyEngine typeEngine) {
 		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName)) {
 			try {
 				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition) context.getCompleteRegistry()
@@ -112,7 +115,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 						if (factoryBd.getFactoryMethodName() == null) {
 							validateFactoryMethod(bean, factoryBd.getBeanClassName(), methodName,
 									(bean.getConstructorArguments().size() > 0 ? bean.getConstructorArguments().size()
-											: -1), Static.NO, context);
+											: -1), Static.NO, context, typeEngine);
 						}
 					}
 				}
@@ -129,15 +132,15 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 	}
 
 	protected void validateFactoryMethod(IBean bean, String className, String methodName, int argCount, Static statics,
-			IBeansValidationContext context) {
+			IBeansValidationContext context, TypeHierarchyEngine typeEngine) {
 		if (className != null && !SpringCoreUtils.hasPlaceHolder(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean).getProject(), className);
 
 			// Skip factory-method validation for factory beans which are
 			// Spring factory beans as well and for those aspectOf methods
 			if (type != null && !ValidationRuleUtils.ASPECT_OF_METHOD_NAME.equals(methodName)
-					&& !JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName())
-					&& !JdtUtils.doesImplement(context.getRootElementResource(), type, ScriptFactory.class.getName())) {
+					&& !JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName(), typeEngine)
+					&& !JdtUtils.doesImplement(context.getRootElementResource(), type, ScriptFactory.class.getName(), typeEngine)) {
 				validateMethod(bean, type, MethodType.FACTORY, methodName, argCount, statics, context);
 			}
 		}

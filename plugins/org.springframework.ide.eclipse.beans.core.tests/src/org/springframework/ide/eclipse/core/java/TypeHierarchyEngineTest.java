@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class TypeHierarchyEngineTest {
 		classReaderFactory = new BytecodeTypeHierarchyClassReaderFactory();
 		elementCacheFactory = new DirectTypeHierarchyElementCacheFactory();
 
-		engine = new TypeHierarchyEngine();
+		engine = new TypeHierarchyEngine(true);
 		engine.setClassReaderFactory(classReaderFactory);
 		engine.setTypeHierarchyElementCacheFactory(elementCacheFactory);
 	}
@@ -67,149 +67,149 @@ public class TypeHierarchyEngineTest {
 	
 	@Test
 	public void testDefaultPackageClass() throws Exception {
-		assertEquals("org.SimpleClass", engine.getSupertype(project, "DefaultPackageClass", true));
-		assertTrue(engine.doesExtend("DefaultPackageClass", "org.SimpleClass", project, true));
+		assertEquals("org.SimpleClass", engine.getSupertype(project, "DefaultPackageClass"));
+		assertTrue(engine.doesExtend("DefaultPackageClass", "org.SimpleClass", project));
 	}
 
 	@Test
 	public void testExtendsItselfObject() throws Exception {
 		IType type = javaProject.findType("java.lang.Object");
-		assertTrue(engine.doesExtend(type, type.getFullyQualifiedName(), true));
+		assertTrue(engine.doesExtend(type, type.getFullyQualifiedName()));
 	}
 
 	@Test
 	public void testExtendsItselfSimpleClass() throws Exception {
 		IType type = javaProject.findType("org.SimpleClass");
-		assertTrue(engine.doesExtend(type, type.getFullyQualifiedName(), true));
+		assertTrue(engine.doesExtend(type, type.getFullyQualifiedName()));
 	}
 
 	@Test
 	public void testTypeHierarchyClassExtendsObject() throws Exception {
 		IType type = javaProject.findType("org.SimpleClass");
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 	}
 
 	@Test
 	public void testTypeHierarchyInterfaceExtendsObject() throws Exception {
 		IType type = javaProject.findType("org.SimpleInterface");
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 	}
 
 	@Test
 	public void testTypeHierarchyExtendsSimple() throws Exception {
 		IType type = javaProject.findType("org.Subclass");
-		assertTrue(engine.doesExtend(type, "org.SimpleClass", true));
+		assertTrue(engine.doesExtend(type, "org.SimpleClass"));
 	}
 
 	@Test
 	public void testTypeHierarchyObjectNotExtendSimple() throws Exception {
 		IType type = javaProject.findType("java.lang.Object");
-		assertFalse(engine.doesExtend(type, "org.SimpleClass", true));
+		assertFalse(engine.doesExtend(type, "org.SimpleClass"));
 	}
 	
 	@Test
 	public void testTypeHierarchySuperclassFromLibrary() throws Exception {
 		IType type = javaProject.findType("org.ImplementingInterfaceThroughExtendingTypeFromLibrary");
-		assertFalse(engine.doesExtend(type, "org.SimpleClass", true));
-		assertTrue(engine.doesExtend(type, "org.springframework.beans.factory.config.AbstractFactoryBean", true));
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
-		assertTrue(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean", true));
+		assertFalse(engine.doesExtend(type, "org.SimpleClass"));
+		assertTrue(engine.doesExtend(type, "org.springframework.beans.factory.config.AbstractFactoryBean"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
+		assertTrue(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean"));
 	}
 	
 	@Test
 	public void testObjectImplementsNothing() throws Exception {
 		IType type = javaProject.findType("java.lang.Object");
-		assertFalse(engine.doesImplement(type, "java.io.Serializable", true));
-		assertFalse(engine.doesImplement(type, "org.SimpleInterface", true));
+		assertFalse(engine.doesImplement(type, "java.io.Serializable"));
+		assertFalse(engine.doesImplement(type, "org.SimpleInterface"));
 	}
 	
 	@Test
 	public void testCombinedSubclassImplementsAndExtends() throws Exception {
 		IType type = javaProject.findType("org.CombinedSubclass");
-		assertTrue(engine.doesImplement(type, "org.SimpleInterface", true));
-		assertTrue(engine.doesExtend(type, "org.SimpleClass", true));
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
-		assertFalse(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean", true));
+		assertTrue(engine.doesImplement(type, "org.SimpleInterface"));
+		assertTrue(engine.doesExtend(type, "org.SimpleClass"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
+		assertFalse(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean"));
 	}
 	
 	@Test
 	public void testClassImplementsInterfaceThroughSubInterface() throws Exception {
 		IType type = javaProject.findType("org.ClassImplementingInterfaceThroughSubInterface");
-		assertTrue(engine.doesImplement(type, "org.SubInterface", true));
-		assertTrue(engine.doesImplement(type, "org.SimpleInterface", true));
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
-		assertFalse(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean", true));
+		assertTrue(engine.doesImplement(type, "org.SubInterface"));
+		assertTrue(engine.doesImplement(type, "org.SimpleInterface"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
+		assertFalse(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean"));
 	}
 	
 	@Test
 	public void testComplexInterfaceStructure() throws Exception {
 		IType type = javaProject.findType("org.sub.ClassABCD");
 		
-		assertTrue(engine.doesExtend(type, "org.sub.ClassB", true));
-		assertTrue(engine.doesExtend(type, "org.ClassA", true));
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
+		assertTrue(engine.doesExtend(type, "org.sub.ClassB"));
+		assertTrue(engine.doesExtend(type, "org.ClassA"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 
-		assertFalse(engine.doesExtend(type, "org.SimpleClass", true));
-		assertFalse(engine.doesExtend(type, "org.Subclass", true));
+		assertFalse(engine.doesExtend(type, "org.SimpleClass"));
+		assertFalse(engine.doesExtend(type, "org.Subclass"));
 
-		assertTrue(engine.doesImplement(type, "org.InterfaceA", true));
-		assertTrue(engine.doesImplement(type, "org.InterfaceB", true));
-		assertTrue(engine.doesImplement(type, "org.InterfaceC", true));
-		assertTrue(engine.doesImplement(type, "org.InterfaceD", true));
-		assertTrue(engine.doesImplement(type, "org.sub.InterfaceAB", true));
-		assertTrue(engine.doesImplement(type, "org.sub.InterfaceCD", true));
+		assertTrue(engine.doesImplement(type, "org.InterfaceA"));
+		assertTrue(engine.doesImplement(type, "org.InterfaceB"));
+		assertTrue(engine.doesImplement(type, "org.InterfaceC"));
+		assertTrue(engine.doesImplement(type, "org.InterfaceD"));
+		assertTrue(engine.doesImplement(type, "org.sub.InterfaceAB"));
+		assertTrue(engine.doesImplement(type, "org.sub.InterfaceCD"));
 		
-		assertFalse(engine.doesImplement(type, "org.SimpleInterface", true));
-		assertFalse(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean", true));
+		assertFalse(engine.doesImplement(type, "org.SimpleInterface"));
+		assertFalse(engine.doesImplement(type, "org.springframework.beans.factory.FactoryBean"));
 	}
 	
 	@Test
 	public void testInnerClassImplementingsInterface() throws Exception {
 		IType type = javaProject.findType("org.OuterClassA$InnerClassA");
-		assertTrue(engine.doesImplement(type, "org.SimpleInterface", true));
-		assertFalse(engine.doesExtend(type, "org.SimpleClass", true));
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
+		assertTrue(engine.doesImplement(type, "org.SimpleInterface"));
+		assertFalse(engine.doesExtend(type, "org.SimpleClass"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 	}
 	
 	@Test
 	public void testClassExtendsInnerClass() throws Exception {
 		IType type = javaProject.findType("org.SubclassingInnerClassB");
-		assertFalse(engine.doesImplement(type, "org.OuterClassB$InnerInterfaceB", true));
-		assertTrue(engine.doesExtend(type, "org.OuterClassB$InnerClassB", true));
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
+		assertFalse(engine.doesImplement(type, "org.OuterClassB$InnerInterfaceB"));
+		assertTrue(engine.doesExtend(type, "org.OuterClassB$InnerClassB"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 	}
 	
 	@Test
 	public void testClassImplementsInnerInterface() throws Exception {
 		IType type = javaProject.findType("org.ImplementingInnerInterfaceB");
-		assertTrue(engine.doesImplement(type, "org.OuterClassB$InnerInterfaceB", true));
-		assertFalse(engine.doesExtend(type, "org.OuterClassB$InnerClassB", true));
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
+		assertTrue(engine.doesImplement(type, "org.OuterClassB$InnerInterfaceB"));
+		assertFalse(engine.doesExtend(type, "org.OuterClassB$InnerClassB"));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 	}
 	
 	@Test
 	public void testGetSupertypeOfClass() throws Exception {
 		IType type = javaProject.findType("org.ImplementingInterfaceThroughExtendingTypeFromLibrary");
-		assertEquals("org.springframework.beans.factory.config.AbstractFactoryBean", engine.getSupertype(type, true));
-		assertEquals("java.lang.Object", engine.getSupertype(project, "org.springframework.beans.factory.config.AbstractFactoryBean", true));
+		assertEquals("org.springframework.beans.factory.config.AbstractFactoryBean", engine.getSupertype(type));
+		assertEquals("java.lang.Object", engine.getSupertype(project, "org.springframework.beans.factory.config.AbstractFactoryBean"));
 	}
 	
 	@Test
 	public void testGetSupertypeOfInterface() throws Exception {
 		IType type = javaProject.findType("org.SimpleInterface");
-		assertEquals("java.lang.Object", engine.getSupertype(type, true));
+		assertEquals("java.lang.Object", engine.getSupertype(type));
 	}
 	
 	@Test
 	public void testGetInterfacesOfClass() throws Exception {
-		String[] interfaces = engine.getInterfaces(project, "org.sub.ClassB", true);
+		String[] interfaces = engine.getInterfaces(project, "org.sub.ClassB");
 		assertEquals(1, interfaces.length);
 		assertEquals("org.sub.InterfaceAB", interfaces[0]);
 	}
 	
 	@Test
 	public void testGetInterfacesOfInterface() throws Exception {
-		String[] interfaces = engine.getInterfaces(project, "org.sub.InterfaceAB", true);
+		String[] interfaces = engine.getInterfaces(project, "org.sub.InterfaceAB");
 		assertEquals(2, interfaces.length);
 		assertEquals("org.InterfaceA", interfaces[0]);
 		assertEquals("org.InterfaceB", interfaces[1]);
@@ -218,7 +218,7 @@ public class TypeHierarchyEngineTest {
 	@Test
 	public void testAdditionalCaseWithLongDoubleConstantsInClass() throws Exception {
 		IType type = javaProject.findType("org.CaseWithLongAndDoubleConstants");
-		assertEquals("java.lang.Object", engine.getSupertype(type, true));
+		assertEquals("java.lang.Object", engine.getSupertype(type));
 	}
 	
 	@Test
@@ -226,11 +226,11 @@ public class TypeHierarchyEngineTest {
 		AccessLoggingClassReaderFactory readerFactory = new AccessLoggingClassReaderFactory(classReaderFactory);
 		engine.setClassReaderFactory(readerFactory);
 		
-		engine.getSupertype(project, "org.sub.ClassB", true);
-		engine.getSupertype(project, "org.sub.InterfaceAB", true);
+		engine.getSupertype(project, "org.sub.ClassB");
+		engine.getSupertype(project, "org.sub.InterfaceAB");
 		
 		IType type = javaProject.findType("org.sub.ClassABCD");
-		assertTrue(engine.doesImplement(type, "org.InterfaceB", true));
+		assertTrue(engine.doesImplement(type, "org.InterfaceB"));
 		
 		AccessLoggingClassReader reader = readerFactory.getReader(project);
 		assertTrue(reader.classAccessed("org/sub/ClassABCD"));
@@ -251,7 +251,7 @@ public class TypeHierarchyEngineTest {
 		engine.setTypeHierarchyElementCacheFactory(cacheFactory);
 		
 		IType type = javaProject.findType("org.sub.ClassABCD");
-		assertTrue(engine.doesExtend(type, "org.ClassA", true));
+		assertTrue(engine.doesExtend(type, "org.ClassA"));
 		
 		AccessLoggingTypeHierarchyElementCache[] caches = cacheFactory.getCaches();
 		assertEquals(1, caches.length);
@@ -260,7 +260,7 @@ public class TypeHierarchyEngineTest {
 		assertEquals(1, caches[0].classAccessed("org/sub/ClassB"));
 		assertEquals(0, caches[0].classAccessed("org/ClassA"));
 		
-		assertTrue(engine.doesExtend(type, "java.lang.Object", true));
+		assertTrue(engine.doesExtend(type, "java.lang.Object"));
 		assertEquals(2, caches[0].classAccessed("org/sub/ClassABCD")); // first class is always accessed
 		assertEquals(1, caches[0].classAccessed("org/sub/ClassB")); // this is not being accessed again
 		assertEquals(1, caches[0].classAccessed("org/ClassA")); // this one is accessed for the first time

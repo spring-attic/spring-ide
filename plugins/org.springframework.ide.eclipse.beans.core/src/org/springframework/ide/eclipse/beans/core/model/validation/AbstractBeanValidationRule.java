@@ -47,4 +47,5 @@ public abstract class AbstractBeanValidationRule extends AbstractNonInfrastructu
 	 * Execute the concrete validation logic of the given {@link IBean} under the given {@link IBeansValidationContext}.
 	 */
 	public abstract void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor);
+	
 }

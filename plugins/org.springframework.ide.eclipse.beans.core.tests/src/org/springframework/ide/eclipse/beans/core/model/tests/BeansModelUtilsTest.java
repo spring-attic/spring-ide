@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2014 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,9 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class BeansModelUtilsTest {
@@ -35,6 +37,7 @@ public class BeansModelUtilsTest {
 	private BeansProject beansProject;
 	private BeansModel originalModel;
 	private IJavaProject javaProject;
+	private TypeHierarchyEngine typeEngine;
 
 	@Before
 	public void createProject() throws Exception {
@@ -50,11 +53,14 @@ public class BeansModelUtilsTest {
 		
 		beansProject.addConfig("basic-bean-config.xml", IBeansConfig.Type.MANUAL);
 		beansProject.addConfig("basic-bean-config-2.xml", IBeansConfig.Type.MANUAL);
+		
+		typeEngine = SpringCore.getTypeHierarchyEngine();
 	}
 	
 	@After
 	public void deleteProject() throws Exception {
 		project.delete(true, null);
+		typeEngine.clearCache();
 		BeansCorePlugin.setModel(originalModel);
 	}
 	
@@ -64,7 +70,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(0, beans.size());
 	}
 
@@ -74,7 +80,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, null);
+		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, typeEngine, null);
 		assertEquals(0, beans.size());
 	}
 
@@ -84,7 +90,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(2, beans.size());
 		
 		Iterator<IBean> iterator = beans.iterator();
@@ -101,7 +107,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, null);
+		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, typeEngine, null);
 		assertEquals(1, beans.size());
 		
 		Iterator<IBeansConfig> iterator = beans.iterator();
@@ -115,7 +121,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(1, beans.size());
 		
 		Iterator<IBean> iterator = beans.iterator();
@@ -130,7 +136,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(1, beans.size());
 		
 		Iterator<IBean> iterator = beans.iterator();
@@ -144,7 +150,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, null);
+		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, typeEngine, null);
 		assertEquals(1, beans.size());
 		
 		Iterator<IBeansConfig> iterator = beans.iterator();
@@ -158,7 +164,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(1, beans.size());
 		
 		Iterator<IBean> iterator = beans.iterator();
@@ -172,7 +178,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, null);
+		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, typeEngine, null);
 		assertEquals(1, beans.size());
 		
 		Iterator<IBeansConfig> iterator = beans.iterator();
@@ -186,7 +192,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(0, beans.size());
 	}
 
@@ -196,7 +202,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(2, beans.size());
 		
 		Iterator<IBean> iterator = beans.iterator();
@@ -213,7 +219,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(1, beans.size());
 		
 		Iterator<IBean> iterator = beans.iterator();
@@ -227,7 +233,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(3, beans.size());
 		
 		Iterator<IBean> iterator = beans.iterator();
@@ -246,7 +252,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, null);
+		Set<IBean> beans = BeansModelUtils.getBeansByContainingTypes(resource, typeEngine, null);
 		assertEquals(2, beans.size());
 		
 		Iterator<IBean> iterator = beans.iterator();
@@ -263,7 +269,7 @@ public class BeansModelUtilsTest {
 		IResource resource = type.getResource();
 		assertNotNull(resource);
 		
-		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, null);
+		Set<IBeansConfig> beans = BeansModelUtils.getConfigsByContainingTypes(resource, typeEngine, null);
 		assertEquals(2, beans.size());
 		
 		Iterator<IBeansConfig> iterator = beans.iterator();

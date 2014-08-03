@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 Spring IDE Developers
+ * Copyright (c) 2007, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,6 +116,13 @@ public class JdtUtils {
 	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
 	 */
 	public static boolean doesImplement(IResource resource, IType type, String className) {
+		return doesImplement(resource, type, className, SpringCore.getTypeHierarchyEngine());
+	}
+
+	/**
+	 * Checks if the given <code>type</code> implements/extends <code>className</code>.
+	 */
+	public static boolean doesImplement(IResource resource, IType type, String className, TypeHierarchyEngine typeEngine) {
 		if (resource == null || type == null || className == null) {
 			return false;
 		}
@@ -132,7 +139,7 @@ public class JdtUtils {
 		}
 		
 		if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
-			return SpringCore.getTypeHierarchyEngine().doesImplement(type, className, true) || SpringCore.getTypeHierarchyEngine().doesExtend(type, className, true);
+			return typeEngine.doesImplement(type, className) || typeEngine.doesExtend(type, className);
 		}
 		else {
 			return doesImplementWithJdt(resource, type, className);
