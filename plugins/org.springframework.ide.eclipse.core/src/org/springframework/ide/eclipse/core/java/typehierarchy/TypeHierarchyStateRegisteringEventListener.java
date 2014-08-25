@@ -34,7 +34,7 @@ public class TypeHierarchyStateRegisteringEventListener extends ProjectContribut
 	public void start(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
 			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
 
-		System.out.println("type hierarchy engine created");
+//		System.out.println("type hierarchy engine created");
 
 		TypeHierarchyEngine engine = new TypeHierarchyEngine(false);
 		engine.setClassReaderFactory(new BytecodeTypeHierarchyClassReaderFactory());

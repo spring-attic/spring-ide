@@ -36,7 +36,7 @@ public class BeansTypeHierachyProjectContributionEventListener extends ProjectCo
 	public void start(int kind, IResourceDelta delta, List<ProjectBuilderDefinition> builderDefinitions,
 			List<ValidatorDefinition> validatorDefinitions, IProjectContributorState state, IProject project) {
 
-		System.out.println("new beans type hierarchy state created");
+//		System.out.println("new beans type hierarchy state created");
 		
 		TypeHierarchyEngine typeEngine = state.get(TypeHierarchyEngine.class);
 		state.hold(new BeansTypeHierachyState(typeEngine));
