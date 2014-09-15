@@ -76,6 +76,7 @@ public class NewSpringBootWizardModel {
 		KNOWN_GROUP_LABELS.put("packaging", "Packaging:");
 		KNOWN_GROUP_LABELS.put("javaVersion", "Java Version:");
 		KNOWN_GROUP_LABELS.put("language", "Language:");
+		KNOWN_GROUP_LABELS.put("bootVersion", "Boot Version:");
 	}
 
 	private final URLConnectionFactory urlConnectionFactory;
