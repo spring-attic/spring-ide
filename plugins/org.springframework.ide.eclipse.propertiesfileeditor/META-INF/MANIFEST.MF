@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spring Properties File Editor
+Bundle-SymbolicName: org.springframework.ide.eclipse.properties.editor;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.springframework.ide.eclipse.propertiesfileeditor.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jdt.ui,
+ org.eclipse.ui.editors,
+ org.eclipse.text,
+ org.eclipse.core.resources,
+ org.eclipse.jface.text,
+ org.eclipse.jdt.core
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,
+ lib/spring-boot-config-processor-1.2.0.BUILD-SNAPSHOT.jar,
+ lib/json-20140107.jar
