@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -78,7 +79,9 @@ public class ConfigMetadataRepositoryJsonLoader {
 	}
 
 	private void loadFromJar(File f) {
-		try (JarFile jarFile = new JarFile(f)) {
+		JarFile jarFile = null;
+		try {
+			jarFile = new JarFile(f);
 			//jarDump(jarFile);
 			ZipEntry e = jarFile.getEntry(DEFAULT_MANUAL_LOCATION_PATTERN);
 			if (e!=null) {
@@ -90,15 +93,31 @@ public class ConfigMetadataRepositoryJsonLoader {
 			}
 		} catch (Throwable e) {
 			SpringPropertiesEditorPlugin.log(e);
+		} finally {
+			if (jarFile!=null) {
+				try {
+					jarFile.close();
+				} catch (IOException e) {
+				}
+			}
 		}
 	}
 
 	private void loadFrom(JarFile jarFile, ZipEntry ze) {
-		try (InputStream is = jarFile.getInputStream(ze)) {
+		InputStream is = null;
+		try {
+			is= jarFile.getInputStream(ze);
 			ConfigMetadataRepository extra = mapper.readRepository(is);
 			repository.include(extra);
 		} catch (Throwable e) {
 			SpringPropertiesEditorPlugin.log(e);
+		} finally {
+			if (is!=null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+				}
+			}
 		}
 	}
 

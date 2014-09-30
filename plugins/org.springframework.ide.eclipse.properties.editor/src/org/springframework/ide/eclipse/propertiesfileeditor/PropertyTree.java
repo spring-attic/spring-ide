@@ -49,7 +49,7 @@ public class PropertyTree {
 	 * ['foo', 'bar', '' ] in this case.
 	 */
 	public static String[] split(String str) {
-		ArrayList<String> segments = new ArrayList<>();
+		ArrayList<String> segments = new ArrayList<String>();
 		int pos = 0;
 		while (pos>=0) {
 			int splitPos = str.indexOf(SEPARATOR, pos);
@@ -82,7 +82,7 @@ public class PropertyTree {
 
 		private Node ensureChild(String segment) {
 			if (children==null) {
-				children = new TreeMap<>(); //Use treemap so things are sorted based on key.
+				children = new TreeMap<String, Node>(); //Use treemap so things are sorted based on key.
 			}
 			Node child = children.get(segment);
 			if (child==null) {

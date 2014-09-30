@@ -160,7 +160,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 
 			Collection<String> suggestions = fEngine.getCompletions(viewer.getDocument(), prefix, offset);
 
-			List<ICompletionProposal> result= new ArrayList<>();
+			List<ICompletionProposal> result= new ArrayList<ICompletionProposal>();
 			for (Iterator<String> it= suggestions.iterator(); it.hasNext();) {
 				String string= (String) it.next();
 				if (string.length() > 0)

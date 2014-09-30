@@ -44,8 +44,8 @@ public class SpringPropertiesCompletionEngine {
 //		System.out.println("<<< spring properties metadata loaded ===");
 	}
 
-	public Collection<String> getCompletions(IDocument doc, String prefix, int offset) {
-		final ArrayList<String> result = new ArrayList<>();
+	public Collection<String> getCompletions(IDocument doc, final String prefix, int offset) {
+		final ArrayList<String> result = new ArrayList<String>();
 		properties.completions(prefix, new PropertyTree.ICompletionRequestor() {
 			@Override
 			public void add(String fullPropName) {
