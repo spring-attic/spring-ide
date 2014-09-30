@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -142,12 +143,10 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 
 	}
 
-	private final SpringPropertiesCompletionEngine fEngine= new SpringPropertiesCompletionEngine();
+	private final SpringPropertiesCompletionEngine fEngine;
 
-	/**
-	 * Creates a new hippie completion proposal computer.
-	 */
-	public SpringPropertiesProposalProcessor() {
+	public SpringPropertiesProposalProcessor(IJavaProject jp) throws Exception {
+		this.fEngine = new SpringPropertiesCompletionEngine(jp);
 	}
 
 	/*

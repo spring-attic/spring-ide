@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -18,6 +19,7 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration 
@@ -31,10 +33,21 @@ extends PropertiesFileSourceViewerConfiguration {
 	
 	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-		ContentAssistant a = new ContentAssistant();
-		a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
-		a.enableAutoActivation(true);
-		return a;
+		try {
+			ITextEditor editor = getEditor();
+			if (editor!=null) {
+				IJavaProject jp = EditorUtility.getJavaProject(editor.getEditorInput());
+				if (jp!=null) {
+					ContentAssistant a = new ContentAssistant();
+					a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(jp), IDocument.DEFAULT_CONTENT_TYPE);
+					a.enableAutoActivation(true);
+					return a;
+				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return null;
 	}
 
 }
