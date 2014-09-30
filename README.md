@@ -68,7 +68,7 @@
   If you wanna work on the project itself, the best way is to install Spring IDE into your Eclipse
   target platform and start from there, using the standard Eclipse way of plugin development using PDE.
   You can clone the Spring IDE git repository and import the projects into your Eclipse workspace
-  and start using them.
+  and start using them. 
 
 ## Building Spring IDE
   
