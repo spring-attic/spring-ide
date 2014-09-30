@@ -183,7 +183,7 @@
 		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
 		
 		<module>plugins/org.springframework.ide.eclipse.properties.editor</module>
-		<!--  TODO: <module>plugins/org.springframework.ide.eclipse.properties.editor.test</module> -->
+		<module>plugins/org.springframework.ide.eclipse.properties.editor.test</module>
 
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>

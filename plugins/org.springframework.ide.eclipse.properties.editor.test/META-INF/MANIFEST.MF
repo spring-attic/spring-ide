@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
-Bundle-SymbolicName: org.springframework.ide.eclipse.propertiesfileeditor.test
-Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: org.springframework.ide.eclipse.properties.editor.test
+Bundle-Version: 3.6.2.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.propertiesfileeditor.test.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.junit;bundle-version="4.11.0",
+ org.junit,
  org.springframework.ide.eclipse.properties.editor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
