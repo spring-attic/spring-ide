@@ -22,7 +22,7 @@ public class PropertyTree {
 	// to the number of properties inserted to the tree.
 
 	public interface ICompletionRequestor {
-		void add(String join);
+		void add(String completion);
 	}
 
 	/**
