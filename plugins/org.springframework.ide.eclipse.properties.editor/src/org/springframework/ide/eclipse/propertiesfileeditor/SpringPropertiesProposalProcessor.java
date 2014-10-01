@@ -155,7 +155,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		try {
 			String prefix= getPrefix(viewer, offset);
-			if (prefix == null || prefix.length() == 0)
+			if (prefix == null/* || prefix.length() == 0*/)
 				return NO_PROPOSALS;
 
 			Collection<String> suggestions = fEngine.getCompletions(viewer.getDocument(), prefix, offset);
