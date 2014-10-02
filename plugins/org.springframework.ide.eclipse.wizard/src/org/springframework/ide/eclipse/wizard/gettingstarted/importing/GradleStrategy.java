@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2014 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -136,7 +136,7 @@ public class GradleStrategy extends ImportStrategy {
 				importOp.setEnableDSLD(false);
 
 				ErrorHandler eh = ErrorHandler.forImportWizard();
-				importOp.perform(eh, new SubProgressMonitor(monitor, 1));
+				importOp.perform(eh, new SubProgressMonitor(monitor, 1), null);
 
 				//3: add spring nature
 				addPringNature(importOp.getProjects(), eh, new SubProgressMonitor(monitor, 1));
