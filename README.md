@@ -1,4 +1,4 @@
-# Spring IDE
+# Spring IDE 
 
   Spring IDE enhances a regular Eclipse IDE with tooling for building Spring-based applications.
   It makes your Eclipse IDE Spring-aware and adds code-completion, validation, content-assist,
