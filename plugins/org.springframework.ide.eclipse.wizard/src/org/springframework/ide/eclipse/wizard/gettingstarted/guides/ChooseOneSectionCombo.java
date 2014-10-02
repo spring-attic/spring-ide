@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Label;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.UIConstants;
 
 /**
  * Wizard section to choose one element from list of elements. Uses a pulldown Combo box to allow selecting
@@ -58,7 +59,7 @@ public class ChooseOneSectionCombo<T> extends ChooseOneSection {
 		Label fieldNameLabel = new Label(field, SWT.NONE);
 		fieldNameLabel.setText(label);
         GridDataFactory.fillDefaults()
-        	.hint(FIELD_LABEL_WIDTH_HINT, SWT.DEFAULT)
+        	.hint(UIConstants.fieldLabelWidthHint(fieldNameLabel), SWT.DEFAULT)
         	.align(SWT.BEGINNING, SWT.CENTER)
         	.applyTo(fieldNameLabel);
 

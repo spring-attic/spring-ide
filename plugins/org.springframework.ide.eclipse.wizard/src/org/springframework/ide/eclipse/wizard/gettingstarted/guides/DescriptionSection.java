@@ -72,7 +72,7 @@ public class DescriptionSection extends WizardPageSection {
 			fieldNameLabel.setText(label);
 			GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.BEGINNING)
-				.hint(UIConstants.FIELD_LABEL_WIDTH_HINT, SWT.DEFAULT)
+				.hint(UIConstants.fieldLabelWidthHint(fieldNameLabel), SWT.DEFAULT)
 				.applyTo(fieldNameLabel);
 			GridDataFactory.fillDefaults().grab(true, false).applyTo(composite);
 		} else {

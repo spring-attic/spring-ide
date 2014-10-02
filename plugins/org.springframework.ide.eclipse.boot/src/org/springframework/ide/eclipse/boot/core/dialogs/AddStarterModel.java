@@ -34,6 +34,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 
 public class AddStarterModel implements OkButtonHandler {
 	
+	//TODO: remove (obsolete?)
+	
 	private final ISpringBootProject project;
 	public final LiveVariable<SpringBootStarter> chosen = new LiveVariable<SpringBootStarter>(null);
 	
