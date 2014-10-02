@@ -136,7 +136,7 @@ public class GradleStrategy extends ImportStrategy {
 				importOp.setEnableDSLD(false);
 
 				ErrorHandler eh = ErrorHandler.forImportWizard();
-				importOp.perform(eh, new SubProgressMonitor(monitor, 1), null);
+				importOp.perform(eh, new SubProgressMonitor(monitor, 1));
 
 				//3: add spring nature
 				addPringNature(importOp.getProjects(), eh, new SubProgressMonitor(monitor, 1));
