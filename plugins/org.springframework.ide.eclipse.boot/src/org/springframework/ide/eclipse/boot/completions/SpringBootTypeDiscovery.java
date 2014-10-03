@@ -11,33 +11,35 @@
 package org.springframework.ide.eclipse.boot.completions;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Stack;
-import java.util.concurrent.Callable;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.ui.ChooseDependencyDialog;
-import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.completions.externaltype.AbstractExternalTypeSource;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscovery;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeEntry;
 import org.springsource.ide.eclipse.commons.completions.util.Requestor;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager.DownloadRequestor;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -350,37 +352,70 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		}
 	}
 
-	private DirectedGraph createGraph() throws Exception {
-		return RetryUtil.retry(RETRY_INTERVAL, RETRY_TIMELIMIT, new Callable<DirectedGraph>() {
-			public DirectedGraph call() throws Exception {
-				DirectedGraph dgraph = new DirectedGraph();
-				
-				SAXParserFactory factory = SAXParserFactory.newInstance();
-				SAXParser saxParser = factory.newSAXParser();
-				MyHandler handler = new MyHandler(dgraph);
-				try {
-					saxParser.parse(XML_DATA_LOCATION.toString()+"/"+bootVersion, handler);
-				} finally {
-					handler.dispose();
-				}
-				return dgraph;
-			}
-		});
-	}
-
-	private DirectedGraph createGraphMaybe() throws Exception {
-		//Should parsing be done lazyly?
-		// Alternatively the callers of this contructor could do it from a job.
+	private DirectedGraph parseFrom(File xmlFile) throws Exception {
 		DirectedGraph dgraph = new DirectedGraph();
-		
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		SAXParser saxParser = factory.newSAXParser();
 		MyHandler handler = new MyHandler(dgraph);
 		try {
-			saxParser.parse(XML_DATA_LOCATION.toString(), handler);
+			saxParser.parse(xmlFile, handler);
 		} finally {
 			handler.dispose();
 		}
 		return dgraph;
 	}
+	
+	private DownloadManager downloader = null;
+	
+	private synchronized DownloadManager downloader() throws IOException {
+		if (downloader==null) {
+			File cacheFolder = new File(BootActivator.getDefault().getStateLocation().toFile(), "typegraphs");
+			if (cacheFolder.exists()) {
+				//Delete 'SNAPSHOT' data so it is downloaded again.
+				for (String name : cacheFolder.list()) {
+					try {
+						if (name.contains("SNAPSHOT")) {
+							new File(cacheFolder, name).delete();
+						}
+					} catch (Throwable e) {
+						BootActivator.log(e);
+					}
+				}
+			}
+			downloader = new DownloadManager(null, cacheFolder);
+		}
+		return downloader;
+	}
+
+	/**
+	 * DownloadablItem for a 'type graph' xml file. Overrides default 'getFileName' method
+	 * to provide more readable/debugable name for the typegrpah files. In all other respects it 
+	 * the same as super class.
+	 */
+	private static class TypeGraphFile extends DownloadableItem {
+		private String bootVersion;
+
+		public TypeGraphFile(String bootVersion, DownloadManager downloader) throws Exception {
+			super(new URL(XML_DATA_LOCATION.toString()+"/"+bootVersion), downloader);
+			this.bootVersion = bootVersion;
+		}
+		
+		@Override
+		protected String getFileName() {
+			return bootVersion;
+		}
+	}
+	
+	private DirectedGraph createGraph() throws Exception {
+		DownloadManager downloader = downloader();
+		final DirectedGraph[] result = new DirectedGraph[]{null};
+		downloader.doWithDownload(new TypeGraphFile(bootVersion, downloader), new DownloadRequestor() {
+			@Override
+			public void exec(File downloadedFile) throws Exception {
+				result[0] = parseFrom(downloadedFile);
+			}
+		});
+		return result[0];
+	}
+
 }
