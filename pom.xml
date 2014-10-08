@@ -181,9 +181,11 @@
 		<!-- boot -->
 		<module>plugins/org.springframework.ide.eclipse.boot</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
-		
+
+        <!-- Not yet in STS 3.6.2, add back later	
 		<module>plugins/org.springframework.ide.eclipse.properties.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.properties.editor.test</module>
+		-->
 
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
