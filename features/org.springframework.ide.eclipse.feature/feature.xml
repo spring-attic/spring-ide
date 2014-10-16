@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.feature"
       label="%featureName"
-      version="3.6.2.qualifier"
+      version="3.6.3.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
@@ -252,11 +252,13 @@
          version="0.0.0"
          unpack="false"/>
 
+<!-- Do not include yet with STS 3.6.2, add later when metadata format is 'stable' and is included in spring boot 1.2
    <plugin
          id="org.springframework.ide.eclipse.properties.editor"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+ -->
 
 </feature>

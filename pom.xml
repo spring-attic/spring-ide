@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.parent</artifactId>
-	<version>3.6.2-SNAPSHOT</version>
+	<version>3.6.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<organization>
@@ -181,9 +181,11 @@
 		<!-- boot -->
 		<module>plugins/org.springframework.ide.eclipse.boot</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
-		
+
+        <!-- Not yet in STS 3.6.2, add back later	
 		<module>plugins/org.springframework.ide.eclipse.properties.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.properties.editor.test</module>
+		-->
 
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
@@ -377,6 +379,50 @@
 			</repositories>
 		</profile>
 
+		<profile>
+			<id>e44</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 4.4</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e44</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.4/</url>
+				</repository>
+				<repository>
+					<id>luna</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/luna/</url>
+				</repository>
+				<repository>
+					<id>ajdt-e44</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/44/dev/update/</url>
+				</repository>
+				<repository>
+					<id>orbit-luna-SR1</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
+				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
+				</repository>
+			</repositories>
+		</profile>
+		
 		<profile>
 			<id>bamboo-signing</id>
 			<properties>
