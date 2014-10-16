@@ -94,7 +94,7 @@ public class RepositoryInformation {
 
 	/**
 	 * Returns a {@link RepositoryInformation} for the repository interface of the given {@link IMethod} if it is a Spring
-	 * Data repository.
+	 * Data repository (meaning it supports dynamic query methods).
 	 * 
 	 * @param element must not be {@literal null}.
 	 * @return
@@ -107,9 +107,11 @@ public class RepositoryInformation {
 	}
 	
 	/**
-	 * Returns a {@link RepositoryInformation} for the given {@link IType} if it is a Spring Data repository.
+	 * Returns a {@link RepositoryInformation} for the given {@link IType} if it
+	 * is a Spring Data repository (meaning it supports dynamic query methods).
 	 * 
-	 * @param type must not be {@literal null}.
+	 * @param type
+	 *            must not be {@literal null}.
 	 * @return
 	 */
 	public static RepositoryInformation create(IType type) {
@@ -154,6 +156,15 @@ public class RepositoryInformation {
 		String fullyQualifiedName = type.getFullyQualifiedName();
 		if ("org.springframework.data.repository.Repository".equals(fullyQualifiedName)) {
 			return true;
+		}
+		
+		/**
+		 * Spring Data Cassandra explicitly does not support dynamic query
+		 * methods, unlike most of the other Spring Data subprojects, and this
+		 * is by design.
+		 */
+		if ("org.springframework.data.cassandra.repository.TypedIdCassandraRepository".equals(fullyQualifiedName)) {
+			return false;
 		}
 		
 		try {
