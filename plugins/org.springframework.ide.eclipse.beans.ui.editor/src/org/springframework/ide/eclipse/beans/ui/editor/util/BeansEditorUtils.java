@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Spring IDE Developers
+ * Copyright (c) 2005, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,10 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -920,7 +922,16 @@ public class BeansEditorUtils {
 				for(String name: tempNodes.keySet()) {
 					Set<Node> set = tempNodes.get(name);
 					if (set != null && set.size() > 0) {
-						nodes.put(name, set.iterator().next());
+						Node node = set.iterator().next();
+						if (node == null) {
+							Activator.log(new Status(IStatus.WARNING,
+									Activator.PLUGIN_ID,
+									"Null entry in the set of referencable nodes. Name: '"
+											+ name + "'. Locator class: "
+											+ locator.getClass().getName()));
+						} else {
+							nodes.put(name, node);
+						}
 					}
 				}
 			}
