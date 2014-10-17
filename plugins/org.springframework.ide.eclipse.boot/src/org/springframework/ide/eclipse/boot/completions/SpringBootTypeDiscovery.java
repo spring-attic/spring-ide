@@ -66,9 +66,9 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	private static final long RETRY_INTERVAL = 15 * SECOND; 
 	
 	/**
-	 *  Retries are not unlimited. When this timelimit is reached we stop retrying.
+	 *  Retries are not unlimited. When this limit is reached we stop retrying.
 	 */
-	private static final long RETRY_TIMELIMIT = 5 * MINUTE;
+	private static final int RETRIES = (int) ((5 * MINUTE)/RETRY_INTERVAL);
 	
 	private static final boolean DEBUG = false;// (""+Platform.getLocation()).contains("kdvolder");
 
@@ -383,6 +383,8 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 				}
 			}
 			downloader = new DownloadManager(null, cacheFolder);
+			downloader.setTries(RETRIES);
+			downloader.setRetryInterval(RETRY_INTERVAL);
 		}
 		return downloader;
 	}
