@@ -32,7 +32,7 @@ public class SpringProjectConfigurator implements IProjectConfigurator {
 	public void configure(IProjectConfigurationRequest request, IProgressMonitor monitor) throws Exception {
 		for (ExternalDependency dependency : request.getGradleModel().getClasspath()) {
 			GradleModuleVersion moduleVersion = dependency.getGradleModuleVersion();
-			if (SPRING_NAME.equals(moduleVersion.getName()) && SPRING_GROUP.equals(moduleVersion.getGroup())) {
+			if (moduleVersion != null && SPRING_NAME.equals(moduleVersion.getName()) && SPRING_GROUP.equals(moduleVersion.getGroup())) {
 				SpringCoreUtils.addProjectNature(request.getProject(), SpringCore.NATURE_ID, monitor);
 			}
 		}

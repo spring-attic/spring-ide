@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 Spring IDE Developers
+ * Copyright (c) 2006, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -127,64 +127,66 @@ public class BeanReferenceSearchRequestor {
 	}
 
 	public void acceptSearchMatch(String beanId, Node beanNode, IFile file, String prefix) {
-		NamedNodeMap attributes = beanNode.getAttributes();
-		if (beanId.toLowerCase().startsWith(prefix.toLowerCase())) {
-			if (beanNode.getParentNode() != null) {
-				String beanName = beanId;
-				String replaceText = beanName;
-				String fileName = file.getProjectRelativePath().toString();
-				String key = beanName + fileName;
-				if (!beans.contains(key)) {
-					StringBuffer buf = new StringBuffer();
-					buf.append(beanName);
-					if (attributes.getNamedItem("class") != null) {
-						String className = attributes.getNamedItem("class").getNodeValue();
-						buf.append(" [");
-						buf.append(Signature.getSimpleName(className));
-						buf.append("]");
-					}
-					if (attributes.getNamedItem("parent") != null) {
-						String parentName = attributes.getNamedItem("parent").getNodeValue();
-						buf.append(" <");
-						buf.append(parentName);
-						buf.append(">");
-					}
-					buf.append(" - ");
-					buf.append(fileName);
-					String displayText = buf.toString();
-					Image image = null;
-					if (Display.getCurrent() != null) {
-						image = new DelegatingLabelProvider().getImage(beanNode);
-					}
-
-					String className = BeansEditorUtils.getClassNameForBean(beanNode);
-					boolean matchesType = false;
-					if (requiredTypes.size() > 0) {
-						IType type = JdtUtils.getJavaType(file.getProject(), className);
-						List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type, type);
-						for (String cn : hierachyTypes) {
-							if (this.requiredTypes.contains(cn)) {
-								matchesType = true;
-								break;
+		if (beanNode != null) {
+			NamedNodeMap attributes = beanNode.getAttributes();
+			if (beanId.toLowerCase().startsWith(prefix.toLowerCase())) {
+				if (beanNode.getParentNode() != null) {
+					String beanName = beanId;
+					String replaceText = beanName;
+					String fileName = file.getProjectRelativePath().toString();
+					String key = beanName + fileName;
+					if (!beans.contains(key)) {
+						StringBuffer buf = new StringBuffer();
+						buf.append(beanName);
+						if (attributes.getNamedItem("class") != null) {
+							String className = attributes.getNamedItem("class").getNodeValue();
+							buf.append(" [");
+							buf.append(Signature.getSimpleName(className));
+							buf.append("]");
+						}
+						if (attributes.getNamedItem("parent") != null) {
+							String parentName = attributes.getNamedItem("parent").getNodeValue();
+							buf.append(" <");
+							buf.append(parentName);
+							buf.append(">");
+						}
+						buf.append(" - ");
+						buf.append(fileName);
+						String displayText = buf.toString();
+						Image image = null;
+						if (Display.getCurrent() != null) {
+							image = new DelegatingLabelProvider().getImage(beanNode);
+						}
+	
+						String className = BeansEditorUtils.getClassNameForBean(beanNode);
+						boolean matchesType = false;
+						if (requiredTypes.size() > 0) {
+							IType type = JdtUtils.getJavaType(file.getProject(), className);
+							List<String> hierachyTypes = JdtUtils.getFlatListOfClassAndInterfaceNames(type, type);
+							for (String cn : hierachyTypes) {
+								if (this.requiredTypes.contains(cn)) {
+									matchesType = true;
+									break;
+								}
 							}
 						}
+	
+						if (!insertedMatchingType && matchingTypeFound && !matchesType) {
+							recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONTENT_ASSIST),
+									TYPE_MATCHING_RELEVANCE - 1, LABEL_SEPARATOR, "");
+							insertedMatchingType = true;
+						}
+	
+						if (matchesType) {
+							recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText, replaceText, beanNode);
+							matchingTypeFound = true;
+						}
+						else {
+							recorder.recordProposal(image, RELEVANCE, displayText, replaceText, beanNode);
+						}
+	
+						beans.add(key);
 					}
-
-					if (!insertedMatchingType && matchingTypeFound && !matchesType) {
-						recorder.recordProposal(BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONTENT_ASSIST),
-								TYPE_MATCHING_RELEVANCE - 1, LABEL_SEPARATOR, "");
-						insertedMatchingType = true;
-					}
-
-					if (matchesType) {
-						recorder.recordProposal(image, TYPE_MATCHING_RELEVANCE, displayText, replaceText, beanNode);
-						matchingTypeFound = true;
-					}
-					else {
-						recorder.recordProposal(image, RELEVANCE, displayText, replaceText, beanNode);
-					}
-
-					beans.add(key);
 				}
 			}
 		}
