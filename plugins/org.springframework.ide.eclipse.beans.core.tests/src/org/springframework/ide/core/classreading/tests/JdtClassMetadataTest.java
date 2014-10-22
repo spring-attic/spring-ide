@@ -16,14 +16,18 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.JdtConnectedMetadata;
 import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
@@ -39,6 +43,17 @@ public class JdtClassMetadataTest {
 	private IJavaProject javaProject;
 	private ClassLoader classloader;
 	private JdtMetadataReaderFactory factory;
+
+	@BeforeClass
+	public static void setUp() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
 
 	@Before
 	public void createProject() throws Exception {

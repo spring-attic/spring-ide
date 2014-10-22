@@ -20,11 +20,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.typehierarchy.BytecodeTypeHierarchyClassReaderFactory;
 import org.springframework.ide.eclipse.core.java.typehierarchy.DirectTypeHierarchyElementCacheFactory;
 import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyClassReader;
@@ -47,6 +51,17 @@ public class TypeHierarchyEngineTest {
 	private BytecodeTypeHierarchyClassReaderFactory classReaderFactory;
 	private DirectTypeHierarchyElementCacheFactory elementCacheFactory;
 
+	@BeforeClass
+	public static void setUp() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
+
 	@Before
 	public void createProject() throws Exception {
 		project = StsTestUtil.createPredefinedProject("type-hierarchy-engine-testcases", "org.springframework.ide.eclipse.beans.core.tests");
@@ -63,6 +78,7 @@ public class TypeHierarchyEngineTest {
 	@After
 	public void deleteProject() throws Exception {
 		project.delete(true, null);
+		engine.clearCache();
 	}
 	
 	@Test
@@ -309,6 +325,7 @@ public class TypeHierarchyEngineTest {
 		}
 
 		public void cleanup() {
+			this.reader.cleanup();
 		}
 		
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 Spring IDE Developers
+ * Copyright (c) 2005, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,11 +16,16 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.tests.BeansCoreTestCase;
 import org.springframework.ide.eclipse.beans.core.tests.MarkerAssertion;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -35,6 +40,17 @@ public class NamespaceElementsRuleTest extends BeansCoreTestCase {
 
 	private IResource resource;
 
+	@BeforeClass
+	public static void setUpAll() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 		// Enable XSD tool annotation rule
@@ -49,6 +65,11 @@ public class NamespaceElementsRuleTest extends BeansCoreTestCase {
 
 		resource = createPredefinedProjectAndGetResource("validation", "src/sts-385.xml");
 		StsTestUtil.waitForResource(resource);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		resource.getProject().delete(true, null);
 	}
 
 	@Test

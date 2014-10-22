@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,15 +13,21 @@ package org.springframework.ide.eclipse.beans.core.model.tests;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -34,6 +40,17 @@ public class BeansProjectDescriptionWriterTest {
 	private IProject project;
 	private BeansModel model;
 	private BeansProject beansProject;
+
+	@BeforeClass
+	public static void setUpAll() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
 
 	@Before
 	public void createProject() throws Exception {
@@ -60,8 +77,11 @@ public class BeansProjectDescriptionWriterTest {
 		
 		String description = os.toString();
 		
-		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+		Matcher matcher = Pattern
+				.compile(
+						"<configs>\\W*<config>basic-bean-config.xml</config>\\W*</configs>")
+				.matcher(description);
+		assertTrue(matcher.find());
 	}
 	
 	@Test
@@ -77,8 +97,11 @@ public class BeansProjectDescriptionWriterTest {
 		
 		String description = os.toString();
 		
-		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t\t<config>java:org.test.spring.SimpleConfigurationClass</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+		Matcher matcher = Pattern
+				.compile(
+						"<configs>\\W*<config>basic-bean-config.xml</config>\\W*<config>java:org.test.spring.SimpleConfigurationClass</config>\\W*</configs>")
+				.matcher(description);
+		assertTrue(matcher.find());
 	}
 	
 	@Test
@@ -94,8 +117,11 @@ public class BeansProjectDescriptionWriterTest {
 		
 		String description = os.toString();
 		
-		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t\t<config>java:org.test.spring.SimpleConfigurationClass</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+		Matcher matcher = Pattern
+				.compile(
+						"<configs>\\W*<config>basic-bean-config.xml</config>\\W*<config>java:org.test.spring.SimpleConfigurationClass</config>\\W*</configs>")
+				.matcher(description);		
+		assertTrue(matcher.find());
 	}
 	
 }

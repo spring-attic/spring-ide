@@ -18,11 +18,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.asm.Type;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ide.eclipse.beans.core.metadata.internal.model.DelegatingAnnotationReadingMetadataProvider;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.annotation.Annotation;
 import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
@@ -50,6 +54,17 @@ public class JdtBasedAnnotationMetadataTest {
 	private IProject project;
 	private CachingClassReaderFactory classReaderFactory;
 	private ClassLoader classLoader;
+
+	@BeforeClass
+	public static void setUp() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
 
 	@Before
 	public void createProject() throws Exception {

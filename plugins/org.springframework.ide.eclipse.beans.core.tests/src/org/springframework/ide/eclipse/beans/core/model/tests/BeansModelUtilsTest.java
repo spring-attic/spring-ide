@@ -14,10 +14,13 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
@@ -39,6 +42,17 @@ public class BeansModelUtilsTest {
 	private IJavaProject javaProject;
 	private TypeHierarchyEngine typeEngine;
 
+	@BeforeClass
+	public static void setUp() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
+	
 	@Before
 	public void createProject() throws Exception {
 		project = StsTestUtil.createPredefinedProject("beans-model-utils-tests", "org.springframework.ide.eclipse.beans.core.tests");
