@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
@@ -188,6 +189,13 @@ public class BeansProjectAutoConfigTest {
 			configs = beansProject.getConfigs();
 			assertEquals(0, configs.size());
 		} finally {
+			new ACondition("Wait for Jobs") {
+				@Override
+				public boolean test() throws Exception {
+					assertJobManagerIdle();
+					return true;
+				}
+			}.waitFor(3 * 60 * 1000);
 			project.delete(true, null);
 		}
 	}
@@ -230,6 +238,13 @@ public class BeansProjectAutoConfigTest {
 			Set<String> autoConfigSetNames = beansProject.getAutoConfigSetNames();
 			assertEquals(0, autoConfigSetNames.size());
 		} finally {
+			new ACondition("Wait for Jobs") {
+				@Override
+				public boolean test() throws Exception {
+					assertJobManagerIdle();
+					return true;
+				}
+			}.waitFor(3 * 60 * 1000);
 			project.delete(true, null);
 		}
 
@@ -260,6 +275,13 @@ public class BeansProjectAutoConfigTest {
 			
 			assertTrue(autoConfigs.contains("java:org.test.advanced.SpringBootConfigClass"));
 		} finally {
+			new ACondition("Wait for Jobs") {
+				@Override
+				public boolean test() throws Exception {
+					assertJobManagerIdle();
+					return true;
+				}
+			}.waitFor(3 * 60 * 1000);
 			project.delete(true, null);
 		}
 
@@ -317,6 +339,13 @@ public class BeansProjectAutoConfigTest {
 			autoConfigs = beansProject.getAutoConfigNames();
 			assertEquals(1, autoConfigs.size());
 		} finally {
+			new ACondition("Wait for Jobs") {
+				@Override
+				public boolean test() throws Exception {
+					assertJobManagerIdle();
+					return true;
+				}
+			}.waitFor(3 * 60 * 1000);
 			project.delete(true, null);
 		}
 	}
@@ -347,6 +376,13 @@ public class BeansProjectAutoConfigTest {
 			assertEquals(1, configNamesInSet.size());
 			assertEquals("WebContent/WEB-INF/spring/root-context.xml", configNamesInSet.iterator().next());
 		} finally {
+			new ACondition("Wait for Jobs") {
+				@Override
+				public boolean test() throws Exception {
+					assertJobManagerIdle();
+					return true;
+				}
+			}.waitFor(3 * 60 * 1000);
 			project.delete(true, null);
 		}
 	}
@@ -388,6 +424,13 @@ public class BeansProjectAutoConfigTest {
 			Set<String> autoConfigSetNames = beansProject.getAutoConfigSetNames();
 			assertEquals(0, autoConfigSetNames.size());
 		} finally {
+			new ACondition("Wait for Jobs") {
+				@Override
+				public boolean test() throws Exception {
+					assertJobManagerIdle();
+					return true;
+				}
+			}.waitFor(3 * 60 * 1000);
 			project.delete(true, null);
 		}
 	}
