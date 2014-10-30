@@ -95,6 +95,7 @@ public class NewSpringBootWizardModel {
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.FORM_URL = formUrl;
 		discoverOptions(stringInputs, style);
+		style.sort();
 
 		projectName = stringInputs.getField("name");
 		projectName.validator(new NewProjectNameValidator(projectName.getVariable()));

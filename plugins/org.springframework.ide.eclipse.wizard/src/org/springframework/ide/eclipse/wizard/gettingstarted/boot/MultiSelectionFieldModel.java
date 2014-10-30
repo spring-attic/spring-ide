@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,7 +26,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 /**
  * Model for a UI widget that offers multiple choices. Could be represented
  * by a set of Checkboxes or multi-selection enabled list/tree viewer.
- * 
+ *
  * @author Kris De Volder
  */
 public class MultiSelectionFieldModel<T> {
@@ -34,9 +36,10 @@ public class MultiSelectionFieldModel<T> {
 	private String label; // Label to display in forms
 	private LiveSet<T> variable = new LiveSet<T>();
 	private LiveExpression<ValidationResult> validator;
-	
+
 	private Map<T,String> labelMap = new LinkedHashMap<T, String>();
-	
+	private boolean mustSort;
+
 	public MultiSelectionFieldModel(Class<T> type, String name) {
 		this.type = type;
 		this.name  = name;
@@ -44,15 +47,15 @@ public class MultiSelectionFieldModel<T> {
 		this.variable = new LiveSet<T>();
 		this.validator = Validator.OK;
 	}
-	
+
 	public Class<T> getType() {
 		return type;
 	}
-	
+
 	public String getLabel() {
 		return label;
 	}
-	
+
 	public String getLabel(T value) {
 		return labelMap.get(value);
 	}
@@ -64,7 +67,7 @@ public class MultiSelectionFieldModel<T> {
 	public LiveExpression<ValidationResult> getValidator() {
 		return validator;
 	}
-	
+
 	public MultiSelectionFieldModel<T> validator(LiveExpression<ValidationResult> v) {
 		this.validator = v;
 		return this;
@@ -73,7 +76,7 @@ public class MultiSelectionFieldModel<T> {
 	public LiveSet<T> getSelecteds() {
 		return variable;
 	}
-	
+
 	public void add(T v) {
 		getSelecteds().add(v);
 	}
@@ -82,9 +85,9 @@ public class MultiSelectionFieldModel<T> {
 	}
 
 	/**
-	 * Add a valid choice to the multi selection model. 
+	 * Add a valid choice to the multi selection model.
 	 * @param label String to show the choice to a user
-	 * @param key  Value added to the set when user selects this choice. 
+	 * @param key  Value added to the set when user selects this choice.
 	 */
 	public MultiSelectionFieldModel<T> choice(String label, T value) {
 		Assert.isLegal(labelMap.get(value)==null, "Duplicate choice "+value+" already added");
@@ -100,7 +103,21 @@ public class MultiSelectionFieldModel<T> {
 	@SuppressWarnings("unchecked")
 	public synchronized T[] getChoices() {
 		Collection<T> values = labelMap.keySet();
-		return values.toArray((T[]) Array.newInstance(getType(), values.size()));
+		T[] choices = values.toArray((T[]) Array.newInstance(getType(), values.size()));
+		if (mustSort) {
+			Arrays.sort(choices, new Comparator<T>() {
+				public int compare(T o1, T o2) {
+					String s1 = getLabel(o1);
+					String s2 = getLabel(o2);
+					return s1.compareTo(s2);
+				}
+			});
+		}
+		return choices;
+	}
+
+	public void sort() {
+		mustSort = true;
 	}
 
 }
