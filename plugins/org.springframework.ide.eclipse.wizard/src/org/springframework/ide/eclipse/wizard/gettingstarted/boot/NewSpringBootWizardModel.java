@@ -79,6 +79,15 @@ public class NewSpringBootWizardModel {
 		KNOWN_GROUP_LABELS.put("bootVersion", "Boot Version:");
 	}
 
+	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<String, BuildType>();
+	static {
+		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
+		KNOWN_TYPES.put("maven-project", BuildType.MAVEN); // New versions of initialzr app
+
+		KNOWN_TYPES.put("gradle.zip", BuildType.GRADLE); //Legacy, can remove when new initializr app uses "gradle-project" definitively
+		KNOWN_TYPES.put("starter.zip", BuildType.MAVEN); //Legacy, can remove when initializr app uses "maven-project" definitively
+	}
+
 	private final URLConnectionFactory urlConnectionFactory;
 	private final String FORM_URL;
 	private String DOWNLOAD_URL; //Derived from 'FORM_URL' by downloading and parsing the form and finding the 'action' in the <form> element
@@ -212,10 +221,9 @@ public class NewSpringBootWizardModel {
 		if (buildTypeRadios!=null) {
 			RadioInfo selected = buildTypeRadios.getSelection().selection.getValue();
 			if (selected!=null) {
-				if ("gradle.zip".equals(selected.getValue())) {
-					return BuildType.GRADLE;
-				} else if ("starter.zip".equals(selected.getValue())) {
-					return BuildType.MAVEN;
+				BuildType bt = KNOWN_TYPES.get(selected.getValue());
+				if (bt!=null) {
+					return bt;
 				} else {
 					//Uknown build type, import it as a general project which is better than nothing
 					return BuildType.GENERAL;
@@ -241,10 +249,6 @@ public class NewSpringBootWizardModel {
 
 	/**
 	 * Dynamically discover input fields and 'style' options by parsing initializr form.
-	 * @throws IOException
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws URISyntaxException
 	 */
 	private void discoverOptions(FieldArrayModel<String> fields, MultiSelectionFieldModel<String> style) throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
 		URLConnection conn = null;
@@ -318,13 +322,9 @@ public class NewSpringBootWizardModel {
 	 */
 	protected boolean include(RadioInfo radio) {
 		if ("type".equals(radio.getGroupName())) {
-			//We can only import specifically supported build types. I.e:
-			// 'starter.zip' meaning 'maven' projects
-			// 'gradle.zip' meaning 'gradle' projects.
-
-			//We only support 'zipped project' imports. Not isolated build files.
+			//We can only import specifically supported build types.
 			String value = radio.getValue();
-			return "gradle.zip".equals(value) || "starter.zip".equals(value);
+			return KNOWN_TYPES.containsKey(value);
 		}
 		//By default always include new radios added to the web wizard.
 		return true;

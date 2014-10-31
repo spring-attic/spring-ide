@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootW
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroups;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
@@ -32,7 +33,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
  * @author Kris De Volder
  */
 public class NewSpringBootWizardModelTest extends TestCase {
-	
 
 	@Override
 	protected void setUp() throws Exception {
@@ -40,7 +40,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 	
 	public static NewSpringBootWizardModel parseFrom(String resourcePath) throws Exception {
-		URL formUrl = NewSpringBootWizardModelTest.class.getResource("test-form.html");
+		URL formUrl = NewSpringBootWizardModelTest.class.getResource(resourcePath);
 		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString());
 	}
 	
@@ -67,12 +67,39 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 	
 	public void testBuildTypeRadios() throws Exception {
+		String mavenId = "starter.zip";
+		String gradleId = "gradle.zip";
 		NewSpringBootWizardModel model = parseFrom("test-form.html");
+		
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
-		assertGroupValues(group, "gradle.zip", "starter.zip");
-		assertEquals("starter.zip", group.getDefault().getValue());
+		assertGroupValues(group, gradleId, mavenId);
+		assertEquals(mavenId, group.getDefault().getValue());
+		
+		group.getSelection().selection.setValue(group.getRadio(mavenId));
+		assertEquals(BuildType.MAVEN, model.getBuildType());
+		
+		group.getSelection().selection.setValue(group.getRadio(gradleId));
+		assertEquals(BuildType.GRADLE, model.getBuildType());
 	}
+	
+	public void testBuildTypeRadiosV2() throws Exception {
+		String mavenId = "maven-project";
+		String gradleId = "gradle-project";
+		NewSpringBootWizardModel model = parseFrom("test-form-v2.html");
+		
+		RadioGroup group = model.getRadioGroups().getGroup("type");
+		assertNotNull(group);
+		assertGroupValues(group, mavenId, gradleId);
+		assertEquals(mavenId, group.getDefault().getValue());
+		
+		group.getSelection().selection.setValue(group.getRadio(mavenId));
+		assertEquals(BuildType.MAVEN, model.getBuildType());
+		
+		group.getSelection().selection.setValue(group.getRadio(gradleId));
+		assertEquals(BuildType.GRADLE, model.getBuildType());
+	}
+	
 	
 	public void testLabels() throws Exception {
 		NewSpringBootWizardModel model = parseFrom("test-form.html");
