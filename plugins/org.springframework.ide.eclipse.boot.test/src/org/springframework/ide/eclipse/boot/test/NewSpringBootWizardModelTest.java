@@ -10,12 +10,19 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -23,8 +30,10 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootW
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroups;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
+import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
@@ -40,18 +49,23 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 	
 	public static NewSpringBootWizardModel parseFrom(String resourcePath) throws Exception {
+		URL formUrl = resourceUrl(resourcePath);
+		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), "application/json");
+	}
+
+	public static URL resourceUrl(String resourcePath) {
 		URL formUrl = NewSpringBootWizardModelTest.class.getResource(resourcePath);
-		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString());
+		return formUrl;
 	}
 	
 	public void testParsedRadios() throws Exception {
-		NewSpringBootWizardModel model = parseFrom("test-form.html");
+		NewSpringBootWizardModel model = parseFrom("initializr.json");
 		RadioGroups radioGroups = model.getRadioGroups();
-		assertGroupNames(radioGroups, "type", "packaging", "javaVersion", "language");
+		assertGroupNames(radioGroups, "type", "packaging", "javaVersion", "language", "bootVersion");
 	}
 
 	public void testPackagingRadios() throws Exception {
-		NewSpringBootWizardModel model = parseFrom("test-form.html");
+		NewSpringBootWizardModel model = parseFrom("initializr.json");
 		RadioGroup packagingTypes = model.getRadioGroups().getGroup("packaging");
 		assertNotNull(packagingTypes);
 		assertGroupValues(packagingTypes, "jar", "war");
@@ -59,7 +73,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 	public void testJavaVersionRadios() throws Exception {
-		NewSpringBootWizardModel model = parseFrom("test-form.html");
+		NewSpringBootWizardModel model = parseFrom("initializr.json");
 		RadioGroup group = model.getRadioGroups().getGroup("javaVersion");
 		assertNotNull(group);
 		assertGroupValues(group, "1.6", "1.7", "1.8");
@@ -67,26 +81,12 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 	
 	public void testBuildTypeRadios() throws Exception {
-		String mavenId = "starter.zip";
-		String gradleId = "gradle.zip";
-		NewSpringBootWizardModel model = parseFrom("test-form.html");
-		
-		RadioGroup group = model.getRadioGroups().getGroup("type");
-		assertNotNull(group);
-		assertGroupValues(group, gradleId, mavenId);
-		assertEquals(mavenId, group.getDefault().getValue());
-		
-		group.getSelection().selection.setValue(group.getRadio(mavenId));
-		assertEquals(BuildType.MAVEN, model.getBuildType());
-		
-		group.getSelection().selection.setValue(group.getRadio(gradleId));
-		assertEquals(BuildType.GRADLE, model.getBuildType());
-	}
-	
-	public void testBuildTypeRadiosV2() throws Exception {
 		String mavenId = "maven-project";
 		String gradleId = "gradle-project";
-		NewSpringBootWizardModel model = parseFrom("test-form-v2.html");
+		String jsonFile = "initializr.json";
+		NewSpringBootWizardModel model = parseFrom(jsonFile);
+		String starterZipUrl = resourceUrl(jsonFile).toURI().resolve("/starter.zip").toString();
+		assertEquals(starterZipUrl, model.baseUrl.getValue());
 		
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
@@ -95,14 +95,66 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		
 		group.getSelection().selection.setValue(group.getRadio(mavenId));
 		assertEquals(BuildType.MAVEN, model.getBuildType());
+		assertEquals(starterZipUrl, model.baseUrl.getValue());
 		
 		group.getSelection().selection.setValue(group.getRadio(gradleId));
 		assertEquals(BuildType.GRADLE, model.getBuildType());
+		assertEquals(starterZipUrl, model.baseUrl.getValue());
 	}
 	
+	public void testBuildTypeRadiosVariant() throws Exception {
+		//Hypothetical variant where the json "types" lists different actions for maven and gradle zip 
+		
+		String mavenId = "maven-project";
+		String gradleId = "gradle-project";
+		String jsonFile = "initializr-variant.json";
+		
+		String mavenZipUrl = resourceUrl(jsonFile).toURI().resolve("/maven.zip").toString();
+		String gradleZipUrl = resourceUrl(jsonFile).toURI().resolve("/gradle.zip").toString();
+		
+		NewSpringBootWizardModel model = parseFrom(jsonFile);
+		
+		RadioGroup group = model.getRadioGroups().getGroup("type");
+		assertNotNull(group);
+		assertGroupValues(group, gradleId, mavenId);
+		assertEquals(mavenId, group.getDefault().getValue());
+		assertEquals(mavenZipUrl, model.baseUrl.getValue());
+		
+		group.getSelection().selection.setValue(group.getRadio(gradleId));
+		assertEquals(BuildType.GRADLE, model.getBuildType());
+		assertEquals(gradleZipUrl, model.baseUrl.getValue());
+		
+		group.getSelection().selection.setValue(group.getRadio(mavenId));
+		assertEquals(BuildType.MAVEN, model.getBuildType());
+		assertEquals(mavenZipUrl, model.baseUrl.getValue());
+	}
 	
+	public void testStarters() throws Exception {
+		NewSpringBootWizardModel model = parseFrom("initializr.json");
+		String[] styles = model.style.getChoices();
+		assertNotNull(styles);
+		assertTrue(styles.length>10);
+		
+		String lastLabel = null; //check that style labels are sorted 
+		for (String choice : model.style.getChoices()) {
+			String label = model.style.getLabel(choice);
+			if (lastLabel!=null) {
+				assertTrue("Labels not sorted: '"+lastLabel+"' > '"+label+"'", lastLabel.compareTo(label)<0);
+			}
+			lastLabel = label;
+			assertNotNull("No tooltip for: "+choice+" ["+label+"]", model.style.getTooltip(choice));
+		}
+		
+	}
+		
 	public void testLabels() throws Exception {
-		NewSpringBootWizardModel model = parseFrom("test-form.html");
+		NewSpringBootWizardModel model = parseFrom("initializr.json");
+		Iterator<FieldModel<String>> stringInputs = model.stringInputs.iterator();
+		while (stringInputs.hasNext()) {
+			FieldModel<String> input = stringInputs.next();
+			assertRealLabel(input.getLabel());
+		}
+		
 		for (RadioGroup group : model.getRadioGroups().getGroups()) {
 			String label = group.getLabel();
 			assertRealLabel(label);
@@ -116,7 +168,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	
 	public void testPrintLabels() throws Exception {
 		//print all radios in groups with lable for quick visual inspection.
-		NewSpringBootWizardModel model = parseFrom("test-form.html");
+		NewSpringBootWizardModel model = parseFrom("initializr.json");
 		for (RadioGroup group : model.getRadioGroups().getGroups()) {
 			String label = group.getLabel();
 			System.out.println(group + " -> "+label);
@@ -130,10 +182,32 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 	
 	/**
+	 * Basic test of the 'spec parser'. Just check that it accepts a well-formed
+	 * json spec document and doesn't crash on it.
+	 */
+	public void testInitializrSpecParser() throws Exception {
+		doParseTest("initializr.json");
+		doParseTest("initializr-variant.json"); //same file with some extra 'crap' added which parser should tolerate.
+	}
+
+	private void doParseTest(String resource) throws IOException, Exception {
+		URL url = NewSpringBootWizardModelTest.class.getResource(resource);
+		URLConnection conn = new URLConnectionFactory().createConnection(url);
+		conn.connect();
+		InputStream input = conn.getInputStream();
+		try {
+			InitializrServiceSpec spec = InitializrServiceSpec.parseFrom(input);
+			assertNotNull(spec);
+		} finally {
+			input.close();
+		}
+	}
+	
+	/**
 	 * Test that radio params are wired up in the model so that selecting them changes the downloadUrl.
 	 */
 	public void testRadioQueryParams() throws Exception {
-		NewSpringBootWizardModel model = parseFrom("test-form.html");
+		NewSpringBootWizardModel model = parseFrom("initializr.json");
 		RadioGroup packaging = model.getRadioGroups().getGroup("packaging");
 		LiveVariable<RadioInfo> selection = packaging.getSelection().selection;
 		assertEquals("jar", selection.getValue().getValue());
@@ -178,16 +252,31 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 	private void assertRealLabel(String label) {
-		assertNotNull(label); //have a label
-		assertFalse("".equals(label.trim())); //label not empty
-		assertTrue(Character.isUpperCase(label.charAt(0))); //'real' label, not just the default taken from the name.
+		assertNotNull("Label is null", label); //have a label
+		assertFalse("Label is empty", "".equals(label.trim())); //label not empty
+		if (Character.isDigit(label.charAt(0))) {
+			//labels like '1.6.' are okay too.
+			return;
+		}
+		assertTrue("Label doesn't start with uppercase: '"+label+"'", Character.isUpperCase(label.charAt(0))); //'real' label, not just the default taken from the name.
 	}
 
 	private void assertGroupValues(RadioGroup group, String... expecteds) {
+		Set<String> expectedSet = new HashSet<String>(Arrays.asList(expecteds));
 		RadioInfo[] radios = group.getRadios();
-		assertEquals(expecteds.length, radios.length);
 		for (int i = 0; i < radios.length; i++) {
-			assertEquals(expecteds[i], radios[i].getValue());
+			String actual = radios[i].getValue();
+			if (!expectedSet.contains(actual)) {
+				fail("Unexpected: "+actual);
+			}
+			expectedSet.remove(actual);
+		}
+		if (!expectedSet.isEmpty()) {
+			StringBuilder notFound = new StringBuilder();
+			for (String missing : expectedSet) {
+				notFound.append(" "+missing);
+			}
+			fail("Missing: "+notFound);
 		}
 	}
 

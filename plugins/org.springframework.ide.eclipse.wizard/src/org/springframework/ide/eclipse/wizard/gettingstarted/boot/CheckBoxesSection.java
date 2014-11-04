@@ -54,11 +54,13 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private Button cb;
 		private final T value;
 		private final String label;
+		private final String tooltip;
 
-		public CheckBox(IPageWithSections owner, T value, String label) {
+		public CheckBox(IPageWithSections owner, T value, String label, String tooltip) {
 			super(owner);
 			this.value = value;
 			this.label = label;
+			this.tooltip = tooltip;
 		}
 
 		@Override
@@ -71,6 +73,9 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			if (page!=null && !page.isDisposed()) {
 				this.cb = new Button(page, SWT.CHECK);
 				cb.setText(label);
+				if (tooltip!=null) {
+					cb.setToolTipText(tooltip);
+				}
 				cb.setSelection(model.getSelecteds().contains(value));
 				GridDataFactory.fillDefaults().grab(true, false).applyTo(cb);
 				cb.addSelectionListener(new SelectionListener() {
@@ -137,7 +142,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 
 		for (int i = 0; i < options.length; i++) {
-			subsections[i] = new CheckBox(owner, options[i], model.getLabel(options[i]));
+			subsections[i] = new CheckBox(owner, options[i], model.getLabel(options[i]), model.getTooltip(options[i]));
 			subsections[i].createContents(group);
 		}
 	}

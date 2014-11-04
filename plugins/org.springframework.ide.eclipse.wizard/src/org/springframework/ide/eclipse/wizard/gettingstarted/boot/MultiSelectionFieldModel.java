@@ -14,6 +14,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,6 +39,7 @@ public class MultiSelectionFieldModel<T> {
 	private LiveExpression<ValidationResult> validator;
 
 	private Map<T,String> labelMap = new LinkedHashMap<T, String>();
+	private Map<T,String> tooltips = null; //don't allocate unless used.
 	private boolean mustSort;
 
 	public MultiSelectionFieldModel(Class<T> type, String name) {
@@ -95,6 +97,25 @@ public class MultiSelectionFieldModel<T> {
 		return this;
 	}
 
+	public void choice(String label, T value, String tooltipText) {
+		choice(label, value);
+		setTooltip(value, tooltipText);
+	}
+
+	public void setTooltip(T value, String tooltipText) {
+		if (tooltips==null) {
+			tooltips = new HashMap<T, String>();
+		}
+		tooltips.put(value,  tooltipText);
+	}
+
+	public String getTooltip(T value) {
+		if (tooltips!=null) {
+			return tooltips.get(value);
+		}
+		return null;
+	}
+
 	public MultiSelectionFieldModel<T> label(String label) {
 		this.label = label;
 		return this;
@@ -119,5 +140,6 @@ public class MultiSelectionFieldModel<T> {
 	public void sort() {
 		mustSort = true;
 	}
+
 
 }
