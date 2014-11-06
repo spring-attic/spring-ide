@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 Spring IDE Developers
+ * Copyright (c) 2004, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -38,7 +39,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
+import org.osgi.service.url.URLConstants;
+import org.osgi.service.url.URLStreamHandlerService;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
@@ -102,6 +106,8 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	private NamespaceManager nsManager;
 
 	private NamespaceBundleLister nsListener;
+	
+	private ServiceRegistration<?> projectAwareUrlService = null;
 
 	/** Internal executor service */
 	private ExecutorService executorService;
@@ -150,6 +156,13 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	@Override
 	public void start(final BundleContext context) throws Exception {
 		super.start(context);
+		
+		Hashtable<String, String> properties = new Hashtable<String, String>();
+		properties.put(URLConstants.URL_HANDLER_PROTOCOL,
+				ProjectAwareUrlStreamHandlerService.PROJECT_AWARE_PROTOCOL);
+		projectAwareUrlService = context.registerService(
+				URLStreamHandlerService.class.getName(),
+				new ProjectAwareUrlStreamHandlerService(), properties);
 		
 		executorService = Executors.newCachedThreadPool(new ThreadFactory() {
 			
@@ -200,6 +213,9 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 			isClosed = true;
 		}
 		model.stop();
+		if (projectAwareUrlService != null) {
+			projectAwareUrlService.unregister();
+		}
 		super.stop(context);
 	}
 

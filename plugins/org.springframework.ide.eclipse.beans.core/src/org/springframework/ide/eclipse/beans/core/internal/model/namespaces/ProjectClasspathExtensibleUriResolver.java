@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 Spring IDE Developers
+ * Copyright (c) 2010, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolverExtension;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.ProjectAwareUrlStreamHandlerService;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor.SchemaLocations;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
@@ -61,8 +62,6 @@ public class ProjectClasspathExtensibleUriResolver implements
 	private static final String KEY_DISABLE_CACHING_PREFERENCE = BeansCorePlugin.PLUGIN_ID + "."
 			+ BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID;
 	
-	public static final String PROJECT_AWARE_PROTOCOL = "project-aware://";
-
 //	private static Map<IProject, ProjectClasspathUriResolver> projectResolvers = new ConcurrentHashMap<IProject, ProjectClasspathUriResolver>();
 	private static ConcurrentMap<IProject, Future<ProjectClasspathUriResolver>> projectResolvers = new ConcurrentHashMap<IProject, Future<ProjectClasspathUriResolver>>();
 
@@ -87,9 +86,11 @@ public class ProjectClasspathExtensibleUriResolver implements
 		IProject project = null;
 		if (file != null) {
 			project = getBestMatchingProject(file);
-		}
-		else if (baseLocation != null && baseLocation.startsWith(PROJECT_AWARE_PROTOCOL)) {
-			String nameAndLocation = baseLocation.substring(PROJECT_AWARE_PROTOCOL.length());
+		} else if (baseLocation != null 
+				&& baseLocation.startsWith(ProjectAwareUrlStreamHandlerService.PROJECT_AWARE_PROTOCOL_HEADER)) {
+			String nameAndLocation = baseLocation
+					.substring(ProjectAwareUrlStreamHandlerService.PROJECT_AWARE_PROTOCOL_HEADER
+							.length());
 			String projectName = nameAndLocation.substring(0, nameAndLocation.indexOf('/'));
 			project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		}
@@ -111,7 +112,7 @@ public class ProjectClasspathExtensibleUriResolver implements
 		if (resolver != null) {
 			String resolved = resolver.resolveOnClasspath(publicId, systemId);
 			if (resolved != null) {
-				resolved = PROJECT_AWARE_PROTOCOL + project.getName() + "/" + resolved;
+				resolved = ProjectAwareUrlStreamHandlerService.createProjectAwareUrl(project.getName(), resolved);
 			}
 			return resolved;
 		}

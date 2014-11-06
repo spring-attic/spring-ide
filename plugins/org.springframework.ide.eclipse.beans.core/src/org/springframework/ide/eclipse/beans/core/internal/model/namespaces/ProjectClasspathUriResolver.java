@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Spring IDE Developers
+ * Copyright (c) 2011, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.resources.IProject;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.ProjectAwareUrlStreamHandlerService;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.CollectionUtils;
@@ -152,7 +153,9 @@ public class ProjectClasspathUriResolver {
 		}
 
 		try {
-			URL url = new URI(resolvedPath).toURL();
+			URL url = new URI(
+					ProjectAwareUrlStreamHandlerService.createProjectAwareUrl(
+							project.getName(), resolvedPath)).toURL();
 			return TargetNamespaceScanner.getTargetNamespace(url);
 		} catch (IOException e) {
 			BeansCorePlugin.log(e);
@@ -193,7 +196,7 @@ public class ProjectClasspathUriResolver {
 			url = cls.getResource(xsdPath);
 		}
 
-		return url != null ? url.toString() : null;
+		return url == null ? null : xsdPath;
 	}
 
 }

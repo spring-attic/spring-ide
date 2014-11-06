@@ -24,7 +24,8 @@ Require-Bundle: org.eclipse.core.runtime,
  javax.persistence,
  org.hamcrest.library;bundle-version="[1.0.0,2.0.0)",
  org.hamcrest.core;bundle-version="[1.0.0,2.0.0)",
- org.springframework.orm
+ org.springframework.orm,
+ org.springsource.ide.eclipse.commons.frameworks.test.util
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Spring IDE Developers
