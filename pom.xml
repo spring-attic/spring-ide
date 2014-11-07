@@ -84,6 +84,8 @@
 		<maven.compiler.source>1.5</maven.compiler.source>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<encoding>UTF-8</encoding>
+		<test.vmargs>${test.osvmargs}</test.vmargs>
+		<test.osvmargs></test.osvmargs>
 	</properties>
 
 	<modules>
@@ -430,6 +432,18 @@
 				<signing.key.password>${env.bamboo_signing_key_password}</signing.key.password>
 			</properties>
 		</profile>
+		
+		<profile>
+			<id>windows</id>
+			<activation>
+				<os>
+			        <family>Windows</family>
+			    </os>
+      		</activation>
+			<properties>
+				<test.osvmargs>-Dgreclipse.nonlocking=true</test.osvmargs>
+			</properties>
+		</profile>
 
 	</profiles>
 
@@ -675,6 +689,16 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-surefire-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<argLine>
+							-Xmx1024m -XX:MaxPermSize=256m ${test.vmargs}
+						</argLine>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

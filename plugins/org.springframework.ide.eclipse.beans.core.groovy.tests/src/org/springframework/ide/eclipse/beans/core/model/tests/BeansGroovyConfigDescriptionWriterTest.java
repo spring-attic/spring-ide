@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,15 +15,20 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.groovy.tests.Activator;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
@@ -36,6 +41,17 @@ public class BeansGroovyConfigDescriptionWriterTest {
 	private BeansModel model;
 	private BeansProject beansProject;
 
+	@BeforeClass
+	public static void setUpAll() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
+
 	@Before
 	public void createProject() throws Exception {
 		project = StsTestUtil.createPredefinedProject("beans-config-tests", Activator.PLUGIN_ID);
@@ -46,6 +62,13 @@ public class BeansGroovyConfigDescriptionWriterTest {
 	
 	@After
 	public void deleteProject() throws Exception {
+		new ACondition("Wait for Jobs") {
+			@Override
+			public boolean test() throws Exception {
+				assertJobManagerIdle();
+				return true;
+			}
+		}.waitFor(3 * 60 * 1000);
 		project.delete(true, null);
 	}
 
