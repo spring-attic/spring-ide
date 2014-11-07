@@ -22,7 +22,6 @@
 	  <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 	  <testSuite>org.springframework.ide.eclipse.beans.core.tests</testSuite>
 	  <testClass>org.springframework.ide.eclipse.beans.core.tests.AllBeansCoreTests</testClass>
-	  <argLine>-Xmx512m</argLine>
 	</configuration>
       </plugin>
 

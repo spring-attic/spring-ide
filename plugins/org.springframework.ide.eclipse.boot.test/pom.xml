@@ -22,7 +22,6 @@
 					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 					<testSuite>org.springframework.ide.eclipse.boot.test</testSuite>
 					<testClass>org.springframework.ide.eclipse.boot.test.AllSpringBootTests</testClass>
-					<argLine>-Xmx512m</argLine>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -23,7 +23,6 @@
 					<includes>
 						<include>**/*Test.java</include>
 					</includes>
-					<argLine>-Xmx512m</argLine>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -433,6 +433,18 @@
 			</properties>
 		</profile>
 		
+ 		<profile>
+			<id>mac</id>
+			<activation>
+				<os>
+			        <family>mac</family>
+			    </os>
+      		</activation>
+			<properties>
+				<test.osvmargs>-XstartOnFirstThread</test.osvmargs>
+			</properties>
+		</profile>
+		
 		<profile>
 			<id>windows</id>
 			<activation>
@@ -444,7 +456,7 @@
 				<test.osvmargs>-Dgreclipse.nonlocking=true</test.osvmargs>
 			</properties>
 		</profile>
-
+		
 	</profiles>
 
 	<repositories>
@@ -690,7 +702,7 @@
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.3</version>
 				</plugin>
-				<plugin>
+ 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-surefire-plugin</artifactId>
 					<version>${tycho-version}</version>
@@ -698,6 +710,9 @@
 						<argLine>
 							-Xmx1024m -XX:MaxPermSize=256m ${test.vmargs}
 						</argLine>
+					<testFailureIgnore>
+						true
+					</testFailureIgnore>
 					</configuration>
 				</plugin>
 			</plugins>
