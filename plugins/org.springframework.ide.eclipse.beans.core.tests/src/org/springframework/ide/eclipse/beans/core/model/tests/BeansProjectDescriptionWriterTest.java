@@ -99,7 +99,7 @@ public class BeansProjectDescriptionWriterTest {
 		
 		Matcher matcher = Pattern
 				.compile(
-						"<configs>\\W*<config>basic-bean-config.xml</config>\\W*<config>java:org.test.spring.SimpleConfigurationClass</config>\\W*</configs>")
+						"<configs>\\W*<config>\\W*basic-bean-config.xml\\W*</config>\\W*<config>\\W*java:org.test.spring.SimpleConfigurationClass\\W*</config>\\W*</configs>")
 				.matcher(description);
 		assertTrue(matcher.find());
 	}
@@ -119,7 +119,7 @@ public class BeansProjectDescriptionWriterTest {
 		
 		Matcher matcher = Pattern
 				.compile(
-						"<configs>\\W*<config>basic-bean-config.xml</config>\\W*<config>java:org.test.spring.SimpleConfigurationClass</config>\\W*</configs>")
+						"<configs>\\W*<config>\\W*basic-bean-config.xml\\W*</config>\\W*<config>\\W*java:org.test.spring.SimpleConfigurationClass\\W*</config>\\W*</configs>")
 				.matcher(description);		
 		assertTrue(matcher.find());
 	}
