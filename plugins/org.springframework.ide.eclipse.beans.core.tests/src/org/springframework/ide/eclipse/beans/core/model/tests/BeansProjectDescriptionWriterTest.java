@@ -79,7 +79,7 @@ public class BeansProjectDescriptionWriterTest {
 		
 		Matcher matcher = Pattern
 				.compile(
-						"<configs>\\W*<config>basic-bean-config.xml</config>\\W*</configs>")
+						"<configs>\\W*<config>\\W*basic-bean-config.xml\\W*</config>\\W*</configs>")
 				.matcher(description);
 		assertTrue(matcher.find());
 	}
