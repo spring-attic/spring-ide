@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.beans.core.model.tests;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Platform;
@@ -84,8 +86,11 @@ public class BeansGroovyConfigDescriptionWriterTest {
 		
 		String description = os.toString();
 		
-		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+		Matcher matcher = Pattern
+				.compile(
+						"<configs>\\W*<config>\\W*basic-bean-config.xml\\W*</config>\\W*</configs>")
+				.matcher(description);
+		assertTrue(matcher.find());
 	}
 	
 	@Test
@@ -101,8 +106,11 @@ public class BeansGroovyConfigDescriptionWriterTest {
 		
 		String description = os.toString();
 		
-		String configs = "\t<configs>\n\t\t<config>basic-bean-config.xml</config>\n\t\t<config>java:org.test.spring.SimpleConfigurationClass</config>\n\t</configs>";
-		assertTrue(description.contains(configs));
+		Matcher matcher = Pattern
+				.compile(
+						"<configs>\\W*<config>\\W*basic-bean-config.xml\\W*</config>\\W*<config>\\W*java:org.test.spring.SimpleConfigurationClass\\W*</config>\\W*</configs>")
+				.matcher(description);
+		assertTrue(matcher.find());
 	}
 	
 }
