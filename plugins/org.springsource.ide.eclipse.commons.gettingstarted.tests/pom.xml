@@ -50,8 +50,7 @@
 					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 					<testSuite>org.springsource.ide.eclipse.commons.gettingstarted.tests</testSuite>
 					<testClass>org.springsource.ide.eclipse.commons.gettingstarted.tests.AllGettingStartedTests</testClass>
-					<argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
-<!-- 					<argLine>-Dgithub.user.name=${github.user.name} -Dgithub.user.password=${github.user.password} -Xmx1024m -XX:MaxPermSize=256m</argLine> -->
+<!-- 					<argLine>-Dgithub.user.name=${github.user.name} -Dgithub.user.password=${github.user.password} ${test.vmargs}</argLine> -->
 				</configuration>
 			</plugin>
 

@@ -20,11 +20,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +47,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.ide.eclipse.beans.core.groovy.tests.Activator;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.classreading.JdtConnectedMetadata;
 import org.springframework.ide.eclipse.core.java.classreading.JdtMetadataReaderFactory;
@@ -51,6 +55,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
@@ -64,6 +69,17 @@ public class JdtGroovyAnnotationMetadataTest {
 	private ClassLoader classloader;
 	private JdtMetadataReaderFactory factory;
 
+	@BeforeClass
+	public static void setUpAll() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
+
 	@Before
 	public void createProject() throws Exception {
 		project = StsTestUtil.createPredefinedProject("jdt-annotation-tests", Activator.PLUGIN_ID);
@@ -74,6 +90,13 @@ public class JdtGroovyAnnotationMetadataTest {
 	
 	@After
 	public void deleteProject() throws Exception {
+		new ACondition("Wait for Jobs") {
+			@Override
+			public boolean test() throws Exception {
+				assertJobManagerIdle();
+				return true;
+			}
+		}.waitFor(3 * 60 * 1000);
 		project.delete(true, null);
 	}
 

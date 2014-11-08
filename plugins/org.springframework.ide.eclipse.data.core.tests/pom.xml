@@ -23,7 +23,6 @@
 	  <includes>
 	    <include>**/AllDataCoreTests.java</include>
 	  </includes>
-	  <argLine>-Xmx512m</argLine>
 	</configuration>
       </plugin>
 

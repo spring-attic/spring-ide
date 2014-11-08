@@ -25,7 +25,6 @@
 	  <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 	  <testSuite>org.springframework.ide.eclipse.bestpractices.tests</testSuite>
 	  <testClass>org.springframework.ide.eclipse.bestpractices.tests.AllBestPracticeRuleTests</testClass>
-	  <argLine>-Xmx512m</argLine>
 	</configuration>
       </plugin>
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,13 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.groovy.tests.Activator;
@@ -36,7 +39,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorDefinition;
 import org.springframework.ide.eclipse.beans.core.model.locate.BeansConfigLocatorFactory;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
@@ -51,6 +56,17 @@ public class BeansGroovyProjectTest {
 	private IJavaProject javaProject;
 	
 	private BeansModel realModel;
+
+	@BeforeClass
+	public static void setUpAll() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			/*
+			 * Set non-locking class-loader for windows testing
+			 */
+			InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID).putBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, true);
+		}
+	}
 
 	@Before
 	public void createProject() throws Exception {
@@ -72,6 +88,13 @@ public class BeansGroovyProjectTest {
 	
 	@After
 	public void deleteProject() throws Exception {
+		new ACondition("Wait for Jobs") {
+			@Override
+			public boolean test() throws Exception {
+				assertJobManagerIdle();
+				return true;
+			}
+		}.waitFor(3 * 60 * 1000);
 		project.delete(true, null);
 		BeansCorePlugin.setModel(realModel);
 	}
