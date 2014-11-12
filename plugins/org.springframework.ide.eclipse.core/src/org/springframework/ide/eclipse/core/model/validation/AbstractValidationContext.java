@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.project.IProjectContributorState;
@@ -144,6 +146,17 @@ public abstract class AbstractValidationContext implements IValidationContext, I
 	public void warning(IResourceModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes) {
 		addProblems(createProblems(element, problemId, IValidationProblemMarker.SEVERITY_WARNING, message, attributes));
+	}
+
+	/**
+	 * @return the TypeHierarchyEngine instance to be used for the validation operations
+	 * @since 3.6.3
+	 */
+	public TypeHierarchyEngine getTypeHierarchyEngine() {
+		if (contributorState != null && contributorState.get(TypeHierarchyEngine.class) != null) {
+			return contributorState.get(TypeHierarchyEngine.class);
+		}
+		return SpringCore.getTypeHierarchyEngine();
 	}
 
 	/**

@@ -84,14 +84,10 @@ public abstract class AbstractNonInfrastructureBeanValidationRule {
 	 * @return
 	 */
 	protected TypeHierarchyEngine getTypeHierarchyEngine(IBeansValidationContext context) {
-		TypeHierarchyEngine typeEngine = null;
 		if (context instanceof AbstractValidationContext) {
-			typeEngine = ((AbstractValidationContext) context).get(TypeHierarchyEngine.class);
+			return ((AbstractValidationContext) context).getTypeHierarchyEngine();
 		}
-		if (typeEngine == null) {
-			typeEngine = SpringCore.getTypeHierarchyEngine();
-		}
-		return typeEngine;
+		return SpringCore.getTypeHierarchyEngine();
 	}
 
 }
