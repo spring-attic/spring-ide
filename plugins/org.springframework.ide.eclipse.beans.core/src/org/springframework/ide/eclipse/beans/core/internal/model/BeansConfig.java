@@ -310,25 +310,15 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 			long start = System.currentTimeMillis();
 			long count = 0;
-
-			// Only install Eclipse-based resource loader if enabled in project properties
-			// IMPORTANT: the following block needs to stay before the w.lock()
-			// as it could otherwise create a runtime deadlock
-			ResourceLoader resourceLoader = null;
-			if (getElementParent() instanceof IBeansProject && ((IBeansProject) getElementParent()).isImportsEnabled()) {
-				resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject(),
-						JdtUtils.getClassLoader(file.getProject(), BeansCorePlugin.getClassLoader()));
-			}
-			else {
-				resourceLoader = new ClassResourceFilteringPatternResolver(file.getProject(), JdtUtils.getClassLoader(
-						file.getProject(), BeansCorePlugin.getClassLoader()));
-			}
-
+			
 			w.lock();
 			if (this.isModelPopulated) {
 				w.unlock();
 				return;
 			}
+			
+			final ClassLoader projectIncludingClassloader = getProjectRelatedClassLoader();
+
 			try {
 				// Publish start events
 				for (IBeansConfigEventListener eventListener : eventListeners) {
@@ -336,6 +326,17 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				}
 
 				if (file != null && file.exists()) {
+					
+					// Only install Eclipse-based resource loader if enabled in project properties
+					// IMPORTANT: the following block needs to stay before the w.lock()
+					// as it could otherwise create a runtime deadlock
+					final ResourceLoader resourceLoader;
+					if (getElementParent() instanceof IBeansProject && ((IBeansProject) getElementParent()).isImportsEnabled()) {
+						resourceLoader = new EclipsePathMatchingResourcePatternResolver(file.getProject(), projectIncludingClassloader);
+					}
+					else {
+						resourceLoader = new ClassResourceFilteringPatternResolver(file.getProject(), projectIncludingClassloader);
+					}
 
 					modificationTimestamp = file.getModificationStamp();
 					if (isArchived) {
@@ -352,20 +353,17 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					}
 
 					// Set up classloader to use for NamespaceHandler and XSD loading
-					final ClassLoader cl;
-					if (NamespaceUtils.useNamespacesFromClasspath(file.getProject())) {
-						cl = JdtUtils.getClassLoader(file.getProject(),  BeansCorePlugin.getClassLoader());
-					}
-					else {
-						 cl = BeansCorePlugin.getClassLoader();
+					ClassLoader namespaceResolvingClassloader = projectIncludingClassloader;
+					if (!NamespaceUtils.useNamespacesFromClasspath(file.getProject())) {
+						 namespaceResolvingClassloader = BeansCorePlugin.getClassLoader();
 					}
 
 					registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
-					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(new BeansDtdResolver(), new PluggableSchemaResolver(cl));
+					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(new BeansDtdResolver(), new PluggableSchemaResolver(namespaceResolvingClassloader));
 					final DocumentAccessor documentAccessor = new DocumentAccessor();
 					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file.getProject());
 					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(this, resource, sourceExtractor, documentAccessor);
-					final NamespaceHandlerResolver namespaceHandlerResolver = new DelegatingNamespaceHandlerResolver(cl, this,	documentAccessor);
+					final NamespaceHandlerResolver namespaceHandlerResolver = new DelegatingNamespaceHandlerResolver(namespaceResolvingClassloader, this,	documentAccessor);
 					
 					problemReporter = new BeansConfigProblemReporter();
 					beanNameGenerator = new UniqueBeanNameGenerator(this);
@@ -442,7 +440,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 								
 								// Obtain thread context classloader and override with the project classloader
 								ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
-								Thread.currentThread().setContextClassLoader(cl);
+								Thread.currentThread().setContextClassLoader(resourceLoader.getClassLoader());
 					
 								try {
 									// Load bean definitions
@@ -452,7 +450,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 									eventListener.registerComponents();
 
 									// Post process beans config if required
-									postProcess();
+									postProcess(resourceLoader.getClassLoader());
 
 									return count;
 								}
@@ -534,7 +532,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				w.unlock();
 
 				// Run external post processors
-				postProcessExternal(externalPostProcessors.keySet());
+				postProcessExternal(externalPostProcessors.keySet(), projectIncludingClassloader);
 
 				// Publish events for all existing post processors
 				if (this.ownPostProcessors != null) {
@@ -565,6 +563,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		}
 	}
 
+	public ClassLoader getProjectRelatedClassLoader() {
+		if (file != null && file.exists()) {
+			return JdtUtils.getClassLoader(file.getProject(), BeansCorePlugin.getClassLoader());
+		}
+		return null;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -585,7 +590,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	/**
 	 * Entry into processing the contributed {@link IBeansConfigPostProcessor}.
 	 */
-	private void postProcess() {
+	private void postProcess(ClassLoader classloader) {
 
 		Set<IBeansConfigPostProcessor> detectedPostProcessors = new LinkedHashSet<IBeansConfigPostProcessor>();
 		removedPostProcessors = new LinkedHashSet<IBeansConfigPostProcessor>();
@@ -614,7 +619,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 		// Run all generally contributed post processors
 		for (IBeansConfigPostProcessor postProcessor : BeansConfigPostProcessorFactory.createPostProcessor(null)) {
-			executePostProcessor(postProcessor, eventListener);
+			executePostProcessor(postProcessor, eventListener, classloader);
 		}
 
 		// Run all post processors specific to a bean class
@@ -626,7 +631,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					for (IBeansConfigPostProcessor postProcessor : BeansConfigPostProcessorFactory
 							.createPostProcessor(beanClassName)) {
 
-						executePostProcessor(postProcessor, eventListener);
+						executePostProcessor(postProcessor, eventListener, classloader);
 
 						// Keep the detected post processor for later
 						detectedPostProcessors.add(postProcessor);
@@ -665,7 +670,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * <p>
 	 * This will only execute the given post processors if this config is already populated.
 	 */
-	private void postProcessExternal(Set<IBeansConfigPostProcessor> postProcessors) {
+	private void postProcessExternal(Set<IBeansConfigPostProcessor> postProcessors, ClassLoader classloader) {
 		if (this.isModelPopulated) {
 			try {
 				w.lock();
@@ -676,7 +681,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				// Run all external found post processor instances
 				for (IBeansConfigPostProcessor postProcessor : postProcessors) {
 					if (!ownPostProcessors.contains(postProcessor)) {
-						executePostProcessor(postProcessor, eventListener);
+						executePostProcessor(postProcessor, eventListener, classloader);
 					}
 				}
 			}
@@ -691,6 +696,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * <p>
 	 * If this config has already been populated only the given {@link IBeansConfigPostProcessor} will be executed;
 	 * otherwise executing is deferred until the model gets populated
+	 * @param classloader 
 	 */
 	protected void addExternalPostProcessor(IBeansConfigPostProcessor postProcessor, IBeansConfig config) {
 		try {
@@ -707,7 +713,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					// Run the external post processors
 					Set<IBeansConfigPostProcessor> postProcessors = new HashSet<IBeansConfigPostProcessor>();
 					postProcessors.add(postProcessor);
-					postProcessExternal(postProcessors);
+					postProcessExternal(postProcessors, getProjectRelatedClassLoader());
 				}
 			}
 		}
@@ -741,7 +747,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * Safely execute the given {@link IBeansConfigPostProcessor}.
 	 */
 	private void executePostProcessor(final IBeansConfigPostProcessor postProcessor,
-			final ReaderEventListener eventListener) {
+			final ReaderEventListener eventListener, final ClassLoader classloader) {
 		SafeRunner.run(new ISafeRunnable() {
 
 			public void handleException(Throwable exception) {
@@ -749,8 +755,19 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			}
 
 			public void run() throws Exception {
-				postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansConfig.this,
-						beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
+				ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
+				
+				if (classloader != null) {
+					Thread.currentThread().setContextClassLoader(classloader);
+				}
+				
+				try {
+					postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansConfig.this,
+							beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
+				}
+				finally {
+					Thread.currentThread().setContextClassLoader(contextLoader);
+				}
 			}
 		});
 	}
