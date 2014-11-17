@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.integration.graph;
 
@@ -164,6 +164,8 @@ public class IntegrationImages {
 	public static final ImageDescriptor BADGE_SI_JMX = create(INT16, "spring-integration-jmx.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_JPA = create(INT16, "spring-integration-jpa.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BADGE_SI_KAFKA = create(INT16, "spring-integration-kafka.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_MAIL = create(INT16, "spring-integration-mail.gif"); //$NON-NLS-1$
 

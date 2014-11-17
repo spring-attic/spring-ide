@@ -364,6 +364,16 @@
       </adapter>
       <adapter
             detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.parts.IntKafkaEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.kafka"
+            label="kafka"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.IntKafkaModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/kafka"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.parts.IntKafkaPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
             editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mail.graph.parts.IntMailEditPartFactory"
             id="com.springsource.sts.config.ui.editors.integration.mail"
             modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mail.graph.model.IntMailModelFactory"
