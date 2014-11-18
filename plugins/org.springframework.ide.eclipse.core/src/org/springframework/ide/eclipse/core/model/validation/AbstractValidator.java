@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 Spring IDE Developers
+ * Copyright (c) 2007, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -238,6 +238,17 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 	protected abstract boolean supports(IModelElement element);
 
 	/**
+	 * provide a hook method to allow validators to skip certain elements during validation
+	 * 
+	 * @param element
+	 * @param validationContext
+	 * @return
+	 */
+	protected boolean shouldValidate(IModelElement element, IValidationContext validationContext) {
+		return true;
+	}
+
+	/**
 	 * {@link IModelElementVisitor} implementation that validates a specified model tree.
 	 */
 	protected final class ValidationVisitor implements IModelElementVisitor {
@@ -253,7 +264,7 @@ public abstract class AbstractValidator implements IValidator, IProjectContribut
 
 		@SuppressWarnings("unchecked")
 		public boolean visit(IModelElement element, IProgressMonitor monitor) {
-			if (supports(element)) {
+			if (supports(element) && shouldValidate(element, context)) {
 				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, ruleDefinitions.size());
 				try {
 					for (ValidationRuleDefinition ruleDefinition : ruleDefinitions) {

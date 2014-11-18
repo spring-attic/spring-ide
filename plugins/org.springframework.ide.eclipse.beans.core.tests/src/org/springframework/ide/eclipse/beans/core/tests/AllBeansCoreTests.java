@@ -24,6 +24,9 @@ import org.springframework.ide.eclipse.beans.core.internal.model.validation.rule
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentRulesAutowireTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRuleTest;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRuleWithConfigSetAndProfileTest;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRuleWithConfigSetTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.model.tests.BeansProjectAutoConfigTest;
@@ -55,6 +58,9 @@ import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 	BeanPropertyRuleTest.class,
 	BeanInitDestroyMethodRuleTest.class,
 	RequiredPropertyRuleTest.class,
+	BeanReferenceRuleTest.class,
+	BeanReferenceRuleWithConfigSetTest.class,
+	BeanReferenceRuleWithConfigSetAndProfileTest.class,
 	NamespaceElementsRuleTest.class,
 	IntrospectorTest.class,
 	JdtUtilsTest.class,
