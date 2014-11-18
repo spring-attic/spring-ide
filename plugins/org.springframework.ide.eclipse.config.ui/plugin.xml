@@ -234,6 +234,16 @@
       </adapter>
       <adapter
             detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.aws.graph.parts.IntAwsEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.aws"
+            label="aws"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.aws.graph.model.IntAwsModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/aws"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.aws.graph.parts.IntAwsPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
             editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.event.graph.parts.IntEventEditPartFactory"
             id="com.springsource.sts.config.ui.editors.integration.event"
             label="event"
@@ -394,6 +404,36 @@
       </adapter>
       <adapter
             detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mqtt.graph.parts.IntMqttEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.mqtt"
+            label="mqtt"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mqtt.graph.model.IntMqttModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/mqtt"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.mqtt.graph.parts.IntMqttPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.print.graph.parts.IntPrintEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.print"
+            label="print"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.print.graph.model.IntPrintModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/print"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.print.graph.parts.IntPrintPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.smb.graph.parts.IntSmbEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.smb"
+            label="smb"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.smb.graph.model.IntSmbModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/smb"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.smb.graph.parts.IntSmbPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
             editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.redis.graph.parts.IntRedisEditPartFactory"
             id="com.springsource.sts.config.ui.editors.integration.redis"
             label="redis"
@@ -438,6 +478,26 @@
       </adapter>
       <adapter
             detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.smpp.graph.parts.IntSmppEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.smpp"
+            label="smpp"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.smpp.graph.model.IntSmppModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/smpp"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.smpp.graph.parts.IntSmppPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.splunk.graph.parts.IntSplunkEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.splunk"
+            label="splunk"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.splunk.graph.model.IntSplunkModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/splunk"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.splunk.graph.parts.IntSplunkPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
             editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.stream.graph.parts.IntStreamEditPartFactory"
             id="com.springsource.sts.config.ui.editors.integration.stream"
             modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.stream.graph.model.IntStreamModelFactory"
@@ -454,6 +514,16 @@
             label="twitter"
             namespaceUri="http://www.springframework.org/schema/integration/twitter"
             paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.twitter.graph.parts.IntTwitterPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.voldemort.graph.parts.IntVoldemortEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.voldemort"
+            label="voldemort"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.voldemort.graph.model.IntVoldemortModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/voldemort"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.voldemort.graph.parts.IntVoldemortPaletteFactory"
             parentUri="http://www.springframework.org/schema/integration">
       </adapter>
       <adapter
@@ -484,6 +554,16 @@
             modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.xmpp.graph.model.IntXmppModelFactory"
             namespaceUri="http://www.springframework.org/schema/integration/xmpp"
             paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.xmpp.graph.parts.IntXmppPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.xquery.graph.parts.IntXqueryEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.xquery"
+            label="xquery"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.xquery.graph.model.IntXqueryModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/xquery"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.xquery.graph.parts.IntXqueryPaletteFactory"
             parentUri="http://www.springframework.org/schema/integration">
       </adapter>
    </extension>

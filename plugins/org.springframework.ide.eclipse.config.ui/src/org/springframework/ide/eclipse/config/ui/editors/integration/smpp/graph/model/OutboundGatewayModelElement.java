@@ -8,27 +8,21 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model;
+package org.springframework.ide.eclipse.config.ui.editors.integration.smpp.graph.model;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
-import org.springframework.ide.eclipse.config.core.schemas.IntAwsSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.model.AbstractConfigGraphDiagram;
-import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractInboundChannelAdapterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractOutboundGatewayModelElement;
 
 @SuppressWarnings("restriction")
-public class InboundChannelAdapterModelElement extends AbstractInboundChannelAdapterModelElement {
+public class OutboundGatewayModelElement extends AbstractOutboundGatewayModelElement {
 
-	public InboundChannelAdapterModelElement() {
+	public OutboundGatewayModelElement() {
 		super();
 	}
 
-	public InboundChannelAdapterModelElement(IDOMElement input, AbstractConfigGraphDiagram diagram) {
+	public OutboundGatewayModelElement(IDOMElement input, AbstractConfigGraphDiagram diagram) {
 		super(input, diagram);
-	}
-
-	@Override
-	public String getInputName() {
-		return IntAwsSchemaConstants.ELEM_INBOUND_CHANNEL_ADAPTER;
 	}
 
 }

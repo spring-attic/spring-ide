@@ -8,26 +8,21 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.parts;
+package org.springframework.ide.eclipse.config.ui.editors.integration.print.graph.parts;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BadgedIntegrationPart;
-import org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.InboundChannelAdapterModelElement;
-import org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.OutboundChannelAdapterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.print.graph.model.OutboundChannelAdapterModelElement;
 
-public class IntKafkaEditPartFactory implements EditPartFactory {
+public class IntPrintEditPartFactory implements EditPartFactory {
 
 	public EditPart createEditPart(EditPart context, Object model) {
 		EditPart part = null;
-		if (model instanceof InboundChannelAdapterModelElement) {
-			part = new BadgedIntegrationPart((InboundChannelAdapterModelElement) model,
-					IntegrationImages.INBOUND_ADAPTER, IntegrationImages.BADGE_SI_KAFKA);
-		}
-		else if (model instanceof OutboundChannelAdapterModelElement) {
+		if (model instanceof OutboundChannelAdapterModelElement) {
 			part = new BadgedIntegrationPart((OutboundChannelAdapterModelElement) model,
-					IntegrationImages.OUTBOUND_ADAPTER, IntegrationImages.BADGE_SI_KAFKA);
+					IntegrationImages.OUTBOUND_ADAPTER, IntegrationImages.BADGE_SI_PRINT);
 		}
 		return part;
 	}

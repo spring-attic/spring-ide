@@ -139,6 +139,8 @@ public class IntegrationImages {
 
 	public static final ImageDescriptor BADGE_SI_AMQP = create(INT16, "spring-integration-amqp.gif"); //$NON-NLS-1$
 
+	public static final ImageDescriptor BADGE_SI_AWS = create(INT16, "spring-integration-aws.gif"); //$NON-NLS-1$
+
 	public static final ImageDescriptor BADGE_SI_EVENT = create(INT16, "spring-integration-event.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_FEED = create(INT16, "spring-integration-feed.gif"); //$NON-NLS-1$
@@ -171,6 +173,10 @@ public class IntegrationImages {
 
 	public static final ImageDescriptor BADGE_SI_MONGODB = create(INT16, "spring-integration-mongodb.gif"); //$NON-NLS-1$
 
+	public static final ImageDescriptor BADGE_SI_MQTT = create(INT16, "spring-integration-mqttadapter.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BADGE_SI_PRINT = create(INT16, "spring-integration-print.gif"); //$NON-NLS-1$
+
 	public static final ImageDescriptor BADGE_SI_REDIS = create(INT16, "spring-integration-redis.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_RMI = create(INT16, "spring-integration-rmi.gif"); //$NON-NLS-1$
@@ -181,15 +187,25 @@ public class IntegrationImages {
 
 	public static final ImageDescriptor BADGE_SI_SFTP = create(INT16, "spring-integration-sftp.gif"); //$NON-NLS-1$
 
+	public static final ImageDescriptor BADGE_SI_SMB = create(INT16, "spring-integration-smb.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BADGE_SI_SMPP = create(INT16, "spring-integration-smpp.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BADGE_SI_SPLUNK = create(INT16, "spring-integration-splunk.gif"); //$NON-NLS-1$
+
 	public static final ImageDescriptor BADGE_SI_STREAM = create(INT16, "spring-integration-stream.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_TWITTER = create(INT16, "spring-integration-twitter.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BADGE_SI_VOLDEMORT = create(INT16, "spring-integration-voldemort.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_WS = create(INT16, "spring-integration-ws.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_XML = create(INT16, "spring-integration-xml.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_XMPP = create(INT16, "spring-integration-xmpp.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BADGE_SI_XQUERY = create(INT16, "spring-integration-xquery.gif"); //$NON-NLS-1$
 
 	private static ImageDescriptor create(String prefix, String name) {
 		try {
