@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
@@ -62,7 +63,6 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.util.ObjectUtils;
-import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * This class holds information for a Spring Beans project. The information is
@@ -1108,7 +1108,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			};
 	
 			job.setPriority(Job.BUILD);
-			job.setRule(project.getProject());
+			job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 			job.schedule();
 		}
 	}
