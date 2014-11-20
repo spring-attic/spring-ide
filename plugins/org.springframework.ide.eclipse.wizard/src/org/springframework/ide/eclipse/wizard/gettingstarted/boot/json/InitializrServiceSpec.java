@@ -11,10 +11,17 @@
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot.json;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TypeOccurrenceCollector;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Option;
 
 /**
  * This class is the 'parsed' form of the json metadata for spring intializr service.
@@ -23,12 +30,16 @@ import org.codehaus.jackson.map.ObjectMapper;
  *
  * @author Kris De Volder
  */
-@JsonIgnoreProperties(ignoreUnknown=true)
 public class InitializrServiceSpec {
 
+	private JSONObject data;
+
+	public InitializrServiceSpec(JSONObject jsonObject) {
+		this.data = jsonObject;
+	}
+
 	public static InitializrServiceSpec parseFrom(InputStream input) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(input, InitializrServiceSpec.class);
+		return new InitializrServiceSpec(new JSONObject(new JSONTokener(new InputStreamReader(input, "utf8"))));
 	}
 
 	/////////////////////////////////////////////////
@@ -45,7 +56,6 @@ public class InitializrServiceSpec {
 		}
 	}
 
-	@JsonIgnoreProperties(ignoreUnknown=true)
 	public static class Type extends Option {
 		private String action;
 
@@ -58,8 +68,7 @@ public class InitializrServiceSpec {
 		}
 	}
 
-	@JsonIgnoreProperties(ignoreUnknown=true)
-	public static class Depependency extends Nameable {
+	public static class Dependency extends Nameable {
 		private String id;
 
 		public String getId() {
@@ -79,23 +88,33 @@ public class InitializrServiceSpec {
 		public void setDescription(String description) {
 			this.description = description;
 		}
+
+		public static Dependency[] from(JSONArray values) throws JSONException {
+			Dependency[] deps = new Dependency[values.length()];
+			for (int i = 0; i < deps.length; i++) {
+				JSONObject obj = values.getJSONObject(i);
+				deps[i] = new Dependency();
+				deps[i].setId(obj.getString("id"));
+				deps[i].setName(obj.optString("name"));
+				deps[i].setDescription(obj.optString("description"));
+			}
+			return deps;
+		}
 	}
 
-	@JsonIgnoreProperties(ignoreUnknown=true)
 	public static class DependencyGroup extends Nameable {
 
-		private Depependency[] content;
+		private Dependency[] content;
 
-		public Depependency[] getContent() {
+		public Dependency[] getContent() {
 			return content;
 		}
 
-		public void setContent(Depependency[] content) {
+		public void setContent(Dependency[] content) {
 			this.content = content;
 		}
 	}
 
-	@JsonIgnoreProperties(ignoreUnknown=true)
 	public static class Option extends Nameable {
 		private String id;
 
@@ -118,88 +137,98 @@ public class InitializrServiceSpec {
 		}
 	}
 
-	/////////////////////////////////////////////////////////////////
-
-	private DependencyGroup[] dependencies;
-
-	public DependencyGroup[] getDependencies() {
-		return dependencies;
-	}
-
-	public void setDependencies(DependencyGroup[] dependencies) {
-		this.dependencies = dependencies;
-	}
 
 	/////////////////////////////////////////////////////////////////
 
-	private Type[] types;
-
-	public Type[] getTypes() {
-		return types;
-	}
-
-	public void setTypes(Type[] types) {
-		this.types = types;
-	}
-
-	/////////////////////////////////////////////////////////////////
-
-	private Option[] packagings;
-
-	public Option[] getPackagings() {
-		return packagings;
-	}
-
-	public void setPackagings(Option[] packagings) {
-		this.packagings = packagings;
-	}
-
-	/////////////////////////////////////////////////////////////////
-
-	private Option[] javaVersions;
-
-	public Option[] getJavaVersions() {
-		return javaVersions;
-	}
-
-	public void setJavaVersions(Option[] javaVersions) {
-		this.javaVersions = javaVersions;
-	}
-
-	/////////////////////////////////////////////////////////////////
-
-	private Option[] languages;
-
-	public Option[] getLanguages() {
-		return languages;
-	}
-
-	public void setLanguages(Option[] languages) {
-		this.languages = languages;
-	}
-
-	/////////////////////////////////////////////////////////////////
-
-	private Option[] bootVersions;
-
-	public Option[] getBootVersions() {
-		return bootVersions;
-	}
-
-	public void setBootVersions(Option[] bootVersions) {
-		this.bootVersions = bootVersions;
-	}
-
-	/////////////////////////////////////////////////////////////////
-
-	private Map<String,String> defaults;
-
-	public Map<String, String> getDefaults() {
+	public Map<String, String> getTextInputs() throws JSONException {
+		Map<String,String> defaults = new HashMap<String, String>();
+		Iterator props = data.keys();
+		while(props.hasNext()) {
+			String key = (String) props.next();
+			JSONObject obj = data.getJSONObject(key);
+			String type = obj.optString("type");
+			if ("text".equals(type)) {
+				defaults.put(key, obj.optString("default", ""));
+			}
+		}
 		return defaults;
 	}
 
-	public void setDefaults(Map<String, String> defaults) {
-		this.defaults = defaults;
+	public Type[] getTypeOptions(String groupName) {
+		try {
+			JSONObject obj = data.optJSONObject(groupName);
+			if (obj!=null && "action".equals(obj.optString("type"))) {
+				String defaultValue = obj.optString("default", "");
+				JSONArray arr = obj.getJSONArray("values");
+				Type[] options = new Type[arr.length()];
+				for (int i = 0; i < options.length; i++) {
+					JSONObject option = arr.getJSONObject(i);
+					options[i] = new Type();
+					String id = option.getString("id");
+					String name = option.getString("name");
+					String action = option.getString("action");
+					options[i].setId(id);
+					options[i].setName(name);
+					options[i].setAction(action);
+					options[i].setDefault(id.equals(defaultValue));
+				}
+				return options;
+			}
+		} catch (JSONException e) {
+			//ignore
+		}
+		return new Type[0];
+	}
+
+
+	public Option[] getSingleSelectOptions(String groupName) {
+		try {
+			JSONObject obj = data.optJSONObject(groupName);
+			if (obj!=null && "single-select".equals(obj.optString("type"))) {
+				String defaultValue = obj.optString("default", "");
+				JSONArray arr = obj.getJSONArray("values");
+				Option[] options = new Option[arr.length()];
+				for (int i = 0; i < options.length; i++) {
+					JSONObject option = arr.getJSONObject(i);
+					options[i] = new Option();
+					String id = option.getString("id");
+					String name = option.getString("name");
+					options[i].setId(id);
+					options[i].setName(name);
+					options[i].setDefault(id.equals(defaultValue));
+				}
+				return options;
+			}
+		} catch (JSONException e) {
+			//ignore
+		}
+		return new Option[0];
+	}
+
+	public DependencyGroup[] getDependencies() {
+		return getHierarchicalMultiSelect("dependencies");
+	}
+
+	private DependencyGroup[] getHierarchicalMultiSelect(String prop) {
+		try {
+			JSONObject obj = data.optJSONObject(prop);
+			if (obj!=null && "hierarchical-multi-select".equals(obj.optString("type"))) {
+				JSONArray arr = obj.getJSONArray("values");
+				DependencyGroup[] groups = new DependencyGroup[arr.length()];
+				for (int i = 0; i < groups.length; i++) {
+					JSONObject group = arr.getJSONObject(i);
+					groups[i] = new DependencyGroup();
+					String name = group.getString("name");
+					JSONArray values = group.getJSONArray("values");
+					groups[i].setName(name);
+					groups[i].setContent(Dependency.from(values));
+				}
+				return groups;
+			}
+		} catch (JSONException e) {
+			//ignore
+		}
+		return new DependencyGroup[0];
 	}
 
 }

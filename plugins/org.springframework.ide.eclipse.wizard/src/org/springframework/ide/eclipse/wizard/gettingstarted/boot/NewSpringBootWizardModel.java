@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -35,7 +36,7 @@ import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Depependency;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Option;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Type;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
@@ -65,6 +66,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
  */
 public class NewSpringBootWizardModel {
 
+	private static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2+json";
 	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<String, BuildType>();
 	static {
 		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
@@ -78,7 +80,7 @@ public class NewSpringBootWizardModel {
 	 * Lists known query parameters that map onto a String input field. The default values for these
 	 * parameters will be pulled from the json spec document.
 	 */
-	private static final Map<String,String> KNOWN_STRING_INPUTS = new HashMap<String, String>();
+	private static final Map<String,String> KNOWN_STRING_INPUTS = new LinkedHashMap<String, String>();
 	static {
 		KNOWN_STRING_INPUTS.put("name", "Name");
 		KNOWN_STRING_INPUTS.put("groupId", "Group");
@@ -87,6 +89,14 @@ public class NewSpringBootWizardModel {
 		KNOWN_STRING_INPUTS.put("description", "Description");
 		KNOWN_STRING_INPUTS.put("packgageName", "Package");
 	};
+
+	private static final Map<String, String> KNOWN_SINGLE_SELECTS = new LinkedHashMap<String, String>();
+	static {
+		KNOWN_SINGLE_SELECTS.put("packaging", "Packaging:");
+		KNOWN_SINGLE_SELECTS.put("javaVersion", "Java Version:");
+		KNOWN_SINGLE_SELECTS.put("language", "Language:");
+		KNOWN_SINGLE_SELECTS.put("bootVersion", "Boot Version:");
+	}
 
 	private final URLConnectionFactory urlConnectionFactory;
 	private final String JSON_URL;
@@ -97,7 +107,7 @@ public class NewSpringBootWizardModel {
 	}
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps) throws Exception {
-		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), stsProps.get("spring.initializr.json.contentType"));
+		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), JSON_CONTENT_TYPE_HEADER);
 	}
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, String contentType) throws Exception {
@@ -255,9 +265,10 @@ public class NewSpringBootWizardModel {
 	private void discoverOptions(FieldArrayModel<String> fields, MultiSelectionFieldModel<String> style) throws Exception {
 		InitializrServiceSpec serviceSpec = parseJsonFrom(new URL(JSON_URL));
 
+		Map<String, String> textInputs = serviceSpec.getTextInputs();
 		for (Entry<String, String> e : KNOWN_STRING_INPUTS.entrySet()) {
 			String name = e.getKey();
-			String defaultValue = serviceSpec.getDefaults().get(name);
+			String defaultValue = textInputs.get(name);
 			if (defaultValue!=null) {
 				fields.add(new StringFieldModel(name, defaultValue).label(e.getValue()));
 			}
@@ -267,7 +278,7 @@ public class NewSpringBootWizardModel {
 			String groupName = "type";
 			RadioGroup group = radioGroups.ensureGroup(groupName);
 			group.label("Type:");
-			for (Type type : serviceSpec.getTypes()) {
+			for (Type type : serviceSpec.getTypeOptions(groupName)) {
 				if (KNOWN_TYPES.containsKey(type.getId())) {
 					TypeRadioInfo radio = new TypeRadioInfo(groupName, type.getId(), type.isDefault(), type.getAction());
 					radio.setLabel(type.getName());
@@ -290,37 +301,16 @@ public class NewSpringBootWizardModel {
 			});
 		}
 
-		{	//field: packaging
-			String groupName = "packaging";
+		for (Entry<String, String> e : KNOWN_SINGLE_SELECTS.entrySet()) {
+			String groupName = e.getKey();
 			RadioGroup group = radioGroups.ensureGroup(groupName);
-			group.label("Packaging:");
-			addOptions(group, serviceSpec.getPackagings());
-		}
-
-		{	//field: javaVersion
-			String groupName = "javaVersion";
-			RadioGroup group = radioGroups.ensureGroup(groupName);
-			group.label("Java Version:");
-			addOptions(group, serviceSpec.getJavaVersions());
-		}
-
-		{	//field: language
-			String groupName = "language";
-			RadioGroup group = radioGroups.ensureGroup(groupName);
-			group.label("Language:");
-			addOptions(group, serviceSpec.getLanguages());
-		}
-
-		{	//field: bootVersion
-			String groupName = "bootVersion";
-			RadioGroup group = radioGroups.ensureGroup(groupName);
-			group.label("Boot Version:");
-			addOptions(group, serviceSpec.getBootVersions());
+			group.label(e.getValue());
+			addOptions(group, serviceSpec.getSingleSelectOptions(groupName));
 		}
 
 		//styles
 		for (DependencyGroup dgroup : serviceSpec.getDependencies()) {
-			for (Depependency dep : dgroup.getContent()) {
+			for (Dependency dep : dgroup.getContent()) {
 				style.choice(dep.getName(), dep.getId(), dep.getDescription());
 			}
 		}
@@ -339,6 +329,7 @@ public class NewSpringBootWizardModel {
 		InputStream input = null;
 		try {
 			conn = urlConnectionFactory.createConnection(url);
+			conn.addRequestProperty("User-Agent", "STS "+WizardPlugin.getDefault().getBundle().getVersion());
 			if (CONTENT_TYPE!=null) {
 				conn.addRequestProperty("Accept", CONTENT_TYPE);
 			}

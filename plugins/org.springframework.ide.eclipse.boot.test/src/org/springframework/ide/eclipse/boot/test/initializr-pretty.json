@@ -1,297 +1,315 @@
 {
-   "dependencies": [
-      {
-         "name": "Core",
-         "content": [
-            {
-               "name": "Security",
-               "id": "security",
-               "description": "Support for spring-security"
-            },
-            {
-               "name": "AOP",
-               "id": "aop",
-               "description": "Support for aspect-oriented programming including spring-aop and AspectJ"
-            }
-         ]
-      },
-      {
-         "name": "Data",
-         "content": [
-            {
-               "name": "JDBC",
-               "id": "jdbc",
-               "description": "Support for JDBC databases"
-            },
-            {
-               "name": "JPA",
-               "id": "data-jpa",
-               "description": "Support for the Java Persistence API including spring-data-jpa, spring-orm and Hibernate"
-            },
-            {
-               "name": "MongoDB",
-               "id": "data-mongodb",
-               "description": "Support for the MongoDB NoSQL Database, including spring-data-mongodb"
-            },
-            {
-               "name": "Redis",
-               "id": "redis",
-               "description": "Support for the REDIS key-value data store, including spring-redis"
-            },
-            {
-               "name": "Gemfire",
-               "id": "data-gemfire",
-               "description": "Support for the GemFire distributed data store including spring-data-gemfire"
-            },
-            {
-               "name": "Solr",
-               "id": "data-solr",
-               "description": "Support for the Apache Solr search platform, including spring-data-solr"
-            },
-            {
-               "name": "Elasticsearch",
-               "id": "data-elasticsearch",
-               "description": "Support for the Elasticsearch search and analytics engine including spring-data-elasticsearch"
-            }
-         ]
-      },
-      {
-         "name": "I/O",
-         "content": [
-            {
-               "name": "Batch",
-               "id": "batch",
-               "description": "Support for Spring Batch including HSQLDB database"
-            },
-            {
-               "name": "Integration",
-               "id": "integration",
-               "description": "Support for common spring-integration modules"
-            },
-            {
-               "name": "JMS",
-               "id": "hornetq",
-               "description": "Support for Java Message Service API via HornetQ"
-            },
-            {
-               "name": "AMQP",
-               "id": "amqp",
-               "description": "Support for the Advanced Message Queuing Protocol via spring-rabbit"
-            }
-         ]
-      },
-      {
-         "name": "Web",
-         "content": [
-            {
-               "name": "Web",
-               "id": "web",
-               "description": "Support for full-stack web development, including Tomcat and spring-webmvc"
-            },
-            {
-               "name": "Websocket",
-               "id": "websocket",
-               "description": "Support for websocket development with Tomcat"
-            },
-            {
-               "name": "WS",
-               "id": "ws",
-               "description": "Support for Spring Web Services"
-            },
-            {
-               "name": "Rest Repositories",
-               "id": "data-rest",
-               "description": "Support for exposing Spring Data repositories over REST via spring-data-rest-webmvc"
-            },
-            {
-               "name": "Mobile",
-               "id": "mobile",
-               "description": "Support for spring-mobile"
-            }
-         ]
-      },
-      {
-         "name": "Template Engines",
-         "content": [
-            {
-               "name": "Freemarker",
-               "id": "freemarker",
-               "description": "Support for the FreeMarker templating engine"
-            },
-            {
-               "name": "Velocity",
-               "id": "velocity",
-               "description": "Support for the Velocity templating engine"
-            },
-            {
-               "name": "Groovy Templates",
-               "id": "groovy-templates",
-               "description": "Support for the Groovy templating engine"
-            },
-            {
-               "name": "Thymeleaf",
-               "id": "thymeleaf",
-               "description": "Support for the Thymeleaf templating engine, including integration with Spring"
-            }
-         ]
-      },
-      {
-         "name": "Social",
-         "content": [
-            {
-               "name": "Facebook",
-               "id": "social-facebook",
-               "description": "Support for spring-social-facebook"
-            },
-            {
-               "name": "LinkedIn",
-               "id": "social-linkedin",
-               "description": "Support for spring-social-linkedin"
-            },
-            {
-               "name": "Twitter",
-               "id": "social-twitter",
-               "description": "Support for spring-social-twitter"
-            }
-         ]
-      },
-      {
-         "name": "Ops",
-         "content": [
-            {
-               "name": "Actuator",
-               "id": "actuator",
-               "description": "Production ready features to help you monitor and manage your application"
-            },
-            {
-               "name": "Remote Shell",
-               "id": "remote-shell",
-               "description": "Support for CRaSH"
-            }
-         ]
-      }
-   ],
-   "types": [
-      {
-         "name": "Maven POM",
-         "id": "maven-build",
-         "action": "/pom.xml",
-         "tags": {
-            "build": "maven",
-            "format": "build"
+   "dependencies": {
+      "type": "hierarchical-multi-select",
+      "values": [
+         {
+            "name": "Core",
+            "values": [
+               {
+                  "id": "security",
+                  "name": "Security",
+                  "description": "Support for spring-security"
+               },
+               {
+                  "id": "aop",
+                  "name": "AOP",
+                  "description": "Support for aspect-oriented programming including spring-aop and AspectJ"
+               }
+            ]
          },
-         "default": false
-      },
-      {
-         "name": "Maven Project",
-         "id": "maven-project",
-         "action": "/starter.zip",
-         "tags": {
-            "format": "project",
-            "build": "maven"
+         {
+            "name": "Data",
+            "values": [
+               {
+                  "id": "jdbc",
+                  "name": "JDBC",
+                  "description": "Support for JDBC databases"
+               },
+               {
+                  "id": "data-jpa",
+                  "name": "JPA",
+                  "description": "Support for the Java Persistence API including spring-data-jpa, spring-orm and Hibernate"
+               },
+               {
+                  "id": "data-mongodb",
+                  "name": "MongoDB",
+                  "description": "Support for the MongoDB NoSQL Database, including spring-data-mongodb"
+               },
+               {
+                  "id": "redis",
+                  "name": "Redis",
+                  "description": "Support for the REDIS key-value data store, including spring-redis"
+               },
+               {
+                  "id": "data-gemfire",
+                  "name": "Gemfire",
+                  "description": "Support for the GemFire distributed data store including spring-data-gemfire"
+               },
+               {
+                  "id": "data-solr",
+                  "name": "Solr",
+                  "description": "Support for the Apache Solr search platform, including spring-data-solr"
+               },
+               {
+                  "id": "data-elasticsearch",
+                  "name": "Elasticsearch",
+                  "description": "Support for the Elasticsearch search and analytics engine including spring-data-elasticsearch"
+               }
+            ]
          },
-         "default": true
-      },
-      {
-         "name": "Gradle Config",
-         "id": "gradle-build",
-         "action": "/build.gradle",
-         "tags": {
-            "build": "gradle",
-            "format": "build"
+         {
+            "name": "I/O",
+            "values": [
+               {
+                  "id": "batch",
+                  "name": "Batch",
+                  "description": "Support for Spring Batch including HSQLDB database"
+               },
+               {
+                  "id": "integration",
+                  "name": "Integration",
+                  "description": "Support for common spring-integration modules"
+               },
+               {
+                  "id": "hornetq",
+                  "name": "JMS",
+                  "description": "Support for Java Message Service API via HornetQ"
+               },
+               {
+                  "id": "amqp",
+                  "name": "AMQP",
+                  "description": "Support for the Advanced Message Queuing Protocol via spring-rabbit"
+               }
+            ]
          },
-         "default": false
-      },
-      {
-         "name": "Gradle Project",
-         "id": "gradle-project",
-         "action": "/starter.zip",
-         "tags": {
-            "format": "project",
-            "build": "gradle"
+         {
+            "name": "Web",
+            "values": [
+               {
+                  "id": "web",
+                  "name": "Web",
+                  "description": "Support for full-stack web development, including Tomcat and spring-webmvc"
+               },
+               {
+                  "id": "websocket",
+                  "name": "Websocket",
+                  "description": "Support for websocket development with Tomcat"
+               },
+               {
+                  "id": "ws",
+                  "name": "WS",
+                  "description": "Support for Spring Web Services"
+               },
+               {
+                  "id": "data-rest",
+                  "name": "Rest Repositories",
+                  "description": "Support for exposing Spring Data repositories over REST via spring-data-rest-webmvc"
+               },
+               {
+                  "id": "mobile",
+                  "name": "Mobile",
+                  "description": "Support for spring-mobile"
+               }
+            ]
          },
-         "default": false
-      }
-   ],
-   "packagings": [
-      {
-         "name": "Jar",
-         "id": "jar",
-         "default": true
-      },
-      {
-         "name": "War",
-         "id": "war",
-         "default": false
-      }
-   ],
-   "javaVersions": [
-      {
-         "name": "1.6",
-         "id": "1.6",
-         "default": false
-      },
-      {
-         "name": "1.7",
-         "id": "1.7",
-         "default": true
-      },
-      {
-         "name": "1.8",
-         "id": "1.8",
-         "default": false
-      }
-   ],
-   "languages": [
-      {
-         "name": "Groovy",
-         "id": "groovy",
-         "default": false
-      },
-      {
-         "name": "Java",
-         "id": "java",
-         "default": true
-      }
-   ],
-   "bootVersions": [
-      {
-         "name": "1.2.0 M2",
-         "id": "1.2.0.M2",
-         "default": false
-      },
-      {
-         "name": "1.2.0 (SNAPSHOT)",
-         "id": "1.2.0.BUILD-SNAPSHOT",
-         "default": false
-      },
-      {
-         "name": "1.1.8",
-         "id": "1.1.8.RELEASE",
-         "default": true
-      },
-      {
-         "name": "1.1.8 (SNAPSHOT)",
-         "id": "1.1.8.BUILD-SNAPSHOT",
-         "default": false
-      },
-      {
-         "name": "1.0.2",
-         "id": "1.0.2.RELEASE",
-         "default": false
-      }
-   ],
-   "defaults": {
-      "groupId": "org.test",
-      "artifactId": "demo",
-      "version": "0.0.1-SNAPSHOT",
-      "name": "demo",
-      "description": "Demo project for Spring Boot",
-      "packageName": "demo",
-      "type": "maven-project",
-      "packaging": "jar",
-      "javaVersion": "1.7",
-      "language": "java",
-      "bootVersion": "1.1.8.RELEASE"
+         {
+            "name": "Template Engines",
+            "values": [
+               {
+                  "id": "freemarker",
+                  "name": "Freemarker",
+                  "description": "Support for the FreeMarker templating engine"
+               },
+               {
+                  "id": "velocity",
+                  "name": "Velocity",
+                  "description": "Support for the Velocity templating engine"
+               },
+               {
+                  "id": "groovy-templates",
+                  "name": "Groovy Templates",
+                  "description": "Support for the Groovy templating engine"
+               },
+               {
+                  "id": "thymeleaf",
+                  "name": "Thymeleaf",
+                  "description": "Support for the Thymeleaf templating engine, including integration with Spring"
+               }
+            ]
+         },
+         {
+            "name": "Social",
+            "values": [
+               {
+                  "id": "social-facebook",
+                  "name": "Facebook",
+                  "description": "Support for spring-social-facebook"
+               },
+               {
+                  "id": "social-linkedin",
+                  "name": "LinkedIn",
+                  "description": "Support for spring-social-linkedin"
+               },
+               {
+                  "id": "social-twitter",
+                  "name": "Twitter",
+                  "description": "Support for spring-social-twitter"
+               }
+            ]
+         },
+         {
+            "name": "Ops",
+            "values": [
+               {
+                  "id": "actuator",
+                  "name": "Actuator",
+                  "description": "Production ready features to help you monitor and manage your application"
+               },
+               {
+                  "id": "remote-shell",
+                  "name": "Remote Shell",
+                  "description": "Support for CRaSH"
+               }
+            ]
+         }
+      ]
+   },
+   "type": {
+      "type": "action",
+      "default": "maven-project",
+      "values": [
+         {
+            "id": "maven-build",
+            "name": "Maven POM",
+            "action": "/pom.xml",
+            "tags": {
+               "build": "maven",
+               "format": "build"
+            }
+         },
+         {
+            "id": "maven-project",
+            "name": "Maven Project",
+            "action": "/starter.zip",
+            "tags": {
+               "format": "project",
+               "build": "maven"
+            }
+         },
+         {
+            "id": "gradle-build",
+            "name": "Gradle Config",
+            "action": "/build.gradle",
+            "tags": {
+               "build": "gradle",
+               "format": "build"
+            }
+         },
+         {
+            "id": "gradle-project",
+            "name": "Gradle Project",
+            "action": "/starter.zip",
+            "tags": {
+               "format": "project",
+               "build": "gradle"
+            }
+         }
+      ]
+   },
+   "packaging": {
+      "type": "single-select",
+      "default": "jar",
+      "values": [
+         {
+            "id": "jar",
+            "name": "Jar"
+         },
+         {
+            "id": "war",
+            "name": "War"
+         }
+      ]
+   },
+   "javaVersion": {
+      "type": "single-select",
+      "default": "1.7",
+      "values": [
+         {
+            "id": "1.6",
+            "name": "1.6"
+         },
+         {
+            "id": "1.7",
+            "name": "1.7"
+         },
+         {
+            "id": "1.8",
+            "name": "1.8"
+         }
+      ]
+   },
+   "language": {
+      "type": "single-select",
+      "default": "java",
+      "values": [
+         {
+            "id": "groovy",
+            "name": "Groovy"
+         },
+         {
+            "id": "java",
+            "name": "Java"
+         }
+      ]
+   },
+   "bootVersion": {
+      "type": "single-select",
+      "default": "1.1.9.RELEASE",
+      "values": [
+         {
+            "id": "1.2.0.RC1",
+            "name": "1.2.0 RC1"
+         },
+         {
+            "id": "1.2.0.BUILD-SNAPSHOT",
+            "name": "1.2.0 (SNAPSHOT)"
+         },
+         {
+            "id": "1.1.9.RELEASE",
+            "name": "1.1.9"
+         },
+         {
+            "id": "1.1.8.BUILD-SNAPSHOT",
+            "name": "1.1.8 (SNAPSHOT)"
+         },
+         {
+            "id": "1.0.2.RELEASE",
+            "name": "1.0.2"
+         }
+      ]
+   },
+   "groupId": {
+      "type": "text",
+      "default": "org.test"
+   },
+   "artifactId": {
+      "type": "text",
+      "default": "demo"
+   },
+   "version": {
+      "type": "text",
+      "default": "0.0.1-SNAPSHOT"
+   },
+   "name": {
+      "type": "text",
+      "default": "demo"
+   },
+   "description": {
+      "type": "text",
+      "default": "Demo project for Spring Boot"
+   },
+   "packageName": {
+      "type": "text",
+      "default": "demo"
    }
 }
