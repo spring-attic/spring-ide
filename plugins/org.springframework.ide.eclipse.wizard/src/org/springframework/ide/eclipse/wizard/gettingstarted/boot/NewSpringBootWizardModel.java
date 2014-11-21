@@ -170,7 +170,7 @@ public class NewSpringBootWizardModel {
 			//The fields need to be discovered by parsing web form.
 	);
 
-	public final MultiSelectionFieldModel<String> style = new MultiSelectionFieldModel<String>(String.class, "style")
+	public final MultiSelectionFieldModel<String> style = new MultiSelectionFieldModel<String>(String.class, "dependencies")
 			.label("Dependencies");
 
 	private final FieldModel<String> projectName; //an alias for stringFields.getField("name");
