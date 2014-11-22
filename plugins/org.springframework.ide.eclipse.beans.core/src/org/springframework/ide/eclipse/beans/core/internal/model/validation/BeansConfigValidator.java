@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 Spring IDE Developers
+ * Copyright (c) 2007, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -247,6 +247,18 @@ public class BeansConfigValidator extends AbstractValidator {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Check whether the element is defiend with a beans profile and if so, if this profile is activated in the
+	 * validation context
+	 * 
+	 * @see org.springframework.ide.eclipse.core.model.validation.AbstractValidator#shouldValidate(org.springframework.ide.eclipse.core.model.IModelElement, org.springframework.ide.eclipse.core.model.validation.IValidationContext)
+	 */
+	@Override
+	protected boolean shouldValidate(IModelElement element, IValidationContext validationContext) {
+		IResourceModelElement contextElement = validationContext.getContextElement();
+		return !BeansModelUtils.isProfileDisabled(contextElement, element);
 	}
 
 	private void addBeans(IBeansConfig beansConfig) {

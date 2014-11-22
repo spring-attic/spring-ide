@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="foo" class="org.test.MyBeanClass"/>
+	
+	<bean id="referenceOk" class="org.test.MyBeanClassWithProperty">
+		<property name="myBeanClass" ref="foo"/>
+	</bean>
+
+	<bean id="referenceMissing" class="org.test.MyBeanClassWithProperty">
+		<property name="myBeanClass" ref="missingfoo"/>
+	</bean>
+	
+	<bean id="referenceToInnerLevelOk" class="org.test.MyBeanClassWithProperty">
+		<property name="myBeanClass" ref="embeddedFoo"/>
+	</bean>
+	
+	<bean id="referenceToInnerLevelWithProfile" class="org.test.MyBeanClassWithProperty">
+		<property name="myBeanClass" ref="profileEmbeddedFoo"/>
+	</bean>
+	
+	<beans>
+		<bean id="embeddedFoo" class="org.test.MyBeanClass"/>
+
+		<bean id="referenceToUpperLevelOk" class="org.test.MyBeanClassWithProperty">
+			<property name="myBeanClass" ref="foo"/>
+		</bean>
+		
+		<bean id="referenceToSameLevelOk" class="org.test.MyBeanClassWithProperty">
+			<property name="myBeanClass" ref="embeddedFoo"/>
+		</bean>
+		
+	</beans>
+
+	<beans profile="testprofile">
+		<bean id="profileEmbeddedFoo" class="org.test.MyBeanClass"/>
+
+		<bean id="profileReferenceToUpperLevelFromProfileBeanOk" class="org.test.MyBeanClassWithProperty">
+			<property name="myBeanClass" ref="foo"/>
+		</bean>
+		
+		<bean id="profileReferenceToNonProfileEmbeddedBean" class="org.test.MyBeanClassWithProperty">
+			<property name="myBeanClass" ref="embeddedFoo"/>
+		</bean>
+		
+		<bean id="profileEmbdeddedReferenceMissing" class="org.test.MyBeanClassWithProperty">
+			<property name="myBeanClass" ref="missingfoo"/>
+		</bean>
+		
+		<bean id="profileEmbdeddedReferenceFromSameComposite" class="org.test.MyBeanClassWithProperty">
+			<property name="myBeanClass" ref="profileEmbeddedFoo"/>
+		</bean>
+		
+	</beans>
+
+</beans>

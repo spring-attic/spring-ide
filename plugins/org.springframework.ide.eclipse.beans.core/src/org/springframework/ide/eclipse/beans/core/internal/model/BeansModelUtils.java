@@ -1225,18 +1225,18 @@ public abstract class BeansModelUtils {
 	/**
 	 * Registers all {@link IBean}s and {@link IBeansComponent}s that are nested within the given
 	 * <code>components</code>.
+	 * 
+	 * @param configSet A beans config set that, is not null, limits the registered beans to those that are included in the beans config set
 	 */
 	private static void registerComponents(IBeansConfigSet configSet, Set<IBeansComponent> components,
 			BeanDefinitionRegistry registry) {
+
 		for (IBeansComponent component : components) {
-			if (configSet != null && component instanceof IProfileAwareBeansComponent) {
-				IProfileAwareBeansComponent profileAwareBeansComponent = (IProfileAwareBeansComponent) component;
-				if (profileAwareBeansComponent.getProfiles().size() != 0
-						&& !CollectionUtils.containsAny(profileAwareBeansComponent.getProfiles(),
-								configSet.getProfiles())) {
-					continue;
-				}
+
+			if (isProfileDisabled(configSet, component)) {
+				continue;
 			}
+
 			for (IBean bean : component.getBeans()) {
 				try {
 					String beanName = bean.getElementName();
@@ -1260,6 +1260,20 @@ public abstract class BeansModelUtils {
 			// Register bean definitions from components
 			registerComponents(configSet, component.getComponents(), registry);
 		}
+	}
+	
+	public static boolean isProfileDisabled(IResourceModelElement contextElement, IModelElement beansComponent) {
+		if (contextElement != null && contextElement instanceof IBeansConfigSet && beansComponent != null && beansComponent instanceof IProfileAwareBeansComponent) {
+			IProfileAwareBeansComponent profileAwareBeansComponent = (IProfileAwareBeansComponent) beansComponent;
+			IBeansConfigSet configSet = (IBeansConfigSet) contextElement;
+
+			if (profileAwareBeansComponent.getProfiles().size() != 0
+					&& !CollectionUtils.containsAny(profileAwareBeansComponent.getProfiles(), configSet.getProfiles())) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
