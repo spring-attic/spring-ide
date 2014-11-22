@@ -24,6 +24,8 @@ public class Messages extends NLS {
 
 	public static String IntFilePaletteFactory_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
 
+	public static String IntFilePaletteFactory_TAIL_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
+
 	public static String IntFilePaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
 
 	public static String IntFilePaletteFactory_OUTBOUND_GATEWAY_COMPONENT_DESCRIPTION;

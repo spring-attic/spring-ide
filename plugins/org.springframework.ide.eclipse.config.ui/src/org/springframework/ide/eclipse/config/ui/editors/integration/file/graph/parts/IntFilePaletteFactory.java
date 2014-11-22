@@ -25,8 +25,8 @@ import org.springframework.ide.eclipse.config.ui.editors.integration.file.graph.
 import org.springframework.ide.eclipse.config.ui.editors.integration.file.graph.model.InboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.file.graph.model.OutboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.file.graph.model.OutboundGatewayModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.file.graph.model.TailInboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
-
 
 /**
  * @author Leo Dos Santos
@@ -38,26 +38,33 @@ public class IntFilePaletteFactory implements IPaletteFactory {
 		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
 
 		CombinedTemplateCreationEntry entry = new CombinedTemplateCreationEntry(
-				IntFileSchemaConstants.ELEM_FILE_TO_BYTES_TRANSFORMER, Messages.IntFilePaletteFactory_FILE_TO_BYTES_TRANSFORMER_COMPONENT_DESCRIPTION,
+				IntFileSchemaConstants.ELEM_FILE_TO_BYTES_TRANSFORMER,
+				Messages.IntFilePaletteFactory_FILE_TO_BYTES_TRANSFORMER_COMPONENT_DESCRIPTION,
 				new ModelElementCreationFactory(FileToBytesTransformerModelElement.class, diagram, namespaceUri),
 				IntegrationImages.TRANSFORMER_SMALL, IntegrationImages.TRANSFORMER);
 		entries.add(entry);
 
 		entry = new CombinedTemplateCreationEntry(IntFileSchemaConstants.ELEM_FILE_TO_STRING_TRANSFORMER,
-				Messages.IntFilePaletteFactory_FILE_TO_STRING_TRANSFORMER_COMPONENT_DESCRIPTION, new ModelElementCreationFactory(
-						FileToStringTransformerModelElement.class, diagram, namespaceUri),
+				Messages.IntFilePaletteFactory_FILE_TO_STRING_TRANSFORMER_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(FileToStringTransformerModelElement.class, diagram, namespaceUri),
 				IntegrationImages.TRANSFORMER_SMALL, IntegrationImages.TRANSFORMER);
 		entries.add(entry);
 
 		entry = new CombinedTemplateCreationEntry(IntFileSchemaConstants.ELEM_INBOUND_CHANNEL_ADAPTER,
-				Messages.IntFilePaletteFactory_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION, new ModelElementCreationFactory(
-						InboundChannelAdapterModelElement.class, diagram, namespaceUri),
+				Messages.IntFilePaletteFactory_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(InboundChannelAdapterModelElement.class, diagram, namespaceUri),
+				IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);
+		entries.add(entry);
+
+		entry = new CombinedTemplateCreationEntry(IntFileSchemaConstants.ELEM_TAIL_INBOUND_CHANNEL_ADAPTER,
+				Messages.IntFilePaletteFactory_TAIL_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(TailInboundChannelAdapterModelElement.class, diagram, namespaceUri),
 				IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);
 		entries.add(entry);
 
 		entry = new CombinedTemplateCreationEntry(IntFileSchemaConstants.ELEM_OUTBOUND_CHANNEL_ADAPTER,
-				Messages.IntFilePaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION, new ModelElementCreationFactory(
-						OutboundChannelAdapterModelElement.class, diagram, namespaceUri),
+				Messages.IntFilePaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(OutboundChannelAdapterModelElement.class, diagram, namespaceUri),
 				IntegrationImages.OUTBOUND_ADAPTER_SMALL, IntegrationImages.OUTBOUND_ADAPTER);
 		entries.add(entry);
 

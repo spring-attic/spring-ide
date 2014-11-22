@@ -31,6 +31,8 @@ public class IntFileSchemaConstants {
 
 	public static String ELEM_INBOUND_CHANNEL_ADAPTER = "inbound-channel-adapter"; //$NON-NLS-1$
 
+	public static String ELEM_TAIL_INBOUND_CHANNEL_ADAPTER = "tail-inbound-channel-adapter"; //$NON-NLS-1$
+
 	public static String ELEM_LOCKER = "locker"; //$NON-NLS-1$
 
 	public static String ELEM_NIO_LOCKER = "nio-locker"; //$NON-NLS-1$
