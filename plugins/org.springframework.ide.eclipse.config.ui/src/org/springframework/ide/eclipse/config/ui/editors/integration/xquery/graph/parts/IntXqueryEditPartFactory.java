@@ -14,7 +14,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BadgedIntegrationPart;
-import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BadgedRouterGraphicalPart;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.RouterGraphicalPart;
 import org.springframework.ide.eclipse.config.ui.editors.integration.xquery.graph.model.XqueryRouterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.xquery.graph.model.XqueryTransformerModelElement;
 
@@ -23,7 +23,7 @@ public class IntXqueryEditPartFactory implements EditPartFactory {
 	public EditPart createEditPart(EditPart context, Object model) {
 		EditPart part = null;
 		if (model instanceof XqueryRouterModelElement) {
-			part = new BadgedRouterGraphicalPart((XqueryRouterModelElement) model, IntegrationImages.ROUTER,
+			part = new RouterGraphicalPart((XqueryRouterModelElement) model, IntegrationImages.ROUTER,
 					IntegrationImages.BADGE_SI_XQUERY);
 		}
 		else if (model instanceof XqueryTransformerModelElement) {

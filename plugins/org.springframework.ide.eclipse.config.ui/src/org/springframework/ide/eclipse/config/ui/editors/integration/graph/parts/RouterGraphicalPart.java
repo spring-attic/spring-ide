@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2014 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ * Contributors:
+ * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts;
 
@@ -16,33 +16,38 @@ import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.requests.CreateConnectionRequest;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.config.graph.parts.ActivityDiagramPart;
 import org.springframework.ide.eclipse.config.graph.parts.BottomAnchor;
 import org.springframework.ide.eclipse.config.graph.parts.RightAnchor;
 import org.springframework.ide.eclipse.config.graph.policies.FixedConnectionNodeEditPolicy;
-import org.springframework.ide.eclipse.config.ui.editors.integration.graph.ChannelNodeEditPolicy;
-import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractChannelModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.RouterNodeEditPolicy;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractRouterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AlternateTransition;
 
-
 /**
- * @author Leo Dos Santos
+ * Router edit part that has an icon image combined from main image and a little
+ * aux decoration icon
+ *
+ * @author Alex Boyko
+ *
  */
-public abstract class AbstractChannelGraphicalEditPart extends BorderedIntegrationPart {
+public class RouterGraphicalPart extends BadgedIntegrationPart {
 
-	public AbstractChannelGraphicalEditPart(AbstractChannelModelElement channel) {
-		super(channel);
+	public RouterGraphicalPart(AbstractRouterModelElement activity, ImageDescriptor mainImageDescriptor,
+			ImageDescriptor auxImageDescriptor) {
+		super(activity, mainImageDescriptor, auxImageDescriptor);
 	}
 
 	@Override
 	protected FixedConnectionNodeEditPolicy getFixedConnectionNodeEditPolicy() {
-		return new ChannelNodeEditPolicy();
+		return new RouterNodeEditPolicy();
 	}
 
 	@Override
 	public ConnectionAnchor getSourceConnectionAnchor(ConnectionEditPart connection) {
 		if (connection instanceof AlternateTransitionPart) {
-			return getWireTapConnectionAnchor();
+			return getMappingConnectionAnchor();
 		}
 		return super.getSourceConnectionAnchor(connection);
 	}
@@ -52,13 +57,13 @@ public abstract class AbstractChannelGraphicalEditPart extends BorderedIntegrati
 		if (request instanceof CreateConnectionRequest) {
 			CreateConnectionRequest create = (CreateConnectionRequest) request;
 			if (AlternateTransition.class == create.getNewObjectType()) {
-				return getWireTapConnectionAnchor();
+				return getMappingConnectionAnchor();
 			}
 		}
 		return super.getSourceConnectionAnchor(request);
 	}
 
-	private ConnectionAnchor getWireTapConnectionAnchor() {
+	private ConnectionAnchor getMappingConnectionAnchor() {
 		EditPart part = getViewer().getContents();
 		if (part instanceof ActivityDiagramPart) {
 			ActivityDiagramPart diagram = (ActivityDiagramPart) part;

@@ -1,17 +1,19 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.integration.xml.graph.parts;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.RouterGraphicalPart;
 import org.springframework.ide.eclipse.config.ui.editors.integration.xml.graph.model.MarshallingTransformerModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.xml.graph.model.UnmarshallingTransformerModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.xml.graph.model.ValidatingFilterModelElement;
@@ -21,7 +23,6 @@ import org.springframework.ide.eclipse.config.ui.editors.integration.xml.graph.m
 import org.springframework.ide.eclipse.config.ui.editors.integration.xml.graph.model.XpathSplitterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.xml.graph.model.XpathTransformerModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.xml.graph.model.XslTransformerModelElement;
-
 
 /**
  * @author Leo Dos Santos
@@ -46,7 +47,8 @@ public class IntXmlEditPartFactory implements EditPartFactory {
 			part = new XpathHeaderEnricherGraphicalEditPart((XpathHeaderEnricherModelElement) model);
 		}
 		else if (model instanceof XpathRouterModelElement) {
-			part = new XpathRouterGraphicalEditPart((XpathRouterModelElement) model);
+			part = new RouterGraphicalPart((XpathRouterModelElement) model, IntegrationImages.ROUTER,
+					IntegrationImages.BADGE_SI_XML);
 		}
 		else if (model instanceof XpathSplitterModelElement) {
 			part = new XpathSplitterGraphicalEditPart((XpathSplitterModelElement) model);

@@ -116,7 +116,8 @@ public class IntegrationEditPartFactory extends AbstractConfigEditPartFactory {
 			part = new EnricherGraphicalEditPart((EnricherModelElement) model);
 		}
 		else if (model instanceof ExceptionTypeRouterModelElement) {
-			part = new ExceptionTypeRouterGraphicalEditPart((ExceptionTypeRouterModelElement) model);
+			part = new RouterGraphicalPart((ExceptionTypeRouterModelElement) model,
+					IntegrationImages.EXCEPTION_ROUTER, IntegrationImages.BADGE_SI);
 		}
 		else if (model instanceof FilterModelElement) {
 			part = new FilterGraphicalEditPart((FilterModelElement) model);
@@ -131,7 +132,8 @@ public class IntegrationEditPartFactory extends AbstractConfigEditPartFactory {
 			part = new HeaderFilterGraphicalEditPart((HeaderFilterModelElement) model);
 		}
 		else if (model instanceof HeaderValueRouterModelElement) {
-			part = new HeaderValueRouterGraphicalEditPart((HeaderValueRouterModelElement) model);
+			part = new RouterGraphicalPart((HeaderValueRouterModelElement) model, IntegrationImages.ROUTER,
+					IntegrationImages.BADGE_SI);
 		}
 		else if (model instanceof ImplicitChannelModelElement) {
 			part = new ImplicitChannelGraphicalEditPart((ImplicitChannelModelElement) model);
@@ -168,7 +170,8 @@ public class IntegrationEditPartFactory extends AbstractConfigEditPartFactory {
 			part = new PayloadSerializingTransformerGraphicalEditPart((PayloadSerializingTransformerModelElement) model);
 		}
 		else if (model instanceof PayloadTypeRouterModelElement) {
-			part = new PayloadTypeRouterGraphicalEditPart((PayloadTypeRouterModelElement) model);
+			part = new RouterGraphicalPart((PayloadTypeRouterModelElement) model, IntegrationImages.ROUTER,
+					IntegrationImages.BADGE_SI);
 		}
 		else if (model instanceof PlaceholderModelElement) {
 			part = new PlaceholderGraphicalEditPart((PlaceholderModelElement) model);
@@ -187,7 +190,8 @@ public class IntegrationEditPartFactory extends AbstractConfigEditPartFactory {
 			part = new ResourceInboundChannelAdapterGraphicalEditPart((ResourceInboundChannelAdapterModelElement) model);
 		}
 		else if (model instanceof RouterModelElement) {
-			part = new RouterGraphicalEditPart((RouterModelElement) model);
+			part = new RouterGraphicalPart((RouterModelElement) model, IntegrationImages.ROUTER,
+					IntegrationImages.BADGE_SI);
 		}
 		else if (model instanceof ServiceActivatorModelElement) {
 			part = new ServiceActivatorGraphicalEditPart((ServiceActivatorModelElement) model);
