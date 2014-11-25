@@ -14,8 +14,8 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BadgedIntegrationPart;
-import org.springframework.ide.eclipse.config.ui.editors.integration.splunk.graph.model.InboundChannelAdapterModelElement;
-import org.springframework.ide.eclipse.config.ui.editors.integration.splunk.graph.model.OutboundChannelAdapterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.mqtt.graph.model.InboundChannelAdapterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.mqtt.graph.model.OutboundChannelAdapterModelElement;
 
 public class IntMqttEditPartFactory implements EditPartFactory {
 

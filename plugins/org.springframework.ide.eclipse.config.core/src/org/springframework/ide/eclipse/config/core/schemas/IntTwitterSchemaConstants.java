@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.core.schemas;
 
@@ -36,6 +36,8 @@ public class IntTwitterSchemaConstants {
 	public static String ELEM_OUTBOUND_CHANNEL_ADAPTER = "outbound-channel-adapter"; //$NON-NLS-1$
 
 	public static String ELEM_SEARCH_INBOUND_CHANNEL_ADAPTER = "search-inbound-channel-adapter"; //$NON-NLS-1$
+
+	public static String ELEM_SEARCH_OUTBOUND_GATEWAY = "search-outbound-gateway"; //$NON-NLS-1$
 
 	// Attribute tags
 

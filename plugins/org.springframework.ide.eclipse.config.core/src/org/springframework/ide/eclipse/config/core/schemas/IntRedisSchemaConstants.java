@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.core.schemas;
 
@@ -31,11 +31,21 @@ public class IntRedisSchemaConstants {
 
 	public static String ELEM_OUTBOUND_CHANNEL_ADAPTER = "outbound-channel-adapter"; //$NON-NLS-1$
 
+	public static String ELEM_OUTBOUND_GATEWAY = "outbound-gateway"; //$NON-NLS-1$
+
 	public static String ELEM_PUBLISH_SUBSCRIBE_CHANNEL = "publish-subscribe-channel"; //$NON-NLS-1$
 
 	public static String ELEM_STORE_INBOUND_CHANNEL_ADAPTER = "store-inbound-channel-adapter"; //$NON-NLS-1$
 
 	public static String ELEM_STORE_OUTBOUND_CHANNEL_ADAPTER = "store-outbound-channel-adapter"; //$NON-NLS-1$
+
+	public static String ELEM_QUEUE_INBOUND_CHANNEL_ADAPTER = "queue-inbound-channel-adapter"; //$NON-NLS-1$
+
+	public static String ELEM_QUEUE_INBOUND_GATEWAY = "queue-inbound-gateway"; //$NON-NLS-1$
+
+	public static String ELEM_QUEUE_OUTBOUND_CHANNEL_ADAPTER = "queue-outbound-channel-adapter"; //$NON-NLS-1$
+
+	public static String ELEM_QUEUE_OUTBOUND_GATEWAY = "queue-outbound-gateway"; //$NON-NLS-1$
 
 	// Attribute tags
 

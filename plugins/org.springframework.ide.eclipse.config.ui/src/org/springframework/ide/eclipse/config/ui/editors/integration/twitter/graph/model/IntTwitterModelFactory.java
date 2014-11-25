@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.springframework.ide.eclipse.config.core.schemas.IntTwitterSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.model.Activity;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractIntegrationModelFactory;
-
 
 /**
  * @author Leo Dos Santos
@@ -51,6 +50,11 @@ public class IntTwitterModelFactory extends AbstractIntegrationModelFactory {
 			list.add(adapter);
 		}
 		else if (input.getLocalName().equals(IntTwitterSchemaConstants.ELEM_SEARCH_INBOUND_CHANNEL_ADAPTER)) {
+			SearchInboundChannelAdapterModelElement adapter = new SearchInboundChannelAdapterModelElement(input,
+					parent.getDiagram());
+			list.add(adapter);
+		}
+		else if (input.getLocalName().equals(IntTwitterSchemaConstants.ELEM_SEARCH_OUTBOUND_GATEWAY)) {
 			SearchInboundChannelAdapterModelElement adapter = new SearchInboundChannelAdapterModelElement(input,
 					parent.getDiagram());
 			list.add(adapter);

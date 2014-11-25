@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.integration.jmx.graph.parts;
 
@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.config.ui.editors.integration.jmx.graph.m
 import org.springframework.ide.eclipse.config.ui.editors.integration.jmx.graph.model.NotificationPublishingChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.jmx.graph.model.OperationInvokingChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.jmx.graph.model.OperationInvokingOutboundGatewayModelElement;
-
+import org.springframework.ide.eclipse.config.ui.editors.integration.jmx.graph.model.TreePollingChannelAdapterModelElement;
 
 /**
  * @author Leo Dos Santos
@@ -41,6 +41,12 @@ public class IntJmxPaletteFactory implements IPaletteFactory {
 				IntJmxSchemaConstants.ELEM_ATTRIBUTE_POLLING_CHANNEL_ADAPTER,
 				Messages.IntJmxPaletteFactory_ATTRIBUTE_POLLING_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
 				new ModelElementCreationFactory(AttributePollingChannelAdapterModelElement.class, diagram, namespaceUri),
+				IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);
+		entries.add(entry);
+
+		entry = new CombinedTemplateCreationEntry(IntJmxSchemaConstants.ELEM_TREE_POLLING_CHANNEL_ADAPTER,
+				Messages.IntJmxPaletteFactory_TREE_POLLING_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(TreePollingChannelAdapterModelElement.class, diagram, namespaceUri),
 				IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);
 		entries.add(entry);
 
@@ -63,9 +69,9 @@ public class IntJmxPaletteFactory implements IPaletteFactory {
 		entries.add(entry);
 
 		entry = new CombinedTemplateCreationEntry(IntJmxSchemaConstants.ELEM_OPERATION_INVOKING_OUTBOUND_GATEWAY,
-				Messages.IntJmxPaletteFactory_OPERATION_INVOKING_OUTBOUND_GATEWAY_COMPONENT_DESCRIPTION, new ModelElementCreationFactory(
-						OperationInvokingOutboundGatewayModelElement.class, diagram, namespaceUri),
-				IntegrationImages.OUTBOUND_GATEWAY_SMALL, IntegrationImages.OUTBOUND_GATEWAY);
+				Messages.IntJmxPaletteFactory_OPERATION_INVOKING_OUTBOUND_GATEWAY_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(OperationInvokingOutboundGatewayModelElement.class, diagram,
+						namespaceUri), IntegrationImages.OUTBOUND_GATEWAY_SMALL, IntegrationImages.OUTBOUND_GATEWAY);
 		entries.add(entry);
 
 		drawer.addAll(entries);

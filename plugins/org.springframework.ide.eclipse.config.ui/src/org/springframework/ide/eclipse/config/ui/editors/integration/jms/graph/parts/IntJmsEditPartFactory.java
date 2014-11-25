@@ -1,17 +1,19 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.integration.jms.graph.parts;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.ChannelGraphicalEditPart;
 import org.springframework.ide.eclipse.config.ui.editors.integration.jms.graph.model.ChannelModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.jms.graph.model.HeaderEnricherModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.jms.graph.model.InboundChannelAdapterModelElement;
@@ -21,7 +23,6 @@ import org.springframework.ide.eclipse.config.ui.editors.integration.jms.graph.m
 import org.springframework.ide.eclipse.config.ui.editors.integration.jms.graph.model.OutboundGatewayModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.jms.graph.model.PublishSubscribeChannelModelElement;
 
-
 /**
  * @author Leo Dos Santos
  */
@@ -30,7 +31,8 @@ public class IntJmsEditPartFactory implements EditPartFactory {
 	public EditPart createEditPart(EditPart context, Object model) {
 		EditPart part = null;
 		if (model instanceof ChannelModelElement) {
-			part = new ChannelGraphicalEditPart((ChannelModelElement) model);
+			part = new ChannelGraphicalEditPart((ChannelModelElement) model, IntegrationImages.CHANNEL,
+					IntegrationImages.BADGE_SI_JMS);
 		}
 		else if (model instanceof HeaderEnricherModelElement) {
 			part = new HeaderEnricherGraphicalEditPart((HeaderEnricherModelElement) model);
@@ -51,7 +53,8 @@ public class IntJmsEditPartFactory implements EditPartFactory {
 			part = new OutboundGatewayGraphicalEditPart((OutboundGatewayModelElement) model);
 		}
 		else if (model instanceof PublishSubscribeChannelModelElement) {
-			part = new PublishSubscribeChannelGraphicalEditPart((PublishSubscribeChannelModelElement) model);
+			part = new ChannelGraphicalEditPart((PublishSubscribeChannelModelElement) model,
+					IntegrationImages.PUBSUB_CHANNEL, IntegrationImages.BADGE_SI_JMS);
 		}
 		return part;
 	}

@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.integration.twitter.graph.parts;
 
@@ -29,6 +29,8 @@ public class Messages extends NLS {
 	public static String IntTwitterPaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
 
 	public static String IntTwitterPaletteFactory_SEARCH_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION;
+
+	public static String IntTwitterPaletteFactory_SEARCH_OUTBOUND_GATEWAY_COMPONENT_DESCRIPTION;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

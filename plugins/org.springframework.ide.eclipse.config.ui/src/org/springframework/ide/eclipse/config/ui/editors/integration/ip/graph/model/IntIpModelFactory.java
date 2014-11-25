@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.model;
 
@@ -16,7 +16,6 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.springframework.ide.eclipse.config.core.schemas.IntIpSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.model.Activity;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractIntegrationModelFactory;
-
 
 /**
  * @author Leo Dos Santos
@@ -51,6 +50,11 @@ public class IntIpModelFactory extends AbstractIntegrationModelFactory {
 		else if (input.getLocalName().equals(IntIpSchemaConstants.ELEM_TCP_OUTBOUND_CHANNEL_ADAPTER)) {
 			TcpOutboundChannelAdapterModelElement adapter = new TcpOutboundChannelAdapterModelElement(input,
 					parent.getDiagram());
+			list.add(adapter);
+		}
+		else if (input.getLocalName().equals(IntIpSchemaConstants.ELEM_TCP_CONNECTION_EVENT_INBOUND_CHANNEL_ADAPTER)) {
+			TcpConnectionEventInboundChannelAdapterModelElement adapter = new TcpConnectionEventInboundChannelAdapterModelElement(
+					input, parent.getDiagram());
 			list.add(adapter);
 		}
 	}

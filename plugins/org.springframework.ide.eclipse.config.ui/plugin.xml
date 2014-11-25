@@ -508,6 +508,16 @@
       </adapter>
       <adapter
             detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.syslog.graph.parts.IntSyslogEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.syslog"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.syslog.graph.model.IntSyslogModelFactory"
+            label="syslog"
+            namespaceUri="http://www.springframework.org/schema/integration/syslog"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.syslog.graph.parts.IntSyslogPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
             editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.twitter.graph.parts.IntTwitterEditPartFactory"
             id="com.springsource.sts.config.ui.editors.integration.twitter"
             modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.twitter.graph.model.IntTwitterModelFactory"
@@ -524,6 +534,16 @@
             modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.voldemort.graph.model.IntVoldemortModelFactory"
             namespaceUri="http://www.springframework.org/schema/integration/voldemort"
             paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.voldemort.graph.parts.IntVoldemortPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.websocket.graph.parts.IntWebsocketEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.websocket"
+            label="websocket"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.websocket.graph.model.IntWebsocketModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/websocket"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.websocket.graph.parts.IntWebsocketPaletteFactory"
             parentUri="http://www.springframework.org/schema/integration">
       </adapter>
       <adapter
@@ -564,6 +584,16 @@
             modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.xquery.graph.model.IntXqueryModelFactory"
             namespaceUri="http://www.springframework.org/schema/integration/xquery"
             paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.xquery.graph.parts.IntXqueryPaletteFactory"
+            parentUri="http://www.springframework.org/schema/integration">
+      </adapter>
+      <adapter
+            detailsFactory="org.springframework.ide.eclipse.config.ui.editors.integration.IntAdapterMasterDetailsBlock"
+            editpartFactory="org.springframework.ide.eclipse.config.ui.editors.integration.jgroups.graph.parts.IntJGroupsEditPartFactory"
+            id="com.springsource.sts.config.ui.editors.integration.jgroups"
+            label="jgroups"
+            modelFactory="org.springframework.ide.eclipse.config.ui.editors.integration.jgroups.graph.model.IntJGroupsModelFactory"
+            namespaceUri="http://www.springframework.org/schema/integration/jgroups"
+            paletteFactory="org.springframework.ide.eclipse.config.ui.editors.integration.jgroups.graph.parts.IntJGroupsPaletteFactory"
             parentUri="http://www.springframework.org/schema/integration">
       </adapter>
    </extension>

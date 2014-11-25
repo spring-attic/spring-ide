@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.parts;
 
@@ -21,13 +21,13 @@ import org.springframework.ide.eclipse.config.graph.model.AbstractConfigGraphDia
 import org.springframework.ide.eclipse.config.graph.model.ModelElementCreationFactory;
 import org.springframework.ide.eclipse.config.graph.parts.IPaletteFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
+import org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.model.TcpConnectionEventInboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.model.TcpInboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.model.TcpInboundGatewayModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.model.TcpOutboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.model.TcpOutboundGatewayModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.model.UdpInboundChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.ip.graph.model.UdpOutboundChannelAdapterModelElement;
-
 
 /**
  * @author Leo Dos Santos
@@ -39,7 +39,13 @@ public class IntIpPaletteFactory implements IPaletteFactory {
 		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
 
 		CombinedTemplateCreationEntry entry = new CombinedTemplateCreationEntry(
-				IntIpSchemaConstants.ELEM_TCP_INBOUND_CHANNEL_ADAPTER,
+				IntIpSchemaConstants.ELEM_TCP_CONNECTION_EVENT_INBOUND_CHANNEL_ADAPTER,
+				Messages.IntIpPaletteFactory_TCP_CONNECTION_EVENT_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(TcpConnectionEventInboundChannelAdapterModelElement.class, diagram,
+						namespaceUri), IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);
+		entries.add(entry);
+
+		entry = new CombinedTemplateCreationEntry(IntIpSchemaConstants.ELEM_TCP_INBOUND_CHANNEL_ADAPTER,
 				Messages.IntIpPaletteFactory_TCP_INBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
 				new ModelElementCreationFactory(TcpInboundChannelAdapterModelElement.class, diagram, namespaceUri),
 				IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);

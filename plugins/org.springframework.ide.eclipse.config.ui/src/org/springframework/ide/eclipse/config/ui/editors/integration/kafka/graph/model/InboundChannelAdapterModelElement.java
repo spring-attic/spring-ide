@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
-import org.springframework.ide.eclipse.config.core.schemas.IntAwsSchemaConstants;
 import org.springframework.ide.eclipse.config.graph.model.AbstractConfigGraphDiagram;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AbstractInboundChannelAdapterModelElement;
 
@@ -24,11 +23,6 @@ public class InboundChannelAdapterModelElement extends AbstractInboundChannelAda
 
 	public InboundChannelAdapterModelElement(IDOMElement input, AbstractConfigGraphDiagram diagram) {
 		super(input, diagram);
-	}
-
-	@Override
-	public String getInputName() {
-		return IntAwsSchemaConstants.ELEM_INBOUND_CHANNEL_ADAPTER;
 	}
 
 }

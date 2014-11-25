@@ -165,6 +165,8 @@ public class IntegrationImages {
 
 	public static final ImageDescriptor BADGE_SI_JMX = create(INT16, "spring-integration-jmx.gif"); //$NON-NLS-1$
 
+	public static final ImageDescriptor BADGE_SI_JGROUPS = create(INT16, "spring-integration-jgroups.gif"); //$NON-NLS-1$
+
 	public static final ImageDescriptor BADGE_SI_JPA = create(INT16, "spring-integration-jpa.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_KAFKA = create(INT16, "spring-integration-kafka.gif"); //$NON-NLS-1$
@@ -195,9 +197,13 @@ public class IntegrationImages {
 
 	public static final ImageDescriptor BADGE_SI_STREAM = create(INT16, "spring-integration-stream.gif"); //$NON-NLS-1$
 
+	public static final ImageDescriptor BADGE_SI_SYSLOG = create(INT16, "spring-integration-syslog.gif"); //$NON-NLS-1$
+
 	public static final ImageDescriptor BADGE_SI_TWITTER = create(INT16, "spring-integration-twitter.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_VOLDEMORT = create(INT16, "spring-integration-voldemort.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BADGE_SI_WEBSOCKET = create(INT16, "spring-integration-websocket.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor BADGE_SI_WS = create(INT16, "spring-integration-ws.gif"); //$NON-NLS-1$
 

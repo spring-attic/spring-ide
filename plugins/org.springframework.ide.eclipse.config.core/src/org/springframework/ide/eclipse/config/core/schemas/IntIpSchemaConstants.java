@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.core.schemas;
 
@@ -26,6 +26,8 @@ public class IntIpSchemaConstants {
 	// Element tags
 
 	public static String ELEM_TCP_CONNECTION_FACTORY = "tcp-connection-factory"; //$NON-NLS-1$
+
+	public static String ELEM_TCP_CONNECTION_EVENT_INBOUND_CHANNEL_ADAPTER = "tcp-connection-event-inbound-channel-adapter"; //$NON-NLS-1$
 
 	public static String ELEM_TCP_INBOUND_CHANNEL_ADAPTER = "tcp-inbound-channel-adapter"; //$NON-NLS-1$
 

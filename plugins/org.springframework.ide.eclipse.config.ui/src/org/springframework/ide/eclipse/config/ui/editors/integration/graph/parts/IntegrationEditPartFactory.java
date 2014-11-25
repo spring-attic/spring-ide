@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.springframework.ide.eclipse.config.graph.model.Transition;
 import org.springframework.ide.eclipse.config.graph.parts.AbstractConfigEditPartFactory;
 import org.springframework.ide.eclipse.config.graph.parts.BorderedActivityPart;
 import org.springframework.ide.eclipse.config.graph.parts.TransitionPart;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AggregatorModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AlternateTransition;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.BridgeModelElement;
@@ -96,7 +97,8 @@ public class IntegrationEditPartFactory extends AbstractConfigEditPartFactory {
 			part = new ChainGraphicalEditPart((ChainModelElement) model);
 		}
 		else if (model instanceof ChannelModelElement) {
-			part = new ChannelGraphicalEditPart((ChannelModelElement) model);
+			part = new ChannelGraphicalEditPart((ChannelModelElement) model, IntegrationImages.CHANNEL,
+					IntegrationImages.BADGE_SI);
 		}
 		else if (model instanceof ClaimCheckInModelElement) {
 			part = new ClaimCheckInGraphicalEditPart((ClaimCheckInModelElement) model);
@@ -172,7 +174,8 @@ public class IntegrationEditPartFactory extends AbstractConfigEditPartFactory {
 			part = new PlaceholderGraphicalEditPart((PlaceholderModelElement) model);
 		}
 		else if (model instanceof PublishSubscribeChannelModelElement) {
-			part = new PublishSubscribeChannelGraphicalEditPart((PublishSubscribeChannelModelElement) model);
+			part = new ChannelGraphicalEditPart((PublishSubscribeChannelModelElement) model,
+					IntegrationImages.PUBSUB_CHANNEL, IntegrationImages.BADGE_SI);
 		}
 		else if (model instanceof RecipientListRouterModelElement) {
 			part = new RecipientListRouterGraphicalEditPart((RecipientListRouterModelElement) model);

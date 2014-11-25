@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2014 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.core.schemas;
 
@@ -26,6 +26,8 @@ public class IntJmxSchemaConstants {
 	// Element tags
 
 	public static String ELEM_ATTRIBUTE_POLLING_CHANNEL_ADAPTER = "attribute-polling-channel-adapter"; //$NON-NLS-1$
+
+	public static String ELEM_TREE_POLLING_CHANNEL_ADAPTER = "tree-polling-channel-adapter"; //$NON-NLS-1$
 
 	public static String ELEM_CONTROL_BUS = "control-bus"; //$NON-NLS-1$
 
