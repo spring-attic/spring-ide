@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2014 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.core.java.annotation.Annotation;
 import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * {@link IAnnotationBeanMetadataProvider} for creating bean metadata from RequestMapping.
@@ -42,7 +43,8 @@ public class RequestMappingAnnotationMetadataProvider implements IAnnotationBean
 			IAnnotationMetadata visitor) {
 		Set<IBeanMetadata> beanMetaDataSet = new LinkedHashSet<IBeanMetadata>();
 		try {
-			if (visitor.hasTypeLevelAnnotations(Controller.class.getName(), REQUEST_MAPPING_CLASS)) {
+			if (visitor.hasTypeLevelAnnotations(Controller.class.getName(), REQUEST_MAPPING_CLASS) ||
+					visitor.hasTypeLevelAnnotations(RestController.class.getName(), REQUEST_MAPPING_CLASS)) {
 				Set<IMethodMetadata> methodMetaData = new HashSet<IMethodMetadata>();
 				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(
 						REQUEST_MAPPING_CLASS).entrySet()) {

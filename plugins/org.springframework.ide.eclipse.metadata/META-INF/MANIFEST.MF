@@ -47,6 +47,7 @@ Import-Package: org.aspectj.lang.annotation,
  org.springframework.stereotype;version="[4.0.0,4.1.0)",
  org.springframework.transaction.annotation;version="[4.0.0,4.1.0)",
  org.springframework.util;version="[4.0.0,4.1.0)",
+ org.springframework.web.bind.annotation;version="[4.0.0,4.1.0)",
  org.springframework.web.context;version="[4.0.0,4.1.0)",
  org.springframework.web.context.support;version="[4.0.0,4.1.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
