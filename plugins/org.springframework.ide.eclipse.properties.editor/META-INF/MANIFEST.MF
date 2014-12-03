@@ -15,6 +15,5 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- lib/spring-boot-config-processor-1.2.0.BUILD-SNAPSHOT.jar,
  lib/json-20140107.jar
 Export-Package: org.springframework.ide.eclipse.propertiesfileeditor

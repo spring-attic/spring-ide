@@ -8,5 +8,5 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.junit,
  org.springframework.ide.eclipse.properties.editor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

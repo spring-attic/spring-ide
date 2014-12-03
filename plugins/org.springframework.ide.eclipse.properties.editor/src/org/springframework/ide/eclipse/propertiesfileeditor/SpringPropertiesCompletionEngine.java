@@ -15,8 +15,8 @@ import java.util.Collection;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
-import org.springframework.boot.config.ConfigMetadataItem;
-import org.springframework.boot.config.ConfigMetadataRepository;
+import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
 
 /**
  * @author Kris De Volder
@@ -26,11 +26,11 @@ public class SpringPropertiesCompletionEngine {
 	private PropertyTree properties = new PropertyTree();
 
 	public SpringPropertiesCompletionEngine(IJavaProject jp) throws Exception {
-		ConfigMetadataRepositoryJsonLoader loader = new ConfigMetadataRepositoryJsonLoader();
-		ConfigMetadataRepository metadata = loader.load(jp); //TODO: is this fast enough? Or should it be done in background?
+		StsConfigMetadataRepositoryJsonLoader loader = new StsConfigMetadataRepositoryJsonLoader();
+		ConfigurationMetadataRepository metadata = loader.load(jp); //TODO: is this fast enough? Or should it be done in background?
 		
-		Collection<ConfigMetadataItem> allEntries = metadata.getAllItems().values();
-		for (ConfigMetadataItem item : allEntries) {
+		Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
+		for (ConfigurationMetadataProperty item : allEntries) {
 			properties.insert(item.getId());
 		}
 		

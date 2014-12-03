@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.propertiesfileeditor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -22,35 +23,27 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.springframework.boot.config.ConfigMetadataRepository;
-import org.springframework.boot.config.SimpleConfigMetadataRepository;
-import org.springframework.boot.config.processor.mapper.ConfigMetadataRepositoryJsonMapper;
+import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
+import org.springframework.configurationmetadata.ConfigurationMetadataRepositoryJsonLoader;
+import org.springframework.configurationmetadata.SimpleConfigurationMetadataRepository;
 
 /**
  * Load a {@link ConfigMetadataRepository} from the content of an eclipse
  * projects classpath.
- * <p>
- * Loosely based on the class of the same name in spring-boot (
- * org.springframework.boot.config.support.ConfigMetadataRepositoryJsonLoader.ConfigMetadataRepositoryJsonLoader())
  *
  * @author Kris De Volder
  */
-public class ConfigMetadataRepositoryJsonLoader {
+public class StsConfigMetadataRepositoryJsonLoader {
 
 	/**
 	 * The default classpath location for config metadata.
 	 */
-	public static final String DEFAULT_LOCATION_PATTERN =
-			"META-INF/boot/config-metadata.json";
+	public static final String[] META_DATA_LOCATIONS = {
+		"META-INF/spring-configuration-metadata.json"
+	};
 
-	/**
-	 * The default classpath location for manual config metadata.
-	 */
-	public static final String DEFAULT_MANUAL_LOCATION_PATTERN =
-			"META-INF/boot/config-manual-metadata.json";
-
-	private ConfigMetadataRepositoryJsonMapper mapper = new ConfigMetadataRepositoryJsonMapper();
-	private SimpleConfigMetadataRepository repository = new SimpleConfigMetadataRepository();
+	private SimpleConfigurationMetadataRepository repository = new SimpleConfigurationMetadataRepository();
+	private ConfigurationMetadataRepositoryJsonLoader loader = new ConfigurationMetadataRepositoryJsonLoader();
 
 	/**
 	 * Load the {@link ConfigMetadataRepository} with the metadata of the current
@@ -58,7 +51,7 @@ public class ConfigMetadataRepositoryJsonLoader {
 	 * metadata items is held within different resources, the first that is
 	 * loaded is kept which means the result is not deterministic.
 	 */
-	public ConfigMetadataRepository load(IJavaProject project) throws Exception {
+	public ConfigurationMetadataRepository load(IJavaProject project) throws Exception {
 		IClasspathEntry[] classpath = project.getResolvedClasspath(true);
 		for (IClasspathEntry e : classpath) {
 			int ekind = e.getEntryKind();
@@ -83,13 +76,11 @@ public class ConfigMetadataRepositoryJsonLoader {
 		try {
 			jarFile = new JarFile(f);
 			//jarDump(jarFile);
-			ZipEntry e = jarFile.getEntry(DEFAULT_MANUAL_LOCATION_PATTERN);
-			if (e!=null) {
-				loadFrom(jarFile, e);
-			}
-			e = jarFile.getEntry(DEFAULT_LOCATION_PATTERN);
-			if (e!=null) {
-				loadFrom(jarFile, e);
+			for (String loc : META_DATA_LOCATIONS) {
+				ZipEntry e = jarFile.getEntry(loc);
+				if (e!=null) {
+					loadFrom(jarFile, e);
+				}
 			}
 		} catch (Throwable e) {
 			SpringPropertiesEditorPlugin.log(e);
@@ -102,12 +93,13 @@ public class ConfigMetadataRepositoryJsonLoader {
 			}
 		}
 	}
+	
 
 	private void loadFrom(JarFile jarFile, ZipEntry ze) {
 		InputStream is = null;
 		try {
-			is= jarFile.getInputStream(ze);
-			ConfigMetadataRepository extra = mapper.readRepository(is);
+			is = jarFile.getInputStream(ze);
+			ConfigurationMetadataRepository extra = loader.loadAll(Collections.singleton(is));
 			repository.include(extra);
 		} catch (Throwable e) {
 			SpringPropertiesEditorPlugin.log(e);
