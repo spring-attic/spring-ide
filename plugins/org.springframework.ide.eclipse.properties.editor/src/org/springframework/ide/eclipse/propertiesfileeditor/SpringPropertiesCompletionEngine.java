@@ -49,7 +49,7 @@ public class SpringPropertiesCompletionEngine {
 		properties.completions(prefix, new PropertyTree.ICompletionRequestor() {
 			@Override
 			public void add(String fullPropName) {
-				result.add(fullPropName.substring(prefix.length()));
+				result.add(fullPropName);
 			}
 		});
 		return result;

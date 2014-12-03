@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -28,11 +29,16 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.TextStyle;
 
 /**
  * A completion proposal computer for hippie word completions.
@@ -47,8 +53,18 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 	private static final ICompletionProposal[] NO_PROPOSALS= new ICompletionProposal[0];
 	private static final IContextInformation[] NO_CONTEXTS= new IContextInformation[0];
 	private static final char[] AUTO_ACTIVATION_CHARS = {'.'};
+	public Styler BOLD = new Styler() {
+		
+		@Override
+		public void applyStyles(TextStyle textStyle) {
+			 textStyle.font = JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+		}
+		
+	};
 
-	private static final class Proposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4 {
+	private final class Proposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4,
+	 ICompletionProposalExtension6
+	{
 
 		private final String fString;
 		private final String fPrefix;
@@ -65,7 +81,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 		}
 
 		public Point getSelection(IDocument document) {
-			return new Point(fOffset + fString.length(), 0);
+			return new Point(fOffset - fPrefix.length()+ fString.length(), 0);
 		}
 
 		public String getAdditionalProposalInfo() {
@@ -73,7 +89,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 		}
 
 		public String getDisplayString() {
-			return fPrefix + fString;
+			return fString;
 		}
 
 		public Image getImage() {
@@ -86,8 +102,8 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 
 		public void apply(IDocument document, char trigger, int offset) {
 			try {
-				String replacement= fString.substring(offset - fOffset);
-				document.replace(offset, 0, replacement);
+				String replacement= fString;
+				document.replace(offset-fPrefix.length(), fPrefix.length(), replacement);
 			} catch (BadLocationException x) {
 				// TODO Auto-generated catch block
 				x.printStackTrace();
@@ -130,7 +146,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 		}
 
 		public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-			return fPrefix + fString;
+			return fString;
 		}
 
 		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
@@ -139,6 +155,14 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 
 		public boolean isAutoInsertable() {
 			return true;
+		}
+
+		@Override
+		public StyledString getStyledDisplayString() {
+			StyledString result = new StyledString();
+			result.append(fPrefix, BOLD);
+			result.append(fString.substring(fPrefix.length()));
+			return result;
 		}
 
 	}

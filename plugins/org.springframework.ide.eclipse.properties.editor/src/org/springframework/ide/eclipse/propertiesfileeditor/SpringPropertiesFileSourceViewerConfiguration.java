@@ -11,13 +11,18 @@
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -40,7 +45,13 @@ extends PropertiesFileSourceViewerConfiguration {
 				if (jp!=null) {
 					ContentAssistant a = new ContentAssistant();
 					a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(jp), IDocument.DEFAULT_CONTENT_TYPE);
+					a.enableColoredLabels(true);
 					a.enableAutoActivation(true);
+					a.setInformationControlCreator(new IInformationControlCreator() {
+						public IInformationControl createInformationControl(Shell parent) {
+							return new DefaultInformationControl(parent);
+						}
+					});
 					return a;
 				}
 			}
