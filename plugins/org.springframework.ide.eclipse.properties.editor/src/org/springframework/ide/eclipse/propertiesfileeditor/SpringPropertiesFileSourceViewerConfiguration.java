@@ -52,6 +52,7 @@ extends PropertiesFileSourceViewerConfiguration {
 							return new DefaultInformationControl(parent);
 						}
 					});
+					//TODO: a.setSorter(...);
 					return a;
 				}
 			}

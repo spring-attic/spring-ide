@@ -17,42 +17,39 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
+import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 
 /**
  * @author Kris De Volder
  */
 public class SpringPropertiesCompletionEngine {
 		
-	private PropertyTree properties = new PropertyTree();
-
+	private FuzzyMap<ConfigurationMetadataProperty> properties = new FuzzyMap<ConfigurationMetadataProperty>() {
+		protected String getKey(ConfigurationMetadataProperty entry) {
+			return entry.getId();
+		}
+	};
 	public SpringPropertiesCompletionEngine(IJavaProject jp) throws Exception {
 		StsConfigMetadataRepositoryJsonLoader loader = new StsConfigMetadataRepositoryJsonLoader();
 		ConfigurationMetadataRepository metadata = loader.load(jp); //TODO: is this fast enough? Or should it be done in background?
 		
 		Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
 		for (ConfigurationMetadataProperty item : allEntries) {
-			properties.insert(item.getId());
+			properties.add(item);
 		}
 		
-		properties.dump();
+//		properties.dump();
 		
-//		System.out.println(">>> spring properties metadata loaded ===");
-//		for (Entry<String, ConfigMetadataItem> entry : ) {
-//			System.out.println(entry.getKey());
-//		}
+		System.out.println(">>> spring properties metadata loaded ===");
+		for (Match<ConfigurationMetadataProperty> entry : properties.find("")) {
+			System.out.println(entry.data.getId());
+		}
 //		dumpPropTree(0, metadata);
 //		System.out.println("<<< spring properties metadata loaded ===");
 	}
 
-	public Collection<String> getCompletions(IDocument doc, final String prefix, int offset) {
-		final ArrayList<String> result = new ArrayList<String>();
-		properties.completions(prefix, new PropertyTree.ICompletionRequestor() {
-			@Override
-			public void add(String fullPropName) {
-				result.add(fullPropName);
-			}
-		});
-		return result;
+	public Collection<Match<ConfigurationMetadataProperty>> getCompletions(IDocument doc, final String prefix, int offset) {
+		return properties.find(prefix);
 	}
 
 //	/**
