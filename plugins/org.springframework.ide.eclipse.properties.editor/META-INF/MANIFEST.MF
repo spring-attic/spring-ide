@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Spring Properties File Editor
+Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.properties.editor;singleton:=true
 Bundle-Version: 3.6.4.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin
@@ -17,3 +17,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/json-20140107.jar
 Export-Package: org.springframework.ide.eclipse.propertiesfileeditor
+Bundle-Vendor: %providerName
