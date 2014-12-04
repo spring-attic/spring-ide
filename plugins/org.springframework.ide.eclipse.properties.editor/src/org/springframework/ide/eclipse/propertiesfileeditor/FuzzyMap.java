@@ -12,13 +12,14 @@ package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.TreeMap;
 
 /**
- * A map-like data structure that can be searched with 'fuzzy' a simple 'fuzzy' string
- * matching algorithm.
+ * A collection of data that can be searched with a simple 'fuzzy' string
+ * matching algorithm. Clients must override 'getKey' method to define how
+ * a search 'key' is associated with each data item. 
+ * <p>
+ * The collection can then be searched for items who's key matches 
+ * simple 'fuzzy' patterns
  */
 public abstract class FuzzyMap<E> {
 	
@@ -72,8 +73,9 @@ public abstract class FuzzyMap<E> {
 	 * pattern if all characters in the pattern can be found in the data, in the
 	 * same order but with possible 'gaps' in between. 
 	 * <p>
-	 * The function returns 0 when the pattern doesn't match the data and a non-zero
-	 * 'score' when it does.
+	 * The function returns 0.o when the pattern doesn't match the data and a non-zero
+	 * 'score' when it does. The higher the score, the better the match is considered to
+	 * be.
 	 */
 	public static double match(String pattern, String data) {
 		int ppos = 0; //pos of next char in pattern to look for
@@ -104,16 +106,17 @@ public abstract class FuzzyMap<E> {
 		}
 		//end of pattern reached. All matched.
 		if (dpos<dlen) {
-			//data left over treat it as a 'gap'
-			gaps++;
-			skips+=dlen-dpos;
+			//data left over
+			//gaps++; don't count end skipped chars as a real 'gap'. Otherwise we 
+			//tend to favor matches that at the end of the string over matches in the middle.
+			skips+=dlen-dpos; //but do count the extra chars at end => worse score
 		}
 		return score(gaps, skips);
 	}
 
 	private static double score(int gaps, int skips) {
-		double badness = gaps + skips/1000.0; // higher is worse
-		return -badness; 
+		double badness = 1+gaps + skips/1000.0; // higher is worse
+		return -badness; //higher is better
 	}
 
 }

@@ -15,8 +15,10 @@ package org.springframework.ide.eclipse.propertiesfileeditor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,6 +35,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
+import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
@@ -45,10 +48,11 @@ import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 
 public class SpringPropertiesProposalProcessor implements IContentAssistProcessor {
-	
+		
 	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
 			"java.lang.Boolean",
 			"java.lang.String",
+			"java.lang.Short",
 			"java.lang.Integer",
 			"java.lang.Long",
 			"java.lan.Double",
@@ -56,10 +60,34 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 			"java.lang.Character",
 			"java.util.List"
 	));
+	
+	private static final String JAVA_LANG = "java.lang.";
+	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
+	
+	private static final Map<String, String> PRIMITIVE_TYPES = new HashMap<String, String>();
+	static {
+		PRIMITIVE_TYPES.put("java.lang.Boolean", "boolean");
+		PRIMITIVE_TYPES.put("java.lang.Integer", "int");
+		PRIMITIVE_TYPES.put("java.lang.Long", "short");
+		PRIMITIVE_TYPES.put("java.lang.Short", "int");
+		PRIMITIVE_TYPES.put("java.lang.Double", "double");
+		PRIMITIVE_TYPES.put("java.lang.Float", "float");
+	}
 
 	private static final ICompletionProposal[] NO_PROPOSALS= new ICompletionProposal[0];
 	private static final IContextInformation[] NO_CONTEXTS= new IContextInformation[0];
 	private static final char[] AUTO_ACTIVATION_CHARS = {'.'};
+
+	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
+		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
+			if (p1 instanceof Proposal && p2 instanceof Proposal) {
+				double s1 = ((Proposal)p1).match.score;
+				double s2 = ((Proposal)p2).match.score;
+				return Double.compare(s2, s1);
+			}
+			return 0;
+		}
+	};
 
 	public Styler JAVA_STRING_COLOR = new Styler() {
 		@Override
@@ -103,24 +131,6 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 			return new Point(fOffset - fPrefix.length() + getCompletion().length(), 0);
 		}
 
-		private String getCompletion() {
-			StringBuilder completion = new StringBuilder(match.data.getId());
-			String defaultValue = formatDefaultValue(match.data.getDefaultValue());
-			if (defaultValue!=null) {
-				completion.append("=");
-				completion.append(defaultValue);
-			} else {
-				String type = match.data.getType();
-				if (ASSIGNABLE_TYPES.contains(type)) {
-					completion.append("=");
-				} else {
-					//assume some kind of 'Object' type
-					completion.append(".");
-				}
-			}
-			return completion.toString();
-		}
-
 		private String formatDefaultValue(Object defaultValue) {
 			if (defaultValue!=null) {
 				if (defaultValue instanceof String) {
@@ -137,7 +147,8 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 		}
 
 		public String getAdditionalProposalInfo() {
-			return "Some more info?";
+			System.out.println("getAdditionalProposalInfo("+match.data.getId()+") =>"+match.data.getDescription());
+			return match.data.getDescription();
 		}
 
 		public String getDisplayString() {
@@ -155,7 +166,8 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 		public void apply(IDocument document, char trigger, int offset) {
 			try {
 				String replacement= getCompletion();
-				document.replace(offset-fPrefix.length(), fPrefix.length(), replacement);
+				int start = this.fOffset-fPrefix.length();
+				document.replace(start, offset-start, replacement);
 			} catch (BadLocationException x) {
 				// TODO Auto-generated catch block
 				x.printStackTrace();
@@ -214,18 +226,62 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 			return true;
 		}
 
-		@Override
-		public StyledString getStyledDisplayString() {
-			Styler.
-			StyledString result = new StyledString();
-			result.append(fPrefix, BOLD);
-			result.append(fString.substring(fPrefix.length()));
-			return result;
+		private String getCompletion() {
+			StringBuilder completion = new StringBuilder(match.data.getId());
+			String defaultValue = formatDefaultValue(match.data.getDefaultValue());
+			if (defaultValue!=null) {
+				completion.append("=");
+				completion.append(defaultValue);
+			} else {
+				String type = match.data.getType();
+				if (ASSIGNABLE_TYPES.contains(type)) {
+				} else {
+					//assume some kind of 'Object' type
+					completion.append(".");
+				}
+			}
+			return completion.toString();
 		}
 		
 		@Override
+		public StyledString getStyledDisplayString() {
+			StyledString result = new StyledString();
+			result.append(match.data.getId());
+			String defaultValue = formatDefaultValue(match.data.getDefaultValue());
+			if (defaultValue!=null) {
+				result.append("=", JAVA_OPERATOR_COLOR);
+				result.append(defaultValue, JAVA_STRING_COLOR);
+			}
+			String type = formatJavaType(match.data.getType());
+			if (type!=null) {
+				result.append(" : ");
+				result.append(type, JAVA_KEYWORD_COLOR);
+			}
+			String description = match.data.getDescription();
+			if (description!=null && !"".equals(description.trim())) {
+				result.append(" ");
+				result.append(description.trim(), StyledString.DECORATIONS_STYLER);
+			}
+			return result;
+		}
+		
+		private String formatJavaType(String type) {
+			if (type!=null) {
+				String primitive = PRIMITIVE_TYPES.get(type);
+				if (primitive!=null) {
+					return primitive;
+				} 
+				if (type.startsWith(JAVA_LANG)) {
+					return type.substring(JAVA_LANG_LEN);
+				}
+				return type;
+			}
+			return null;
+		}
+
+		@Override
 		public String toString() {
-			return "<"+fPrefix+">"+fString.substring(fPrefix.length());
+			return "<"+fPrefix+">"+match.data.getId();
 		}
 
 	}

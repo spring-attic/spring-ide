@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -24,7 +24,6 @@ import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration 
@@ -52,7 +51,7 @@ extends PropertiesFileSourceViewerConfiguration {
 							return new DefaultInformationControl(parent);
 						}
 					});
-					//TODO: a.setSorter(...);
+					a.setSorter(SpringPropertiesProposalProcessor.SORTER);
 					return a;
 				}
 			}
