@@ -235,6 +235,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 			} else {
 				String type = match.data.getType();
 				if (ASSIGNABLE_TYPES.contains(type)) {
+					completion.append("=");
 				} else {
 					//assume some kind of 'Object' type
 					completion.append(".");
