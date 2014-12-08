@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
+import java.lang.reflect.Method;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
@@ -51,7 +53,7 @@ extends PropertiesFileSourceViewerConfiguration {
 							return new DefaultInformationControl(parent);
 						}
 					});
-					a.setSorter(SpringPropertiesProposalProcessor.SORTER);
+					setSorter(a);
 					return a;
 				}
 			}
@@ -61,4 +63,14 @@ extends PropertiesFileSourceViewerConfiguration {
 		return null;
 	}
 
+	public static void setSorter(ContentAssistant a) {
+		try {
+			Class<?> sorterInterface = Class.forName("org.eclipse.jface.text.contentassist.ICompletionProposalSorter");
+			Method m = ContentAssistant.class.getMethod("setSorter", sorterInterface);
+			m.invoke(a, SpringPropertiesProposalProcessor.SORTER);
+		} catch (Throwable e) {
+			//ignore, sorter not supported with Eclipse 3.7 API
+		}
+	}
+	
 }
