@@ -16,5 +16,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/json-20140107.jar
-Export-Package: org.springframework.ide.eclipse.propertiesfileeditor
+Export-Package: org.springframework.configurationmetadata,
+ org.springframework.ide.eclipse.propertiesfileeditor
 Bundle-Vendor: %providerName

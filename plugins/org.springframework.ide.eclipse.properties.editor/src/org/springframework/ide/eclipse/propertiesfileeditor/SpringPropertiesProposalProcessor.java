@@ -24,6 +24,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
+import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -78,7 +79,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 	private static final IContextInformation[] NO_CONTEXTS= new IContextInformation[0];
 	private static final char[] AUTO_ACTIVATION_CHARS = {'.'};
 
-	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
+	public static final AbstractProposalSorter SORTER = new AbstractProposalSorter() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 			if (p1 instanceof Proposal && p2 instanceof Proposal) {
 				double s1 = ((Proposal)p1).match.score;

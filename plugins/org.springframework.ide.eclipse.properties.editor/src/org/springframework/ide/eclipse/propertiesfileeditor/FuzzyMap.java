@@ -19,7 +19,7 @@ import java.util.Collection;
  * a search 'key' is associated with each data item. 
  * <p>
  * The collection can then be searched for items who's key matches 
- * simple 'fuzzy' patterns
+ * simple 'fuzzy' patterns.
  */
 public abstract class FuzzyMap<E> {
 	
@@ -53,18 +53,6 @@ public abstract class FuzzyMap<E> {
 				matches.add(new Match<E>(score, e));
 			}
 		}
-//		Collections.sort(matches, new Comparator<Match<E>>() {
-//			@Override
-//			public int compare(Match<E> o1, Match<E> o2) {
-//				if (o1.score>o2.score) {
-//					return -1;
-//				} else if (o1.score<o2.score) {
-//					return +1;
-//				} else {
-//					return 0;
-//				}
-//			}
-//		});
 		return matches;
 	}
 	
@@ -108,8 +96,8 @@ public abstract class FuzzyMap<E> {
 		if (dpos<dlen) {
 			//data left over
 			//gaps++; don't count end skipped chars as a real 'gap'. Otherwise we 
-			//tend to favor matches that at the end of the string over matches in the middle.
-			skips+=dlen-dpos; //but do count the extra chars at end => worse score
+			//tend to favor matches at the end of the string over matches in the middle.
+			skips+=dlen-dpos; //but do count the extra chars at end => more extra = worse score
 		}
 		return score(gaps, skips);
 	}

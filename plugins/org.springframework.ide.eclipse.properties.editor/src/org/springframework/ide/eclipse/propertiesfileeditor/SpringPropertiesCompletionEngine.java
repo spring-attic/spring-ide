@@ -10,17 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
-import java.text.BreakIterator;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
-import org.springframework.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
-import org.springframework.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 
 /**
@@ -33,13 +28,25 @@ public class SpringPropertiesCompletionEngine {
 			return entry.getId();
 		}
 	};
+	
+	/** 
+	 * Create an empty completion engine. Meant for unit testing. Real clients should use the
+	 * constructor that accepts an {@link IJavaProject}. 
+	 */
+	public SpringPropertiesCompletionEngine() {
+	}
+	
+	/** 
+	 * Create a completion engine and poplulate it with metadata parsed from given 
+	 * {@link IJavaProject}'s classpath.
+	 */
 	public SpringPropertiesCompletionEngine(IJavaProject jp) throws Exception {
 		StsConfigMetadataRepositoryJsonLoader loader = new StsConfigMetadataRepositoryJsonLoader();
 		ConfigurationMetadataRepository metadata = loader.load(jp); //TODO: is this fast enough? Or should it be done in background?
 		
 		Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
 		for (ConfigurationMetadataProperty item : allEntries) {
-			index.add(item);
+			add(item);
 		}
 		
 //		System.out.println(">>> spring properties metadata loaded ===");
@@ -48,6 +55,15 @@ public class SpringPropertiesCompletionEngine {
 //			System.out.println(String.format("%3d", ++i)+":"+ entry.data.getId());
 //		}
 //		System.out.println("<<< spring properties metadata loaded ===");
+	}
+
+	/**
+	 * Add a ConfigurationMetadataProperty item to the CompletionEngine. Normal clients don't really need to
+	 * call this, the data will be parsed from project's classpath. This mostly here to allow the engine to
+	 * be more easily unit tested with controlled test data.
+	 */
+	public void add(ConfigurationMetadataProperty item) {
+		index.add(item);
 	}
 
 	public Collection<Match<ConfigurationMetadataProperty>> getCompletions(IDocument doc, final String prefix, int offset) {
