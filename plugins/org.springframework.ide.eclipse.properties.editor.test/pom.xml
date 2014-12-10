@@ -21,7 +21,7 @@
 				<configuration>
 					<forkedProcessTimeoutInSeconds>1200</forkedProcessTimeoutInSeconds>
 					<includes>
-						<include>**/*Test.java</include>
+						<include>**/*Tests.java</include>
 					</includes>
 				</configuration>
 			</plugin>
