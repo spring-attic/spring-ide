@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.util.Spring3Mapping
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.gettingstarted.GettingStartedActivator;
 
 /**
  * A GithubClient instance needs to configured with some credentials and then it is able to
@@ -114,7 +115,12 @@ public class GithubClient {
 	 * associated with a user. This only works over an authenticated github connection.
 	 */
 	public Repo[] getMyRepos() {
-		return get("/user/repos", Repo[].class);
+		try {
+			return get("/user/repos", Repo[].class);
+		} catch (Throwable e) {
+			GettingStartedActivator.log(e);
+		}
+		return new Repo[0];
 	}
 
 	/**

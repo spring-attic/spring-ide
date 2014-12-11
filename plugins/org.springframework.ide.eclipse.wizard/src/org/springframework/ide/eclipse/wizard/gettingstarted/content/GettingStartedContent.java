@@ -36,7 +36,7 @@ public class GettingStartedContent extends ContentManager {
 	private static GettingStartedContent INSTANCE = null;
 
 	private final static boolean ADD_REAL =  true;
-	private final static boolean ADD_MOCKS = true; // (""+Platform.getLocation()).contains("kdvolder")
+	private final static boolean ADD_MOCKS = false; // (""+Platform.getLocation()).contains("kdvolder")
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder")
 				|| (""+Platform.getLocation()).contains("bamboo");
