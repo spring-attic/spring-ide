@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 
@@ -34,7 +36,7 @@ public class GettingStartedContent extends ContentManager {
 	private static GettingStartedContent INSTANCE = null;
 
 	private final static boolean ADD_REAL =  true;
-	private final static boolean ADD_MOCKS = false; // (""+Platform.getLocation()).contains("kdvolder")
+	private final static boolean ADD_MOCKS = true; // (""+Platform.getLocation()).contains("kdvolder")
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder")
 				|| (""+Platform.getLocation()).contains("bamboo");
@@ -179,9 +181,17 @@ public class GettingStartedContent extends ContentManager {
 	 */
 	public GithubRepoContent[] getAllGuides() {
 		ArrayList<GithubRepoContent> all = new ArrayList<GithubRepoContent>();
-		all.addAll(Arrays.asList(getTutorials()));
-		all.addAll(Arrays.asList(getGSGuides()));
+		all.addAll(asList(getTutorials()));
+		all.addAll(asList(getGSGuides()));
 		return all.toArray(new GithubRepoContent[all.size()]);
+	}
+
+	private <A> Collection<A> asList(A[] tutorials) {
+		if (tutorials==null) {
+			return Collections.EMPTY_LIST;
+		} else {
+			return Arrays.asList(tutorials);
+		}
 	}
 
 //	public GettingStartedGuide getGuide(String guideName) {
