@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
@@ -30,6 +31,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration 
 extends PropertiesFileSourceViewerConfiguration {
+
+	private static final String DIALOG_SETTINGS_KEY = null;
 
 	public SpringPropertiesFileSourceViewerConfiguration(
 			IColorManager colorManager, IPreferenceStore preferenceStore,
@@ -54,6 +57,7 @@ extends PropertiesFileSourceViewerConfiguration {
 						}
 					});
 					setSorter(a);
+					a.setRestoreCompletionProposalSize(getDialogSettings(DIALOG_SETTINGS_KEY));
 					return a;
 				}
 			}
@@ -63,11 +67,19 @@ extends PropertiesFileSourceViewerConfiguration {
 		return null;
 	}
 
+	private static IDialogSettings getDialogSettings(String dialogSettingsKey) {
+		IDialogSettings existing = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		if (existing!=null) {
+			return existing;
+		}
+		return SpringPropertiesEditorPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+	}
+
 	public static void setSorter(ContentAssistant a) {
 		try {
 			Class<?> sorterInterface = Class.forName("org.eclipse.jface.text.contentassist.ICompletionProposalSorter");
 			Method m = ContentAssistant.class.getMethod("setSorter", sorterInterface);
-			m.invoke(a, SpringPropertiesProposalProcessor.SORTER);
+			m.invoke(a, SpringPropertiesCompletionEngine.SORTER);
 		} catch (Throwable e) {
 			//ignore, sorter not supported with Eclipse 3.7 API
 		}
