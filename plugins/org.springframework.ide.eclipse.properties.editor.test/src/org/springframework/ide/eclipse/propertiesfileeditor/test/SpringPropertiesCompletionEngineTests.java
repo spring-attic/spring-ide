@@ -130,7 +130,7 @@ public class SpringPropertiesCompletionEngineTests extends TestCase {
 	public void testServerPort() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
 		assertCompletion("ser<*>", "server.port=8080<*>");
-		assertDisplayString("ser<*>", "server.port=8080 int Port where server listens for http.");
+		assertDisplayString("ser<*>", "server.port=8080 : int Port where server listens for http.");
 	}
 	
 	private void assertDisplayString(String editorContents, String expected) throws Exception {
