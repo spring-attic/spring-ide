@@ -19,8 +19,11 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContentAssistantExtension;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+
+import static org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING;
 
 public class SpringPropertiesProposalProcessor implements IContentAssistProcessor {
 		
@@ -88,4 +91,5 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 	public String getErrorMessage() {
 		return null; // no custom error message
 	}
+
 }

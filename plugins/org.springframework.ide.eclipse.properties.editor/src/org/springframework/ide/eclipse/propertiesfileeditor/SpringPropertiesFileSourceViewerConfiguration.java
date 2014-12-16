@@ -15,18 +15,24 @@ import java.lang.reflect.Method;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration 
@@ -48,14 +54,19 @@ extends PropertiesFileSourceViewerConfiguration {
 				IJavaProject jp = EditorUtility.getJavaProject(editor.getEditorInput());
 				if (jp!=null) {
 					ContentAssistant a = new ContentAssistant();
+					a.setDocumentPartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
 					a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(jp), IDocument.DEFAULT_CONTENT_TYPE);
 					a.enableColoredLabels(true);
 					a.enableAutoActivation(true);
-					a.setInformationControlCreator(new IInformationControlCreator() {
-						public IInformationControl createInformationControl(Shell parent) {
-							return new DefaultInformationControl(parent);
-						}
-					});
+					a.setInformationControlCreator(new SpringPropertiesInformationControlCreator(editor.getEditorSite()));
+//					a.setInformationControlCreator(new IInformationControlCreator() {
+//						public IInformationControl createInformationControl(Shell parent) {
+//							if (BrowserInformationControl.isAvailable(parent)) {
+//								return new BrowserInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, false);
+//							}
+//							return new DefaultInformationControl(parent, false);
+//						}
+//					});
 					setSorter(a);
 					a.setRestoreCompletionProposalSize(getDialogSettings(DIALOG_SETTINGS_KEY));
 					return a;
@@ -67,6 +78,16 @@ extends PropertiesFileSourceViewerConfiguration {
 		return null;
 	}
 
+	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
+		return new SpringPropertiesTextHover(sourceViewer, contentType);
+	}
+	
+	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		return new SpringPropertiesTextHover(sourceViewer, contentType);
+	}
+	
 	private static IDialogSettings getDialogSettings(String dialogSettingsKey) {
 		IDialogSettings existing = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
 		if (existing!=null) {

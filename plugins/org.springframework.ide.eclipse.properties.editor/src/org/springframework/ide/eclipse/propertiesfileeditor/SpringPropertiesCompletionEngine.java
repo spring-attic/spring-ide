@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,14 +21,19 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
+import org.eclipse.jface.internal.text.html.BrowserInformationControl;
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
@@ -41,6 +47,7 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
+import org.eclipse.swt.widgets.Shell;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
@@ -105,6 +112,21 @@ public class SpringPropertiesCompletionEngine {
 		}
 	};
 	
+	public static String formatDefaultValue(Object defaultValue) {
+		if (defaultValue!=null) {
+			if (defaultValue instanceof String) {
+				return (String) defaultValue;
+			} else if (defaultValue instanceof Number) {
+				return ((Number)defaultValue).toString();
+			} else if (defaultValue instanceof Boolean) {
+				return Boolean.toString((Boolean) defaultValue);
+			} else {
+				//no idea what it is so ignore
+			}
+		}
+		return null;
+	}
+	
 	private FuzzyMap<ConfigurationMetadataProperty> index = new FuzzyMap<ConfigurationMetadataProperty>() {
 		protected String getKey(ConfigurationMetadataProperty entry) {
 			return entry.getId();
@@ -164,15 +186,19 @@ public class SpringPropertiesCompletionEngine {
 	}
 	
 	public Collection<ICompletionProposal> getCompletions(IDocument doc, int offset) throws BadLocationException {
-		String prefix= getPrefix(doc, offset);
-		if (prefix != null) {
-			Collection<Match<ConfigurationMetadataProperty>> matches = index.find(prefix);
-			if (matches!=null && !matches.isEmpty()) {
-				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
-				for (Match<ConfigurationMetadataProperty> match : matches) {
-					proposals.add(new Proposal(prefix, offset, match));
+		ITypedRegion partition = doc.getPartition(offset);
+		if (partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+			//inside a property 'key' 
+			String prefix= getPrefix(doc, offset);
+			if (prefix != null) {
+				Collection<Match<ConfigurationMetadataProperty>> matches = index.find(prefix);
+				if (matches!=null && !matches.isEmpty()) {
+					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
+					for (Match<ConfigurationMetadataProperty> match : matches) {
+						proposals.add(new Proposal(prefix, offset, match));
+					}
+					return proposals;
 				}
-				return proposals;
 			}
 		}
 		return Collections.emptyList();
@@ -196,24 +222,41 @@ public class SpringPropertiesCompletionEngine {
 			return new Point(fOffset - fPrefix.length() + getCompletion().length(), 0);
 		}
 
-		private String formatDefaultValue(Object defaultValue) {
-			if (defaultValue!=null) {
-				if (defaultValue instanceof String) {
-					return (String) defaultValue;
-				} else if (defaultValue instanceof Number) {
-					return ((Number)defaultValue).toString();
-				} else if (defaultValue instanceof Boolean) {
-					return Boolean.toString((Boolean) defaultValue);
-				} else {
-					//no idea what it is so ignore
-				}
-			}
-			return null;
-		}
-
 		public String getAdditionalProposalInfo() {
-			System.out.println("getAdditionalProposalInfo("+match.data.getId()+") =>"+match.data.getDescription());
-			return match.data.getDescription();
+			HtmlBuffer html = new HtmlBuffer();
+			
+			html.raw("<b>");
+				html.text(match.data.getId());
+			html.raw("</b>");
+			html.raw("<br>");
+			
+			String type = match.data.getType();
+			if (type==null) {
+				type = Object.class.getName();
+			}
+			html.raw("<a href=\"");
+			html.url("type/"+type);
+			html.raw("\">");
+			html.text(type);
+			html.raw("</a>");
+			
+			
+			String deflt = formatDefaultValue(match.data.getDefaultValue());
+			if (deflt!=null) {
+				html.raw("<br><br>");
+				html.text("Default: ");
+				html.raw("<i>");
+				html.text(deflt);
+				html.raw("</i>");
+			}
+			
+			String description = match.data.getDescription();
+			if (description!=null) {
+				html.raw("<br><br>");
+				html.text(description);
+			}
+			
+			return html.toString();
 		}
 
 		public String getDisplayString() {
@@ -328,7 +371,7 @@ public class SpringPropertiesCompletionEngine {
 				result.append(" : ");
 				result.append(type, JAVA_KEYWORD_COLOR);
 			}
-			String description = match.data.getDescription();
+			String description = getShortDescription();
 			if (description!=null && !"".equals(description.trim())) {
 				result.append(" ");
 				result.append(description.trim(), StyledString.DECORATIONS_STYLER);
@@ -336,6 +379,19 @@ public class SpringPropertiesCompletionEngine {
 			return result;
 		}
 		
+		private String getShortDescription() {
+			String description = match.data.getDescription();
+			if (description!=null) {
+				int dotPos = description.indexOf('.');
+				if (dotPos>=0) {
+					description = description.substring(0, dotPos+1);
+				}
+				description = description.replaceAll("\\p{Cntrl}", ""); //mostly here to remove line breaks, these mess with the layout in the popup control.
+				return description;
+			}
+			return null;
+		}
+
 		private String formatJavaType(String type) {
 			if (type!=null) {
 				String primitive = PRIMITIVE_TYPES.get(type);
