@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,13 +20,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
-import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
-import org.eclipse.jface.internal.text.html.BrowserInformationControl;
-import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -47,7 +41,6 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
-import org.eclipse.swt.widgets.Shell;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
