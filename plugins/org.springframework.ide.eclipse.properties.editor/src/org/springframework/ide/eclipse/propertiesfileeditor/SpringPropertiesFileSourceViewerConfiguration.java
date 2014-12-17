@@ -59,14 +59,6 @@ extends PropertiesFileSourceViewerConfiguration {
 					a.enableColoredLabels(true);
 					a.enableAutoActivation(true);
 					a.setInformationControlCreator(new SpringPropertiesInformationControlCreator(editor.getEditorSite()));
-//					a.setInformationControlCreator(new IInformationControlCreator() {
-//						public IInformationControl createInformationControl(Shell parent) {
-//							if (BrowserInformationControl.isAvailable(parent)) {
-//								return new BrowserInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, false);
-//							}
-//							return new DefaultInformationControl(parent, false);
-//						}
-//					});
 					setSorter(a);
 					a.setRestoreCompletionProposalSize(getDialogSettings(DIALOG_SETTINGS_KEY));
 					return a;
@@ -80,12 +72,18 @@ extends PropertiesFileSourceViewerConfiguration {
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
-		return new SpringPropertiesTextHover(sourceViewer, contentType);
+		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+			return new SpringPropertiesTextHover(sourceViewer, contentType);
+		}
+		return super.getTextHover(sourceViewer, contentType);
 	}
 	
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		return new SpringPropertiesTextHover(sourceViewer, contentType);
+		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+			return new SpringPropertiesTextHover(sourceViewer, contentType);
+		}
+		return super.getTextHover(sourceViewer, contentType, stateMask);
 	}
 	
 	private static IDialogSettings getDialogSettings(String dialogSettingsKey) {
