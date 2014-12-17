@@ -16,18 +16,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
@@ -125,6 +129,7 @@ public class SpringPropertiesCompletionEngine {
 			return entry.getId();
 		}
 	};
+	private IInformationControlCreator informationControlCreator;
 	
 	/** 
 	 * Create an empty completion engine. Meant for unit testing. Real clients should use the
@@ -146,12 +151,9 @@ public class SpringPropertiesCompletionEngine {
 			add(item);
 		}
 		
-//		System.out.println(">>> spring properties metadata loaded ===");
-//		int i = 0;
-//		for (Match<ConfigurationMetadataProperty> entry : index.find("")) {
-//			System.out.println(String.format("%3d", ++i)+":"+ entry.data.getId());
-//		}
-//		System.out.println("<<< spring properties metadata loaded ===");
+		System.out.println(">>> spring properties metadata loaded ===");
+		dumpAsTestData();
+		System.out.println("<<< spring properties metadata loaded ===");
 	}
 
 	/**
@@ -197,6 +199,44 @@ public class SpringPropertiesCompletionEngine {
 		return Collections.emptyList();
 	}
 	
+	private static String getHtmlHoverText(ConfigurationMetadataProperty data) {
+		HtmlBuffer html = new HtmlBuffer();
+		
+		html.raw("<b>");
+			html.text(data.getId());
+		html.raw("</b>");
+		html.raw("<br>");
+		
+		String type = data.getType();
+		if (type==null) {
+			type = Object.class.getName();
+		}
+		html.raw("<a href=\"");
+		html.url("type/"+type);
+		html.raw("\">");
+		html.text(type);
+		html.raw("</a>");
+		
+		
+		String deflt = formatDefaultValue(data.getDefaultValue());
+		if (deflt!=null) {
+			html.raw("<br><br>");
+			html.text("Default: ");
+			html.raw("<i>");
+			html.text(deflt);
+			html.raw("</i>");
+		}
+		
+		String description = data.getDescription();
+		if (description!=null) {
+			html.raw("<br><br>");
+			html.text(description);
+		}
+		
+		return html.toString();
+	}
+	
+	
 	private final class Proposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4,
 	 ICompletionProposalExtension6
 	{
@@ -216,41 +256,10 @@ public class SpringPropertiesCompletionEngine {
 		}
 
 		public String getAdditionalProposalInfo() {
-			HtmlBuffer html = new HtmlBuffer();
-			
-			html.raw("<b>");
-				html.text(match.data.getId());
-			html.raw("</b>");
-			html.raw("<br>");
-			
-			String type = match.data.getType();
-			if (type==null) {
-				type = Object.class.getName();
-			}
-			html.raw("<a href=\"");
-			html.url("type/"+type);
-			html.raw("\">");
-			html.text(type);
-			html.raw("</a>");
-			
-			
-			String deflt = formatDefaultValue(match.data.getDefaultValue());
-			if (deflt!=null) {
-				html.raw("<br><br>");
-				html.text("Default: ");
-				html.raw("<i>");
-				html.text(deflt);
-				html.raw("</i>");
-			}
-			
-			String description = match.data.getDescription();
-			if (description!=null) {
-				html.raw("<br><br>");
-				html.text(description);
-			}
-			
-			return html.toString();
+			ConfigurationMetadataProperty data = match.data;
+			return getHtmlHoverText(data);
 		}
+
 
 		public String getDisplayString() {
 			StyledString styledText = getStyledDisplayString();
@@ -405,37 +414,120 @@ public class SpringPropertiesCompletionEngine {
 		}
 
 	}
+
+	public String getHoverInfo(IDocument doc, IRegion r, String contentType) {
+		try {
+			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+				ConfigurationMetadataProperty best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()));
+				if (best!=null) {
+					return getHtmlHoverText(best);
+				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return null;
+	}
+
+	/**
+	 * Search known properties for the best 'match' to show as hover data.
+	 */
+	private ConfigurationMetadataProperty findBestHoverMatch(String propName) {
+		ConfigurationMetadataProperty best = null;
+		int bestCommonPrefixLen = 0; //We try to pick property with longest common prefix
+		int bestExtraLen = Integer.MAX_VALUE;
+		for (ConfigurationMetadataProperty candidate : index) {
+			int commonPrefixLen = commonPrefixLength(propName, candidate.getId());
+			int extraLen = candidate.getId().length()-commonPrefixLen;
+			if (commonPrefixLen==propName.length() && extraLen==0) {
+				//exact match found, can stop searching for better matches
+				return candidate;
+			}
+			//candidate is better if...
+			if (commonPrefixLen>bestCommonPrefixLen // it has a longer common prefix
+			|| commonPrefixLen==bestCommonPrefixLen && extraLen<bestExtraLen //or same common prefix but fewer extra chars
+			) {
+				bestCommonPrefixLen = commonPrefixLen;
+				bestExtraLen = extraLen;
+				best = candidate;
+			}
+		}
+		return best;
+	}
+
+	private int commonPrefixLength(String s, String t) {
+		int shortestStringLen = Math.min(s.length(), t.length());
+		for (int i = 0; i < shortestStringLen; i++) {
+			if (s.charAt(i)!=t.charAt(i)) {
+				return i;
+			}
+		}
+		//no difference found upto entire length of shortest string.
+		return shortestStringLen;
+	}
+
+	/**
+	 * Dumps out 'test data' based on the current contents of the index. This is not meant to be
+	 * used in 'production' code. The idea is to call this method during development to dump a
+	 * 'snapshot' of the index onto System.out. The data is printed in a forma so that it can be easily 
+	 * pasted/used into JUNit testing code. 
+	 */
+	public void dumpAsTestData() {
+		List<Match<ConfigurationMetadataProperty>> allData = index.find("");
+		for (Match<ConfigurationMetadataProperty> match : allData) {
+			ConfigurationMetadataProperty d = match.data;
+			System.out.println("data("
+					+dumpString(d.getId())+", "
+					+dumpString(d.getType())+", "
+					+dumpString(d.getDefaultValue())+", "
+					+dumpString(d.getDescription()) +");"
+			);
+		}
+	}
+
+	private String dumpString(Object v) {
+		if (v==null) {
+			return "null";
+		}
+		return dumpString(""+v);
+	}
+
+	private String dumpString(String s) {
+		if (s==null) {
+			return "null";
+		} else {
+			StringBuilder buf = new StringBuilder("\"");
+			for (char c : s.toCharArray()) {
+				switch (c) {
+				case '\r':
+					buf.append("\\r"); 
+					break;
+				case '\n':
+					buf.append("\\n"); 
+					break;
+				case '\\':
+					buf.append("\\\\"); 
+					break;
+				case '\"':
+					buf.append("\\\"");
+					break;
+				default:
+					buf.append(c);
+					break;
+				}
+			}
+			buf.append("\"");
+			return buf.toString();
+		}
+	}
+
+	public IRegion getHoverRegion(IDocument document, int offset) {
+    	try {
+    		return TextUtilities.getPartition(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
+    	} catch (Exception e) {
+    		SpringPropertiesEditorPlugin.log(e);
+    		return null;
+    	}
+	}
 	
-
 }
-
-//Mock implementation (makes suggestions from a hard-coded list of words.
-//
-//public class SpringPropertiesCompletionEngine {
-//	
-//	private String[] WORDS = {
-//		"bar",
-//		"bartentender",
-//		"bartering",
-//		"barren",
-//		"banana",
-//		"bar.mitswa"
-//	};
-//	
-//	private IJavaProject javaProject;
-//
-//	public SpringPropertiesCompletionEngine(IJavaProject jp) {
-//		this.javaProject = jp;
-//	}
-//
-//	public Collection<String> getCompletions(IJavaProject javaProject, IDocument doc, String prefix, int offset) {
-//		ArrayList<String> completions = new ArrayList<>();
-//		for (String word : WORDS) {
-//			if (word.startsWith(prefix)) {
-//				completions.add(word.substring(prefix.length()));
-//			}
-//		}
-//		return completions;
-//	}
-//
-//}

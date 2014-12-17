@@ -14,16 +14,12 @@ package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.util.Collection;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.jface.text.contentassist.IContentAssistantExtension;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-
-import static org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING;
 
 public class SpringPropertiesProposalProcessor implements IContentAssistProcessor {
 		
@@ -34,8 +30,8 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 
 	private final SpringPropertiesCompletionEngine fEngine;
 
-	public SpringPropertiesProposalProcessor(IJavaProject jp) throws Exception {
-		this.fEngine = new SpringPropertiesCompletionEngine(jp);
+	public SpringPropertiesProposalProcessor(SpringPropertiesCompletionEngine engine) throws Exception {
+		this.fEngine = engine;
 	}
 
 	/*

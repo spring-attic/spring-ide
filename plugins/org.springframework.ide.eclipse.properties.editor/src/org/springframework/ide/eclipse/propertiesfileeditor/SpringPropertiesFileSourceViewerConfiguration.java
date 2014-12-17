@@ -14,31 +14,24 @@ import java.lang.reflect.Method;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
-import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
-
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration 
 extends PropertiesFileSourceViewerConfiguration {
 
 	private static final String DIALOG_SETTINGS_KEY = null;
+	private SpringPropertiesCompletionEngine engine;
 
 	public SpringPropertiesFileSourceViewerConfiguration(
 			IColorManager colorManager, IPreferenceStore preferenceStore,
@@ -49,20 +42,17 @@ extends PropertiesFileSourceViewerConfiguration {
 	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		try {
-			ITextEditor editor = getEditor();
-			if (editor!=null) {
-				IJavaProject jp = EditorUtility.getJavaProject(editor.getEditorInput());
-				if (jp!=null) {
-					ContentAssistant a = new ContentAssistant();
-					a.setDocumentPartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
-					a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(jp), IDocument.DEFAULT_CONTENT_TYPE);
-					a.enableColoredLabels(true);
-					a.enableAutoActivation(true);
-					a.setInformationControlCreator(new SpringPropertiesInformationControlCreator(editor.getEditorSite()));
-					setSorter(a);
-					a.setRestoreCompletionProposalSize(getDialogSettings(DIALOG_SETTINGS_KEY));
-					return a;
-				}
+			SpringPropertiesCompletionEngine engine = getEngine();
+			if (engine!=null) {
+				ContentAssistant a = new ContentAssistant();
+				a.setDocumentPartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
+				a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(getEngine()), IDocument.DEFAULT_CONTENT_TYPE);
+				a.enableColoredLabels(true);
+				a.enableAutoActivation(true);
+				a.setInformationControlCreator(new SpringPropertiesInformationControlCreator());
+				setSorter(a);
+				a.setRestoreCompletionProposalSize(getDialogSettings(DIALOG_SETTINGS_KEY));
+				return a;
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
@@ -70,18 +60,45 @@ extends PropertiesFileSourceViewerConfiguration {
 		return null;
 	}
 
+	private SpringPropertiesCompletionEngine getEngine() throws Exception {
+		if (engine==null) {
+			ITextEditor editor = getEditor();
+			if (editor!=null) {
+				IJavaProject jp = EditorUtility.getJavaProject(getEditor().getEditorInput());
+				if (jp!=null) {
+					engine = new SpringPropertiesCompletionEngine(jp);
+				}
+			}
+		}
+		return engine;
+	}
+
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
-		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
-			return new SpringPropertiesTextHover(sourceViewer, contentType);
+		try {
+			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+				SpringPropertiesCompletionEngine engine = getEngine();
+				if (engine!=null) {
+					return new SpringPropertiesTextHover(sourceViewer, contentType, engine);
+				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
 		}
 		return super.getTextHover(sourceViewer, contentType);
 	}
 	
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
-			return new SpringPropertiesTextHover(sourceViewer, contentType);
+		try {
+			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+				SpringPropertiesCompletionEngine engine = getEngine();
+				if (engine!=null) {
+					return new SpringPropertiesTextHover(sourceViewer, contentType, engine);
+				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
 		}
 		return super.getTextHover(sourceViewer, contentType, stateMask);
 	}

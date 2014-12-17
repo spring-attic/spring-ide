@@ -10,38 +10,35 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 @SuppressWarnings("restriction")
-public class SpringPropertiesTextHover implements ITextHover {
+public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtension {
 
 	private String contentType;
+	private SpringPropertiesCompletionEngine engine;
 
-	public SpringPropertiesTextHover(ISourceViewer sourceViewer, String contentType) {
+	public SpringPropertiesTextHover(ISourceViewer sourceViewer, String contentType, SpringPropertiesCompletionEngine engine) {
 		this.contentType = contentType;
+		this.engine = engine;
 	}
 	
     public IRegion getHoverRegion(ITextViewer tv, int offset) {
-    	try {
-//    		return tv.getDocument().getPartition(offset);
-    		return TextUtilities.getPartition(tv.getDocument(), IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
-    	} catch (Exception e) {
-    		return null;
-    	}
+    	return engine.getHoverRegion(tv.getDocument(), offset);
      }
     
      public String getHoverInfo(ITextViewer tv, IRegion r) {
-        try {
-           return contentType + "@" + r.getOffset() + ", "+r.getLength(); 
-        }
-        catch (Exception e) {            
-           return ""; 
-        }
+    	 return engine.getHoverInfo(tv.getDocument(), r, contentType);
      }
+
+	@Override
+	public IInformationControlCreator getHoverControlCreator() {
+		return new SpringPropertiesInformationControlCreator();
+	}
 
 }

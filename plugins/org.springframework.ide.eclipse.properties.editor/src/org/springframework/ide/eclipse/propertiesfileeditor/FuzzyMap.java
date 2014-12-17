@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A collection of data that can be searched with a simple 'fuzzy' string
@@ -21,14 +23,30 @@ import java.util.Collection;
  * The collection can then be searched for items who's key matches 
  * simple 'fuzzy' patterns.
  */
-public abstract class FuzzyMap<E> {
+public abstract class FuzzyMap<E> implements Iterable<E> {
 	
+	@Override
+	public Iterator<E> iterator() {
+		return entries.iterator();
+	}
+
 	public static class Match<E> {
 		public double score;
 		public final E data;
 		public Match(double score, E e) {
 			this.score = score;
 			this.data = e;
+		}
+		public static <E> Match<E> getBest(Collection<Match<E>> matches) {
+			double bestScore = Double.NEGATIVE_INFINITY;
+			Match<E> best = null;
+			for (Match<E> match : matches) {
+				if (match.score>bestScore) {
+					best = match;
+					bestScore = match.score;
+				}
+			}
+			return best;
 		}
 	}
 
@@ -44,7 +62,7 @@ public abstract class FuzzyMap<E> {
 	 * Search for pattern. A pattern is just a sequence of characters which have to found in 
 	 * an entrie's key in the same order as they are in the pattern. 
 	 */
-	public Collection<Match<E>> find(String pattern) {
+	public List<Match<E>> find(String pattern) {
 		ArrayList<Match<E>> matches = new ArrayList<Match<E>>();
 		for (E e : entries) {
 			String key = getKey(e);
@@ -61,7 +79,7 @@ public abstract class FuzzyMap<E> {
 	 * pattern if all characters in the pattern can be found in the data, in the
 	 * same order but with possible 'gaps' in between. 
 	 * <p>
-	 * The function returns 0.o when the pattern doesn't match the data and a non-zero
+	 * The function returns 0. when the pattern doesn't match the data and a non-zero
 	 * 'score' when it does. The higher the score, the better the match is considered to
 	 * be.
 	 */
