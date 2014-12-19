@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.ui.JavaUI;
@@ -45,9 +46,12 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
+import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
+import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileStrategy.ProblemCollector;
+import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
 
 /**
  * @author Kris De Volder
@@ -528,6 +532,29 @@ public class SpringPropertiesCompletionEngine {
     		SpringPropertiesEditorPlugin.log(e);
     		return null;
     	}
+	}
+
+	/**
+	 * Used by Reconciling to scan document regions for invalid propery names and report them as problems.
+	 */
+	public void check(IDocument doc, IRegion[] regions, ProblemCollector problemCollector, IProgressMonitor mon) {
+		problemCollector.beginCollecting();
+		try {
+			// TODO replace this 'fake' implementation which adds problems anywhere the word 'bad' occurs.
+			for (IRegion r : regions) {
+				try {
+					String text = doc.get(r.getOffset(), r.getLength());
+					int badPos = -1;
+					while ((badPos = text.indexOf("bad", badPos+1))>=0) {
+						problemCollector.accept(new SpringPropertyProblem("bad", r.getOffset()+badPos, 3));
+					}
+				} catch (Exception e) {
+					SpringPropertiesEditorPlugin.log(e);
+				}
+			}
+		} finally {
+			problemCollector.endCollecting();
+		}
 	}
 	
 }

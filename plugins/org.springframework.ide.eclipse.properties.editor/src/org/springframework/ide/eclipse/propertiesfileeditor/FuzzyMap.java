@@ -12,8 +12,10 @@ package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * A collection of data that can be searched with a simple 'fuzzy' string
@@ -27,7 +29,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	
 	@Override
 	public Iterator<E> iterator() {
-		return entries.iterator();
+		return entries.values().iterator();
 	}
 
 	public static class Match<E> {
@@ -50,12 +52,13 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 		}
 	}
 
-	private ArrayList<E> entries = new ArrayList<E>();
+	private HashMap<String,E> entries = new HashMap<String, E>();
 	
 	protected abstract String getKey(E entry);
 	
 	public void add(E value) {
-		entries.add(value);
+		//This assumes no two entries have the same id.
+		entries.put(getKey(value), value);
 	}
 	
 	/**
@@ -63,15 +66,23 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	 * an entrie's key in the same order as they are in the pattern. 
 	 */
 	public List<Match<E>> find(String pattern) {
+		//TODO: optimize somehow with a smarter index? (right now searches all map entries sequentially)
 		ArrayList<Match<E>> matches = new ArrayList<Match<E>>();
-		for (E e : entries) {
-			String key = getKey(e);
+		for (Entry<String, E> e : entries.entrySet()) {
+			String key = e.getKey();
 			double score = match(pattern, key);
 			if (score!=0.0) {
-				matches.add(new Match<E>(score, e));
+				matches.add(new Match<E>(score, e.getValue()));
 			}
 		}
 		return matches;
+	}
+
+	/**
+	 * Find an exact match if it exists.
+	 */
+	public E get(String id) {
+		return entries.get(id);
 	}
 	
 	/**

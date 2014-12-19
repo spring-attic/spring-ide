@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor;
@@ -19,6 +21,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileEditor extends PropertiesFileEditor {
 	
+	/**
+	 * Content Type ID this editor is registered to open for.
+	 */
+	public static final IContentType CONTENT_TYPE = Platform.getContentTypeManager().getContentType("org.springframework.ide.eclipse.applicationProperties");
 
 	public SpringPropertiesFileEditor() {
 		super();
