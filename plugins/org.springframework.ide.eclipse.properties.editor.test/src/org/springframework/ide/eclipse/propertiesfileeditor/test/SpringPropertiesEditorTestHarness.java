@@ -67,6 +67,7 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 	};
 
 	public static final String INTEGER = Integer.class.getName();
+	public static final String BOOLEAN = Boolean.class.getName();
 	public static final String STRING = String.class.getName();
 	public static final String CURSOR = "<*>";
 	

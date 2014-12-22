@@ -13,19 +13,9 @@ package org.springframework.ide.eclipse.propertiesfileeditor.test;
 import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
-	
-	//TODO: test hovers with spaces around the keys
-	//TODO: test hover when exact match is shorter than longer also valid match with extra crap at end
-	//        i.e. if hovering over 'foo' and both 'foo' and 'foo.bar' are valid, the info for foo should 
-	//        be shown.
-	//TODO: test hover over foo with 'faa', 'foo.bar'
-	
-	//TODO: unit tests for 'longest common prefix' search in TreeMap (current version suspected buggy).
-
 	
 	//TODO: List type is assignable (but paramteric),
 	//  - handle this in reconciling?
@@ -73,7 +63,17 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		//Case 2: an object/map property has extra text after the property name
 		assertHoverText(editor, "logging.", "<b>logging.level</b>");
 	}
-	
+
+	public void testHoverLongAndShort() throws Exception {
+		data("server.port", INTEGER, 8080, "Port where server listens for http.");
+		data("server.port.fancy", BOOLEAN, 8080, "Whether the port is fancy.");
+		MockEditor editor = new MockEditor(
+				"server.port=8080\n" + 
+				"server.port.fancy=true\n"
+		);
+		assertHoverText(editor, "server.", "<b>server.port</b>");
+		assertHoverText(editor, "port.fa", "<b>server.port.fancy</b>");
+	}
 
 	public void testLoggingLevelCompletion() throws Exception {
 		data("logging.level", "java.util.Map<java.lang.String,java.lang.Object>", null, "Logging level per package.");
