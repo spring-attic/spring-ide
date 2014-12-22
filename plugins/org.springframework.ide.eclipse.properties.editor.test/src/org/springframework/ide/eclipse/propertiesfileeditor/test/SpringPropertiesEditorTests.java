@@ -26,6 +26,11 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	
 	//TODO: unit tests for 'longest common prefix' search in TreeMap (current version suspected buggy).
 
+	
+	//TODO: List type is assignable (but paramteric),
+	//  - handle this in reconciling?
+	//  - add test for completion (does it add '=' as expected?)
+	
 	public void testServerPortCompletion() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
 		assertCompletion("ser<*>", "server.port=8080<*>");
@@ -92,17 +97,29 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 	
 	public void testReconcileValues() throws Exception {
-		//TODO: make this test pass
 		MockEditor editor = new MockEditor(
 				"server.port=badPort\n" + 
-				"liquibase.enable=nuggels"
+				"liquibase.enabled=nuggels"
 		);
 		assertProblems(editor,
 				"badPort|Integer",
 				"nuggels|Boolean"
 		);
-		
 	}
+	
+	public void testReconcileValuesWithSpaces() throws Exception {
+		MockEditor editor = new MockEditor(
+				"server.port  =   badPort\n" + 
+				"liquibase.enabled   nuggels  \n" +
+				"liquibase.enabled   : snikkers"
+		);
+		assertProblems(editor,
+				"badPort|Integer",
+				"nuggels|Boolean",
+				"snikkers|Boolean"
+		);
+	}
+	
 	
 	public void testReconcileWithExtraSpaces() throws Exception {
 		//Same test as previous but with extra spaces to make things more confusing
@@ -121,23 +138,32 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 	
-
+	/**
+	 * Check that a 'expectedProblems' are found by the reconciler. Expected problems are
+	 * specified by string of the form "${locationSnippet}|${messageSnippet}". The locationSnippet
+	 * defines the location where the error marker is expected (the first places where the
+	 * text occurs in the editor) and the message snippet must be found in the corresponding
+	 * error marker
+	 * @param editor
+	 * @param expectedProblems
+	 * @throws BadLocationException
+	 */
 	public void assertProblems(MockEditor editor, String... expectedProblems) throws BadLocationException {
 		defaultTestData();
 		List<SpringPropertyProblem> actualProblems = reconcile(editor);
-		boolean bad = false;
+		String bad = null;
 		if (actualProblems.size()!=expectedProblems.length) {
-			bad = true;
+			bad = "Wrong number of problems (expecting "+expectedProblems.length+" but found "+actualProblems.size()+")";
 		} else {
 			for (int i = 0; i < expectedProblems.length; i++) {
 				if (!matchProblem(editor, actualProblems.get(i), expectedProblems[i])) {
-					bad = true;
+					bad = "First mismatch: "+expectedProblems[i]+"\n";
 					break;
 				}
 			}
 		}
-		if (bad) {
-			fail(problemSumary(editor, actualProblems));
+		if (bad!=null) {
+			fail(bad+problemSumary(editor, actualProblems));
 		}
 	}
 
