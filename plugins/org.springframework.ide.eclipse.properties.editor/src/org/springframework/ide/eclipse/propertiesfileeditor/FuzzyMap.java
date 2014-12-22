@@ -12,10 +12,12 @@ package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
 /**
  * A collection of data that can be searched with a simple 'fuzzy' string
@@ -52,7 +54,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 		}
 	}
 
-	private HashMap<String,E> entries = new HashMap<String, E>();
+	private TreeMap<String,E> entries = new TreeMap<String, E>();
 	
 	protected abstract String getKey(E entry);
 	
@@ -76,6 +78,43 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 			}
 		}
 		return matches;
+	}
+
+	/**
+	 * Searches the index for the longest string which is both
+	 *  - a prefix of propertyName
+	 *  - a prefix of some key in the map.
+	 * Note: If the map is empty, then this returns null, since
+	 * no string, not even the empty string is a prefix of a
+	 * key in the map.
+	 */
+	public String findValidPrefix(String propertyName) {
+		E best = findLongestCommonPrefixEntry(propertyName);
+		return best==null?null:StringUtil.commonPrefix(propertyName, getKey(best));
+	}
+	
+	/**
+	 * Find property with longest common prefix for given key.
+	 */
+	public E findLongestCommonPrefixEntry(String propertyName) {
+		//We can implementation this O(log(n)) because the properties are kept in a TreeMap which is sorted.
+		//This means that entries with common prefix will occur 'next to eachother'
+		//The 'best' entry must therefore be either the entry just before or just after
+		//the property we are searching for.
+		
+		Entry<String, E> ceiln = entries.ceilingEntry(propertyName);
+		Entry<String, E> floor = entries.floorEntry(propertyName);
+		Entry<String, E> best;
+		if (floor==null || floor==ceiln) {
+			best = ceiln;
+		} else if (ceiln==null) {
+			best = floor;
+		} else {
+			int floorScore = floor==null?0:StringUtil.commonPrefixLength(floor.getKey(), propertyName);
+			int ceilnScore = ceiln==null?0:StringUtil.commonPrefixLength(ceiln.getKey(), propertyName);
+			best = floorScore>ceilnScore ? floor : ceiln;
+		}
+		return best==null?null:best.getValue();
 	}
 
 	/**
@@ -134,6 +173,10 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	private static double score(int gaps, int skips) {
 		double badness = 1+gaps + skips/1000.0; // higher is worse
 		return -badness; //higher is better
+	}
+
+	public boolean isEmpty() {
+		return entries==null || entries.isEmpty();
 	}
 
 }

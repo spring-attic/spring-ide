@@ -47,7 +47,7 @@ public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtensio
      	if (s!=null) {
      		return text2html(s);
      	}
-     	return engine.getHoverInfo(tv.getDocument(), r, contentType);
+     	return engine.getHoverInfo(tv.getDocument(), r.getOffset(), contentType);
      }
      
  	private String text2html(String s) {
@@ -68,7 +68,7 @@ public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtensio
  				}
  			}
  		}
- 		return engine.getHoverInfo(tv.getDocument(), r, contentType);
+ 		return engine.getHoverInfo(tv.getDocument(), r.getOffset(), contentType);
  	}
      
 

@@ -15,18 +15,18 @@ package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
  */
 public class SpringPropertyProblem {
 
-	private String name;
+	private String msg;
 	private int length;
 	private int offset;
 	
-	public SpringPropertyProblem(String name, int offset, int length) {
-		this.name = name;
+	public SpringPropertyProblem(String msg, int offset, int length) {
+		this.msg = msg;
 		this.offset = offset;
 		this.length = length;
 	}
 
 	public String getMessage() {
-		return "Unknown property: "+name;
+		return msg;
 	}
 
 	public int getOffset() {
@@ -34,7 +34,12 @@ public class SpringPropertyProblem {
 	}
 
 	public int getLength() {
-		return name.length();
+		return length;
 	}
 
+	@Override
+	public String toString() {
+		return "@["+offset+","+length+"]: "+msg;
+	}
+	
 }

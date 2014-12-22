@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
+import java.beans.FeatureDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.ui.JavaUI;
@@ -29,7 +29,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
@@ -46,12 +45,10 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
-import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
-import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileStrategy.ProblemCollector;
-import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
 /**
  * @author Kris De Volder
@@ -90,7 +87,7 @@ public class SpringPropertiesCompletionEngine {
 		PRIMITIVE_TYPES.put("java.lang.Float", "float");
 	}
 	
-	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
+	public static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
 			"java.lang.Boolean",
 			"java.lang.String",
 			"java.lang.Short",
@@ -419,10 +416,11 @@ public class SpringPropertiesCompletionEngine {
 
 	}
 
-	public String getHoverInfo(IDocument doc, IRegion r, String contentType) {
+	public String getHoverInfo(IDocument doc, int offset, String contentType) {
 		try {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
-				ConfigurationMetadataProperty best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()));
+				ITypedRegion r = getHoverRegion(doc, offset);
+				ConfigurationMetadataProperty best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()).trim());
 				if (best!=null) {
 					return getHtmlHoverText(best);
 				}
@@ -432,16 +430,26 @@ public class SpringPropertiesCompletionEngine {
 		}
 		return null;
 	}
+	
+	public ITypedRegion getHoverRegion(IDocument document, int offset) {
+    	try {
+    		return TextUtilities.getPartition(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
+    	} catch (Exception e) {
+    		SpringPropertiesEditorPlugin.log(e);
+    		return null;
+    	}
+	}
 
 	/**
 	 * Search known properties for the best 'match' to show as hover data.
 	 */
 	private ConfigurationMetadataProperty findBestHoverMatch(String propName) {
+		//TODO: optimize, should be able to use index's treemap to find this without iterating all entries.
 		ConfigurationMetadataProperty best = null;
 		int bestCommonPrefixLen = 0; //We try to pick property with longest common prefix
 		int bestExtraLen = Integer.MAX_VALUE;
 		for (ConfigurationMetadataProperty candidate : index) {
-			int commonPrefixLen = commonPrefixLength(propName, candidate.getId());
+			int commonPrefixLen = StringUtil.commonPrefixLength(propName, candidate.getId());
 			int extraLen = candidate.getId().length()-commonPrefixLen;
 			if (commonPrefixLen==propName.length() && extraLen==0) {
 				//exact match found, can stop searching for better matches
@@ -457,17 +465,6 @@ public class SpringPropertiesCompletionEngine {
 			}
 		}
 		return best;
-	}
-
-	private int commonPrefixLength(String s, String t) {
-		int shortestStringLen = Math.min(s.length(), t.length());
-		for (int i = 0; i < shortestStringLen; i++) {
-			if (s.charAt(i)!=t.charAt(i)) {
-				return i;
-			}
-		}
-		//no difference found upto entire length of shortest string.
-		return shortestStringLen;
 	}
 
 	/**
@@ -525,36 +522,8 @@ public class SpringPropertiesCompletionEngine {
 		}
 	}
 
-	public IRegion getHoverRegion(IDocument document, int offset) {
-    	try {
-    		return TextUtilities.getPartition(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
-    	} catch (Exception e) {
-    		SpringPropertiesEditorPlugin.log(e);
-    		return null;
-    	}
-	}
-
-	/**
-	 * Used by Reconciling to scan document regions for invalid propery names and report them as problems.
-	 */
-	public void check(IDocument doc, IRegion[] regions, ProblemCollector problemCollector, IProgressMonitor mon) {
-		problemCollector.beginCollecting();
-		try {
-			// TODO replace this 'fake' implementation which adds problems anywhere the word 'bad' occurs.
-			for (IRegion r : regions) {
-				try {
-					String text = doc.get(r.getOffset(), r.getLength());
-					int badPos = -1;
-					while ((badPos = text.indexOf("bad", badPos+1))>=0) {
-						problemCollector.accept(new SpringPropertyProblem("bad", r.getOffset()+badPos, 3));
-					}
-				} catch (Exception e) {
-					SpringPropertiesEditorPlugin.log(e);
-				}
-			}
-		} finally {
-			problemCollector.endCollecting();
-		}
+	public FuzzyMap<ConfigurationMetadataProperty> getIndex() {
+		return index;
 	}
 	
 }

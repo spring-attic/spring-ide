@@ -23,12 +23,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISynchronizable;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
@@ -37,8 +40,13 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
+import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
+import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 
+import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.ASSIGNABLE_TYPES;
 
 /**
  * Reconcile strategy used for spell checking.
@@ -51,7 +59,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	/**
 	 * Spelling problem collector.
 	 */
-	public static class ProblemCollector {
+	private static class ProblemCollector implements IProblemCollector {
 
 		/** Annotation model. */
 		private IAnnotationModel fAnnotationModel;
@@ -126,8 +134,6 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	/** Text content type */
 	private static final IContentType TEXT_CONTENT_TYPE= Platform.getContentTypeManager().getContentType(IContentTypeManager.CT_TEXT);
 	
-	private SpringPropertiesCompletionEngine fEngine;
-
 	/** The text editor to operate on. */
 	private ISourceViewer fViewer;
 
@@ -139,12 +145,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 	private ProblemCollector fProblemCollector;
 
-	/**
-	 * Region array, used to prevent us from creating a new array on each reconcile pass.
-	 * @since 3.4
-	 */
-	private IRegion[] fRegions= new IRegion[1];
-
+	private SpringPropertiesReconcileEngine fEngine;
 
 	/**
 	 * Creates a new comment reconcile strategy.
@@ -152,11 +153,11 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 * @param viewer the source viewer
 	 * @param spellingService the spelling service to use
 	 */
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, SpringPropertiesCompletionEngine engine) {
+	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, FuzzyMap<ConfigurationMetadataProperty> index) {
 		Assert.isNotNull(viewer);
-		Assert.isNotNull(engine);
+		Assert.isNotNull(index);
 		fViewer= viewer;
-		fEngine = engine;
+		fEngine = new SpringPropertiesReconcileEngine(index);
 	}
 
 	/*
@@ -190,11 +191,13 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	public void reconcile(IRegion region) {
 		if (getAnnotationModel() == null || fProblemCollector == null)
 			return;
-
-		fRegions[0]= region;
-		fEngine.check(fDocument, fRegions, fProblemCollector, fProgressMonitor);
+		//Note: This isn't an 'incremental' reconciler. It always checks the whole document. The dirty
+		// region is ignored.
+		fEngine.reconcile(fDocument, fProblemCollector, fProgressMonitor);
 	}
 
+	
+	
 	/**
 	 * Returns the content type of the underlying editor input.
 	 *

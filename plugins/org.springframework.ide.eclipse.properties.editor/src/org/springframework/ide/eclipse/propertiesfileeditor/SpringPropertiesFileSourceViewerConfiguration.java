@@ -36,6 +36,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
+import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileStrategy;
 
 @SuppressWarnings("restriction")
@@ -84,6 +85,12 @@ extends PropertiesFileSourceViewerConfiguration {
 		}
 		return engine;
 	}
+	
+	private FuzzyMap<ConfigurationMetadataProperty> getIndex() throws Exception {
+		return getEngine().getIndex();
+	}
+
+	
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
@@ -137,7 +144,7 @@ extends PropertiesFileSourceViewerConfiguration {
 			strategy = compose(strategy, spellcheck);
 		}
 		try {
-			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, getEngine());
+			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, getIndex());
 			strategy = compose(strategy, propertyChecker);
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);

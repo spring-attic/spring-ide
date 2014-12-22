@@ -10,24 +10,92 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
+import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
+import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
+import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
 
-public class SpringPropertiesCompletionEngineTests extends TestCase {
+public abstract class SpringPropertiesEditorTestHarness extends TestCase {
+
+	public class MockProblemCollector implements IProblemCollector {
+		
+		private List<SpringPropertyProblem> problems = null;
+
+		public List<SpringPropertyProblem> getAllProblems() {
+			return problems;
+		}
+
+		@Override
+		public void beginCollecting() {
+			problems = new ArrayList<SpringPropertyProblem>();
+		}
+
+		@Override
+		public void endCollecting() {
+		}
+
+		@Override
+		public void accept(SpringPropertyProblem e) {
+			problems.add(e);
+		}
+
+	}
+
+
+
+	private static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
+		@Override
+		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
+			return SpringPropertiesCompletionEngine.SORTER.compare(p1, p2);
+		}
+	};
+
+	public static final String INTEGER = Integer.class.getName();
+	public static final String STRING = String.class.getName();
+	public static final String CURSOR = "<*>";
 	
+	private SpringPropertiesCompletionEngine engine;
+	
+	public void data(String id, String type, Object deflt, String description) {
+		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
+		item.setId(id);
+		item.setDescription(description);
+		item.setType(type);
+		item.setDefaultValue(deflt);
+		engine.add(item);
+	}
+	
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		engine = new SpringPropertiesCompletionEngine();
+	}
+	
+	
+	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
+		SpringPropertiesReconcileEngine reconciler = new SpringPropertiesReconcileEngine(engine.getIndex());
+		MockProblemCollector problems=new MockProblemCollector();
+		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
+		return problems.getAllProblems();
+	}
+	
+
 	/**
 	 * Basic 'simulated' editor. Contains text and a cursor position / selection.
 	 */
@@ -95,116 +163,30 @@ public class SpringPropertiesCompletionEngineTests extends TestCase {
 			completion.apply(document);
 			setSelection(completion.getSelection(document));
 		}
+
+		public String getText(int offset, int length) throws BadLocationException {
+			return document.get(offset, length);
+		}
 		
 	}
-
-	private static final String INTEGER = Integer.class.getName();
-	private static final String STRING = String.class.getName();
-	private static final String CURSOR = "<*>";
 	
-	private static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
-		@Override
-		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			return SpringPropertiesCompletionEngine.SORTER.compare(p1, p2);
-		}
-	};
-	
-	private SpringPropertiesCompletionEngine engine;
-	
-	public void data(String id, String type, Object deflt, String description) {
-		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
-		item.setId(id);
-		item.setDescription(description);
-		item.setType(type);
-		item.setDefaultValue(deflt);
-		engine.add(item);
-	}
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		engine = new SpringPropertiesCompletionEngine();
-	}
-	
-
-	public void testServerPortCompletion() throws Exception {
-		data("server.port", INTEGER, 8080, "Port where server listens for http.");
-		assertCompletion("ser<*>", "server.port=8080<*>");
-		assertDisplayString("ser<*>", "server.port=8080 : int Port where server listens for http.");
-	}
-	
-	public void testHoverInfos() throws Exception {
-		defaultTestData();
-		MockEditor editor = new MockEditor(
-				"#foo\n" + 
-				"# bar\n" + 
-				"server.port=8080\n" + 
-				"logging.level.com.acme=INFO\n"
-		);
-		//Case 1: an 'exact' match of the property is in the hover region
-		assertHoverText(editor, "server.",
-				"<b>server.port</b>"+
-				"<br><a href=\"type%2Fjava.lang.Integer\">java.lang.Integer</a>"+
-				"<br><br>Server HTTP port"
-		);
-		//Case 2: an object/map property has extra text after the property name
-		assertHoverText(editor, "logging.", "<b>logging.level</b>");
-	}
-
 	/**
-	 * Verifies an expected textSnippet is contained in the hovertext that is
-	 * computed when hovering mouse at position at the end of first occurence of
-	 * a given string in the editor.
-	 */
-	private void assertHoverText(MockEditor editor, String afterString, String expectSnippet) {
-		String hoverText = getHoverText(editor, afterString);
-		assertContains(expectSnippet, hoverText);
-	}
-
-	private void assertContains(String needle, String haystack) {
-		if (haystack==null || !haystack.contains(needle)) {
-			fail("Not found: "+needle+"\n in \n"+haystack);
-		}
- 	}
-
-	/**
-	 * Compue hover text when mouse hovers placed at the end of the first occurence of
+	 * Compute hover text when mouse hovers at the end of the first occurence of
 	 * a given String in the editor contents.
 	 */
-	private String getHoverText(MockEditor editor, String atString) {
+	public String getHoverText(MockEditor editor, String atString) {
 		int pos = editor.getText().indexOf(atString);
 		if (pos>=0) {
 			pos += atString.length();
 		}
 		ITypedRegion region = (ITypedRegion)engine.getHoverRegion(editor.document, pos);
 		if (region!=null) {
-			return engine.getHoverInfo(editor.document, region, region.getType());
+			return engine.getHoverInfo(editor.document, pos, region.getType());
 		}
 		return null;
 	}
 
-	public void testLoggingLevelCompletion() throws Exception {
-		data("logging.level", "java.util.Map<java.lang.String,java.lang.Object>", null, "Logging level per package.");
-		assertCompletion("lolev<*>","logging.level.<*>");
-	}
-	
-	private void assertDisplayString(String editorContents, String expected) throws Exception {
-		MockEditor editor = new MockEditor(editorContents);
-		ICompletionProposal completion = getFirstCompletion(editor);
-		assertEquals(expected, completion.getDisplayString());
-	}
-
-	/**
-	 * Simulates applying the first completion to a text buffer and checks the result.
-	 */
-	private void assertCompletion(String textBefore, String expectTextAfter) throws Exception {
-		MockEditor editor = new MockEditor(textBefore);
-		ICompletionProposal completion = getFirstCompletion(editor);
-		editor.apply(completion);
-		assertEquals(expectTextAfter, editor.getText());
-	}
-
-	private ICompletionProposal getFirstCompletion(MockEditor editor)
+	public ICompletionProposal getFirstCompletion(MockEditor editor)
 			throws BadLocationException {
 		Collection<ICompletionProposal> _completions = engine.getCompletions(editor.document, editor.selectionStart);
 		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
@@ -213,6 +195,45 @@ public class SpringPropertiesCompletionEngineTests extends TestCase {
 		return completion;
 	}
 
+	/**
+	 * Verifies an expected textSnippet is contained in the hovertext that is
+	 * computed when hovering mouse at position at the end of first occurence of
+	 * a given string in the editor.
+	 */
+	public void assertHoverText(MockEditor editor, String afterString, String expectSnippet) {
+		String hoverText = getHoverText(editor, afterString);
+		assertContains(expectSnippet, hoverText);
+	}
+
+	public void assertContains(String needle, String haystack) {
+		if (haystack==null || !haystack.contains(needle)) {
+			fail("Not found: "+needle+"\n in \n"+haystack);
+		}
+ 	}
+
+	public void assertCompletionDisplayString(String editorContents, String expected) throws Exception {
+		MockEditor editor = new MockEditor(editorContents);
+		ICompletionProposal completion = getFirstCompletion(editor);
+		assertEquals(expected, completion.getDisplayString());
+	}
+
+	/**
+	 * Simulates applying the first completion to a text buffer and checks the result.
+	 */
+	public void assertCompletion(String textBefore, String expectTextAfter) throws Exception {
+		MockEditor editor = new MockEditor(textBefore);
+		ICompletionProposal completion = getFirstCompletion(editor);
+		editor.apply(completion);
+		assertEquals(expectTextAfter, editor.getText());
+	}
+
+
+	
+	/**
+	 * Call this method to add some default test data to the Completion engine's index.
+	 * Note that this data is not added automatically, some test may want to use smaller
+	 * test data sets.
+	 */
 	public void defaultTestData() {
 		data("banner.charset", "java.nio.charset.Charset", "UTF-8", "Banner file encoding.");
 		data("banner.location", "java.lang.String", "classpath:banner.txt", "Banner file location.");
@@ -620,5 +641,6 @@ public class SpringPropertiesCompletionEngineTests extends TestCase {
 		data("spring.view.prefix", "java.lang.String", null, "Spring MVC view prefix.");
 		data("spring.view.suffix", "java.lang.String", null, "Spring MVC view suffix.");
 	}
+
 	
 }
