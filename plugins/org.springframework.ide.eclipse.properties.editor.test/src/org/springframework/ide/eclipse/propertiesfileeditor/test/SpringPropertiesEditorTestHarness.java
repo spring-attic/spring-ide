@@ -228,7 +228,31 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 		assertEquals(expectTextAfter, editor.getText());
 	}
 
+	
+	/**
+	 * Like 'assertCompletionsBasic' but places the 'textBefore' in a context 
+	 * with other text around it... trying several different variations of
+	 * text before and after the 'interesting' line.
+	 */
 	public void assertCompletions(String textBefore, String... expectTextAfter) throws Exception {
+		//Variation 1: by itself
+		assertCompletionsBasic(textBefore, expectTextAfter);
+		//Variation 2: comment text before and after
+		assertCompletionsBasic("#comment\n"+textBefore+"\n#comment", "#comment\n"+expectTextAfter+"\n#comment");
+		//Variation 3: empty lines of text before and after
+		assertCompletionsBasic("\n"+textBefore+"\n\n", "\n"+expectTextAfter+"\n\n");
+		//Variation 3.b: empty lines of text before and single newline after
+		assertCompletionsBasic("\n"+textBefore+"\n", "\n"+expectTextAfter+"\n");
+		//Variation 4: property assignment before and after
+		assertCompletionsBasic("foo=bar\n"+textBefore+"\nnol=brol", "foo=bar\n"+expectTextAfter+"\nnol=brol");
+		
+	}
+
+	/**
+	 * Checks that applying completions to a given 'textBefore' editor content produces the
+	 * expected results.
+	 */
+	public void assertCompletionsBasic(String textBefore, String... expectTextAfter) throws Exception {
 		MockEditor editor = new MockEditor(textBefore);
 		ICompletionProposal[] completions = getCompletions(editor);
 		String[] completed = new String[completions.length];
