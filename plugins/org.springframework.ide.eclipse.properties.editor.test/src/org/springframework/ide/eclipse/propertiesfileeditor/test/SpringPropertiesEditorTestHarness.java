@@ -57,7 +57,6 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 
 
 	private static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
-		@Override
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 			return SpringPropertiesCompletionEngine.SORTER.compare(p1, p2);
 		}
@@ -237,7 +236,7 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 		for (int i = 0; i < completed.length; i++) {
 			editor = new MockEditor(textBefore);
 			editor.apply(completions[i]);
-			assertEquals(expectTextAfter, editor.getText());
+			assertEquals(expectTextAfter[i], editor.getText());
 		}
 	}
 
