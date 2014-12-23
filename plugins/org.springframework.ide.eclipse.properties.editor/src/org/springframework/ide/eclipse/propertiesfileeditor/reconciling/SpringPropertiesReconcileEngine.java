@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
 
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.ASSIGNABLE_TYPES;
+import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.isAssign;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -197,7 +199,7 @@ public class SpringPropertiesReconcileEngine {
 							int startChar = firstNonWhitespaceCharOfRegion(doc, errorRegion);
 							if (startChar>=0) {
 								char assign = doc.getChar(startChar);
-								if (assign==':'||assign=='=') {
+								if (isAssign(assign)) {
 									startChar = firstNonWhitespaceCharOfRegion(doc, new Region(startChar+1, endChar-startChar));
 								}
 							}
@@ -283,7 +285,7 @@ public class SpringPropertiesReconcileEngine {
 					regionText = regionText.trim();
 					if (!regionText.isEmpty()) {
 						char assignment = regionText.charAt(0);
-						if (assignment==':'||assignment=='=') {
+						if (isAssign(assignment)) {
 							//strip of 'assignment' and also more whitepace which might occur 
 							//after it.
 							regionText = regionText.substring(1).trim(); //
@@ -315,7 +317,7 @@ public class SpringPropertiesReconcileEngine {
 		try {
 			char c = doc.getChar(r.getOffset()+r.getLength());
 			//Note either a '=' or a ':' can be used to assign properties.
-			return c==':' || c=='=';
+			return isAssign(c);
 		} catch (BadLocationException e) {
 			//happens if looking for assignment char outside the document
 			return false;

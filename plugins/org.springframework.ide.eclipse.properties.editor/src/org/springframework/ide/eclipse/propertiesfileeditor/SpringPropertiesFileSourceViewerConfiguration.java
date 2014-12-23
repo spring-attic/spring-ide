@@ -60,6 +60,7 @@ extends PropertiesFileSourceViewerConfiguration {
 				ContentAssistant a = new ContentAssistant();
 				a.setDocumentPartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
 				a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(getEngine()), IDocument.DEFAULT_CONTENT_TYPE);
+				a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(getEngine()), IPropertiesFilePartitions.PROPERTY_VALUE);
 				a.enableColoredLabels(true);
 				a.enableAutoActivation(true);
 				a.setInformationControlCreator(new SpringPropertiesInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));

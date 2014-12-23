@@ -32,6 +32,7 @@ import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
@@ -98,13 +99,22 @@ public class SpringPropertiesCompletionEngine {
 			"java.lang.Character",
 			"java.util.List"
 	));
+
+	private static final Map<String, String[]> TYPE_VALUES = new HashMap<String, String[]>();
+	static {
+		TYPE_VALUES.put("java.lang.Boolean", new String[] { "true", "false" });
+	}
 	
 	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			if (p1 instanceof Proposal && p2 instanceof Proposal) {
-				double s1 = ((Proposal)p1).match.score;
-				double s2 = ((Proposal)p2).match.score;
+			if (p1 instanceof PropertyProposal && p2 instanceof PropertyProposal) {
+				double s1 = ((PropertyProposal)p1).match.score;
+				double s2 = ((PropertyProposal)p2).match.score;
 				return Double.compare(s2, s1);
+			} else if (p1 instanceof ValueProposal && p2 instanceof ValueProposal) {
+				int order1 = ((ValueProposal)p1).sortingOrder;
+				int order2 = ((ValueProposal)p2).sortingOrder;
+				return Integer.compare(order1, order2);
 			}
 			return 0;
 		}
@@ -182,19 +192,73 @@ public class SpringPropertiesCompletionEngine {
 	}
 	
 	public Collection<ICompletionProposal> getCompletions(IDocument doc, int offset) throws BadLocationException {
-		ITypedRegion partition = doc.getPartition(offset);
-		if (partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+		ITypedRegion partition = getPartition(doc, offset);
+		String type = partition.getType();
+		if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 			//inside a property 'key' 
-			String prefix= getPrefix(doc, offset);
-			if (prefix != null) {
-				Collection<Match<ConfigurationMetadataProperty>> matches = index.find(prefix);
-				if (matches!=null && !matches.isEmpty()) {
-					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
-					for (Match<ConfigurationMetadataProperty> match : matches) {
-						proposals.add(new Proposal(prefix, offset, match));
+			getPropertyCompletions(doc, offset);
+		} else if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
+			getValueCompletions(doc, offset, partition);
+		}
+		return Collections.emptyList();
+	}
+	
+	public static boolean isAssign(char assign) {
+		return assign==':'||assign=='=';
+	}
+
+	private ITypedRegion getPartition(IDocument doc, int offset) throws BadLocationException {
+		ITypedRegion part = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
+		if (part.getType()==IDocument.DEFAULT_CONTENT_TYPE && part.getLength()==0 && offset==doc.getLength() && offset>0) {
+			//A special case because when cursor at end of document and just after a '=' sign, then we get a DEFAULT content type
+			// with a empty region. We rather would get the non-empty 'Value' partition just before that (which has the assignment in it.
+			char assign = doc.getChar(offset-1);
+			if (isAssign(assign)) {
+				return new TypedRegion(offset-1, 1, IPropertiesFilePartitions.PROPERTY_VALUE);
+			}
+		}
+		return part;
+	}
+
+	private Collection<ValueProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
+		int startOfValue = valuePartition.getOffset();
+		try {
+			String valuePrefix = doc.get(startOfValue, offset-startOfValue);
+			String propertyName= getPrefix(doc, offset);
+			ConfigurationMetadataProperty prop = index.get(propertyName);
+			if (prop!=null) {
+				String[] valueCompletions = getValueCompletions(prop.getType());
+				if (valueCompletions!=null && valueCompletions.length>0) {
+					ArrayList<ValueProposal> proposals = new ArrayList<ValueProposal>();
+					for (int i = 0; i < valueCompletions.length; i++) {
+						String valueCandidate = valueCompletions[i];
+						if (valueCandidate.startsWith(valuePrefix)) {
+							proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)); 
+						}
 					}
 					return proposals;
 				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return Collections.emptyList();
+	}
+
+	private String[] getValueCompletions(String type) {
+		return TYPE_VALUES.get(type);
+	}
+
+	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
+		String prefix= getPrefix(doc, offset);
+		if (prefix != null) {
+			Collection<Match<ConfigurationMetadataProperty>> matches = index.find(prefix);
+			if (matches!=null && !matches.isEmpty()) {
+				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
+				for (Match<ConfigurationMetadataProperty> match : matches) {
+					proposals.add(new PropertyProposal(prefix, offset, match));
+				}
+				return proposals;
 			}
 		}
 		return Collections.emptyList();
@@ -237,8 +301,60 @@ public class SpringPropertiesCompletionEngine {
 		return html.toString();
 	}
 	
+	private final class ValueProposal implements ICompletionProposal {
+		
+		private int valueStart;
+		private String valuePrefix;
+		private String value;
+		private int sortingOrder;
+		
+		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder) {
+			this.valueStart = valueStart;
+			this.valuePrefix = valuePrefix;
+			this.value = value;
+			this.sortingOrder = sortingOrder;
+		}
+
+		@Override
+		public void apply(IDocument document) {
+			try {
+				document.replace(valueStart, valuePrefix.length(), value);
+			} catch (BadLocationException e) {
+				SpringPropertiesEditorPlugin.log(e);
+			}
+		}
+
+		@Override
+		public Point getSelection(IDocument document) {
+			return new Point(valueStart+value.length(), 0);
+		}
+
+		@Override
+		public String getAdditionalProposalInfo() {
+			return null;
+		}
+
+		@Override
+		public String getDisplayString() {
+			return value;
+		}
+
+		@Override
+		public Image getImage() {
+			return null;
+		}
+
+		@Override
+		public IContextInformation getContextInformation() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+	}
+
+
 	
-	private final class Proposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4,
+	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4,
 	 ICompletionProposalExtension6
 	{
 
@@ -246,7 +362,7 @@ public class SpringPropertiesCompletionEngine {
 		private final int fOffset;
 		private Match<ConfigurationMetadataProperty> match;
 
-		public Proposal(String prefix, int offset, Match<ConfigurationMetadataProperty> match) {
+		public PropertyProposal(String prefix, int offset, Match<ConfigurationMetadataProperty> match) {
 			fPrefix= prefix;
 			fOffset= offset;
 			this.match = match;
@@ -433,7 +549,7 @@ public class SpringPropertiesCompletionEngine {
 	
 	public ITypedRegion getHoverRegion(IDocument document, int offset) {
     	try {
-    		return TextUtilities.getPartition(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
+    		return getPartition(document, offset);
     	} catch (Exception e) {
     		SpringPropertiesEditorPlugin.log(e);
     		return null;

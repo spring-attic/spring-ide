@@ -41,16 +41,13 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 			return problems;
 		}
 
-		@Override
 		public void beginCollecting() {
 			problems = new ArrayList<SpringPropertyProblem>();
 		}
 
-		@Override
 		public void endCollecting() {
 		}
 
-		@Override
 		public void accept(SpringPropertyProblem e) {
 			problems.add(e);
 		}
@@ -189,13 +186,17 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 
 	public ICompletionProposal getFirstCompletion(MockEditor editor)
 			throws BadLocationException {
+		return getCompletions(editor)[0];
+	}
+
+	public ICompletionProposal[] getCompletions(MockEditor editor)
+			throws BadLocationException {
 		Collection<ICompletionProposal> _completions = engine.getCompletions(editor.document, editor.selectionStart);
 		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
 		Arrays.sort(completions, COMPARATOR);
-		ICompletionProposal completion = completions[0];
-		return completion;
+		return completions;
 	}
-
+	
 	/**
 	 * Verifies an expected textSnippet is contained in the hovertext that is
 	 * computed when hovering mouse at position at the end of first occurence of
@@ -226,6 +227,18 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
 		assertEquals(expectTextAfter, editor.getText());
+	}
+
+	public void assertCompletions(String textBefore, String... expectTextAfter) throws Exception {
+		MockEditor editor = new MockEditor(textBefore);
+		ICompletionProposal[] completions = getCompletions(editor);
+		String[] completed = new String[completions.length];
+		assertEquals(expectTextAfter.length, completions.length);
+		for (int i = 0; i < completed.length; i++) {
+			editor = new MockEditor(textBefore);
+			editor.apply(completions[i]);
+			assertEquals(expectTextAfter, editor.getText());
+		}
 	}
 
 

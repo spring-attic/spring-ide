@@ -19,12 +19,23 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	
 	//TODO: List type is assignable (but paramteric),
 	//  - handle this in reconciling?
-	//  - add test for completion (does it add '=' as expected?)
 	
 	public void testServerPortCompletion() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
 		assertCompletion("ser<*>", "server.port=8080<*>");
 		assertCompletionDisplayString("ser<*>", "server.port=8080 : int Port where server listens for http.");
+	}
+	
+	public void testLoggingLevelCompletion() throws Exception {
+		data("logging.level", "java.util.Map<java.lang.String,java.lang.Object>", null, "Logging level per package.");
+		assertCompletion("lolev<*>","logging.level.<*>");
+	}
+	
+	public void testValueCompletion() throws Exception {
+		assertCompletions("liquibase.enabled=",
+				"liquibase.enabled=false<*>",
+				"liquibase.enabled=true<*>"
+		);
 	}
 	
 	public void testHoverInfos() throws Exception {
@@ -73,11 +84,6 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		assertHoverText(editor, "server.", "<b>server.port</b>");
 		assertHoverText(editor, "port.fa", "<b>server.port.fancy</b>");
-	}
-
-	public void testLoggingLevelCompletion() throws Exception {
-		data("logging.level", "java.util.Map<java.lang.String,java.lang.Object>", null, "Logging level per package.");
-		assertCompletion("lolev<*>","logging.level.<*>");
 	}
 
 	public void testReconcile() throws Exception {
