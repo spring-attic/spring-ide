@@ -19,6 +19,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	
 	//TODO: List type is assignable (but paramteric),
 	//  - handle this in reconciling?
+	//testValueCompletion -> create a version with some extra text around the one liner
 	
 	public void testServerPortCompletion() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
@@ -32,11 +33,62 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 	
 	public void testValueCompletion() throws Exception {
+		defaultTestData();
 		assertCompletions("liquibase.enabled=",
-				"liquibase.enabled=false<*>",
+				"liquibase.enabled=true<*>",
+				"liquibase.enabled=false<*>"
+		);
+		
+		assertCompletions("liquibase.enabled:",
+				"liquibase.enabled:true<*>",
+				"liquibase.enabled:false<*>"
+		);
+		
+		assertCompletions("liquibase.enabled = ",
+				"liquibase.enabled = true<*>",
+				"liquibase.enabled = false<*>"
+		);
+		
+		assertCompletions("liquibase.enabled   ",
+				"liquibase.enabled   true<*>",
+				"liquibase.enabled   false<*>"
+		);
+		
+		assertCompletions("liquibase.enabled=f",
+				"liquibase.enabled=false<*>"
+		);
+		
+		assertCompletions("liquibase.enabled=t",
 				"liquibase.enabled=true<*>"
 		);
+		
+		assertCompletions("liquibase.enabled:f",
+				"liquibase.enabled:false<*>"
+		);
+		
+		assertCompletions("liquibase.enabled:t",
+				"liquibase.enabled:true<*>"
+		);
+
+		assertCompletions("liquibase.enabled = f",
+				"liquibase.enabled = false<*>"
+		);
+		
+		assertCompletions("liquibase.enabled = t",
+				"liquibase.enabled = true<*>"
+		);
+		
+		assertCompletions("liquibase.enabled   t",
+				"liquibase.enabled   true<*>"
+		);
+		
+		//one more... for special char like '-' in the name
+
+		assertCompletions("liquibase.check-change-log-location=t",
+				"liquibase.check-change-log-location=true<*>"
+		);
 	}
+	
 	
 	public void testHoverInfos() throws Exception {
 		defaultTestData();

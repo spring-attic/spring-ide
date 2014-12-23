@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.ASSIGNABLE_TYPES;
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.isAssign;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +27,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
+import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
@@ -196,11 +196,11 @@ public class SpringPropertiesReconcileEngine {
 					try {
 						int endChar = lastNonWhitespaceCharOfRegion(doc, errorRegion);
 						if (endChar>=0) {
-							int startChar = firstNonWhitespaceCharOfRegion(doc, errorRegion);
+							int startChar = SpringPropertiesCompletionEngine.firstNonWhitespaceCharOfRegion(doc, errorRegion);
 							if (startChar>=0) {
 								char assign = doc.getChar(startChar);
 								if (isAssign(assign)) {
-									startChar = firstNonWhitespaceCharOfRegion(doc, new Region(startChar+1, endChar-startChar));
+									startChar = SpringPropertiesCompletionEngine.firstNonWhitespaceCharOfRegion(doc, new Region(startChar+1, endChar-startChar));
 								}
 							}
 							if (startChar>=0) {
@@ -247,24 +247,6 @@ public class SpringPropertiesReconcileEngine {
 		return -1;
 	}
 	
-	private int firstNonWhitespaceCharOfRegion(IDocument doc, IRegion errorRegion) {
-		try {
-			int pos = errorRegion.getOffset();
-			int end = errorRegion.getOffset()+errorRegion.getLength();
-			while (pos<end&&Character.isWhitespace(doc.getChar(pos))) {
-				pos++;
-			}
-			if (pos<end) {
-				return pos;
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		return -1;
-	}
-
-	
-
 	/**
 	 * Extract the 'assigned' value represented as String from document. 
 	 * 

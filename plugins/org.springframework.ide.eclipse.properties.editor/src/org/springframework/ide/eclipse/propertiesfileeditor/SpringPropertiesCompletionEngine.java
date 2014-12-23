@@ -29,6 +29,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
@@ -188,7 +189,7 @@ public class SpringPropertiesCompletionEngine {
 	}
 	
 	private boolean isPrefixChar(char c) {
-		return c=='.' || Character.isJavaIdentifierPart(c);
+		return !Character.isWhitespace(c);
 	}
 	
 	public Collection<ICompletionProposal> getCompletions(IDocument doc, int offset) throws BadLocationException {
@@ -196,9 +197,9 @@ public class SpringPropertiesCompletionEngine {
 		String type = partition.getType();
 		if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 			//inside a property 'key' 
-			getPropertyCompletions(doc, offset);
+			return getPropertyCompletions(doc, offset);
 		} else if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
-			getValueCompletions(doc, offset, partition);
+			return getValueCompletions(doc, offset, partition);
 		}
 		return Collections.emptyList();
 	}
@@ -215,34 +216,71 @@ public class SpringPropertiesCompletionEngine {
 			char assign = doc.getChar(offset-1);
 			if (isAssign(assign)) {
 				return new TypedRegion(offset-1, 1, IPropertiesFilePartitions.PROPERTY_VALUE);
+			} else {
+				//For a similar case but where there's extra spaces after the '='
+				ITypedRegion previousPart = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset-1, true);
+				int previousEnd = previousPart.getOffset()+previousPart.getLength();
+				if (previousEnd==offset) {
+					//prefer this over a 0 length partition ending at the same location
+					return previousPart;
+				}
 			}
 		}
 		return part;
 	}
 
-	private Collection<ValueProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
-		int startOfValue = valuePartition.getOffset();
+	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
+		int regionStart = valuePartition.getOffset();
+		int startOfValue = findValueStart(doc, regionStart);
 		try {
-			String valuePrefix = doc.get(startOfValue, offset-startOfValue);
-			String propertyName= getPrefix(doc, offset);
-			ConfigurationMetadataProperty prop = index.get(propertyName);
-			if (prop!=null) {
-				String[] valueCompletions = getValueCompletions(prop.getType());
-				if (valueCompletions!=null && valueCompletions.length>0) {
-					ArrayList<ValueProposal> proposals = new ArrayList<ValueProposal>();
-					for (int i = 0; i < valueCompletions.length; i++) {
-						String valueCandidate = valueCompletions[i];
-						if (valueCandidate.startsWith(valuePrefix)) {
-							proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)); 
+			String valuePrefix = "";
+			if (startOfValue>=0 && startOfValue<offset) {
+				valuePrefix = doc.get(startOfValue, offset-startOfValue);
+			} else {
+				startOfValue = offset;
+				valuePrefix = "";
+			}
+			String propertyName = getPrefix(doc, regionStart); //note: no need to skip whitespace backwards. 
+					//because value partition includes whitespace around the assignment
+			if (propertyName!=null) {
+				ConfigurationMetadataProperty prop = index.get(propertyName);
+				if (prop!=null) {
+					String[] valueCompletions = getValueCompletions(prop.getType());
+					if (valueCompletions!=null && valueCompletions.length>0) {
+						ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+						for (int i = 0; i < valueCompletions.length; i++) {
+							String valueCandidate = valueCompletions[i];
+							if (valueCandidate.startsWith(valuePrefix)) {
+								proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)); 
+							}
 						}
+						return proposals;
 					}
-					return proposals;
 				}
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	private int findValueStart(IDocument doc, int pos) {
+		try {
+			pos = skipWhiteSpace(doc, pos);
+			if (pos>=0) {
+				char assign = doc.getChar(pos);
+				if (!isAssign(assign)) {
+					return pos; //For the case where key and value are separated by whitespace instead of assignment 
+				}
+				pos = skipWhiteSpace(doc, pos+1);
+				if (pos>=0) {
+					return pos;
+				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return -1;
 	}
 
 	private String[] getValueCompletions(String type) {
@@ -348,6 +386,11 @@ public class SpringPropertiesCompletionEngine {
 		public IContextInformation getContextInformation() {
 			// TODO Auto-generated method stub
 			return null;
+		}
+		
+		@Override
+		public String toString() {
+			return "<"+valuePrefix+">"+value;
 		}
 
 	}
@@ -640,6 +683,33 @@ public class SpringPropertiesCompletionEngine {
 
 	public FuzzyMap<ConfigurationMetadataProperty> getIndex() {
 		return index;
+	}
+
+	public static int firstNonWhitespaceCharOfRegion(IDocument doc, IRegion errorRegion) {
+		try {
+			int pos = skipWhiteSpace(doc, errorRegion.getOffset());
+			if (pos<errorRegion.getOffset()+errorRegion.getLength()) {
+				return pos;
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return -1;
+	}
+
+	public static int skipWhiteSpace(IDocument doc, int pos) {
+		try {
+			int end = doc.getLength();
+			while (pos<end&&Character.isWhitespace(doc.getChar(pos))) {
+				pos++;
+			}
+			if (pos<end) {
+				return pos;
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return -1;
 	}
 	
 }
