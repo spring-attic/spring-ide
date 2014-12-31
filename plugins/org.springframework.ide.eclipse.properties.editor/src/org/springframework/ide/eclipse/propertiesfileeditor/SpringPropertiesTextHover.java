@@ -47,7 +47,7 @@ public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtensio
      	if (s!=null) {
      		return text2html(s);
      	}
-     	return engine.getHoverInfo(tv.getDocument(), r.getOffset(), contentType);
+     	return engine.getHoverInfo(tv.getDocument(), r.getOffset(), contentType).getHtml();
      }
      
  	private String text2html(String s) {

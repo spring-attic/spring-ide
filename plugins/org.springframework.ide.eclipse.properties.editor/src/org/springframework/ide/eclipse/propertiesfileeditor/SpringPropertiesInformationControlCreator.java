@@ -10,12 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
+import java.util.List;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -62,23 +70,63 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 					}
 				};
 			} else {
-				ToolBarManager toolbar = createToolbar();
-				return new BrowserInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, toolbar) {
+				ToolBarManager toolbar= new ToolBarManager(SWT.FLAT);
+				BrowserInformationControl control = new BrowserInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, toolbar) {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return new SpringPropertiesInformationControlCreator(true, null);
 					}
 				};
-
+				fillToolbar(toolbar, control);
+				toolbar.update(true);
+				return control;
 			}
 		}
 		return new DefaultInformationControl(parent, true);
 	}
 
 	/**
-	 * Creates an optional toolbar for the enriched version of the control.
+	 * Add menu items to the toolbar for the enriched version of the control.
 	 */
-	protected ToolBarManager createToolbar() {
-		return null;
+	private void fillToolbar(ToolBarManager tbm, BrowserInformationControl infoControl) {
+		tbm.add(new OpenDeclarationAction(infoControl));
 	}
+	
+	/**
+	 * Action that opens the current hover input element.
+	 *
+	 * @since 3.4
+	 */
+	private static final class OpenDeclarationAction extends Action {
+		private final BrowserInformationControl fInfoControl;
+
+		public OpenDeclarationAction(BrowserInformationControl infoControl) {
+			fInfoControl= infoControl;
+			setText("Open Declaration");
+			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.gif"); //$NON-NLS-1$ //TODO: better images
+		}
+
+		/*
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		@Override
+		public void run() {
+			try {
+				SpringPropertyHoverInfo infoInput= (SpringPropertyHoverInfo) fInfoControl.getInput();
+				if (infoInput!=null) {
+					List<IJavaElement> elements = infoInput.getJavaElements();
+					//TODO: This only opens the first element, if there's more than one should offer a choice/
+					if (!elements.isEmpty()) {
+						IJavaElement je = elements.get(0);
+						fInfoControl.notifyDelayedInputChange(null);
+						fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
+						JavaUI.openInEditor(je);
+					}
+				}
+			} catch (Exception e) {
+				SpringPropertiesEditorPlugin.log(e);
+			}
+		}
+	}
+	
 }

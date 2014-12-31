@@ -25,10 +25,10 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
-import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
+import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.DocumentUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
 /**
@@ -88,7 +88,7 @@ public class SpringPropertiesReconcileEngine {
 		});
 	}
 
-	private FuzzyMap<ConfigurationMetadataProperty> fIndex;
+	private FuzzyMap<PropertyInfo> fIndex;
 
 	public interface IProblemCollector {
 
@@ -99,7 +99,7 @@ public class SpringPropertiesReconcileEngine {
 	}
 
 	
-	public SpringPropertiesReconcileEngine(FuzzyMap<ConfigurationMetadataProperty> index) {
+	public SpringPropertiesReconcileEngine(FuzzyMap<PropertyInfo> index) {
 		fIndex = index;
 	}
 
@@ -134,7 +134,7 @@ public class SpringPropertiesReconcileEngine {
 									continue;
 								}
 							}
-							ConfigurationMetadataProperty validProperty = findLongestValidProperty(fullName);
+							PropertyInfo validProperty = findLongestValidProperty(fullName);
 							if (validProperty!=null) {
 								if (validProperty.getId().length()==fullName.length()) {
 									//exact match. Do not complain about key, but try to reconcile assigned value
@@ -156,13 +156,12 @@ public class SpringPropertiesReconcileEngine {
 								}
 							} else { //validProperty==null
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
-								ConfigurationMetadataProperty similarEntry = fIndex.findLongestCommonPrefixEntry(fullName);
+								PropertyInfo similarEntry = fIndex.findLongestCommonPrefixEntry(fullName);
 								String validPrefix = StringUtil.commonPrefix(similarEntry.getId(), fullName);
 								problemCollector.accept(new SpringPropertyProblem("'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName), 
 										trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length()));
 							} //end: validProperty==null
 						}
-						//TODO: check value types.
 					} catch (Exception e) {
 						SpringPropertiesEditorPlugin.log(e);
 					}
@@ -175,14 +174,14 @@ public class SpringPropertiesReconcileEngine {
 		}
 	}
 
-	private void reconcileType(IDocument doc, ConfigurationMetadataProperty validProperty, ITypedRegion[] regions, int i, IProblemCollector problems) {
+	private void reconcileType(IDocument doc, PropertyInfo validProperty, ITypedRegion[] regions, int i, IProblemCollector problems) {
 		String expectType = validProperty.getType();
 		ValueParser parser = getValueParser(expectType);
 		if (parser!=null) {
 			String escapedValue = getAssignedValue(doc, regions, i);
 			IRegion errorRegion = null;
 			if (escapedValue==null) {
-				int charPos = lastNonWhitespaceCharOfRegion(doc, regions[i]);
+				int charPos = DocumentUtil.lastNonWhitespaceCharOfRegion(doc, regions[i]);
 				if (charPos>=0) {
 					errorRegion = new Region(charPos, 1);
 				}
@@ -194,13 +193,13 @@ public class SpringPropertiesReconcileEngine {
 					errorRegion = regions[i+1]; //i+1 must be in range, otherwise paddedValue would be null
 					//Try to shrink errorRegion to demarkate the value String more precisely
 					try {
-						int endChar = lastNonWhitespaceCharOfRegion(doc, errorRegion);
+						int endChar = DocumentUtil.lastNonWhitespaceCharOfRegion(doc, errorRegion);
 						if (endChar>=0) {
-							int startChar = SpringPropertiesCompletionEngine.firstNonWhitespaceCharOfRegion(doc, errorRegion);
+							int startChar = DocumentUtil.firstNonWhitespaceCharOfRegion(doc, errorRegion);
 							if (startChar>=0) {
 								char assign = doc.getChar(startChar);
 								if (isAssign(assign)) {
-									startChar = SpringPropertiesCompletionEngine.firstNonWhitespaceCharOfRegion(doc, new Region(startChar+1, endChar-startChar));
+									startChar = DocumentUtil.firstNonWhitespaceCharOfRegion(doc, new Region(startChar+1, endChar-startChar));
 								}
 							}
 							if (startChar>=0) {
@@ -229,24 +228,6 @@ public class SpringPropertiesReconcileEngine {
 		return VALUE_PARSERS.get(type);
 	}
 
-	/**
-	 * Compute location of the last character in the region that is not a whitespace character.
-	 */
-	private int lastNonWhitespaceCharOfRegion(IDocument doc, IRegion errorRegion) {
-		try {
-			int pos = errorRegion.getOffset()+errorRegion.getLength()-1;
-			while (pos>=errorRegion.getOffset()&&Character.isWhitespace(doc.getChar(pos))) {
-				pos--;
-			}
-			if (pos>=errorRegion.getOffset()) {
-				return pos;
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		return -1;
-	}
-	
 	/**
 	 * Extract the 'assigned' value represented as String from document. 
 	 * 
@@ -282,7 +263,7 @@ public class SpringPropertiesReconcileEngine {
 		return null;
 	}
 
-	private String suggestSimilar(ConfigurationMetadataProperty similarEntry, String validPrefix, String fullName) {
+	private String suggestSimilar(PropertyInfo similarEntry, String validPrefix, String fullName) {
 		int matchedChars = validPrefix.length();
 		int wrongChars = fullName.length()-matchedChars;
 		if (wrongChars<matchedChars) {
@@ -311,9 +292,9 @@ public class SpringPropertiesReconcileEngine {
 	 * 'string prefix' but a prefix in the sense of treating '.' as a kind of separators. So 
 	 * 'prefix' is not allowed to end in the middle of a 'segment'.
 	 */
-	private ConfigurationMetadataProperty findLongestValidProperty(String name) {
+	private PropertyInfo findLongestValidProperty(String name) {
 		int endPos = name.length();
-		ConfigurationMetadataProperty prop = null;
+		PropertyInfo prop = null;
 		while (endPos>0 && prop==null) {
 			prop = fIndex.get(name.substring(0, endPos));
 			if (prop==null) {

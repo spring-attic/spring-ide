@@ -63,4 +63,8 @@ public class SpringPropertiesEditorPlugin extends AbstractUIPlugin {
 		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
 	}
 
+	public static void warning(String msg) {
+		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, msg, null));
+	}
+
 }

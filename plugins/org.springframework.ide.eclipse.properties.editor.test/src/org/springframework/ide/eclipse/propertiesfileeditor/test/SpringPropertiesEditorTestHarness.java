@@ -26,6 +26,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
@@ -75,7 +76,7 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 		item.setDescription(description);
 		item.setType(type);
 		item.setDefaultValue(deflt);
-		engine.add(item);
+		engine.add(new PropertyInfo(item));
 	}
 	
 	@Override
@@ -178,7 +179,7 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 		}
 		ITypedRegion region = (ITypedRegion)engine.getHoverRegion(editor.document, pos);
 		if (region!=null) {
-			return engine.getHoverInfo(editor.document, pos, region.getType());
+			return engine.getHoverInfo(editor.document, pos, region.getType()).getHtml();
 		}
 		return null;
 	}

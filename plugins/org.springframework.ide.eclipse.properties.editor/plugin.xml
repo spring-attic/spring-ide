@@ -20,7 +20,6 @@
             class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor"
    -->
    <extension
-         id="spring-properties-editor"
          point="org.eclipse.ui.editors">
       <editor
             name="Spring Properties Editor"
@@ -34,6 +33,5 @@
             /> 
       </editor>
    </extension>
-   
 
 </plugin>

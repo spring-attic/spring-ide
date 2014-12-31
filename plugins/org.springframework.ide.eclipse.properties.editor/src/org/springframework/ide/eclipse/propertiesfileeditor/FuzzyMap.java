@@ -60,7 +60,13 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	
 	public void add(E value) {
 		//This assumes no two entries have the same id.
-		entries.put(getKey(value), value);
+		String key = getKey(value);
+		E existing = entries.get(key);
+		if (existing==null) {
+			entries.put(getKey(value), value);
+		} else {
+			SpringPropertiesEditorPlugin.warning(FuzzyMap.class.getName()+": Multiple entries for key "+key+" some entries discarded");
+		}
 	}
 	
 	/**
@@ -177,6 +183,10 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 
 	public boolean isEmpty() {
 		return entries==null || entries.isEmpty();
+	}
+
+	public int size() {
+		return entries.size();
 	}
 
 }

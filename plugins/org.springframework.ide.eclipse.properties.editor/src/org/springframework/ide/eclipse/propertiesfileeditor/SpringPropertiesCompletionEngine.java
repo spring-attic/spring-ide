@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
-import java.beans.FeatureDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.ui.JavaUI;
@@ -29,7 +30,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
@@ -39,6 +39,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -47,9 +48,13 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
+import org.springframework.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
+import org.springframework.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
+import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.DocumentUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
 /**
@@ -121,23 +126,8 @@ public class SpringPropertiesCompletionEngine {
 		}
 	};
 	
-	public static String formatDefaultValue(Object defaultValue) {
-		if (defaultValue!=null) {
-			if (defaultValue instanceof String) {
-				return (String) defaultValue;
-			} else if (defaultValue instanceof Number) {
-				return ((Number)defaultValue).toString();
-			} else if (defaultValue instanceof Boolean) {
-				return Boolean.toString((Boolean) defaultValue);
-			} else {
-				//no idea what it is so ignore
-			}
-		}
-		return null;
-	}
-	
-	private FuzzyMap<ConfigurationMetadataProperty> index = new FuzzyMap<ConfigurationMetadataProperty>() {
-		protected String getKey(ConfigurationMetadataProperty entry) {
+	private FuzzyMap<PropertyInfo> index = new FuzzyMap<PropertyInfo>() {
+		protected String getKey(PropertyInfo entry) {
 			return entry.getId();
 		}
 	};
@@ -160,12 +150,22 @@ public class SpringPropertiesCompletionEngine {
 		
 		Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
 		for (ConfigurationMetadataProperty item : allEntries) {
-			add(item);
+			add(new PropertyInfo(item));
 		}
 		
-		System.out.println(">>> spring properties metadata loaded ===");
-		dumpAsTestData();
-		System.out.println("<<< spring properties metadata loaded ===");
+		for (ConfigurationMetadataGroup group : metadata.getAllGroups().values()) {
+			for (ConfigurationMetadataSource source : group.getSources().values()) {
+				for (ConfigurationMetadataProperty prop : source.getProperties().values()) {
+					PropertyInfo info = index.get(prop.getId());
+					info.addSource(source);
+				}
+			}
+		}
+		
+//		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
+//		dumpAsTestData();
+//		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
+		
 	}
 
 	/**
@@ -173,7 +173,7 @@ public class SpringPropertiesCompletionEngine {
 	 * call this, the data will be parsed from project's classpath. This mostly here to allow the engine to
 	 * be more easily unit tested with controlled test data.
 	 */
-	public void add(ConfigurationMetadataProperty item) {
+	public void add(PropertyInfo item) {
 		index.add(item);
 	}
 
@@ -243,7 +243,7 @@ public class SpringPropertiesCompletionEngine {
 			String propertyName = getPrefix(doc, regionStart); //note: no need to skip whitespace backwards. 
 					//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
-				ConfigurationMetadataProperty prop = index.get(propertyName);
+				PropertyInfo prop = index.get(propertyName);
 				if (prop!=null) {
 					String[] valueCompletions = getValueCompletions(prop.getType());
 					if (valueCompletions!=null && valueCompletions.length>0) {
@@ -290,53 +290,16 @@ public class SpringPropertiesCompletionEngine {
 	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
 		String prefix= getPrefix(doc, offset);
 		if (prefix != null) {
-			Collection<Match<ConfigurationMetadataProperty>> matches = index.find(prefix);
+			Collection<Match<PropertyInfo>> matches = index.find(prefix);
 			if (matches!=null && !matches.isEmpty()) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
-				for (Match<ConfigurationMetadataProperty> match : matches) {
-					proposals.add(new PropertyProposal(prefix, offset, match));
+				for (Match<PropertyInfo> match : matches) {
+					proposals.add(new PropertyProposal(doc, prefix, offset, match));
 				}
 				return proposals;
 			}
 		}
 		return Collections.emptyList();
-	}
-	
-	private static String getHtmlHoverText(ConfigurationMetadataProperty data) {
-		HtmlBuffer html = new HtmlBuffer();
-		
-		html.raw("<b>");
-			html.text(data.getId());
-		html.raw("</b>");
-		html.raw("<br>");
-		
-		String type = data.getType();
-		if (type==null) {
-			type = Object.class.getName();
-		}
-		html.raw("<a href=\"");
-		html.url("type/"+type);
-		html.raw("\">");
-		html.text(type);
-		html.raw("</a>");
-		
-		
-		String deflt = formatDefaultValue(data.getDefaultValue());
-		if (deflt!=null) {
-			html.raw("<br><br>");
-			html.text("Default: ");
-			html.raw("<i>");
-			html.text(deflt);
-			html.raw("</i>");
-		}
-		
-		String description = data.getDescription();
-		if (description!=null) {
-			html.raw("<br><br>");
-			html.text(description);
-		}
-		
-		return html.toString();
 	}
 	
 	private final class ValueProposal implements ICompletionProposal {
@@ -397,15 +360,17 @@ public class SpringPropertiesCompletionEngine {
 
 
 	
-	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4,
-	 ICompletionProposalExtension6
+	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, 
+	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
 	{
 
 		private final String fPrefix;
 		private final int fOffset;
-		private Match<ConfigurationMetadataProperty> match;
+		private Match<PropertyInfo> match;
+		private IDocument fDoc;
 
-		public PropertyProposal(String prefix, int offset, Match<ConfigurationMetadataProperty> match) {
+		public PropertyProposal(IDocument doc, String prefix, int offset, Match<PropertyInfo> match) {
+			fDoc = doc;
 			fPrefix= prefix;
 			fOffset= offset;
 			this.match = match;
@@ -416,8 +381,13 @@ public class SpringPropertiesCompletionEngine {
 		}
 
 		public String getAdditionalProposalInfo() {
-			ConfigurationMetadataProperty data = match.data;
-			return getHtmlHoverText(data);
+			PropertyInfo data = match.data;
+			return SpringPropertyHoverInfo.getHtmlHoverText(data);
+		}
+		
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return new SpringPropertyHoverInfo(DocumentUtil.getJavaProject(fDoc), match.data);
 		}
 
 
@@ -503,7 +473,7 @@ public class SpringPropertiesCompletionEngine {
 
 		private String getCompletion() {
 			StringBuilder completion = new StringBuilder(match.data.getId());
-			String defaultValue = formatDefaultValue(match.data.getDefaultValue());
+			String defaultValue = SpringPropertyHoverInfo.formatDefaultValue(match.data.getDefaultValue());
 			if (defaultValue!=null) {
 				completion.append("=");
 				completion.append(defaultValue);
@@ -523,7 +493,7 @@ public class SpringPropertiesCompletionEngine {
 		public StyledString getStyledDisplayString() {
 			StyledString result = new StyledString();
 			result.append(match.data.getId());
-			String defaultValue = formatDefaultValue(match.data.getDefaultValue());
+			String defaultValue = SpringPropertyHoverInfo.formatDefaultValue(match.data.getDefaultValue());
 			if (defaultValue!=null) {
 				result.append("=", JAVA_OPERATOR_COLOR);
 				result.append(defaultValue, JAVA_STRING_COLOR);
@@ -575,19 +545,27 @@ public class SpringPropertiesCompletionEngine {
 
 	}
 
-	public String getHoverInfo(IDocument doc, int offset, String contentType) {
+	public SpringPropertyHoverInfo getHoverInfo(IDocument doc, int offset, String contentType) {
 		try {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				ITypedRegion r = getHoverRegion(doc, offset);
-				ConfigurationMetadataProperty best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()).trim());
+				PropertyInfo best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()).trim());
 				if (best!=null) {
-					return getHtmlHoverText(best);
+					return new SpringPropertyHoverInfo(DocumentUtil.getJavaProject(doc), best);
 				}
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return null;
+	}
+	
+	public List<IJavaElement> getSourceElements(IDocument doc, int offset) {
+		SpringPropertyHoverInfo hoverinfo = getHoverInfo(doc, offset, IDocument.DEFAULT_CONTENT_TYPE);
+		if (hoverinfo!=null) {
+			return hoverinfo.getJavaElements();
+		}
+		return Collections.emptyList();
 	}
 	
 	public ITypedRegion getHoverRegion(IDocument document, int offset) {
@@ -602,12 +580,12 @@ public class SpringPropertiesCompletionEngine {
 	/**
 	 * Search known properties for the best 'match' to show as hover data.
 	 */
-	private ConfigurationMetadataProperty findBestHoverMatch(String propName) {
+	private PropertyInfo findBestHoverMatch(String propName) {
 		//TODO: optimize, should be able to use index's treemap to find this without iterating all entries.
-		ConfigurationMetadataProperty best = null;
+		PropertyInfo best = null;
 		int bestCommonPrefixLen = 0; //We try to pick property with longest common prefix
 		int bestExtraLen = Integer.MAX_VALUE;
-		for (ConfigurationMetadataProperty candidate : index) {
+		for (PropertyInfo candidate : index) {
 			int commonPrefixLen = StringUtil.commonPrefixLength(propName, candidate.getId());
 			int extraLen = candidate.getId().length()-commonPrefixLen;
 			if (commonPrefixLen==propName.length() && extraLen==0) {
@@ -633,15 +611,22 @@ public class SpringPropertiesCompletionEngine {
 	 * pasted/used into JUNit testing code. 
 	 */
 	public void dumpAsTestData() {
-		List<Match<ConfigurationMetadataProperty>> allData = index.find("");
-		for (Match<ConfigurationMetadataProperty> match : allData) {
-			ConfigurationMetadataProperty d = match.data;
+		List<Match<PropertyInfo>> allData = index.find("");
+		for (Match<PropertyInfo> match : allData) {
+			PropertyInfo d = match.data;
 			System.out.println("data("
 					+dumpString(d.getId())+", "
 					+dumpString(d.getType())+", "
 					+dumpString(d.getDefaultValue())+", "
 					+dumpString(d.getDescription()) +");"
 			);
+			for (PropertySource source : d.getSources()) {
+				String st = source.getSourceType();
+				String sm = source.getSourceMethod();
+				if (sm!=null) {
+					System.out.println(d.getId() +" from: "+st+"::"+sm);
+				}
+			}
 		}
 	}
 
@@ -681,20 +666,8 @@ public class SpringPropertiesCompletionEngine {
 		}
 	}
 
-	public FuzzyMap<ConfigurationMetadataProperty> getIndex() {
+	public FuzzyMap<PropertyInfo> getIndex() {
 		return index;
-	}
-
-	public static int firstNonWhitespaceCharOfRegion(IDocument doc, IRegion errorRegion) {
-		try {
-			int pos = skipWhiteSpace(doc, errorRegion.getOffset());
-			if (pos<errorRegion.getOffset()+errorRegion.getLength()) {
-				return pos;
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		return -1;
 	}
 
 	public static int skipWhiteSpace(IDocument doc, int pos) {
@@ -711,5 +684,5 @@ public class SpringPropertiesCompletionEngine {
 		}
 		return -1;
 	}
-	
+
 }

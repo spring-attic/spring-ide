@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jdt.core.IJavaProject;
@@ -24,9 +26,14 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.eclipse.jface.text.hyperlink.IHyperlinkPresenter;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
@@ -87,7 +94,7 @@ extends PropertiesFileSourceViewerConfiguration {
 		return engine;
 	}
 	
-	private FuzzyMap<ConfigurationMetadataProperty> getIndex() throws Exception {
+	private FuzzyMap<PropertyInfo> getIndex() throws Exception {
 		return getEngine().getIndex();
 	}
 
@@ -156,6 +163,44 @@ extends PropertiesFileSourceViewerConfiguration {
 			return reconciler;
 		}
 		return null;
+	}
+	
+	@Override
+	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+		SpringPropertiesHyperlinkDetector myDetector = null;
+		try {
+			myDetector = new SpringPropertiesHyperlinkDetector(getEngine());
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return merge(
+				super.getHyperlinkDetectors(sourceViewer),
+				myDetector
+		);
+	}
+	
+//	@Override
+//	public IHyperlinkPresenter getHyperlinkPresenter(ISourceViewer sourceViewer) {
+//		return super.getHyperlinkPresenter(sourceViewer);
+//	}
+	
+	protected java.util.Map<String,org.eclipse.core.runtime.IAdaptable> getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
+		Map<String, IAdaptable> superTargets = super.getHyperlinkDetectorTargets(sourceViewer);
+		superTargets.remove("org.eclipse.jdt.ui.PropertiesFileEditor"); //This just adds a 'search for' link which never seems to return anything useful
+		return superTargets;
+	};
+
+	private IHyperlinkDetector[] merge(IHyperlinkDetector[] a, SpringPropertiesHyperlinkDetector b) {
+		if (a==null || a.length==0) {
+			return new IHyperlinkDetector[] {b};
+		} 
+		if (b==null) {
+			return a;
+		}
+		IHyperlinkDetector[] merged = new IHyperlinkDetector[a.length+1];
+		System.arraycopy(a, 0, merged, 0, a.length);
+		merged[a.length] = b;
+		return merged;
 	}
 
 	private IReconcilingStrategy compose(IReconcilingStrategy s1, IReconcilingStrategy s2) {

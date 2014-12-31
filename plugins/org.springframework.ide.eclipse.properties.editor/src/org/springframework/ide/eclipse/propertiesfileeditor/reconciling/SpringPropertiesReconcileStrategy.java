@@ -42,6 +42,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
+import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
@@ -153,7 +154,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 * @param viewer the source viewer
 	 * @param spellingService the spelling service to use
 	 */
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, FuzzyMap<ConfigurationMetadataProperty> index) {
+	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, FuzzyMap<PropertyInfo> index) {
 		Assert.isNotNull(viewer);
 		Assert.isNotNull(index);
 		fViewer= viewer;
