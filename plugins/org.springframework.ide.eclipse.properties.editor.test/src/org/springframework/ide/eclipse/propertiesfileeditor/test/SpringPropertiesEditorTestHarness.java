@@ -239,14 +239,22 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 		//Variation 1: by itself
 		assertCompletionsBasic(textBefore, expectTextAfter);
 		//Variation 2: comment text before and after
-		assertCompletionsBasic("#comment\n"+textBefore+"\n#comment", "#comment\n"+expectTextAfter+"\n#comment");
+		assertCompletionsBasic("#comment\n"+textBefore+"\n#comment", wrap("#comment\n", expectTextAfter, "\n#comment"));
 		//Variation 3: empty lines of text before and after
-		assertCompletionsBasic("\n"+textBefore+"\n\n", "\n"+expectTextAfter+"\n\n");
+		assertCompletionsBasic("\n"+textBefore+"\n\n", wrap("\n", expectTextAfter, "\n\n"));
 		//Variation 3.b: empty lines of text before and single newline after
-		assertCompletionsBasic("\n"+textBefore+"\n", "\n"+expectTextAfter+"\n");
+		assertCompletionsBasic("\n"+textBefore+"\n", wrap("\n", expectTextAfter, "\n"));
 		//Variation 4: property assignment before and after
-		assertCompletionsBasic("foo=bar\n"+textBefore+"\nnol=brol", "foo=bar\n"+expectTextAfter+"\nnol=brol");
-		
+		assertCompletionsBasic("foo=bar\n"+textBefore+"\nnol=brol", wrap("foo=bar\n", expectTextAfter, "\nnol=brol"));
+	}
+
+	private String[] wrap(String before, String[] middle, String after) {
+		//"\n"+expectTextAfter+"\n\n"
+		String[] result = new String[middle.length];
+		for (int i = 0; i < result.length; i++) {
+			result[i] =  before+middle[i]+after;
+		}
+		return result;
 	}
 
 	/**

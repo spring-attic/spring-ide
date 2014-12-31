@@ -34,57 +34,57 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	
 	public void testValueCompletion() throws Exception {
 		defaultTestData();
-		assertCompletions("liquibase.enabled=",
+		assertCompletions("liquibase.enabled=<*>",
 				"liquibase.enabled=true<*>",
 				"liquibase.enabled=false<*>"
 		);
 		
-		assertCompletions("liquibase.enabled:",
+		assertCompletions("liquibase.enabled:<*>",
 				"liquibase.enabled:true<*>",
 				"liquibase.enabled:false<*>"
 		);
 		
-		assertCompletions("liquibase.enabled = ",
+		assertCompletions("liquibase.enabled = <*>",
 				"liquibase.enabled = true<*>",
 				"liquibase.enabled = false<*>"
 		);
 		
-		assertCompletions("liquibase.enabled   ",
+		assertCompletions("liquibase.enabled   <*>",
 				"liquibase.enabled   true<*>",
 				"liquibase.enabled   false<*>"
 		);
 		
-		assertCompletions("liquibase.enabled=f",
+		assertCompletions("liquibase.enabled=f<*>",
 				"liquibase.enabled=false<*>"
 		);
 		
-		assertCompletions("liquibase.enabled=t",
+		assertCompletions("liquibase.enabled=t<*>",
 				"liquibase.enabled=true<*>"
 		);
 		
-		assertCompletions("liquibase.enabled:f",
+		assertCompletions("liquibase.enabled:f<*>",
 				"liquibase.enabled:false<*>"
 		);
 		
-		assertCompletions("liquibase.enabled:t",
+		assertCompletions("liquibase.enabled:t<*>",
 				"liquibase.enabled:true<*>"
 		);
 
-		assertCompletions("liquibase.enabled = f",
+		assertCompletions("liquibase.enabled = f<*>",
 				"liquibase.enabled = false<*>"
 		);
 		
-		assertCompletions("liquibase.enabled = t",
+		assertCompletions("liquibase.enabled = t<*>",
 				"liquibase.enabled = true<*>"
 		);
 		
-		assertCompletions("liquibase.enabled   t",
+		assertCompletions("liquibase.enabled   t<*>",
 				"liquibase.enabled   true<*>"
 		);
 		
 		//one more... for special char like '-' in the name
 
-		assertCompletions("liquibase.check-change-log-location=t",
+		assertCompletions("liquibase.check-change-log-location=t<*>",
 				"liquibase.check-change-log-location=true<*>"
 		);
 	}
