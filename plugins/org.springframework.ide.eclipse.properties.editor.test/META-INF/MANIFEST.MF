@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: org.springframework.ide.eclipse.properties.editor.test
@@ -10,6 +11,9 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.properties.editor,
  org.eclipse.text,
  org.eclipse.jface.text,
- org.eclipse.jdt.ui
+ org.eclipse.jdt.ui,
+ org.springsource.ide.eclipse.commons.tests.util,
+ org.eclipse.jdt.core,
+ org.eclipse.core.resources
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

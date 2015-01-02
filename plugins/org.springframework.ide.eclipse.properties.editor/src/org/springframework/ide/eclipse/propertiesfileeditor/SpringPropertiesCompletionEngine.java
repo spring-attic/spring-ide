@@ -54,7 +54,6 @@ import org.springframework.configurationmetadata.ConfigurationMetadataRepository
 import org.springframework.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.DocumentUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
 /**
@@ -125,6 +124,8 @@ public class SpringPropertiesCompletionEngine {
 			return 0;
 		}
 	};
+	
+	private DocumentContextFinder documentContextFinder = DocumentContextFinder.DEFAULT;
 	
 	private FuzzyMap<PropertyInfo> index = new FuzzyMap<PropertyInfo>() {
 		protected String getKey(PropertyInfo entry) {
@@ -387,7 +388,7 @@ public class SpringPropertiesCompletionEngine {
 		
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return new SpringPropertyHoverInfo(DocumentUtil.getJavaProject(fDoc), match.data);
+			return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(fDoc), match.data);
 		}
 
 
@@ -551,7 +552,7 @@ public class SpringPropertiesCompletionEngine {
 				ITypedRegion r = getHoverRegion(doc, offset);
 				PropertyInfo best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()).trim());
 				if (best!=null) {
-					return new SpringPropertyHoverInfo(DocumentUtil.getJavaProject(doc), best);
+					return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(doc), best);
 				}
 			}
 		} catch (Exception e) {
@@ -685,4 +686,8 @@ public class SpringPropertiesCompletionEngine {
 		return -1;
 	}
 
+	public void setDocumentContextFinder(DocumentContextFinder it) {
+		this.documentContextFinder = it;
+	}
+	
 }

@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.test;
 
-import java.util.List;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.core.resources.IProject;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
 	
@@ -137,6 +138,27 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertHoverText(editor, "server.", "<b>server.port</b>");
 		assertHoverText(editor, "port.fa", "<b>server.port.fancy</b>");
 	}
+	
+	public void testHyperlinkTargets() throws Exception {
+		IProject p = createPredefinedProject("demo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		
+		MockEditor editor = new MockEditor(
+				"server.port=888\n" + 
+				"spring.datasource.login-timeout=1000\n"
+		);
+		
+		assertLinkTargets(editor, "server", 
+				"org.springframework.boot.autoconfigure.web.ServerProperties"
+		);
+		assertLinkTargets(editor, "data", 
+				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.hikariDataSource()",
+				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.tomcatDataSource()",
+				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.dbcpDataSource()"
+		);
+		
+	}
 
 	public void testReconcile() throws Exception {
 		MockEditor editor = new MockEditor(
@@ -194,59 +216,6 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"snuggem|unknown property",
 				"ogus.no.good|unknown property"
 		);
-	}
-	
-	/**
-	 * Check that a 'expectedProblems' are found by the reconciler. Expected problems are
-	 * specified by string of the form "${locationSnippet}|${messageSnippet}". The locationSnippet
-	 * defines the location where the error marker is expected (the first places where the
-	 * text occurs in the editor) and the message snippet must be found in the corresponding
-	 * error marker
-	 * @param editor
-	 * @param expectedProblems
-	 * @throws BadLocationException
-	 */
-	public void assertProblems(MockEditor editor, String... expectedProblems) throws BadLocationException {
-		defaultTestData();
-		List<SpringPropertyProblem> actualProblems = reconcile(editor);
-		String bad = null;
-		if (actualProblems.size()!=expectedProblems.length) {
-			bad = "Wrong number of problems (expecting "+expectedProblems.length+" but found "+actualProblems.size()+")";
-		} else {
-			for (int i = 0; i < expectedProblems.length; i++) {
-				if (!matchProblem(editor, actualProblems.get(i), expectedProblems[i])) {
-					bad = "First mismatch: "+expectedProblems[i]+"\n";
-					break;
-				}
-			}
-		}
-		if (bad!=null) {
-			fail(bad+problemSumary(editor, actualProblems));
-		}
-	}
-
-	private String problemSumary(MockEditor editor, List<SpringPropertyProblem> actualProblems) throws BadLocationException {
-		StringBuilder buf = new StringBuilder();
-		for (SpringPropertyProblem p : actualProblems) {
-			buf.append("----------------------\n");
-			String snippet = editor.getText(p.getOffset(), p.getLength());
-			buf.append("("+p.getOffset()+", "+p.getLength()+")["+snippet+"]:\n");
-			buf.append("   "+p.getMessage());
-		}
-		return buf.toString();
-	}
-
-	private boolean matchProblem(MockEditor editor, SpringPropertyProblem actual,
-			String expect) {
-		String[] parts = expect.split("\\|");
-		assertEquals(2, parts.length);
-		String badSnippet = parts[0];
-		String messageSnippet = parts[1];
-		int offset = editor.getText().indexOf(badSnippet);
-		assertTrue(offset>=0);
-		return actual.getOffset()==offset 
-				&& actual.getLength()==badSnippet.length()
-				&& actual.getMessage().contains(messageSnippet);
 	}
 
 }

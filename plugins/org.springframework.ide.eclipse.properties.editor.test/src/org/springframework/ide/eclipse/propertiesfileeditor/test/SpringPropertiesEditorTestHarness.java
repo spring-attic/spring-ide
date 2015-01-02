@@ -19,20 +19,32 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.ide.eclipse.propertiesfileeditor.DocumentContextFinder;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 
-public abstract class SpringPropertiesEditorTestHarness extends TestCase {
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
+
+	@Override
+	protected String getBundleName() {
+		return "org.springframework.ide.eclipse.properties.editor.test";
+	}
 
 	public class MockProblemCollector implements IProblemCollector {
 		
@@ -55,8 +67,6 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 
 	}
 
-
-
 	private static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 			return SpringPropertiesCompletionEngine.SORTER.compare(p1, p2);
@@ -70,7 +80,7 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 	
 	private SpringPropertiesCompletionEngine engine;
 	
-	public void data(String id, String type, Object deflt, String description) {
+	public void data(String id, String type, Object deflt, String description, String... source) {
 		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
 		item.setId(id);
 		item.setDescription(description);
@@ -84,7 +94,6 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 		super.setUp();
 		engine = new SpringPropertiesCompletionEngine();
 	}
-	
 	
 	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
 		SpringPropertiesReconcileEngine reconciler = new SpringPropertiesReconcileEngine(engine.getIndex());
@@ -271,6 +280,20 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 			editor.apply(completions[i]);
 			assertEquals(expectTextAfter[i], editor.getText());
 		}
+	}
+
+	/**
+	 * Uses the given IJavaProject as the 'context' for the editor and populates engine test-data
+	 * from this project's classpath as well.
+	 */
+	public void useProject(final IJavaProject jp) throws Exception {
+		engine = new SpringPropertiesCompletionEngine(jp);
+		engine.setDocumentContextFinder(new DocumentContextFinder() {
+			@Override
+			public IJavaProject getJavaProject(IDocument fDoc) {
+				return jp;
+			}
+		});
 	}
 
 
@@ -688,5 +711,74 @@ public abstract class SpringPropertiesEditorTestHarness extends TestCase {
 		data("spring.view.suffix", "java.lang.String", null, "Spring MVC view suffix.");
 	}
 
-	
+	/**
+	 * Check that a 'expectedProblems' are found by the reconciler. Expected problems are
+	 * specified by string of the form "${locationSnippet}|${messageSnippet}". The locationSnippet
+	 * defines the location where the error marker is expected (the first places where the
+	 * text occurs in the editor) and the message snippet must be found in the corresponding
+	 * error marker
+	 * @param editor
+	 * @param expectedProblems
+	 * @throws BadLocationException
+	 */
+	public void assertProblems(MockEditor editor, String... expectedProblems)
+			throws BadLocationException {
+				defaultTestData();
+				List<SpringPropertyProblem> actualProblems = reconcile(editor);
+				String bad = null;
+				if (actualProblems.size()!=expectedProblems.length) {
+					bad = "Wrong number of problems (expecting "+expectedProblems.length+" but found "+actualProblems.size()+")";
+				} else {
+					for (int i = 0; i < expectedProblems.length; i++) {
+						if (!matchProblem(editor, actualProblems.get(i), expectedProblems[i])) {
+							bad = "First mismatch: "+expectedProblems[i]+"\n";
+							break;
+						}
+					}
+				}
+				if (bad!=null) {
+					fail(bad+problemSumary(editor, actualProblems));
+				}
+			}
+
+	private String problemSumary(MockEditor editor, List<SpringPropertyProblem> actualProblems)
+			throws BadLocationException {
+				StringBuilder buf = new StringBuilder();
+				for (SpringPropertyProblem p : actualProblems) {
+					buf.append("----------------------\n");
+					String snippet = editor.getText(p.getOffset(), p.getLength());
+					buf.append("("+p.getOffset()+", "+p.getLength()+")["+snippet+"]:\n");
+					buf.append("   "+p.getMessage());
+				}
+				return buf.toString();
+			}
+
+	private boolean matchProblem(MockEditor editor, SpringPropertyProblem actual, String expect) {
+		String[] parts = expect.split("\\|");
+		assertEquals(2, parts.length);
+		String badSnippet = parts[0];
+		String messageSnippet = parts[1];
+		int offset = editor.getText().indexOf(badSnippet);
+		assertTrue(offset>=0);
+		return actual.getOffset()==offset 
+				&& actual.getLength()==badSnippet.length()
+				&& actual.getMessage().contains(messageSnippet);
+	}
+
+	public void assertLinkTargets(MockEditor editor, String hoverAtEndOf, String... expecteds) {
+		int pos = editor.getText().indexOf(hoverAtEndOf);
+		assertTrue("Not found in editor: '"+hoverAtEndOf+"'", pos>=0);
+		pos += hoverAtEndOf.length();
+		List<IJavaElement> targets = getLinkTargets(editor, pos);
+		assertEquals(expecteds.length, targets.size());
+		for (int i = 0; i < expecteds.length; i++) {
+			assertEquals(expecteds[i], JavaElementLabels.getElementLabel(targets.get(i), JavaElementLabels.DEFAULT_QUALIFIED));
+		}
+	}
+
+	protected List<IJavaElement> getLinkTargets(MockEditor editor, int pos) {
+		return engine.getSourceElements(editor.document, pos);
+	}
+
+
 }
