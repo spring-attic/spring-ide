@@ -48,12 +48,9 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
-import org.springframework.configurationmetadata.ConfigurationMetadataGroup;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
-import org.springframework.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
 /**
@@ -125,57 +122,35 @@ public class SpringPropertiesCompletionEngine {
 		}
 	};
 	
-	private DocumentContextFinder documentContextFinder = DocumentContextFinder.DEFAULT;
-	
-	private FuzzyMap<PropertyInfo> index = new FuzzyMap<PropertyInfo>() {
-		protected String getKey(PropertyInfo entry) {
-			return entry.getId();
-		}
-	};
-	private IInformationControlCreator informationControlCreator;
+	private DocumentContextFinder documentContextFinder = null;
+	private Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
 	
 	/** 
 	 * Create an empty completion engine. Meant for unit testing. Real clients should use the
 	 * constructor that accepts an {@link IJavaProject}. 
+	 * <p>
+	 * In a test context the test harness is responsible for injecting proper documentContextFinder
+	 * and indexProvider.
 	 */
 	public SpringPropertiesCompletionEngine() {
 	}
 	
 	/** 
-	 * Create a completion engine and poplulate it with metadata parsed from given 
-	 * {@link IJavaProject}'s classpath.
+	 * Constructor used in 'production'. Wires up stuff properly for running inside a normal 
+	 * Eclipse runtime. 
 	 */
-	public SpringPropertiesCompletionEngine(IJavaProject jp) throws Exception {
-		StsConfigMetadataRepositoryJsonLoader loader = new StsConfigMetadataRepositoryJsonLoader();
-		ConfigurationMetadataRepository metadata = loader.load(jp); //TODO: is this fast enough? Or should it be done in background?
-		
-		Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
-		for (ConfigurationMetadataProperty item : allEntries) {
-			add(new PropertyInfo(item));
-		}
-		
-		for (ConfigurationMetadataGroup group : metadata.getAllGroups().values()) {
-			for (ConfigurationMetadataSource source : group.getSources().values()) {
-				for (ConfigurationMetadataProperty prop : source.getProperties().values()) {
-					PropertyInfo info = index.get(prop.getId());
-					info.addSource(source);
-				}
+	public SpringPropertiesCompletionEngine(final IJavaProject jp) throws Exception {
+		this.indexProvider = new Provider<FuzzyMap<PropertyInfo>>() {
+			public FuzzyMap<PropertyInfo> get() {
+				return SpringPropertiesEditorPlugin.getIndexManager().get(jp);
 			}
-		}
-		
+		};
+		this.documentContextFinder = DocumentContextFinder.DEFAULT;
+
 //		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
 //		dumpAsTestData();
 //		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
 		
-	}
-
-	/**
-	 * Add a ConfigurationMetadataProperty item to the CompletionEngine. Normal clients don't really need to
-	 * call this, the data will be parsed from project's classpath. This mostly here to allow the engine to
-	 * be more easily unit tested with controlled test data.
-	 */
-	public void add(PropertyInfo item) {
-		index.add(item);
 	}
 
 	private String getPrefix(IDocument doc, int offset) throws BadLocationException {
@@ -244,7 +219,7 @@ public class SpringPropertiesCompletionEngine {
 			String propertyName = getPrefix(doc, regionStart); //note: no need to skip whitespace backwards. 
 					//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
-				PropertyInfo prop = index.get(propertyName);
+				PropertyInfo prop = getIndex().get(propertyName);
 				if (prop!=null) {
 					String[] valueCompletions = getValueCompletions(prop.getType());
 					if (valueCompletions!=null && valueCompletions.length>0) {
@@ -291,7 +266,7 @@ public class SpringPropertiesCompletionEngine {
 	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
 		String prefix= getPrefix(doc, offset);
 		if (prefix != null) {
-			Collection<Match<PropertyInfo>> matches = index.find(prefix);
+			Collection<Match<PropertyInfo>> matches = getIndex().find(prefix);
 			if (matches!=null && !matches.isEmpty()) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
 				for (Match<PropertyInfo> match : matches) {
@@ -586,7 +561,7 @@ public class SpringPropertiesCompletionEngine {
 		PropertyInfo best = null;
 		int bestCommonPrefixLen = 0; //We try to pick property with longest common prefix
 		int bestExtraLen = Integer.MAX_VALUE;
-		for (PropertyInfo candidate : index) {
+		for (PropertyInfo candidate : getIndex()) {
 			int commonPrefixLen = StringUtil.commonPrefixLength(propName, candidate.getId());
 			int extraLen = candidate.getId().length()-commonPrefixLen;
 			if (commonPrefixLen==propName.length() && extraLen==0) {
@@ -612,7 +587,7 @@ public class SpringPropertiesCompletionEngine {
 	 * pasted/used into JUNit testing code. 
 	 */
 	public void dumpAsTestData() {
-		List<Match<PropertyInfo>> allData = index.find("");
+		List<Match<PropertyInfo>> allData = getIndex().find("");
 		for (Match<PropertyInfo> match : allData) {
 			PropertyInfo d = match.data;
 			System.out.println("data("
@@ -668,7 +643,7 @@ public class SpringPropertiesCompletionEngine {
 	}
 
 	public FuzzyMap<PropertyInfo> getIndex() {
-		return index;
+		return indexProvider.get();
 	}
 
 	public static int skipWhiteSpace(IDocument doc, int pos) {
@@ -688,6 +663,10 @@ public class SpringPropertiesCompletionEngine {
 
 	public void setDocumentContextFinder(DocumentContextFinder it) {
 		this.documentContextFinder = it;
+	}
+
+	public void setIndexProvider(Provider<FuzzyMap<PropertyInfo>> it) {
+		this.indexProvider = it;
 	}
 	
 }

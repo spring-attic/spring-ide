@@ -19,5 +19,6 @@ Bundle-ClassPath: .,
  lib/json-20140107.jar
 Export-Package: org.springframework.configurationmetadata,
  org.springframework.ide.eclipse.propertiesfileeditor,
- org.springframework.ide.eclipse.propertiesfileeditor.reconciling
+ org.springframework.ide.eclipse.propertiesfileeditor.reconciling,
+ org.springframework.ide.eclipse.propertiesfileeditor.util
 Bundle-Vendor: %providerName

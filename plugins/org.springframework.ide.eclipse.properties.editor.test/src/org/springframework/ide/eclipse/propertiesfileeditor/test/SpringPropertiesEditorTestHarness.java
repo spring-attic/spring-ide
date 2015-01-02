@@ -16,12 +16,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -30,14 +29,15 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.DocumentContextFinder;
+import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
+import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
 
 public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 
@@ -79,6 +79,9 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	public static final String CURSOR = "<*>";
 	
 	private SpringPropertiesCompletionEngine engine;
+	private SpringPropertyIndex index = new SpringPropertyIndex();
+	private IJavaProject javaProject = null;
+
 	
 	public void data(String id, String type, Object deflt, String description, String... source) {
 		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
@@ -86,13 +89,23 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		item.setDescription(description);
 		item.setType(type);
 		item.setDefaultValue(deflt);
-		engine.add(new PropertyInfo(item));
+		index.add(new PropertyInfo(item));
 	}
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		engine = new SpringPropertiesCompletionEngine();
+		engine.setDocumentContextFinder(new DocumentContextFinder() {
+			public IJavaProject getJavaProject(IDocument fDoc) {
+				return javaProject;
+			}
+		});
+		engine.setIndexProvider(new Provider<FuzzyMap<PropertyInfo>>() {
+			public FuzzyMap<PropertyInfo> get() {
+				return index;
+			}
+		});
 	}
 	
 	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
@@ -287,13 +300,8 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	 * from this project's classpath as well.
 	 */
 	public void useProject(final IJavaProject jp) throws Exception {
-		engine = new SpringPropertiesCompletionEngine(jp);
-		engine.setDocumentContextFinder(new DocumentContextFinder() {
-			@Override
-			public IJavaProject getJavaProject(IDocument fDoc) {
-				return jp;
-			}
-		});
+		this.javaProject  = jp;
+		this.index = new SpringPropertyIndex(jp);
 	}
 
 
