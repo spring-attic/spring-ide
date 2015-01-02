@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.ClasspathListenerManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -66,5 +67,16 @@ public class SpringPropertiesEditorPlugin extends AbstractUIPlugin {
 	public static void warning(String msg) {
 		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, msg, null));
 	}
+	
+	private static ClasspathListenerManager classpathListeners;
+	
+	public static synchronized ClasspathListenerManager getClasspathListeners() {
+		if (classpathListeners==null) {
+			classpathListeners = new ClasspathListenerManager();
+		}
+		return classpathListeners;
+	}
+	
+
 
 }
