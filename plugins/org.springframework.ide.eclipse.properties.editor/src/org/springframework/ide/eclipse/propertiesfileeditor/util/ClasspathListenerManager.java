@@ -48,6 +48,7 @@ public class ClasspathListenerManager {
 				if (isClasspathChanged(delta.getFlags())) {
 					notifyListeners((IJavaProject)el);
 				}
+				break;
 			default:
 				break;
 			}
@@ -70,9 +71,6 @@ public class ClasspathListenerManager {
 
 	private ListenerList listeners = new ListenerList(ListenerList.IDENTITY);
 	
-	/**
-	 * This class is a singleton, use 'getInstance()'.
-	 */
 	public ClasspathListenerManager() {
 		JavaCore.addElementChangedListener(new MyListener(), ElementChangedEvent.POST_CHANGE);
 	}
