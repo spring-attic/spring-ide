@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.propertiesfileeditor.test;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.core.resources.IProject;
 
@@ -137,6 +138,15 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		assertHoverText(editor, "server.", "<b>server.port</b>");
 		assertHoverText(editor, "port.fa", "<b>server.port.fancy</b>");
+	}
+	
+	
+	public void testPredefinedProject() throws Exception {
+		IProject p = createPredefinedProject("demo");
+		IJavaProject jp = JavaCore.create(p);
+		
+		IType type = JavaCore.create(p).findType("demo.DemoApplication");
+		assertNotNull(type);
 	}
 	
 	public void testHyperlinkTargets() throws Exception {
