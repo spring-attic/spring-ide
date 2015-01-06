@@ -1,25 +1,30 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal Software Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.graph;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.SWTGraphics;
@@ -59,8 +64,11 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
+import org.eclipse.wst.xml.core.internal.validation.XMLValidationReport;
+import org.eclipse.wst.xml.core.internal.validation.eclipse.XMLValidator;
 import org.springframework.ide.eclipse.config.core.IConfigEditor;
 import org.springframework.ide.eclipse.config.core.IConfigEditorPage;
 import org.springframework.ide.eclipse.config.core.contentassist.SpringConfigContentAssistProcessor;
@@ -74,7 +82,6 @@ import org.springframework.ide.eclipse.config.graph.model.AbstractConfigGraphDia
 import org.springframework.ide.eclipse.config.graph.parts.AbstractConfigEditPartFactory;
 import org.springframework.ide.eclipse.config.graph.parts.AbstractConfigPaletteFactory;
 import org.springframework.ide.eclipse.config.graph.parts.ActivityDiagramPart;
-
 
 /**
  * @author Leo Dos Santos
@@ -104,6 +111,10 @@ public abstract class AbstractConfigGraphicalEditor extends GraphicalEditorWithP
 	private TemplateTransferDragSourceListener transferSourceListener;
 
 	private TemplateTransferDropTargetListener transferTargetListener;
+
+	protected boolean validateOnModelUpdate = false;
+
+	private final AtomicBoolean updatePosted = new AtomicBoolean(false);
 
 	public AbstractConfigGraphicalEditor() {
 		super();
@@ -258,7 +269,7 @@ public abstract class AbstractConfigGraphicalEditor extends GraphicalEditorWithP
 	public void doSaveAs() {
 		getCommandStack().markSaveLocation();
 		setInput(editor.getEditorInput());
-		modelUpdated();
+		refreshAll();
 		diagram.doSaveCoordinates();
 	}
 
@@ -388,6 +399,46 @@ public abstract class AbstractConfigGraphicalEditor extends GraphicalEditorWithP
 	}
 
 	public void modelUpdated() {
+		if (validateOnModelUpdate) {
+			if (!updatePosted.get()) {
+				updatePosted.set(true);
+				Job job = new Job("Validating XML for diagram") {
+
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						updatePosted.set(false);
+						String uri = editor.getResourceFile().getLocationURI().getPath();
+						ByteArrayInputStream is = new ByteArrayInputStream(editor.getDomDocument()
+								.getStructuredDocument().get().getBytes());
+						XMLValidationReport report = XMLValidator.getInstance().validate(uri, is);
+						if (report.isValid()) {
+							UIJob refreshUiJob = new UIJob("Refresh diagram") {
+								@Override
+								public IStatus runInUIThread(IProgressMonitor monitor) {
+									refreshAll();
+									return Status.OK_STATUS;
+								}
+							};
+							refreshUiJob.setSystem(true);
+							refreshUiJob.schedule();
+						}
+						return Status.OK_STATUS;
+					}
+
+				};
+				job.setSystem(true);
+				job.schedule();
+			}
+		}
+		else {
+			refreshAll();
+		}
+	}
+
+	/**
+	 * Refreshes the model from XML and then controller and view.
+	 */
+	protected void refreshAll() {
 		ActivityDiagramPart part = (ActivityDiagramPart) getGraphicalViewer().getContents();
 		if (part != null && part.isActive()) {
 			part.refreshAll();
