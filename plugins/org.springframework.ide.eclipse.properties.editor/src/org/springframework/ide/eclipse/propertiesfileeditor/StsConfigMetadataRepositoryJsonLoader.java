@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -19,10 +20,13 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepositoryJsonLoader;
 import org.springframework.configurationmetadata.SimpleConfigurationMetadataRepository;
@@ -57,18 +61,69 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			int ekind = e.getEntryKind();
 			int ckind = e.getContentKind();
 			IPath path = e.getPath();
-			System.out.println(ekind(ekind)+" "+ckind(ckind)+": "+path);
 			if (ekind==IClasspathEntry.CPE_LIBRARY && ckind==IPackageFragmentRoot.K_BINARY) {
 				//jar file dependency
 				File jarFile = path.toFile();
 				if (isJarFile(jarFile)) {
 					loadFromJar(jarFile);
 				}
+			} else if (ekind==IClasspathEntry.CPE_PROJECT) {
+				loadFromProjectDependency(e);
+			} else {
+				//TODO: project dependencies?
+				//TODO: source folders?
+				System.out.println("Skipped: "+ekind(ekind)+" "+ckind(ckind)+": "+path);
 			}
-			//TODO: project dependencies?
-			//TODO: source folders?
 		}
+		loadFromOutputFolder(project);
 		return repository;
+	}
+
+	private void loadFromProjectDependency(IClasspathEntry entry) {
+		try {
+			String pname = entry.getPath().segment(0);
+			if (pname!=null) {
+				IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
+				if (p.isAccessible() && p.hasNature(JavaCore.NATURE_ID)) {
+					loadFromOutputFolder(JavaCore.create(p));
+				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+	}
+
+	private void loadFromOutputFolder(IJavaProject project) {
+		try {
+			File outputFolder = ResourcesPlugin.getWorkspace().getRoot().getLocation().append(project.getOutputLocation()).toFile();
+			for (String mdLoc : META_DATA_LOCATIONS) {
+				File mdf = new File(outputFolder, mdLoc);
+				loadFromJsonFile(mdf);
+			}
+			
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+	}
+
+	private void loadFromJsonFile(File jsonFile) {
+		if (jsonFile.exists()) {
+			InputStream is = null;
+			try {
+				is = new FileInputStream(jsonFile);
+				loadFromInputStream(is);
+			} catch (Exception e) {
+				SpringPropertiesEditorPlugin.log(e);
+			} finally {
+				if (is!=null) {
+					try {
+						is.close();
+					} catch (IOException e) {
+						//ignore
+					}
+				}
+			}
+		}
 	}
 
 	private void loadFromJar(File f) {
@@ -99,8 +154,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 		InputStream is = null;
 		try {
 			is = jarFile.getInputStream(ze);
-			ConfigurationMetadataRepository extra = loader.loadAll(Collections.singleton(is));
-			repository.include(extra);
+			loadFromInputStream(is);
 		} catch (Throwable e) {
 			SpringPropertiesEditorPlugin.log(e);
 		} finally {
@@ -111,6 +165,11 @@ public class StsConfigMetadataRepositoryJsonLoader {
 				}
 			}
 		}
+	}
+
+	private void loadFromInputStream(InputStream is) throws IOException {
+		ConfigurationMetadataRepository extra = loader.loadAll(Collections.singleton(is));
+		repository.include(extra);
 	}
 
 	private boolean isJarFile(File jarFile) {
