@@ -83,6 +83,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DelegatingNamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor;
@@ -1235,16 +1236,25 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			AnnotatedBeanDefinition {
 
 		private static final long serialVersionUID = 467157320316462045L;
+		private AnnotationMetadata metadata;
+		private MethodMetadata factoryMethodMetadata;
 
-		public InternalScannedGenericBeanDefinition(AbstractBeanDefinition beanDefinition) {
+		public InternalScannedGenericBeanDefinition(ScannedGenericBeanDefinition beanDefinition) {
 			setBeanClassName(beanDefinition.getBeanClassName());
 			setSource(beanDefinition.getSource());
 			setResource(beanDefinition.getResource());
+			metadata = beanDefinition.getMetadata();
+			factoryMethodMetadata = beanDefinition.getFactoryMethodMetadata();
 		}
 
 		public AnnotationMetadata getMetadata() {
-			return null;
+			return metadata;
 		}
+
+		public MethodMetadata getFactoryMethodMetadata() {
+			return factoryMethodMetadata;
+		}
+	
 	}
 
 	/**

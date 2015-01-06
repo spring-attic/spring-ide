@@ -184,4 +184,9 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory implement
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
 		return null;
 	}
+
+	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+		return null;
+	}
+
 }

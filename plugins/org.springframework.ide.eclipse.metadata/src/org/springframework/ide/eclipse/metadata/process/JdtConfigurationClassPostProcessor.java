@@ -36,6 +36,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.DelegatingSourceExtractor;
 import org.springframework.ide.eclipse.beans.core.internal.model.ProfileAwareCompositeComponentDefinition;
@@ -269,11 +270,12 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 			this.annotationMetadata = annotationMetadata;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		public AnnotationMetadata getMetadata() {
 			return annotationMetadata;
+		}
+
+		public MethodMetadata getFactoryMethodMetadata() {
+			return null;
 		}
 
 	}
