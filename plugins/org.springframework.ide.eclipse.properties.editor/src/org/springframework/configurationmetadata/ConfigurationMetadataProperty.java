@@ -109,5 +109,10 @@ public class ConfigurationMetadataProperty {
 	public void setDeprecated(boolean deprecated) {
 		this.deprecated = deprecated;
 	}
+	
+	@Override
+	public String toString() {
+		return getId() +"::"+getType();
+	}
 
 }

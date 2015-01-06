@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 
@@ -59,12 +61,12 @@ public class GettingStartedContent extends ContentManager {
 	private Repo[] getGuidesRepos() {
 		if (cachedRepos==null) {
 			Repo[] repos = github.getOrgRepos("spring-guides");
+			Arrays.sort(repos, new Comparator<Repo>() {
+				public int compare(Repo o1, Repo o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
 			if (DEBUG) {
-				Arrays.sort(repos, new Comparator<Repo>() {
-					public int compare(Repo o1, Repo o2) {
-						return o1.getName().compareTo(o2.getName());
-					}
-				});
 //				System.out.println("==== spring-guides-repos ====");
 //				int count = 1;
 //				for (Repo r : repos) {
@@ -106,27 +108,26 @@ public class GettingStartedContent extends ContentManager {
 			}
 		);
 
-		register(TutorialGuide.class, TutorialGuide.GUIDE_DESCRIPTION_TEXT,
-			new ContentProvider<TutorialGuide>() {
-//				@Override
-				public TutorialGuide[] fetch(DownloadManager downloader) {
-					LinkedHashMap<String, TutorialGuide> guides = new LinkedHashMap<String, TutorialGuide>();
-					addGuidesFrom(getGuidesRepos(), guides, downloader);
-					return guides.values().toArray(new TutorialGuide[guides.size()]);
-				}
-
-				private LinkedHashMap<String, TutorialGuide> addGuidesFrom(Repo[] repos, LinkedHashMap<String, TutorialGuide> guides, DownloadManager downloader) {
-					for (Repo repo : repos) {
-						String name = repo.getName();
-	//					System.out.println("repo : "+name + " "+repo.getUrl());
-						if (name.startsWith("tut-") && !guides.containsKey(name)) {
-							guides.put(name, new TutorialGuide(stsProps, repo, downloader));
-						}
-					}
-					return guides;
-				}
-			}
-		);
+// Commented out: there are no more tutorial guides.
+//		register(TutorialGuide.class, TutorialGuide.GUIDE_DESCRIPTION_TEXT,
+//			new ContentProvider<TutorialGuide>() {
+//				public TutorialGuide[] fetch(DownloadManager downloader) {
+//					LinkedHashMap<String, TutorialGuide> guides = new LinkedHashMap<String, TutorialGuide>();
+//					addGuidesFrom(getGuidesRepos(), guides, downloader);
+//					return guides.values().toArray(new TutorialGuide[guides.size()]);
+//				}
+//
+//				private LinkedHashMap<String, TutorialGuide> addGuidesFrom(Repo[] repos, LinkedHashMap<String, TutorialGuide> guides, DownloadManager downloader) {
+//					for (Repo repo : repos) {
+//						String name = repo.getName();
+//						if (name.startsWith("tut-") && !guides.containsKey(name)) {
+//							guides.put(name, new TutorialGuide(stsProps, repo, downloader));
+//						}
+//					}
+//					return guides;
+//				}
+//			}
+//		);
 
 
 		//References apps: are discoverable because we maintain a list of json metadata
@@ -180,9 +181,17 @@ public class GettingStartedContent extends ContentManager {
 	 */
 	public GithubRepoContent[] getAllGuides() {
 		ArrayList<GithubRepoContent> all = new ArrayList<GithubRepoContent>();
-		all.addAll(Arrays.asList(getTutorials()));
-		all.addAll(Arrays.asList(getGSGuides()));
+		all.addAll(asList(getTutorials()));
+		all.addAll(asList(getGSGuides()));
 		return all.toArray(new GithubRepoContent[all.size()]);
+	}
+
+	private <A> Collection<A> asList(A[] tutorials) {
+		if (tutorials==null) {
+			return Collections.EMPTY_LIST;
+		} else {
+			return Arrays.asList(tutorials);
+		}
 	}
 
 //	public GettingStartedGuide getGuide(String guideName) {

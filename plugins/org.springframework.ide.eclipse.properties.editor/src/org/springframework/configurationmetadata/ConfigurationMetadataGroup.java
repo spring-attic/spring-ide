@@ -65,4 +65,9 @@ public class ConfigurationMetadataGroup {
 		return this.properties;
 	}
 
+	@Override
+	public String toString() {
+		return "ConfigurationMetadataGroup("+id+")";
+	}
+	
 }

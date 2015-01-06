@@ -12,285 +12,26 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
-import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.StyledString.Styler;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.TextStyle;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 
 public class SpringPropertiesProposalProcessor implements IContentAssistProcessor {
 		
-	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
-			"java.lang.Boolean",
-			"java.lang.String",
-			"java.lang.Short",
-			"java.lang.Integer",
-			"java.lang.Long",
-			"java.lan.Double",
-			"java.lang.Float",
-			"java.lang.Character",
-			"java.util.List"
-	));
-	
-	private static final String JAVA_LANG = "java.lang.";
-	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
-	
-	private static final Map<String, String> PRIMITIVE_TYPES = new HashMap<String, String>();
-	static {
-		PRIMITIVE_TYPES.put("java.lang.Boolean", "boolean");
-		PRIMITIVE_TYPES.put("java.lang.Integer", "int");
-		PRIMITIVE_TYPES.put("java.lang.Long", "short");
-		PRIMITIVE_TYPES.put("java.lang.Short", "int");
-		PRIMITIVE_TYPES.put("java.lang.Double", "double");
-		PRIMITIVE_TYPES.put("java.lang.Float", "float");
-	}
-
 	private static final ICompletionProposal[] NO_PROPOSALS= new ICompletionProposal[0];
 	private static final IContextInformation[] NO_CONTEXTS= new IContextInformation[0];
 	private static final char[] AUTO_ACTIVATION_CHARS = {'.'};
 
-	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
-		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			if (p1 instanceof Proposal && p2 instanceof Proposal) {
-				double s1 = ((Proposal)p1).match.score;
-				double s2 = ((Proposal)p2).match.score;
-				return Double.compare(s2, s1);
-			}
-			return 0;
-		}
-	};
-
-	public Styler JAVA_STRING_COLOR = new Styler() {
-		@Override
-		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_STRING);
-		}
-	};
-	public Styler JAVA_KEYWORD_COLOR = new Styler() {
-		@Override
-		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_KEYWORD);
-		}
-	};
-	public Styler JAVA_OPERATOR_COLOR = new Styler() {
-		@Override
-		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_OPERATOR);
-		}
-	};
-	
-
-	private final class Proposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4,
-	 ICompletionProposalExtension6
-	{
-
-		private final String fPrefix;
-		private final int fOffset;
-		private Match<ConfigurationMetadataProperty> match;
-
-		public Proposal(String prefix, int offset, Match<ConfigurationMetadataProperty> match) {
-			fPrefix= prefix;
-			fOffset= offset;
-			this.match = match;
-		}
-
-		public void apply(IDocument document) {
-			apply(null, '\0', 0, fOffset);
-		}
-
-		public Point getSelection(IDocument document) {
-			return new Point(fOffset - fPrefix.length() + getCompletion().length(), 0);
-		}
-
-		private String formatDefaultValue(Object defaultValue) {
-			if (defaultValue!=null) {
-				if (defaultValue instanceof String) {
-					return (String) defaultValue;
-				} else if (defaultValue instanceof Number) {
-					return ((Number)defaultValue).toString();
-				} else if (defaultValue instanceof Boolean) {
-					return Boolean.toString((Boolean) defaultValue);
-				} else {
-					//no idea what it is so ignore
-				}
-			}
-			return null;
-		}
-
-		public String getAdditionalProposalInfo() {
-			System.out.println("getAdditionalProposalInfo("+match.data.getId()+") =>"+match.data.getDescription());
-			return match.data.getDescription();
-		}
-
-		public String getDisplayString() {
-			return this.match.data.getId();
-		}
-
-		public Image getImage() {
-			return null;
-		}
-
-		public IContextInformation getContextInformation() {
-			return null;
-		}
-
-		public void apply(IDocument document, char trigger, int offset) {
-			try {
-				String replacement= getCompletion();
-				int start = this.fOffset-fPrefix.length();
-				document.replace(start, offset-start, replacement);
-			} catch (BadLocationException x) {
-				// TODO Auto-generated catch block
-				x.printStackTrace();
-			}
-		}
-
-		public boolean isValidFor(IDocument document, int offset) {
-			return validate(document, offset, null);
-		}
-
-		public char[] getTriggerCharacters() {
-			return null;
-		}
-
-		public int getContextInformationPosition() {
-			return 0;
-		}
-
-		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-			apply(viewer.getDocument(), trigger, offset);
-		}
-
-		public void selected(ITextViewer viewer, boolean smartToggle) {
-		}
-
-		public void unselected(ITextViewer viewer) {
-		}
-
-		public boolean validate(IDocument document, int offset, DocumentEvent event) {
-			try {
-				int prefixStart= fOffset - fPrefix.length();
-				String newPrefix = document.get(prefixStart, offset-prefixStart);
-				double newScore = FuzzyMap.match(newPrefix, match.data.getId());
-				if (newScore!=0.0) {
-					match.score = newScore; //Score might change, but I don't think Eclipse CA will re-sort results after incremental.
-					return true;
-				}
-			} catch (BadLocationException x) {
-			}
-			return false;
-		}
-
-		public IInformationControlCreator getInformationControlCreator() {
-			return null;
-		}
-
-		public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-			return match.data.getId();
-		}
-
-		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
-			return fOffset - fPrefix.length();
-		}
-
-		public boolean isAutoInsertable() {
-			return true;
-		}
-
-		private String getCompletion() {
-			StringBuilder completion = new StringBuilder(match.data.getId());
-			String defaultValue = formatDefaultValue(match.data.getDefaultValue());
-			if (defaultValue!=null) {
-				completion.append("=");
-				completion.append(defaultValue);
-			} else {
-				String type = match.data.getType();
-				if (ASSIGNABLE_TYPES.contains(type)) {
-					completion.append("=");
-				} else {
-					//assume some kind of 'Object' type
-					completion.append(".");
-				}
-			}
-			return completion.toString();
-		}
-		
-		@Override
-		public StyledString getStyledDisplayString() {
-			StyledString result = new StyledString();
-			result.append(match.data.getId());
-			String defaultValue = formatDefaultValue(match.data.getDefaultValue());
-			if (defaultValue!=null) {
-				result.append("=", JAVA_OPERATOR_COLOR);
-				result.append(defaultValue, JAVA_STRING_COLOR);
-			}
-			String type = formatJavaType(match.data.getType());
-			if (type!=null) {
-				result.append(" : ");
-				result.append(type, JAVA_KEYWORD_COLOR);
-			}
-			String description = match.data.getDescription();
-			if (description!=null && !"".equals(description.trim())) {
-				result.append(" ");
-				result.append(description.trim(), StyledString.DECORATIONS_STYLER);
-			}
-			return result;
-		}
-		
-		private String formatJavaType(String type) {
-			if (type!=null) {
-				String primitive = PRIMITIVE_TYPES.get(type);
-				if (primitive!=null) {
-					return primitive;
-				} 
-				if (type.startsWith(JAVA_LANG)) {
-					return type.substring(JAVA_LANG_LEN);
-				}
-				return type;
-			}
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			return "<"+fPrefix+">"+match.data.getId();
-		}
-
-	}
 
 	private final SpringPropertiesCompletionEngine fEngine;
 
-	public SpringPropertiesProposalProcessor(IJavaProject jp) throws Exception {
-		this.fEngine = new SpringPropertiesCompletionEngine(jp);
+	public SpringPropertiesProposalProcessor(SpringPropertiesCompletionEngine engine) throws Exception {
+		this.fEngine = engine;
 	}
 
 	/*
@@ -298,39 +39,18 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		try {
-			String prefix= getPrefix(viewer, offset);
-			if (prefix == null/* || prefix.length() == 0*/)
+			Collection<ICompletionProposal> proposals = fEngine.getCompletions(viewer.getDocument(), offset);
+			if (proposals==null || proposals.isEmpty()) {
 				return NO_PROPOSALS;
-
-			Collection<Match<ConfigurationMetadataProperty>> suggestions = fEngine.getCompletions(viewer.getDocument(), prefix, offset);
-
-			List<ICompletionProposal> result= new ArrayList<ICompletionProposal>();
-			for (Match<ConfigurationMetadataProperty> match : suggestions) {
-				result.add(new Proposal(prefix, offset, match));
+			} else {
+				return proposals.toArray(new ICompletionProposal[proposals.size()]);
 			}
-			return (ICompletionProposal[]) result.toArray(new ICompletionProposal[result.size()]);
-
 		} catch (BadLocationException x) {
 			// ignore and return no proposals
 			return NO_PROPOSALS;
 		}
 	}
 
-	private String getPrefix(ITextViewer viewer, int offset) throws BadLocationException {
-		IDocument doc= viewer.getDocument();
-		if (doc == null || offset > doc.getLength())
-			return null;
-
-		int length= 0;
-		while (--offset >= 0 && isPrefixChar(doc.getChar(offset)))
-			length++;
-
-		return doc.get(offset + 1, length);
-	}
-
-	private boolean isPrefixChar(char c) {
-		return c=='.' || Character.isJavaIdentifierPart(c);
-	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
@@ -367,4 +87,5 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 	public String getErrorMessage() {
 		return null; // no custom error message
 	}
+
 }
