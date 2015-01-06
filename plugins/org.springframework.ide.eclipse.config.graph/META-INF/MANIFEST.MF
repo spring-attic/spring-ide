@@ -5,7 +5,8 @@ Bundle-SymbolicName: org.springframework.ide.eclipse.config.graph;singleton:=tru
 Bundle-Version: 3.6.4.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.config.graph.ConfigGraphPlugin
 Bundle-Vendor: %providerName
-Require-Bundle: org.eclipse.ui,
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.forms,
  org.eclipse.ui.views,
