@@ -11,12 +11,17 @@
 package org.springframework.ide.eclipse.propertiesfileeditor.test;
 
 import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.JavaProjectUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.springframework.ide.eclipse.propertiesfileeditor.StsConfigMetadataRepositoryJsonLoader;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
 	
@@ -148,9 +153,22 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertNotNull(type);
 	}
 	
-	public void testEnableApt() throws Exception {
+	public void testEnableApt() throws Throwable {
 		IProject p = createPredefinedProject("demo-live-metadata");
-		AptUtils.enableApt(JavaCore.create(p));
+		IJavaProject jp = JavaCore.create(p);
+		
+		//Check some assumptions about the initial state of the test project (if these checks fail then
+		// the test may be 'vacuous' since the things we are testing for already exist beforehand.
+		assertFalse(AptUtils.isAptEnabled(jp));
+		IFile metadataFile = JavaProjectUtil.getOutputFile(jp, StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS[0]);
+		assertFalse(metadataFile.exists());
+
+		AptUtils.enableApt(jp);
+		StsTestUtil.buildProject(jp);
+		
+		assertTrue(AptUtils.isAptEnabled(jp));
+		assertTrue(metadataFile.exists()); //apt should create the json metadata file during project build.
+		assertContains("\"name\": \"foo.counter\"", getContents(metadataFile));
 	}
 	
 	public void testHyperlinkTargets() throws Exception {

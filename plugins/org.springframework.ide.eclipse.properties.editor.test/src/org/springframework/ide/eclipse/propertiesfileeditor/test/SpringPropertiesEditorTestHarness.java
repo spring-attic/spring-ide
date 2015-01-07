@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -38,6 +42,7 @@ import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPr
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 
@@ -788,5 +793,20 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		return engine.getSourceElements(editor.document, pos);
 	}
 
+	public static String getContents(IFile file) throws Exception {
+		InputStream in = file.getContents();
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			IOUtil.pipe(in, out);
+			String encoding = file.getCharset();
+			try {
+				return out.toString(encoding);
+			} catch (UnsupportedEncodingException e) {
+				return out.toString("utf8");
+			}
+		} finally {
+			in.close();
+		}
+	}
 
 }

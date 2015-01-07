@@ -15,6 +15,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
@@ -44,6 +49,24 @@ public class JavaProjectUtil {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Get IFile handle relative to project's default output folder.
+	 */
+	public static IFile getOutputFile(IJavaProject jp, String relativePath) {
+		return getOutputFile(jp, new Path(relativePath));
+	}
+
+	public static IFile getOutputFile(IJavaProject jp, IPath relativePath) {
+		try {
+			IPath loc = jp.getOutputLocation().append(relativePath);
+			String pname = loc.segment(0);
+			return ResourcesPlugin.getWorkspace().getRoot().getProject(pname).getFile(loc.removeFirstSegments(1));
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return null;
 	}
 
 }

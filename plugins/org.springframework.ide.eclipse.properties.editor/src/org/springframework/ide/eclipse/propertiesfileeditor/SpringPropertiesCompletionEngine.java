@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -57,6 +58,17 @@ import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
  * @author Kris De Volder
  */
 public class SpringPropertiesCompletionEngine {
+	
+	//private static final boolean DEBUG = false;
+	private static final boolean DEBUG = 
+			(""+Platform.getLocation()).contains("kdvolder") ||
+			(""+Platform.getLocation()).contains("bamboo");
+	
+	public static void debug(String msg) {
+		if (DEBUG) {
+			System.out.println("SpringPropertiesCompletionEngine: "+msg);
+		}
+	}
 	
 	public Styler JAVA_STRING_COLOR = new Styler() {
 		@Override
@@ -537,9 +549,12 @@ public class SpringPropertiesCompletionEngine {
 	}
 	
 	public List<IJavaElement> getSourceElements(IDocument doc, int offset) {
+		debug("getSourceElements");
 		SpringPropertyHoverInfo hoverinfo = getHoverInfo(doc, offset, IDocument.DEFAULT_CONTENT_TYPE);
 		if (hoverinfo!=null) {
 			return hoverinfo.getJavaElements();
+		} else {
+			debug("hoverInfo = null");
 		}
 		return Collections.emptyList();
 	}

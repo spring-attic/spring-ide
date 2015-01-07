@@ -127,7 +127,9 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 	public List<IJavaElement> getJavaElements() {
 		try {
 			if (javaProject!=null) {
+				SpringPropertiesCompletionEngine.debug("javaProject = "+javaProject.getElementName());
 				List<PropertySource> sources = data.getSources();
+				SpringPropertiesCompletionEngine.debug("propertySources = "+sources);
 				if (!sources.isEmpty()) {
 					ArrayList<IJavaElement> elements = new ArrayList<IJavaElement>();
 					for (PropertySource source : sources) {
@@ -150,6 +152,8 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 					}
 					return elements;
 				}
+			} else {
+				SpringPropertiesCompletionEngine.debug("javaProject = null");
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);

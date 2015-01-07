@@ -54,6 +54,11 @@ public class AptUtils {
 		}
 	}
 
+	public static boolean isAptEnabled(IJavaProject jp) {
+		return AptConfig.isEnabled(jp);
+	}
+
+	
 	/**
 	 * Attempt to use a classpath variable to make given absolutePath relative (this
 	 * is nicer for users because the paths end up getting stored in project settings in
