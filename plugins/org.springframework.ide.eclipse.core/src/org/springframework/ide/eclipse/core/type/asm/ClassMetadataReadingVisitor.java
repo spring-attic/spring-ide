@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 Spring IDE Developers
+ * Copyright (c) 2007, 2014 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,8 @@ public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMe
 
 	private boolean isInterface;
 
+	private boolean isAnnotation;
+
 	private boolean isAbstract;
 
 	private boolean isFinal;
@@ -62,6 +64,7 @@ public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMe
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
+		this.isAnnotation = ((access & Opcodes.ACC_ANNOTATION) != 0);
 		this.isAbstract = ((access & Opcodes.ACC_ABSTRACT) != 0);
 		this.isFinal = ((access & Opcodes.ACC_FINAL) != 0);
 		if (supername != null) {
@@ -125,6 +128,10 @@ public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMe
 
 	public boolean isInterface() {
 		return this.isInterface;
+	}
+
+	public boolean isAnnotation() {
+		return this.isAnnotation;
 	}
 
 	public boolean isAbstract() {

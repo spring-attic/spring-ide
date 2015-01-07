@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Spring IDE Developers
+ * Copyright (c) 2012, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,13 +246,13 @@ public class JdtAnnotationMetadataTest {
 
 		Map<String, Object> importResourceAttributesAsStrings = annotationMetadata.getAnnotationAttributes(ImportResource.class.getName(), true);
 		assertEquals(2, importResourceAttributesAsStrings.size());
-		assertEquals("org.springframework.beans.factory.xml.XmlBeanDefinitionReader", importResourceAttributesAsStrings.get("reader"));
+		assertEquals("org.springframework.beans.factory.support.BeanDefinitionReader", importResourceAttributesAsStrings.get("reader"));
 		assertEquals("classpath:/com/acme/database-config.xml", ((String[])importResourceAttributesAsStrings.get("value"))[0]);
 		
 		Map<String, Object> importResourceAttributesAsObjects = annotationMetadata.getAnnotationAttributes(ImportResource.class.getName(), false);
 		assertEquals(2, importResourceAttributesAsObjects.size());
 		assertTrue(importResourceAttributesAsObjects.get("reader") instanceof Class);
-		assertEquals("org.springframework.beans.factory.xml.XmlBeanDefinitionReader", ((Class<?>)importResourceAttributesAsObjects.get("reader")).getName());
+		assertEquals("org.springframework.beans.factory.support.BeanDefinitionReader", ((Class<?>)importResourceAttributesAsObjects.get("reader")).getName());
 		assertEquals("classpath:/com/acme/database-config.xml", ((String[])importResourceAttributesAsObjects.get("value"))[0]);
 
 		Map<String, Object> importAttributesAsStrings = annotationMetadata.getAnnotationAttributes(Import.class.getName(), true);
@@ -431,7 +431,7 @@ public class JdtAnnotationMetadataTest {
 		assertEquals(ComponentScan.class.getName(), types.iterator().next());
 		
 		Map<String, Object> attributes = annotationMetadata.getAnnotationAttributes(ComponentScan.class.getName());
-		assertEquals(10, attributes.size());
+		assertEquals(11, attributes.size());
 		
 		assertTrue(attributes.get("value") instanceof String[]);
 		assertEquals(0, ((String[])attributes.get("value")).length);
@@ -454,6 +454,7 @@ public class JdtAnnotationMetadataTest {
 		
 		assertEquals(BeanNameGenerator.class, attributes.get("nameGenerator"));
 		assertEquals("**/*.class", attributes.get("resourcePattern"));
+		assertEquals(Boolean.FALSE, attributes.get("lazyInit"));
 	}
 
 	@Test
