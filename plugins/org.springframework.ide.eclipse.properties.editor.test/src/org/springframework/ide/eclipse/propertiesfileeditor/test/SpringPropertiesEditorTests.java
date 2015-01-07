@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.test;
 
+import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -143,10 +144,13 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	
 	public void testPredefinedProject() throws Exception {
 		IProject p = createPredefinedProject("demo");
-		IJavaProject jp = JavaCore.create(p);
-		
 		IType type = JavaCore.create(p).findType("demo.DemoApplication");
 		assertNotNull(type);
+	}
+	
+	public void testEnableApt() throws Exception {
+		IProject p = createPredefinedProject("demo-live-metadata");
+		AptUtils.enableApt(JavaCore.create(p));
 	}
 	
 	public void testHyperlinkTargets() throws Exception {

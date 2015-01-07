@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepositoryJsonLoader;
 import org.springframework.configurationmetadata.SimpleConfigurationMetadataRepository;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.FileUtil;
 
 /**
  * Load a {@link ConfigMetadataRepository} from the content of an eclipse
@@ -64,7 +65,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			if (ekind==IClasspathEntry.CPE_LIBRARY && ckind==IPackageFragmentRoot.K_BINARY) {
 				//jar file dependency
 				File jarFile = path.toFile();
-				if (isJarFile(jarFile)) {
+				if (FileUtil.isJarFile(jarFile)) {
 					loadFromJar(jarFile);
 				}
 			} else if (ekind==IClasspathEntry.CPE_PROJECT) {
@@ -172,16 +173,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 		repository.include(extra);
 	}
 
-	private boolean isJarFile(File jarFile) {
-		try {
-			return jarFile!=null && jarFile.isFile() && jarFile.toString().toLowerCase().endsWith(".jar");
-		} catch (Throwable e) {
-			SpringPropertiesEditorPlugin.log(e);
-			return false;
-		}
-	}
-
-/// Debug utils
+	/// Debug utils
 	private String ckind(int ckind) {
 		switch (ckind) {
 		case IPackageFragmentRoot.K_SOURCE:

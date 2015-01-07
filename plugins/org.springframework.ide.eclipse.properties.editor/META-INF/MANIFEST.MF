@@ -12,13 +12,21 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.jface.text,
  org.eclipse.jdt.core,
- org.eclipse.ui.workbench.texteditor
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.jdt.apt.core,
+ org.eclipse.jdt.launching,
+ org.eclipse.debug.core,
+ org.springframework.ide.eclipse.maven;resolution:=optional,
+ org.eclipse.m2e.core;resolution:=optional,
+ org.eclipse.m2e.maven.runtime;resolution:=optional,
+ org.eclipse.m2e.jdt;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/json-20140107.jar
 Export-Package: org.springframework.configurationmetadata,
  org.springframework.ide.eclipse.propertiesfileeditor,
+ org.springframework.ide.eclipse.propertiesfileeditor.maven,
  org.springframework.ide.eclipse.propertiesfileeditor.reconciling,
  org.springframework.ide.eclipse.propertiesfileeditor.util
 Bundle-Vendor: %providerName
