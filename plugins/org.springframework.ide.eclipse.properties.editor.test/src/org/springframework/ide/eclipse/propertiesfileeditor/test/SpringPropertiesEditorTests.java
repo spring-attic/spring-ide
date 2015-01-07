@@ -172,6 +172,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 	
 	public void testHyperlinkTargets() throws Exception {
+		System.out.println(">>> testHyperlinkTargets");
 		IProject p = createPredefinedProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
@@ -189,7 +190,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.tomcatDataSource()",
 				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.dbcpDataSource()"
 		);
-		
+		System.out.println("<<< testHyperlinkTargets");
 	}
 
 	public void testReconcile() throws Exception {
