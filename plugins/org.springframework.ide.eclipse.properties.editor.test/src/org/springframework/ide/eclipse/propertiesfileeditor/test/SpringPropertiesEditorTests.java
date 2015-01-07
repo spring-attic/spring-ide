@@ -160,7 +160,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertFalse(metadataFile.exists());
 
 		AptUtils.enableApt(jp);
-		StsTestUtil.buildProject(jp);
+		buildProject(jp);
 		
 		assertTrue(AptUtils.isAptEnabled(jp));
 		assertTrue(metadataFile.exists()); //apt should create the json metadata file during project build.

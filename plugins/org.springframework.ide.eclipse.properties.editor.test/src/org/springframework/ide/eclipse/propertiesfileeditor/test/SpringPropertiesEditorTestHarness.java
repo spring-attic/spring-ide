@@ -45,7 +45,9 @@ import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPr
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 
@@ -85,7 +87,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	public static final String BOOLEAN = Boolean.class.getName();
 	public static final String STRING = String.class.getName();
 	public static final String CURSOR = "<*>";
-	
+
 	protected SpringPropertiesCompletionEngine engine;
 	private SpringPropertyIndex index = new SpringPropertyIndex();
 	private IJavaProject javaProject = null;
@@ -838,6 +840,18 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		} finally {
 			in.close();
 		}
+	}
+
+	public static void buildProject(final IJavaProject jp) throws Exception {
+		StsTestUtil.buildProject(jp);
+// This doesn't seem needed anymore
+//		new ACondition("Project build without errors: "+jp.getElementName()) {
+//			@Override
+//			public boolean test() throws Exception {
+//				StsTestUtil.buildProject(jp);
+//				return true;
+//			}
+//		}.waitFor(PROJECT_BUILD_TIMEOUT);
 	}
 
 }

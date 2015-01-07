@@ -16,15 +16,21 @@
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-surefire-plugin</artifactId>
+				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<forkedProcessTimeoutInSeconds>1200</forkedProcessTimeoutInSeconds>
-					<includes>
-						<include>**/All*Tests.java</include>
-					</includes>
 					<dependency-resolution>
 						<extraRequirements>
+							<requirement>
+								<type>eclipse-feature</type>
+								<id>org.springframework.ide.eclipse.feature</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-feature</type>
+								<id>org.springframework.ide.eclipse.maven.feature</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
 							<requirement>
 								<type>eclipse-feature</type>
 								<id>org.eclipse.m2e.feature</id>
@@ -32,6 +38,18 @@
 							</requirement>
 						</extraRequirements>
 					</dependency-resolution>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<forkedProcessTimeoutInSeconds>1200</forkedProcessTimeoutInSeconds>
+					<includes>
+						<include>**/All*Tests.java</include>
+					</includes>
 				</configuration>
 			</plugin>
 		</plugins>
