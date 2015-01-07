@@ -10,24 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.test;
 
-import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.JavaProjectUtil;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.propertiesfileeditor.StsConfigMetadataRepositoryJsonLoader;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.JavaProjectUtil;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
 	
 	//TODO: List type is assignable (but paramteric),
 	//  - handle this in reconciling?
-	//testValueCompletion -> create a version with some extra text around the one liner
 	
 	public void testServerPortCompletion() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");

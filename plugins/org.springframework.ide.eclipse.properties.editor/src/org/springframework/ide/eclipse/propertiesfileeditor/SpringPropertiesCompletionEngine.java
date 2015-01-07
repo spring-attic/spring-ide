@@ -534,9 +534,11 @@ public class SpringPropertiesCompletionEngine {
 	}
 
 	public SpringPropertyHoverInfo getHoverInfo(IDocument doc, int offset, String contentType) {
+		debug("getHoverInfo("+offset+", "+contentType+")");
 		try {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				ITypedRegion r = getHoverRegion(doc, offset);
+				debug("hoverRegion = "+r);
 				PropertyInfo best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()).trim());
 				if (best!=null) {
 					return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(doc), best);
@@ -572,6 +574,8 @@ public class SpringPropertiesCompletionEngine {
 	 * Search known properties for the best 'match' to show as hover data.
 	 */
 	private PropertyInfo findBestHoverMatch(String propName) {
+		debug(">> findBestHoverMatch("+propName+")");
+		debug("index size: "+getIndex().size());
 		//TODO: optimize, should be able to use index's treemap to find this without iterating all entries.
 		PropertyInfo best = null;
 		int bestCommonPrefixLen = 0; //We try to pick property with longest common prefix
@@ -592,6 +596,7 @@ public class SpringPropertiesCompletionEngine {
 				best = candidate;
 			}
 		}
+		debug("<< findBestHoverMatch("+propName+"): "+best);
 		return best;
 	}
 

@@ -122,13 +122,14 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 	}
 	
 	/**
-	 * Get IJavaElements that define this property.
+	 * Like 'getSources' but converts raw info into IJavaElements. Raw data which fails to be converted
+	 * is silenetly ignored.
 	 */
 	public List<IJavaElement> getJavaElements() {
 		try {
 			if (javaProject!=null) {
 				SpringPropertiesCompletionEngine.debug("javaProject = "+javaProject.getElementName());
-				List<PropertySource> sources = data.getSources();
+				List<PropertySource> sources = getSources();
 				SpringPropertiesCompletionEngine.debug("propertySources = "+sources);
 				if (!sources.isEmpty()) {
 					ArrayList<IJavaElement> elements = new ArrayList<IJavaElement>();
@@ -159,6 +160,13 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Get 'raw' info about sources that define this property.
+	 */
+	public List<PropertySource> getSources() {
+		return data.getSources();
 	}
 
 	private IMethod getMethod(IType type, String methodSig) throws JavaModelException {
@@ -194,6 +202,5 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 	}
-	
 
 }

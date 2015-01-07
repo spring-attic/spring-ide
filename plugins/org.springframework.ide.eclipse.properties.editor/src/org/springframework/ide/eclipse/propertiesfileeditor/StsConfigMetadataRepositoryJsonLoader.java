@@ -32,6 +32,8 @@ import org.springframework.configurationmetadata.ConfigurationMetadataRepository
 import org.springframework.configurationmetadata.SimpleConfigurationMetadataRepository;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.FileUtil;
 
+import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.debug;
+
 /**
  * Load a {@link ConfigMetadataRepository} from the content of an eclipse
  * projects classpath.
@@ -57,6 +59,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 	 * loaded is kept which means the result is not deterministic.
 	 */
 	public ConfigurationMetadataRepository load(IJavaProject project) throws Exception {
+		debug(">> load ConfigurationMetadataRepository for "+project.getElementName());
 		IClasspathEntry[] classpath = project.getResolvedClasspath(true);
 		for (IClasspathEntry e : classpath) {
 			int ekind = e.getEntryKind();
@@ -73,10 +76,11 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			} else {
 				//TODO: project dependencies?
 				//TODO: source folders?
-				System.out.println("Skipped: "+ekind(ekind)+" "+ckind(ckind)+": "+path);
+				debug("Skipped: "+ekind(ekind)+" "+ckind(ckind)+": "+path);
 			}
 		}
 		loadFromOutputFolder(project);
+		debug("<< load ConfigurationMetadataRepository for "+project.getElementName()+": "+repository.getAllProperties().size()+" properties");
 		return repository;
 	}
 
@@ -128,6 +132,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 	}
 
 	private void loadFromJar(File f) {
+		debug("load from jar: "+f);
 		JarFile jarFile = null;
 		try {
 			jarFile = new JarFile(f);

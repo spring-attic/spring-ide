@@ -16,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -36,7 +37,9 @@ import org.springframework.ide.eclipse.propertiesfileeditor.DocumentContextFinde
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
+import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertyIndex;
+import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
@@ -83,7 +86,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	public static final String STRING = String.class.getName();
 	public static final String CURSOR = "<*>";
 	
-	private SpringPropertiesCompletionEngine engine;
+	protected SpringPropertiesCompletionEngine engine;
 	private SpringPropertyIndex index = new SpringPropertyIndex();
 	private IJavaProject javaProject = null;
 
@@ -129,6 +132,10 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		private int selectionStart;
 		private int selectionEnd;
 		private Document document;
+
+		public Document getDocument() {
+			return document;
+		}
 
 		/**
 		 * Create mock editor. Selection position is initialized by looking for the CURSOR string.
@@ -782,11 +789,35 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		int pos = editor.getText().indexOf(hoverAtEndOf);
 		assertTrue("Not found in editor: '"+hoverAtEndOf+"'", pos>=0);
 		pos += hoverAtEndOf.length();
+		
+		List<PropertySource> rawTargets = getRawLinkTargets(editor, pos);
+		assertEquals(expecteds.length, rawTargets.size());
+		for (int i = 0; i < expecteds.length; i++) {
+			assertEquals(expecteds[i], label(rawTargets.get(i)));
+		}
+		
 		List<IJavaElement> targets = getLinkTargets(editor, pos);
 		assertEquals(expecteds.length, targets.size());
 		for (int i = 0; i < expecteds.length; i++) {
 			assertEquals(expecteds[i], JavaElementLabels.getElementLabel(targets.get(i), JavaElementLabels.DEFAULT_QUALIFIED));
 		}
+	}
+
+	private String label(PropertySource propertySource) {
+		if (propertySource.getSourceMethod()==null) {
+			return propertySource.getSourceType();
+		} else {
+			return propertySource.getSourceType()+"."+propertySource.getSourceMethod();
+		}
+	}
+
+	private List<PropertySource> getRawLinkTargets(MockEditor editor, int pos) {
+		SpringPropertyHoverInfo hover = engine.getHoverInfo(editor.document, pos, IDocument.DEFAULT_CONTENT_TYPE);
+		if (hover!=null) {
+			return hover.getSources();
+		}
+		
+		return Collections.emptyList();
 	}
 
 	protected List<IJavaElement> getLinkTargets(MockEditor editor, int pos) {
