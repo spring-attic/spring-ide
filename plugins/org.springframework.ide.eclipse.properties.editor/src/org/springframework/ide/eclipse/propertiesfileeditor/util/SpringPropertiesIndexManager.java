@@ -13,11 +13,23 @@ package org.springframework.ide.eclipse.propertiesfileeditor.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertyIndex;
+import org.springframework.ide.eclipse.propertiesfileeditor.StsConfigMetadataRepositoryJsonLoader;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.ClasspathListenerManager.ClasspathListener;
 
 /**
@@ -30,10 +42,16 @@ import org.springframework.ide.eclipse.propertiesfileeditor.util.ClasspathListen
  */
 public class SpringPropertiesIndexManager implements ClasspathListener {
 	
+	//TODO: More precise cache flushing?
+	// right now, any detected change that may affect the cached metadata results.
+	// in clearing the entire cache.
+	// Probably this is okay, since reading the data is pretty fast.
+	
 	private Map<String, FuzzyMap<PropertyInfo>> indexes = null;
 	
 	public SpringPropertiesIndexManager() {
 		SpringPropertiesEditorPlugin.getClasspathListeners().add(this);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(new LiveMetadataListener(), IResourceChangeEvent.POST_CHANGE);
 	}
 
 	public synchronized FuzzyMap<PropertyInfo> get(IJavaProject jp) {
@@ -51,7 +69,75 @@ public class SpringPropertiesIndexManager implements ClasspathListener {
 	
 	@Override
 	public synchronized void classpathChanged(IJavaProject jp) {
-		indexes.remove(jp.getElementName());
+		indexes.clear();
 	}
+	
 
+	/**
+	 * Called by LiveMetadataListener when a change to live json metadata file in the
+	 * output folder of a IJavaProject is detected.
+	 * 
+	 * @param The project on which the metadata change was detected.
+	 * @param jsonFile The IFile in project's output folder that was changed.
+	 */
+	public synchronized void liveMetadataChanged(IJavaProject jp, IFile jsonFile) {
+		indexes.clear();
+	}
+	
+	private class LiveMetadataListener implements IResourceChangeListener, IResourceDeltaVisitor {
+
+		@Override
+		public void resourceChanged(IResourceChangeEvent event) {
+			try {
+				event.getDelta().accept(this);
+			} catch (Exception e) {
+				SpringPropertiesEditorPlugin.log(e);
+			}
+		}
+
+		public boolean visit(IResourceDelta delta) throws CoreException {
+			IResource r = delta.getResource();
+			int t = r.getType();
+			System.out.println("Changed: "+r);
+			switch (t) {
+			case IResource.PROJECT:
+				IProject p = (IProject)r;
+				if (p.isAccessible() && p.hasNature(JavaCore.NATURE_ID)) {
+					IJavaProject jp = JavaCore.create(p);
+					IPath outputPath = jp.getOutputLocation().removeFirstSegments(1); //output path without project name.
+					for (String metaLoc : StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS) {
+						IResourceDelta metaDelta = delta.findMember(outputPath.append(metaLoc));
+						IFile jsonFile = getFile(metaDelta);
+						if (jsonFile!=null) {
+							//interesting change found.
+							liveMetadataChanged(jp, jsonFile);
+						}
+					}
+				} else {
+					//TODO: not accessible (closed or deleted?)
+					//  Do we need to do something with these?
+				}
+				return false;
+			default:
+				break;
+			}
+			return true;
+		}
+
+		/**
+		 * @return IFile if this delta's resource is a file or null otherwise.
+		 */
+		private IFile getFile(IResourceDelta delta) {
+			if (delta!=null) {
+				IResource r = delta.getResource();
+				if (r!=null) {
+					int t = r.getType();
+					if ((t|IResource.FILE)!=0) {
+						return (IFile)r;
+					}
+				}
+			}
+			return null;
+		}
+	}
 }
