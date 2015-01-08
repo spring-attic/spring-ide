@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.propertiesfileeditor.StsConfigMetadataRepositoryJsonLoader;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.ClasspathListenerManager.ClasspathListener;
 
 /**
  * Support for Reconciling, Content Assist and Hover Text in spring properties
@@ -40,7 +39,7 @@ import org.springframework.ide.eclipse.propertiesfileeditor.util.ClasspathListen
  *  
  * @author Kris De Volder
  */
-public class SpringPropertiesIndexManager implements ClasspathListener {
+public class SpringPropertiesIndexManager extends ListenerManager<Listener<SpringPropertiesIndexManager>> implements ClasspathListener {
 	
 	//TODO: More precise cache flushing?
 	// right now, any detected change that may affect the cached metadata results.
@@ -50,7 +49,7 @@ public class SpringPropertiesIndexManager implements ClasspathListener {
 	private Map<String, FuzzyMap<PropertyInfo>> indexes = null;
 	
 	public SpringPropertiesIndexManager() {
-		SpringPropertiesEditorPlugin.getClasspathListeners().add(this);
+		SpringPropertiesEditorPlugin.getClasspathListeners().addListener(this);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(new LiveMetadataListener(), IResourceChangeEvent.POST_CHANGE);
 	}
 
@@ -69,7 +68,14 @@ public class SpringPropertiesIndexManager implements ClasspathListener {
 	
 	@Override
 	public synchronized void classpathChanged(IJavaProject jp) {
+		clear();
+	}
+
+	private void clear() {
 		indexes.clear();
+		for (Listener<SpringPropertiesIndexManager> l : getListeners()) {
+			l.changed(this);
+		}
 	}
 	
 
@@ -81,7 +87,7 @@ public class SpringPropertiesIndexManager implements ClasspathListener {
 	 * @param jsonFile The IFile in project's output folder that was changed.
 	 */
 	public synchronized void liveMetadataChanged(IJavaProject jp, IFile jsonFile) {
-		indexes.clear();
+		clear();
 	}
 	
 	private class LiveMetadataListener implements IResourceChangeListener, IResourceDeltaVisitor {
@@ -140,4 +146,5 @@ public class SpringPropertiesIndexManager implements ClasspathListener {
 			return null;
 		}
 	}
+
 }

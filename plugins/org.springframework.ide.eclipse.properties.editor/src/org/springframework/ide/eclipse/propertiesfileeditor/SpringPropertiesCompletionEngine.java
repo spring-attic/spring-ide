@@ -665,6 +665,10 @@ public class SpringPropertiesCompletionEngine {
 	public FuzzyMap<PropertyInfo> getIndex() {
 		return indexProvider.get();
 	}
+	
+	public Provider<FuzzyMap<PropertyInfo>> getIndexProvider() {
+		return indexProvider;
+	}
 
 	public static int skipWhiteSpace(IDocument doc, int pos) {
 		try {

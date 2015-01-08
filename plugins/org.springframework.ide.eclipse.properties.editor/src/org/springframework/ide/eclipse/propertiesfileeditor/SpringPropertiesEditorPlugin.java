@@ -14,7 +14,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.ClasspathListener;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.ClasspathListenerManager;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.ListenerManager;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.SpringPropertiesIndexManager;
 
 /**
@@ -69,9 +71,9 @@ public class SpringPropertiesEditorPlugin extends AbstractUIPlugin {
 		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, msg, null));
 	}
 	
-	private static ClasspathListenerManager classpathListeners;
+	private static ListenerManager<ClasspathListener> classpathListeners;
 	
-	public static synchronized ClasspathListenerManager getClasspathListeners() {
+	public static synchronized ListenerManager<ClasspathListener> getClasspathListeners() {
 		if (classpathListeners==null) {
 			classpathListeners = new ClasspathListenerManager();
 		}

@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.DocumentUtil;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
 /**
@@ -88,7 +89,7 @@ public class SpringPropertiesReconcileEngine {
 		});
 	}
 
-	private FuzzyMap<PropertyInfo> fIndex;
+	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 
 	public interface IProblemCollector {
 
@@ -99,12 +100,13 @@ public class SpringPropertiesReconcileEngine {
 	}
 
 	
-	public SpringPropertiesReconcileEngine(FuzzyMap<PropertyInfo> index) {
-		fIndex = index;
+	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider) {
+		fIndexProvider = provider;
 	}
 
 	public void reconcile(IDocument doc, IProblemCollector problemCollector, IProgressMonitor mon) {
-		if (fIndex==null || fIndex.isEmpty()) {
+		FuzzyMap<PropertyInfo> index = getIndex();
+		if (index==null || index.isEmpty()) {
 			//don't report errors when index is empty, simply don't check (otherwise we will just reprot 
 			// all properties as errors, but this not really useful information since the cause is
 			// some problem putting information about properties into the index.
@@ -134,7 +136,7 @@ public class SpringPropertiesReconcileEngine {
 									continue;
 								}
 							}
-							PropertyInfo validProperty = findLongestValidProperty(fullName);
+							PropertyInfo validProperty = findLongestValidProperty(index, fullName);
 							if (validProperty!=null) {
 								if (validProperty.getId().length()==fullName.length()) {
 									//exact match. Do not complain about key, but try to reconcile assigned value
@@ -156,7 +158,7 @@ public class SpringPropertiesReconcileEngine {
 								}
 							} else { //validProperty==null
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
-								PropertyInfo similarEntry = fIndex.findLongestCommonPrefixEntry(fullName);
+								PropertyInfo similarEntry = index.findLongestCommonPrefixEntry(fullName);
 								String validPrefix = StringUtil.commonPrefix(similarEntry.getId(), fullName);
 								problemCollector.accept(new SpringPropertyProblem("'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName), 
 										trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length()));
@@ -172,6 +174,10 @@ public class SpringPropertiesReconcileEngine {
 		} finally {
 			problemCollector.endCollecting();
 		}
+	}
+
+	private FuzzyMap<PropertyInfo> getIndex() {
+		return fIndexProvider.get();
 	}
 
 	private void reconcileType(IDocument doc, PropertyInfo validProperty, ITypedRegion[] regions, int i, IProblemCollector problems) {
@@ -292,11 +298,11 @@ public class SpringPropertiesReconcileEngine {
 	 * 'string prefix' but a prefix in the sense of treating '.' as a kind of separators. So 
 	 * 'prefix' is not allowed to end in the middle of a 'segment'.
 	 */
-	private PropertyInfo findLongestValidProperty(String name) {
+	private PropertyInfo findLongestValidProperty(FuzzyMap<PropertyInfo> index, String name) {
 		int endPos = name.length();
 		PropertyInfo prop = null;
 		while (endPos>0 && prop==null) {
-			prop = fIndex.get(name.substring(0, endPos));
+			prop = index.get(name.substring(0, endPos));
 			if (prop==null) {
 				endPos = name.lastIndexOf('.', endPos-1);
 			}

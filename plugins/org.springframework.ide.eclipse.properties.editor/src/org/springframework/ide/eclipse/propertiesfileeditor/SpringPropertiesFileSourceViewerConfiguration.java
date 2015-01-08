@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -26,32 +25,46 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.eclipse.jface.text.hyperlink.IHyperlinkPresenter;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
-import org.eclipse.jface.text.reconciler.Reconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileStrategy;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration 
 extends PropertiesFileSourceViewerConfiguration {
 
+	/**
+	 * WE unforytunately must subclass this just to make it possible to call non 
+	 * public method 'forceReconcile'.
+	 * 
+	 * We need this to trigger a reconcile when live metadata has changed.
+	 */
+	public class SpringPropertiesReconciler extends MonoReconciler {
+		
+		public SpringPropertiesReconciler(IReconcilingStrategy strategy) {
+			super(strategy, false);
+		}
+		
+		public void forceReconcile() {
+			super.forceReconciling();
+		}
+
+	}
+
 	private static final String DIALOG_SETTINGS_KEY = null;
 	private SpringPropertiesCompletionEngine engine;
+	private SpringPropertiesReconciler fReconciler;
 
 	public SpringPropertiesFileSourceViewerConfiguration(
 			IColorManager colorManager, IPreferenceStore preferenceStore,
@@ -94,12 +107,6 @@ extends PropertiesFileSourceViewerConfiguration {
 		return engine;
 	}
 	
-	private FuzzyMap<PropertyInfo> getIndex() throws Exception {
-		return getEngine().getIndex();
-	}
-
-	
-
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
 		return getTextHover(sourceViewer, contentType, 0);
@@ -142,6 +149,7 @@ extends PropertiesFileSourceViewerConfiguration {
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		IReconcilingStrategy strategy = null;
+		Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
 		if (EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
 			IReconcilingStrategy spellcheck = new SpellingReconcileStrategy(sourceViewer, EditorsUI.getSpellingService()) {
 				@Override
@@ -152,15 +160,16 @@ extends PropertiesFileSourceViewerConfiguration {
 			strategy = compose(strategy, spellcheck);
 		}
 		try {
-			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, getIndex());
+			indexProvider = getEngine().getIndexProvider();
+			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, getEngine().getIndexProvider());
 			strategy = compose(strategy, propertyChecker);
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		if (strategy!=null) {
-			MonoReconciler reconciler = new MonoReconciler(strategy, false);
-			reconciler.setDelay(500);
-			return reconciler;
+			fReconciler = new SpringPropertiesReconciler(strategy);
+			fReconciler.setDelay(500);
+			return fReconciler;
 		}
 		return null;
 	}
@@ -213,6 +222,12 @@ extends PropertiesFileSourceViewerConfiguration {
 		CompositeReconcilingStrategy composite = new CompositeReconcilingStrategy();
 		composite.setReconcilingStrategies(new IReconcilingStrategy[] {s1, s2});
 		return composite;
+	}
+
+	public void forceReconcile() {
+		if (fReconciler!=null) {
+			fReconciler.forceReconcile();
+		}
 	}
 	
 }

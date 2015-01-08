@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.ASSIGNABLE_TYPES;
 
@@ -154,11 +155,11 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 * @param viewer the source viewer
 	 * @param spellingService the spelling service to use
 	 */
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, FuzzyMap<PropertyInfo> index) {
+	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, Provider<FuzzyMap<PropertyInfo>> provider) {
 		Assert.isNotNull(viewer);
-		Assert.isNotNull(index);
+		Assert.isNotNull(provider);
 		fViewer= viewer;
-		fEngine = new SpringPropertiesReconcileEngine(index);
+		fEngine = new SpringPropertiesReconcileEngine(provider);
 	}
 
 	/*

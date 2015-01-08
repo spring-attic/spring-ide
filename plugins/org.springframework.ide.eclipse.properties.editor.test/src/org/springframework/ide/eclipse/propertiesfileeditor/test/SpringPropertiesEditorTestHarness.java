@@ -119,7 +119,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	}
 	
 	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
-		SpringPropertiesReconcileEngine reconciler = new SpringPropertiesReconcileEngine(engine.getIndex());
+		SpringPropertiesReconcileEngine reconciler = new SpringPropertiesReconcileEngine(engine.getIndexProvider());
 		MockProblemCollector problems=new MockProblemCollector();
 		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
 		return problems.getAllProblems();

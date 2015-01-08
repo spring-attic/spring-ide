@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.util;
 
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,11 +24,7 @@ import org.eclipse.jdt.core.JavaCore;
  * 
  * @author Kris De Volder
  */
-public class ClasspathListenerManager {
-
-	public interface ClasspathListener {
-		public abstract void classpathChanged(IJavaProject jp);
-	}
+public class ClasspathListenerManager extends ListenerManager<ClasspathListener>{
 
 	private class MyListener implements IElementChangedListener {
 
@@ -69,23 +64,13 @@ public class ClasspathListenerManager {
 	}
 
 
-	private ListenerList listeners = new ListenerList(ListenerList.IDENTITY);
-	
 	public ClasspathListenerManager() {
 		JavaCore.addElementChangedListener(new MyListener(), ElementChangedEvent.POST_CHANGE);
 	}
-	
-	public void add(ClasspathListener l) {
-		listeners.add(l);
-	}
-	
-	public void remove(ClasspathListener l) {
-		listeners.remove(l);
-	}
-	
-	private void notifyListeners(IJavaProject el) {
-		for (Object _l : listeners.getListeners()) {
-			ClasspathListener l = (ClasspathListener) _l;
+
+
+	protected void notifyListeners(IJavaProject el) {
+		for (ClasspathListener l : getListeners()) {
 			l.classpathChanged(el);
 		}
 	}

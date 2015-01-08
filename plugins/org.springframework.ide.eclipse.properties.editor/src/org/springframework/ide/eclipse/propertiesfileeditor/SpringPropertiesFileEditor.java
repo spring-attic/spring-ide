@@ -17,14 +17,17 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartition
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.Listener;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.SpringPropertiesIndexManager;
 
 @SuppressWarnings("restriction")
-public class SpringPropertiesFileEditor extends PropertiesFileEditor {
+public class SpringPropertiesFileEditor extends PropertiesFileEditor implements Listener<SpringPropertiesIndexManager> {
 	
 	/**
 	 * Content Type ID this editor is registered to open for.
 	 */
 	public static final IContentType CONTENT_TYPE = Platform.getContentTypeManager().getContentType("org.springframework.ide.eclipse.applicationProperties");
+	private SpringPropertiesFileSourceViewerConfiguration fSourceViewerConf;
 
 	public SpringPropertiesFileEditor() {
 		super();
@@ -40,8 +43,24 @@ public class SpringPropertiesFileEditor extends PropertiesFileEditor {
 		//Override SourceViewerConfiguration with our own
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		setSourceViewerConfiguration(new SpringPropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
+		setSourceViewerConfiguration(fSourceViewerConf = new SpringPropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
+		SpringPropertiesEditorPlugin.getIndexManager().addListener(this);
 	}
 	
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		SpringPropertiesEditorPlugin.getIndexManager().removeListener(this);
+	}
+
+	/**
+	 * Called when property index manager was changed.
+	 * TODO: could we make this more precise? We only care about a particular index (for same project this editor is on).
+	 */
+	@Override
+	public void changed(SpringPropertiesIndexManager index) {
+		fSourceViewerConf.forceReconcile();
+	}
 
 }
