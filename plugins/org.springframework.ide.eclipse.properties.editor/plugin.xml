@@ -13,9 +13,6 @@
       </content-type>
    </extension>
 
- <!-- original props file editor 
-            class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor"
-   -->
    <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -41,15 +38,4 @@
         </configurator>
      </extension>
      
-<!--   
-    <extension
-          point="org.springsource.ide.eclipse.gradle.core.projectConfigurators">
-       <configurator
-             class="org.springframework.ide.eclipse.propertiesfileeditor.maven.EnableJdtAptM2EProjectConfigurator"
-             id="org.springframework.ide.eclipse.propertiesfileeditor.maven.EnableJdtAptM2EProjectConfigurator"
-             name="Enable JDT Apt for spring-boot-configuration-processor">
-       </configurator>
-    </extension>
-  -->
-
 </plugin>
