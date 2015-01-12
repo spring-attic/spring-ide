@@ -5,15 +5,12 @@
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
             base-type="org.eclipse.jdt.core.javaProperties"
-            default-charset="UTF8"
+            default-charset="ISO-8859-1"
             file-names="application.properties"
             id="org.springframework.ide.eclipse.applicationProperties"
             name="Spring Properties File"
-            priority="normal">
+            priority="high">
       </content-type>
-      <file-association
-            content-type="org.springframework.ide.eclipse.boot.properties.file-association1">
-      </file-association>
    </extension>
 
  <!-- original props file editor 
@@ -23,8 +20,7 @@
          point="org.eclipse.ui.editors">
       <editor
             name="Spring Properties Editor"
-            icon="icons/file_obj.gif"
-            contributorClass="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorActionContributor"
+            icon="icons/spring_obj.gif"
             class="org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesFileEditor"
             symbolicFontName="org.eclipse.jdt.ui.PropertiesFileEditor.textfont"
             id="org.springframework.ide.eclipse.PropertiesFileEditor">
