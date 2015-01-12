@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2014 Spring IDE Developers
+ * Copyright (c) 2004, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,8 +35,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -1105,10 +1107,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 				public boolean belongsTo(Object family) {
 					return family.equals("populateAutoConfigsJobFamily");
 				}
+				
 			};
 	
 			job.setPriority(Job.BUILD);
-			job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			job.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), BeansCoreUtils.BEANS_MODEL_INIT_RULE));
 			job.schedule();
 		}
 	}

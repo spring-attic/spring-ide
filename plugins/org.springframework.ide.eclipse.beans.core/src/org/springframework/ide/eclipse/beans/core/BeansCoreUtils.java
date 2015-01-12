@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 Spring IDE Developers
+ * Copyright (c) 2004, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 /**
  * Some helper methods for the Spring IDE core model.
@@ -21,6 +22,11 @@ import org.eclipse.core.resources.IResource;
  * @author Martin Lippert
  */
 public class BeansCoreUtils {
+	
+	/**
+	 * Scheduling rule for Beans model initilization job
+	 */
+	public static final ISchedulingRule BEANS_MODEL_INIT_RULE = lightRule("Beans Model Initialization"); //$NON-NLS-1$
 
 	/**
 	 * Returns <code>true</code> if given resource is a Spring bean factory
@@ -46,5 +52,24 @@ public class BeansCoreUtils {
 			return BeansCorePlugin.getModel().isConfig((IFile) resource, includeImported);
 		}
 		return false;
+	}
+	
+	private static ISchedulingRule lightRule(final String name) {
+		return new ISchedulingRule() {
+			
+			public boolean contains(ISchedulingRule rule) {
+				return rule == this;
+			}
+
+			public boolean isConflicting(ISchedulingRule rule) {
+				return rule == this || rule.contains(this);
+			}
+			
+			@Override
+			public String toString() {
+				return name;
+			}
+			
+		};
 	}
 }
