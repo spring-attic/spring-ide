@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
 
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.ASSIGNABLE_TYPES;
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.isAssign;
+import static org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyAnnotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
  * 
  * @author Kris De Volder
  */
+@SuppressWarnings("restriction")
 public class SpringPropertiesReconcileEngine {
 
 	public static abstract class ValueParser {
@@ -142,10 +144,10 @@ public class SpringPropertiesReconcileEngine {
 									//exact match. Do not complain about key, but try to reconcile assigned value
 									reconcileType(doc, validProperty, regions, i, problemCollector);
 								} else { //found a 'validPrefix' which is shorter than the fullName.
-									//check if it looks okay to continue with sub-properties at based on property type
+									//check if it looks okay to continue with sub-properties based on property type
 									String validPrefix = validProperty.getId();
 									if (ASSIGNABLE_TYPES.contains(validProperty.getType())) {
-										problemCollector.accept(new SpringPropertyProblem(
+										problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
 												"Supbproperties are invalid for property "+
 														"'"+validPrefix+"' with type '"+validProperty.getType()+"'", 
 														trimmedRegion.getOffset()+validPrefix.length(),
@@ -160,7 +162,8 @@ public class SpringPropertiesReconcileEngine {
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
 								PropertyInfo similarEntry = index.findLongestCommonPrefixEntry(fullName);
 								String validPrefix = StringUtil.commonPrefix(similarEntry.getId(), fullName);
-								problemCollector.accept(new SpringPropertyProblem("'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName), 
+								problemCollector.accept(new SpringPropertyProblem(WARNING_TYPE,
+										"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName), 
 										trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length()));
 							} //end: validProperty==null
 						}
@@ -194,7 +197,10 @@ public class SpringPropertiesReconcileEngine {
 			} else { //paddedValue!=null
 				try {
 					String valueStr = PropertiesFileEscapes.unescape(escapedValue.trim());
-					parser.parse(valueStr);
+					if (!valueStr.contains("${")) {
+						//Don't check strings that look like they use variable substitution.
+						parser.parse(valueStr);
+					}
 				} catch (Exception e) {
 					errorRegion = regions[i+1]; //i+1 must be in range, otherwise paddedValue would be null
 					//Try to shrink errorRegion to demarkate the value String more precisely
@@ -218,7 +224,9 @@ public class SpringPropertiesReconcileEngine {
 				}
 			}
 			if (errorRegion!=null) {
-				problems.accept(new SpringPropertyProblem("Expecting '"+shortTypeName(expectType)+"' for property '"+validProperty.getId()+"'", errorRegion.getOffset(), errorRegion.getLength()));
+				problems.accept(new SpringPropertyProblem(ERROR_TYPE,
+						"Expecting '"+shortTypeName(expectType)+"' for property '"+validProperty.getId()+"'", 
+						errorRegion.getOffset(), errorRegion.getLength()));
 			}
 		}
 	}

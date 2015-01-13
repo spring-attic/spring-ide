@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
 
+import org.eclipse.core.runtime.IStatus;
+
 /**
  * @author Kris De Volder
  */
@@ -19,10 +21,18 @@ public class SpringPropertyProblem {
 	private int length;
 	private int offset;
 	
-	public SpringPropertyProblem(String msg, int offset, int length) {
+	private String severity = SpringPropertyAnnotation.ERROR_TYPE;
+	
+	/**
+	 * Create a SpringProperty file annotation with a given severity.
+	 * The severity should be one of the XXX_TYPE constants defined in
+	 * {@link SpringPropertyAnnotation}.
+	 */
+	public SpringPropertyProblem(String severity, String msg, int offset, int length) {
 		this.msg = msg;
 		this.offset = offset;
 		this.length = length;
+		this.severity = severity;
 	}
 
 	public String getMessage() {
@@ -40,6 +50,10 @@ public class SpringPropertyProblem {
 	@Override
 	public String toString() {
 		return "@["+offset+","+length+"]: "+msg;
+	}
+
+	public String getSeverity() {
+		return severity;
 	}
 	
 }

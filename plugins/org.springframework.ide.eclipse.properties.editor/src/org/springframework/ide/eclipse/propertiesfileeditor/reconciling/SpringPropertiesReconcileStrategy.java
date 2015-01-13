@@ -111,7 +111,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 				Iterator iter= fAnnotationModel.getAnnotationIterator();
 				while (iter.hasNext()) {
 					Annotation annotation= (Annotation)iter.next();
-					if (SpringPropertyAnnotation.TYPE.equals(annotation.getType()))
+					if (SpringPropertyAnnotation.TYPES.contains(annotation.getType()))
 						toRemove.add(annotation);
 				}
 				Annotation[] annotationsToRemove= (Annotation[])toRemove.toArray(new Annotation[toRemove.size()]);
