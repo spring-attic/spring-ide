@@ -142,6 +142,8 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 								String methodSig = source.getSourceMethod();
 								if (methodSig!=null) {
 									method = getMethod(type, methodSig);
+								} else {
+									method = getSetter(type, getElement());
 								}
 							}
 							if (method!=null) {
@@ -160,6 +162,56 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	private IMethod getSetter(IType type, PropertyInfo propertyInfo) {
+		try {
+			String propName = propertyInfo.getName();
+			String setterName = "set"
+				+Character.toUpperCase(propName.charAt(0))
+				+toCamelCase(propName.substring(1));
+			String sloppySetterName = setterName.toLowerCase();
+	
+			IMethod sloppyMatch = null;
+			for (IMethod m : type.getMethods()) {
+				String mname = m.getElementName();
+				if (setterName.equals(mname)) {
+					//found 'exact' name match... done
+					return m;
+				} else if (mname.toLowerCase().equals(sloppySetterName)) {
+					sloppyMatch = m;
+				}
+			}
+			return sloppyMatch;
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+			return null;
+		}
+	}
+
+	/**
+	 * Convert hyphened name to camel case name. It is 
+	 * safe to call this on an already camel-cased name.
+	 */
+	private String toCamelCase(String name) {
+		if (name.isEmpty()) {
+			return name;
+		} else {
+			StringBuilder camel = new StringBuilder();
+			char[] chars = name.toCharArray();
+			for (int i = 0; i < chars.length; i++) {
+				char c = chars[i];
+				if (c=='-') {
+					i++;
+					if (i<chars.length) {
+						camel.append(Character.toUpperCase(chars[i]));
+					}
+				} else {
+					camel.append(chars[i]);
+				}
+			}
+			return camel.toString();
+		}
 	}
 
 	/**

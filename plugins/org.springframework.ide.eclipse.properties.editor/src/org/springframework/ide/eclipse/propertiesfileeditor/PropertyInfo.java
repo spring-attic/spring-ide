@@ -63,6 +63,9 @@ public class PropertyInfo {
 	public String getType() {
 		return property.getType();
 	}
+	public String getName() {
+		return property.getName();
+	}
 	public Object getDefaultValue() {
 		return property.getDefaultValue();
 	}
