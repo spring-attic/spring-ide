@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
 
-import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.ASSIGNABLE_TYPES;
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.isAssign;
 import static org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyAnnotation.*;
 
@@ -28,6 +27,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
+import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.DocumentUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
@@ -146,7 +146,7 @@ public class SpringPropertiesReconcileEngine {
 								} else { //found a 'validPrefix' which is shorter than the fullName.
 									//check if it looks okay to continue with sub-properties based on property type
 									String validPrefix = validProperty.getId();
-									if (ASSIGNABLE_TYPES.contains(validProperty.getType())) {
+									if (SpringPropertiesCompletionEngine.isAssignableType(validProperty.getType())) {
 										problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
 												"Supbproperties are invalid for property "+
 														"'"+validPrefix+"' with type '"+validProperty.getType()+"'", 

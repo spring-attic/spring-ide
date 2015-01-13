@@ -51,6 +51,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
+import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 
@@ -474,7 +475,7 @@ public class SpringPropertiesCompletionEngine {
 				completion.append(defaultValue);
 			} else {
 				String type = match.data.getType();
-				if (ASSIGNABLE_TYPES.contains(type)) {
+				if (SpringPropertiesCompletionEngine.isAssignableType(type)) {
 					completion.append("=");
 				} else {
 					//assume some kind of 'Object' type
@@ -699,5 +700,18 @@ public class SpringPropertiesCompletionEngine {
 	public void setIndexProvider(Provider<FuzzyMap<PropertyInfo>> it) {
 		this.indexProvider = it;
 	}
+
+	public static boolean isAssignableType(String type) {
+		return ASSIGNABLE_TYPES.contains(typeErasure(type));
+	}
+	
+	public static String typeErasure(String type) {
+		int paramStarts = type.indexOf('<');
+		if (paramStarts>=0) {
+			return type.substring(0,paramStarts);
+		}
+		return type;
+	}
+
 	
 }

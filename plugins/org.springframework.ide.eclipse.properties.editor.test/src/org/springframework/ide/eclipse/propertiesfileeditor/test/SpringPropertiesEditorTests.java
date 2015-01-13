@@ -15,13 +15,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.propertiesfileeditor.StsConfigMetadataRepositoryJsonLoader;
-import org.springframework.ide.eclipse.propertiesfileeditor.test.SpringPropertiesEditorTestHarness.MockEditor;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.JavaProjectUtil;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
 	
@@ -37,6 +34,11 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testLoggingLevelCompletion() throws Exception {
 		data("logging.level", "java.util.Map<java.lang.String,java.lang.Object>", null, "Logging level per package.");
 		assertCompletion("lolev<*>","logging.level.<*>");
+	}
+	
+	public void testListCompletion() throws Exception {
+		data("foo.bars", "java.util.List<java.lang.String>", null, "List of bars in foo.");
+		assertCompletion("foba<*>","foo.bars=<*>");
 	}
 	
 	public void testEmptyPrefixProposalsSortedAlpabetically() throws Exception {
@@ -193,7 +195,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		
 		MockEditor editor = new MockEditor(
 				"server.port=888\n" + 
-				"spring.datasource.login-timeout=1000\n"
+				"spring.datasource.login-timeout=1000\n" +
+				"flyway.init-sqls=a,b,c\n"
 		);
 		
 		assertLinkTargets(editor, "server", 
@@ -204,6 +207,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.tomcatDataSource()",
 				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.dbcpDataSource()"
 		);
+		assertLinkTargets(editor, "flyway",
+				"org.springframework.boot.autoconfigure.flyway.FlywayProperties.setInitSqls(List<String>)");
 		System.out.println("<<< testHyperlinkTargets");
 	}
 
