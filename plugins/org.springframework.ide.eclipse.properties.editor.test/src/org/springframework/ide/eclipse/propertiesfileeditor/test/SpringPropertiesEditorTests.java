@@ -234,6 +234,17 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 	
+	public void testNoReconcileInterpolatedValues() throws Exception {
+		MockEditor editor = new MockEditor(
+				"server.port=${port}\n" + 
+				"liquibase.enabled=nuggels"
+		);
+		assertProblems(editor,
+				//no problem should be reported for ${port}
+				"nuggels|Boolean"
+		);
+	}
+	
 	public void testReconcileValuesWithSpaces() throws Exception {
 		MockEditor editor = new MockEditor(
 				"server.port  =   badPort\n" + 
