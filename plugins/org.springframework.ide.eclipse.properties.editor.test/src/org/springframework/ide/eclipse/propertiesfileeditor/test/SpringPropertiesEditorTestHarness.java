@@ -794,14 +794,16 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		
 		List<PropertySource> rawTargets = getRawLinkTargets(editor, pos);
 		assertEquals(expecteds.length, rawTargets.size());
-		for (int i = 0; i < expecteds.length; i++) {
-			assertEquals(expecteds[i], label(rawTargets.get(i)));
-		}
+// below code doesn't work anymore becuase the 'raw' targets aren't as precise as th IJavaElements 
+// IJavaElement will point to specific setter if possible, but property source only points to source type.
+//		for (int i = 0; i < expecteds.length; i++) {
+//			assertEquals(expecteds[i], label(rawTargets.get(i)));
+//		}
 		
 		List<IJavaElement> targets = getLinkTargets(editor, pos);
 		assertEquals(expecteds.length, targets.size());
 		for (int i = 0; i < expecteds.length; i++) {
-			assertEquals(expecteds[i], JavaElementLabels.getElementLabel(targets.get(i), JavaElementLabels.DEFAULT_QUALIFIED));
+			assertEquals(expecteds[i], JavaElementLabels.getElementLabel(targets.get(i), JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES));
 		}
 	}
 

@@ -197,7 +197,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		
 		assertLinkTargets(editor, "server", 
-				"org.springframework.boot.autoconfigure.web.ServerProperties"
+				"org.springframework.boot.autoconfigure.web.ServerProperties.setPort(Integer)"
 		);
 		assertLinkTargets(editor, "data", 
 				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.hikariDataSource()",
