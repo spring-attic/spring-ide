@@ -57,6 +57,7 @@ import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 /**
  * @author Kris De Volder
  */
+@SuppressWarnings("restriction")
 public class SpringPropertiesCompletionEngine {
 	
 	//private static final boolean DEBUG = false;
@@ -124,7 +125,13 @@ public class SpringPropertiesCompletionEngine {
 			if (p1 instanceof PropertyProposal && p2 instanceof PropertyProposal) {
 				double s1 = ((PropertyProposal)p1).match.score;
 				double s2 = ((PropertyProposal)p2).match.score;
-				return Double.compare(s2, s1);
+				if (s1==s2) {
+					String name1 = ((PropertyProposal)p1).match.data.getId();
+					String name2 = ((PropertyProposal)p2).match.data.getId();
+					return name1.compareTo(name2);
+				} else {
+					return Double.compare(s2, s1);
+				}
 			} else if (p1 instanceof ValueProposal && p2 instanceof ValueProposal) {
 				int order1 = ((ValueProposal)p1).sortingOrder;
 				int order2 = ((ValueProposal)p2).sortingOrder;

@@ -15,7 +15,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.propertiesfileeditor.StsConfigMetadataRepositoryJsonLoader;
+import org.springframework.ide.eclipse.propertiesfileeditor.test.SpringPropertiesEditorTestHarness.MockEditor;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.JavaProjectUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -34,6 +37,21 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testLoggingLevelCompletion() throws Exception {
 		data("logging.level", "java.util.Map<java.lang.String,java.lang.Object>", null, "Logging level per package.");
 		assertCompletion("lolev<*>","logging.level.<*>");
+	}
+	
+	public void testEmptyPrefixProposalsSortedAlpabetically() throws Exception {
+		defaultTestData();
+		MockEditor editor = new MockEditor("");
+		ICompletionProposal[] completions = getCompletions(editor);
+		assertTrue(completions.length>100); //should be many proposals
+		String previous = null;
+		for (ICompletionProposal c : completions) {
+			String current = c.getDisplayString();
+			if (previous!=null) {
+				assertTrue("Incorrect order: \n   "+previous+"\n   "+current, previous.compareTo(current)<=0);
+			}
+			previous = current;
+		}
 	}
 	
 	public void testValueCompletion() throws Exception {

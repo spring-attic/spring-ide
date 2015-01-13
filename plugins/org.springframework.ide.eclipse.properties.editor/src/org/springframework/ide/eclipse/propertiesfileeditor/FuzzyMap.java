@@ -74,16 +74,27 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	 * an entrie's key in the same order as they are in the pattern. 
 	 */
 	public List<Match<E>> find(String pattern) {
-		//TODO: optimize somehow with a smarter index? (right now searches all map entries sequentially)
-		ArrayList<Match<E>> matches = new ArrayList<Match<E>>();
-		for (Entry<String, E> e : entries.entrySet()) {
-			String key = e.getKey();
-			double score = match(pattern, key);
-			if (score!=0.0) {
-				matches.add(new Match<E>(score, e.getValue()));
+		if ("".equals(pattern)) {
+			//Special case because
+			// 1) no need to search. Matches everything
+			// 2) want to use different way of sorting / scoring. See https://issuetracker.springsource.com/browse/STS-4008
+			ArrayList<Match<E>> matches = new ArrayList<Match<E>>(entries.size());
+			for (E v : entries.values()) {
+				matches.add(new Match<E>(1.0, v));
 			}
+			return matches;
+		} else {
+			//TODO: optimize somehow with a smarter index? (right now searches all map entries sequentially)
+			ArrayList<Match<E>> matches = new ArrayList<Match<E>>();
+			for (Entry<String, E> e : entries.entrySet()) {
+				String key = e.getKey();
+				double score = match(pattern, key);
+				if (score!=0.0) {
+					matches.add(new Match<E>(score, e.getValue()));
+				}
+			}
+			return matches;
 		}
-		return matches;
 	}
 
 	/**
