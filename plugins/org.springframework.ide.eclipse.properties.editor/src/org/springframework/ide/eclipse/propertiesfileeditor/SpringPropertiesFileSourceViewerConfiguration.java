@@ -33,6 +33,8 @@ import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
@@ -62,7 +64,7 @@ extends PropertiesFileSourceViewerConfiguration {
 
 	}
 
-	private static final String DIALOG_SETTINGS_KEY = null;
+	private static final String DIALOG_SETTINGS_KEY = PropertiesFileSourceViewerConfiguration.class.getName();
 	private SpringPropertiesCompletionEngine engine;
 	private SpringPropertiesReconciler fReconciler;
 
@@ -85,7 +87,7 @@ extends PropertiesFileSourceViewerConfiguration {
 				a.enableAutoActivation(true);
 				a.setInformationControlCreator(new SpringPropertiesInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));
 				setSorter(a);
-				a.setRestoreCompletionProposalSize(getDialogSettings(DIALOG_SETTINGS_KEY));
+				a.setRestoreCompletionProposalSize(getDialogSettings(sourceViewer, DIALOG_SETTINGS_KEY));
 				return a;
 			}
 		} catch (Exception e) {
@@ -128,12 +130,20 @@ extends PropertiesFileSourceViewerConfiguration {
 		return delegate;
 	}
 	
-	private static IDialogSettings getDialogSettings(String dialogSettingsKey) {
+	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
 		IDialogSettings existing = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
 		if (existing!=null) {
 			return existing;
 		}
-		return SpringPropertiesEditorPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+		IDialogSettings created = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+		Rectangle windowBounds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getBounds();
+		int suggestW = (int)(windowBounds.width*0.35);
+		int suggestH = (int)(suggestW*0.6); 
+		if (suggestW>300) {
+			created.put(ContentAssistant.STORE_SIZE_X, suggestW);
+			created.put(ContentAssistant.STORE_SIZE_Y, suggestH);
+		}
+		return created;
 	}
 
 	public static void setSorter(ContentAssistant a) {
