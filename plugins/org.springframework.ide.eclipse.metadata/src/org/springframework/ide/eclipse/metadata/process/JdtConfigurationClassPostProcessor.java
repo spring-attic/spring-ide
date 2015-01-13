@@ -208,6 +208,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 					newBeanDefinition.setBeanClassName(className);
 					
 					registry.registerBeanDefinition(beanName, newBeanDefinition);
+					super.registerBeanDefinition(beanName, beanDefinition);
 					
 					Map<String, Object> profileAnnotationMetadata = newBeanDefinition.getMetadata().
 							getAnnotationAttributes("org.springframework.context.annotation.Profile");
@@ -230,6 +231,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 					}
 					
 					registry.registerBeanDefinition(beanName, beanDefinition);
+					super.registerBeanDefinition(beanName, beanDefinition);
 					beansConfigRegistrationSupport.registerComponent(new BeanComponentDefinition(beanDefinition,
 							beanName));
 				}
@@ -240,6 +242,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 				}
 				
 				registry.registerBeanDefinition(beanName, beanDefinition);
+				super.registerBeanDefinition(beanName, beanDefinition);
 				beansConfigRegistrationSupport.registerComponent(new BeanComponentDefinition(beanDefinition,
 						beanName));
 			}
@@ -257,6 +260,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 		 */
 		public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 			registry.removeBeanDefinition(beanName);
+			super.removeBeanDefinition(beanName);
 		}
 
 	}
