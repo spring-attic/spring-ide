@@ -102,6 +102,7 @@ public class SpringPropertiesCompletionEngine {
 		PRIMITIVE_TYPES.put("java.lang.Short", "int");
 		PRIMITIVE_TYPES.put("java.lang.Double", "double");
 		PRIMITIVE_TYPES.put("java.lang.Float", "float");
+		PRIMITIVE_TYPES.put("java.lang.Character", "char");
 	}
 	
 	public static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
@@ -113,7 +114,9 @@ public class SpringPropertiesCompletionEngine {
 			"java.lan.Double",
 			"java.lang.Float",
 			"java.lang.Character",
-			"java.util.List"
+			"java.util.List",
+			"java.net.InetAddress",
+			"java.lang.String[]"
 	));
 
 	private static final Map<String, String[]> TYPE_VALUES = new HashMap<String, String[]>();

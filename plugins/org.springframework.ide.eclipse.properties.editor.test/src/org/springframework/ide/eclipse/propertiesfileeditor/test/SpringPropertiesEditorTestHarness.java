@@ -562,7 +562,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		data("spring.freemarker.request-context-attribute", "java.lang.String", null, "Name of the RequestContext attribute for all views.");
 		data("spring.freemarker.settings", "java.util.Map<java.lang.String,java.lang.String>", null, "Well-known FreeMarker keys which will be passed to FreeMarker's Configuration.");
 		data("spring.freemarker.suffix", "java.lang.String", null, "Suffix that gets appended to view names when building a URL.");
-		data("spring.freemarker.template-loader-path", "java.lang.String[]", "[Ljava.lang.Object;@e614d0e", "Comma-separated list of template paths.");
+		data("spring.freemarker.template-loader-path", "java.lang.String[]", new String[] {"snuzzle" ,"buggles"}, "Comma-separated list of template paths.");
 		data("spring.freemarker.view-names", "java.lang.String[]", null, "White list of view names that can be resolved.");
 		data("spring.groovy.template.cache", "java.lang.Boolean", null, "Enable template caching.");
 		data("spring.groovy.template.char-set", "java.lang.String", null, null);

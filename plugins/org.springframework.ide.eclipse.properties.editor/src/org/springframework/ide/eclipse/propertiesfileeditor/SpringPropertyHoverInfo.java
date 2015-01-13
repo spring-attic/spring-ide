@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +24,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
+import org.springframework.util.StringUtils;
 
 /**
  * Information object that is displayed in SpringPropertiesTextHover's information
@@ -96,8 +99,13 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 				return ((Number)defaultValue).toString();
 			} else if (defaultValue instanceof Boolean) {
 				return Boolean.toString((Boolean) defaultValue);
+			} else if (defaultValue instanceof Object[]) {
+				return StringUtils.arrayToCommaDelimitedString((Object[]) defaultValue);
+			} else if (defaultValue instanceof Collection<?>) {
+				return StringUtils.collectionToCommaDelimitedString((Collection<?>) defaultValue);
 			} else {
-				//no idea what it is so ignore
+				//no idea what it is but try 'toString' and hope for the best
+				return defaultValue.toString();
 			}
 		}
 		return null;

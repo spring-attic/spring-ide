@@ -41,6 +41,19 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("foba<*>","foo.bars=<*>");
 	}
 	
+	public void testInetAddresCompletion() throws Exception {
+		defaultTestData();
+		assertCompletion("server.add<*>", "server.address=<*>");
+	}
+	
+	public void testStringArrayCompletion() throws Exception {
+		data("spring.freemarker.view-names", "java.lang.String[]", null, "White list of view names that can be resolved.");
+		data("some.defaulted.array", "java.lang.String[]", new String[] {"a", "b", "c"} , "Stuff.");
+		
+		assertCompletion("spring.freemarker.vn<*>", "spring.freemarker.view-names=<*>");
+		assertCompletion("some.d.a<*>", "some.defaulted.array=a,b,c<*>");
+	}
+	
 	public void testEmptyPrefixProposalsSortedAlpabetically() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor("");
