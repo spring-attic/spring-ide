@@ -49,5 +49,6 @@ Export-Package: org.springframework.ide.eclipse.quickfix,
  org.springframework.ide.eclipse.quickfix.validator,
  org.springframework.ide.eclipse.quickfix.validator.helper
 Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
  org.eclipse.osgi.util,
  org.osgi.framework
