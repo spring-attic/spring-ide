@@ -25,8 +25,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 		
 	private static final ICompletionProposal[] NO_PROPOSALS= new ICompletionProposal[0];
 	private static final IContextInformation[] NO_CONTEXTS= new IContextInformation[0];
-	private static final char[] AUTO_ACTIVATION_CHARS = {'.'};
-
+	private static final char[] AUTO_ACTIVATION_CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
 
 	private final SpringPropertiesCompletionEngine fEngine;
 
