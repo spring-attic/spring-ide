@@ -19,7 +19,9 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.maven;resolution:=optional,
  org.eclipse.m2e.core;resolution:=optional,
  org.eclipse.m2e.maven.runtime;resolution:=optional,
- org.eclipse.m2e.jdt;resolution:=optional
+ org.eclipse.m2e.jdt;resolution:=optional,
+ org.springsource.ide.eclipse.commons.frameworks.ui,
+ org.eclipse.ui.ide
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
