@@ -24,7 +24,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 import org.springframework.util.StringUtils;
 
 /**
@@ -40,8 +39,15 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 
 	private static final String[] NO_ARGS = new String[0];
 	
-	private IJavaProject javaProject; // Java project which is used to find declaration for 'navigate to declaration action
-	private PropertyInfo data; //Data object to display in 'hover info control'
+	/**
+	 * Java project which is used to find declaration for 'navigate to declaration' action
+	 */
+	private IJavaProject javaProject;
+	
+	/**
+	 * Data object to display in 'hover text'
+	 */
+	private PropertyInfo data; 
 
 	public SpringPropertyHoverInfo(IJavaProject project, PropertyInfo data) {
 		super(null);
@@ -172,6 +178,10 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 		return Collections.emptyList();
 	}
 
+	/**
+	 * Attempt to find corresponding setter method for a given property.
+	 * @return setter method, or null if not found.
+	 */
 	private IMethod getSetter(IType type, PropertyInfo propertyInfo) {
 		try {
 			String propName = propertyInfo.getName();

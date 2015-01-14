@@ -23,15 +23,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISynchronizable;
-import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
@@ -39,16 +36,10 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
-import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
-import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
-
-import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.ASSIGNABLE_TYPES;
 
 /**
  * Reconcile strategy used for spell checking.

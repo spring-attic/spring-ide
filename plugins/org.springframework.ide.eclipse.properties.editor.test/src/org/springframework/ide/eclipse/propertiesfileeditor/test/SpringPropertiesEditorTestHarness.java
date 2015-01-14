@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014-2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -753,7 +753,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 				} else {
 					for (int i = 0; i < expectedProblems.length; i++) {
 						if (!matchProblem(editor, actualProblems.get(i), expectedProblems[i])) {
-							bad = "First mismatch: "+expectedProblems[i]+"\n";
+							bad = "First mismatch at index "+i+": "+expectedProblems[i]+"\n";
 							break;
 						}
 					}
@@ -767,7 +767,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 			throws BadLocationException {
 				StringBuilder buf = new StringBuilder();
 				for (SpringPropertyProblem p : actualProblems) {
-					buf.append("----------------------\n");
+					buf.append("\n----------------------\n");
 					String snippet = editor.getText(p.getOffset(), p.getLength());
 					buf.append("("+p.getOffset()+", "+p.getLength()+")["+snippet+"]:\n");
 					buf.append("   "+p.getMessage());
@@ -780,11 +780,13 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		assertEquals(2, parts.length);
 		String badSnippet = parts[0];
 		String messageSnippet = parts[1];
-		int offset = editor.getText().indexOf(badSnippet);
-		assertTrue(offset>=0);
-		return actual.getOffset()==offset 
-				&& actual.getLength()==badSnippet.length()
-				&& actual.getMessage().contains(messageSnippet);
+		try {
+			String actualBadSnippet = editor.getText(actual.getOffset(), actual.getLength());
+			return actualBadSnippet.equals(badSnippet)
+					&& actual.getMessage().contains(messageSnippet);
+		} catch (BadLocationException e) {
+			return false;
+		}
 	}
 
 	public void assertLinkTargets(MockEditor editor, String hoverAtEndOf, String... expecteds) {

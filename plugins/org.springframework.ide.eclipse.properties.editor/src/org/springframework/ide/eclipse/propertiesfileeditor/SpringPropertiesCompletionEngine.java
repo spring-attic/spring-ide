@@ -54,6 +54,9 @@ import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.Propert
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil;
+
+import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil.*;
 
 /**
  * @author Kris De Volder
@@ -91,38 +94,7 @@ public class SpringPropertiesCompletionEngine {
 		}
 	};
 	
-	private static final String JAVA_LANG = "java.lang.";
-	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
 	
-	private static final Map<String, String> PRIMITIVE_TYPES = new HashMap<String, String>();
-	static {
-		PRIMITIVE_TYPES.put("java.lang.Boolean", "boolean");
-		PRIMITIVE_TYPES.put("java.lang.Integer", "int");
-		PRIMITIVE_TYPES.put("java.lang.Long", "short");
-		PRIMITIVE_TYPES.put("java.lang.Short", "int");
-		PRIMITIVE_TYPES.put("java.lang.Double", "double");
-		PRIMITIVE_TYPES.put("java.lang.Float", "float");
-		PRIMITIVE_TYPES.put("java.lang.Character", "char");
-	}
-	
-	public static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
-			"java.lang.Boolean",
-			"java.lang.String",
-			"java.lang.Short",
-			"java.lang.Integer",
-			"java.lang.Long",
-			"java.lan.Double",
-			"java.lang.Float",
-			"java.lang.Character",
-			"java.util.List",
-			"java.net.InetAddress",
-			"java.lang.String[]"
-	));
-
-	private static final Map<String, String[]> TYPE_VALUES = new HashMap<String, String[]>();
-	static {
-		TYPE_VALUES.put("java.lang.Boolean", new String[] { "true", "false" });
-	}
 	
 	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
@@ -244,7 +216,7 @@ public class SpringPropertiesCompletionEngine {
 			if (propertyName!=null) {
 				PropertyInfo prop = getIndex().get(propertyName);
 				if (prop!=null) {
-					String[] valueCompletions = getValueCompletions(prop.getType());
+					String[] valueCompletions = getValues(prop.getType());
 					if (valueCompletions!=null && valueCompletions.length>0) {
 						ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 						for (int i = 0; i < valueCompletions.length; i++) {
@@ -280,10 +252,6 @@ public class SpringPropertiesCompletionEngine {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return -1;
-	}
-
-	private String[] getValueCompletions(String type) {
-		return TYPE_VALUES.get(type);
 	}
 
 	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
@@ -478,7 +446,7 @@ public class SpringPropertiesCompletionEngine {
 				completion.append(defaultValue);
 			} else {
 				String type = match.data.getType();
-				if (SpringPropertiesCompletionEngine.isAssignableType(type)) {
+				if (TypeUtil.isAssignableType(type)) {
 					completion.append("=");
 				} else {
 					//assume some kind of 'Object' type
@@ -523,19 +491,6 @@ public class SpringPropertiesCompletionEngine {
 			return null;
 		}
 
-		private String formatJavaType(String type) {
-			if (type!=null) {
-				String primitive = PRIMITIVE_TYPES.get(type);
-				if (primitive!=null) {
-					return primitive;
-				} 
-				if (type.startsWith(JAVA_LANG)) {
-					return type.substring(JAVA_LANG_LEN);
-				}
-				return type;
-			}
-			return null;
-		}
 
 		@Override
 		public String toString() {
@@ -702,18 +657,6 @@ public class SpringPropertiesCompletionEngine {
 
 	public void setIndexProvider(Provider<FuzzyMap<PropertyInfo>> it) {
 		this.indexProvider = it;
-	}
-
-	public static boolean isAssignableType(String type) {
-		return ASSIGNABLE_TYPES.contains(typeErasure(type));
-	}
-	
-	public static String typeErasure(String type) {
-		int paramStarts = type.indexOf('<');
-		if (paramStarts>=0) {
-			return type.substring(0,paramStarts);
-		}
-		return type;
 	}
 
 	

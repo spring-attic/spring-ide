@@ -241,6 +241,35 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				
 	}
 	
+	public void testReconcileArrayNotation() throws Exception {
+		MockEditor editor = new MockEditor(
+				"borked=bad+\n" + //token problem, to make sure reconciler is working
+				"server.ssl.ciphers[0]=foo\n" +
+				"server.ssl.ciphers[${one}]=foo"
+		);
+		assertProblems(editor,
+				"orked|unknown property"
+				//no other problems
+		);
+	}
+	
+	public void testReconcileArrayNotationError() throws Exception {
+		MockEditor editor = new MockEditor(
+				"server.ssl.ciphers[bork]=foo\n" +
+				"server.ssl.ciphers[1=foo\n" +
+				"server.ssl.ciphers[1]crap=foo\n" +
+				"server.port[0]=8888"
+		);
+		assertProblems(editor,
+				"bork|Integer",
+				"[|matching ']'",
+				"crap|extra text",
+				"[0]|[...] notation is invalid"
+				//no other problems
+		);
+	}
+	
+	
 	public void testReconcileValues() throws Exception {
 		MockEditor editor = new MockEditor(
 				"server.port=badPort\n" + 

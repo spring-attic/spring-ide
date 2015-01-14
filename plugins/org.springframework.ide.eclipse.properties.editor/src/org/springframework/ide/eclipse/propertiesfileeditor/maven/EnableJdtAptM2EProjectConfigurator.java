@@ -37,7 +37,7 @@ public class EnableJdtAptM2EProjectConfigurator extends AbstractSpringProjectCon
 		}
 	}
 
-	private boolean shouldEnableApt(MavenProject mp) {
+	protected boolean shouldEnableApt(MavenProject mp) {
 		for (Artifact a : mp.getArtifacts()) {
 			if (
 				"org.springframework.boot".equals(a.getGroupId()) &&  

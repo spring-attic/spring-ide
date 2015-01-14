@@ -27,11 +27,11 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
-import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.DocumentUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
+import org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil;
 
 /**
  * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.
@@ -146,15 +146,57 @@ public class SpringPropertiesReconcileEngine {
 								} else { //found a 'validPrefix' which is shorter than the fullName.
 									//check if it looks okay to continue with sub-properties based on property type
 									String validPrefix = validProperty.getId();
-									if (SpringPropertiesCompletionEngine.isAssignableType(validProperty.getType())) {
-										problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
-												"Supbproperties are invalid for property "+
-														"'"+validPrefix+"' with type '"+validProperty.getType()+"'", 
-														trimmedRegion.getOffset()+validPrefix.length(),
-														trimmedRegion.getLength()-validPrefix.length()
-												));
+									if (TypeUtil.isArrayLikeType(validProperty.getType())) {
+										//can go 'deeper' in collection type using array notation: foo.bar[123]=...
+										int lbrack = validPrefix.length();
+										if (fullName.charAt(lbrack)!='[') {
+											subpropertiesInvalidError(
+													problemCollector,
+													trimmedRegion,
+													validProperty, validPrefix);
+										} else {
+											int rbrack = fullName.lastIndexOf(']');
+											if (rbrack<0) {
+												problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE, 
+														"No matching ']'",
+														trimmedRegion.getOffset()+lbrack, 1));
+											} else {
+												String indexStr = fullName.substring(lbrack+1, rbrack);
+												if (!indexStr.contains("${")) {
+													try {
+														Integer.parseInt(indexStr);
+													} catch (Exception e) {
+														problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE, 
+															"Expecting 'Integer' for '[...]' notation '"+validProperty.getId()+"'",
+															trimmedRegion.getOffset()+lbrack+1, rbrack-lbrack-1
+														));
+													}
+												}
+												if (rbrack<fullName.length()-1) {
+													problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
+															"Expecting no extra text after ']'",
+															trimmedRegion.getOffset()+rbrack+1,fullName.length()-rbrack-1
+													));
+												}
+											}
+										}
+									} else if (TypeUtil.isAssignableType(validProperty.getType())) {
+										//assignable, but not 'array like'
+										if ('['==fullName.charAt(validProperty.getId().length())) {
+											problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
+													"[...] notation is invalid for property "+
+															"'"+validPrefix+"' with type '"+validProperty.getType()+"'", 
+															trimmedRegion.getOffset()+validPrefix.length(),
+															trimmedRegion.getLength()-validPrefix.length()
+													));
+										} else {
+											subpropertiesInvalidError(
+													problemCollector,
+													trimmedRegion, validProperty,
+													validPrefix);
+										}
 									} else { //type is not a known directly assignable type
-										//accessing sub-properties with '.' is probably ok in this case. 
+										//accessing sub-properties may be ok in this case. 
 										// So do not complain
 									}
 								}
@@ -177,6 +219,17 @@ public class SpringPropertiesReconcileEngine {
 		} finally {
 			problemCollector.endCollecting();
 		}
+	}
+
+	private void subpropertiesInvalidError(IProblemCollector problemCollector,
+			IRegion trimmedRegion, PropertyInfo validProperty,
+			String validPrefix) {
+		problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
+				"Supbproperties are invalid for property "+
+						"'"+validPrefix+"' with type '"+validProperty.getType()+"'", 
+						trimmedRegion.getOffset()+validPrefix.length(),
+						trimmedRegion.getLength()-validPrefix.length()
+				));
 	}
 
 	private FuzzyMap<PropertyInfo> getIndex() {
@@ -307,7 +360,8 @@ public class SpringPropertiesReconcileEngine {
 	 * 'prefix' is not allowed to end in the middle of a 'segment'.
 	 */
 	private PropertyInfo findLongestValidProperty(FuzzyMap<PropertyInfo> index, String name) {
-		int endPos = name.length();
+		int bracketPos = name.lastIndexOf('[');
+		int endPos = bracketPos>=0?bracketPos:name.length();
 		PropertyInfo prop = null;
 		while (endPos>0 && prop==null) {
 			prop = index.get(name.substring(0, endPos));
