@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 Spring IDE Developers and others
+ * Copyright (c) 2004, 2015 Spring IDE Developers and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -278,12 +278,14 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			if (bd.getFactoryBeanName() != null) {
 				isFactory = Boolean.TRUE;
 			}
-			if (isRootBean() && bd.getFactoryMethodName() != null) {
+			else if (isRootBean() && bd.getFactoryMethodName() != null) {
 				isFactory = Boolean.TRUE;
 			}
-			IType type = BeansModelUtils.getBeanType(this, null);
-			if (type != null) {
-				isFactory = JdtUtils.doesImplement(getElementResource(), type, FactoryBean.class.getName());
+			else {
+				IType type = BeansModelUtils.getBeanType(this, null);
+				if (type != null) {
+					isFactory = JdtUtils.doesImplement(getElementResource(), type, FactoryBean.class.getName());
+				}
 			}
 		}
 		return isFactory;
