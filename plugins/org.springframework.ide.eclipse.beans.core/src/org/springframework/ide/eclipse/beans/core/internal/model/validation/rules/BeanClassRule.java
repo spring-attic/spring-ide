@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -54,7 +55,8 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 
 	@Override
 	public void validate(IBean bean, IBeansValidationContext context, IProgressMonitor monitor) {
-		String className = ((Bean) bean).getBeanDefinition().getBeanClassName();
+		BeanDefinition beanDefinition = ((Bean) bean).getBeanDefinition();
+		String className = beanDefinition.getBeanClassName();
 
 		// Validate bean class and constructor arguments - skip child beans and
 		// class names with placeholders
@@ -63,13 +65,13 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 			try {
 				IModelSourceLocation sourceLocation = bean.getElementSourceLocation();
 				if (type != null) {
-					if (!bean.isAbstract() && !(sourceLocation instanceof JavaModelSourceLocation)) {
+					if (!bean.isAbstract() && !bean.isFactory() && !(sourceLocation instanceof JavaModelSourceLocation)) {
 						if (type.isInterface()) {
 							context.warning(bean, "CLASS_NOT_CLASS", "Class '" + className + "' is an interface",
 									new ValidationProblemAttribute("CLASS", className), 
 									new ValidationProblemAttribute("BEAN_NAME", bean.getElementName()));
 						} else if (type.isClass() && Flags.isAbstract(type.getFlags())) {
-							context.warning(bean, "CLASS_NOT_CONCRETE", "Class '" + className + "' is abstract ",
+							context.warning(bean, "CLASS_NOT_CONCRETE", "Class '" + className + "' is abstract",
 									new ValidationProblemAttribute("CLASS", className), 
 									new ValidationProblemAttribute("BEAN_NAME", bean.getElementName()));
 						}
