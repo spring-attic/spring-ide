@@ -87,7 +87,7 @@ public class NewSpringBootWizardModel {
 		KNOWN_STRING_INPUTS.put("artifactId", "Artifact");
 		KNOWN_STRING_INPUTS.put("version", "Version");
 		KNOWN_STRING_INPUTS.put("description", "Description");
-		KNOWN_STRING_INPUTS.put("packgageName", "Package");
+		KNOWN_STRING_INPUTS.put("packageName", "Package");
 	};
 
 	private static final Map<String, String> KNOWN_SINGLE_SELECTS = new LinkedHashMap<String, String>();
