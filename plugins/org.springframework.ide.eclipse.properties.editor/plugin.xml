@@ -147,5 +147,14 @@
       <initializer
             class="org.springframework.ide.eclipse.propertiesfileeditor.preferences.PreferenceInitializer">
       </initializer>
-  </extension>     
+  </extension>
+<extension
+      point="org.springsource.ide.eclipse.gradle.core.projectConfigurators">
+       <configurator
+             after="org.springframework.ide.eclipse.springproject"
+             class="org.springframework.ide.eclipse.propertiesfileeditor.gradle.EnableJdtAptGradleProjectConfigurator"
+             id="org.springframework.ide.eclipse.propertiesfileeditor.gradle.EnableJdtAptGradleProjectConfigurator"
+             name="Spring">
+       </configurator>
+</extension>     
 </plugin>
