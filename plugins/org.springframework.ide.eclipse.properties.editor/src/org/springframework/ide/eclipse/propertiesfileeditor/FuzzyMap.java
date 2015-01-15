@@ -52,6 +52,11 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 			}
 			return best;
 		}
+		
+		@Override
+		public String toString() {
+			return "Match(score="+score+", data="+data+")";
+		}
 	}
 
 	private TreeMap<String,E> entries = new TreeMap<String, E>();

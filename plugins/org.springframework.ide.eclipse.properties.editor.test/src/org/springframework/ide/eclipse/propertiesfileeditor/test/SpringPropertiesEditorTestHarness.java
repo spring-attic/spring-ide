@@ -735,10 +735,13 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 
 	/**
 	 * Check that a 'expectedProblems' are found by the reconciler. Expected problems are
-	 * specified by string of the form "${locationSnippet}|${messageSnippet}". The locationSnippet
-	 * defines the location where the error marker is expected (the first places where the
-	 * text occurs in the editor) and the message snippet must be found in the corresponding
-	 * error marker
+	 * specified by string of the form "${badSnippet}|${messageSnippet}". The badSnippet
+	 * is the text expected to be covered by the marker's region and the message snippet must 
+	 * be found in the error marker's message.
+	 * <p>
+	 * The expected problems are matched one-to-one in the order given (so markers in the 
+	 * editor must appear in the expected order for the assert to pass). 
+	 * 
 	 * @param editor
 	 * @param expectedProblems
 	 * @throws BadLocationException

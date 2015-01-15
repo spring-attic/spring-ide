@@ -131,5 +131,21 @@
            categoryId="org.springframework.ide.eclipse.properties.file.editor.category"
            name="Enable/Disable Spring Properties Editor"/>
   </extension>
-     
+  
+  <extension
+	      point="org.eclipse.ui.preferencePages">
+	   <page
+	         name="Annotation Processing"
+	         category="org.springsource.ide.eclipse.commons.preferencePage"
+	         class="org.springframework.ide.eclipse.propertiesfileeditor.preferences.AnotationProcessingPreferencesPage"
+	         id="org.springframework.ide.eclipse.propertiesfileeditor.preferences.AnotationProcessingPreferencesPage">
+	   </page>
+   </extension>  
+   
+<extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.springframework.ide.eclipse.propertiesfileeditor.preferences.PreferenceInitializer">
+      </initializer>
+  </extension>     
 </plugin>

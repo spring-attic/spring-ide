@@ -89,6 +89,4 @@ public class SpringPropertiesEditorPlugin extends AbstractUIPlugin {
 		return indexManager;
 	}
 
-
-
 }

@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
+import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil.formatJavaType;
+import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil.getValues;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -51,12 +49,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil;
-
-import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil.*;
 
 /**
  * @author Kris De Volder
@@ -64,10 +59,10 @@ import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil
 @SuppressWarnings("restriction")
 public class SpringPropertiesCompletionEngine {
 	
-	//private static final boolean DEBUG = false;
-	private static final boolean DEBUG = 
-			(""+Platform.getLocation()).contains("kdvolder") ||
-			(""+Platform.getLocation()).contains("bamboo");
+	private static final boolean DEBUG = false;
+//	private static final boolean DEBUG = 
+//			(""+Platform.getLocation()).contains("kdvolder") ||
+//			(""+Platform.getLocation()).contains("bamboo");
 	
 	public static void debug(String msg) {
 		if (DEBUG) {
