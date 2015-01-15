@@ -72,9 +72,11 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 	}
 
 	private void clear() {
-		indexes.clear();
-		for (Listener<SpringPropertiesIndexManager> l : getListeners()) {
-			l.changed(this);
+		if (indexes!=null) {
+			indexes.clear();
+			for (Listener<SpringPropertiesIndexManager> l : getListeners()) {
+				l.changed(this);
+			}
 		}
 	}
 	
