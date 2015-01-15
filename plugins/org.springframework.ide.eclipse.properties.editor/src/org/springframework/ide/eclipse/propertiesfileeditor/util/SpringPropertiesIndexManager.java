@@ -106,7 +106,6 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource r = delta.getResource();
 			int t = r.getType();
-			System.out.println("Changed: "+r);
 			switch (t) {
 			case IResource.PROJECT:
 				IProject p = (IProject)r;
