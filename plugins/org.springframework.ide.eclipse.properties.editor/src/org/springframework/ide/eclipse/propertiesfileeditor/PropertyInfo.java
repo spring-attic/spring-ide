@@ -36,7 +36,8 @@ public class PropertyInfo {
 		private final String sourceType;
 		private final String sourceMethod;
 		public PropertySource(ConfigurationMetadataSource source) {
-			this.sourceType = source.getSourceType();
+			String st = source.getSourceType();
+			this.sourceType = st!=null?st:source.getType();
 			this.sourceMethod = source.getSourceMethod();
 		}
 		@Override

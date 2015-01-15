@@ -224,6 +224,22 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"org.springframework.boot.autoconfigure.flyway.FlywayProperties.setInitSqls(List<String>)");
 		System.out.println("<<< testHyperlinkTargets");
 	}
+	
+	public void testHyperlinkTargetsLoggingLevel() throws Exception {
+		System.out.println(">>> testHyperlinkTargetsLoggingLevel");
+		IProject p = createPredefinedProject("demo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		
+		MockEditor editor = new MockEditor(
+				"logging.level.com.acme=INFO\n"
+		);
+		assertLinkTargets(editor, "level", 
+				"org.springframework.boot.logging.LoggingApplicationListener"
+		);
+		System.out.println("<<< testHyperlinkTargetsLoggingLevel");
+	}
+	
 
 	public void testReconcile() throws Exception {
 		MockEditor editor = new MockEditor(
